@@ -334,7 +334,6 @@ namespace Seeker
                 separator.Visibility = ViewStates.Visible;
             }
 
-
             View v = rootView.FindViewById<View>(Resource.Id.relativeLayout1);
             v.Focusable = true;
             if (OperatingSystem.IsAndroidVersionAtLeast(26))
@@ -343,7 +342,6 @@ namespace Seeker
             }
 
             v.FocusableInTouchMode = true;
-
 
             EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
             filterText.TextChanged += FilterText_TextChanged;
@@ -361,11 +359,8 @@ namespace Seeker
             (floatingActionButton as FloatingActionButton).SetImageResource(Resource.Drawable.ic_filter_list_white_24dp);
             floatingActionButton.Click += FloatingActionButtonClick;
 
-
             return this.rootView;
         }
-
-
 
         private void FilterText_Touch(object sender, View.TouchEventArgs e)
         {
@@ -668,72 +663,37 @@ namespace Seeker
 
         private void DownloadUserFilesEntryStage3(bool downloadSubfolders, List<FullFileInfo> recursiveFullFileInfo, List<FullFileInfo> topLevelFullFileInfoOnly, bool queuePaused)
         {
-            if (downloadSubfolders)
+            var filesToDownload = downloadSubfolders ? recursiveFullFileInfo : topLevelFullFileInfoOnly;
+            if (filesToDownload.Count == 0)
             {
-                if (recursiveFullFileInfo.Count == 0) //this is possible if they have a tree of folders with no files in them at all.  which would be rare but possible.
-                {
-                    SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
-                    return;
-                }
-                Browse.BrowseService.DownloadListOfFiles(recursiveFullFileInfo, queuePaused, state.CurrentUsername);
+                SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
+                return;
             }
-            else
-            {
-                if (topLevelFullFileInfoOnly.Count == 0)
-                {
-                    SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
-                    return;
-                }
-                Browse.BrowseService.DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused, state.CurrentUsername);
-            }
+            Browse.BrowseService.DownloadListOfFiles(filesToDownload, queuePaused, state.CurrentUsername);
         }
 
-        private (List<FullFileInfo> topLevel, List<FullFileInfo> recursive, bool containsSubDirs) BuildDownloadFileInfos(bool justFilteredItems)
+        private void DownloadUserFilesEntryStage2(List<DataItem> dataItemsForDownload, List<DataItem> filteredDataItemsForDownload, bool justFilteredItems, bool queuePaused)
         {
-            var sourceList = justFilteredItems ? state.FilteredDataItemsForDownload : state.DataItemsForDownload;
-            lock (sourceList)
-            {
-                return BrowseUtils.BuildDownloadFileInfos(sourceList);
-            }
-        }
-
-        private void DownloadUserFilesEntryStage2(bool justFilteredItems, bool queuePaused)
-        {
-            if (justFilteredItems && state.FilteredDataItemsForDownload.Count == 0)
+            var sourceList = justFilteredItems ? filteredDataItemsForDownload : dataItemsForDownload;
+            if (sourceList.Count == 0)
             {
                 SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                 return;
             }
 
-            var (topLevelFullFileInfoOnly, recursiveFullFileInfo, containsSubDirs) = BuildDownloadFileInfos(justFilteredItems);
+            var (topLevelFullFileInfoOnly, recursiveFullFileInfo, containsSubDirs) = BrowseUtils.BuildDownloadFileInfos(sourceList);
             int toplevelItems = topLevelFullFileInfoOnly.Count;
             int totalItems = recursiveFullFileInfo.Count;
 
-            //show message with total num of files...
             if (containsSubDirs)
             {
-                //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
                 var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
                 builder.SetTitle(Resource.String.ThisFolderContainsSubfolders);
 
-                string topLevelStr = string.Empty;
-                if (toplevelItems == 1)
-                {
-                    topLevelStr = string.Format(SeekerApplication.GetString(Resource.String.item_total_singular), toplevelItems);
-                }
-                else
-                {
-                    topLevelStr = string.Format(SeekerApplication.GetString(Resource.String.item_total_plural), toplevelItems);
-                }
-                string recursiveStr = string.Empty;
-                if (totalItems == 1)
-                {
-                    recursiveStr = string.Format(SeekerApplication.GetString(Resource.String.item_total_singular), totalItems);
-                }
-                else
-                {
-                    recursiveStr = string.Format(SeekerApplication.GetString(Resource.String.item_total_plural), totalItems);
-                }
+                string topLevelStr = string.Format(SeekerApplication.GetString(
+                    toplevelItems == 1 ? Resource.String.item_total_singular : Resource.String.item_total_plural), toplevelItems);
+                string recursiveStr = string.Format(SeekerApplication.GetString(
+                    totalItems == 1 ? Resource.String.item_total_singular : Resource.String.item_total_plural), totalItems);
 
                 if (queuePaused)
                 {
@@ -749,17 +709,7 @@ namespace Seeker
                 });
                 EventHandler<DialogClickEventArgs> eventHandlerRecursiveFolders = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    if (containsSubDirs)
-                    {
-                        if (!justFilteredItems)
-                        {
-                            BrowseUtils.SetDepthTags(state.DataItemsForDownload.First(), recursiveFullFileInfo);
-                        }
-                        else
-                        {
-                            BrowseUtils.SetDepthTags(state.FilteredDataItemsForDownload.First(), recursiveFullFileInfo);
-                        }
-                    }
+                    BrowseUtils.SetDepthTags(sourceList.First(), recursiveFullFileInfo);
                     DownloadUserFilesEntryStage3(true, recursiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
                 });
                 builder.SetPositiveButton(Resource.String.all, eventHandlerRecursiveFolders);
@@ -772,51 +722,52 @@ namespace Seeker
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="queuePaused"></param>
         /// <param name="downloadShownInListView">True if to select everything currently shown in the listview.  False if the user is selecting a single folder.</param>
-        /// <param name="positionOfFolderToDownload"></param>
         private void DownloadUserFilesEntry(bool queuePaused, bool downloadShownInListView, DataItem itemSelected = null)
         {
+            List<DataItem> dataItemsForDownload;
+            List<DataItem> filteredDataItemsForDownload;
+
             if (downloadShownInListView)
             {
-                state.DataItemsForDownload = state.DataItems.ToList();
-                state.FilteredDataItemsForDownload = state.FilteredDataItems.ToList();
+                lock (state.DataItems)
+                {
+                    dataItemsForDownload = state.DataItems.ToList();
+                }
+                lock (state.FilteredDataItems)
+                {
+                    filteredDataItemsForDownload = state.FilteredDataItems.ToList();
+                }
             }
             else
             {
-                //put the contents of the selected folder into the dataItemsToDownload and then do the functions as normal.
-                state.DataItemsForDownload = new List<DataItem>();
                 if (itemSelected == null)
                 {
                     UiHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Browse User File Selection Issue");
-                    return; //else nullref
+                    return;
                 }
-                PopulateDataItemsToItemSelected(state.DataItemsForDownload, itemSelected);
-                state.FilteredDataItemsForDownload = BrowseUtils.FilterBrowseList(state.DataItemsForDownload.ToList(), state.Filter);
+                dataItemsForDownload = BrowseUtils.GetDataItemsForNode(itemSelected.Node);
+                filteredDataItemsForDownload = BrowseUtils.FilterBrowseList(dataItemsForDownload, state.Filter);
             }
 
-
-            if (state.DataItemsForDownload.Count == 0)
+            if (dataItemsForDownload.Count == 0)
             {
                 SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                 return;
             }
-            if (state.Filter.IsFiltered && (state.DataItemsForDownload.Count != state.FilteredDataItemsForDownload.Count))
+            if (state.Filter.IsFiltered && (dataItemsForDownload.Count != filteredDataItemsForDownload.Count))
             {
-                //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
                 var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
                 b.SetTitle(Resource.String.filter_is_on);
                 b.SetMessage(Resource.String.filter_is_on_body);
                 EventHandler<DialogClickEventArgs> eventHandlerAll = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    DownloadUserFilesEntryStage2(false, queuePaused);
+                    DownloadUserFilesEntryStage2(dataItemsForDownload, filteredDataItemsForDownload, false, queuePaused);
                 });
                 EventHandler<DialogClickEventArgs> eventHandlerFiltered = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    DownloadUserFilesEntryStage2(true, queuePaused);
+                    DownloadUserFilesEntryStage2(dataItemsForDownload, filteredDataItemsForDownload, true, queuePaused);
                 });
                 b.SetPositiveButton(Resource.String.just_filtered, eventHandlerFiltered);
                 b.SetNegativeButton(Resource.String.all, eventHandlerAll);
@@ -824,7 +775,7 @@ namespace Seeker
             }
             else
             {
-                DownloadUserFilesEntryStage2(false, queuePaused);
+                DownloadUserFilesEntryStage2(dataItemsForDownload, filteredDataItemsForDownload, false, queuePaused);
             }
         }
 
