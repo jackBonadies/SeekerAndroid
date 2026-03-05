@@ -54,6 +54,7 @@ namespace Seeker
         public View rootView;
 
         private RecyclerView recyclerViewDirectories;
+        private BrowseAdapter BrowseAdapterInstance => recyclerViewDirectories?.GetAdapter() as BrowseAdapter;
         private LinearLayoutManager browseLayoutManager;
         private RecyclerView treePathRecyclerView;
         private LinearLayoutManager treePathLayoutManager;
@@ -177,7 +178,7 @@ namespace Seeker
 
         public override void OnPrepareOptionsMenu(IMenu menu)
         {
-            int numSelected = (recyclerViewDirectories?.GetAdapter() as BrowseAdapter)?.SelectedPositions?.Count ?? 0;
+            int numSelected = BrowseAdapterInstance?.SelectedPositions?.Count ?? 0;
 
             UiHelpers.SetMenuTitles(menu, CurrentUsername);
 
@@ -234,7 +235,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_download_selected_files:
                     DownloadSelectedFiles(false);
-                    (recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Clear();
+                    BrowseAdapterInstance.SelectedPositions.Clear();
                     ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_show_folder_info:
@@ -243,7 +244,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_queue_selected_paused:
                     DownloadSelectedFiles(true);
-                    (recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Clear();
+                    BrowseAdapterInstance.SelectedPositions.Clear();
                     ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_copy_folder_url:
@@ -254,7 +255,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_copy_selected_url:
                     CopySelectedURLs();
-                    (recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Clear();
+                    BrowseAdapterInstance.SelectedPositions.Clear();
                     ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_add_user:
@@ -511,7 +512,7 @@ namespace Seeker
 
         public override void OnSaveInstanceState(Bundle outState)
         {
-            outState.PutIntArray("selectedPositions", (this.recyclerViewDirectories?.GetAdapter() as BrowseAdapter)?.SelectedPositions?.ToArray());
+            outState.PutIntArray("selectedPositions", BrowseAdapterInstance?.SelectedPositions?.ToArray());
             base.OnSaveInstanceState(outState);
         }
 
@@ -664,7 +665,7 @@ namespace Seeker
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.NothingToCopy), ToastLength.Long);
             }
-            else if ((recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Count == 0)
+            else if (BrowseAdapterInstance.SelectedPositions.Count == 0)
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.nothing_selected), ToastLength.Long);
             }
@@ -677,7 +678,7 @@ namespace Seeker
                     {
                         for (int i = 0; i < filteredDataItemsForListView.Count; i++)
                         {
-                            if ((recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Contains(i))
+                            if (BrowseAdapterInstance.SelectedPositions.Contains(i))
                             {
                                 DataItem d = filteredDataItemsForListView[i];
                                 FullFileInfo f = new FullFileInfo();
@@ -696,7 +697,7 @@ namespace Seeker
                     {
                         for (int i = 0; i < dataItemsForListView.Count; i++)
                         {
-                            if ((recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Contains(i))
+                            if (BrowseAdapterInstance.SelectedPositions.Contains(i))
                             {
                                 DataItem d = dataItemsForListView[i];
                                 FullFileInfo f = new FullFileInfo();
@@ -721,7 +722,7 @@ namespace Seeker
                     linkToCopy = linkToCopy + CommonHelpers.CreateSlskLink(false, ffi.FullFileName, this.currentUsernameUI);
                 }
                 CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, linkToCopy);
-                if ((recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Count > 1)
+                if (BrowseAdapterInstance.SelectedPositions.Count > 1)
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinksCopied), ToastLength.Short);
                 }
@@ -740,7 +741,7 @@ namespace Seeker
             {
                 SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
             }
-            else if ((recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Count == 0)
+            else if (BrowseAdapterInstance.SelectedPositions.Count == 0)
             {
                 SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_selected), ToastLength.Long);
             }
@@ -753,7 +754,7 @@ namespace Seeker
                     {
                         for (int i = 0; i < filteredDataItemsForListView.Count; i++)
                         {
-                            if ((recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Contains(i))
+                            if (BrowseAdapterInstance.SelectedPositions.Contains(i))
                             {
                                 DataItem d = filteredDataItemsForListView[i];
                                 FullFileInfo f = new FullFileInfo();
@@ -772,7 +773,7 @@ namespace Seeker
                     {
                         for (int i = 0; i < dataItemsForListView.Count; i++)
                         {
-                            if ((recyclerViewDirectories.GetAdapter() as BrowseAdapter).SelectedPositions.Contains(i))
+                            if (BrowseAdapterInstance.SelectedPositions.Contains(i))
                             {
                                 DataItem d = dataItemsForListView[i];
                                 FullFileInfo f = new FullFileInfo();
@@ -1120,7 +1121,7 @@ namespace Seeker
                 {
                     isFile = true;
 
-                    var adapter = (recyclerViewDirectories.GetAdapter() as BrowseAdapter);
+                    var adapter = BrowseAdapterInstance;
                     bool alreadySelected = adapter.SelectedPositions.Contains(position);
                     if (!alreadySelected)
                     {
@@ -1153,7 +1154,7 @@ namespace Seeker
             {
                 return;
             }
-            var adapter = recyclerViewDirectories.GetAdapter() as BrowseAdapter;
+            var adapter = BrowseAdapterInstance;
             if (adapter != null)
             {
                 adapter.NotifyDataSetChanged();
