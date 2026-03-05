@@ -66,6 +66,7 @@ namespace Seeker
 
         private static List<DataItem> dataItemsForDownload = null;
         private static List<DataItem> filteredDataItemsForDownload = null;
+        private DataItem DataItemSelectedForLongClick = null;
 
         private static string username = "";
         private bool isPaused = true;
@@ -1013,7 +1014,7 @@ namespace Seeker
         /// <param name="queuePaused"></param>
         /// <param name="downloadShownInListView">True if to select everything currently shown in the listview.  False if the user is selecting a single folder.</param>
         /// <param name="positionOfFolderToDownload"></param>
-        private void DownloadUserFilesEntry(bool queuePaused, bool downloadShownInListView, int positionOfFolderToDownload = -1)
+        private void DownloadUserFilesEntry(bool queuePaused, bool downloadShownInListView, DataItem itemSelected = null)
         {
             if (downloadShownInListView)
             {
@@ -1024,7 +1025,6 @@ namespace Seeker
             {
                 //put the contents of the selected folder into the dataItemsToDownload and then do the functions as normal.
                 dataItemsForDownload = new List<DataItem>();
-                DataItem itemSelected = GetItemSelected(positionOfFolderToDownload, BrowseFilter.IsFiltered);
                 if (itemSelected == null)
                 {
                     UiHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Browse User File Selection Issue");
@@ -1105,19 +1105,15 @@ namespace Seeker
             }
             return itemSelected;
         }
-        public static int ItemPositionLongClicked = -1;
         public void OnItemLongClick(int position, View view)
         {
-            bool filteredResults = BrowseFilter.IsFiltered;
-            DataItem itemSelected = GetItemSelected(position, filteredResults);
-            if (itemSelected == null)
+            DataItemSelectedForLongClick = GetItemSelected(position, BrowseFilter.IsFiltered);
+            if (DataItemSelectedForLongClick == null)
             {
                 return;
             }
-            if (itemSelected.IsDirectory())
+            if (DataItemSelectedForLongClick.IsDirectory())
             {
-                ItemPositionLongClicked = position;
-                Logger.InfoFirebase($"{nameof(ItemPositionLongClicked)} {ItemPositionLongClicked}");
                 view.ShowContextMenu();
             }
             else
@@ -1373,20 +1369,18 @@ namespace Seeker
                 switch (item.ItemId)
                 {
                     case 0:
-                        DownloadUserFilesEntry(false, false, ItemPositionLongClicked);
+                        DownloadUserFilesEntry(false, false, DataItemSelectedForLongClick);
                         return true;
                     case 1:
-                        DownloadUserFilesEntry(true, false, ItemPositionLongClicked);
+                        DownloadUserFilesEntry(true, false, DataItemSelectedForLongClick);
                         return true;
                     case 2:
-                        DataItem itemSelected = GetItemSelected(ItemPositionLongClicked, BrowseFilter.IsFiltered);
-                        var folderSummary = BrowseUtils.GetFolderSummary(itemSelected);
+                        var folderSummary = BrowseUtils.GetFolderSummary(DataItemSelectedForLongClick);
                         ShowFolderSummaryDialog(folderSummary);
                         return true;
                     case 3:
-                        DataItem _itemSelected = GetItemSelected(ItemPositionLongClicked, BrowseFilter.IsFiltered);
                         //bool isDir = itemSelected.IsDirectory();
-                        string slskLink = CommonHelpers.CreateSlskLink(true, _itemSelected.Directory.Name, currentUsernameUI);
+                        string slskLink = CommonHelpers.CreateSlskLink(true, DataItemSelectedForLongClick.Directory.Name, currentUsernameUI);
                         CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
                         return true;
