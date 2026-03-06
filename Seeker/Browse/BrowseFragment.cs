@@ -248,7 +248,6 @@ namespace Seeker
             browseLayoutManager = new LinearLayoutManager(this.Context);
             recyclerViewDirectories.SetLayoutManager(browseLayoutManager);
             recyclerViewDirectories.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
-            this.RegisterForContextMenu(recyclerViewDirectories);
             DebounceTimer.Elapsed += DebounceTimer_Elapsed;
 
             treePathRecyclerView = this.rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewHorizontalPath);
@@ -802,7 +801,7 @@ namespace Seeker
             if (DataItemSelectedForLongClick == null) return;
             if (DataItemSelectedForLongClick.IsDirectory())
             {
-                view.ShowContextMenu();
+                ShowFolderContextMenu(DataItemSelectedForLongClick);
             }
         }
 
@@ -1014,57 +1013,54 @@ namespace Seeker
 
 
 
-        //https://stackoverflow.com/questions/5297842/how-to-handle-oncontextitemselected-in-a-multi-fragment-activity
-        //onContextItemSelected() is called for all currently existing fragments starting with the first added one.
-        public const int UNIQUE_BROWSE_GROUP_ID = 304;
-        private const int CONTEXT_DOWNLOAD_FOLDER = 0;
-        private const int CONTEXT_QUEUE_FOLDER_PAUSED = 1;
-        private const int CONTEXT_SHOW_FOLDER_INFO = 2;
-        private const int CONTEXT_COPY_URL = 3;
-        public override void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
+        private void ShowFolderContextMenu(DataItem dataItem)
         {
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
+            string[] items = new string[]
+            {
+                SeekerApplication.GetString(Resource.String.download_folder),
+                SeekerApplication.GetString(Resource.String.QueueFolderAsPaused),
+                SeekerApplication.GetString(Resource.String.ShowFolderInfo),
+                SeekerApplication.GetString(Resource.String.CopyURL)
+            };
+            int[] icons = new int[]
+            {
+                Resource.Drawable.download,
+                Resource.Drawable.paused,
+                Resource.Drawable.information_outline,
+                Resource.Drawable.link_variant
+            };
+
             var typedValue = new TypedValue();
             Context.Theme.ResolveAttribute(Resource.Attribute.colorOnSurface, typedValue, true);
             int tintColor = typedValue.Data;
 
-            SetTintedIcon(menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_DOWNLOAD_FOLDER, CONTEXT_DOWNLOAD_FOLDER, Resource.String.download_folder), Resource.Drawable.download, tintColor);
-            SetTintedIcon(menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_QUEUE_FOLDER_PAUSED, CONTEXT_QUEUE_FOLDER_PAUSED, Resource.String.QueueFolderAsPaused), Resource.Drawable.paused, tintColor);
-            SetTintedIcon(menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_SHOW_FOLDER_INFO, CONTEXT_SHOW_FOLDER_INFO, Resource.String.ShowFolderInfo), Resource.Drawable.information_outline, tintColor);
-            SetTintedIcon(menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_COPY_URL, CONTEXT_COPY_URL, Resource.String.CopyURL), Resource.Drawable.link_variant, tintColor);
-            base.OnCreateContextMenu(menu, v, menuInfo);
-        }
+            var adapter = new IconMenuAdapter(this.Context, items, icons, tintColor);
 
-        private void SetTintedIcon(IMenuItem item, int drawableRes, int tintColor)
-        {
-            var drawable = AndroidX.Core.Content.ContextCompat.GetDrawable(Context, drawableRes).Mutate();
-            AndroidX.Core.Graphics.Drawable.DrawableCompat.SetTint(drawable, new Android.Graphics.Color(tintColor));
-            item.SetIcon(drawable);
-        }
-
-        public override bool OnContextItemSelected(IMenuItem item)
-        {
-            if (item.GroupId == UNIQUE_BROWSE_GROUP_ID)
+            EventHandler<DialogClickEventArgs> handler = (sender, args) =>
             {
-                switch (item.ItemId)
+                switch (args.Which)
                 {
-                    case CONTEXT_DOWNLOAD_FOLDER:
-                        DownloadUserFilesEntry(false, false, DataItemSelectedForLongClick);
-                        return true;
-                    case CONTEXT_QUEUE_FOLDER_PAUSED:
-                        DownloadUserFilesEntry(true, false, DataItemSelectedForLongClick);
-                        return true;
-                    case CONTEXT_SHOW_FOLDER_INFO:
-                        var folderSummary = BrowseUtils.GetFolderSummary(DataItemSelectedForLongClick);
+                    case 0: // Download Folder
+                        DownloadUserFilesEntry(false, false, dataItem);
+                        break;
+                    case 1: // Queue Folder as Paused
+                        DownloadUserFilesEntry(true, false, dataItem);
+                        break;
+                    case 2: // Show Folder Info
+                        var folderSummary = BrowseUtils.GetFolderSummary(dataItem);
                         ShowFolderSummaryDialog(folderSummary);
-                        return true;
-                    case CONTEXT_COPY_URL:
-                        string slskLink = CommonHelpers.CreateSlskLink(true, DataItemSelectedForLongClick.Directory.Name, state.CurrentUsername);
+                        break;
+                    case 3: // Copy URL
+                        string slskLink = CommonHelpers.CreateSlskLink(true, dataItem.Directory.Name, state.CurrentUsername);
                         CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
-                        return true;
+                        break;
                 }
-            }
-            return base.OnContextItemSelected(item);
+            };
+
+            builder.SetAdapter(adapter, handler);
+            builder.Show();
         }
 
         public void ShowFolderSummaryDialog(FolderSummary folderSummary)
