@@ -182,9 +182,7 @@ namespace Seeker
         {
             if (isSelected)
             {
-                var color = SeekerState.InDarkModeCache
-                    ? new Android.Graphics.Color(255, 255, 255, 48)   // #30FFFFFF
-                    : new Android.Graphics.Color(0, 0, 0, 32);        // #20000000
+                var color = new Android.Graphics.Color(52, 152, 219, 48); // theme blue at ~19% opacity
                 this.SetBackgroundColor(color);
             }
             else

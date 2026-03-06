@@ -788,6 +788,7 @@ namespace Seeker
             BrowseActionMode = SeekerState.MainActivityRef.StartSupportActionMode(BrowseActionModeCallbackInstance);
             adapter.IsInBatchSelectMode = true;
             ToggleBatchSelect(position);
+            adapter.NotifyDataSetChanged();
         }
 
         public void OnActionButtonClick(int position, BrowseResponseItemView view)

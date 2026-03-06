@@ -96,14 +96,10 @@ namespace Seeker
             {
                 SeekerState.ActiveActivityRef?.Window?.SetStatusBarColor(Android.Graphics.Color.Transparent);
 
-                int[] prevSelectedItems = Adapter.SelectedPositions.ToArray();
                 BrowseActionMode = null;
                 Adapter.SelectedPositions.Clear();
                 Adapter.IsInBatchSelectMode = false;
-                foreach (int i in prevSelectedItems)
-                {
-                    Adapter.NotifyItemChanged(i);
-                }
+                Adapter.NotifyDataSetChanged();
             }
         }
 
