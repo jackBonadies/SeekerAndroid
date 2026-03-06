@@ -197,10 +197,12 @@ namespace Seeker
             if (lastTerm != string.Empty && lastTerm != null)
             {
                 lastSearchTerm.Text = searchTab.LastSearchTerm;
+                lastSearchTerm.SetTypeface(lastSearchTerm.Typeface, Android.Graphics.TypefaceStyle.Normal);
             }
             else
             {
-                lastSearchTerm.Text = "[No Search]";
+                lastSearchTerm.SetText(Resource.String.new_search_tab, TextView.BufferType.Normal);
+                lastSearchTerm.SetTypeface(lastSearchTerm.Typeface, Android.Graphics.TypefaceStyle.Italic);
             }
 
             bool isActive = (i == SearchTabHelper.CurrentTab);
