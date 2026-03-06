@@ -1,11 +1,12 @@
-﻿<menu
+<menu
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
 >
     <item
         android:id="@+id/action_browse_user"
         android:title="@string/browse_user"
-        android:icon="@drawable/baseline_add_white_24"
+        android:icon="@drawable/folder_account_outline"
+        app:iconTint="?attr/colorOnSurface"
         app:showAsAction="always"
         android:iconifiedByDefault="true"
     />

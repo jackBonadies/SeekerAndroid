@@ -6,6 +6,7 @@
         android:id="@+id/action_download_batch"
         android:title="@string/download_selected"
         android:icon="@drawable/ic_download_white_24"
+        app:iconTint="?attr/colorOnSurface"
         app:showAsAction="always"
         android:iconifiedByDefault="true"
     />
@@ -13,6 +14,8 @@
     <item
         android:id="@+id/action_queue_paused_batch"
         android:title="@string/QueueSelectedAsPaused"
+        android:icon="@drawable/paused"
+        app:iconTint="?attr/colorOnSurface"
         app:showAsAction="never"
         android:iconifiedByDefault="false"
     />
@@ -20,6 +23,8 @@
     <item
         android:id="@+id/action_show_selected_info"
         android:title="@string/ShowSelectedInfo"
+        android:icon="@drawable/information_outline"
+        app:iconTint="?attr/colorOnSurface"
         app:showAsAction="never"
         android:iconifiedByDefault="false"
     />
@@ -27,6 +32,8 @@
     <item
         android:id="@+id/action_copy_selected_url_batch"
         android:title="@string/CopySelectedURLs"
+        android:icon="@drawable/link_variant"
+        app:iconTint="?attr/colorOnSurface"
         app:showAsAction="never"
         android:iconifiedByDefault="false"
     />
@@ -34,6 +41,8 @@
     <item
         android:id="@+id/select_all"
         android:title="@string/SelectAll"
+        android:icon="@drawable/select_all"
+        app:iconTint="?attr/colorOnSurface"
         app:showAsAction="never"
         android:iconifiedByDefault="false"
     />
@@ -41,6 +50,8 @@
     <item
         android:id="@+id/invert_selection"
         android:title="@string/InvertSelection"
+        android:icon="@drawable/select_inverse"
+        app:iconTint="?attr/colorOnSurface"
         app:showAsAction="never"
         android:iconifiedByDefault="false"
     />

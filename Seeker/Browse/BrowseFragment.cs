@@ -976,11 +976,22 @@ namespace Seeker
         private const int CONTEXT_COPY_URL = 3;
         public override void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
         {
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_DOWNLOAD_FOLDER, CONTEXT_DOWNLOAD_FOLDER, Resource.String.download_folder);
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_QUEUE_FOLDER_PAUSED, CONTEXT_QUEUE_FOLDER_PAUSED, Resource.String.QueueFolderAsPaused);
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_SHOW_FOLDER_INFO, CONTEXT_SHOW_FOLDER_INFO, Resource.String.ShowFolderInfo);
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_COPY_URL, CONTEXT_COPY_URL, Resource.String.CopyURL);
+            var typedValue = new TypedValue();
+            Context.Theme.ResolveAttribute(Resource.Attribute.colorOnSurface, typedValue, true);
+            int tintColor = typedValue.Data;
+
+            SetTintedIcon(menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_DOWNLOAD_FOLDER, CONTEXT_DOWNLOAD_FOLDER, Resource.String.download_folder), Resource.Drawable.download, tintColor);
+            SetTintedIcon(menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_QUEUE_FOLDER_PAUSED, CONTEXT_QUEUE_FOLDER_PAUSED, Resource.String.QueueFolderAsPaused), Resource.Drawable.paused, tintColor);
+            SetTintedIcon(menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_SHOW_FOLDER_INFO, CONTEXT_SHOW_FOLDER_INFO, Resource.String.ShowFolderInfo), Resource.Drawable.information_outline, tintColor);
+            SetTintedIcon(menu.Add(UNIQUE_BROWSE_GROUP_ID, CONTEXT_COPY_URL, CONTEXT_COPY_URL, Resource.String.CopyURL), Resource.Drawable.link_variant, tintColor);
             base.OnCreateContextMenu(menu, v, menuInfo);
+        }
+
+        private void SetTintedIcon(IMenuItem item, int drawableRes, int tintColor)
+        {
+            var drawable = AndroidX.Core.Content.ContextCompat.GetDrawable(Context, drawableRes).Mutate();
+            AndroidX.Core.Graphics.Drawable.DrawableCompat.SetTint(drawable, new Android.Graphics.Color(tintColor));
+            item.SetIcon(drawable);
         }
 
         public override bool OnContextItemSelected(IMenuItem item)
