@@ -332,11 +332,7 @@ namespace Seeker
                         GetTransitionDrawable().InvalidateSelf();
                     }
                     this.SetCustomViewTabNumberImageViewState();
-                    if (this.Activity == null)
-                    {
-                        GetSearchFragmentMoreDiag();
-                    }
-                    this.Activity.InvalidateOptionsMenu(); //this wil be the new nullref if fragment isnt ready...
+                    this.Activity?.InvalidateOptionsMenu(); //this wil be the new nullref if fragment isnt ready...
 
                     if (!fromIntent)
                     {
@@ -434,28 +430,6 @@ namespace Seeker
             return null;
         }
 
-        public static SearchFragment GetSearchFragmentMoreDiag()
-        {
-            if (SeekerState.ActiveActivityRef is MainActivity)
-            {
-                Logger.InfoFirebase("current activity is Main");
-            }
-            else
-            {
-                Logger.InfoFirebase("current activity is NOT Main");
-            }
-            foreach (Fragment frag in SeekerState.MainActivityRef.SupportFragmentManager.Fragments)
-            {
-                if (frag is SearchFragment sfrag)
-                {
-                    Logger.InfoFirebase("yes search fragment,  isAdded: " + sfrag.IsAdded);
-                    return sfrag;
-                }
-            }
-            Logger.InfoFirebase("no search fragment.");
-            return null;
-        }
-
         public void ShowSearchTabsDialog()
         {
             SearchTabDialog searchTabDialog = new SearchTabDialog();
@@ -542,11 +516,6 @@ namespace Seeker
                     UpdateDrawableState(editText);
                 }
             }
-        }
-
-        private static void Actv_EditorAction(object sender, TextView.EditorActionEventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         private static string SearchingText = string.Empty;
@@ -829,8 +798,6 @@ namespace Seeker
                     //we still want to change focus as otherwise one can still type into it...
                     test.ClearFocus();
                     rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    bsb.State = BottomSheetBehavior.StateHidden;
-
                 }
                 bsb.State = BottomSheetBehavior.StateHidden;
             }
@@ -1468,7 +1435,7 @@ namespace Seeker
 
         private static void SoulseekClient_SearchResponseReceived(object sender, SearchResponse response, int fromTab, bool fromWishlist)
         {
-            if (response.FileCount == 0 && PreferencesState.HideLockedResultsInSearch || !PreferencesState.HideLockedResultsInSearch && response.FileCount == 0 && response.LockedFileCount == 0)
+            if ((response.FileCount == 0 && PreferencesState.HideLockedResultsInSearch) || (!PreferencesState.HideLockedResultsInSearch && response.FileCount == 0 && response.LockedFileCount == 0))
             {
                 Logger.Debug("Skipping Locked or 0/0");
                 return;
