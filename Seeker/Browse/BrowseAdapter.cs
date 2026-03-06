@@ -182,7 +182,7 @@ namespace Seeker
         {
             if (isSelected)
             {
-                var color = new Android.Graphics.Color(52, 152, 219, 48); // theme blue at ~19% opacity
+                var color = new Android.Graphics.Color(120, 180, 230, 48); // soft pastel blue at ~19% opacity
                 this.SetBackgroundColor(color);
             }
             else
