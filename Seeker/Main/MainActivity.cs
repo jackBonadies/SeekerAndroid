@@ -1101,8 +1101,8 @@ namespace Seeker
         {
             base.OnPause();
 
-            string userListSerialized = SeekerState.UserList != null
-                ? SerializationHelper.SaveUserListToString(SeekerState.UserList)
+            string userListSerialized = CommonState.UserList != null
+                ? SerializationHelper.SaveUserListToString(CommonState.UserList)
                 : null;
             PreferencesManager.SaveOnPauseState(userListSerialized);
         }
@@ -1133,9 +1133,9 @@ namespace Seeker
             //outState.PutString(KeyConsts.M_UploadDirectoryUri, SeekerState.UploadDataDirectoryUri);
             outState.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, PreferencesState.AllowPrivateRoomInvitations);
             outState.PutBoolean(KeyConsts.M_SharingOn, PreferencesState.SharingOn);
-            if (SeekerState.UserList != null)
+            if (CommonState.UserList != null)
             {
-                outState.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(SeekerState.UserList));
+                outState.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(CommonState.UserList));
             }
 
         }

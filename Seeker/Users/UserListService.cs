@@ -35,22 +35,22 @@ namespace Seeker
 
         public bool ContainsUser(string username)
         {
-            lock (SeekerState.UserList)
+            lock (CommonState.UserList)
             {
-                if (SeekerState.UserList == null)
+                if (CommonState.UserList == null)
                 {
                     return false;
                 }
-                return SeekerState.UserList.FirstOrDefault((userlistinfo) => { return userlistinfo.Username == username; }) != null;
+                return CommonState.UserList.FirstOrDefault((userlistinfo) => { return userlistinfo.Username == username; }) != null;
             }
         }
 
         public bool SetDoesNotExist(string username)
         {
             bool found = false;
-            lock (SeekerState.UserList)
+            lock (CommonState.UserList)
             {
-                foreach (UserListItem item in SeekerState.UserList)
+                foreach (UserListItem item in CommonState.UserList)
                 {
                     if (item.Username == username)
                     {
@@ -69,10 +69,10 @@ namespace Seeker
         /// <returns>true if user was already added</returns>
         public bool AddUser(UserData userData, UserPresence? status = null)
         {
-            lock (SeekerState.UserList)
+            lock (CommonState.UserList)
             {
                 bool found = false;
-                foreach (UserListItem item in SeekerState.UserList)
+                foreach (UserListItem item in CommonState.UserList)
                 {
                     if (item.Username == userData.Username)
                     {
@@ -100,7 +100,7 @@ namespace Seeker
                         SeekerApplication.RemoveFromIgnoreList(userData.Username);
                     }
 
-                    SeekerState.UserList.Add(item);
+                    CommonState.UserList.Add(item);
                     return false;
                 }
                 else
@@ -143,9 +143,9 @@ namespace Seeker
                     Instance.AddUser(t.Result);
                     if (!massImportCase)
                     {
-                        if (SeekerState.SharedPreferences != null && SeekerState.UserList != null)
+                        if (SeekerState.SharedPreferences != null && CommonState.UserList != null)
                         {
-                            PreferencesManager.SaveUserList(SerializationHelper.SaveUserListToString(SeekerState.UserList));
+                            PreferencesManager.SaveUserList(SerializationHelper.SaveUserListToString(CommonState.UserList));
                         }
                     }
                     if (UIaction != null)
@@ -204,10 +204,10 @@ namespace Seeker
         /// <returns>true if user was found (if false then bad..)</returns>
         public bool RemoveUser(string username)
         {
-            lock (SeekerState.UserList)
+            lock (CommonState.UserList)
             {
                 UserListItem itemToRemove = null;
-                foreach (UserListItem item in SeekerState.UserList)
+                foreach (UserListItem item in CommonState.UserList)
                 {
                     if (item.Username == username)
                     {
@@ -219,7 +219,7 @@ namespace Seeker
                 {
                     return false;
                 }
-                SeekerState.UserList.Remove(itemToRemove);
+                CommonState.UserList.Remove(itemToRemove);
                 return true;
             }
         }

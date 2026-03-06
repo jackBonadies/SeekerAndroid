@@ -1,4 +1,5 @@
 using Common.Messages;
+using Seeker;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -103,7 +104,7 @@ namespace Common
         public static bool PutFriendsOnTop = false;
 
         // User list
-        public static int UserListSortOrder = 0; // DateAddedAsc
+        public static SortOrder UserListSortOrder = SortOrder.DateAddedAsc;
 
         // Smart filters
         public static bool ShowSmartFilters = true;

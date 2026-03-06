@@ -1028,12 +1028,12 @@ namespace Seeker
         private void ClearRecentUserHistory_Click(object sender, EventArgs e)
         {
             //set to just the added users....
-            int count = SeekerState.UserList?.Count ?? 0;
+            int count = CommonState.UserList?.Count ?? 0;
             if (count > 0)
             {
-                lock (SeekerState.UserList)
+                lock (CommonState.UserList)
                 {
-                    SeekerState.RecentUsersManager.SetRecentUserList(SeekerState.UserList.Select(uli => uli.Username).ToList());
+                    SeekerState.RecentUsersManager.SetRecentUserList(CommonState.UserList.Select(uli => uli.Username).ToList());
                 }
             }
             else
@@ -3381,8 +3381,8 @@ namespace Seeker
         private SeekerImportExportData GetCurrentExportData()
         {
             var seekerImportExportData = new SeekerImportExportData();
-            seekerImportExportData.Userlist = SeekerState.UserList.Select(uli => uli.Username).ToList();
-            seekerImportExportData.BanIgnoreList = SeekerState.IgnoreUserList.Select(uli => uli.Username).ToList();
+            seekerImportExportData.Userlist = CommonState.UserList.Select(uli => uli.Username).ToList();
+            seekerImportExportData.BanIgnoreList = CommonState.IgnoreUserList.Select(uli => uli.Username).ToList();
             seekerImportExportData.Wishlist = SearchTabHelper.SearchTabCollection.Where((pair1) => pair1.Value.SearchTarget == SearchTarget.Wishlist).Select((pair1) => pair1.Value.LastSearchTerm).ToList();
             List<KeyValueEl> userNotes = new List<KeyValueEl>();
             foreach (KeyValuePair<string, string> pair in SeekerState.UserNotes)

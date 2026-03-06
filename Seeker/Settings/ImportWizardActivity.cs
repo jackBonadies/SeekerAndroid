@@ -262,14 +262,14 @@ namespace Seeker
         {
             foreach (string uname in selectedData.IgnoredBanned)
             {
-                lock (SeekerState.IgnoreUserList)
+                lock (CommonState.IgnoreUserList)
                 {
-                    SeekerState.IgnoreUserList.Add(new UserListItem(uname, UserRole.Ignored));
+                    CommonState.IgnoreUserList.Add(new UserListItem(uname, UserRole.Ignored));
                 }
             }
             foreach (string uname in selectedData.UserList)
             {
-                lock (SeekerState.UserList)
+                lock (CommonState.UserList)
                 {
                     UserListService.AddUserAPI(this, uname, null, true);
                 }
@@ -286,13 +286,13 @@ namespace Seeker
             SearchTabHelper.SaveHeadersToSharedPrefs();
             //SearchTabHelper.SaveAllSearchTabsToDisk(SeekerState.ActiveActivityRef); //there are no additional results...
             CommonHelpers.SaveUserNotes();
-            if (SeekerState.SharedPreferences != null && SeekerState.UserList != null)
+            if (SeekerState.SharedPreferences != null && CommonState.UserList != null)
             {
-                PreferencesManager.SaveUserList(SerializationHelper.SaveUserListToString(SeekerState.UserList));
+                PreferencesManager.SaveUserList(SerializationHelper.SaveUserListToString(CommonState.UserList));
             }
-            if (SeekerState.SharedPreferences != null && SeekerState.IgnoreUserList != null)
+            if (SeekerState.SharedPreferences != null && CommonState.IgnoreUserList != null)
             {
-                PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
+                PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList));
             }
         }
 
@@ -723,7 +723,7 @@ namespace Seeker
                         noneFound.Visibility = ViewStates.Gone;
                     }
                     //todo already present
-                    var currentlyHave = SeekerState.UserList.Select(item => item.Username).ToList();
+                    var currentlyHave = CommonState.UserList.Select(item => item.Username).ToList();
                     var notYetAdded = data.UserList.Except(currentlyHave).ToList();
                     var alreadyAddedList = data.UserList.Except(notYetAdded).ToList();
                     if (alreadyAddedList.Count == 0)
@@ -773,7 +773,7 @@ namespace Seeker
                         noneFound.Visibility = ViewStates.Gone;
                     }
                     //todo already present
-                    var currentlyHaveIgnored = SeekerState.IgnoreUserList.Select(item => item.Username).ToList();
+                    var currentlyHaveIgnored = CommonState.IgnoreUserList.Select(item => item.Username).ToList();
                     var notYetIgnored = data.IgnoredBanned.Except(currentlyHaveIgnored).ToList();
                     var alreadyIgnoredList = data.IgnoredBanned.Except(notYetIgnored).ToList();
                     if (alreadyIgnoredList.Count == 0)

@@ -120,7 +120,7 @@ namespace Seeker
             PreferencesState.SharingOn = prefs.GetBoolean(KeyConsts.M_SharingOn, false);
             PreferencesState.UploadSpeed = prefs.GetInt(KeyConsts.M_UploadSpeed, -1);
             PreferencesState.AllowUploadsOnMetered = prefs.GetBoolean(KeyConsts.M_AllowUploadsOnMetered, true);
-            PreferencesState.UserListSortOrder = prefs.GetInt(KeyConsts.M_UserListSortOrder, 0);
+            PreferencesState.UserListSortOrder = (SortOrder)prefs.GetInt(KeyConsts.M_UserListSortOrder, 0);
             PreferencesState.LogDiagnostics = prefs.GetBoolean(KeyConsts.M_LOG_DIAGNOSTICS, false);
             PreferencesState.LimitSimultaneousDownloads = prefs.GetBoolean(KeyConsts.M_LimitSimultaneousDownloads, false);
             PreferencesState.MaxSimultaneousLimit = prefs.GetInt(KeyConsts.M_MaxSimultaneousLimit, 1);
@@ -382,7 +382,7 @@ namespace Seeker
             lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutInt(KeyConsts.M_UserListSortOrder, PreferencesState.UserListSortOrder);
+                editor.PutInt(KeyConsts.M_UserListSortOrder, (int)PreferencesState.UserListSortOrder);
                 editor.Apply();
             }
         }

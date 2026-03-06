@@ -1586,9 +1586,9 @@ namespace Seeker
             {
                 try
                 {
-                    lock (SeekerState.UserList)
+                    lock (CommonState.UserList)
                     {
-                        foreach (UserListItem item in SeekerState.UserList)
+                        foreach (UserListItem item in CommonState.UserList)
                         {
                             Logger.Debug("adding user: " + item.Username);
                             SeekerState.SoulseekClient.WatchUserAsync(item.Username).ContinueWith(UpdateUserInfo);
@@ -1772,18 +1772,18 @@ namespace Seeker
                 UserListService.Instance.RemoveUser(username);
             }
 
-            lock (SeekerState.IgnoreUserList)
+            lock (CommonState.IgnoreUserList)
             {
-                if (SeekerState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
+                if (CommonState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
                 {
                     return false;
                 }
                 else
                 {
-                    SeekerState.IgnoreUserList.Add(new UserListItem(username, UserRole.Ignored));
+                    CommonState.IgnoreUserList.Add(new UserListItem(username, UserRole.Ignored));
                 }
             }
-            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
+            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList));
             return true;
         }
 
@@ -1806,26 +1806,26 @@ namespace Seeker
         /// <returns></returns>
         public static bool RemoveFromIgnoreList(string username)
         {
-            lock (SeekerState.IgnoreUserList)
+            lock (CommonState.IgnoreUserList)
             {
-                if (!SeekerState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
+                if (!CommonState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
                 {
                     return false;
                 }
                 else
                 {
-                    SeekerState.IgnoreUserList = SeekerState.IgnoreUserList.Where(userListItem => { return userListItem.Username != username; }).ToList();
+                    CommonState.IgnoreUserList = CommonState.IgnoreUserList.Where(userListItem => { return userListItem.Username != username; }).ToList();
                 }
             }
-            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
+            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList));
             return true;
         }
 
         public static bool IsUserInIgnoreList(string username)
         {
-            lock (SeekerState.IgnoreUserList)
+            lock (CommonState.IgnoreUserList)
             {
-                return SeekerState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; });
+                return CommonState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; });
             }
         }
 
@@ -1925,10 +1925,10 @@ namespace Seeker
         {
             UserPresence? prevStatus = UserPresence.Offline;
             bool found = false;
-            lock (SeekerState.UserList)
+            lock (CommonState.UserList)
             {
 
-                foreach (UserListItem item in SeekerState.UserList)
+                foreach (UserListItem item in CommonState.UserList)
                 {
                     if (item.Username == username)
                     {
@@ -2056,9 +2056,9 @@ namespace Seeker
                 // Side-effect restores that depend on Android APIs
                 UploadDirectoryManager.RestoreFromSavedState(sharedPreferences);
 
-                SeekerState.UserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_UserList, string.Empty));
+                CommonState.UserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_UserList, string.Empty));
                 RestoreRecentUsersManagerFromString(sharedPreferences.GetString(KeyConsts.M_RecentUsersList, string.Empty));
-                SeekerState.IgnoreUserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
+                CommonState.IgnoreUserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
 
                 SeekerState.UserNotes = SerializationHelper.RestoreUserNotesFromString(sharedPreferences.GetString(KeyConsts.M_UserNotes, string.Empty));
                 SeekerState.UserOnlineAlerts = SerializationHelper.RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(KeyConsts.M_UserOnlineAlerts, string.Empty));
@@ -2083,9 +2083,9 @@ namespace Seeker
                 {
                     //dont show people that we have already added...
                     var recents = SeekerState.RecentUsersManager.GetRecentUserList();
-                    lock (SeekerState.UserList)
+                    lock (CommonState.UserList)
                     {
-                        foreach (var uli in SeekerState.UserList)
+                        foreach (var uli in CommonState.UserList)
                         {
                             recents.Remove(uli.Username);
                         }
@@ -2115,10 +2115,10 @@ namespace Seeker
             SeekerState.RecentUsersManager = new RecentUserManager();
             if (xmlRecentUsersList == string.Empty)
             {
-                int count = SeekerState.UserList?.Count ?? 0;
+                int count = CommonState.UserList?.Count ?? 0;
                 if (count > 0)
                 {
-                    SeekerState.RecentUsersManager.SetRecentUserList(SeekerState.UserList.Select(uli => uli.Username).ToList());
+                    SeekerState.RecentUsersManager.SetRecentUserList(CommonState.UserList.Select(uli => uli.Username).ToList());
                 }
                 else
                 {
@@ -2167,7 +2167,7 @@ namespace Seeker
             }
             else
             {
-                if (SeekerState.UserList == null)
+                if (CommonState.UserList == null)
                 {
                     Logger.Firebase("UserList is null on user data receive");
                 }
@@ -2246,7 +2246,7 @@ namespace Seeker
             else
             {
                 //we get user status changed for those we are in the same room as us
-                if (SeekerState.UserList != null)
+                if (CommonState.UserList != null)
                 {
                     bool found = UserListAddIfContainsUser(e.Username, null, new UserStatus(e.Username, e.Presence, e.IsPrivileged));
                     if (found)

@@ -41,5 +41,23 @@ namespace Seeker
             UserData = null;
             UserInfo = null;
         }
+
+        //both item.UserStatus and item.UserData have status
+        public Soulseek.UserPresence GetStatusFromItem(out bool statusExists)
+        {
+            statusExists = false;
+            Soulseek.UserPresence status = Soulseek.UserPresence.Away;
+            if (this.UserStatus != null)
+            {
+                statusExists = true;
+                status = this.UserStatus.Presence;
+            }
+            else if (this.UserData != null)
+            {
+                statusExists = true;
+                status = this.UserData.Status;
+            }
+            return status;
+        }
     }
 }

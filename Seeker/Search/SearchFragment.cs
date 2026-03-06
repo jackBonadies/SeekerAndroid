@@ -1799,12 +1799,12 @@ namespace Seeker
             }
             else if (SearchTabHelper.SearchTarget == SearchTarget.UserList)
             {
-                if (SeekerState.UserList == null || SeekerState.UserList.Count == 0)
+                if (CommonState.UserList == null || CommonState.UserList.Count == 0)
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.user_list_empty), ToastLength.Short);
                     return;
                 }
-                scope = new SearchScope(SearchScopeType.User, SeekerState.UserList.Select(item => item.Username).ToArray());
+                scope = new SearchScope(SearchScopeType.User, CommonState.UserList.Select(item => item.Username).ToArray());
             }
             else if (SearchTabHelper.SearchTarget == SearchTarget.ChosenUser)
             {

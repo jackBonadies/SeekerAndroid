@@ -67,8 +67,6 @@ namespace Seeker
         }
         public static PendingStatusChange PendingStatusChangeToAwayOnline = PendingStatusChange.NothingPending;
 
-        public static List<UserListItem> IgnoreUserList = new List<UserListItem>();
-        public static List<UserListItem> UserList = new List<UserListItem>();
         public static RecentUserManager RecentUsersManager = null;
         public static System.Collections.Concurrent.ConcurrentDictionary<string, string> UserNotes = null;
         /// <summary>
