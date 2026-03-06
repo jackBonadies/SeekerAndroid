@@ -872,7 +872,20 @@ namespace Seeker
                 SeekerApplication.GetString(Resource.String.QueueSelectedAsPaused),
                 SeekerApplication.GetString(Resource.String.CopyURL)
             };
-            builder.SetItems(items, (sender, args) =>
+            int[] icons = new int[]
+            {
+                Resource.Drawable.download,
+                Resource.Drawable.paused,
+                Resource.Drawable.link_variant
+            };
+
+            var typedValue = new TypedValue();
+            Context.Theme.ResolveAttribute(Resource.Attribute.colorOnSurface, typedValue, true);
+            int tintColor = typedValue.Data;
+
+            var adapter = new IconMenuAdapter(this.Context, items, icons, tintColor);
+
+            EventHandler<DialogClickEventArgs> handler = (sender, args) =>
             {
                 switch (args.Which)
                 {
@@ -891,8 +904,42 @@ namespace Seeker
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
                         break;
                 }
-            });
+            };
+
+            builder.SetAdapter(adapter, handler);
             builder.Show();
+        }
+
+        private class IconMenuAdapter : ArrayAdapter<string>
+        {
+            private readonly int[] iconRes;
+            private readonly int tintColor;
+
+            public IconMenuAdapter(Context context, string[] items, int[] iconRes, int tintColor)
+                : base(context, 0, items)
+            {
+                this.iconRes = iconRes;
+                this.tintColor = tintColor;
+            }
+
+            public override View GetView(int position, View convertView, ViewGroup parent)
+            {
+                if (convertView == null)
+                {
+                    convertView = LayoutInflater.From(Context).Inflate(Resource.Layout.icon_menu_item, parent, false);
+                }
+
+                var icon = convertView.FindViewById<ImageView>(Resource.Id.menuIcon);
+                var text = convertView.FindViewById<TextView>(Resource.Id.menuText);
+
+                text.Text = GetItem(position);
+
+                var drawable = AndroidX.Core.Content.ContextCompat.GetDrawable(Context, iconRes[position]).Mutate();
+                AndroidX.Core.Graphics.Drawable.DrawableCompat.SetTint(drawable, new Android.Graphics.Color(tintColor));
+                icon.SetImageDrawable(drawable);
+
+                return convertView;
+            }
         }
 
         private void ClearAllSelectedPositions()
