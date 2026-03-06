@@ -97,20 +97,23 @@ namespace Seeker
             if (dataItem.IsDirectory())
             {
                 itemView.FolderIcon.Visibility = ViewStates.Visible;
+                itemView.ActionContainer.Visibility = ViewStates.Visible;
                 itemView.FolderIndicator.Visibility = ViewStates.Visible;
                 itemView.FileDetails.Visibility = ViewStates.Gone;
             }
             else
             {
                 itemView.FolderIcon.Visibility = ViewStates.Gone;
-                itemView.FolderIndicator.Visibility = ViewStates.Gone;
+                itemView.ActionContainer.Visibility = ViewStates.Gone;
+                itemView.FolderIndicator.Visibility = ViewStates.Invisible;
                 itemView.FileDetails.Visibility = ViewStates.Visible;
                 itemView.FileDetails.Text = SimpleHelpers.GetSizeLengthAttrString(dataItem.File);
             }
 
             if (IsInBatchSelectMode)
             {
-                itemView.FolderIndicator.Visibility = ViewStates.Gone;
+                itemView.ActionContainer.Visibility = ViewStates.Visible;
+                itemView.FolderIndicator.Visibility = ViewStates.Invisible;
                 itemView.SelectionCheckbox.Visibility = ViewStates.Visible;
                 if (SelectedPositions.Contains(position))
                 {
@@ -123,7 +126,7 @@ namespace Seeker
             }
             else
             {
-                itemView.SelectionCheckbox.Visibility = ViewStates.Gone;
+                itemView.SelectionCheckbox.Visibility = ViewStates.Invisible;
             }
 
             itemView.DisplayName.Text = dataItem.GetDisplayName();
@@ -149,6 +152,7 @@ namespace Seeker
         public ImageView FolderIndicator;
         public ImageView FolderIcon;
         public ImageView SelectionCheckbox;
+        public FrameLayout ActionContainer;
         public LinearLayout ContainingViewGroup;
         public BrowseResponseItemViewHolder ViewHolder { get; set; }
         public BrowseResponseItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -174,6 +178,7 @@ namespace Seeker
             FolderIndicator = FindViewById<ImageView>(Resource.Id.folderIndicator);
             FolderIcon = FindViewById<ImageView>(Resource.Id.folderIcon);
             SelectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
+            ActionContainer = FindViewById<FrameLayout>(Resource.Id.actionContainer);
             FileDetails = FindViewById<TextView>(Resource.Id.fileDetails);
             ContainingViewGroup = FindViewById<LinearLayout>(Resource.Id.containingViewGroup);
         }
