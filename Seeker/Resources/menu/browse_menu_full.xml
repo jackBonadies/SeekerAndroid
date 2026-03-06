@@ -25,13 +25,6 @@
         android:iconifiedByDefault="false"
     />
 
-    <item
-        android:id="@+id/action_download_selected_files"
-        android:title="@string/download_selected"
-        app:showAsAction="never"
-        android:iconifiedByDefault="false"
-    />
-
     <item android:id="@+id/userOptions" android:title="@string/UserOptions">
         <menu>
             <item
@@ -74,13 +67,6 @@
             />
 
             <item
-                android:id="@+id/action_queue_selected_paused"
-                android:title="@string/QueueSelectedAsPaused"
-                app:showAsAction="never"
-                android:iconifiedByDefault="false"
-            />
-
-            <item
                 android:id="@+id/action_show_folder_info"
                 android:title="@string/ShowFolderInfo"
                 app:showAsAction="never"
@@ -94,12 +80,6 @@
                 android:iconifiedByDefault="false"
             />
 
-            <item
-                android:id="@+id/action_copy_selected_url"
-                android:title="@string/CopySelectedURL"
-                app:showAsAction="never"
-                android:iconifiedByDefault="false"
-            />
         </menu>
     </item>
 </menu>

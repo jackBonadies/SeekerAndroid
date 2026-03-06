@@ -40,7 +40,7 @@ using Common.Browse;
 
 namespace Seeker
 {
-    public class BrowseFragment : Fragment
+    public partial class BrowseFragment : Fragment
     {
         //for filtering - we always just get the filtered copy from the main copy on the fly.
         //the main copy will move up, down, etc.  so no need for the filtered copy to keep track of any of that
@@ -167,35 +167,7 @@ namespace Seeker
 
         public override void OnPrepareOptionsMenu(IMenu menu)
         {
-            int numSelected = BrowseAdapterInstance?.SelectedPositions?.Count ?? 0;
-
             UiHelpers.SetMenuTitles(menu, state.CurrentUsername);
-
-            if (menu.FindItem(Resource.Id.action_up_directory) != null) //lets just make sure we are using the full menu.  o.w. the menu is empty so these guys dont exist.
-            {
-                if (numSelected == 0)
-                {
-                    menu.FindItem(Resource.Id.action_download_selected_files).SetVisible(false);
-                    menu.FindItem(Resource.Id.action_queue_selected_paused).SetVisible(false);
-                    menu.FindItem(Resource.Id.action_copy_selected_url).SetVisible(false);
-                }
-                else if (numSelected > 0)
-                {
-                    menu.FindItem(Resource.Id.action_download_selected_files).SetVisible(true);
-                    menu.FindItem(Resource.Id.action_queue_selected_paused).SetVisible(true);
-                    menu.FindItem(Resource.Id.action_copy_selected_url).SetVisible(true);
-                    if (numSelected > 1)
-                    {
-                        menu.FindItem(Resource.Id.action_copy_selected_url).SetTitle(Resource.String.CopySelectedURLs);
-                    }
-                    else
-                    {
-                        menu.FindItem(Resource.Id.action_copy_selected_url).SetTitle(Resource.String.CopySelectedURL);
-                    }
-                }
-            }
-
-
             base.OnPrepareOptionsMenu(menu);
         }
 
@@ -222,30 +194,15 @@ namespace Seeker
                 case Resource.Id.action_download_files:
                     DownloadUserFilesEntry(false, true);
                     return true;
-                case Resource.Id.action_download_selected_files:
-                    DownloadSelectedFiles(false);
-                    BrowseAdapterInstance.SelectedPositions.Clear();
-                    ClearAllSelectedPositions();
-                    return true;
                 case Resource.Id.action_show_folder_info:
                     var folderSummary = BrowseUtils.GetFolderSummary(state.DataItems);
                     ShowFolderSummaryDialog(folderSummary);
-                    return true;
-                case Resource.Id.action_queue_selected_paused:
-                    DownloadSelectedFiles(true);
-                    BrowseAdapterInstance.SelectedPositions.Clear();
-                    ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_copy_folder_url:
                     string fullDirName = state.DataItems[0].Node.Data.Name;
                     string slskLink = CommonHelpers.CreateSlskLink(true, fullDirName, state.CurrentUsername);
                     CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
-                    return true;
-                case Resource.Id.action_copy_selected_url:
-                    CopySelectedURLs();
-                    BrowseAdapterInstance.SelectedPositions.Clear();
-                    ClearAllSelectedPositions();
                     return true;
                 case Resource.Id.action_add_user:
                     UserListService.AddUserAPI(SeekerState.MainActivityRef, state.CurrentUsername, null);
@@ -274,6 +231,7 @@ namespace Seeker
 
         public override void OnDestroyView()
         {
+            BrowseActionMode?.Finish();
             DebounceTimer.Elapsed -= DebounceTimer_Elapsed; //the timer is static...
             base.OnDestroyView();
         }
@@ -431,8 +389,6 @@ namespace Seeker
                     //we still want to change focus as otherwise one can still type into it...
                     test.ClearFocus();
                     rootView.FindViewById<View>(Resource.Id.relativeLayout1).RequestFocus();
-                    bsb.State = BottomSheetBehavior.StateHidden;
-
                 }
                 bsb.State = BottomSheetBehavior.StateHidden;
             }
@@ -557,6 +513,7 @@ namespace Seeker
 
         private void FilterText_TextChanged(object sender, TextChangedEventArgs e)
         {
+            BrowseActionMode?.Finish();
             string oldFilterString = state.Filter.IsFiltered ? state.Filter.FilterString : string.Empty;
             Logger.Debug("time between typing: " + (DiagStopWatch.ElapsedMilliseconds - lastTime).ToString());
             lastTime = DiagStopWatch.ElapsedMilliseconds;
@@ -819,19 +776,32 @@ namespace Seeker
         }
         public void OnItemLongClick(int position, View view)
         {
-            DataItemSelectedForLongClick = GetItemSelected(position, state.Filter.IsFiltered);
-            if (DataItemSelectedForLongClick == null)
+            if (BrowseActionMode != null)
             {
+                ToggleBatchSelect(position);
                 return;
             }
+            var adapter = BrowseAdapterInstance;
+            if (adapter == null) return;
+
+            BrowseActionModeCallbackInstance = new BrowseActionModeCallback() { Adapter = adapter, Frag = this };
+            BrowseActionMode = SeekerState.MainActivityRef.StartSupportActionMode(BrowseActionModeCallbackInstance);
+            adapter.IsInBatchSelectMode = true;
+            ToggleBatchSelect(position);
+        }
+
+        public void OnActionButtonClick(int position, BrowseResponseItemView view)
+        {
+            if (BrowseActionMode != null)
+            {
+                ToggleBatchSelect(position);
+                return;
+            }
+            DataItemSelectedForLongClick = GetItemSelected(position, state.Filter.IsFiltered);
+            if (DataItemSelectedForLongClick == null) return;
             if (DataItemSelectedForLongClick.IsDirectory())
             {
                 view.ShowContextMenu();
-            }
-            else
-            {
-                //no special long click event if file.
-                this.OnItemClick(position);
             }
         }
 
@@ -843,6 +813,12 @@ namespace Seeker
 
         public void OnItemClick(int position)
         {
+            if (BrowseActionMode != null)
+            {
+                ToggleBatchSelect(position);
+                return;
+            }
+
             state.CachedFilteredDataItems = null;
             bool filteredResults = state.Filter.IsFiltered;
             DataItem itemSelected = GetItemSelected(position, filteredResults);
@@ -851,14 +827,12 @@ namespace Seeker
                 return;
             }
 
-            bool isFile = false;
             lock (state.DataItems)
             {
                 if (itemSelected.IsDirectory())
                 {
                     if (itemSelected.Node.Children.Count == 0 && (itemSelected.Directory == null || itemSelected.Directory.FileCount == 0))
                     {
-                        //dont let them do this... if this happens then there is no way to get back up...
                         SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.directory_is_empty), ToastLength.Short);
                         return;
                     }
@@ -873,32 +847,51 @@ namespace Seeker
                 }
                 else
                 {
-                    isFile = true;
-
-                    var adapter = BrowseAdapterInstance;
-                    bool alreadySelected = adapter.SelectedPositions.Contains(position);
-                    if (!alreadySelected)
-                    {
-                        adapter.SelectedPositions.Add(position);
-                    }
-                    else
-                    {
-                        adapter.SelectedPositions.Remove(position);
-                    }
-                    adapter.NotifyItemChanged(position);
+                    ShowFileContextMenu(position, itemSelected);
                 }
-
             }
             lock (state.DataItems)
             {
                 lock (state.FilteredDataItems)
                 {
-                    if (!isFile && filteredResults)
+                    if (itemSelected.IsDirectory() && filteredResults)
                     {
                         SetBrowseAdapters(filteredResults, state.DataItems, false, false);
                     }
                 }
             }
+        }
+
+        private void ShowFileContextMenu(int position, DataItem dataItem)
+        {
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
+            string[] items = new string[]
+            {
+                SeekerApplication.GetString(Resource.String.DownloadFile),
+                SeekerApplication.GetString(Resource.String.QueueSelectedAsPaused),
+                SeekerApplication.GetString(Resource.String.CopyURL)
+            };
+            builder.SetItems(items, (sender, args) =>
+            {
+                switch (args.Which)
+                {
+                    case 0: // Download File
+                        var ffi = BrowseUtils.ToFullFileInfo(dataItem);
+                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(new[] { ffi }, false, state.CurrentUsername).Start());
+                        break;
+                    case 1: // Queue as Paused
+                        var ffi2 = BrowseUtils.ToFullFileInfo(dataItem);
+                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(new[] { ffi2 }, true, state.CurrentUsername).Start());
+                        break;
+                    case 2: // Copy URL
+                        var ffi3 = BrowseUtils.ToFullFileInfo(dataItem);
+                        string slskLink = CommonHelpers.CreateSlskLink(false, ffi3.FullFileName, state.CurrentUsername);
+                        CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
+                        break;
+                }
+            });
+            builder.Show();
         }
 
         private void ClearAllSelectedPositions()
@@ -917,6 +910,11 @@ namespace Seeker
 
         public bool BackButton()
         {
+            if (BrowseActionMode != null)
+            {
+                BrowseActionMode.Finish();
+                return true;
+            }
             return GoUpDirectory();
         }
 
@@ -937,6 +935,7 @@ namespace Seeker
         /// <param name="nonFilteredItems"></param>
         public void SetBrowseAdapters(bool toFilter, List<DataItem> nonFilteredItems, bool fullRefreshOfPathItems, bool goingUp = false)
         {
+            BrowseActionMode?.Finish();
             if (toFilter)
             {
                 state.FilteredDataItems = BrowseUtils.FilterBrowseList(state.DataItems, state.Filter);

@@ -1165,6 +1165,10 @@ namespace Seeker
             {
                 TransfersFragment.TransfersActionMode.Finish();
             }
+            if (BrowseFragment.BrowseActionMode != null)
+            {
+                BrowseFragment.BrowseActionMode.Finish();
+            }
             //in addition each fragment is responsible for expanding their menu...
             switch (e.Position)
             {

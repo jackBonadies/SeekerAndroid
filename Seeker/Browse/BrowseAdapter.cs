@@ -17,6 +17,7 @@ namespace Seeker
     public class BrowseAdapter : RecyclerView.Adapter
     {
         public List<int> SelectedPositions = new List<int>();
+        public bool IsInBatchSelectMode = false;
         public BrowseFragment Owner = null;
         private List<DataItem> localDataSet;
 
@@ -67,6 +68,14 @@ namespace Seeker
                     Owner.OnItemLongClick(pos, itemView);
                 }
             };
+            itemView.FolderIndicator.Click += (sender, e) =>
+            {
+                int pos = holder.BindingAdapterPosition;
+                if (pos != RecyclerView.NoPosition)
+                {
+                    Owner.OnActionButtonClick(pos, itemView);
+                }
+            };
             return holder;
         }
 
@@ -87,15 +96,35 @@ namespace Seeker
             var dataItem = localDataSet[position];
             if (dataItem.IsDirectory())
             {
+                itemView.FolderIcon.Visibility = ViewStates.Visible;
                 itemView.FolderIndicator.Visibility = ViewStates.Visible;
                 itemView.FileDetails.Visibility = ViewStates.Gone;
             }
             else
             {
+                itemView.FolderIcon.Visibility = ViewStates.Gone;
                 itemView.FolderIndicator.Visibility = ViewStates.Gone;
                 itemView.FileDetails.Visibility = ViewStates.Visible;
                 itemView.FileDetails.Text = SimpleHelpers.GetSizeLengthAttrString(dataItem.File);
             }
+
+            if (IsInBatchSelectMode)
+            {
+                itemView.SelectionCheckbox.Visibility = ViewStates.Visible;
+                if (SelectedPositions.Contains(position))
+                {
+                    itemView.SelectionCheckbox.SetImageResource(Resource.Drawable.check_circle);
+                }
+                else
+                {
+                    itemView.SelectionCheckbox.SetImageResource(Resource.Drawable.check_circle_outline);
+                }
+            }
+            else
+            {
+                itemView.SelectionCheckbox.Visibility = ViewStates.Gone;
+            }
+
             itemView.DisplayName.Text = dataItem.GetDisplayName();
         }
     }
@@ -117,6 +146,8 @@ namespace Seeker
         public TextView DisplayName;
         public TextView FileDetails;
         public ImageView FolderIndicator;
+        public ImageView FolderIcon;
+        public ImageView SelectionCheckbox;
         public LinearLayout ContainingViewGroup;
         public BrowseResponseItemViewHolder ViewHolder { get; set; }
         public BrowseResponseItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -140,6 +171,8 @@ namespace Seeker
         {
             DisplayName = FindViewById<TextView>(Resource.Id.displayName);
             FolderIndicator = FindViewById<ImageView>(Resource.Id.folderIndicator);
+            FolderIcon = FindViewById<ImageView>(Resource.Id.folderIcon);
+            SelectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
             FileDetails = FindViewById<TextView>(Resource.Id.fileDetails);
             ContainingViewGroup = FindViewById<LinearLayout>(Resource.Id.containingViewGroup);
         }
