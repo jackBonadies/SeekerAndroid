@@ -70,7 +70,7 @@
         android:paddingTop="0dp"
         android:layout_marginTop="0dp"
         android:ellipsize="end"
-        android:paddingStart="32dp"
+        android:paddingStart="5dp"
         android:text="15mb - 10:14 - 245kbps"
         android:singleLine="true"
     />

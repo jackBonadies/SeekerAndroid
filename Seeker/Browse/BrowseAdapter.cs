@@ -110,6 +110,7 @@ namespace Seeker
 
             if (IsInBatchSelectMode)
             {
+                itemView.FolderIndicator.Visibility = ViewStates.Gone;
                 itemView.SelectionCheckbox.Visibility = ViewStates.Visible;
                 if (SelectedPositions.Contains(position))
                 {
@@ -179,23 +180,17 @@ namespace Seeker
 
         public void SetSelectedBackground(bool isSelected)
         {
-#pragma warning disable 0618
             if (isSelected)
             {
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
-                }
-                else
-                {
-                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                }
+                var color = SeekerState.InDarkModeCache
+                    ? new Android.Graphics.Color(255, 255, 255, 48)   // #30FFFFFF
+                    : new Android.Graphics.Color(0, 0, 0, 32);        // #20000000
+                this.SetBackgroundColor(color);
             }
             else
             {
                 this.Background = null;
             }
-#pragma warning restore 0618
         }
     }
 
