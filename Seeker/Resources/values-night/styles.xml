@@ -35,16 +35,6 @@
         <item name="mainPurpleStatusBar">@color/colorPrimaryDark</item>
 
         <!--<item name="buttonStyle">@drawable/buttonStyle_4f58c4</item>-->
-        <item name="rounded_bottom_left_purple">
-            @drawable/rounded_bottom_left_purple_4f58c4
-        </item>
-        <item name="rounded_button">@drawable/rounded_button_4f58c4</item>
-        <item name="rounded_bottom_right_purple">
-            @drawable/rounded_bottom_right_purple_4f58c4
-        </item>
-        <item name="rounded_top_purple">
-            @drawable/rounded_top_purple_4f58c4
-        </item>
 
         <item name="whitePurpleForNavBar">#858ddd</item>
 
@@ -73,7 +63,7 @@
         <item name="android:textColor">#ffffff</item>
         <item name="android:paddingLeft">10dp</item>
         <item name="android:paddingRight">10dp</item>
-        <item name="android:background">?attr/rounded_button</item>
+        <item name="android:background">@drawable/rounded_button</item>
         <item name="backgroundTint">@null</item>
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>

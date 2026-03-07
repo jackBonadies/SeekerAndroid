@@ -108,16 +108,6 @@
         <item name="seeker_notification_other_person_color">#47B2A4</item>
 
         <!--<item name="buttonStyle">@drawable/buttonStyle_126291</item>-->
-        <item name="rounded_bottom_left_purple">
-            @drawable/rounded_bottom_left_purple_126291
-        </item>
-        <item name="rounded_button">@drawable/rounded_button_126291</item>
-        <item name="rounded_bottom_right_purple">
-            @drawable/rounded_bottom_right_purple_126291
-        </item>
-        <item name="rounded_top_purple">
-            @drawable/rounded_top_purple_126291
-        </item>
 
         <item name="whitePurpleForNavBar">#4c8aae</item>
 
@@ -150,16 +140,6 @@
         <item name="swipeToRefreshProgress">#B22525</item>
         <item name="mainPurpleStatusBar">#7B0000</item>
         <!--<item name="buttonStyle">@drawable/buttonStyle_B22525</item>-->
-        <item name="rounded_bottom_left_purple">
-            @drawable/rounded_bottom_left_purple_B22525
-        </item>
-        <item name="rounded_button">@drawable/rounded_button_B22525</item>
-        <item name="rounded_bottom_right_purple">
-            @drawable/rounded_bottom_right_purple_B22525
-        </item>
-        <item name="rounded_top_purple">
-            @drawable/rounded_top_purple_B22525
-        </item>
         <item name="whitePurpleForNavBar">#c44e4e</item>
         <item name="mainTextColorHinted">#d57676</item>
         <item name="mainTextColor">#B22525</item>
@@ -192,16 +172,6 @@
         <item name="mainPurple">#126291</item>
         <item name="mainPurpleStatusBar">#10496b</item>
         <!--<item name="buttonStyle">@drawable/buttonStyle_126291</item>-->
-        <item name="rounded_bottom_left_purple">
-            @drawable/rounded_bottom_left_purple_126291
-        </item>
-        <item name="rounded_button">@drawable/rounded_button_126291</item>
-        <item name="rounded_bottom_right_purple">
-            @drawable/rounded_bottom_right_purple_126291
-        </item>
-        <item name="rounded_top_purple">
-            @drawable/rounded_top_purple_126291
-        </item>
         <item name="colorAccent">#86b2cb</item>
         <item name="whitePurpleForNavBar">#4c8aae</item>
         <item name="mainTextColor">#86b2cb</item>
@@ -232,16 +202,6 @@
         <item name="mainPurple">#202124</item>
         <item name="mainPurpleStatusBar">#000000</item>
         <!--<item name="buttonStyle">@drawable/buttonStyle_202124</item>-->
-        <item name="rounded_bottom_left_purple">
-            @drawable/rounded_bottom_left_purple_202124
-        </item>
-        <item name="rounded_button">@drawable/rounded_button_202124</item>
-        <item name="rounded_bottom_right_purple">
-            @drawable/rounded_bottom_right_purple_202124
-        </item>
-        <item name="rounded_top_purple">
-            @drawable/rounded_top_purple_202124
-        </item>
         <item name="mainPurpleForNavBar">#202124</item>
         <!--a grey accent looks very bad-->
         <item name="colorAccent">#86b2cb</item>
@@ -281,16 +241,6 @@
         <item name="mainPurpleStatusBar">#0c0c0c</item>
 
         <!--<item name="buttonStyle">@drawable/buttonStyle_333333</item>-->
-        <item name="rounded_bottom_left_purple">
-            @drawable/rounded_bottom_left_purple_333333
-        </item>
-        <item name="rounded_button">@drawable/rounded_button_333333</item>
-        <item name="rounded_bottom_right_purple">
-            @drawable/rounded_bottom_right_purple_333333
-        </item>
-        <item name="rounded_top_purple">
-            @drawable/rounded_top_purple_333333
-        </item>
         <item name="mainPurpleForNavBar">#333333</item>
         <item name="colorAccent">#86b2cb</item>
         <item name="whitePurpleForNavBar">#556070</item>
