@@ -28,8 +28,8 @@
 		<TextView
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:text="Sign in or create new account"
-			android:layout_marginTop="10dp"
+			android:text="@string/signin_or_create_account"
+			android:layout_marginTop="7dp"
 			android:id="@+id/loginSubText"
 			android:textColor="@color/subTextColor"
 			android:textSize="14sp"
@@ -95,27 +95,27 @@
 		</com.google.android.material.textfield.TextInputLayout>
 
 		<Button
-			android:layout_marginLeft="40dp"
-			android:layout_marginRight="40dp"
-			android:layout_marginTop="40dp"
+			android:layout_marginLeft="44dp"
+			android:layout_marginRight="44dp"
+			android:layout_marginTop="20dp"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:foreground="?android:attr/selectableItemBackground"
 			style="@style/SeekerButtonStyle"
-			android:text="@string/submit"
+			android:text="@string/signin"
 			android:id="@+id/buttonLogin"
 			android:layout_below="@+id/passwordTextInputLayout"
         />
 
 		<TextView
 			android:layout_marginStart="6dp"
-			android:layout_marginTop="2dp"
+			android:layout_marginTop="6dp"
 			android:layout_marginBottom="6dp"
-			android:layout_width="wrap_content"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:text="@string/no_account"
 			android:id="@+id/noAccount"
-			android:layout_gravity="center_horizontal"
+			android:gravity="center"
 			android:textColor="@color/subTextColor"
 			android:textSize="14sp"
         />

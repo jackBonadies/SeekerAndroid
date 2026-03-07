@@ -9,6 +9,9 @@
     <string name="searches_tab">Searches</string>
     <string name="searches_tab2">Search</string>
 
+	<string name="signin">Sign In</string>
+	<string name="signin_or_create_account">Sign in or create new account</string>
+
     <string name="new_result">new result</string>
     <string name="new_results">new results</string>
 
