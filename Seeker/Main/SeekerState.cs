@@ -34,7 +34,7 @@ namespace Seeker
 
         public static bool AutoRequeueDownloadsAtStartup = true;
 
-        public static SoulseekClient SoulseekClient = null;
+        public static ISoulseekClient SoulseekClient = null;
 
         public static bool IsStartUpServiceCurrentlyRunning = false;
 

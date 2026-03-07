@@ -20,7 +20,7 @@ namespace Seeker.Services
         private readonly IFileSystemService fileSystemService;
         private readonly ISessionService sessionService;
         private readonly IMainThreadRunner mainThreadRunner;
-        private readonly Func<SoulseekClient> soulseekClientFactory;
+        private readonly Func<ISoulseekClient> soulseekClientFactory;
         private readonly ILoggerBackend logger;
         private readonly INetworkStatus networkStatus;
         private long taskWasCancelledToastDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
@@ -28,7 +28,7 @@ namespace Seeker.Services
         public event EventHandler<int> TransferItemChanged;
         public event EventHandler<Action> TransferListRefreshRequested;
 
-        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, ISessionService sessionService, IMainThreadRunner mainThreadRunner, Func<SoulseekClient> soulseekClientFactory, ILoggerBackend logger, INetworkStatus networkStatus)
+        public DownloadService(IToaster toaster, IFileSystemService fileSystemService, ISessionService sessionService, IMainThreadRunner mainThreadRunner, Func<ISoulseekClient> soulseekClientFactory, ILoggerBackend logger, INetworkStatus networkStatus)
         {
             this.toaster = toaster ?? throw new ArgumentNullException(nameof(toaster));
             this.fileSystemService = fileSystemService ?? throw new ArgumentNullException(nameof(fileSystemService));
