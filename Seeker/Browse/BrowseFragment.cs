@@ -1068,7 +1068,7 @@ namespace Seeker
             string lengthTimePt2 = (folderSummary.LengthSeconds == 0) ? ": -" : string.Format(": {0}", SimpleHelpers.GetHumanReadableTime(folderSummary.LengthSeconds));
             string lengthTime = SeekerApplication.GetString(Resource.String.Length) + lengthTimePt2;
 
-            string sizeString = SeekerApplication.GetString(Resource.String.size_column) + string.Format(" {0}", SimpleHelpers.GetHumanReadableSize(folderSummary.SizeBytes));
+            string sizeString = SeekerApplication.GetString(Resource.String.size_column) + string.Format(": {0}", SimpleHelpers.GetHumanReadableSize(folderSummary.SizeBytes));
 
             string numFilesString = SeekerApplication.GetString(Resource.String.NumFiles) + string.Format(": {0}", folderSummary.NumFiles);
             string numSubFoldersString = SeekerApplication.GetString(Resource.String.NumSubfolders) + string.Format(": {0}", folderSummary.NumSubFolders);
