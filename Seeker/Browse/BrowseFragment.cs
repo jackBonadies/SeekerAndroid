@@ -1066,13 +1066,10 @@ namespace Seeker
 
         public void ShowFolderSummaryDialog(FolderSummary folderSummary, string folderName = null)
         {
-            string lengthTimePt2 = (folderSummary.LengthSeconds == 0) ? ": -" : string.Format(": {0}", SimpleHelpers.GetHumanReadableTime(folderSummary.LengthSeconds));
-            string lengthTime = SeekerApplication.GetString(Resource.String.Length) + lengthTimePt2;
-
-            string sizeString = SeekerApplication.GetString(Resource.String.size_column) + string.Format(": {0}", SimpleHelpers.GetHumanReadableSize(folderSummary.SizeBytes));
-
-            string numFilesString = SeekerApplication.GetString(Resource.String.NumFiles) + string.Format(": {0}", folderSummary.NumFiles);
-            string numSubFoldersString = SeekerApplication.GetString(Resource.String.NumSubfolders) + string.Format(": {0}", folderSummary.NumSubFolders);
+            var metrics = this.Context.Resources.DisplayMetrics;
+            int dp24 = (int)Android.Util.TypedValue.ApplyDimension(Android.Util.ComplexUnitType.Dip, 24, metrics);
+            int dp20 = (int)Android.Util.TypedValue.ApplyDimension(Android.Util.ComplexUnitType.Dip, 20, metrics);
+            int dp8 = (int)Android.Util.TypedValue.ApplyDimension(Android.Util.ComplexUnitType.Dip, 8, metrics);
 
             var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
 
@@ -1080,8 +1077,6 @@ namespace Seeker
             {
                 var titleView = new Android.Widget.TextView(this.Context);
                 titleView.Text = folderName;
-                int dp24 = (int)Android.Util.TypedValue.ApplyDimension(Android.Util.ComplexUnitType.Dip, 24, this.Context.Resources.DisplayMetrics);
-                int dp20 = (int)Android.Util.TypedValue.ApplyDimension(Android.Util.ComplexUnitType.Dip, 20, this.Context.Resources.DisplayMetrics);
                 titleView.SetPadding(dp24, dp20, dp24, 0);
                 titleView.SetTextSize(Android.Util.ComplexUnitType.Sp, 20);
                 titleView.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor));
@@ -1090,21 +1085,56 @@ namespace Seeker
                 builder.SetCustomTitle(titleView);
             }
 
+            var labelColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued);
+            var valueColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor);
+
+            string lengthValue = (folderSummary.LengthSeconds == 0) ? "-" : SimpleHelpers.GetHumanReadableTime(folderSummary.LengthSeconds);
+
+            var rows = new (string label, string value)[]
+            {
+                (SeekerApplication.GetString(Resource.String.NumFiles), folderSummary.NumFiles.ToString()),
+                (SeekerApplication.GetString(Resource.String.NumSubfolders), folderSummary.NumSubFolders.ToString()),
+                (SeekerApplication.GetString(Resource.String.size_column), SimpleHelpers.GetHumanReadableSize(folderSummary.SizeBytes)),
+                (SeekerApplication.GetString(Resource.String.Length), lengthValue),
+            };
+
+            var container = new Android.Widget.LinearLayout(this.Context);
+            container.Orientation = Android.Widget.Orientation.Vertical;
+            container.SetPadding(dp24, dp20, dp24, dp8);
+
+            foreach (var (label, value) in rows)
+            {
+                var row = new Android.Widget.LinearLayout(this.Context);
+                row.Orientation = Android.Widget.Orientation.Horizontal;
+                row.SetPadding(0, 0, 0, dp8);
+
+                var labelView = new Android.Widget.TextView(this.Context);
+                labelView.Text = label;
+                labelView.SetTextSize(Android.Util.ComplexUnitType.Sp, 16);
+                labelView.SetTextColor(labelColor);
+                labelView.LayoutParameters = new Android.Widget.LinearLayout.LayoutParams(0, Android.Views.ViewGroup.LayoutParams.WrapContent, 1f);
+
+                var valueView = new Android.Widget.TextView(this.Context);
+                valueView.Text = value;
+                valueView.SetTextSize(Android.Util.ComplexUnitType.Sp, 16);
+                valueView.SetTextColor(valueColor);
+                valueView.SetTypeface(valueView.Typeface, Android.Graphics.TypefaceStyle.Bold);
+                valueView.LayoutParameters = new Android.Widget.LinearLayout.LayoutParams(
+                    Android.Views.ViewGroup.LayoutParams.WrapContent, Android.Views.ViewGroup.LayoutParams.WrapContent);
+
+                row.AddView(labelView);
+                row.AddView(valueView);
+                container.AddView(row);
+            }
+
+            builder.SetView(container);
+
             void OnCloseClick(object sender, DialogClickEventArgs e)
             {
                 (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
             }
 
-            var diag = builder.SetMessage(numFilesString +
-                System.Environment.NewLine +
-                System.Environment.NewLine +
-                numSubFoldersString +
-                System.Environment.NewLine +
-                System.Environment.NewLine +
-                sizeString +
-                System.Environment.NewLine +
-                System.Environment.NewLine +
-                lengthTime).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+            var diag = builder.SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
             diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
         }
