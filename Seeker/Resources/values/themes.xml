@@ -73,6 +73,7 @@
         </item>
 
         <item name="mainTextColorHinted">#959BDC</item>
+        <item name="searchTabButtonColor">?attr/mainPurple</item>
 
         <item name="the_rounded_corner_background_drawable">
             @drawable/rounded_corner_background_light
@@ -395,6 +396,7 @@
         </item>
 
         <item name="mainTextColorHinted">#bcc1f7</item>
+        <item name="searchTabButtonColor">?attr/mainTextColorHinted</item>
     </style>
 
     <style name="Amoled" parent="DefaultDark">

@@ -209,9 +209,16 @@ namespace Seeker
             pillIndicator.SetBackgroundResource(isActive
                 ? Resource.Drawable.search_tab_pill_active
                 : Resource.Drawable.search_tab_pill_inactive);
-            rowBackground.SetBackgroundResource(isActive
-                ? Resource.Drawable.search_tab_row_bg
-                : 0);
+            if (isActive)
+            {
+                rowBackground.SetBackgroundResource(Resource.Drawable.search_tab_row_bg);
+                rowBackground.Background.Mutate();
+                rowBackground.Background.Alpha = 40;
+            }
+            else
+            {
+                rowBackground.Background = null;
+            }
         }
     }
 

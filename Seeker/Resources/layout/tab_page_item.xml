@@ -41,6 +41,7 @@
                 android:id="@+id/lastSearchTerm"
                 android:textSize="16sp"
                 android:textStyle="bold"
+                android:textColor="?attr/normalTextColorNonTinted"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="test artistsongDUMMY"

@@ -19,6 +19,7 @@
     <attr name="whitePurpleForNavBar" format="color" />
     <attr name="slskAccent" format="color" />
     <attr name="mainTextColorHinted" format="color" />
+    <attr name="searchTabButtonColor" format="color" />
     <attr name="cellStroke" format="color" />
     <attr name="checkBoxColor" format="color" />
     <attr name="expandIconColor" format="color" />
