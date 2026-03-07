@@ -27,7 +27,7 @@ namespace Seeker
 
         public static string GenerateIncompleteFolderName(string username, string fullFileName, int depth)
         {
-            string albumFolderName = null;
+            string albumFolderName = string.Empty;
             if (depth == 1)
             {
                 albumFolderName = Common.Helpers.GetFolderNameFromFile(fullFileName, depth);
@@ -252,13 +252,13 @@ namespace Seeker
             {
                 filesWithLength = filesWithLength.Concat(searchResponse.LockedFiles.Where(f => f.Length.HasValue));
             }
-            string timeString = null;
+            string timeString = string.Empty;
             if (filesWithLength.Count() > 0)
             {
                 //translate length into human readable
                 timeString = GetHumanReadableTime(filesWithLength.Sum(f => f.Length.Value));
             }
-            if (timeString == null)
+            if (string.IsNullOrEmpty(timeString))
             {
                 return string.Format("{0} files • {1}", numFiles, sizeString);
             }
@@ -274,17 +274,17 @@ namespace Seeker
         {
 
             string sizeString = string.Format("{0:0.##} mb", f.Size / (1024.0 * 1024.0));
-            string lengthString = f.Length.HasValue ? GetHumanReadableTime(f.Length.Value) : null;
+            string lengthString = f.Length.HasValue ? GetHumanReadableTime(f.Length.Value) : string.Empty;
             string attrString = GetHumanReadableAttributesForSingleItem(f);
-            if (attrString == null && lengthString == null)
+            if (string.IsNullOrEmpty(attrString) && string.IsNullOrEmpty(lengthString))
             {
                 return sizeString;
             }
-            else if (attrString == null)
+            else if (string.IsNullOrEmpty(attrString))
             {
                 return String.Format("{0} • {1}", sizeString, lengthString);
             }
-            else if (lengthString == null)
+            else if (string.IsNullOrEmpty(lengthString))
             {
                 return String.Format("{0} • {1}", sizeString, attrString);
             }
@@ -297,7 +297,6 @@ namespace Seeker
 
         public static string GetHumanReadableAttributesForSingleItem(Soulseek.File f)
         {
-
             int bitRate = -1;
             int bitDepth = -1;
             double sampleRate = double.NaN;
@@ -318,7 +317,7 @@ namespace Seeker
             }
             if (bitRate == -1 && bitDepth == -1 && double.IsNaN(sampleRate))
             {
-                return null; //nothing to add
+                return string.Empty; //nothing to add
             }
             else if (bitDepth != -1 && !double.IsNaN(sampleRate))
             {
@@ -334,7 +333,7 @@ namespace Seeker
             }
             else
             {
-                return null;
+                return string.Empty;
             }
         }
 
@@ -351,26 +350,27 @@ namespace Seeker
         }
 
 
-        public static string GetHumanReadableTime(int totalSeconds)
+        public static string GetHumanReadableTime(int totalSeconds, bool withSpace = false)
         {
             int sec = totalSeconds % 60;
             int minutes = (totalSeconds % 3600) / 60;
             int hours = (totalSeconds / 3600);
+            string space = withSpace ? " " : string.Empty;
             if (minutes == 0 && hours == 0 && sec == 0)
             {
-                return null;
+                return string.Empty;
             }
             else if (minutes == 0 && hours == 0)
             {
-                return string.Format("{0}s", sec);
+                return string.Format("{1}s", space, sec);
             }
             else if (hours == 0)
             {
-                return string.Format("{0}m{1}s", minutes, sec);
+                return string.Format("{1}m{0}{2}s", space, minutes, sec);
             }
             else
             {
-                return string.Format("{0}h{1}m{2}s", hours, minutes, sec);
+                return string.Format("{1}h{0}{2}m{0}{3}s", space, hours, minutes, sec);
             }
         }
 
@@ -436,6 +436,7 @@ namespace Seeker
         {
             KNOWN_TYPES = new List<string>() { ".mp3", ".flac", ".wav", ".aiff", ".wma", ".aac" }.AsReadOnly();
         }
+
         public static ReadOnlyCollection<string> KNOWN_TYPES;
 
         public static string GetAllButLast(string path) //"raw:\\storage\\emulated\\0\\Download\\Soulseek Complete"

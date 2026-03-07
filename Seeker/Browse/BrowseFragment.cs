@@ -1088,7 +1088,7 @@ namespace Seeker
             var labelColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued);
             var valueColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor);
 
-            string lengthValue = (folderSummary.LengthSeconds == 0) ? "-" : SimpleHelpers.GetHumanReadableTime(folderSummary.LengthSeconds);
+            string lengthValue = (folderSummary.LengthSeconds == 0) ? "-" : SimpleHelpers.GetHumanReadableTime(folderSummary.LengthSeconds, true);
 
             var rows = new (string label, string value)[]
             {
