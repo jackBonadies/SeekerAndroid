@@ -196,7 +196,8 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_show_folder_info:
                     var folderSummary = BrowseUtils.GetFolderSummary(state.DataItems);
-                    ShowFolderSummaryDialog(folderSummary);
+                    string currentFolderName = state.PathItems.Count > 0 ? state.PathItems[state.PathItems.Count - 1].DisplayName : null;
+                    ShowFolderSummaryDialog(folderSummary, currentFolderName);
                     return true;
                 case Resource.Id.action_copy_folder_url:
                     string fullDirName = state.DataItems[0].Node.Data.Name;
@@ -1049,7 +1050,7 @@ namespace Seeker
                         break;
                     case 2: // Show Folder Info
                         var folderSummary = BrowseUtils.GetFolderSummary(dataItem);
-                        ShowFolderSummaryDialog(folderSummary);
+                        ShowFolderSummaryDialog(folderSummary, dataItem.GetDisplayName());
                         break;
                     case 3: // Copy URL
                         string slskLink = CommonHelpers.CreateSlskLink(true, dataItem.Directory.Name, state.CurrentUsername);
@@ -1063,7 +1064,7 @@ namespace Seeker
             builder.Show();
         }
 
-        public void ShowFolderSummaryDialog(FolderSummary folderSummary)
+        public void ShowFolderSummaryDialog(FolderSummary folderSummary, string folderName = null)
         {
             string lengthTimePt2 = (folderSummary.LengthSeconds == 0) ? ": -" : string.Format(": {0}", SimpleHelpers.GetHumanReadableTime(folderSummary.LengthSeconds));
             string lengthTime = SeekerApplication.GetString(Resource.String.Length) + lengthTimePt2;
@@ -1074,6 +1075,20 @@ namespace Seeker
             string numSubFoldersString = SeekerApplication.GetString(Resource.String.NumSubfolders) + string.Format(": {0}", folderSummary.NumSubFolders);
 
             var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
+
+            if (!string.IsNullOrEmpty(folderName))
+            {
+                var titleView = new Android.Widget.TextView(this.Context);
+                titleView.Text = folderName;
+                int dp24 = (int)Android.Util.TypedValue.ApplyDimension(Android.Util.ComplexUnitType.Dip, 24, this.Context.Resources.DisplayMetrics);
+                int dp20 = (int)Android.Util.TypedValue.ApplyDimension(Android.Util.ComplexUnitType.Dip, 20, this.Context.Resources.DisplayMetrics);
+                titleView.SetPadding(dp24, dp20, dp24, 0);
+                titleView.SetTextSize(Android.Util.ComplexUnitType.Sp, 20);
+                titleView.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor));
+                titleView.SetMaxLines(2);
+                titleView.Ellipsize = Android.Text.TextUtils.TruncateAt.End;
+                builder.SetCustomTitle(titleView);
+            }
 
             void OnCloseClick(object sender, DialogClickEventArgs e)
             {
