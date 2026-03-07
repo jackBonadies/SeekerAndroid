@@ -31,4 +31,7 @@
     <color name="subTextColorAgainstPurple">#ffC7C7C7</color>
 
     <color name="chipSeparatorColor">#ffe0e0e0</color>
+
+    <color name="checkCircleSelected">#FFFFFF</color>
+    <color name="checkCircleUnselected">#999999</color>
 </resources>

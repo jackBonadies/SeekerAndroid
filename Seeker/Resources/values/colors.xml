@@ -40,4 +40,7 @@
     <color name="absoluteBackColor1">#ff000000</color>
     <color name="absoluteBackColor2">#ff303030</color>
     <color name="absoluteBackColor3">#ffffff</color>
+
+    <color name="checkCircleSelected">#303030</color>
+    <color name="checkCircleUnselected">#303030</color>
 </resources>
