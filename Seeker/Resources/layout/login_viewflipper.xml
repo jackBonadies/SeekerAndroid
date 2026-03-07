@@ -27,7 +27,7 @@
             android:id="@+id/usernameTextInputLayout"
             android:layout_below="@+id/textView"
             android:layout_marginTop="38dp"
-            android:background="?attr/rounded_input_edit"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             app:errorEnabled="false"
             app:hintEnabled="false"
             android:layout_marginLeft="40dp"
@@ -55,8 +55,8 @@
             android:layout_below="@+id/usernameTextInputLayout"
             android:id="@+id/passwordTextInputLayout"
             android:layout_marginTop="15dp"
-            android:background="?attr/rounded_input_edit"
             app:passwordToggleEnabled="true"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             app:errorEnabled="false"
             app:hintEnabled="false"
             android:singleLine="true"
@@ -66,8 +66,6 @@
             android:layout_height="wrap_content"
         >
             <EditText
-                android:paddingTop="0dp"
-                android:paddingBottom="0dp"
                 android:textColorHighlight="?attr/mainTextColor"
                 android:textColorHint="?attr/mainTextColor"
                 android:layout_marginBottom="0dp"
