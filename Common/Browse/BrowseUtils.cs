@@ -22,6 +22,10 @@ namespace Common.Browse
             foreach (var childNode in di)
             {
                 SumFiles(folderSummary, childNode);
+                if (childNode.IsDirectory())
+                {
+                    folderSummary.NumSubFolders++;
+                }
             }
             return folderSummary;
         }

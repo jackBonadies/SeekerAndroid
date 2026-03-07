@@ -338,6 +338,7 @@ namespace UnitTestCommon
 
             // Music (2 files + SubFolder with 1 file) + Documents (1 file) = 4 total files
             Assert.AreEqual(4, summary.NumFiles);
+            Assert.AreEqual(3, summary.NumSubFolders);
             Assert.AreEqual(650, summary.SizeBytes); // 100+200+300+50
         }
 
