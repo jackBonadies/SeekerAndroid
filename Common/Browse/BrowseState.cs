@@ -85,6 +85,24 @@ namespace Seeker
             }
         }
 
+        public bool IsAtRoot()
+        {
+            if (DataItems.Count == 0) 
+            {
+                return true; 
+            }
+            var first = DataItems[0];
+            if (first.File != null)
+            {
+                return first.Node?.Parent == null;
+            }
+            else if (first.Directory != null)
+            {
+                return first.Node?.Parent?.Parent == null;
+            }
+            return true;
+        }
+
         public bool GoUpDirectory(Action<bool, List<DataItem>, bool, bool> setBrowseAdapters, int additionalLevels)
         {
             CachedFilteredDataItems = null; 

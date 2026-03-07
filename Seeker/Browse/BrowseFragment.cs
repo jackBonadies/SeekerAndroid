@@ -168,6 +168,11 @@ namespace Seeker
         public override void OnPrepareOptionsMenu(IMenu menu)
         {
             UiHelpers.SetMenuTitles(menu, state.CurrentUsername);
+            var upItem = menu.FindItem(Resource.Id.action_up_directory);
+            if (upItem != null)
+            {
+                upItem.SetVisible(!state.IsAtRoot());
+            }
             base.OnPrepareOptionsMenu(menu);
         }
 
@@ -1010,6 +1015,7 @@ namespace Seeker
                 treePathRecyclerAdapter.NotifyDataSetChanged();
                 treePathRecyclerView.ScrollToPosition(state.PathItems.Count - 1);
             }
+            SeekerState.MainActivityRef?.InvalidateOptionsMenu();
         }
 
 
