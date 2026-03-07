@@ -17,7 +17,7 @@
         android:clickable="true"
         android:ellipsize="end"
         android:text="@string/chatroom_loading_ticker"
-        android:background="?attr/cell_shape_end"
+        android:background="@drawable/cell_shape_end"
     />
     <Seeker.RecyclerView2
         android:layout_width="match_parent"
@@ -25,7 +25,7 @@
         android:id="@+id/room_statuses_recycler_view"
         android:clickable="true"
         android:paddingBottom="4dp"
-        android:background="?attr/cell_shape_end"
+        android:background="@drawable/cell_shape_end"
     />
     <RelativeLayout
         android:id="@+id/test1"

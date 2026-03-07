@@ -308,8 +308,8 @@ namespace Seeker
 #pragma warning disable 0618
                 if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
-                    e.View.Background = SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
+                    e.View.Background = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
+                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
                 }
                 else
                 {
@@ -682,7 +682,7 @@ namespace Seeker
 #pragma warning disable 0618
                 if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
-                    var cellbackNormal = SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
+                    var cellbackNormal = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
                     itemView.Background = cellbackNormal;
                     itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = cellbackNormal;
                 }

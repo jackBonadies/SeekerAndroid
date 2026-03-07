@@ -42,7 +42,6 @@
         <item name="swipeToRefreshProgress">#4f58c4</item>
         <item name="swipeToRefreshBackground">#ffffffff</item>
         <item name="mainPurpleStatusBar">@color/colorPrimaryDark</item>
-        <!--<item name="buttonStyle">@drawable/buttonStyle_4f58c4</item>-->
 
         <item name="whitePurpleForNavBar">#858ddd</item>
 

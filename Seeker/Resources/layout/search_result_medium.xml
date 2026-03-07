@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:foreground="?android:attr/selectableItemBackground"
     android:descendantFocusability="beforeDescendants"
-    android:background="?attr/cell_shape_end"
+    android:background="@drawable/cell_shape_end"
 >
     <TextView
         android:id="@+id/folderNameTextView"
@@ -92,7 +92,7 @@
         android:textColor="@android:color/black"
         android:layout_height = "match_parent"
         android:layout_weight = ".5"
-        android:background = "?attr/cell_shape"
+        android:background = "@drawable/cell_shape"
         android:ellipsize = "end"
         android:padding = "5dp"
         android:textSize="12dp"
