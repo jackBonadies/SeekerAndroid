@@ -1433,14 +1433,14 @@ namespace Seeker
             }
         }
 
-        private static void SoulseekClient_SearchResponseReceived(object sender, SearchResponse response, int fromTab, bool fromWishlist)
+        private static void AddIncomingSearchResponse(SearchResponse response, int fromTab, bool fromWishlist)
         {
             if ((response.FileCount == 0 && PreferencesState.HideLockedResultsInSearch) || (!PreferencesState.HideLockedResultsInSearch && response.FileCount == 0 && response.LockedFileCount == 0))
             {
                 Logger.Debug("Skipping Locked or 0/0");
                 return;
             }
-            refreshListView(response, fromTab, fromWishlist);
+            AddIncomingSearchResponseImp(response, fromTab, fromWishlist);
 
         }
 
@@ -1512,16 +1512,8 @@ namespace Seeker
         /// To add a search response to the list view
         /// </summary>
         /// <param name="resp"></param>
-        private static void refreshListView(SearchResponse resp, int fromTab, bool fromWishlist)
+        private static void AddIncomingSearchResponseImp(SearchResponse resp, int fromTab, bool fromWishlist)
         {
-            //sort before adding.
-
-            //if search response has multiple directories, we want to split it up just like 
-            //how desktop client does.
-            //if(SearchTabHelper.CurrentTab == fromTab) //we want to sort 
-            //{
-
-
             lock (SearchTabHelper.SearchTabCollection[fromTab].SortHelperLockObject) //lock object for the sort helper in question. this used to be the current tab one. I think thats wrong.
             {
                 Tuple<bool, List<SearchResponse>> splitResponses = new Tuple<bool, List<SearchResponse>>(false, null);
@@ -1779,7 +1771,7 @@ namespace Seeker
 
             Action<(Soulseek.Search, SearchResponse)> searchResponseReceived = new Action<(Soulseek.Search, SearchResponse)>(tuple =>
             {
-                SoulseekClient_SearchResponseReceived(null, tuple.Item2, fromTab, fromWishlist);
+                AddIncomingSearchResponse(tuple.Item2, fromTab, fromWishlist);
             });
 
             SearchOptions searchOptions = new SearchOptions(responseLimit: PreferencesState.NumberSearchResults, 
