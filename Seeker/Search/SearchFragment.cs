@@ -1506,15 +1506,50 @@ namespace Seeker
 
         private static List<SearchResponse> oldList = new List<SearchResponse>();
         private static string oldListCondition = string.Empty;
-        private static List<SearchResponse> newList = new List<SearchResponse>();
+
+        /// <summary>
+        /// Applies new search results to the RecyclerView, creating a new adapter if needed
+        /// or using DiffUtil for incremental updates.
+        /// </summary>
+        private static void ApplySearchResults(List<SearchResponse> newResults, string cacheKey)
+        {
+            var prevList = GetOldList(cacheKey);
+            if (prevList == null)
+            {
+                Instance.recyclerSearchAdapter = new SearchAdapterRecyclerVersion(newResults);
+                Instance.recyclerViewTransferItems.SetAdapter(Instance.recyclerSearchAdapter);
+            }
+            else
+            {
+                // SaveInstanceState/RestoreInstanceState prevents autoscroll even when animations are off
+                var state = Instance.recycleLayoutManager.OnSaveInstanceState();
+#if DEBUG
+                if (prevList.Count == 0)
+                {
+                    Logger.Debug("refreshListView  oldList: " + prevList.Count + " newList " + newResults.Count);
+                }
+#endif
+                var diff = DiffUtil.CalculateDiff(new SearchDiffCallback(prevList, newResults), true);
+                // When filtered, localDataSet IS newResults (updated in-place by UpdateFilteredResponses).
+                // When unfiltered, localDataSet is a different object and needs manual update.
+                if (!ReferenceEquals(Instance.recyclerSearchAdapter.localDataSet, newResults))
+                {
+                    Instance.recyclerSearchAdapter.localDataSet.Clear();
+                    Instance.recyclerSearchAdapter.localDataSet.AddRange(newResults);
+                }
+                diff.DispatchUpdatesTo(Instance.recyclerSearchAdapter);
+                Instance.recycleLayoutManager.OnRestoreInstanceState(state);
+            }
+            SetOldList(cacheKey, newResults.ToList());
+        }
 
         /// <summary>
         /// To add a search response to the list view
         /// </summary>
-        /// <param name="resp"></param>
         private static void AddIncomingSearchResponseImp(SearchResponse resp, int fromTab, bool fromWishlist)
         {
-            lock (SearchTabHelper.SearchTabCollection[fromTab].SortHelperLockObject) //lock object for the sort helper in question. this used to be the current tab one. I think thats wrong.
+            var tab = SearchTabHelper.SearchTabCollection[fromTab];
+            lock (tab.SortHelperLockObject)
             {
                 Tuple<bool, List<SearchResponse>> splitResponses = new Tuple<bool, List<SearchResponse>>(false, null);
                 try
@@ -1528,26 +1563,22 @@ namespace Seeker
 
                 try
                 {
-
                     if (splitResponses.Item1)
-                    { //we have multiple to add
+                    {
                         foreach (SearchResponse splitResponse in splitResponses.Item2)
                         {
                             if (fromWishlist && WishlistController.OldResultsToCompare[fromTab].Contains(splitResponse))
                             {
                                 continue;
                             }
-                            SearchTabHelper.SearchTabCollection[fromTab].SortHelper.Add(splitResponse, null);
+                            tab.SortHelper.Add(splitResponse, null);
                         }
                     }
                     else
                     {
-                        if (fromWishlist && WishlistController.OldResultsToCompare[fromTab].Contains(resp))
+                        if (!fromWishlist || !WishlistController.OldResultsToCompare[fromTab].Contains(resp))
                         {
-                        }
-                        else
-                        {
-                            SearchTabHelper.SearchTabCollection[fromTab].SortHelper.Add(resp, null); //before I added an .Equals method I would get Duplicate Key Exceptions...
+                            tab.SortHelper.Add(resp, null);
                         }
                     }
                 }
@@ -1556,11 +1587,9 @@ namespace Seeker
                     Logger.Debug(e.Message);
                 }
 
-                SearchTabHelper.SearchTabCollection[fromTab].SearchResponses = SearchTabHelper.SearchTabCollection[fromTab].SortHelper.Keys.ToList();
-                SearchTabHelper.SearchTabCollection[fromTab].LastSearchResultsCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
+                tab.SearchResponses = tab.SortHelper.Keys.ToList();
+                tab.LastSearchResultsCount = tab.SearchResponses.Count;
             }
-
-            //only do fromWishlist if SearchFragment.Instance is not null...
 
             if ((!fromWishlist || SearchFragment.Instance != null) && fromTab == SearchTabHelper.CurrentTab)
             {
@@ -1568,92 +1597,32 @@ namespace Seeker
                 {
 #if DEBUG
                     Seeker.SearchFragment.StopWatch.Stop();
-                    //Logger.Debug("time between start and stop " + AndriodApp1.SearchFragment.StopWatch.ElapsedMilliseconds);
                     Seeker.SearchFragment.StopWatch.Reset();
                     Seeker.SearchFragment.StopWatch.Start();
 #endif
-                    //SearchResponses.Add(resp);
-                    //Logger.Debug("UI - SEARCH RESPONSE RECEIVED");
                     if (fromTab != SearchTabHelper.CurrentTab)
                     {
                         return;
                     }
-                    //int total = newList.Count;
-                    int total = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
-                    //Logger.Debug("START _ ui thread response received - search collection: " + total);
-                    if (SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount == total)
+                    int total = tab.SearchResponses.Count;
+                    if (tab.LastSearchResponseCount == total)
                     {
-                        //Logger.Debug("already did it..: " + total);
-                        //we already updated for this one.
-                        //the UI marshelled calls are delayed.  as a result there will be many all coming in with the final search response count of say 751.  
                         return;
                     }
 
-                    //Logger.Debug("refreshListView SearchResponses.Count = " + SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count);
-
-                    if (SearchTabHelper.SearchTabCollection[fromTab].TextFilter.IsFiltered || AreChipsFiltering())
+                    if (tab.TextFilter.IsFiltered || AreChipsFiltering())
                     {
-                        oldList = GetOldList(SearchTabHelper.SearchTabCollection[fromTab].TextFilter.FilterString);
-                        if (oldList == null)
-                        {
-                            SearchFragment.Instance.UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);  //WE JUST NEED TO FILTER THE NEW RESPONSES!!
-                                                                                                                            //todo: diffutil.. was filtered -> now filtered...
-                            SearchFragment.Instance.recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses);
-                            SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.recyclerSearchAdapter);
-                        }
-                        else
-                        {
-                            //todo: place back
-                            var recyclerViewState = SearchFragment.Instance.recycleLayoutManager.OnSaveInstanceState();//  recyclerView.getLayoutManager().onSaveInstanceState();
-
-                            SearchFragment.Instance.UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);
-                            Logger.Debug("refreshListView  oldList: " + oldList.Count + " newList " + newList.Count);
-                            DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(oldList, SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses), true);
-                            res.DispatchUpdatesTo(SearchFragment.Instance.recyclerSearchAdapter);
-
-
-                            SearchFragment.Instance.recycleLayoutManager.OnRestoreInstanceState(recyclerViewState);
-                        }
-                        SetOldList(SearchTabHelper.SearchTabCollection[fromTab].TextFilter.FilterString, SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses.ToList());
+                        SearchFragment.Instance.UpdateFilteredResponses(tab);
+                        ApplySearchResults(tab.UI_SearchResponses, tab.TextFilter.FilterString);
                     }
                     else
                     {
-                        oldList = GetOldList(null);
-                        List<SearchResponse> newListx = null;
-                        if (oldList == null)
-                        {
-                            SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.ToList();
-                            newListx = SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses;
-                            SearchFragment.Instance.recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses);
-                            SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.recyclerSearchAdapter);
-                        }
-                        else
-                        {
-                            //the SaveInstanceState and RestoreInstanceState are needed, else autoscroll... even when animations are off...
-                            //https://stackoverflow.com/questions/43458146/diffutil-in-recycleview-making-it-autoscroll-if-a-new-item-is-added
-                            var recyclerViewState = SearchFragment.Instance.recycleLayoutManager.OnSaveInstanceState();//  recyclerView.getLayoutManager().onSaveInstanceState();
-
-                            newListx = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.ToList();
-#if DEBUG
-                            if (oldList.Count == 0)
-                            {
-                                Logger.Debug("refreshListView  oldList: " + oldList.Count + " newList " + newListx.Count);
-                            }
-#endif
-                            DiffUtil.DiffResult res = DiffUtil.CalculateDiff(new SearchDiffCallback(oldList, newListx), true); //race condition where gototab sets oldList to empty and so in DiffUtil we get an index out of range.... or maybe a wishlist happening at thte same time does it??????
-                            SearchFragment.Instance.recyclerSearchAdapter.localDataSet.Clear();
-                            SearchFragment.Instance.recyclerSearchAdapter.localDataSet.AddRange(newListx);
-                            res.DispatchUpdatesTo(SearchFragment.Instance.recyclerSearchAdapter);
-
-                            SearchFragment.Instance.recycleLayoutManager.OnRestoreInstanceState(recyclerViewState);
-                        }
-
-                        //when I was adding an empty list here updates only took 1 millisecond (though updating was choppy and weird)... whereas with an actual diff it takes 10 - 50ms but looks a lot nicer.
-                        SetOldList(null, newListx);
+                        tab.UI_SearchResponses = tab.SearchResponses.ToList();
+                        ApplySearchResults(tab.UI_SearchResponses, null);
                     }
-                    SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount = total;
-                    Seeker.SearchFragment.StopWatch.Stop();
+                    tab.LastSearchResponseCount = total;
 #if DEBUG
+                    Seeker.SearchFragment.StopWatch.Stop();
                     Seeker.SearchFragment.StopWatch.Reset();
                     Seeker.SearchFragment.StopWatch.Start();
 #endif
