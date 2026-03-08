@@ -48,7 +48,7 @@ namespace Seeker
         public Func<string, string, CancellationToken?, Task>? SetRoomTickerAsyncHandler { get; set; }
 
         // --- Mutable properties ---
-        public SoulseekClientStates State { get; set; } = SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn;
+        public SoulseekClientStates State { get; set; } = SoulseekClientStates.None;
         public string Username { get; set; } = "mockUser";
         public string Address { get; set; } = "mock.server";
         public int? Port { get; set; } = 2242;
@@ -171,7 +171,16 @@ namespace Seeker
         {
             if (ConnectAsyncHandler != null) { await ConnectAsyncHandler(username, password, cancellationToken); return; }
             ChangeState(SoulseekClientStates.Connecting, "Connecting");
+            if (username.Contains("slow"))
+            {
+                await Task.Delay(4000).ConfigureAwait(false);
+            }
             await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
+            if (username.Contains("reject"))
+            {
+                ChangeState(SoulseekClientStates.Disconnected, "Failed");
+                throw new LoginRejectedException($"The server rejected login attempt:");
+            }
             ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggingIn, "Logging in");
             await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
             Username = username;
@@ -185,8 +194,17 @@ namespace Seeker
             if (ConnectWithAddressAsyncHandler != null) { await ConnectWithAddressAsyncHandler(address, port, username, password, cancellationToken); return; }
             Address = address;
             Port = port;
+            if (username.Contains("slow"))
+            {
+                await Task.Delay(4000).ConfigureAwait(false);
+            }
             ChangeState(SoulseekClientStates.Connecting, "Connecting");
             await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
+            if (username.Contains("reject"))
+            {
+                ChangeState(SoulseekClientStates.Disconnected, "Failed");
+                throw new LoginRejectedException($"The server rejected login attempt:");
+            }
             ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggingIn, "Logging in");
             await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
             Username = username;
@@ -205,8 +223,70 @@ namespace Seeker
         public async Task<BrowseResponse> BrowseAsync(string username, BrowseOptions options = null, CancellationToken? cancellationToken = null)
         {
             if (BrowseAsyncHandler != null) return await BrowseAsyncHandler(username, options, cancellationToken);
-            await Task.Delay(SimulatedDelayMs * 2).ConfigureAwait(false);
-            return new BrowseResponse(Array.Empty<Soulseek.Directory>());
+            int millisecondDelay = 100;
+            if (username.Contains("ultraslow")) {
+                millisecondDelay = 20000;
+            } else if (username.Contains("slow")) {
+                millisecondDelay = 5000;
+            } else if (username.Contains("mid")) {
+                millisecondDelay = 500;
+            }
+            await Task.Delay(millisecondDelay).ConfigureAwait(false);
+            Soulseek.File MakeFile(string name, long size = 5_000_000) =>
+                new Soulseek.File(1, name, size, name[(name.LastIndexOf('.') + 1)..],
+                    new[] { new FileAttribute(FileAttributeType.BitRate, 320), new FileAttribute(FileAttributeType.Length, 240) });
+
+            BrowseResponse browseResponse;
+            if (username.Contains("large"))
+            {
+                var dirs = new List<Soulseek.Directory>
+                {
+                    new("@@mockuser\\Music", new[] { MakeFile("cover.jpg", 200_000) }),
+                    new("@@mockuser\\Music\\ArtistA\\Album1", new[] { MakeFile("01 Track One.mp3"), MakeFile("02 Track Two.mp3"), MakeFile("03 Track Three.mp3") }),
+                    new("@@mockuser\\Music\\ArtistA\\Album2", new[] { MakeFile("01 Intro.flac", 30_000_000), MakeFile("02 Main.flac", 45_000_000) }),
+                    new("@@mockuser\\Music\\ArtistA\\Album2\\CD2", new[] { MakeFile("01 Bonus.flac", 28_000_000) }),
+                    new("@@mockuser\\Music\\ArtistB\\Best Of", new[] { MakeFile("01 Hit.mp3"), MakeFile("02 Single.mp3"), MakeFile("03 Classic.mp3"), MakeFile("04 Deep Cut.mp3") }),
+                    new("@@mockuser\\Music\\ArtistC\\Live", new[] { MakeFile("01 Opening.mp3"), MakeFile("02 Encore.mp3") }),
+                    new("@@mockuser\\Music\\Various\\Compilation", new[] { MakeFile("01 Song.mp3"), MakeFile("02 Song.mp3"), MakeFile("03 Song.mp3") }),
+                    new("@@mockuser\\Documents\\Misc", new[] { MakeFile("readme.txt", 1_000) }),
+                };
+                var lockedDirs = new List<Soulseek.Directory>
+                {
+                    new("@@mockuser\\Music\\ArtistA\\Album3 (Private)", new[] { MakeFile("01 Unreleased.mp3"), MakeFile("02 Demo.mp3") }),
+                    new("@@mockuser\\Music\\ArtistD\\Rare", new[] { MakeFile("01 Rarity.flac", 40_000_000) }),
+                };
+                browseResponse = new BrowseResponse(dirs, lockedDirs);
+            }
+            else if (username.Contains("medium"))
+            {
+                var dirs = new List<Soulseek.Directory>
+                {
+                    new("@@mockuser\\Music\\ArtistA\\Album1", new[] { MakeFile("01 Track One.mp3"), MakeFile("02 Track Two.mp3"), MakeFile("03 Track Three.mp3") }),
+                    new("@@mockuser\\Music\\ArtistB\\Album1", new[] { MakeFile("01 First.mp3"), MakeFile("02 Second.mp3") }),
+                    new("@@mockuser\\Music\\ArtistC\\Singles", new[] { MakeFile("01 Single.mp3") }),
+                };
+                browseResponse = new BrowseResponse(dirs);
+            }
+            else if (username.Contains("small"))
+            {
+                var dirs = new List<Soulseek.Directory>
+                {
+                    new("@@mockuser\\Music\\Album", new[] { MakeFile("01 Only Track.mp3"), MakeFile("02 Another.mp3") }),
+                };
+                browseResponse = new BrowseResponse(dirs);
+            }
+            else
+            {
+                var dirs = new List<Soulseek.Directory>
+                {
+                    new("@@mockuser\\Music"),
+                    new("@@mockuser\\Documents"),
+                    new("@@mockuser\\Pictures"),
+                };
+                browseResponse = new BrowseResponse(dirs);
+            }
+
+            return browseResponse;
         }
 
         public Task<IReadOnlyCollection<Soulseek.Directory>> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null, bool isLegacy = false)
@@ -215,23 +295,92 @@ namespace Seeker
             return Task.FromResult<IReadOnlyCollection<Soulseek.Directory>>(Array.Empty<Soulseek.Directory>());
         }
 
+        private static readonly Random _random = new Random();
+        private static readonly string[] _mockUsernames = { "musiclover42", "vinyl_rips", "flac_hoarder", "mp3collector", "audiophile99", "shareking", "basshead", "djmix", "recorddigger", "soundwave" };
+        private static readonly string[] _mockArtists = { "bach", "beethoven", "mozart" };
+        private static readonly string[] _mockAlbums = { "Greatest Hits", "Live Sessions", "Remastered Edition", "Deluxe", "The Collection", "Anthology", "Unplugged", "B-Sides" };
+        private static readonly string[] _extensions = { "mp3", "flac", "ogg", "wav", "m4a" };
+
+        private static (int count, int totalTimeMs) ParseMockSearchParams(SearchQuery query)
+        {
+            int count = 30;
+            int totalTimeMs = 1000;
+            foreach (var term in query.Terms)
+            {
+                if (term.StartsWith("n:", StringComparison.OrdinalIgnoreCase) && int.TryParse(term.Substring(2), out int n))
+                    count = Math.Max(1, n);
+                else if (term.StartsWith("t:", StringComparison.OrdinalIgnoreCase) && int.TryParse(term.Substring(2), out int t))
+                    totalTimeMs = Math.Max(0, t);
+            }
+            return (count, totalTimeMs);
+        }
+
+        private static SearchResponse GenerateMockSearchResponse(int token)
+        {
+            var username = _mockUsernames[_random.Next(_mockUsernames.Length)];
+            var artist = _mockArtists[_random.Next(_mockArtists.Length)];
+            var album = _mockAlbums[_random.Next(_mockAlbums.Length)];
+            var ext = _extensions[_random.Next(_extensions.Length)];
+            var uploadSpeed = _random.Next(50_000, 10_000_000);
+            var queueLength = _random.Next(0, 50);
+            var hasFreeSlot = _random.Next(2) == 0;
+            var isLocked = _random.Next(5) == 0; // ~20% chance locked
+
+            int trackCount = _random.Next(1, 6);
+            var files = new List<Soulseek.File>();
+            int bitRate = ext == "flac" ? 1411 : new[] { 128, 192, 256, 320 }[_random.Next(4)];
+            for (int i = 0; i < trackCount; i++)
+            {
+                int trackNum = i + 1;
+                long size = _random.Next(2_000_000, 60_000_000);
+                int length = _random.Next(120, 480);
+                string filename = $"@@{username}\\Music\\{artist}\\AlbumName {album}\\{trackNum:D2} Track {trackNum}.{ext}";
+                files.Add(new Soulseek.File(1, filename, size, ext,
+                    new[] { new FileAttribute(FileAttributeType.BitRate, bitRate), new FileAttribute(FileAttributeType.Length, length) }));
+            }
+
+            if (isLocked)
+            {
+                return new SearchResponse(username, token, hasFreeSlot, uploadSpeed, queueLength,
+                    Array.Empty<Soulseek.File>(), files);
+            }
+            return new SearchResponse(username, token, hasFreeSlot, uploadSpeed, queueLength, files);
+        }
+
         public async Task<(Soulseek.Search Search, IReadOnlyCollection<SearchResponse> Responses)> SearchAsync(SearchQuery query, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null)
         {
             if (SearchAsyncHandler != null) return await SearchAsyncHandler(query, scope, token, options, cancellationToken);
             var resolvedScope = scope ?? new SearchScope(SearchScopeType.Network);
             var resolvedToken = token ?? GetNextToken();
 
+            var (count, totalTimeMs) = ParseMockSearchParams(query);
+            int delayPerResponse = count > 0 ? totalTimeMs / count : 0;
+
             var searchRequested = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.Requested, 0, 0, 0);
             SearchStateChanged?.Invoke(this, new SearchStateChangedEventArgs(SearchStates.None, searchRequested));
-            await Task.Delay(SimulatedDelayMs / 2).ConfigureAwait(false);
 
             var searchInProgress = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.InProgress, 0, 0, 0);
             SearchStateChanged?.Invoke(this, new SearchStateChangedEventArgs(SearchStates.Requested, searchInProgress));
-            await Task.Delay(SimulatedDelayMs * 2).ConfigureAwait(false);
 
-            var searchCompleted = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.Completed, 0, 0, 0);
+            var allResponses = new List<SearchResponse>();
+            for (int i = 0; i < count; i++)
+            {
+                if (cancellationToken?.IsCancellationRequested == true)
+                    break;
+
+                var response = GenerateMockSearchResponse(resolvedToken);
+                allResponses.Add(response);
+
+                var currentSearch = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.InProgress, i + 1, 0, 0);
+                options?.ResponseReceived?.Invoke((currentSearch, response));
+
+                if (delayPerResponse > 0)
+                    await Task.Delay(delayPerResponse).ConfigureAwait(false);
+            }
+
+            var searchCompleted = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.Completed, count, 0, 0);
             SearchStateChanged?.Invoke(this, new SearchStateChangedEventArgs(SearchStates.InProgress, searchCompleted));
-            return (searchCompleted, Array.Empty<SearchResponse>());
+            return (searchCompleted, allResponses.AsReadOnly());
         }
 
         public async Task<Soulseek.Search> SearchAsync(SearchQuery query, Action<SearchResponse> responseHandler, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null)
