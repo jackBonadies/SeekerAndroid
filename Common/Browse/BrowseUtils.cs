@@ -313,6 +313,21 @@ namespace Common.Browse
             return count;
         }
 
+        public record struct BrowseStats(double NumFolders, double NumFiles);
+
+        public static BrowseStats GetBrowseStats(BrowseResponse browseResponse)
+        {
+            if (PreferencesState.HideLockedResultsInBrowse)
+            {
+                return new BrowseStats(browseResponse.DirectoryCount, browseResponse.Directories.Sum(it => it.FileCount));
+            } 
+            else
+            {
+                return new BrowseStats(browseResponse.DirectoryCount + browseResponse.LockedDirectoryCount, 
+                    browseResponse.Directories.Sum(it => it.FileCount) + browseResponse.LockedDirectories.Sum(it => it.FileCount));
+            }
+        }
+
         public static List<DataItem> GetDataItemsForNode(TreeNode<Directory> node)
         {
             var items = new List<DataItem>();

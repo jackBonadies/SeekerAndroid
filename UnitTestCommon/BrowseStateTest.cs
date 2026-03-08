@@ -73,7 +73,7 @@ namespace UnitTestCommon
             var state = new BrowseState();
             var tree = BuildTestTree();
 
-            var error = state.SetBrowseResponse("testuser", tree, null);
+            var error = state.SetBrowseResponse("testuser", tree, null, null);
 
             Assert.AreEqual(BrowseStateError.None, error);
             Assert.AreEqual("testuser", state.CurrentUsername);
@@ -86,7 +86,7 @@ namespace UnitTestCommon
             var state = new BrowseState();
             var tree = BuildTestTree();
 
-            var error = state.SetBrowseResponse("testuser", tree, "");
+            var error = state.SetBrowseResponse("testuser", tree, null, "");
 
             Assert.AreEqual(BrowseStateError.None, error);
             Assert.AreEqual(2, state.DataItems.Count); // Music + Documents
@@ -98,7 +98,7 @@ namespace UnitTestCommon
             var state = new BrowseState();
             var tree = BuildTestTree();
 
-            var error = state.SetBrowseResponse("testuser", tree, @"root\Music");
+            var error = state.SetBrowseResponse("testuser", tree, null, @"root\Music");
 
             Assert.AreEqual(BrowseStateError.None, error);
             // Music has 1 child dir (SubFolder) + 2 files
@@ -111,7 +111,7 @@ namespace UnitTestCommon
             var state = new BrowseState();
             var tree = BuildTestTree();
 
-            var error = state.SetBrowseResponse("testuser", tree, "nonexistent");
+            var error = state.SetBrowseResponse("testuser", tree, null, "nonexistent");
 
             Assert.AreEqual(BrowseStateError.CannotFindStartDirectory, error);
             Assert.AreEqual(2, state.DataItems.Count); // falls back to root
@@ -123,12 +123,12 @@ namespace UnitTestCommon
             var state = new BrowseState();
             var tree = BuildTestTree();
 
-            state.SetBrowseResponse("user1", tree, null);
+            state.SetBrowseResponse("user1", tree, null, null);
             Assert.AreEqual(2, state.DataItems.Count);
 
             // Second call should clear old data
             var tree2 = new TreeNode<Directory>(new Directory("empty"), false);
-            state.SetBrowseResponse("user2", tree2, null);
+            state.SetBrowseResponse("user2", tree2, null, null);
             Assert.AreEqual("user2", state.CurrentUsername);
             Assert.AreEqual(0, state.DataItems.Count);
         }
@@ -141,7 +141,7 @@ namespace UnitTestCommon
             Assert.IsTrue(state.Filter.IsFiltered);
 
             var tree = BuildTestTree();
-            state.SetBrowseResponse("testuser", tree, null);
+            state.SetBrowseResponse("testuser", tree, null, null);
 
             Assert.IsFalse(state.Filter.IsFiltered);
         }
@@ -169,7 +169,7 @@ namespace UnitTestCommon
         {
             var state = new BrowseState();
             var tree = BuildTestTree();
-            state.SetBrowseResponse("testuser", tree, @"root\Music");
+            state.SetBrowseResponse("testuser", tree, null, @"root\Music");
             // DataItems: SubFolder (dir), song1.mp3, song2.mp3
 
             state.Filter.Set("song1");
@@ -184,7 +184,7 @@ namespace UnitTestCommon
         {
             var state = new BrowseState();
             var tree = BuildTestTree();
-            state.SetBrowseResponse("testuser", tree, @"root\Music");
+            state.SetBrowseResponse("testuser", tree, null, @"root\Music");
 
             state.Filter.Set("song");
             state.UpdateFilteredResponses();
@@ -198,7 +198,7 @@ namespace UnitTestCommon
         {
             var state = new BrowseState();
             var tree = BuildTestTree();
-            state.SetBrowseResponse("testuser", tree, @"root\Music");
+            state.SetBrowseResponse("testuser", tree, null, @"root\Music");
 
             // First filter
             state.Filter.Set("song");
@@ -235,7 +235,7 @@ namespace UnitTestCommon
             var subFolderNode = musicNode.Children.First();
 
             // Navigate to SubFolder's contents (files)
-            state.SetBrowseResponse("testuser", tree, @"root\Music\SubFolder");
+            state.SetBrowseResponse("testuser", tree, null, @"root\Music\SubFolder");
             Assert.IsTrue(state.DataItems.Any(d => d.File != null)); // should have files
 
             var adapterCalls = new List<(bool filtered, int count)>();
@@ -256,7 +256,7 @@ namespace UnitTestCommon
             var tree = BuildTestTree();
 
             // Navigate to Music level (which shows SubFolder dir + files)
-            state.SetBrowseResponse("testuser", tree, @"root\Music");
+            state.SetBrowseResponse("testuser", tree, null, @"root\Music");
             // DataItems[0] is SubFolder directory
 
             var adapterCalls = 0;
@@ -277,7 +277,7 @@ namespace UnitTestCommon
             var tree = BuildTestTree();
 
             // At root level, DataItems are Music and Documents (dirs)
-            state.SetBrowseResponse("testuser", tree, null);
+            state.SetBrowseResponse("testuser", tree, null, null);
 
             bool result = state.GoUpDirectory((f, d, b1, b2) => { }, 0);
 
@@ -290,7 +290,7 @@ namespace UnitTestCommon
         {
             var state = new BrowseState();
             var tree = BuildTestTree();
-            state.SetBrowseResponse("testuser", tree, @"root\Music\SubFolder");
+            state.SetBrowseResponse("testuser", tree, null, @"root\Music\SubFolder");
 
             var adapterCalls = 0;
             bool result = state.GoUpDirectory((filtered, items, b1, b2) =>
@@ -310,7 +310,7 @@ namespace UnitTestCommon
         {
             var state = new BrowseState();
             var tree = BuildTestTree();
-            state.SetBrowseResponse("testuser", tree, @"root\Music\SubFolder");
+            state.SetBrowseResponse("testuser", tree, null, @"root\Music\SubFolder");
             state.Filter.Set("song");
             state.UpdateFilteredResponses();
 
@@ -340,7 +340,7 @@ namespace UnitTestCommon
             nodeB.AddChild(dirC, false);
 
             var state = new BrowseState();
-            state.SetBrowseResponse("testuser", root, @"root\A\B");
+            state.SetBrowseResponse("testuser", root, null, @"root\A\B");
             // DataItems: C (dir)
             // Going up from dir -> Parent.Parent = A, then additionalLevels=1 -> root
 
@@ -353,7 +353,7 @@ namespace UnitTestCommon
         {
             var state = new BrowseState();
             var tree = BuildTestTree();
-            state.SetBrowseResponse("testuser", tree, @"root\Music\SubFolder");
+            state.SetBrowseResponse("testuser", tree, null, @"root\Music\SubFolder");
             state.CachedFilteredDataItems = new System.Tuple<string, List<DataItem>>("cached", new List<DataItem>());
 
             state.GoUpDirectory((f, d, b1, b2) => { }, 0);

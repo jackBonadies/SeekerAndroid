@@ -17,26 +17,27 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Seeker.Browse;
 using Android.Content;
 using Android.OS;
 using Android.Text;
+using Android.Text.Style;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Fragment.App;
 using AndroidX.RecyclerView.Widget;
 using Common;
+using Common.Browse;
 using Google.Android.Material.BottomNavigation;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.FloatingActionButton;
+using Seeker.Browse;
+using Seeker.Helpers;
 using Seeker.Services;
 using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Seeker.Helpers;
-using Common.Browse;
 
 namespace Seeker
 {
@@ -474,11 +475,25 @@ namespace Seeker
                 var pager = (AndroidX.ViewPager.Widget.ViewPager)SeekerState.MainActivityRef?.FindViewById(Resource.Id.pager);
                 if (pager != null && pager.CurrentItem == BROWSE_TAB_INDEX)
                 {
-                    SeekerState.MainActivityRef.SupportActionBar.Title = GetTabTitle(SeekerState.MainActivityRef);
+                    SetActionBarTitle();
                     SeekerState.MainActivityRef.InvalidateOptionsMenu();
                 }
-
             });
+        }
+
+        public static void SetActionBarTitle()
+        {
+            SeekerState.MainActivityRef.SupportActionBar.Title = GetTabTitle(SeekerState.MainActivityRef);
+            if (string.IsNullOrEmpty(state.CurrentUsername))
+            {
+                SeekerState.MainActivityRef.SupportActionBar.SubtitleFormatted = null;
+            } 
+            else
+            {
+                var s = new SpannableString($"{state.Stats.NumFolders} folders, {state.Stats.NumFiles} files");
+                s.SetSpan(new RelativeSizeSpan(0.8f), 0, s.Length(), SpanTypes.ExclusiveExclusive);
+                SeekerState.MainActivityRef.SupportActionBar.SubtitleFormatted = s;
+            }
         }
 
         public override void OnResume()
@@ -488,7 +503,7 @@ namespace Seeker
                 && !SeekerState.MainActivityRef.SupportActionBar.Title.EndsWith(": " + state.CurrentUsername)
                 && SeekerState.MainActivityRef.OnBrowseTab())
             {
-                SeekerState.MainActivityRef.SupportActionBar.Title = GetTabTitle(SeekerState.MainActivityRef);
+                SetActionBarTitle();
             }
             BrowseResponseReceivedUI += BrowseResponseReceivedUI_Handler;
             if (currentUsernameUI != state.CurrentUsername)
@@ -1163,7 +1178,7 @@ namespace Seeker
             ClearFilterUIString();
             ScrollPositionRestore?.Clear();
             ScrollPositionRestoreRotate = null;
-            var errorCode = state.SetBrowseResponse(e.Username, e.BrowseResponseTree, e.StartingLocation);
+            var errorCode = state.SetBrowseResponse(e.Username, e.BrowseResponseTree, e.OriginalBrowseResponse, e.StartingLocation);
             if (errorCode == BrowseStateError.CannotFindStartDirectory)
             {
                 Logger.Firebase("SeekerState_BrowseResponseReceived: startingPoint is null " + e.StartingLocation);

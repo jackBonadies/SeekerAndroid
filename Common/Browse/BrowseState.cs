@@ -4,6 +4,7 @@ using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static Common.Browse.BrowseUtils;
 
 namespace Seeker
 {
@@ -21,17 +22,19 @@ namespace Seeker
         public List<PathItem> PathItems { get; set; } = new List<PathItem>();
         public TextFilter Filter { get; } = new TextFilter();
         public string? CurrentUsername { get; set; }
+        public BrowseStats Stats { get; private set; } 
 
         public bool HasResponse()
         {
             return !string.IsNullOrEmpty(CurrentUsername);
         }
 
-        public BrowseStateError SetBrowseResponse(string username, TreeNode<Directory> browseResponseTree, string startingLocation)
+        public BrowseStateError SetBrowseResponse(string username, TreeNode<Directory> browseResponseTree, BrowseResponse originalBrowseResponse, string startingLocation)
         {
             BrowseStateError errorState = BrowseStateError.None;
             ClearFilter();
             CurrentUsername = username;
+            Stats = originalBrowseResponse != null ? BrowseUtils.GetBrowseStats(originalBrowseResponse) : default;
 
             lock (DataItems) //on non UI thread.
             {

@@ -1179,6 +1179,7 @@ namespace Seeker
                     this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
                     this.SupportActionBar.Title = this.GetString(Resource.String.home_tab);
+                    this.SupportActionBar.SubtitleFormatted = null;
                     this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
                     break;
                 case 1:
@@ -1220,7 +1221,7 @@ namespace Seeker
 
                     this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
-                    this.SupportActionBar.Title = BrowseFragment.GetTabTitle(this);
+                    BrowseFragment.SetActionBarTitle();
                     this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.transfers_menu);
                     break;
             }
@@ -1233,12 +1234,14 @@ namespace Seeker
                 if (TransfersViewState.Instance.CurrentlySelectedUploadFolder == null)
                 {
                     this.SupportActionBar.Title = this.GetString(Resource.String.Uploads);
+                    this.SupportActionBar.SubtitleFormatted = null;
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                     this.SupportActionBar.SetHomeButtonEnabled(false);
                 }
                 else
                 {
                     this.SupportActionBar.Title = TransfersViewState.Instance.CurrentlySelectedUploadFolder.FolderName;
+                    this.SupportActionBar.SubtitleFormatted = null;
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
                     this.SupportActionBar.SetHomeButtonEnabled(true);
                 }
@@ -1248,12 +1251,14 @@ namespace Seeker
                 if (TransfersViewState.Instance.CurrentlySelectedDLFolder == null)
                 {
                     this.SupportActionBar.Title = this.GetString(Resource.String.Downloads);
+                    this.SupportActionBar.SubtitleFormatted = null;
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                     this.SupportActionBar.SetHomeButtonEnabled(false);
                 }
                 else
                 {
                     this.SupportActionBar.Title = TransfersViewState.Instance.CurrentlySelectedDLFolder.FolderName;
+                    this.SupportActionBar.SubtitleFormatted = null;
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
                     this.SupportActionBar.SetHomeButtonEnabled(true);
                 }
