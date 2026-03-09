@@ -278,23 +278,23 @@ namespace Seeker
         public void UpdateConnectionStatus(SoulseekClientStates state)
         {
             int textResId;
-            int dotColor;
-            int textColor;
-            int chipBgColor;
+            int dotColorResId;
+            int textColorResId;
+            int chipBgColorResId;
 
             if (state.HasFlag(SoulseekClientStates.LoggedIn))
             {
                 textResId = Resource.String.status_connected;
-                dotColor = Android.Graphics.Color.ParseColor("#4CAF50");
-                textColor = Android.Graphics.Color.ParseColor("#2E7D32");
-                chipBgColor = Android.Graphics.Color.ParseColor("#1A4CAF50");
+                dotColorResId = Resource.Color.statusConnectedDot;
+                textColorResId = Resource.Color.statusConnectedText;
+                chipBgColorResId = Resource.Color.statusConnectedChipBg;
             }
             else if (state.HasFlag(SoulseekClientStates.Connecting) || state.HasFlag(SoulseekClientStates.LoggingIn))
             {
                 textResId = Resource.String.status_connecting;
-                dotColor = Android.Graphics.Color.ParseColor("#FFA726");
-                textColor = Android.Graphics.Color.ParseColor("#E65100");
-                chipBgColor = Android.Graphics.Color.ParseColor("#1AFFA726");
+                dotColorResId = Resource.Color.statusConnectingDot;
+                textColorResId = Resource.Color.statusConnectingText;
+                chipBgColorResId = Resource.Color.statusConnectingChipBg;
             }
             else
             {
@@ -306,10 +306,15 @@ namespace Seeker
                 {
                     textResId = Resource.String.status_disconnected;
                 }
-                dotColor = Android.Graphics.Color.ParseColor("#F44336");
-                textColor = Android.Graphics.Color.ParseColor("#C62828");
-                chipBgColor = Android.Graphics.Color.ParseColor("#1AF44336");
+                dotColorResId = Resource.Color.statusDisconnectedDot;
+                textColorResId = Resource.Color.statusDisconnectedText;
+                chipBgColorResId = Resource.Color.statusDisconnectedChipBg;
             }
+
+            var resources = this.Context.Resources;
+            int dotColor = resources.GetColor(dotColorResId, this.Context.Theme);
+            int textColor = resources.GetColor(textColorResId, this.Context.Theme);
+            int chipBgColor = resources.GetColor(chipBgColorResId, this.Context.Theme);
 
             var dotDrawable = (GradientDrawable)connectionStatusDot.Background;
             dotDrawable.SetColor(dotColor);

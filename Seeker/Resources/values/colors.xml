@@ -43,4 +43,14 @@
 
     <color name="checkCircleSelected">#303030</color>
     <color name="checkCircleUnselected">#303030</color>
+
+    <color name="statusConnectedDot">#4CAF50</color>
+    <color name="statusConnectedText">#2E7D32</color>
+    <color name="statusConnectedChipBg">#1A4CAF50</color>
+    <color name="statusConnectingDot">#FFA726</color>
+    <color name="statusConnectingText">#E65100</color>
+    <color name="statusConnectingChipBg">#1AFFA726</color>
+    <color name="statusDisconnectedDot">#F44336</color>
+    <color name="statusDisconnectedText">#C62828</color>
+    <color name="statusDisconnectedChipBg">#1AF44336</color>
 </resources>
