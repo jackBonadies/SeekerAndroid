@@ -199,7 +199,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/userNameView"
-                        android:textColor="?attr/mainTextColor"
+                        android:textColor="?attr/normalTextColor"
                         android:textStyle="bold"
                         android:textSize="20sp"
                         android:layout_marginTop="2dp"
@@ -316,7 +316,7 @@
                             android:layout_weight="1"
                             android:text="@string/set_up_sharing"
                             android:textSize="16sp"
-                            android:textColor="?attr/mainTextColor"
+                            android:textColor="?attr/normalTextColor"
                             android:layout_marginStart="16dp"
                         />
                         <ImageView
@@ -365,7 +365,7 @@
                             android:layout_weight="1"
                             android:text="@string/manage_user_list"
                             android:textSize="16sp"
-                            android:textColor="?attr/mainTextColor"
+                            android:textColor="?attr/normalTextColor"
                             android:layout_marginStart="16dp"
                         />
                         <ImageView
@@ -428,7 +428,7 @@
                             android:layout_weight="1"
                             android:text="@string/messages"
                             android:textSize="16sp"
-                            android:textColor="?attr/mainTextColor"
+                            android:textColor="?attr/normalTextColor"
                             android:layout_marginStart="16dp"
                         />
                         <TextView
@@ -500,7 +500,7 @@
                             android:layout_weight="1"
                             android:text="@string/settings"
                             android:textSize="16sp"
-                            android:textColor="?attr/mainTextColor"
+                            android:textColor="?attr/normalTextColor"
                             android:layout_marginStart="16dp"
                         />
                         <ImageView
