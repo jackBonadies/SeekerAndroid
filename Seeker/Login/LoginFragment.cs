@@ -74,6 +74,28 @@ namespace Seeker
             base.OnCreateOptionsMenu(menu, inflater);
         }
 
+        public override void OnResume()
+        {
+            base.OnResume();
+
+            SeekerState.SoulseekClient.StateChanged += SoulseekClient_StateChanged;
+            UpdateConnectionStatus(SeekerState.SoulseekClient.State);
+        }
+
+        public override void OnPause()
+        {
+            base.OnPause();
+            SeekerState.SoulseekClient.StateChanged -= SoulseekClient_StateChanged;
+        }
+
+        private void SoulseekClient_StateChanged(object sender, SoulseekClientStateChangedEventArgs e)
+        {
+            this.Activity?.RunOnUiThread(() =>
+            {
+                UpdateConnectionStatus(e.State);
+            });
+        }
+
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             HasOptionsMenu = true;
@@ -198,7 +220,6 @@ namespace Seeker
                 SeekerState.MainActivityRef.RunOnUiThread(action);
             }
         }
-
         public void ShowLoading()
         {
             var action = new Action(() =>
@@ -277,7 +298,14 @@ namespace Seeker
             }
             else
             {
-                textResId = Resource.String.status_disconnected;
+                if (state.HasFlag(SoulseekClientStates.Disconnecting))
+                {
+                    textResId = Resource.String.status_disconnecting;
+                }
+                else
+                {
+                    textResId = Resource.String.status_disconnected;
+                }
                 dotColor = Android.Graphics.Color.ParseColor("#F44336");
                 textColor = Android.Graphics.Color.ParseColor("#C62828");
                 chipBgColor = Android.Graphics.Color.ParseColor("#1AF44336");

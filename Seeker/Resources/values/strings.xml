@@ -14,11 +14,10 @@
 
     <string name="set_up_sharing">Set Up Sharing</string>
     <string name="manage_user_list">Manage User List</string>
-    <string name="messages">Messages</string>
     <string name="unread_count_fmt">%d unread</string>
-    <string name="section_setup">SETUP</string>
-    <string name="section_communication">COMMUNICATION</string>
-    <string name="section_account">ACCOUNT</string>
+    <string name="section_caps_setup">SETUP</string>
+    <string name="section_caps_communication">COMMUNICATION</string>
+    <string name="section_caps_account">ACCOUNT</string>
 
     <string name="new_result">new result</string>
     <string name="new_results">new results</string>
@@ -622,6 +621,7 @@ Directory Count: {5}"
     <string name="status_connected">Connected</string>
     <string name="status_connecting">Connecting</string>
     <string name="status_disconnected">Disconnected</string>
+    <string name="status_disconnecting">Disconnecting</string>
 
     <string name="failed_to_establish_direct_or_indirect">
         Failed to establish a direct or indirect message connection to user

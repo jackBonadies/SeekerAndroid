@@ -1312,6 +1312,19 @@ namespace Seeker
             return true;
         }
 
+        #if DEBUG
+        public override bool DispatchKeyEvent(KeyEvent e)
+        {
+            if (e.KeyCode == Keycode.VolumeUp)
+            {
+                SeekerState.SoulseekClient.Disconnect("test");
+            }
+            else if (e.KeyCode == Keycode.VolumeDown)
+            {
+                SeekerState.SoulseekClient.ConnectAsync("slowtest", "slowpass");
+            }
+            return base.DispatchKeyEvent(e);
+        }
+        #endif
     }
-
 }
