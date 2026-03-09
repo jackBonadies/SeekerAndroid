@@ -168,7 +168,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
-            app:cardBackgroundColor="#FFFFFF"
+            app:cardBackgroundColor="?attr/colorSurface"
             android:layout_marginTop="20dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
@@ -199,7 +199,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/userNameView"
-                        android:textColor="#000000"
+                        android:textColor="?attr/mainTextColor"
                         android:textStyle="bold"
                         android:textSize="20sp"
                         android:layout_marginTop="2dp"
@@ -272,7 +272,7 @@
                     android:text="@string/section_caps_setup"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:textColor="#909090"
+                    android:textColor="@color/subTextColor"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp"
@@ -285,7 +285,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:cardCornerRadius="12dp"
-                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardBackgroundColor="?attr/colorSurface"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
                     android:layout_marginBottom="4dp"
@@ -308,7 +308,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/upload_material"
-                            app:tint="#757575"
+                            app:tint="@color/subTextColor"
                         />
                         <TextView
                             android:layout_width="0dp"
@@ -316,14 +316,14 @@
                             android:layout_weight="1"
                             android:text="@string/set_up_sharing"
                             android:textSize="16sp"
-                            android:textColor="#000000"
+                            android:textColor="?attr/mainTextColor"
                             android:layout_marginStart="16dp"
                         />
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:src="@drawable/chevron_right"
-                            app:tint="#757575"
+                            app:tint="@color/subTextColor"
                         />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -335,7 +335,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:cardCornerRadius="12dp"
-                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardBackgroundColor="?attr/colorSurface"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
                     android:layout_marginBottom="4dp"
@@ -357,7 +357,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/baseline_group_white_24"
-                            app:tint="#757575"
+                            app:tint="@color/subTextColor"
                         />
                         <TextView
                             android:layout_width="0dp"
@@ -365,14 +365,14 @@
                             android:layout_weight="1"
                             android:text="@string/manage_user_list"
                             android:textSize="16sp"
-                            android:textColor="#000000"
+                            android:textColor="?attr/mainTextColor"
                             android:layout_marginStart="16dp"
                         />
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:src="@drawable/chevron_right"
-                            app:tint="#757575"
+                            app:tint="@color/subTextColor"
                         />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -385,7 +385,7 @@
                     android:text="@string/section_caps_communication"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:textColor="#909090"
+                    android:textColor="@color/subTextColor"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="8dp"
@@ -398,7 +398,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:cardCornerRadius="12dp"
-                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardBackgroundColor="?attr/colorSurface"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
                     android:layout_marginBottom="4dp"
@@ -420,7 +420,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/baseline_chat_bubble_white_24"
-                            app:tint="#757575"
+                            app:tint="@color/subTextColor"
                         />
                         <TextView
                             android:layout_width="0dp"
@@ -428,7 +428,7 @@
                             android:layout_weight="1"
                             android:text="@string/messages"
                             android:textSize="16sp"
-                            android:textColor="#000000"
+                            android:textColor="?attr/mainTextColor"
                             android:layout_marginStart="16dp"
                         />
                         <TextView
@@ -436,7 +436,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="14sp"
-                            android:textColor="#757575"
+                            android:textColor="@color/subTextColor"
                             android:layout_marginEnd="8dp"
                             android:visibility="gone"
                         />
@@ -444,7 +444,7 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:src="@drawable/chevron_right"
-                            app:tint="#757575"
+                            app:tint="@color/subTextColor"
                         />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -457,7 +457,7 @@
                     android:text="@string/section_caps_account"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:textColor="#909090"
+                    android:textColor="@color/subTextColor"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="8dp"
@@ -470,7 +470,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:cardCornerRadius="12dp"
-                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardBackgroundColor="?attr/colorSurface"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
                     android:layout_marginBottom="4dp"
@@ -492,7 +492,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/baseline_settings_white_24"
-                            app:tint="#757575"
+                            app:tint="@color/subTextColor"
                         />
                         <TextView
                             android:layout_width="0dp"
@@ -500,14 +500,14 @@
                             android:layout_weight="1"
                             android:text="@string/settings"
                             android:textSize="16sp"
-                            android:textColor="#000000"
+                            android:textColor="?attr/mainTextColor"
                             android:layout_marginStart="16dp"
                         />
                         <ImageView
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:src="@drawable/chevron_right"
-                            app:tint="#757575"
+                            app:tint="@color/subTextColor"
                         />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -519,7 +519,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:cardCornerRadius="12dp"
-                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardBackgroundColor="?attr/colorSurface"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
                     android:layout_marginBottom="4dp"
@@ -556,7 +556,7 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:src="@drawable/chevron_right"
-                            app:tint="#757575"
+                            app:tint="@color/subTextColor"
                         />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
