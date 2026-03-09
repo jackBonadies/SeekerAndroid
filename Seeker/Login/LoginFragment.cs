@@ -30,6 +30,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Seeker.Helpers;
+using Seeker.Messages;
 using Common;
 namespace Seeker
 {
@@ -49,13 +50,19 @@ namespace Seeker
         private TextInputLayout usernameInputLayout;
 
         // Logged-in views (child 2)
-        private Button logoutButton;
-        private Button settingsButton;
         private Button mustSelectDirButton;
         private TextView welcomeTextView;
         private View connectionStatusDot;
         private TextView connectionStatusText;
         private View connectionStatusChip;
+
+        // Menu rows
+        private View menuSetUpSharing;
+        private View menuManageUserList;
+        private View menuMessages;
+        private TextView messagesUnreadBadge;
+        private View menuSettings;
+        private View menuLogout;
 
         private const int ChildLoginForm = 0;
         private const int ChildLoading = 1;
@@ -137,15 +144,31 @@ namespace Seeker
 
         private void SetUpLoggedInViews()
         {
-            logoutButton = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-            logoutButton.Click += LogoutClick;
-            settingsButton = rootView.FindViewById<Button>(Resource.Id.settingsButton);
-            settingsButton.Click += Settings_Click;
             mustSelectDirButton = rootView.FindViewById<Button>(Resource.Id.mustSelectDirectory);
             welcomeTextView = rootView.FindViewById<TextView>(Resource.Id.userNameView);
             connectionStatusDot = rootView.FindViewById<View>(Resource.Id.connectionStatusDot);
             connectionStatusText = rootView.FindViewById<TextView>(Resource.Id.connectionStatusText);
             connectionStatusChip = rootView.FindViewById<View>(Resource.Id.connectionStatusChip);
+
+            menuSetUpSharing = rootView.FindViewById<View>(Resource.Id.menuSetUpSharing);
+            menuManageUserList = rootView.FindViewById<View>(Resource.Id.menuManageUserList);
+            menuMessages = rootView.FindViewById<View>(Resource.Id.menuMessages);
+            messagesUnreadBadge = rootView.FindViewById<TextView>(Resource.Id.messagesUnreadBadge);
+            menuSettings = rootView.FindViewById<View>(Resource.Id.menuSettings);
+            menuLogout = rootView.FindViewById<View>(Resource.Id.menuLogout);
+
+            menuManageUserList.Click += (s, e) =>
+            {
+                Intent intent = new Intent(SeekerState.MainActivityRef, typeof(UserListActivity));
+                SeekerState.MainActivityRef.StartActivityForResult(intent, 141);
+            };
+            menuMessages.Click += (s, e) =>
+            {
+                Intent intent = new Intent(SeekerState.MainActivityRef, typeof(MessagesActivity));
+                SeekerState.MainActivityRef.StartActivityForResult(intent, 142);
+            };
+            menuSettings.Click += Settings_Click;
+            menuLogout.Click += LogoutClick;
         }
 
         // --- View-flipping methods ---
@@ -198,6 +221,27 @@ namespace Seeker
             {
                 welcomeTextView.Text = PreferencesState.Username;
                 UpdateConnectionStatus(SeekerState.SoulseekClient.State);
+
+                int unreadCount = MessageController.UnreadUsernames?.Count ?? 0;
+                if (unreadCount > 0)
+                {
+                    messagesUnreadBadge.Text = string.Format(SeekerApplication.GetString(Resource.String.unread_count_fmt), unreadCount);
+                    messagesUnreadBadge.Visibility = ViewStates.Visible;
+                }
+                else
+                {
+                    messagesUnreadBadge.Visibility = ViewStates.Gone;
+                }
+
+                if (UploadDirectoryManager.UploadDirectories == null || UploadDirectoryManager.UploadDirectories.Count == 0)
+                {
+                    menuSetUpSharing.Visibility = ViewStates.Visible;
+                }
+                else
+                {
+                    menuSetUpSharing.Visibility = ViewStates.Gone;
+                }
+
                 viewFlipper.DisplayedChild = ChildLoggedIn;
             });
             if (MainActivity.OnUIthread())

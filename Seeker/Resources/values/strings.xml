@@ -12,6 +12,14 @@
 	<string name="signin">Sign In</string>
 	<string name="signin_or_create_account">Sign in or create new account</string>
 
+    <string name="set_up_sharing">Set Up Sharing</string>
+    <string name="manage_user_list">Manage User List</string>
+    <string name="messages">Messages</string>
+    <string name="unread_count_fmt">%d unread</string>
+    <string name="section_setup">SETUP</string>
+    <string name="section_communication">COMMUNICATION</string>
+    <string name="section_account">ACCOUNT</string>
+
     <string name="new_result">new result</string>
     <string name="new_results">new results</string>
 
