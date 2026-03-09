@@ -6,7 +6,6 @@
         android:id="@+id/action_browse_user"
         android:title="@string/browse_user"
         android:icon="@drawable/baseline_add_white_24"
-        app:iconTint="?attr/colorOnSurface"
         app:showAsAction="always"
         android:iconifiedByDefault="true"
     />
