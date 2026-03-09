@@ -19,6 +19,7 @@
 
 using Seeker.Services;
 using Android.Content;
+using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
@@ -52,6 +53,8 @@ namespace Seeker
         private Button settingsButton;
         private Button mustSelectDirButton;
         private TextView welcomeTextView;
+        private View connectionStatusDot;
+        private TextView connectionStatusText;
 
         private const int ChildLoginForm = 0;
         private const int ChildLoading = 1;
@@ -139,6 +142,8 @@ namespace Seeker
             settingsButton.Click += Settings_Click;
             mustSelectDirButton = rootView.FindViewById<Button>(Resource.Id.mustSelectDirectory);
             welcomeTextView = rootView.FindViewById<TextView>(Resource.Id.userNameView);
+            connectionStatusDot = rootView.FindViewById<View>(Resource.Id.connectionStatusDot);
+            connectionStatusText = rootView.FindViewById<TextView>(Resource.Id.connectionStatusText);
         }
 
         // --- View-flipping methods ---
@@ -189,7 +194,8 @@ namespace Seeker
         {
             var action = new Action(() =>
             {
-                welcomeTextView.Text = string.Format(SeekerApplication.GetString(Resource.String.welcome), PreferencesState.Username);
+                welcomeTextView.Text = PreferencesState.Username;
+                UpdateConnectionStatus(SeekerState.SoulseekClient.State);
                 viewFlipper.DisplayedChild = ChildLoggedIn;
             });
             if (MainActivity.OnUIthread())
@@ -200,6 +206,34 @@ namespace Seeker
             {
                 SeekerState.MainActivityRef.RunOnUiThread(action);
             }
+        }
+
+        public void UpdateConnectionStatus(SoulseekClientStates state)
+        {
+            int colorResId;
+            int textResId;
+
+            if (state.HasFlag(SoulseekClientStates.LoggedIn))
+            {
+                colorResId = Resource.Color.online;
+                textResId = Resource.String.status_connected;
+            }
+            else if (state.HasFlag(SoulseekClientStates.Connecting) || state.HasFlag(SoulseekClientStates.LoggingIn))
+            {
+                colorResId = Resource.Color.away;
+                textResId = Resource.String.status_connecting;
+            }
+            else
+            {
+                colorResId = Resource.Color.offline;
+                textResId = Resource.String.status_disconnected;
+            }
+
+            var color = AndroidX.Core.Content.ContextCompat.GetColor(connectionStatusDot.Context, colorResId);
+            var dotDrawable = (GradientDrawable)connectionStatusDot.Background;
+            dotDrawable.SetColor(color);
+            connectionStatusText.Text = SeekerApplication.GetString(textResId);
+            connectionStatusText.SetTextColor(new Android.Graphics.Color(color));
         }
 
         public void ShowMustSelectDirectoryButton(EventHandler clickHandler)

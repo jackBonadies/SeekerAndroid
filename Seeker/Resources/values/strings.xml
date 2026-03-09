@@ -610,6 +610,10 @@ Directory Count: {5}"
         Deleted Message History with {0}
     </string>
     <string name="welcome">Welcome, {0}</string>
+    <string name="logged_in_as">Logged in as</string>
+    <string name="status_connected">Connected</string>
+    <string name="status_connecting">Connecting</string>
+    <string name="status_disconnected">Disconnected</string>
 
     <string name="failed_to_establish_direct_or_indirect">
         Failed to establish a direct or indirect message connection to user

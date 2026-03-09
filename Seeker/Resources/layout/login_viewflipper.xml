@@ -163,16 +163,69 @@
         android:layout_height="match_parent"
         android:id="@+id/loggedInLayout"
     >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/username"
-            android:layout_marginTop="25dp"
-            android:id="@+id/userNameView"
-            android:layout_centerHorizontal="true"
-            android:textColor="?attr/mainTextColor"
-            android:textSize="35sp"
-        />
+        <com.google.android.material.card.MaterialCardView
+            style="@style/SettingsCard"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:id="@+id/loggedInCard"
+        >
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical"
+            >
+                <!-- Left side: label + username -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                >
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/logged_in_as"
+                        android:textColor="@color/subTextColor"
+                        android:textSize="14sp"
+                    />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/userNameView"
+                        android:textColor="?attr/mainTextColor"
+                        android:textStyle="bold"
+                        android:textSize="20sp"
+                        android:layout_marginTop="2dp"
+                    />
+                </LinearLayout>
+
+                <!-- Right side: status dot + text -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                >
+                    <View
+                        android:id="@+id/connectionStatusDot"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:background="@drawable/connection_status_dot"
+                    />
+                    <TextView
+                        android:id="@+id/connectionStatusText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/status_connected"
+                        android:textSize="14sp"
+                        android:layout_marginStart="6dp"
+                    />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
         <Button
             android:foreground="@drawable/button"
             android:layout_centerHorizontal="true"
@@ -182,7 +235,7 @@
             android:layout_marginTop="35dp"
             style="@style/SeekerButtonStyle"
             android:id="@+id/buttonLogout"
-            android:layout_below="@+id/userNameView"
+            android:layout_below="@+id/loggedInCard"
         />
 
         <Button
