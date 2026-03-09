@@ -164,7 +164,10 @@
         android:id="@+id/loggedInLayout"
     >
         <com.google.android.material.card.MaterialCardView
-            style="@style/SettingsCard"
+            style="@style/Widget.Material3.CardView.Elevated"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
             android:layout_marginTop="20dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
