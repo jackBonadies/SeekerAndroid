@@ -269,10 +269,10 @@
                     android:id="@+id/menuSetupHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/section_setup"
+                    android:text="@string/section_caps_setup"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:textColor="#757575"
+                    android:textColor="#909090"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp"
@@ -307,7 +307,7 @@
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
-                            android:src="@drawable/folder_swap_outline"
+                            android:src="@drawable/upload_material"
                             app:tint="#757575"
                         />
                         <TextView
@@ -382,10 +382,10 @@
                     android:id="@+id/menuCommunicationHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/section_communication"
+                    android:text="@string/section_caps_communication"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:textColor="#757575"
+                    android:textColor="#909090"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="8dp"
@@ -454,10 +454,10 @@
                     android:id="@+id/menuAccountHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/section_account"
+                    android:text="@string/section_caps_account"
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:textColor="#757575"
+                    android:textColor="#909090"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="8dp"
@@ -540,7 +540,7 @@
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
-                            android:src="@drawable/account_cancel"
+                            android:src="@drawable/logout_material"
                             app:tint="#F44336"
                         />
                         <TextView
