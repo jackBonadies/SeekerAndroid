@@ -205,17 +205,23 @@
                     />
                 </LinearLayout>
 
-                <!-- Right side: status dot + text -->
+                <!-- Right side: chip-like status badge -->
                 <LinearLayout
+                    android:id="@+id/connectionStatusChip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
+                    android:background="@drawable/connection_status_chip_bg"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
                 >
                     <View
                         android:id="@+id/connectionStatusDot"
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
                         android:background="@drawable/connection_status_dot"
                     />
                     <TextView
@@ -223,7 +229,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/status_connected"
-                        android:textSize="14sp"
+                        android:textSize="13sp"
+                        android:textColor="#2E7D32"
                         android:layout_marginStart="6dp"
                     />
                 </LinearLayout>

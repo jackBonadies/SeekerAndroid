@@ -55,6 +55,7 @@ namespace Seeker
         private TextView welcomeTextView;
         private View connectionStatusDot;
         private TextView connectionStatusText;
+        private View connectionStatusChip;
 
         private const int ChildLoginForm = 0;
         private const int ChildLoading = 1;
@@ -144,6 +145,7 @@ namespace Seeker
             welcomeTextView = rootView.FindViewById<TextView>(Resource.Id.userNameView);
             connectionStatusDot = rootView.FindViewById<View>(Resource.Id.connectionStatusDot);
             connectionStatusText = rootView.FindViewById<TextView>(Resource.Id.connectionStatusText);
+            connectionStatusChip = rootView.FindViewById<View>(Resource.Id.connectionStatusChip);
         }
 
         // --- View-flipping methods ---
@@ -210,30 +212,39 @@ namespace Seeker
 
         public void UpdateConnectionStatus(SoulseekClientStates state)
         {
-            int colorResId;
             int textResId;
+            int dotColor;
+            int textColor;
+            int chipBgColor;
 
             if (state.HasFlag(SoulseekClientStates.LoggedIn))
             {
-                colorResId = Resource.Color.online;
                 textResId = Resource.String.status_connected;
+                dotColor = Android.Graphics.Color.ParseColor("#4CAF50");
+                textColor = Android.Graphics.Color.ParseColor("#2E7D32");
+                chipBgColor = Android.Graphics.Color.ParseColor("#1A4CAF50");
             }
             else if (state.HasFlag(SoulseekClientStates.Connecting) || state.HasFlag(SoulseekClientStates.LoggingIn))
             {
-                colorResId = Resource.Color.away;
                 textResId = Resource.String.status_connecting;
+                dotColor = Android.Graphics.Color.ParseColor("#FFA726");
+                textColor = Android.Graphics.Color.ParseColor("#E65100");
+                chipBgColor = Android.Graphics.Color.ParseColor("#1AFFA726");
             }
             else
             {
-                colorResId = Resource.Color.offline;
                 textResId = Resource.String.status_disconnected;
+                dotColor = Android.Graphics.Color.ParseColor("#F44336");
+                textColor = Android.Graphics.Color.ParseColor("#C62828");
+                chipBgColor = Android.Graphics.Color.ParseColor("#1AF44336");
             }
 
-            var color = AndroidX.Core.Content.ContextCompat.GetColor(connectionStatusDot.Context, colorResId);
             var dotDrawable = (GradientDrawable)connectionStatusDot.Background;
-            dotDrawable.SetColor(color);
+            dotDrawable.SetColor(dotColor);
             connectionStatusText.Text = SeekerApplication.GetString(textResId);
-            connectionStatusText.SetTextColor(new Android.Graphics.Color(color));
+            connectionStatusText.SetTextColor(new Android.Graphics.Color(textColor));
+            var chipBgDrawable = (GradientDrawable)connectionStatusChip.Background;
+            chipBgDrawable.SetColor(chipBgColor);
         }
 
         public void ShowMustSelectDirectoryButton(EventHandler clickHandler)
