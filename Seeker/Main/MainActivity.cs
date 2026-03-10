@@ -1240,8 +1240,8 @@ namespace Seeker
                 }
                 else
                 {
-                    this.SupportActionBar.Title = TransfersViewState.Instance.CurrentlySelectedUploadFolder.FolderName;
-                    this.SupportActionBar.SubtitleFormatted = null;
+                    this.SupportActionBar.Title = TransfersViewState.Instance.CurrentlySelectedUploadFolder.GetDisplayFolderName();
+                    this.SupportActionBar.SubtitleFormatted = GetFolderSubtitle(TransfersViewState.Instance.CurrentlySelectedUploadFolder);
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
                     this.SupportActionBar.SetHomeButtonEnabled(true);
                 }
@@ -1257,12 +1257,23 @@ namespace Seeker
                 }
                 else
                 {
-                    this.SupportActionBar.Title = TransfersViewState.Instance.CurrentlySelectedDLFolder.FolderName;
-                    this.SupportActionBar.SubtitleFormatted = null;
+                    this.SupportActionBar.Title = TransfersViewState.Instance.CurrentlySelectedDLFolder.GetDisplayFolderName();
+                    this.SupportActionBar.SubtitleFormatted = GetFolderSubtitle(TransfersViewState.Instance.CurrentlySelectedDLFolder);
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
                     this.SupportActionBar.SetHomeButtonEnabled(true);
                 }
             }
+        }
+
+        private static Android.Text.SpannableString GetFolderSubtitle(FolderItem folder)
+        {
+            int numFiles = folder.TransferItems.Count;
+            folder.GetFolderProgress(out long totalBytes, out _);
+            string sizeStr = SimpleHelpers.GetHumanReadableSize(totalBytes);
+            string subtitle = string.Format("{0} \u00b7 {1} files \u00b7 {2}", folder.Username, numFiles, sizeStr);
+            var s = new Android.Text.SpannableString(subtitle);
+            s.SetSpan(new Android.Text.Style.RelativeSizeSpan(0.8f), 0, s.Length(), Android.Text.SpanTypes.ExclusiveExclusive);
+            return s;
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)
