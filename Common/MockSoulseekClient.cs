@@ -1,14 +1,17 @@
 #if DEBUG
 namespace Seeker
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Net;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Soulseek;
     using Soulseek.Diagnostics;
     using Soulseek.Messaging.Messages;
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.Linq;
+    using System.Net;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     public class MockSoulseekClient : ISoulseekClient
     {
@@ -57,8 +60,8 @@ namespace Seeker
         public SoulseekClientOptions? Options { get; set; }
         public ServerInfo? ServerInfo { get; set; }
         public DistributedNetworkInfo? DistributedNetwork { get; set; }
-        public IReadOnlyCollection<Transfer> Downloads { get; set; } = Array.Empty<Transfer>();
-        public IReadOnlyCollection<Transfer> Uploads { get; set; } = Array.Empty<Transfer>();
+        public IReadOnlyCollection<Transfer> Downloads => DownloadDictionary.Values.Select(t => new Transfer(t)).ToList().AsReadOnly();
+        public IReadOnlyCollection<Transfer> Uploads => UploadDictionary.Values.Select(t => new Transfer(t)).ToList().AsReadOnly();
 
         // Explicit interface implementations for read-only properties
         string ISoulseekClient.Address => Address;
@@ -121,6 +124,14 @@ namespace Seeker
         public event EventHandler<UserStatistics>? UserStatisticsChanged;
         public event EventHandler<UserStatus>? UserStatusChanged;
         public event EventHandler<DiagnosticEventArgs>? DiagnosticGenerated;
+        public event EventHandler<TransferAddedRemovedInternalEventArgs>? DownloadAddedRemovedInternal;
+        public event EventHandler<TransferAddedRemovedInternalEventArgs>? UploadAddedRemovedInternal;
+
+        public void InvokeDownloadAddedRemovedInternalHandler(int count)
+            => DownloadAddedRemovedInternal?.Invoke(this, new TransferAddedRemovedInternalEventArgs(count));
+
+        public void InvokeUploadAddedRemovedInternalHandler(int count)
+            => UploadAddedRemovedInternal?.Invoke(this, new TransferAddedRemovedInternalEventArgs(count));
 
         // --- Event raise helpers (for events Seeker subscribes to) ---
         public void RaiseConnected() => Connected?.Invoke(this, EventArgs.Empty);
@@ -301,21 +312,25 @@ namespace Seeker
         private static readonly string[] _mockAlbums = { "Greatest Hits", "Live Sessions", "Remastered Edition", "Deluxe", "The Collection", "Anthology", "Unplugged", "B-Sides" };
         private static readonly string[] _extensions = { "mp3", "flac", "ogg", "wav", "m4a" };
 
-        private static (int count, int totalTimeMs) ParseMockSearchParams(SearchQuery query)
+        private static (int count, int totalTimeMs, string search) ParseMockSearchParams(SearchQuery query)
         {
             int count = 30;
             int totalTimeMs = 1000;
+            string search = string.Empty;
             foreach (var term in query.Terms)
             {
                 if (term.StartsWith("n:", StringComparison.OrdinalIgnoreCase) && int.TryParse(term.Substring(2), out int n))
                     count = Math.Max(1, n);
                 else if (term.StartsWith("t:", StringComparison.OrdinalIgnoreCase) && int.TryParse(term.Substring(2), out int t))
                     totalTimeMs = Math.Max(0, t);
+                else  
+                    search += query + " ";
+                
             }
-            return (count, totalTimeMs);
+            return (count, totalTimeMs, search);
         }
 
-        private static SearchResponse GenerateMockSearchResponse(int token)
+        private static SearchResponse GenerateMockSearchResponse(int token, string term = "")
         {
             var username = _mockUsernames[_random.Next(_mockUsernames.Length)];
             var artist = _mockArtists[_random.Next(_mockArtists.Length)];
@@ -334,7 +349,7 @@ namespace Seeker
                 int trackNum = i + 1;
                 long size = _random.Next(2_000_000, 60_000_000);
                 int length = _random.Next(120, 480);
-                string filename = $"@@{username}\\Music\\{artist}\\AlbumName {album}\\{trackNum:D2} Track {trackNum}.{ext}";
+                string filename = $"@@{username}\\Music\\{artist}\\{term} - AlbumName {album}\\{trackNum:D2} Track {trackNum}.{ext}";
                 files.Add(new Soulseek.File(1, filename, size, ext,
                     new[] { new FileAttribute(FileAttributeType.BitRate, bitRate), new FileAttribute(FileAttributeType.Length, length) }));
             }
@@ -353,7 +368,7 @@ namespace Seeker
             var resolvedScope = scope ?? new SearchScope(SearchScopeType.Network);
             var resolvedToken = token ?? GetNextToken();
 
-            var (count, totalTimeMs) = ParseMockSearchParams(query);
+            var (count, totalTimeMs, search) = ParseMockSearchParams(query);
             int delayPerResponse = count > 0 ? totalTimeMs / count : 0;
 
             var searchRequested = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.Requested, 0, 0, 0);
@@ -368,7 +383,7 @@ namespace Seeker
                 if (cancellationToken?.IsCancellationRequested == true)
                     break;
 
-                var response = GenerateMockSearchResponse(resolvedToken);
+                var response = GenerateMockSearchResponse(resolvedToken, search);
                 allResponses.Add(response);
 
                 var currentSearch = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.InProgress, i + 1, 0, 0);
@@ -405,44 +420,248 @@ namespace Seeker
         public async Task<Transfer> DownloadAsync(string username, string remoteFilename, string localFilename, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
         {
             if (DownloadToFileAsyncHandler != null) return await DownloadToFileAsyncHandler(username, remoteFilename, localFilename, size, startOffset, token, options, cancellationToken);
-            return await SimulateTransferAsync(TransferDirection.Download, username, remoteFilename, size ?? 1024, token ?? GetNextToken());
+            return await DownloadInternalAsync(username, remoteFilename, size ?? 1024, startOffset, token ?? GetNextToken(), options, cancellationToken ?? CancellationToken.None);
         }
 
         public async Task<Transfer> DownloadAsync(string username, string remoteFilename, Func<Task<System.IO.Stream>> outputStreamFactory, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
         {
             if (DownloadToStreamAsyncHandler != null) return await DownloadToStreamAsyncHandler(username, remoteFilename, outputStreamFactory, size, startOffset, token, options, cancellationToken);
-            return await SimulateTransferAsync(TransferDirection.Download, username, remoteFilename, size ?? 1024, token ?? GetNextToken());
+            return await DownloadInternalAsync(username, remoteFilename, size ?? 1024, startOffset, token ?? GetNextToken(), options, cancellationToken ?? CancellationToken.None);
         }
 
         public async Task<Transfer> UploadAsync(string username, string remoteFilename, string localFilename, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
         {
             if (UploadFromFileAsyncHandler != null) return await UploadFromFileAsyncHandler(username, remoteFilename, localFilename, token, options, cancellationToken);
-            return await SimulateTransferAsync(TransferDirection.Upload, username, remoteFilename, 1024, token ?? GetNextToken());
+            return await UploadInternalAsync(username, remoteFilename, 1024, 0, token ?? GetNextToken(), options, cancellationToken ?? CancellationToken.None);
         }
 
         public async Task<Transfer> UploadAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
         {
             if (UploadFromStreamAsyncHandler != null) return await UploadFromStreamAsyncHandler(username, remoteFilename, size, inputStreamFactory, token, options, cancellationToken);
-            return await SimulateTransferAsync(TransferDirection.Upload, username, remoteFilename, size, token ?? GetNextToken());
+            return await UploadInternalAsync(username, remoteFilename, size, 0, token ?? GetNextToken(), options, cancellationToken ?? CancellationToken.None);
         }
 
-        private async Task<Transfer> SimulateTransferAsync(TransferDirection direction, string username, string filename, long size, int token)
+        SemaphoreSlim GlobalDownloadSemaphore = new SemaphoreSlim(initialCount: 3, maxCount: 3);
+        SemaphoreSlim GlobalUploadSemaphore = new SemaphoreSlim(initialCount: 3, maxCount: 3);
+        ConcurrentDictionary<int, TransferInternal> DownloadDictionary = new ConcurrentDictionary<int, TransferInternal>();
+        ConcurrentDictionary<int, TransferInternal> UploadDictionary = new ConcurrentDictionary<int, TransferInternal>();
+        ConcurrentDictionary<string, bool> UniqueKeyDictionary = new ConcurrentDictionary<string, bool>();
+
+        private async Task<Transfer> DownloadInternalAsync(string username, string filename, long size, long startOffset, int token, TransferOptions options, CancellationToken cancellationToken)
         {
-            var queued = new Transfer(direction, username, filename, token, TransferStates.Queued | TransferStates.Locally, size, 0);
-            TransferStateChanged?.Invoke(this, new TransferStateChangedEventArgs(TransferStates.None, queued));
-            await Task.Delay(SimulatedDelayMs / 2).ConfigureAwait(false);
+            options ??= new TransferOptions();
 
-            var requested = new Transfer(direction, username, filename, token, TransferStates.Requested, size, 0);
-            TransferStateChanged?.Invoke(this, new TransferStateChangedEventArgs(TransferStates.Queued | TransferStates.Locally, requested));
-            await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
+            var download = new TransferInternal(TransferDirection.Download, username, filename, token, options)
+            {
+                StartOffset = startOffset,
+                Size = size,
+            };
 
-            var inProgress = new Transfer(direction, username, filename, token, TransferStates.InProgress, size, 0, startTime: DateTime.UtcNow);
-            TransferStateChanged?.Invoke(this, new TransferStateChangedEventArgs(TransferStates.Requested, inProgress));
-            await Task.Delay(SimulatedDelayMs * 2).ConfigureAwait(false);
+            var uniqueKey = $"{TransferDirection.Download}:{username}:{filename}";
 
-            var completed = new Transfer(direction, username, filename, token, TransferStates.Completed | TransferStates.Succeeded, size, 0, bytesTransferred: size, endTime: DateTime.UtcNow);
-            TransferStateChanged?.Invoke(this, new TransferStateChangedEventArgs(TransferStates.InProgress, completed));
-            return completed;
+            if (!UniqueKeyDictionary.TryAdd(key: uniqueKey, value: true))
+            {
+                throw new DuplicateTransferException($"Duplicate download of {filename} from {username} aborted");
+            }
+
+            if (!DownloadDictionary.TryAdd(token, download))
+            {
+                UniqueKeyDictionary.TryRemove(uniqueKey, out _);
+                throw new DuplicateTransferException($"Duplicate download of {filename} from {username} aborted");
+            }
+
+            InvokeDownloadAddedRemovedInternalHandler(DownloadDictionary.Count);
+
+            var lastState = TransferStates.None;
+
+            void UpdateState(TransferStates state)
+            {
+                download.State = state;
+                var e = new TransferStateChangedEventArgs(previousState: lastState, transfer: new Transfer(download));
+                lastState = state;
+                options.StateChanged?.Invoke((e.PreviousState, e.Transfer));
+                TransferStateChanged?.Invoke(this, e);
+            }
+
+            void UpdateProgress(long bytesDownloaded)
+            {
+                var lastBytes = download.BytesTransferred;
+                download.UpdateProgress(bytesDownloaded);
+                var e = new TransferProgressUpdatedEventArgs(lastBytes, new Transfer(download));
+                options.ProgressUpdated?.Invoke((e.PreviousBytesTransferred, e.Transfer));
+                TransferProgressUpdated?.Invoke(this, e);
+            }
+
+            bool globalSemaphoreAcquired = false;
+
+            try
+            {
+                UpdateState(TransferStates.Queued | TransferStates.Locally);
+                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+
+                await GlobalDownloadSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                globalSemaphoreAcquired = true;
+
+                UpdateState(TransferStates.Requested);
+                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+
+                UpdateState(TransferStates.Queued | TransferStates.Remotely);
+                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+
+                UpdateState(TransferStates.Initializing);
+                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+
+                UpdateState(TransferStates.InProgress);
+                UpdateProgress(startOffset);
+
+                int steps = 10;
+                long chunkSize = (size - startOffset) / steps;
+                for (int i = 1; i <= steps; i++)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    await Task.Delay(200, cancellationToken).ConfigureAwait(false);
+                    UpdateProgress(startOffset + chunkSize * i);
+                }
+
+                UpdateProgress(size);
+                UpdateState(TransferStates.Completed | TransferStates.Succeeded);
+
+                return new Transfer(download);
+            }
+            catch (OperationCanceledException)
+            {
+                UpdateState(TransferStates.Completed | TransferStates.Cancelled);
+                throw;
+            }
+            catch (Exception)
+            {
+                UpdateState(TransferStates.Completed | TransferStates.Errored);
+                throw;
+            }
+            finally
+            {
+                if (globalSemaphoreAcquired)
+                {
+                    GlobalDownloadSemaphore.Release();
+                }
+
+                bool allCancelled = false;
+                if (download.State.HasFlag(TransferStates.Cancelled))
+                {
+                    allCancelled = DownloadDictionary.Values.All(ti => ti.State.HasFlag(TransferStates.Cancelled));
+                }
+
+                DownloadDictionary.TryRemove(token, out _);
+                InvokeDownloadAddedRemovedInternalHandler(allCancelled ? 0 : DownloadDictionary.Count);
+                UniqueKeyDictionary.TryRemove(uniqueKey, out _);
+            }
+        }
+
+        private async Task<Transfer> UploadInternalAsync(string username, string filename, long size, long startOffset, int token, TransferOptions options, CancellationToken cancellationToken)
+        {
+            options ??= new TransferOptions();
+
+            var upload = new TransferInternal(TransferDirection.Upload, username, filename, token, options)
+            {
+                StartOffset = startOffset,
+                Size = size,
+            };
+
+            var uniqueKey = $"{TransferDirection.Upload}:{username}:{filename}";
+
+            if (!UniqueKeyDictionary.TryAdd(key: uniqueKey, value: true))
+            {
+                throw new DuplicateTransferException($"Duplicate upload of {filename} to {username} aborted");
+            }
+
+            if (!UploadDictionary.TryAdd(token, upload))
+            {
+                UniqueKeyDictionary.TryRemove(uniqueKey, out _);
+                throw new DuplicateTransferException($"Duplicate upload of {filename} to {username} aborted");
+            }
+
+            InvokeUploadAddedRemovedInternalHandler(UploadDictionary.Count);
+
+            var lastState = TransferStates.None;
+
+            void UpdateState(TransferStates state)
+            {
+                upload.State = state;
+                var e = new TransferStateChangedEventArgs(previousState: lastState, transfer: new Transfer(upload));
+                lastState = state;
+                options.StateChanged?.Invoke((e.PreviousState, e.Transfer));
+                TransferStateChanged?.Invoke(this, e);
+            }
+
+            void UpdateProgress(long bytesUploaded)
+            {
+                var lastBytes = upload.BytesTransferred;
+                upload.UpdateProgress(bytesUploaded);
+                var e = new TransferProgressUpdatedEventArgs(lastBytes, new Transfer(upload));
+                options.ProgressUpdated?.Invoke((e.PreviousBytesTransferred, e.Transfer));
+                TransferProgressUpdated?.Invoke(this, e);
+            }
+
+            bool globalSemaphoreAcquired = false;
+
+            try
+            {
+                UpdateState(TransferStates.Queued | TransferStates.Locally);
+                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+
+                await GlobalUploadSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                globalSemaphoreAcquired = true;
+
+                UpdateState(TransferStates.Requested);
+                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+
+                UpdateState(TransferStates.Initializing);
+                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+
+                UpdateState(TransferStates.InProgress);
+                UpdateProgress(startOffset);
+
+                int steps = 10;
+                long chunkSize = (size - startOffset) / steps;
+                for (int i = 1; i <= steps; i++)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    await Task.Delay(200, cancellationToken).ConfigureAwait(false);
+                    UpdateProgress(startOffset + chunkSize * i);
+                }
+
+                UpdateProgress(size);
+                UpdateState(TransferStates.Completed | TransferStates.Succeeded);
+
+                return new Transfer(upload);
+            }
+            catch (OperationCanceledException)
+            {
+                UpdateState(TransferStates.Completed | TransferStates.Cancelled);
+                throw;
+            }
+            catch (Exception)
+            {
+                UpdateState(TransferStates.Completed | TransferStates.Errored);
+                throw;
+            }
+            finally
+            {
+                if (globalSemaphoreAcquired)
+                {
+                    GlobalUploadSemaphore.Release();
+                }
+
+                bool allCancelled = false;
+                if (upload.State.HasFlag(TransferStates.Cancelled))
+                {
+                    allCancelled = UploadDictionary.Values.All(ti => ti.State.HasFlag(TransferStates.Cancelled));
+                }
+
+                UploadDictionary.TryRemove(token, out _);
+                InvokeUploadAddedRemovedInternalHandler(allCancelled ? 0 : UploadDictionary.Count);
+                UniqueKeyDictionary.TryRemove(uniqueKey, out _);
+            }
         }
 
         public async Task<RoomData> JoinRoomAsync(string roomName, bool isPrivate = false, CancellationToken? cancellationToken = null)
@@ -567,7 +786,8 @@ namespace Seeker
         private int _nextToken = 1;
         public int GetNextToken() => _nextToken++;
 
-        public bool IsTransferInDownloads(string username, string filename) => false;
+        public bool IsTransferInDownloads(string username, string filename)
+            => Downloads.Any(d => d.Username == username && d.Filename == filename);
 
         private readonly List<Delegate> _searchResponseReceivedHandlers = new List<Delegate>();
 

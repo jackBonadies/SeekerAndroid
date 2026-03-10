@@ -518,27 +518,18 @@ namespace Soulseek
             }
         }
 
-        public class TransferAddedRemovedInternalEventArgs : EventArgs
+        public void InvokeDownloadAddedRemovedInternalHandler(int count)
         {
-            public int Count;
-            public TransferAddedRemovedInternalEventArgs(int count)
-            {
-                Count = count;
-            }
+            DownloadAddedRemovedInternal?.Invoke(this, new TransferAddedRemovedInternalEventArgs(count));
         }
 
-        public static void InvokeDownloadAddedRemovedInternalHandler(int count)
+        public void InvokeUploadAddedRemovedInternalHandler(int count)
         {
-            DownloadAddedRemovedInternal?.Invoke(null, new TransferAddedRemovedInternalEventArgs(count));
+            UploadAddedRemovedInternal?.Invoke(this, new TransferAddedRemovedInternalEventArgs(count));
         }
 
-        public static void InvokeUploadAddedRemovedInternalHandler(int count)
-        {
-            UploadAddedRemovedInternal?.Invoke(null, new TransferAddedRemovedInternalEventArgs(count));
-        }
-
-        public static event EventHandler<TransferAddedRemovedInternalEventArgs> DownloadAddedRemovedInternal;
-        public static event EventHandler<TransferAddedRemovedInternalEventArgs> UploadAddedRemovedInternal;
+        public event EventHandler<TransferAddedRemovedInternalEventArgs> DownloadAddedRemovedInternal;
+        public event EventHandler<TransferAddedRemovedInternalEventArgs> UploadAddedRemovedInternal;
         /// <summary>
         /// Solves the transfer size mismatch problem in line.
         /// </summary>
@@ -5014,6 +5005,15 @@ namespace Soulseek
             {
                 throw new SoulseekClientException($"Failed to watch user {username}: {ex.Message}", ex);
             }
+        }
+    }
+
+    public class TransferAddedRemovedInternalEventArgs : EventArgs
+    {
+        public int Count;
+        public TransferAddedRemovedInternalEventArgs(int count)
+        {
+            Count = count;
         }
     }
 }

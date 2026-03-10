@@ -262,6 +262,12 @@ namespace Soulseek
         /// <remarks>Add a user to the server watch list with <see cref="WatchUserAsync(string, CancellationToken?)"/>.</remarks>
         event EventHandler<UserStatus> UserStatusChanged;
 
+        event EventHandler<TransferAddedRemovedInternalEventArgs> DownloadAddedRemovedInternal;
+        event EventHandler<TransferAddedRemovedInternalEventArgs> UploadAddedRemovedInternal;
+
+        void InvokeDownloadAddedRemovedInternalHandler(int count);
+        void InvokeUploadAddedRemovedInternalHandler(int count);
+
         /// <summary>
         ///     Gets the unresolved server address.
         /// </summary>

@@ -246,6 +246,22 @@ namespace Seeker
 
             //need search response and enqueue download action...
             //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:PreferencesState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
+            #if DEBUG
+            SeekerState.SoulseekClient = new MockSoulseekClient();
+            //128,
+            //new SoulseekClientOptions(
+            //    minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info,
+            //    messageTimeout: 30000,
+            //    enableListener: PreferencesState.ListenerEnabled,
+            //    autoAcknowledgePrivateMessages: false,
+            //    acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations,
+            //    listenPort: PreferencesState.ListenerPort,
+            //    maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue,
+            //    maximumConcurrentSearches: 5,
+            //    serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
+            //    addressResolver: ResolveAddressAsync,
+            //    userInfoResolver: UserInfoResponseHandler));
+            #else
             SeekerState.SoulseekClient = new SoulseekClient(
                 128,
                 new SoulseekClientOptions(
@@ -259,6 +275,7 @@ namespace Seeker
                     serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
                     addressResolver: ResolveAddressAsync,
                     userInfoResolver: UserInfoResponseHandler));
+            #endif
             SetDiagnosticState(LOG_DIAGNOSTICS);
             SeekerState.SoulseekClient.UserStatisticsChanged += SoulseekClient_UserDataReceived;
             SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
@@ -289,8 +306,8 @@ namespace Seeker
             SoulseekClient.DebugLogHandler += DebugLogHandler;
             #endif
 
-            SoulseekClient.DownloadAddedRemovedInternal += SoulseekClient_DownloadAddedRemovedInternal;
-            SoulseekClient.UploadAddedRemovedInternal += SoulseekClient_UploadAddedRemovedInternal;
+            SeekerState.SoulseekClient.DownloadAddedRemovedInternal += SoulseekClient_DownloadAddedRemovedInternal;
+            SeekerState.SoulseekClient.UploadAddedRemovedInternal += SoulseekClient_UploadAddedRemovedInternal;
 
             UPnpManager.Context = this;
             UPnpManager.Instance.SearchAndSetMappingIfRequired();
@@ -828,7 +845,7 @@ namespace Seeker
 
         public static volatile int UPLOAD_COUNT = -1; // a hack see below
 
-        private void SoulseekClient_UploadAddedRemovedInternal(object sender, SoulseekClient.TransferAddedRemovedInternalEventArgs e)
+        private void SoulseekClient_UploadAddedRemovedInternal(object sender, TransferAddedRemovedInternalEventArgs e)
         {
             TransferItemManager.MarkTransfersDirty();
             bool abortAll = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.AbortAllWasPressedDebouncer) < 750;
@@ -895,7 +912,7 @@ namespace Seeker
         public static volatile int DL_COUNT = -1; // a hack see below
 
         //it works in the case of successfully finished, cancellation token used, etc.
-        private void SoulseekClient_DownloadAddedRemovedInternal(object sender, SoulseekClient.TransferAddedRemovedInternalEventArgs e)
+        private void SoulseekClient_DownloadAddedRemovedInternal(object sender, TransferAddedRemovedInternalEventArgs e)
         {
             TransferItemManager.MarkTransfersDirty();
             Logger.Debug("SoulseekClient_DownloadAddedRemovedInternal with count:" + e.Count);
