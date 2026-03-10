@@ -197,11 +197,11 @@ namespace Seeker
         {
             if (bytesPerSecond > 1048576) //more than 1MB
             {
-                return string.Format("{0:F1}mbs", bytesPerSecond / 1048576.0);
+                return string.Format("{0:F1} MB/s", bytesPerSecond / 1048576.0);
             }
             else
             {
-                return string.Format("{0:F1}kbs", bytesPerSecond / 1024.0);
+                return string.Format("{0:F1} KB/s", bytesPerSecond / 1024.0);
             }
         }
 
@@ -273,7 +273,7 @@ namespace Seeker
         public static string GetSizeLengthAttrString(Soulseek.File f)
         {
 
-            string sizeString = string.Format("{0:0.##} mb", f.Size / (1024.0 * 1024.0));
+            string sizeString = string.Format("{0:0.##} MB", f.Size / (1024.0 * 1024.0));
             string lengthString = f.Length.HasValue ? GetHumanReadableTime(f.Length.Value) : string.Empty;
             string attrString = GetHumanReadableAttributesForSingleItem(f);
             if (string.IsNullOrEmpty(attrString) && string.IsNullOrEmpty(lengthString))
@@ -341,11 +341,11 @@ namespace Seeker
         {
             if (totalBytes > 1024 * 1024 * 1024)
             {
-                return string.Format("{0:0.##} gb", totalBytes / (1024.0 * 1024.0 * 1024.0));
+                return string.Format("{0:0.##} GB", totalBytes / (1024.0 * 1024.0 * 1024.0));
             }
             else
             {
-                return string.Format("{0:0.##} mb", totalBytes / (1024.0 * 1024.0));
+                return string.Format("{0:0.##} MB", totalBytes / (1024.0 * 1024.0));
             }
         }
 
