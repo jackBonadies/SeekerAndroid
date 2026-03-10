@@ -30,7 +30,6 @@ namespace Seeker
 
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public TimeSpan? RemainingTime;
-        [System.Xml.Serialization.XmlIgnoreAttribute]
         public double AvgSpeed = 0;
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public bool CancelAndClearFlag = false;
