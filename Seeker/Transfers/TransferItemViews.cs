@@ -2,6 +2,7 @@
 using Android.Content;
 using Android.Content.Res;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Runtime;
 using Android.Util;
@@ -594,62 +595,140 @@ namespace Seeker
             }
         }
 
+        public static readonly bool ShowChipIcons = false;
+
+        private enum TransferChipType
+        {
+            Completed,
+            Downloading,
+            Queued,
+            Paused,
+            Failed
+        }
+
+        private static void StyleTransferChip(TextView chip, string text, TransferChipType chipType)
+        {
+            chip.Text = text;
+            if (text == string.Empty)
+            {
+                chip.Visibility = ViewStates.Gone;
+                return;
+            }
+            chip.Visibility = ViewStates.Visible;
+
+            int textColorResId;
+            int bgColorResId;
+            switch (chipType)
+            {
+                case TransferChipType.Completed:
+                    textColorResId = Resource.Color.transferChipCompletedText;
+                    bgColorResId = Resource.Color.transferChipCompletedBg;
+                    break;
+                case TransferChipType.Downloading:
+                    textColorResId = Resource.Color.transferChipDownloadingText;
+                    bgColorResId = Resource.Color.transferChipDownloadingBg;
+                    break;
+                case TransferChipType.Queued:
+                    textColorResId = Resource.Color.transferChipQueuedText;
+                    bgColorResId = Resource.Color.transferChipQueuedBg;
+                    break;
+                case TransferChipType.Paused:
+                    textColorResId = Resource.Color.transferChipPausedText;
+                    bgColorResId = Resource.Color.transferChipPausedBg;
+                    break;
+                case TransferChipType.Failed:
+                default:
+                    textColorResId = Resource.Color.transferChipFailedText;
+                    bgColorResId = Resource.Color.transferChipFailedBg;
+                    break;
+            }
+
+            var resources = chip.Context.Resources;
+            var theme = chip.Context.Theme;
+            int textColor = resources.GetColor(textColorResId, theme);
+            int bgColor = resources.GetColor(bgColorResId, theme);
+
+            chip.SetTextColor(new Color(textColor));
+            var bg = chip.Background?.Mutate() as GradientDrawable;
+            if (bg != null)
+            {
+                bg.SetColor(bgColor);
+            }
+        }
+
+        private static string ChipLabel(string icon, string text)
+        {
+            return ShowChipIcons ? icon + " " + text : text;
+        }
+
         public static void SetAdditionalStatusText(TextView viewStatusAdditionalInfo, ITransferItem item, TransferStates state, bool showSpeed)
         {
-            if (state.HasFlag(TransferStates.InProgress))
+            if (state.HasFlag(TransferStates.Succeeded))
             {
-                //Helpers.GetTransferSpeedString(avgSpeedBytes);
-                if (showSpeed)
-                {
-                    viewStatusAdditionalInfo.Text = SimpleHelpers.GetTransferSpeedString(item.GetAvgSpeed()) + "  •  " + GetTimeRemainingString(item.GetRemainingTime());
-                }
-                else
-                {
-                    viewStatusAdditionalInfo.Text = GetTimeRemainingString(item.GetRemainingTime());
-                }
+                StyleTransferChip(viewStatusAdditionalInfo, ChipLabel("\u2713", SeekerApplication.GetString(Resource.String.completed)), TransferChipType.Completed);
             }
-            else if (state.HasFlag(TransferStates.Queued) && !(item.IsUpload()))
+            else if (state.HasFlag(TransferStates.InProgress))
             {
-                int queueLen = item.GetQueueLength();
-                if (queueLen == int.MaxValue) //i.e. unknown
-                {
-                    viewStatusAdditionalInfo.Text = string.Empty;
-                }
-                else
-                {
-                    viewStatusAdditionalInfo.Text = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.position_), queueLen.ToString());
-                }
+                StyleTransferChip(viewStatusAdditionalInfo, ChipLabel("\u2193", SeekerApplication.GetString(Resource.String.in_progress)), TransferChipType.Downloading);
             }
-            else if (item is TransferItem && state.HasFlag(TransferStates.Rejected))
+            else if (state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested))
             {
+                StyleTransferChip(viewStatusAdditionalInfo, ChipLabel("\u2193", SeekerApplication.GetString(Resource.String.not_started)), TransferChipType.Downloading);
+            }
+            else if (state.HasFlag(TransferStates.Queued))
+            {
+                string label = SeekerApplication.GetString(Resource.String.in_queue);
+                if (!item.IsUpload())
+                {
+                    int queueLen = item.GetQueueLength();
+                    if (queueLen != int.MaxValue)
+                    {
+                        label += " " + string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.position_), queueLen.ToString());
+                    }
+                }
+                StyleTransferChip(viewStatusAdditionalInfo, ChipLabel("\u23F3", label), TransferChipType.Queued);
+            }
+            else if (state.HasFlag(TransferStates.Cancelled))
+            {
+                string label = item.IsUpload() ? SeekerApplication.GetString(Resource.String.Aborted) : SeekerApplication.GetString(Resource.String.paused);
+                StyleTransferChip(viewStatusAdditionalInfo, ChipLabel("\u275A\u275A", label), TransferChipType.Paused);
+            }
+            else if (state.HasFlag(TransferStates.Rejected))
+            {
+                string label;
                 if (item.IsUpload())
                 {
-                    viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.Cancelled);
+                    label = SeekerApplication.GetString(Resource.String.Cancelled);
                 }
                 else
                 {
-                    viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.denied);
+                    label = SeekerApplication.GetString(Resource.String.denied);
                 }
+                StyleTransferChip(viewStatusAdditionalInfo, ChipLabel("\u2717", label), TransferChipType.Failed);
             }
-            else if (item is TransferItem && state.HasFlag(TransferStates.TimedOut))
+            else if (state.HasFlag(TransferStates.TimedOut))
             {
-                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.TimedOut);
+                StyleTransferChip(viewStatusAdditionalInfo, ChipLabel("\u2717", SeekerApplication.GetString(Resource.String.TimedOut)), TransferChipType.Failed);
             }
-            else if (item is TransferItem && state.HasFlag(TransferStates.UserOffline))
+            else if (state.HasFlag(TransferStates.UserOffline))
             {
-                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.UserIsOffline);
+                StyleTransferChip(viewStatusAdditionalInfo, ChipLabel("\u2717", SeekerApplication.GetString(Resource.String.UserIsOffline)), TransferChipType.Failed);
             }
-            else if (item is TransferItem && state.HasFlag(TransferStates.CannotConnect))
+            else if (state.HasFlag(TransferStates.CannotConnect))
             {
-                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.CannotConnect);
+                StyleTransferChip(viewStatusAdditionalInfo, ChipLabel("\u2717", SeekerApplication.GetString(Resource.String.CannotConnect)), TransferChipType.Failed);
             }
             else if (item is TransferItem ti2 && ti2.TransferItemExtra.HasFlag(TransferItemExtras.DirNotSet))
             {
-                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.DirectoryNotSet);
+                StyleTransferChip(viewStatusAdditionalInfo, ChipLabel("\u2717", SeekerApplication.GetString(Resource.String.DirectoryNotSet)), TransferChipType.Failed);
+            }
+            else if (state.HasFlag(TransferStates.Aborted))
+            {
+                StyleTransferChip(viewStatusAdditionalInfo, ChipLabel("\u2193", SeekerApplication.GetString(Resource.String.re_requesting)), TransferChipType.Downloading);
             }
             else
             {
-                viewStatusAdditionalInfo.Text = "";
+                StyleTransferChip(viewStatusAdditionalInfo, "", TransferChipType.Queued);
             }
         }
     }

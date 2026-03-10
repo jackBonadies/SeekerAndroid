@@ -427,6 +427,7 @@ namespace Seeker
             SetRecyclerAdapter();
 
             recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
+            recyclerViewTransferItems.AddItemDecoration(new AndroidX.RecyclerView.Widget.DividerItemDecoration(Activity, AndroidX.RecyclerView.Widget.DividerItemDecoration.Vertical));
 
             Logger.InfoFirebase("AutoClear: " + PreferencesState.AutoClearCompleteDownloads);
             Logger.InfoFirebase("AutoRetry: " + PreferencesState.AutoRetryDownload);
@@ -1117,37 +1118,7 @@ namespace Seeker
                     (v.InnerTransferItem as FolderItem).RemainingFolderTime = timeRemaining;
                     //TODO chain avg speeds so that its per folder rather than per transfer.
 
-                    if (relevantItem.State.HasFlag(TransferStates.InProgress))
-                    {
-                        if (v.GetShowSpeed())
-                        {
-                            v.GetAdditionalStatusInfoView().Text = SimpleHelpers.GetTransferSpeedString(avgSpeedBytes) + "  •  " + TransferViewHelper.GetTimeRemainingString(timeRemaining);
-                        }
-                        else
-                        {
-                            v.GetAdditionalStatusInfoView().Text = TransferViewHelper.GetTimeRemainingString(timeRemaining);
-                        }
-
-                    }
-                    else if (relevantItem.State.HasFlag(TransferStates.Queued) && !(relevantItem.IsUpload()))
-                    {
-                        int queueLen = v.InnerTransferItem.GetQueueLength();
-                        if (queueLen == int.MaxValue) //unknown
-                        {
-                            v.GetAdditionalStatusInfoView().Text = "";
-                        }
-                        else
-                        {
-                            v.GetAdditionalStatusInfoView().Text = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.position_), queueLen.ToString());
-                        }
-                    }
-                    else
-                    {
-                        v.GetAdditionalStatusInfoView().Text = "";
-                    }
-
-
-                    //TransferViewHelper.SetAdditionalStatusText(v.GetAdditionalStatusInfoView(), v.InnerTransferItem, relevantItem.State);
+                    TransferViewHelper.SetAdditionalStatusText(v.GetAdditionalStatusInfoView(), v.InnerTransferItem, relevantItem.State, v.GetShowSpeed());
                     if (wasFailed)
                     {
                         ClearProgressBarColor(v.progressBar);
