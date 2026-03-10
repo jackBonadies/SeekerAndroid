@@ -6,7 +6,6 @@
         android:id="@+id/action_download_batch"
         android:title="@string/download_selected"
         android:icon="@drawable/ic_download_white_24"
-        app:iconTint="?attr/colorOnSurface"
         app:showAsAction="always"
         android:iconifiedByDefault="true"
     />
