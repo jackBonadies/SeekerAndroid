@@ -68,6 +68,8 @@ namespace Seeker
         private TextView viewSize;
         private TextView viewSpeed;
         private TextView viewSizeSeparator;
+        private ImageView selectionCheckbox;
+        private FrameLayout actionContainer;
 
         public ITransferItem InnerTransferItem { get; set; }
         //private TextView viewQueue;
@@ -152,6 +154,9 @@ namespace Seeker
             viewSpeed = FindViewById<TextView>(Resource.Id.textViewSpeed);
             viewSizeSeparator = FindViewById<TextView>(Resource.Id.textViewSizeSeparator);
 
+            selectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
+            actionContainer = FindViewById<FrameLayout>(Resource.Id.actionContainer);
+
             if (OperatingSystem.IsAndroidVersionAtLeast(28))
             {
                 viewFoldername.Typeface = Typeface.Create(viewFoldername.Typeface, 600, false);
@@ -186,19 +191,18 @@ namespace Seeker
             }
             TransferViewHelper.SetProgressBarTint(progressBar, state, isFailed);
 
-            if (isInBatchMode && TransfersViewState.Instance.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition))
+            if (isInBatchMode)
             {
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
-                }
-                else
-                {
-                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                }
+                actionContainer.Visibility = ViewStates.Visible;
+                selectionCheckbox.Visibility = ViewStates.Visible;
+                bool isSelected = TransfersViewState.Instance.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition);
+                selectionCheckbox.SetImageResource(isSelected ? Resource.Drawable.check_circle : Resource.Drawable.check_circle_outline);
+                this.Background = isSelected ? Resources.GetDrawable(Resource.Color.batchSelectHighlight, null) : null;
             }
             else
             {
+                actionContainer.Visibility = ViewStates.Gone;
+                selectionCheckbox.Visibility = ViewStates.Invisible;
                 this.Background = null;
             }
         }
@@ -789,6 +793,8 @@ namespace Seeker
         private TextView viewSize;
         private TextView viewSpeed;
         private TextView viewSizeSeparator;
+        private ImageView selectionCheckbox;
+        private FrameLayout actionContainer;
 
         public ITransferItem InnerTransferItem { get; set; }
         //private TextView viewQueue;
@@ -865,6 +871,9 @@ namespace Seeker
             viewSpeed = FindViewById<TextView>(Resource.Id.textViewSpeed);
             viewSizeSeparator = FindViewById<TextView>(Resource.Id.textViewSizeSeparator);
 
+            selectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
+            actionContainer = FindViewById<FrameLayout>(Resource.Id.actionContainer);
+
             if (OperatingSystem.IsAndroidVersionAtLeast(28))
             {
                 viewFilename.Typeface = Typeface.Create(viewFilename.Typeface, 600, false);
@@ -893,19 +902,18 @@ namespace Seeker
             }
             TransferViewHelper.SetProgressBarTint(progressBar, ti.State, isFailedOrAborted);
 
-            if (isInBatchMode && TransfersViewState.Instance.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition))
+            if (isInBatchMode)
             {
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
-                }
-                else
-                {
-                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                }
+                actionContainer.Visibility = ViewStates.Visible;
+                selectionCheckbox.Visibility = ViewStates.Visible;
+                bool isSelected = TransfersViewState.Instance.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition);
+                selectionCheckbox.SetImageResource(isSelected ? Resource.Drawable.check_circle : Resource.Drawable.check_circle_outline);
+                this.Background = isSelected ? Resources.GetDrawable(Resource.Color.batchSelectHighlight, null) : null;
             }
             else
             {
+                actionContainer.Visibility = ViewStates.Gone;
+                selectionCheckbox.Visibility = ViewStates.Invisible;
                 this.Background = null;
             }
         }

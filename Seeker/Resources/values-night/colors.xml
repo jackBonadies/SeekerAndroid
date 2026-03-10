@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#1B3147</color>
     <color name="colorAccent">#3498db</color>
     <color name="cellbackSelected">#3498db</color>
+    <color name="batchSelectHighlight">#3498db</color>
 
     <color name="mainPurpleTransparent">#994f58c4</color>
     <!--light transparency-->

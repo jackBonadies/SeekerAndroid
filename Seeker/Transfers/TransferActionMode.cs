@@ -180,10 +180,7 @@ namespace Seeker
                 TransfersActionMode = null;
                 ViewState.BatchSelectedItems.Clear();
                 this.Adapter.IsInBatchSelectMode = false;
-                foreach (int i in prevSelectedItems)
-                {
-                    this.Adapter.NotifyItemChanged(i);
-                }
+                this.Adapter.NotifyDataSetChanged();
 
             }
 

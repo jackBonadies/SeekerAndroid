@@ -5,6 +5,7 @@
     <color name="colorAccent">#3498db</color>
     <color name="colorSurface">#FF0000</color>
     <color name="cellbackSelected">#3498db</color>
+    <color name="batchSelectHighlight">#BAD3F2</color>
 
     <color name="mainPurpleTransparent">#994f58c4</color>
     <!--light transparency-->

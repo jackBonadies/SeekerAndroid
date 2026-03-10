@@ -309,6 +309,7 @@ namespace Seeker
                     ForceOutIfZeroSelected = false;
                     TransfersActionMode = SeekerState.MainActivityRef.StartSupportActionMode(TransfersActionModeCallback);
                     recyclerTransferAdapter.IsInBatchSelectMode = true;
+                    recyclerTransferAdapter.NotifyDataSetChanged();
                     TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), 0);
                     TransfersActionMode.Invalidate();
                     return true;
@@ -928,6 +929,7 @@ namespace Seeker
                         ForceOutIfZeroSelected = true;
                         TransfersActionMode = SeekerState.MainActivityRef.StartSupportActionMode(TransfersActionModeCallback);
                         recyclerTransferAdapter.IsInBatchSelectMode = true;
+                        recyclerTransferAdapter.NotifyDataSetChanged();
                         ToggleItemBatchSelect(recyclerTransferAdapter, position);
                         break;
                 }
