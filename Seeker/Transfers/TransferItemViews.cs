@@ -115,14 +115,7 @@ namespace Seeker
         {
             bool _showSizes = attrs.GetAttributeBooleanValue("http://schemas.android.com/apk/res-auto", "show_progress_size", false);
 
-            if (_showSizes)
-            {
                 LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder_showProgressSize, this, true);
-            }
-            else
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder, this, true);
-            }
 
             setupChildren();
         }
@@ -130,14 +123,7 @@ namespace Seeker
         {
             bool _showSizes = attrs.GetAttributeBooleanValue("http://schemas.android.com/apk/res-auto", "show_progress_size", false);
 
-            if (_showSizes)
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder_showProgressSize, this, true);
-            }
-            else
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder, this, true);
-            }
+            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder_showProgressSize, this, true);
 
             setupChildren();
         }
@@ -145,14 +131,7 @@ namespace Seeker
         public static TransferItemViewFolder inflate(ViewGroup parent, bool _showSize, bool _showSpeed)
         {
             TransferItemViewFolder itemView = null;
-            if (_showSize)
-            {
-                itemView = (TransferItemViewFolder)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_view_folder_dummy_showSizeProgress, parent, false);
-            }
-            else
-            {
-                itemView = (TransferItemViewFolder)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_view_folder_dummy, parent, false);
-            }
+            itemView = (TransferItemViewFolder)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_view_folder_dummy_showSizeProgress, parent, false);
             itemView.showSpeed = _showSpeed;
             itemView.showSize = _showSize;
             return itemView;
@@ -627,15 +606,14 @@ namespace Seeker
                 var theme = speedView.Context.Theme;
                 int color = resources.GetColor(Resource.Color.transferChipDownloadingText, theme);
                 speedView.SetTextColor(new Color(color));
+                speedView.SetTypeface(speedView.Typeface, TypefaceStyle.Bold);
             }
             else if (state.HasFlag(TransferStates.Succeeded) && avgSpeed > 0)
             {
                 speedView.Visibility = ViewStates.Visible;
                 speedView.Text = SimpleHelpers.GetTransferSpeedString(avgSpeed);
-                var resources = speedView.Context.Resources;
-                var theme = speedView.Context.Theme;
-                int color = resources.GetColor(Resource.Color.transferSpeedSubdued, theme);
-                speedView.SetTextColor(new Color(color));
+                speedView.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(speedView.Context, Resource.Attribute.cellTextColor));
+                speedView.SetTypeface(speedView.Typeface, TypefaceStyle.Normal);
             }
             else
             {
