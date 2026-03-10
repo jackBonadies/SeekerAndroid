@@ -602,12 +602,12 @@ namespace Seeker
         public static void SetSpeedText(TextView speedView, ITransferItem item, TransferStates state)
         {
             double avgSpeed = item.GetAvgSpeed();
+            var resources = speedView.Context.Resources;
+            var theme = speedView.Context.Theme;
             if ((state.HasFlag(TransferStates.InProgress) || state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested)) && avgSpeed > 0)
             {
                 speedView.Visibility = ViewStates.Visible;
                 speedView.Text = SimpleHelpers.GetTransferSpeedString(avgSpeed);
-                var resources = speedView.Context.Resources;
-                var theme = speedView.Context.Theme;
                 int color = resources.GetColor(Resource.Color.transferChipDownloadingText, theme);
                 speedView.SetTextColor(new Color(color));
                 speedView.SetTypeface(speedView.Typeface, TypefaceStyle.Bold);
@@ -616,7 +616,9 @@ namespace Seeker
             {
                 speedView.Visibility = ViewStates.Visible;
                 speedView.Text = SimpleHelpers.GetTransferSpeedString(avgSpeed);
-                speedView.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(speedView.Context, Resource.Attribute.cellTextColor));
+                //speedView.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(speedView.Context, Resource.Attribute.transferSpeedSubdued));
+                int color = resources.GetColor(Resource.Color.transferSpeedSubdued, theme);
+                speedView.SetTextColor(new Color(color));
                 speedView.SetTypeface(speedView.Typeface, TypefaceStyle.Normal);
             }
             else
