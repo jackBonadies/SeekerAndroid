@@ -48,12 +48,16 @@
     <color name="transferChipCompletedBg">#1A4CAF50</color>
     <color name="transferChipDownloadingText">#1565C0</color>
     <color name="transferChipDownloadingBg">#1A2196F3</color>
-    <color name="transferChipQueuedText">#616161</color>
-    <color name="transferChipQueuedBg">#1A9E9E9E</color>
-    <color name="transferChipPausedText">#E65100</color>
-    <color name="transferChipPausedBg">#1AFFA726</color>
+    <color name="transferChipQueuedText">#E65100</color>
+    <color name="transferChipQueuedBg">#1AFFA726</color>
+    <color name="transferChipPausedText">#616161</color>
+    <color name="transferChipPausedBg">#1A9E9E9E</color>
     <color name="transferChipFailedText">#C62828</color>
     <color name="transferChipFailedBg">#1AF44336</color>
+
+    <color name="transferProgressTrack">#1A000000</color>
+    <color name="transferSpeedSubdued">#9E9E9E</color>
+    <color name="transferUsernameSubdued">#999999</color>
 
     <color name="statusConnectedDot">#4CAF50</color>
     <color name="statusConnectedText">#2E7D32</color>

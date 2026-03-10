@@ -1078,21 +1078,6 @@ namespace Seeker
             }
         }
 
-        private void ClearProgressBarColor(ProgressBar pb)
-        {
-#pragma warning disable 0618
-            if (OperatingSystem.IsAndroidVersionAtLeast(21))
-            {
-                pb.ProgressTintList = ColorStateList.ValueOf(Color.DodgerBlue);
-            }
-            else
-            {
-                pb.ProgressDrawable.SetColorFilter(Color.DodgerBlue, PorterDuff.Mode.Multiply);
-            }
-#pragma warning restore 0618
-        }
-
-
         private void refreshItemProgress(int indexToRefresh, int progress, TransferItem relevantItem, bool wasFailed, double avgSpeedBytes)
         {
             ITransferItemView v = recyclerViewTransferItems.GetLayoutManager().FindViewByPosition(indexToRefresh) as ITransferItemView;
@@ -1103,11 +1088,6 @@ namespace Seeker
 
                     int prog = (v.InnerTransferItem as FolderItem).GetFolderProgress(out long totalBytes, out long completedBytes);
                     v.progressBar.Progress = prog;
-                    if (v.GetShowProgressSize())
-                    {
-                        (v.GetProgressSizeTextView() as ProgressSizeTextView).Progress = prog;
-                        TransferViewHelper.SetSizeText(v.GetProgressSizeTextView(), prog, totalBytes);
-                    }
 
                     TimeSpan? timeRemaining = null;
                     long bytesRemaining = totalBytes - completedBytes;
@@ -1116,26 +1096,15 @@ namespace Seeker
                         timeRemaining = TimeSpan.FromSeconds(bytesRemaining / avgSpeedBytes);
                     }
                     (v.InnerTransferItem as FolderItem).RemainingFolderTime = timeRemaining;
-                    //TODO chain avg speeds so that its per folder rather than per transfer.
 
-                    TransferViewHelper.SetAdditionalStatusText(v.GetAdditionalStatusInfoView(), v.InnerTransferItem, relevantItem.State, v.GetShowSpeed());
-                    if (wasFailed)
-                    {
-                        ClearProgressBarColor(v.progressBar);
-                    }
+                    TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeSeparatorView(), v.GetSizeTextView(), v.GetSpeedTextView(), v.InnerTransferItem, relevantItem.State, v.GetShowProgressSize(), v.GetShowSpeed());
+                    TransferViewHelper.SetProgressBarTint(v.progressBar, relevantItem.State, wasFailed);
                 }
                 else
                 {
                     v.progressBar.Progress = progress;
-                    if (v.GetShowProgressSize())
-                    {
-                        TransferViewHelper.SetSizeText(v.GetProgressSizeTextView(), relevantItem.Progress, relevantItem.Size);
-                    }
-                    TransferViewHelper.SetAdditionalStatusText(v.GetAdditionalStatusInfoView(), relevantItem, relevantItem.State, v.GetShowSpeed());
-                    if (wasFailed)
-                    {
-                        ClearProgressBarColor(v.progressBar);
-                    }
+                    TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeSeparatorView(), v.GetSizeTextView(), v.GetSpeedTextView(), relevantItem, relevantItem.State, v.GetShowProgressSize(), v.GetShowSpeed());
+                    TransferViewHelper.SetProgressBarTint(v.progressBar, relevantItem.State, wasFailed);
                 }
             }
         }

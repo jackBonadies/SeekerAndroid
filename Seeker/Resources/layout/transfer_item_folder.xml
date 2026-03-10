@@ -12,32 +12,33 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingTop="2dp"
+        android:gravity="center_vertical"
     >
         <TextView
             android:id="@+id/textViewFoldername"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="3"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:ellipsize="end"
-            android:paddingStart="3dp"
-            android:paddingEnd="3dp"
-            android:text="1.5"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
             android:textColor="?attr/cellTextColor"
-            android:textSize="12sp"
+            android:textSize="13sp"
+            android:textStyle="bold"
             android:singleLine="true"
         />
 
         <TextView
             android:id="@+id/textViewUser"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:paddingStart="2dp"
-            android:paddingEnd="2dp"
-            android:text="2"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:gravity="end"
+            android:maxWidth="140dp"
             android:textSize="12sp"
-            android:textColor="?attr/cellTextColor"
+            android:textColor="@color/transferUsernameSubdued"
             android:singleLine="true"
         />
     </LinearLayout>
@@ -49,40 +50,59 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
     >
-        <TextView
-            android:id="@+id/textViewStatus"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="0"
-            android:visibility="gone"
+        <View
+            android:id="@+id/statusDot"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:background="@drawable/transfer_status_dot"
+            android:layout_marginStart="4dp"
         />
 
         <TextView
             android:id="@+id/textViewStatusAdditionalInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/transfer_status_chip_bg"
             android:ellipsize="end"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="2dp"
-            android:paddingBottom="2dp"
-            android:layout_marginStart="3dp"
-            android:text=""
-            android:textSize="10sp"
+            android:layout_marginStart="4dp"
+            android:textSize="11sp"
             android:singleLine="true"
+        />
+
+        <TextView
+            android:id="@+id/textViewSizeSeparator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" \u00b7 "
+            android:textSize="11sp"
+            android:textColor="?attr/cellTextColor"
+        />
+
+        <TextView
+            android:id="@+id/textViewSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:textColor="?attr/cellTextColor"
         />
 
         <ProgressBar
             android:id="@+id/simpleProgressBar"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="4dp"
             android:layout_weight="1"
-            android:paddingStart="2dp"
-            android:paddingEnd="5dp"
-            android:singleLine="true"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:progressDrawable="@drawable/transfer_progress_bar"
             style="?android:attr/progressBarStyleHorizontal"
             android:max="100"
+        />
+
+        <TextView
+            android:id="@+id/textViewSpeed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:layout_marginEnd="4dp"
         />
     </LinearLayout>
 
@@ -92,7 +112,6 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="2dp"
-        android:background="@drawable/header_cell_shape_bottom"
     >
         <TextView
             android:id="@+id/filesRemaining"
