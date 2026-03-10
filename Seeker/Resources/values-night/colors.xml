@@ -35,10 +35,10 @@
     <color name="checkCircleSelected">#FFFFFF</color>
     <color name="checkCircleUnselected">#999999</color>
 
-    <color name="transferChipCompletedText">#81C784</color>
-    <color name="transferChipCompletedBg">#2681C784</color>
-    <color name="transferChipDownloadingText">#64B5F6</color>
-    <color name="transferChipDownloadingBg">#262196F3</color>
+    <color name="transferChipCompletedText">#5EC98E</color>
+    <color name="transferChipCompletedBg">#265EC98E</color>
+    <color name="transferChipDownloadingText">#6AADFF</color>
+    <color name="transferChipDownloadingBg">#266AADFF</color>
     <color name="transferChipQueuedText">#FFB74D</color>
     <color name="transferChipQueuedBg">#26FFA726</color>
     <color name="transferChipPausedText">#B0B0B0</color>

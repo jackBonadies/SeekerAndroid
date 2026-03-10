@@ -3,6 +3,8 @@ using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -349,6 +351,19 @@ namespace Seeker
             }
         }
 
+        public static string GetHumanReadableProgressSize(long currentBytes, long totalBytes)
+        {
+            if (totalBytes > 1024 * 1024 * 1024)
+            {
+                var denom = 1024.0 * 1024.0 * 1024.0;
+                return string.Format("{0:F2}/{1:F2} GB", currentBytes / denom, totalBytes / denom);
+            }
+            else
+            {
+                var denom = 1024.0 * 1024.0;
+                return string.Format("{0:F2}/{1:F2} MB", currentBytes / denom, totalBytes / denom);
+            }
+        }
 
         public static string GetHumanReadableTime(int totalSeconds, bool withSpace = false)
         {

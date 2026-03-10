@@ -172,6 +172,11 @@ namespace Seeker
             viewSize = FindViewById<TextView>(Resource.Id.textViewSize);
             viewSpeed = FindViewById<TextView>(Resource.Id.textViewSpeed);
             viewSizeSeparator = FindViewById<TextView>(Resource.Id.textViewSizeSeparator);
+
+            if (OperatingSystem.IsAndroidVersionAtLeast(28))
+            {
+                viewFoldername.Typeface = Typeface.Create(viewFoldername.Typeface, 600, false);
+            }
         }
 
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
@@ -429,34 +434,12 @@ namespace Seeker
         {
             if (progress == 100)
             {
-                if (sizeBytes > 1024 * 1024)
-                {
-                    size.Text = System.String.Format("{0:F1}mb", sizeBytes / 1048576.0);
-                }
-                else if (sizeBytes >= 0)
-                {
-                    size.Text = System.String.Format("{0:F1}kb", sizeBytes / 1024.0);
-                }
-                else
-                {
-                    size.Text = "??";
-                }
+                size.Text = SimpleHelpers.GetHumanReadableSize(sizeBytes);
             }
             else
             {
                 long bytesTransferred = progress * sizeBytes;
-                if (sizeBytes > 1024 * 1024)
-                {
-                    size.Text = System.String.Format("{0:F1}/{1:F1}mb", bytesTransferred / (1048576.0 * 100.0), sizeBytes / 1048576.0);
-                }
-                else if (sizeBytes >= 0)
-                {
-                    size.Text = System.String.Format("{0:F1}/{1:F1}kb", bytesTransferred / (1024.0 * 100.0), sizeBytes / 1024.0);
-                }
-                else
-                {
-                    size.Text = "??";
-                }
+                size.Text = SimpleHelpers.GetHumanReadableProgressSize(bytesTransferred / 100, sizeBytes);
             }
         }
 
@@ -623,6 +606,8 @@ namespace Seeker
 
             text.SetTextColor(new Color(color));
             text.SetBackgroundColor(Color.Transparent);
+            text.SetTypeface(text.Typeface, Android.Graphics.TypefaceStyle.Bold);
+            text.SetTextSize(ComplexUnitType.Sp, 10);
 
             var bg = dot.Background?.Mutate() as GradientDrawable;
             if (bg != null)
@@ -637,7 +622,7 @@ namespace Seeker
             if ((state.HasFlag(TransferStates.InProgress) || state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested)) && avgSpeed > 0)
             {
                 speedView.Visibility = ViewStates.Visible;
-                speedView.Text = string.Format("{0:F1} {1}", avgSpeed / 1024.0, SimpleHelpers.STRINGS_KBS);
+                speedView.Text = SimpleHelpers.GetTransferSpeedString(avgSpeed);
                 var resources = speedView.Context.Resources;
                 var theme = speedView.Context.Theme;
                 int color = resources.GetColor(Resource.Color.transferChipDownloadingText, theme);
@@ -646,7 +631,7 @@ namespace Seeker
             else if (state.HasFlag(TransferStates.Succeeded) && avgSpeed > 0)
             {
                 speedView.Visibility = ViewStates.Visible;
-                speedView.Text = string.Format("{0:F1} {1}", avgSpeed / 1024.0, SimpleHelpers.STRINGS_KBS);
+                speedView.Text = SimpleHelpers.GetTransferSpeedString(avgSpeed);
                 var resources = speedView.Context.Resources;
                 var theme = speedView.Context.Theme;
                 int color = resources.GetColor(Resource.Color.transferSpeedSubdued, theme);
@@ -870,32 +855,12 @@ namespace Seeker
         public bool showSizes;
         public TransferItemViewDetails(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
-            bool _showSizes = attrs.GetAttributeBooleanValue("http://schemas.android.com/apk/res-auto", "show_progress_size", false);
-
-            if (_showSizes)
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
-            }
-            else
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed, this, true);
-            }
-
+            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
             setupChildren();
         }
         public TransferItemViewDetails(Context context, IAttributeSet attrs) : base(context, attrs)
         {
-            bool _showSizes = attrs.GetAttributeBooleanValue("http://schemas.android.com/apk/res-auto", "show_progress_size", false);
-
-            if (_showSizes)
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
-            }
-            else
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed, this, true);
-            }
-
+            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
             setupChildren();
         }
 
@@ -903,14 +868,7 @@ namespace Seeker
         {
 
             TransferItemViewDetails itemView = null;
-            if (_showSizes)
-            {
-                itemView = (TransferItemViewDetails)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_details_dummy_showProgressSize, parent, false);
-            }
-            else
-            {
-                itemView = (TransferItemViewDetails)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_details_dummy, parent, false);
-            }
+            itemView = (TransferItemViewDetails)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_details_dummy_showProgressSize, parent, false);
             itemView.showSpeed = _showSpeed;
             itemView.showSizes = _showSizes;
             return itemView;
@@ -928,6 +886,11 @@ namespace Seeker
             viewSize = FindViewById<TextView>(Resource.Id.textViewSize);
             viewSpeed = FindViewById<TextView>(Resource.Id.textViewSpeed);
             viewSizeSeparator = FindViewById<TextView>(Resource.Id.textViewSizeSeparator);
+
+            if (OperatingSystem.IsAndroidVersionAtLeast(28))
+            {
+                viewFilename.Typeface = Typeface.Create(viewFilename.Typeface, 600, false);
+            }
         }
 
 
