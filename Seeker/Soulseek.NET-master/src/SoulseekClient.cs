@@ -518,18 +518,6 @@ namespace Soulseek
             }
         }
 
-        public void InvokeDownloadAddedRemovedInternalHandler(int count)
-        {
-            DownloadAddedRemovedInternal?.Invoke(this, new TransferAddedRemovedInternalEventArgs(count));
-        }
-
-        public void InvokeUploadAddedRemovedInternalHandler(int count)
-        {
-            UploadAddedRemovedInternal?.Invoke(this, new TransferAddedRemovedInternalEventArgs(count));
-        }
-
-        public event EventHandler<TransferAddedRemovedInternalEventArgs> DownloadAddedRemovedInternal;
-        public event EventHandler<TransferAddedRemovedInternalEventArgs> UploadAddedRemovedInternal;
         /// <summary>
         /// Solves the transfer size mismatch problem in line.
         /// </summary>
@@ -538,23 +526,6 @@ namespace Soulseek
         public delegate bool TransferSizeMismatchDelegate(Stream stream, string b, string c, long d, long e, long f, string g, out Stream h);
         public static TransferSizeMismatchDelegate OnTransferSizeMismatchFunc;
 
-        //public static void ClearDownloadAddedInternalHandler(object target)
-        //{
-        //    if (DownloadAddedRemovedInternal == null)
-        //    {
-        //        return;
-        //    }
-        //    else
-        //    {
-        //        foreach (Delegate d in DownloadAddedRemovedInternal.GetInvocationList())
-        //        {
-        //            if (d.Target.GetType() == target.GetType())
-        //            {
-        //                DownloadAddedRemovedInternal -= (EventHandler<DownloadAddedRemovedInternalEventArgs>)d;
-        //            }
-        //        }
-        //    }
-        //}
 
         /// <summary>
         /// a
@@ -3439,15 +3410,6 @@ namespace Soulseek
                 throw new DuplicateTransferException($"Duplicate download of {remoteFilename} from {username} aborted");
             }
 
-            try
-            {
-                InvokeDownloadAddedRemovedInternalHandler(DownloadDictionary.Count);
-            }
-            catch (Exception error)
-            {
-                ErrorLogHandler?.Invoke(null, new ErrorLogEventArgs(error.Message + "InvokeDownloadAddedRemovedInternalHandler"));
-            }
-
             var lastState = TransferStates.None;
 
             void UpdateState(TransferStates state)
@@ -3808,30 +3770,7 @@ namespace Soulseek
                         }
                     }
 
-                    bool allCancelled = false;
-                    try
-                    {
-                        // if you cancelled one of them, then test, did you cancel all?
-                        if (download.State.HasFlag(TransferStates.Cancelled))
-                        {
-                            allCancelled = DownloadDictionary.Values.All((TransferInternal ti) => { return ti.State.HasFlag(TransferStates.Cancelled); });
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        InvokeErrorLogHandler("The cancelled checking failed: " + e.Message);
-                    }
-
                     DownloadDictionary.TryRemove(download.Token, out _);
-
-                    if (allCancelled)
-                    {
-                        InvokeDownloadAddedRemovedInternalHandler(0);
-                    }
-                    else
-                    {
-                        InvokeDownloadAddedRemovedInternalHandler(DownloadDictionary.Count);
-                    }
 
                     UniqueKeyDictionary.TryRemove(uniqueKey, out _);
                 }
@@ -4527,15 +4466,6 @@ namespace Soulseek
                 throw new DuplicateTransferException($"Duplicate upload of {remoteFilename} to {username} aborted");
             }
 
-            try
-            {
-                InvokeUploadAddedRemovedInternalHandler(UploadDictionary.Count);
-            }
-            catch (Exception error)
-            {
-                ErrorLogHandler?.Invoke(null, new ErrorLogEventArgs(error.Message + "InvokeUploadAddedRemovedInternalHandler"));
-            }
-
             var lastState = TransferStates.None;
 
             void UpdateState(TransferStates state)
@@ -4955,30 +4885,7 @@ namespace Soulseek
                         }
                     }
 
-                    bool allCancelled = false;
-                    try
-                    {
-                        // if you cancelled one of them, then test, did you cancel all?
-                        if (upload.State.HasFlag(TransferStates.Cancelled))
-                        {
-                            allCancelled = UploadDictionary.Values.All((TransferInternal ti) => { return ti.State.HasFlag(TransferStates.Cancelled); });
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        InvokeErrorLogHandler("The cancelled checking failed: " + e.Message);
-                    }
-
                     UploadDictionary.TryRemove(upload.Token, out _);
-
-                    if (allCancelled)
-                    {
-                        InvokeUploadAddedRemovedInternalHandler(0);
-                    }
-                    else
-                    {
-                        InvokeUploadAddedRemovedInternalHandler(UploadDictionary.Count);
-                    }
 
                     UniqueKeyDictionary.TryRemove(uniqueKey, out _);
                 }
@@ -5008,12 +4915,4 @@ namespace Soulseek
         }
     }
 
-    public class TransferAddedRemovedInternalEventArgs : EventArgs
-    {
-        public int Count;
-        public TransferAddedRemovedInternalEventArgs(int count)
-        {
-            Count = count;
-        }
-    }
 }

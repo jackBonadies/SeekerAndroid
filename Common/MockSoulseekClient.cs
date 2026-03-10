@@ -124,14 +124,6 @@ namespace Seeker
         public event EventHandler<UserStatistics>? UserStatisticsChanged;
         public event EventHandler<UserStatus>? UserStatusChanged;
         public event EventHandler<DiagnosticEventArgs>? DiagnosticGenerated;
-        public event EventHandler<TransferAddedRemovedInternalEventArgs>? DownloadAddedRemovedInternal;
-        public event EventHandler<TransferAddedRemovedInternalEventArgs>? UploadAddedRemovedInternal;
-
-        public void InvokeDownloadAddedRemovedInternalHandler(int count)
-            => DownloadAddedRemovedInternal?.Invoke(this, new TransferAddedRemovedInternalEventArgs(count));
-
-        public void InvokeUploadAddedRemovedInternalHandler(int count)
-            => UploadAddedRemovedInternal?.Invoke(this, new TransferAddedRemovedInternalEventArgs(count));
 
         // --- Event raise helpers (for events Seeker subscribes to) ---
         public void RaiseConnected() => Connected?.Invoke(this, EventArgs.Empty);
@@ -470,8 +462,6 @@ namespace Seeker
                 throw new DuplicateTransferException($"Duplicate download of {filename} from {username} aborted");
             }
 
-            InvokeDownloadAddedRemovedInternalHandler(DownloadDictionary.Count);
-
             var lastState = TransferStates.None;
 
             void UpdateState(TransferStates state)
@@ -545,14 +535,7 @@ namespace Seeker
                     GlobalDownloadSemaphore.Release();
                 }
 
-                bool allCancelled = false;
-                if (download.State.HasFlag(TransferStates.Cancelled))
-                {
-                    allCancelled = DownloadDictionary.Values.All(ti => ti.State.HasFlag(TransferStates.Cancelled));
-                }
-
                 DownloadDictionary.TryRemove(token, out _);
-                InvokeDownloadAddedRemovedInternalHandler(allCancelled ? 0 : DownloadDictionary.Count);
                 UniqueKeyDictionary.TryRemove(uniqueKey, out _);
             }
         }
@@ -579,8 +562,6 @@ namespace Seeker
                 UniqueKeyDictionary.TryRemove(uniqueKey, out _);
                 throw new DuplicateTransferException($"Duplicate upload of {filename} to {username} aborted");
             }
-
-            InvokeUploadAddedRemovedInternalHandler(UploadDictionary.Count);
 
             var lastState = TransferStates.None;
 
@@ -652,14 +633,7 @@ namespace Seeker
                     GlobalUploadSemaphore.Release();
                 }
 
-                bool allCancelled = false;
-                if (upload.State.HasFlag(TransferStates.Cancelled))
-                {
-                    allCancelled = UploadDictionary.Values.All(ti => ti.State.HasFlag(TransferStates.Cancelled));
-                }
-
                 UploadDictionary.TryRemove(token, out _);
-                InvokeUploadAddedRemovedInternalHandler(allCancelled ? 0 : UploadDictionary.Count);
                 UniqueKeyDictionary.TryRemove(uniqueKey, out _);
             }
         }

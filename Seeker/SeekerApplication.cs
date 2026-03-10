@@ -306,8 +306,6 @@ namespace Seeker
             SoulseekClient.DebugLogHandler += DebugLogHandler;
             #endif
 
-            SeekerState.SoulseekClient.DownloadAddedRemovedInternal += SoulseekClient_DownloadAddedRemovedInternal;
-            SeekerState.SoulseekClient.UploadAddedRemovedInternal += SoulseekClient_UploadAddedRemovedInternal;
 
             UPnpManager.Context = this;
             UPnpManager.Instance.SearchAndSetMappingIfRequired();
@@ -843,15 +841,17 @@ namespace Seeker
 
 
 
-        public static volatile int UPLOAD_COUNT = -1; // a hack see below
+        private static int _activeUploadCount = 0;
+        public static int ActiveUploadCount => _activeUploadCount;
 
-        private void SoulseekClient_UploadAddedRemovedInternal(object sender, TransferAddedRemovedInternalEventArgs e)
+        private static int _activeDownloadCount = 0;
+        public static int ActiveDownloadCount => _activeDownloadCount;
+
+        private void OnUploadCountChanged(int count)
         {
-            TransferItemManager.MarkTransfersDirty();
             bool abortAll = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.AbortAllWasPressedDebouncer) < 750;
-            if (e.Count == 0 || abortAll)
+            if (count <= 0 || abortAll)
             {
-                UPLOAD_COUNT = -1;
                 Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
                 Logger.Debug("Stop Service");
                 this.StopService(uploadServiceIntent);
@@ -859,70 +859,37 @@ namespace Seeker
             }
             else if (!SeekerState.UploadKeepAliveServiceRunning)
             {
-                UPLOAD_COUNT = e.Count;
                 Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
                 if (OperatingSystem.IsAndroidVersionAtLeast(26))
                 {
                     bool? isForeground = SeekerState.ActiveActivityRef?.IsResumed();
-
-                    //LogDebug("IsForeground: " + isForeground + " current state: " + this.Lifecycle.CurrentState.ToString()); //REMOVE THIS!!!
                     if (isForeground ?? false)
                     {
-                        this.StartService(uploadServiceIntent); //this will throw if the app is in background.
-                    }
-                    else
-                    {
-                        //only do this if we absolutely must
-                        //this will throw in api 31 if the app is in background. so now it is out of the question.  no way to start foreground service if in background.
-                        //this.StartForegroundService(uploadServiceIntent);
+                        this.StartService(uploadServiceIntent);
                     }
                 }
                 else
                 {
-                    //even when targetting and compiling for api 31, old devices can still do this just fine.
-                    this.StartService(uploadServiceIntent); //this will throw if the app is in background.
+                    this.StartService(uploadServiceIntent);
                 }
                 SeekerState.UploadKeepAliveServiceRunning = true;
             }
-            else if (SeekerState.UploadKeepAliveServiceRunning && e.Count != 0)
+            else
             {
-                UPLOAD_COUNT = e.Count;
-                //for two downloads, this notification will go up before the service is started...
-
-                //requires run on ui thread? NOPE
-                string msg = string.Empty;
-                if (e.Count == 1)
-                {
-                    msg = string.Format(UploadForegroundService.SingularUploadRemaining, e.Count);
-                }
-                else
-                {
-                    msg = string.Format(UploadForegroundService.PluralUploadsRemaining, e.Count);
-                }
+                string msg = count == 1
+                    ? string.Format(UploadForegroundService.SingularUploadRemaining, count)
+                    : string.Format(UploadForegroundService.PluralUploadsRemaining, count);
                 var notif = UploadForegroundService.CreateNotification(this, msg);
                 NotificationManager manager = GetSystemService(Context.NotificationService) as NotificationManager;
                 manager.Notify(UploadForegroundService.NOTIF_ID, notif);
             }
-            //});
-
-
         }
 
-
-        public static volatile int DL_COUNT = -1; // a hack see below
-
-        //it works in the case of successfully finished, cancellation token used, etc.
-        private void SoulseekClient_DownloadAddedRemovedInternal(object sender, TransferAddedRemovedInternalEventArgs e)
+        private void OnDownloadCountChanged(int count)
         {
-            TransferItemManager.MarkTransfersDirty();
-            Logger.Debug("SoulseekClient_DownloadAddedRemovedInternal with count:" + e.Count);
-            Logger.Debug("the thread is: " + System.Threading.Thread.CurrentThread.ManagedThreadId);
-
             bool cancelAndClear = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.CancelAndClearAllWasPressedDebouncer) < 750;
-            Logger.Debug("SoulseekClient_DownloadAddedRemovedInternal cancel and clear:" + cancelAndClear);
-            if (e.Count == 0 || cancelAndClear)
+            if (count <= 0 || cancelAndClear)
             {
-                DL_COUNT = -1;
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
                 Logger.Debug("Stop Service");
                 this.StopService(downloadServiceIntent);
@@ -930,51 +897,30 @@ namespace Seeker
             }
             else if (!SeekerState.DownloadKeepAliveServiceRunning)
             {
-                DL_COUNT = e.Count;
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
                 if (OperatingSystem.IsAndroidVersionAtLeast(26))
                 {
                     bool? isForeground = SeekerState.ActiveActivityRef?.IsResumed();
-
-                    //LogDebug("IsForeground: " + isForeground + " current state: " + this.Lifecycle.CurrentState.ToString()); //REMOVE THIS!!!
                     if (isForeground ?? false)
                     {
-                        this.StartService(downloadServiceIntent); //this will throw if the app is in background.
-                    }
-                    else
-                    {
-                        //only do this if we absolutely must
-                        //this will throw in api 31 if the app is in background. so now it is out of the question.  no way to start foreground service if in background.
-                        //this.StartForegroundService(downloadServiceIntent);
+                        this.StartService(downloadServiceIntent);
                     }
                 }
                 else
                 {
-                    //even when targetting and compiling for api 31, old devices can still do this just fine.
-                    this.StartService(downloadServiceIntent); //this will throw if the app is in background.
+                    this.StartService(downloadServiceIntent);
                 }
                 SeekerState.DownloadKeepAliveServiceRunning = true;
             }
-            else if (SeekerState.DownloadKeepAliveServiceRunning && e.Count != 0)
+            else
             {
-                DL_COUNT = e.Count;
-                //for two downloads, this notification will go up before the service is started...
-
-                //requires run on ui thread? NOPE
-                string msg = string.Empty;
-                if (e.Count == 1)
-                {
-                    msg = string.Format(DownloadForegroundService.SingularDownloadRemaining, e.Count);
-                }
-                else
-                {
-                    msg = string.Format(DownloadForegroundService.PluralDownloadsRemaining, e.Count);
-                }
+                string msg = count == 1
+                    ? string.Format(DownloadForegroundService.SingularDownloadRemaining, count)
+                    : string.Format(DownloadForegroundService.PluralDownloadsRemaining, count);
                 var notif = DownloadForegroundService.CreateNotification(this, msg);
                 NotificationManager manager = GetSystemService(Context.NotificationService) as NotificationManager;
                 manager.Notify(DownloadForegroundService.NOTIF_ID, notif);
             }
-            //});
         }
 
 
@@ -1015,6 +961,38 @@ namespace Seeker
             }
 
             bool isUpload = e.Transfer.Direction == TransferDirection.Upload;
+
+            // Track active transfer counts via atomic counters.
+            // Increment when a transfer first appears (previous state is None).
+            // Decrement when a transfer reaches a terminal state (Completed flag set).
+            if (e.PreviousState == TransferStates.None)
+            {
+                TransferItemManager.MarkTransfersDirty();
+                if (isUpload)
+                {
+                    int count = System.Threading.Interlocked.Increment(ref _activeUploadCount);
+                    OnUploadCountChanged(count);
+                }
+                else
+                {
+                    int count = System.Threading.Interlocked.Increment(ref _activeDownloadCount);
+                    OnDownloadCountChanged(count);
+                }
+            }
+            else if (e.Transfer.State.HasFlag(TransferStates.Completed) && !e.PreviousState.HasFlag(TransferStates.Completed))
+            {
+                TransferItemManager.MarkTransfersDirty();
+                if (isUpload)
+                {
+                    int count = Math.Max(0, System.Threading.Interlocked.Decrement(ref _activeUploadCount));
+                    OnUploadCountChanged(count);
+                }
+                else
+                {
+                    int count = Math.Max(0, System.Threading.Interlocked.Decrement(ref _activeDownloadCount));
+                    OnDownloadCountChanged(count);
+                }
+            }
 
             if (!isUpload && e.Transfer.State.HasFlag(TransferStates.UserOffline))
             {
