@@ -835,6 +835,7 @@ namespace Seeker.Services
                             try
                             {
                                 //retry download.
+                                e.dlInfo.TransferItemReference.ClearStateForRetry();
                                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                                 TransferState.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
                                 var retryDlInfo = new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, null, cancellationTokenSource, e.dlInfo.QueueLength, resetRetryCount ? 0 : 1, task.Exception, e.dlInfo.Depth) { TransferItemReference = e.dlInfo.TransferItemReference };
