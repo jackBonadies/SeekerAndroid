@@ -624,7 +624,9 @@ namespace Seeker
                     }
                     else if (ti.State.HasFlag(TransferStates.InProgress) || ti.State.HasFlag(TransferStates.Initializing) || ti.State.HasFlag(TransferStates.Requested) || ti.State.HasFlag(TransferStates.Aborted))
                     {
-                        bytesInProgress += size;
+                        long completedBytes = (long)((ti.Progress / 100.0) * size);
+                        bytesInProgress += completedBytes;
+                        bytesNotYet += size - completedBytes;
                     }
                     else if (ti.State.HasFlag(TransferStates.Errored) || ti.State.HasFlag(TransferStates.Rejected) || ti.State.HasFlag(TransferStates.TimedOut))
                     {
