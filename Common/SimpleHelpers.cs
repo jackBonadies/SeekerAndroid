@@ -339,8 +339,8 @@ namespace Seeker
             }
         }
 
-        public const long TOTAL_BYTES_MB = 1048576;
-        public const long TOTAL_BYTES_GB = 1073741824;
+        public const double TOTAL_BYTES_MB = 1048576;
+        public const double TOTAL_BYTES_GB = 1073741824;
 
         public static string GetHumanReadableSize(long totalBytes)
         {

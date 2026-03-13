@@ -245,7 +245,7 @@ namespace Seeker
                 var dirs = new List<Soulseek.Directory>
                 {
                     new("@@mockuser\\Music", new[] { MakeFile("cover.jpg", 200_000) }),
-                    new("@@mockuser\\Music\\ArtistA\\Album1", new[] { MakeFile("01 Track One.mp3"), MakeFile("02 Track Two.mp3"), MakeFile("03 Track Three.mp3") }),
+                    new("@@mockuser\\Music\\ArtistA\\Album1", new[] { MakeFile("01 Track One.mp3"), MakeFile("02 Track Two.mp3"), MakeFile("03 Track Three failed.mp3") }),
                     new("@@mockuser\\Music\\ArtistA\\Album2", new[] { MakeFile("01 Intro.flac", 30_000_000), MakeFile("02 Main.flac", 45_000_000) }),
                     new("@@mockuser\\Music\\ArtistA\\Album2\\CD2", new[] { MakeFile("01 Bonus.flac", 28_000_000) }),
                     new("@@mockuser\\Music\\ArtistB\\Best Of", new[] { MakeFile("01 Hit.mp3"), MakeFile("02 Single.mp3"), MakeFile("03 Classic.mp3"), MakeFile("04 Deep Cut.mp3") }),
@@ -255,7 +255,7 @@ namespace Seeker
                 };
                 var lockedDirs = new List<Soulseek.Directory>
                 {
-                    new("@@mockuser\\Music\\ArtistA\\Album3 (Private)", new[] { MakeFile("01 Unreleased.mp3"), MakeFile("02 Demo.mp3") }),
+                    new("@@mockuser\\Music\\ArtistA\\Album3 (Private)", new[] { MakeFile("01 Unreleased.mp3"), MakeFile("02 Demo failed.mp3") }),
                     new("@@mockuser\\Music\\ArtistD\\Rare", new[] { MakeFile("01 Rarity.flac", 40_000_000) }),
                 };
                 browseResponse = new BrowseResponse(dirs, lockedDirs);
@@ -265,7 +265,7 @@ namespace Seeker
                 var dirs = new List<Soulseek.Directory>
                 {
                     new("@@mockuser\\Music\\ArtistA\\Album1", new[] { MakeFile("01 Track One.mp3"), MakeFile("02 Track Two.mp3"), MakeFile("03 Track Three.mp3") }),
-                    new("@@mockuser\\Music\\ArtistB\\Album1", new[] { MakeFile("01 First.mp3"), MakeFile("02 Second.mp3") }),
+                    new("@@mockuser\\Music\\ArtistB\\Album1", new[] { MakeFile("01 First.mp3"), MakeFile("02 Second failed.mp3") }),
                     new("@@mockuser\\Music\\ArtistC\\Singles", new[] { MakeFile("01 Single.mp3") }),
                 };
                 browseResponse = new BrowseResponse(dirs);
@@ -274,7 +274,7 @@ namespace Seeker
             {
                 var dirs = new List<Soulseek.Directory>
                 {
-                    new("@@mockuser\\Music\\Album", new[] { MakeFile("01 Only Track.mp3"), MakeFile("02 Another.mp3") }),
+                    new("@@mockuser\\Music\\Album", new[] { MakeFile("01 Only Track.mp3"), MakeFile("02 Another failed.mp3") }),
                 };
                 browseResponse = new BrowseResponse(dirs);
             }
@@ -486,6 +486,13 @@ namespace Seeker
 
             try
             {
+                if (filename.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    UpdateState(TransferStates.Queued | TransferStates.Locally);
+                    UpdateState(TransferStates.Completed | TransferStates.Errored);
+                    throw new TransferRejectedException("Transfer rejected: filename contains 'failed'");
+                }
+
                 UpdateState(TransferStates.Queued | TransferStates.Locally);
                 await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
 
@@ -591,6 +598,13 @@ namespace Seeker
 
             try
             {
+                if (filename.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    UpdateState(TransferStates.Queued | TransferStates.Locally);
+                    UpdateState(TransferStates.Completed | TransferStates.Errored);
+                    throw new TransferRejectedException("Transfer rejected: filename contains 'failed'");
+                }
+
                 UpdateState(TransferStates.Queued | TransferStates.Locally);
                 await Task.Delay(SimulatedDelayMs * 2, cancellationToken).ConfigureAwait(false);
 
