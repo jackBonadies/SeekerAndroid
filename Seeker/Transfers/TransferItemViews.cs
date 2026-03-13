@@ -264,7 +264,7 @@ namespace Seeker
         {
             SetFolderStatusSpannable(filesLongStatus, fi);
 
-            if (folderState.HasFlag(TransferStates.InProgress) || folderState.HasFlag(TransferStates.Queued) || folderState.HasFlag(TransferStates.Initializing) || folderState.HasFlag(TransferStates.Requested) || folderState.HasFlag(TransferStates.Aborted))
+            if (folderState.HasFlag(TransferStates.InProgress) || folderState.HasFlag(TransferStates.Initializing) || folderState.HasFlag(TransferStates.Requested) || folderState.HasFlag(TransferStates.Aborted))
             {
                 string currentFilename = string.Empty;
                 lock (fi.TransferItems)
@@ -674,6 +674,14 @@ namespace Seeker
             else if (state.HasFlag(TransferStates.Aborted))
             {
                 StyleStatusIndicator(statusDot, statusText, SeekerApplication.GetString(Resource.String.re_requesting), TransferChipType.Downloading);
+            }
+            else if (state.HasFlag(TransferStates.Errored))
+            {
+                StyleStatusIndicator(statusDot, statusText, SeekerApplication.GetString(Resource.String.failed), TransferChipType.Failed);
+            }
+            else if (!item.IsUpload() && state == TransferStates.None)
+            {
+                StyleStatusIndicator(statusDot, statusText, SeekerApplication.GetString(Resource.String.paused), TransferChipType.Paused);
             }
             else
             {

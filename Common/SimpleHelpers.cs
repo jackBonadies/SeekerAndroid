@@ -339,29 +339,34 @@ namespace Seeker
             }
         }
 
+        public const long TOTAL_BYTES_MB = 1048576;
+        public const long TOTAL_BYTES_GB = 1073741824;
+
         public static string GetHumanReadableSize(long totalBytes)
         {
-            if (totalBytes > 1024 * 1024 * 1024)
+            if (totalBytes > TOTAL_BYTES_GB)
             {
-                return string.Format("{0:0.##} GB", totalBytes / (1024.0 * 1024.0 * 1024.0));
+                return $"{totalBytes / TOTAL_BYTES_GB:0.##} GB";
             }
             else
             {
-                return string.Format("{0:0.##} MB", totalBytes / (1024.0 * 1024.0));
+                return $"{totalBytes / TOTAL_BYTES_MB:0.##} MB";
             }
         }
 
         public static string GetHumanReadableProgressSize(long currentBytes, long totalBytes)
         {
-            if (totalBytes > 1024 * 1024 * 1024)
+            if (totalBytes > TOTAL_BYTES_GB)
             {
-                var denom = 1024.0 * 1024.0 * 1024.0;
-                return string.Format("{0:F2}/{1:F2} GB", currentBytes / denom, totalBytes / denom);
+                return currentBytes == 0
+                    ? $"0 GB / {totalBytes / TOTAL_BYTES_GB:F1} GB"
+                    : $"{currentBytes / TOTAL_BYTES_GB:F1} GB / {totalBytes / TOTAL_BYTES_GB:F1} GB";
             }
             else
             {
-                var denom = 1024.0 * 1024.0;
-                return string.Format("{0:F2}/{1:F2} MB", currentBytes / denom, totalBytes / denom);
+                return currentBytes == 0
+                    ? $"0 MB / {totalBytes / TOTAL_BYTES_MB:F1} MB"
+                    : $"{currentBytes / TOTAL_BYTES_MB:F1} MB / {totalBytes / TOTAL_BYTES_MB:F1} MB";
             }
         }
 
