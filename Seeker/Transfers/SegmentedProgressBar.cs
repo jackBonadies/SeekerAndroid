@@ -12,7 +12,7 @@ namespace Seeker.Transfers
         private readonly Paint paintNotYetDownloaded = new Paint(PaintFlags.AntiAlias);
         private readonly Paint paintFailed = new Paint(PaintFlags.AntiAlias);
 
-        private int succeeded, inProgress, notYetDownloaded, failed;
+        private long succeeded, inProgress, notYetDownloaded, failed;
 
         private readonly Path clipPath = new Path();
         private float cornerRadius;
@@ -49,7 +49,7 @@ namespace Seeker.Transfers
             paintFailed.Color = new Color(resources.GetColor(Resource.Color.transferChipFailedText, theme));
         }
 
-        public void SetSegments(int succeeded, int inProgress, int notYetDownloaded, int failed)
+        public void SetSegments(long succeeded, long inProgress, long notYetDownloaded, long failed)
         {
             if (this.succeeded == succeeded && this.inProgress == inProgress &&
                 this.notYetDownloaded == notYetDownloaded && this.failed == failed)
@@ -88,7 +88,7 @@ namespace Seeker.Transfers
             // Grey background (not yet downloaded)
             canvas.DrawRect(0, 0, w, h, paintNotYetDownloaded);
 
-            int total = succeeded + inProgress + notYetDownloaded + failed;
+            long total = succeeded + inProgress + notYetDownloaded + failed;
             if (total <= 0)
             {
                 canvas.Restore();
@@ -99,7 +99,7 @@ namespace Seeker.Transfers
             float x = 0;
             if (succeeded > 0)
             {
-                float segW = (float)succeeded / total * w;
+                float segW = (float)((double)succeeded / total * w);
                 canvas.DrawRect(x, 0, x + segW, h, paintSucceeded);
                 x += segW;
             }
@@ -107,14 +107,14 @@ namespace Seeker.Transfers
             // Blue (in progress) next
             if (inProgress > 0)
             {
-                float segW = (float)inProgress / total * w;
+                float segW = (float)((double)inProgress / total * w);
                 canvas.DrawRect(x, 0, x + segW, h, paintInProgress);
             }
 
             // Red (failed) from right
             if (failed > 0)
             {
-                float segW = (float)failed / total * w;
+                float segW = (float)((double)failed / total * w);
                 canvas.DrawRect(w - segW, 0, w, h, paintFailed);
             }
 

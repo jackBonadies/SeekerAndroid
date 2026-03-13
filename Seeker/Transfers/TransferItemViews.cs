@@ -606,11 +606,36 @@ namespace Seeker
 
         public static void UpdateSegmentedProgressBar(Transfers.SegmentedProgressBar bar, FolderItem fi)
         {
-            GetStatusNumbers(fi.TransferItems, out int numInProgress, out int numFailed,
-                out int numPaused, out int numSucceeded, out int numQueued);
-            int total = fi.TransferItems.Count;
-            int notYetDownloaded = total - numSucceeded - numInProgress - numFailed;
-            bar.SetSegments(numSucceeded, numInProgress, notYetDownloaded, numFailed);
+            long bytesSucceeded = 0;
+            long bytesInProgress = 0;
+            long bytesFailed = 0;
+            long bytesNotYet = 0;
+
+            lock (fi.TransferItems)
+            {
+                foreach (var ti in fi.TransferItems)
+                {
+                    long size = ti.Size;
+                    if (ti.State.HasFlag(TransferStates.Succeeded))
+                    {
+                        bytesSucceeded += size;
+                    }
+                    else if (ti.State.HasFlag(TransferStates.InProgress) || ti.State.HasFlag(TransferStates.Initializing) || ti.State.HasFlag(TransferStates.Requested) || ti.State.HasFlag(TransferStates.Aborted))
+                    {
+                        bytesInProgress += size;
+                    }
+                    else if (ti.State.HasFlag(TransferStates.Errored) || ti.State.HasFlag(TransferStates.Rejected) || ti.State.HasFlag(TransferStates.TimedOut))
+                    {
+                        bytesFailed += size;
+                    }
+                    else
+                    {
+                        bytesNotYet += size;
+                    }
+                }
+            }
+
+            bar.SetSegments(bytesSucceeded, bytesInProgress, bytesNotYet, bytesFailed);
         }
 
         public static void SetProgressBarTint(ProgressBar pb, TransferStates state, bool isFailed)
