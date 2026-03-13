@@ -78,8 +78,8 @@
                 android:textStyle="bold"
                 android:singleLine="true"
                 android:background="@drawable/transfer_status_chip_bg"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
                 android:paddingTop="2dp"
                 android:paddingBottom="2dp"
             />
@@ -122,6 +122,8 @@
         </LinearLayout>
 
         <LinearLayout
+			android:layout_marginTop="2dp"
+            android:paddingStart="3dp"
             android:orientation="horizontal"
             android:id="@+id/relativeLayout3"
             android:layout_width="fill_parent"

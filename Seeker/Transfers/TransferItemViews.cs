@@ -543,6 +543,8 @@ namespace Seeker
             if (bg != null)
             {
                 bg.SetColor(bgColor);
+                int strokeWidth = (int)(1 * resources.DisplayMetrics.Density);
+                bg.SetStroke(strokeWidth, new Color(textColor));
             }
         }
 
