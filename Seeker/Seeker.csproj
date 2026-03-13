@@ -41,6 +41,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release IzzySoft|AnyCPU'">
 	  <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
 	  <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
+	  <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
+	  <PublishTrimmed>true</PublishTrimmed>
+	  <AndroidLinkMode>SdkOnly</AndroidLinkMode>
 	  <RunAOTCompilation>false</RunAOTCompilation>
 	  <EnableLLVM>false</EnableLLVM>
 	  <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
