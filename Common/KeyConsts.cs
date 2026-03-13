@@ -13,6 +13,7 @@ namespace Common
         public const string M_Messages = "Momento_Messages_v2";
         public const string M_UnreadMessageUsernames_Legacy = "Momento_UnreadMessageUsernames";
         public const string M_UnreadMessageUsernames = "Momento_UnreadMessageUsernames_v2";
+        public const string M_LastReadMessageCounts = "Momento_LastReadMessageCounts";
         public const string M_SearchHistory = "Momento_SearchHistoryArray";
 
         public const string M_DefaultSearchResultSortAlgorithm = "Momento_DefaultSearchResultSortAlgorithm";

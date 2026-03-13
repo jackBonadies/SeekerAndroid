@@ -1,5 +1,6 @@
 using Common.Messages;
 using Seeker;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,8 +11,36 @@ namespace Common
         // Account
         // if user logged in (regardless of connection status)
         public static bool CurrentlyLoggedIn = false;
-        public static string Username = null;
-        public static string Password = null;
+
+        private static string? _username;
+        public static string? Username
+        {
+            get => _username;
+            set
+            {
+                if (_username != value)
+                {
+                    _username = value;
+                    UsernameChanged?.Invoke(value);
+                }
+            }
+        }
+        public static event Action<string?>? UsernameChanged;
+
+        public static string? Password = null;
+
+        public static void SetCredentials(string username, string password)
+        {
+            Password = password;
+            Username = username; // fires event last, after Password is set
+        }
+
+        public static void ClearCredentials()
+        {
+            CurrentlyLoggedIn = false;
+            Password = null;
+            Username = null; // fires event last
+        }
 
         // Data directories
         public static string SaveDataDirectoryUri = null;

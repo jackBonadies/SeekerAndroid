@@ -69,10 +69,7 @@ namespace Seeker
         {
             if (AnythingToMigrate(sharedPreferences, oldKey))
             {
-                var oldKeyValue = sharedPreferences.GetString(oldKey, string.Empty);
-                var items = RestoreUnreadUsernamesFromString(oldKeyValue, true);
-                var newString = SerializationHelper.SaveUnreadUsernamesToString(items);
-                SaveToSharedPrefs(sharedPreferences, newKey, newString);
+                // Legacy migration — no longer called since we moved to LastReadMessageCounts with a new key.
                 RemoveOldKey(sharedPreferences, oldKey);
                 return true;
             }

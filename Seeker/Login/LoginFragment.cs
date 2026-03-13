@@ -243,7 +243,7 @@ namespace Seeker
                 welcomeTextView.Text = PreferencesState.Username;
                 UpdateConnectionStatus(SeekerState.SoulseekClient.State);
 
-                int unreadCount = MessageController.UnreadUsernames?.Count ?? 0;
+                int unreadCount = MessageController.GetTotalUnreadCount();
                 if (unreadCount > 0)
                 {
                     messagesUnreadBadge.Text = string.Format(SeekerApplication.GetString(Resource.String.unread_count_fmt), unreadCount);
@@ -542,11 +542,13 @@ namespace Seeker
             var action = new Action(() =>
             {
                 SeekerApplication.Toaster.ShowToast(msg, ToastLength.Long);
-                PreferencesState.CurrentlyLoggedIn = false;
                 if (clearCreds)
                 {
-                    PreferencesState.Username = null;
-                    PreferencesState.Password = null;
+                    PreferencesState.ClearCredentials();
+                }
+                else
+                {
+                    PreferencesState.CurrentlyLoggedIn = false;
                 }
                 ShowLoginForm(prefill: !clearCreds);
             });
@@ -570,9 +572,7 @@ namespace Seeker
             catch
             {
             }
-            PreferencesState.Username = null;
-            PreferencesState.Password = null;
-            PreferencesState.CurrentlyLoggedIn = false;
+            PreferencesState.ClearCredentials();
             ShowLoginForm(prefill: false);
         }
 
@@ -625,8 +625,7 @@ namespace Seeker
                 {
                     ShowLoading();
                 }
-                PreferencesState.Username = usernameTextEdit.Text;
-                PreferencesState.Password = passwordTextEdit.Text;
+                PreferencesState.SetCredentials(usernameTextEdit.Text, passwordTextEdit.Text);
                 if (!alreadyConnected)
                 {
                     s_loginInFlight = true;

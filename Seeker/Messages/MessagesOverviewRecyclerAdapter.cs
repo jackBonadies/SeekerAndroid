@@ -254,7 +254,7 @@ namespace Seeker.Messages
 
             viewDateTimeAgo.Text = SimpleHelpers.GetDateTimeSinceAbbrev(m.LocalDateTime);
 
-            if (MessageController.UnreadUsernames.ContainsKey(username))
+            if (MessageController.GetUnreadCount(username) > 0)
             {
                 unreadImageView.Visibility = ViewStates.Visible;
                 viewUsername.SetTypeface(viewUsername.Typeface, TypefaceStyle.Bold);

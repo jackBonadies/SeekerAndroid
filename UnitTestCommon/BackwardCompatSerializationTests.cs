@@ -26,17 +26,6 @@ namespace UnitTestCommon
         }
 
         [Test]
-        public void UnreadMessageUsernames_DeserializesFromDisk()
-        {
-            var raw = GetPreferenceString("Momento_UnreadMessageUsernames_v2");
-            var result = SerializationHelper.RestoreUnreadUsernamesFromString(raw);
-
-            Assert.AreEqual(1, result.Count);
-            Assert.IsTrue(result.ContainsKey("user123"));
-            Assert.AreEqual((byte)0, result["user123"]);
-        }
-
-        [Test]
         public void UserOnlineAlerts_DeserializesFromDisk()
         {
             var raw = GetPreferenceString("Momento_UserOnlineAlerts_v2");

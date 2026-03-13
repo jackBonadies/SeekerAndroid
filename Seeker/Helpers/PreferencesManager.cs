@@ -561,12 +561,12 @@ namespace Seeker
             }
         }
 
-        public static void SaveUnreadMessageUsernames(string serialized)
+        public static void SaveLastReadMessageCounts(string serialized)
         {
             lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_UnreadMessageUsernames, serialized);
+                editor.PutString(KeyConsts.M_LastReadMessageCounts, serialized);
                 editor.Apply();
             }
         }

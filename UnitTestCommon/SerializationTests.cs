@@ -270,27 +270,37 @@ namespace UnitTestCommon
         }
 
         [Test]
-        public void UnreadUsernames_RoundTrip()
+        public void LastReadCounts_RoundTrip()
         {
-            var unread = new ConcurrentDictionary<string, byte>();
-            unread["userX"] = 0;
-            unread["userY"] = 1;
+            var innerUser1 = new ConcurrentDictionary<string, int>();
+            innerUser1["userX"] = 0;
+            innerUser1["userY"] = 5;
 
-            var serialized = SerializationHelper.SaveUnreadUsernamesToString(unread);
-            var restored = SerializationHelper.RestoreUnreadUsernamesFromString(serialized);
+            var innerUser2 = new ConcurrentDictionary<string, int>();
+            innerUser2["userZ"] = 42;
+
+            var root = new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
+            root["account1"] = innerUser1;
+            root["account2"] = innerUser2;
+
+            var serialized = SerializationHelper.SaveLastReadCountsToString(root);
+            var restored = SerializationHelper.RestoreLastReadCountsFromString(serialized);
 
             Assert.AreEqual(2, restored.Count);
-            Assert.AreEqual((byte)0, restored["userX"]);
-            Assert.AreEqual((byte)1, restored["userY"]);
+            Assert.AreEqual(2, restored["account1"].Count);
+            Assert.AreEqual(0, restored["account1"]["userX"]);
+            Assert.AreEqual(5, restored["account1"]["userY"]);
+            Assert.AreEqual(1, restored["account2"].Count);
+            Assert.AreEqual(42, restored["account2"]["userZ"]);
         }
 
         [Test]
-        public void UnreadUsernames_EmptyOrNull_ReturnsEmpty()
+        public void LastReadCounts_EmptyOrNull_ReturnsEmpty()
         {
-            var restored1 = SerializationHelper.RestoreUnreadUsernamesFromString(string.Empty);
+            var restored1 = SerializationHelper.RestoreLastReadCountsFromString(string.Empty);
             Assert.AreEqual(0, restored1.Count);
 
-            var restored2 = SerializationHelper.RestoreUnreadUsernamesFromString(null);
+            var restored2 = SerializationHelper.RestoreLastReadCountsFromString(null);
             Assert.AreEqual(0, restored2.Count);
         }
 

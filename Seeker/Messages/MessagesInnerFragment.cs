@@ -232,6 +232,11 @@ namespace Seeker.Messages
                 {
                     recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
                 }
+                // If we're currently viewing this conversation, keep it marked as read
+                if (currentlyResumed && msg.Username == Username)
+                {
+                    MessageController.MarkAsRead(Username);
+                }
             }));
         }
 

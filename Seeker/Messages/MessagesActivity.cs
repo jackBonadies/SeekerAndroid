@@ -458,11 +458,6 @@ namespace Seeker
 
         protected override void OnResume()
         {
-            if (PreferencesState.Username != MessageController.MessagesUsername && MessageController.RootMessages != null)
-            {
-                MessageController.MessagesUsername = PreferencesState.Username;
-                MessageController.Messages = MessageController.RootMessages[PreferencesState.Username]; //username can be null here... perhaps restarting the app without internet or such...
-            }
             base.OnResume();
         }
 
@@ -495,43 +490,6 @@ namespace Seeker
             this.SupportActionBar.SetHomeButtonEnabled(true);
             //this.SupportActionBar.SetDisplayShowHomeEnabled(true);
 
-            if (MessageController.RootMessages == null)
-            {
-                var sharedPref = this.GetSharedPreferences(Constants.SharedPrefFile, 0);
-                MessageController.RestoreMessagesFromSharedPrefs(sharedPref);
-                if (PreferencesState.Username != null && PreferencesState.Username != string.Empty)
-                {
-                    MessageController.MessagesUsername = PreferencesState.Username;
-                    if (!MessageController.RootMessages.ContainsKey(PreferencesState.Username))
-                    {
-                        MessageController.RootMessages[PreferencesState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-                    }
-                    else
-                    {
-                        MessageController.Messages = MessageController.RootMessages[PreferencesState.Username];
-                    }
-                }
-            }
-            else if (PreferencesState.Username != MessageController.MessagesUsername)
-            {
-                MessageController.MessagesUsername = PreferencesState.Username;
-                if (PreferencesState.Username == null || PreferencesState.Username == string.Empty)
-                {
-                    MessageController.Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-                }
-                else
-                {
-                    if (MessageController.RootMessages.ContainsKey(PreferencesState.Username))
-                    {
-                        MessageController.Messages = MessageController.RootMessages[PreferencesState.Username];
-                    }
-                    else
-                    {
-                        MessageController.RootMessages[PreferencesState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-                        MessageController.Messages = MessageController.RootMessages[PreferencesState.Username];
-                    }
-                }
-            }
             bool startWithUserFragment = false;
 
             if (savedInstanceState != null && savedInstanceState.GetBoolean("SaveStateAtInner"))
@@ -606,7 +564,7 @@ namespace Seeker
 
             if (markAsRead)
             {
-                MessageController.UnreadUsernames.TryRemove(uname, out _);
+                MessageController.UnsetAsUnreadAndSaveIfApplicable(uname);
 
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.From(context);
                 // notificationId is a unique int for each notification that you must define
@@ -620,7 +578,7 @@ namespace Seeker
             Bundle remoteInputBundle = AndroidX.Core.App.RemoteInput.GetResultsFromIntent(intent);
             if (directReply)
             {
-                MessageController.UnreadUsernames.TryRemove(uname, out _);
+                MessageController.UnsetAsUnreadAndSaveIfApplicable(uname);
                 if (remoteInputBundle != null)
                 {
                     string replyText = remoteInputBundle.GetString("key_text_result");
