@@ -564,28 +564,6 @@ namespace Soulseek
             }
         }
 
-        ///// <summary>
-        ///// Is Transfer In Downloads.  If so we need to cancel it before retrying it.
-        ///// </summary>
-        ///// <param name="username"></param>
-        ///// <param name="filename"></param>
-        ///// <param name="token">The token for the transfer</param>
-        ///// <returns></returns>
-        //public bool IsTransferInDownloads(string username, string filename, out int token)
-        //{
-        //    var dlInQuestion = Downloads.Values.Where(d => d.Username == username && d.Filename == filename);
-        //    if (dlInQuestion.Count()==0)
-        //    {
-        //        token = int.MinValue;
-        //        return false;
-        //    }
-        //    else
-        //    {
-        //        token = dlInQuestion.First().Token;
-        //        return true;
-        //    }
-        //}
-
         /// <summary>
         /// Is Transfer In Downloads.  If so we need to cancel it before retrying it.
         /// </summary>
@@ -2257,9 +2235,9 @@ namespace Soulseek
                     listener = new Listener(newAddress, newPort, Options.IncomingConnectionOptions);
                     listener.Start();
                 }
-                catch (SocketException ex)
+                catch (Exception)
                 {
-                    InvokeErrorLogHandler("Socket Listener - ReconfigureOptionsAsync precheck" + ex.Message + ex.StackTrace + newPort);
+                    throw new ListenException($"Failed to start listening on {newAddress}:{newPort}; the IP and/or port may be in use or are otherwise unavailable");
                 }
                 finally
                 {
@@ -3771,7 +3749,6 @@ namespace Soulseek
                     }
 
                     DownloadDictionary.TryRemove(download.Token, out _);
-
                     UniqueKeyDictionary.TryRemove(uniqueKey, out _);
                 }
             }
@@ -4601,7 +4578,7 @@ namespace Soulseek
                     var startOffsetBytes = await upload.Connection.ReadAsync(8, cancellationToken).ConfigureAwait(false);
                     upload.StartOffset = BitConverter.ToInt64(startOffsetBytes, 0);
                 }
-                catch (Exception ex) when (!(ex is OperationCanceledException) && !(ex is TimeoutException))
+                catch (Exception ex) when (ex is not OperationCanceledException && ex is not TimeoutException)
                 {
                     Diagnostic.Debug($"Failed to read start offset for upload of {Path.GetFileName(upload.Filename)} to {username}: {ex.Message}");
                     throw new MessageReadException($"Failed to read transfer start offset: {ex.Message}", ex);
@@ -4886,7 +4863,6 @@ namespace Soulseek
                     }
 
                     UploadDictionary.TryRemove(upload.Token, out _);
-
                     UniqueKeyDictionary.TryRemove(uniqueKey, out _);
                 }
             }
@@ -4914,5 +4890,4 @@ namespace Soulseek
             }
         }
     }
-
 }
