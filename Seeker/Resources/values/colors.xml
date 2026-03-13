@@ -69,4 +69,6 @@
     <color name="statusDisconnectedDot">#F44336</color>
     <color name="statusDisconnectedText">#C62828</color>
     <color name="statusDisconnectedChipBg">#1AF44336</color>
+
+    <color name="unreadBadgeText">#FFFFFF</color>
 </resources>

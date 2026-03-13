@@ -17,6 +17,7 @@
         <!--<item name="colorPrimary">#3598D8</item>-->
         <item name="colorOnPrimary">#ffffff</item>
         <item name="colorSurface">#FEF7FF</item>
+        <item name="colorSurfaceLogin">#FEF7FF</item>
         <item name="colorOnSurface">?attr/normalTextColor</item>
 		<item name="colorOnBackground">?attr/normalTextColor</item>
 
@@ -185,6 +186,7 @@
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
         <item name="colorOnPrimary">#ffffff</item>
         <item name="colorSurface">#303030</item>
+        <item name="colorSurfaceLogin">#404040</item>
         <item name="colorOnSurface">?attr/normalTextColor</item>
 		<item name="colorOnBackground">?attr/normalTextColor</item>
         <item name="mainTextColor">#bcc1f7</item>
@@ -250,6 +252,7 @@
 
     <style name="Amoled" parent="DefaultDark">
         <item name="colorSurface">#000000</item>
+        <item name="colorSurfaceLogin">#1A1A1A</item>
         <item name="floating_action_bar_to_bottom_icon">#d8d8d8</item>
         <item name="floating_action_bar_to_bottom_background">#303030</item>
         <item name="swipeToRefreshBackground">#ff343434</item>

@@ -52,4 +52,5 @@
     <attr name="chatInputBackground" format="reference" />
 
     <attr name="show_progress_size" format="boolean" />
+    <attr name="colorSurfaceLogin" format="color" />
 </resources>

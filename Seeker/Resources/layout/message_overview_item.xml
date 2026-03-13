@@ -44,7 +44,7 @@
             android:paddingStart="6dp"
             android:paddingEnd="6dp"
             android:background="@drawable/unread_badge_background"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/unreadBadgeText"
             android:textSize="11sp"
             android:textStyle="bold"
             android:visibility="gone"
