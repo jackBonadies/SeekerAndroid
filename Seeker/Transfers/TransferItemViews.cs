@@ -76,6 +76,7 @@ namespace Seeker
         public ITransferItem InnerTransferItem { get; set; }
         //private TextView viewQueue;
         public ProgressBar progressBar { get; set; }
+        public Transfers.SegmentedProgressBar segmentedProgressBar;
 
         public TextView GetAdditionalStatusInfoView()
         {
@@ -145,7 +146,8 @@ namespace Seeker
         {
             viewUsername = FindViewById<TextView>(Resource.Id.textViewUser);
             viewFoldername = FindViewById<TextView>(Resource.Id.textViewFoldername);
-            progressBar = FindViewById<ProgressBar>(Resource.Id.simpleProgressBar);
+            segmentedProgressBar = FindViewById<Transfers.SegmentedProgressBar>(Resource.Id.segmentedProgressBar);
+            progressBar = null;
 
             viewStatusAdditionalInfo = FindViewById<TextView>(Resource.Id.textViewStatusAdditionalInfo);
             viewNumRemaining = FindViewById<TextView>(Resource.Id.filesRemaining);
@@ -179,19 +181,9 @@ namespace Seeker
 
             TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSizeSeparator, viewSize, viewSpeed, item, state, this.showSize, this.showSpeed, isFolder: true);
             TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state);
-            int prog = folderItem.GetFolderProgress(out long totalBytes, out _);
-            progressBar.Progress = prog;
+            TransferViewHelper.UpdateSegmentedProgressBar(segmentedProgressBar, folderItem);
 
             viewUsername.Text = folderItem.Username;
-            if (item.IsUpload() && state.HasFlag(TransferStates.Cancelled))
-            {
-                isFailed = true;
-            }
-            if (isFailed)
-            {
-                progressBar.Progress = 100;
-            }
-            TransferViewHelper.SetProgressBarTint(progressBar, state, isFailed);
 
             if (isInBatchMode)
             {
@@ -610,6 +602,15 @@ namespace Seeker
             {
                 speedView.Visibility = ViewStates.Gone;
             }
+        }
+
+        public static void UpdateSegmentedProgressBar(Transfers.SegmentedProgressBar bar, FolderItem fi)
+        {
+            GetStatusNumbers(fi.TransferItems, out int numInProgress, out int numFailed,
+                out int numPaused, out int numSucceeded, out int numQueued);
+            int total = fi.TransferItems.Count;
+            int notYetDownloaded = total - numSucceeded - numInProgress - numFailed;
+            bar.SetSegments(numSucceeded, numInProgress, notYetDownloaded, numFailed);
         }
 
         public static void SetProgressBarTint(ProgressBar pb, TransferStates state, bool isFailed)

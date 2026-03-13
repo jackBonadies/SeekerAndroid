@@ -1085,11 +1085,10 @@ namespace Seeker
             ITransferItemView v = recyclerViewTransferItems.GetLayoutManager().FindViewByPosition(indexToRefresh) as ITransferItemView;
             if (v != null) //it scrolled out of view which is find bc it will get updated when it gets rebound....
             {
-                if (v is TransferItemViewFolder)
+                if (v is TransferItemViewFolder folderView)
                 {
-
-                    int prog = (v.InnerTransferItem as FolderItem).GetFolderProgress(out long totalBytes, out long completedBytes);
-                    v.progressBar.Progress = prog;
+                    var fi = v.InnerTransferItem as FolderItem;
+                    int prog = fi.GetFolderProgress(out long totalBytes, out long completedBytes);
 
                     TimeSpan? timeRemaining = null;
                     long bytesRemaining = totalBytes - completedBytes;
@@ -1097,10 +1096,10 @@ namespace Seeker
                     {
                         timeRemaining = TimeSpan.FromSeconds(bytesRemaining / avgSpeedBytes);
                     }
-                    (v.InnerTransferItem as FolderItem).RemainingFolderTime = timeRemaining;
+                    fi.RemainingFolderTime = timeRemaining;
 
                     TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeSeparatorView(), v.GetSizeTextView(), v.GetSpeedTextView(), v.InnerTransferItem, relevantItem.State, v.GetShowProgressSize(), v.GetShowSpeed(), isFolder: true);
-                    TransferViewHelper.SetProgressBarTint(v.progressBar, relevantItem.State, wasFailed);
+                    TransferViewHelper.UpdateSegmentedProgressBar(folderView.segmentedProgressBar, fi);
                 }
                 else
                 {

@@ -103,17 +103,13 @@
                 android:textColor="?attr/cellTextColor"
             />
 
-            <ProgressBar
-                android:id="@+id/simpleProgressBar"
+            <Seeker.Transfers.SegmentedProgressBar
+                android:id="@+id/segmentedProgressBar"
                 android:layout_width="0dp"
                 android:layout_height="6dp"
                 android:layout_weight="1"
-                android:layout_marginTop="0dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="6dp"
-                android:progressDrawable="@drawable/transfer_progress_bar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:max="100"
             />
 
             <TextView
