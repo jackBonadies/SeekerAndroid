@@ -131,13 +131,12 @@
                 android:id="@+id/filesRemaining"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1.2"
+                android:layout_weight="1"
                 android:ellipsize="end"
                 android:paddingStart="3dp"
                 android:paddingEnd="3dp"
-                android:text="3 files remaining"
                 android:textColor="?attr/cellTextColor"
-                android:textSize="12sp"
+                android:textSize="10sp"
                 android:singleLine="true"
             />
 
@@ -145,13 +144,13 @@
                 android:id="@+id/currentFile"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="2.8"
+                android:layout_weight="1"
                 android:ellipsize="end"
                 android:paddingStart="5dp"
                 android:paddingEnd="5dp"
-                android:text="Current: filename..."
-                android:textSize="12sp"
+                android:textSize="10sp"
                 android:textColor="?attr/cellTextColor"
+                android:drawablePadding="3dp"
                 android:singleLine="true"
             />
         </LinearLayout>

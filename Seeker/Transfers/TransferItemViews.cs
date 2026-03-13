@@ -14,6 +14,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Android.Text;
+using Android.Text.Style;
 
 namespace Seeker
 {
@@ -260,155 +262,92 @@ namespace Seeker
 
         public static void SetAdditionalFolderInfoState(TextView filesLongStatus, TextView currentFile, FolderItem fi, TransferStates folderState)
         {
-            //if in progress, X files remaining, Current File:
-            //if in queue, ^ ^ (or initializing, requesting, basically if in progress in the literal sense)
-            //if completed, X files suceeded - hide p2
-            //if failed, X files suceeded (if applicable), X files failed. - hide p2
-            //if paused, X files suceeded, X failed, X paused. - hide p2
+            SetFolderStatusSpannable(filesLongStatus, fi);
+
             if (folderState.HasFlag(TransferStates.InProgress) || folderState.HasFlag(TransferStates.Queued) || folderState.HasFlag(TransferStates.Initializing) || folderState.HasFlag(TransferStates.Requested) || folderState.HasFlag(TransferStates.Aborted))
             {
-                int numRemaining = 0;
                 string currentFilename = string.Empty;
-                int total = 0;
                 lock (fi.TransferItems)
                 {
                     foreach (var ti in fi.TransferItems)
                     {
-                        total++;
-                        if (!(ti.State.HasFlag(TransferStates.Completed)))
-                        {
-                            numRemaining++;
-                        }
                         if (ti.State.HasFlag(TransferStates.InProgress))
                         {
                             currentFilename = ti.Filename;
                         }
                     }
-                    if (currentFilename == string.Empty) //init or requested case
+                    if (currentFilename == string.Empty)
                     {
                         currentFilename = fi.TransferItems.First().Filename;
                     }
                 }
 
-                filesLongStatus.Text = string.Format(SeekerApplication.GetString(Resource.String.X_of_Y_Remaining), numRemaining, total);
                 currentFile.Visibility = ViewStates.Visible;
-                currentFile.Text = string.Format("Current: {0}", currentFilename);
-            }
-            else if (folderState.HasFlag(TransferStates.Succeeded))
-            {
-                int numSucceeded = fi.TransferItems.Count;
+                currentFile.Text = currentFilename;
 
-                filesLongStatus.Text = string.Format("{0} {1} {2}", SeekerApplication.GetString(Resource.String.all), numSucceeded, SeekerApplication.GetString(Resource.String.Succeeded).ToLower());
-                currentFile.Visibility = ViewStates.Gone;
-            }
-            else if (folderState.HasFlag(TransferStates.Errored) || folderState.HasFlag(TransferStates.Rejected) || folderState.HasFlag(TransferStates.TimedOut))
-            {
-                int numFailed = 0;
-                int numSucceeded = 0;
-                int numPaused = 0;
-                lock (fi.TransferItems)
-                {
+                var resources = currentFile.Context.Resources;
+                var theme = currentFile.Context.Theme;
+                int dlColor = resources.GetColor(Resource.Color.transferChipDownloadingText, theme);
+                currentFile.SetTextColor(new Color(dlColor));
 
-                    foreach (var ti in fi.TransferItems)
-                    {
-                        if (ti.State.HasFlag(TransferStates.Succeeded))
-                        {
-                            numSucceeded++;
-                        }
-                        else if (ti.State.HasFlag(TransferStates.Errored) || ti.State.HasFlag(TransferStates.Rejected) || ti.State.HasFlag(TransferStates.TimedOut))
-                        {
-                            numFailed++;
-                        }
-                        else if (ti.State.HasFlag(TransferStates.Cancelled))
-                        {
-                            numPaused++;
-                        }
-                    }
-                }
-
-                SetFilesLongStatusIfNotInProgress(filesLongStatus, fi, numFailed, numSucceeded, numPaused);
-                currentFile.Visibility = ViewStates.Gone;
-                //set views + visi
-            }
-            else if (folderState.HasFlag(TransferStates.Cancelled))
-            {
-                int numFailed = 0;
-                int numSucceeded = 0;
-                int numPaused = 0;
-                lock (fi.TransferItems)
-                {
-
-                    foreach (var ti in fi.TransferItems)
-                    {
-                        if (ti.State.HasFlag(TransferStates.Succeeded))
-                        {
-                            numSucceeded++;
-                        }
-                        else if (ti.State.HasFlag(TransferStates.Cancelled))
-                        {
-                            numPaused++;
-                        }
-                        else if (ti.State.HasFlag(TransferStates.Errored))
-                        {
-                            numFailed++;
-                        }
-                    }
-                }
-
-                if (numPaused == 0)
-                {
-                    //error
-                }
-
-                SetFilesLongStatusIfNotInProgress(filesLongStatus, fi, numFailed, numSucceeded, numPaused);
-                currentFile.Visibility = ViewStates.Gone;
-                //set views + visi
+                var arrow = resources.GetDrawable(Resource.Drawable.arrow_down, theme);
+                int iconSize = (int)(10 * resources.DisplayMetrics.Density);
+                arrow.SetBounds(0, 0, iconSize, iconSize);
+                arrow.SetTint(dlColor);
+                currentFile.SetCompoundDrawables(arrow, null, null, null);
+                currentFile.CompoundDrawablePadding = (int)(2 * resources.DisplayMetrics.Density);
             }
             else
             {
-                //i.e. None, can be due to uploading 0 byte files. or for transfers that never got initialized.
-                //     dont leave this as is bc it will display "3 files remaining and Current: filename..." always.
                 currentFile.Visibility = ViewStates.Gone;
-                filesLongStatus.Text = string.Format(SeekerApplication.GetString(Resource.String.Num_FilesRemaining), fi.TransferItems.Count);
+                currentFile.SetCompoundDrawables(null, null, null, null);
             }
-
         }
 
-        private static void SetFilesLongStatusIfNotInProgress(TextView filesLongStatus, FolderItem fi, int numFailed, int numSucceeded, int numPaused)
+        private static void SetFolderStatusSpannable(TextView view, FolderItem fi)
         {
-            string failedString = SeekerApplication.GetString(Resource.String.failed).ToLower();
-            string succeededString = SeekerApplication.GetString(Resource.String.Succeeded).ToLower();
-            string AllString = SeekerApplication.GetString(Resource.String.all);
-            string cancelledString = fi.IsUpload() ? SeekerApplication.GetString(Resource.String.Aborted).ToLower() : SeekerApplication.GetString(Resource.String.paused).ToLower();
-            // 0 0 0 isnt one.
-            if (numSucceeded == 0 && numFailed == 0 && numPaused != 0) //all paused
+            GetStatusNumbers(fi.TransferItems, out int numInProgress, out int numFailed,
+                out int numPaused, out int numSucceeded, out int numQueued);
+            int total = fi.TransferItems.Count;
+
+            var resources = view.Context.Resources;
+            var theme = view.Context.Theme;
+            var sb = new SpannableStringBuilder();
+            bool first = true;
+
+            if (numSucceeded > 0) AppendStatusSegment(sb, $"{numSucceeded} done", Resource.Color.transferChipCompletedText, resources, theme, ref first);
+            if (numInProgress > 0) AppendStatusSegment(sb, $"{numInProgress} active", Resource.Color.transferChipDownloadingText, resources, theme, ref first);
+            if (numFailed > 0) AppendStatusSegment(sb, $"{numFailed} failed", Resource.Color.transferChipFailedText, resources, theme, ref first);
+            if (numPaused > 0) AppendStatusSegment(sb, $"{numPaused} paused", Resource.Color.transferChipPausedText, resources, theme, ref first);
+            if (numQueued > 0) AppendStatusSegment(sb, $"{numQueued} queued", Resource.Color.transferChipQueuedText, resources, theme, ref first);
+
+            string ofTotal = $" of {total}";
+            int subduedColor = resources.GetColor(Resource.Color.transferSpeedSubdued, theme);
+            var ofTotalSpan = new SpannableString(ofTotal);
+            ofTotalSpan.SetSpan(new ForegroundColorSpan(new Color(subduedColor)), 0, ofTotal.Length, SpanTypes.ExclusiveExclusive);
+            sb.Append(ofTotalSpan);
+
+            view.SetText(sb, TextView.BufferType.Spannable);
+        }
+
+        private static void AppendStatusSegment(SpannableStringBuilder sb, string text, int colorResId,
+            Android.Content.Res.Resources resources, Android.Content.Res.Resources.Theme theme, ref bool first)
+        {
+            if (!first)
             {
-                filesLongStatus.Text = string.Format(AllString + " {0} {1}", numPaused, cancelledString);
+                string sep = " \u00b7 ";
+                int subduedColor = resources.GetColor(Resource.Color.transferSpeedSubdued, theme);
+                var sepSpan = new SpannableString(sep);
+                sepSpan.SetSpan(new ForegroundColorSpan(new Color(subduedColor)), 0, sep.Length, SpanTypes.ExclusiveExclusive);
+                sb.Append(sepSpan);
             }
-            else if (numSucceeded == 0 && numFailed != 0 && numPaused == 0) //all failed
-            {
-                filesLongStatus.Text = string.Format(AllString + " {0} {1}", numFailed, failedString);
-            }
-            else if (numSucceeded == 0 && numFailed != 0 && numPaused != 0) //all failed or paused
-            {
-                filesLongStatus.Text = string.Format("{0} {1}, {2} {3}", numPaused, cancelledString, numFailed, failedString);
-            }
-            else if (numSucceeded != 0 && numFailed == 0 && numPaused == 0) //all succeeded
-            {
-                filesLongStatus.Text = string.Format(AllString + " {0} {1}", numSucceeded, succeededString);
-            }
-            else if (numSucceeded != 0 && numFailed == 0 && numPaused != 0) //all succeeded or paused
-            {
-                filesLongStatus.Text = string.Format("{0} {1}, {2} {3}", numPaused, cancelledString, numSucceeded, succeededString);
-            }
-            else if (numSucceeded != 0 && numFailed != 0 && numPaused == 0) //all succeeded or failed
-            {
-                filesLongStatus.Text = string.Format("{0} {1}, {2} {3}", numFailed, failedString, numSucceeded, succeededString);
-            }
-            else //all
-            {
-                filesLongStatus.Text = string.Format("{0} {1}, {2} {3}, {4} {5}", numPaused, cancelledString, numSucceeded, succeededString, numFailed, failedString);
-            }
+            first = false;
+
+            int color = resources.GetColor(colorResId, theme);
+            var segment = new SpannableString(text);
+            segment.SetSpan(new ForegroundColorSpan(new Color(color)), 0, text.Length, SpanTypes.ExclusiveExclusive);
+            segment.SetSpan(new StyleSpan(TypefaceStyle.Bold), 0, text.Length, SpanTypes.ExclusiveExclusive);
+            sb.Append(segment);
         }
 
 
