@@ -1,3 +1,4 @@
+using Common;
 using System.Collections.Generic;
 
 namespace Seeker
@@ -6,8 +7,17 @@ namespace Seeker
     {
         public static readonly TransfersViewState Instance = new TransfersViewState();
 
-        public bool GroupByFolder;
-        public volatile bool InUploadsMode;
+        public bool GroupByFolder
+        {
+            get => PreferencesState.TransferViewGroupByFolder;
+            set => PreferencesState.TransferViewGroupByFolder = value;
+        }
+
+        public bool InUploadsMode
+        {
+            get => PreferencesState.TransferViewInUploadsMode;
+            set => PreferencesState.TransferViewInUploadsMode = value;
+        }
         public FolderItem? CurrentlySelectedDLFolder;
         public FolderItem? CurrentlySelectedUploadFolder;
         public List<int> BatchSelectedItems = new List<int>();

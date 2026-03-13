@@ -217,6 +217,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_toggle_group_by: //toggle group by. group / ungroup by folder.
                     ViewState.GroupByFolder = !ViewState.GroupByFolder;
+                    PreferencesManager.SaveTransferViewGroupByFolder();
                     SetRecyclerAdapter();
                     return true;
                 case Resource.Id.action_show_size:
@@ -242,6 +243,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_toggle_download_upload:
                     ViewState.InUploadsMode = !ViewState.InUploadsMode;
+                    PreferencesManager.SaveTransferViewInUploadsMode();
                     RefreshForModeSwitch();
                     return true;
                 case Resource.Id.action_cancel_and_clear_all: //cancel and clear all
@@ -560,6 +562,7 @@ namespace Seeker
         public void MoveToUploadForNotif()
         {
             ViewState.SwitchToUploadsMode();
+            PreferencesManager.SaveTransferViewInUploadsMode();
             this.RefreshForModeSwitch();
             SeekerState.MainActivityRef.InvalidateOptionsMenu();
         }

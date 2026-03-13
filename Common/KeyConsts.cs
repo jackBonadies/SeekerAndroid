@@ -55,6 +55,8 @@ namespace Common
         public const string M_HideLockedSearch = "Momento_HideLockedSearch";
         public const string M_TransfersShowSizes = "Momento_TransfersShowSizes";
         public const string M_TransfersShowSpeed = "Momento_TransfersShowSpeed";
+        public const string M_TransfersGroupByFolder = "Momento_TransfersGroupByFolder";
+        public const string M_TransfersInUploadsMode = "Momento_TransfersInUploadsMode";
         public const string M_DisableToastNotifications = "Momento_DisableToastNotifications";
         public const string M_MemoryBackedDownload = "Momento_MemoryBackedDownload";
         public const string M_FilterSticky = "Momento_FilterSticky";
