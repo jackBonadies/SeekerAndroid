@@ -1099,7 +1099,7 @@ namespace Seeker
                     }
                     (v.InnerTransferItem as FolderItem).RemainingFolderTime = timeRemaining;
 
-                    TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeSeparatorView(), v.GetSizeTextView(), v.GetSpeedTextView(), v.InnerTransferItem, relevantItem.State, v.GetShowProgressSize(), v.GetShowSpeed());
+                    TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeSeparatorView(), v.GetSizeTextView(), v.GetSpeedTextView(), v.InnerTransferItem, relevantItem.State, v.GetShowProgressSize(), v.GetShowSpeed(), isFolder: true);
                     TransferViewHelper.SetProgressBarTint(v.progressBar, relevantItem.State, wasFailed);
                 }
                 else

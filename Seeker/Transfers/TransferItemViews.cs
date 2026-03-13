@@ -177,7 +177,7 @@ namespace Seeker
             viewFoldername.Text = folderItem.GetDisplayFolderName();
             var state = folderItem.GetState(out bool isFailed, out _);
 
-            TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSizeSeparator, viewSize, viewSpeed, item, state, this.showSize, this.showSpeed);
+            TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSizeSeparator, viewSize, viewSpeed, item, state, this.showSize, this.showSpeed, isFolder: true);
             TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state);
             int prog = folderItem.GetFolderProgress(out long totalBytes, out _);
             progressBar.Progress = prog;
@@ -508,6 +508,52 @@ namespace Seeker
             }
         }
 
+        private static int GetChipBgColorResId(TransferChipType chipType)
+        {
+            switch (chipType)
+            {
+                case TransferChipType.Completed:
+                    return Resource.Color.transferChipCompletedBg;
+                case TransferChipType.Downloading:
+                    return Resource.Color.transferChipDownloadingBg;
+                case TransferChipType.Queued:
+                    return Resource.Color.transferChipQueuedBg;
+                case TransferChipType.Paused:
+                    return Resource.Color.transferChipPausedBg;
+                case TransferChipType.Failed:
+                default:
+                    return Resource.Color.transferChipFailedBg;
+            }
+        }
+
+        private static void StyleStatusChip(View dot, TextView text, string label, TransferChipType chipType)
+        {
+            if (label == string.Empty)
+            {
+                dot.Visibility = ViewStates.Gone;
+                text.Visibility = ViewStates.Gone;
+                return;
+            }
+            dot.Visibility = ViewStates.Gone;
+            text.Visibility = ViewStates.Visible;
+            text.Text = label;
+
+            var resources = text.Context.Resources;
+            var theme = text.Context.Theme;
+            int textColor = resources.GetColor(GetChipTextColorResId(chipType), theme);
+            int bgColor = resources.GetColor(GetChipBgColorResId(chipType), theme);
+
+            text.SetTextColor(new Color(textColor));
+            text.SetTypeface(text.Typeface, Android.Graphics.TypefaceStyle.Bold);
+            text.SetTextSize(ComplexUnitType.Sp, 10);
+
+            var bg = text.Background?.Mutate() as GradientDrawable;
+            if (bg != null)
+            {
+                bg.SetColor(bgColor);
+            }
+        }
+
         private static void StyleStatusIndicator(View dot, TextView text, string label, TransferChipType chipType)
         {
             if (label == string.Empty)
@@ -609,20 +655,24 @@ namespace Seeker
         public static void SetAdditionalStatusText(
             View statusDot, TextView statusText, TextView sizeSeparator,
             TextView sizeView, TextView speedView,
-            ITransferItem item, TransferStates state, bool showSize, bool showSpeed)
+            ITransferItem item, TransferStates state, bool showSize, bool showSpeed, bool isFolder = false)
         {
+            Action<View, TextView, string, TransferChipType> StyleStatus = isFolder
+                ? (Action<View, TextView, string, TransferChipType>)StyleStatusChip
+                : StyleStatusIndicator;
+
             // Status label + dot
             if (state.HasFlag(TransferStates.Succeeded))
             {
-                StyleStatusIndicator(statusDot, statusText, SeekerApplication.GetString(Resource.String.completed), TransferChipType.Completed);
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.completed), TransferChipType.Completed);
             }
             else if (state.HasFlag(TransferStates.InProgress))
             {
-                StyleStatusIndicator(statusDot, statusText, SeekerApplication.GetString(Resource.String.in_progress), TransferChipType.Downloading);
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.in_progress), TransferChipType.Downloading);
             }
             else if (state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested))
             {
-                StyleStatusIndicator(statusDot, statusText, SeekerApplication.GetString(Resource.String.not_started), TransferChipType.Downloading);
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.not_started), TransferChipType.Downloading);
             }
             else if (state.HasFlag(TransferStates.Queued))
             {
@@ -635,12 +685,12 @@ namespace Seeker
                         label += " " + string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.position_), queueLen.ToString());
                     }
                 }
-                StyleStatusIndicator(statusDot, statusText, label, TransferChipType.Queued);
+                StyleStatus(statusDot, statusText, label, TransferChipType.Queued);
             }
             else if (state.HasFlag(TransferStates.Cancelled))
             {
                 string label = item.IsUpload() ? SeekerApplication.GetString(Resource.String.Aborted) : SeekerApplication.GetString(Resource.String.paused);
-                StyleStatusIndicator(statusDot, statusText, label, TransferChipType.Paused);
+                StyleStatus(statusDot, statusText, label, TransferChipType.Paused);
             }
             else if (state.HasFlag(TransferStates.Rejected))
             {
@@ -653,39 +703,39 @@ namespace Seeker
                 {
                     label = SeekerApplication.GetString(Resource.String.denied);
                 }
-                StyleStatusIndicator(statusDot, statusText, label, TransferChipType.Failed);
+                StyleStatus(statusDot, statusText, label, TransferChipType.Failed);
             }
             else if (state.HasFlag(TransferStates.TimedOut))
             {
-                StyleStatusIndicator(statusDot, statusText, SeekerApplication.GetString(Resource.String.TimedOut), TransferChipType.Failed);
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.TimedOut), TransferChipType.Failed);
             }
             else if (state.HasFlag(TransferStates.UserOffline))
             {
-                StyleStatusIndicator(statusDot, statusText, SeekerApplication.GetString(Resource.String.UserIsOffline), TransferChipType.Failed);
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.UserIsOffline), TransferChipType.Failed);
             }
             else if (state.HasFlag(TransferStates.CannotConnect))
             {
-                StyleStatusIndicator(statusDot, statusText, SeekerApplication.GetString(Resource.String.CannotConnect), TransferChipType.Failed);
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.CannotConnect), TransferChipType.Failed);
             }
             else if (item is TransferItem ti2 && ti2.TransferItemExtra.HasFlag(TransferItemExtras.DirNotSet))
             {
-                StyleStatusIndicator(statusDot, statusText, SeekerApplication.GetString(Resource.String.DirectoryNotSet), TransferChipType.Failed);
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.DirectoryNotSet), TransferChipType.Failed);
             }
             else if (state.HasFlag(TransferStates.Aborted))
             {
-                StyleStatusIndicator(statusDot, statusText, SeekerApplication.GetString(Resource.String.re_requesting), TransferChipType.Downloading);
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.re_requesting), TransferChipType.Downloading);
             }
             else if (state.HasFlag(TransferStates.Errored))
             {
-                StyleStatusIndicator(statusDot, statusText, SeekerApplication.GetString(Resource.String.failed), TransferChipType.Failed);
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.failed), TransferChipType.Failed);
             }
             else if (!item.IsUpload() && state == TransferStates.None)
             {
-                StyleStatusIndicator(statusDot, statusText, SeekerApplication.GetString(Resource.String.paused), TransferChipType.Paused);
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.paused), TransferChipType.Paused);
             }
             else
             {
-                StyleStatusIndicator(statusDot, statusText, "", TransferChipType.Queued);
+                StyleStatus(statusDot, statusText, "", TransferChipType.Queued);
             }
 
             // Inline size text
