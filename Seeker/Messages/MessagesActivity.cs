@@ -579,6 +579,7 @@ namespace Seeker
             if (directReply)
             {
                 MessageController.UnsetAsUnreadAndSaveIfApplicable(uname);
+                MarkAsReadFromNotification?.Invoke(null, uname);
                 if (remoteInputBundle != null)
                 {
                     string replyText = remoteInputBundle.GetString("key_text_result");

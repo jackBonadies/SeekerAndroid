@@ -80,12 +80,18 @@ namespace Seeker
 
             SeekerState.SoulseekClient.StateChanged += SoulseekClient_StateChanged;
             UpdateConnectionStatus(SeekerState.SoulseekClient.State);
+
+            MessageController.MessageReceived += OnMessageReceivedUpdateBadge;
+            MessagesBroadcastReceiver.MarkAsReadFromNotification += OnMarkAsReadUpdateBadge;
+            UpdateUnreadBadge();
         }
 
         public override void OnPause()
         {
             base.OnPause();
             SeekerState.SoulseekClient.StateChanged -= SoulseekClient_StateChanged;
+            MessageController.MessageReceived -= OnMessageReceivedUpdateBadge;
+            MessagesBroadcastReceiver.MarkAsReadFromNotification -= OnMarkAsReadUpdateBadge;
         }
 
         private void SoulseekClient_StateChanged(object sender, SoulseekClientStateChangedEventArgs e)
@@ -243,16 +249,7 @@ namespace Seeker
                 welcomeTextView.Text = PreferencesState.Username;
                 UpdateConnectionStatus(SeekerState.SoulseekClient.State);
 
-                int unreadCount = MessageController.GetTotalUnreadCount();
-                if (unreadCount > 0)
-                {
-                    messagesUnreadBadge.Text = string.Format(SeekerApplication.GetString(Resource.String.unread_count_fmt), unreadCount);
-                    messagesUnreadBadge.Visibility = ViewStates.Visible;
-                }
-                else
-                {
-                    messagesUnreadBadge.Visibility = ViewStates.Gone;
-                }
+                UpdateUnreadBadge();
 
                 if (UploadDirectoryManager.UploadDirectories == null || UploadDirectoryManager.UploadDirectories.Count == 0)
                 {
@@ -322,6 +319,31 @@ namespace Seeker
             connectionStatusText.SetTextColor(new Android.Graphics.Color(textColor));
             var chipBgDrawable = (GradientDrawable)connectionStatusChip.Background;
             chipBgDrawable.SetColor(chipBgColor);
+        }
+
+        private void UpdateUnreadBadge()
+        {
+            int unreadCount = MessageController.GetTotalUnreadCount();
+            if (unreadCount > 0)
+            {
+                messagesUnreadBadge.Text = string.Format(
+                    SeekerApplication.GetString(Resource.String.unread_count_fmt), unreadCount);
+                messagesUnreadBadge.Visibility = ViewStates.Visible;
+            }
+            else
+            {
+                messagesUnreadBadge.Visibility = ViewStates.Gone;
+            }
+        }
+
+        private void OnMessageReceivedUpdateBadge(object sender, Message msg)
+        {
+            this.Activity?.RunOnUiThread(() => UpdateUnreadBadge());
+        }
+
+        private void OnMarkAsReadUpdateBadge(object sender, string username)
+        {
+            this.Activity?.RunOnUiThread(() => UpdateUnreadBadge());
         }
 
         public void ShowMustSelectDirectoryButton(EventHandler clickHandler)
