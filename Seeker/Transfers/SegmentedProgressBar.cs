@@ -11,8 +11,9 @@ namespace Seeker.Transfers
         private readonly Paint paintInProgress = new Paint(PaintFlags.AntiAlias);
         private readonly Paint paintNotYetDownloaded = new Paint(PaintFlags.AntiAlias);
         private readonly Paint paintFailed = new Paint(PaintFlags.AntiAlias);
+        private readonly Paint paintPaused = new Paint(PaintFlags.AntiAlias);
 
-        private long succeeded, inProgress, notYetDownloaded, failed;
+        private long succeeded, inProgress, notYetDownloaded, failed, paused;
 
         private readonly Path clipPath = new Path();
         private float cornerRadius;
@@ -47,12 +48,14 @@ namespace Seeker.Transfers
             paintInProgress.Color = new Color(resources.GetColor(Resource.Color.transferChipDownloadingText, theme));
             paintNotYetDownloaded.Color = new Color(resources.GetColor(Resource.Color.transferProgressTrack, theme));
             paintFailed.Color = new Color(resources.GetColor(Resource.Color.transferChipFailedText, theme));
+            paintPaused.Color = new Color(resources.GetColor(Resource.Color.transferChipPausedText, theme));
         }
 
-        public void SetSegments(long succeeded, long inProgress, long notYetDownloaded, long failed)
+        public void SetSegments(long succeeded, long inProgress, long notYetDownloaded, long failed, long paused = 0)
         {
             if (this.succeeded == succeeded && this.inProgress == inProgress &&
-                this.notYetDownloaded == notYetDownloaded && this.failed == failed)
+                this.notYetDownloaded == notYetDownloaded && this.failed == failed &&
+                this.paused == paused)
             {
                 return;
             }
@@ -61,6 +64,7 @@ namespace Seeker.Transfers
             this.inProgress = inProgress;
             this.notYetDownloaded = notYetDownloaded;
             this.failed = failed;
+            this.paused = paused;
             Invalidate();
         }
 
@@ -88,7 +92,7 @@ namespace Seeker.Transfers
             // Grey background (not yet downloaded)
             canvas.DrawRect(0, 0, w, h, paintNotYetDownloaded);
 
-            long total = succeeded + inProgress + notYetDownloaded + failed;
+            long total = succeeded + inProgress + notYetDownloaded + failed + paused;
             if (total <= 0)
             {
                 canvas.Restore();
@@ -101,6 +105,14 @@ namespace Seeker.Transfers
             {
                 float segW = (float)((double)succeeded / total * w);
                 canvas.DrawRect(x, 0, x + segW, h, paintSucceeded);
+                x += segW;
+            }
+
+            // Purple (paused) next
+            if (paused > 0)
+            {
+                float segW = (float)((double)paused / total * w);
+                canvas.DrawRect(x, 0, x + segW, h, paintPaused);
                 x += segW;
             }
 

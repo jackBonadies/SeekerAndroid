@@ -612,6 +612,7 @@ namespace Seeker
             long bytesInProgress = 0;
             long bytesFailed = 0;
             long bytesNotYet = 0;
+            long bytesPaused = 0;
 
             lock (fi.TransferItems)
             {
@@ -632,6 +633,12 @@ namespace Seeker
                     {
                         bytesFailed += size;
                     }
+                    else if (ti.State.HasFlag(TransferStates.Cancelled))
+                    {
+                        long completedBytes = (long)((ti.Progress / 100.0) * size);
+                        bytesPaused += completedBytes;
+                        bytesNotYet += size - completedBytes;
+                    }
                     else
                     {
                         bytesNotYet += size;
@@ -639,7 +646,7 @@ namespace Seeker
                 }
             }
 
-            bar.SetSegments(bytesSucceeded, bytesInProgress, bytesNotYet, bytesFailed);
+            bar.SetSegments(bytesSucceeded, bytesInProgress, bytesNotYet, bytesFailed, bytesPaused);
         }
 
         public static void SetProgressBarTint(ProgressBar pb, TransferStates state, bool isFailed)
