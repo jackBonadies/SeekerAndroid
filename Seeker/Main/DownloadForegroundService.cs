@@ -71,9 +71,10 @@ namespace Seeker
 
             CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = null;
-            int cnt = SeekerApplication.DL_COUNT;
-            if (cnt == -1)
+            int cnt = SeekerApplication.ActiveDownloadCount;
+            if (cnt <= 0)
             {
+                Logger.Firebase("started download service with 0 transfers");
                 notification = CreateNotification(this, this.GetString(Resource.String.transfers_in_progress));
             }
             else
@@ -127,7 +128,7 @@ namespace Seeker
             SeekerState.DownloadKeepAliveServiceRunning = false;
             SeekerApplication.ReleaseTransferLocksIfServicesComplete();
             //save once complete
-            TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, false, 0);
+            TransferPersistenceWrapper.SaveTransferItems();
             base.OnDestroy();
         }
 

@@ -25,14 +25,16 @@ namespace Seeker
             downloadInfoList = new List<DownloadInfo>();
         }
 
+        public const string DefaultMusicUri = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
+
         // Misc (non-persisted)
         public static bool InDarkModeCache = false;
-        public static bool logoutClicked = false; // TODO hack
+        public static volatile LoginFragment LoginFragmentRef = null;
 
-        public const bool AutoRetryDownload = true;
+
         public static bool AutoRequeueDownloadsAtStartup = true;
 
-        public static SoulseekClient SoulseekClient = null;
+        public static ISoulseekClient SoulseekClient = null;
 
         public static bool IsStartUpServiceCurrentlyRunning = false;
 
@@ -65,8 +67,6 @@ namespace Seeker
         }
         public static PendingStatusChange PendingStatusChangeToAwayOnline = PendingStatusChange.NothingPending;
 
-        public static List<UserListItem> IgnoreUserList = new List<UserListItem>();
-        public static List<UserListItem> UserList = new List<UserListItem>();
         public static RecentUserManager RecentUsersManager = null;
         public static System.Collections.Concurrent.ConcurrentDictionary<string, string> UserNotes = null;
         /// <summary>
@@ -77,12 +77,6 @@ namespace Seeker
         public static EventHandler<EventArgs> DirectoryUpdatedEvent;
         public static EventHandler<EventArgs> SharingStatusChangedEvent;
 
-        /// <summary>
-        /// This is only for showing toasts.  The logic is as follows.  If we showed a cancelled toast
-        /// notification <1000ms ago then dont keep showing them. if >1s ago then its okay to show.
-        /// They all come in super fast
-        /// </summary>
-        public static long TaskWasCancelledToastDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
 
         /// <summary>
         /// This is for when the cancelAndClear button was last pressed.  It is because of the massive amount of cancellation

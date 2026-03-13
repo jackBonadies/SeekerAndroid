@@ -201,28 +201,7 @@ namespace Seeker.Managers
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_check_privileges), ToastLength.Short);
                 return;
             }
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { GetPrivilegesLogic(feedback); });
-
-                }));
-            }
-            else
-            {
-                GetPrivilegesLogic(feedback);
-            }
+            SessionService.Instance.RunWithReconnect(() => GetPrivilegesLogic(feedback));
         }
 
         public bool CheckIfPrivileged(string username)

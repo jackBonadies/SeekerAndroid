@@ -68,7 +68,7 @@ using ActivityFlags = Android.Content.ActivityFlags;
 //\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 namespace Seeker
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true, Exported = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask, MainLauncher = true, Exported = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
     public partial class MainActivity :
         ThemeableActivity, 
         ActivityCompat.IOnRequestPermissionsResultCallback, 
@@ -151,7 +151,6 @@ namespace Seeker
 
 
         private ISharedPreferences sharedPreferences;
-        private const string defaultMusicUri = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
         protected override void OnCreate(Bundle savedInstanceState)
         {
             bool reborn = false;
@@ -221,15 +220,15 @@ namespace Seeker
                 {
                     pager.SetCurrentItem(2, false);
                 }
-                else if (Intent.GetIntExtra(SeekerApplication.FromFolderAlert, -1) == 2)
+                else if (Intent.GetBooleanExtra(FolderAlertExtra, false))
                 {
                     pager.SetCurrentItem(2, false);
                 }
-                else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToBrowse, -1) == 3)
+                else if (Intent.GetBooleanExtra(GoToBrowseExtra, false))
                 {
                     pager.SetCurrentItem(3, false);
                 }
-                else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToSearch, -1) == 1)
+                else if (Intent.GetBooleanExtra(GoToSearchExtra, false))
                 {
                     //var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
                     //navigator.NavigationItemReselected += Navigator_NavigationItemReselected;
@@ -245,11 +244,11 @@ namespace Seeker
                 {
                     HandleWishlistIntent();
                 }
-                else if (((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1) == 2) || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2)) && !alreadyHandled) //else every rotation will change Downloads to Uploads.
+                else if ((Intent.GetBooleanExtra(GoToUploadsForegroundExtra, false) || Intent.GetBooleanExtra(GoToUploadsExtra, false)) && !alreadyHandled) //else every rotation will change Downloads to Uploads.
                 {
                     HandleFromNotificationUploadIntent();
                 }
-                else if (Intent.GetIntExtra(SettingsActivity.FromBrowseSelf, -1) == 3)
+                else if (Intent.GetBooleanExtra(GoToBrowseSelfExtra, false))
                 {
                     Logger.InfoFirebase("from browse self");
                     pager.SetCurrentItem(3, false);
@@ -325,156 +324,53 @@ namespace Seeker
 
             UpdateForScreenSize();
 
-            // TODO2026 should this be moved to SeekerApplication
+            // Document files are initialized once per process in SeekerApplication.OnCreate.
+            // Here we only handle the things that require an Activity context.
             if (SeekerState.UseLegacyStorage())
             {
                 if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.WriteExternalStorage) == Android.Content.PM.Permission.Denied)
                 {
                     ActivityCompat.RequestPermissions(this, new string[] { Manifest.Permission.WriteExternalStorage }, WRITE_EXTERNAL);
                 }
-                //file picker with legacy case
-                if (!string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
-                {
-                    var chosenUri = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
-                    bool canWrite = CheckDirectoryForWritePermission(chosenUri, PreferencesState.SaveDataDirectoryUriIsFromTree, "legacy download");
-                    if (canWrite)
-                    {
-                        SeekerState.RootDocumentFile = SeekerState.OpenRootFile(this, chosenUri);
-                    }
-                }
-
-                //now for incomplete
-                if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
-                {
-                    var chosenUri = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
-                    bool canWrite = CheckDirectoryForWritePermission(chosenUri, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "legacy incomplete");
-                    if (canWrite)
-                    {
-                        SeekerState.RootIncompleteDocumentFile = SeekerState.OpenRootFile(this, chosenUri);
-                    }
-                }
             }
-            else
+            else if (SeekerState.RootDocumentFile == null)
             {
-                Android.Net.Uri res = null; 
-                if (string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
+                // SeekerApplication.InitializeDocumentFiles could not write the download directory —
+                // permission was revoked. Ask the user to re-select one.
+                Android.Net.Uri res = string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri)
+                    ? Android.Net.Uri.Parse(SeekerState.DefaultMusicUri)
+                    : Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
+                var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
+                b.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
+                b.SetMessage(this.GetString(Resource.String.seeker_needs_dl_dir_content));
+                EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    res = Android.Net.Uri.Parse(defaultMusicUri);
-                }
-                else
-                {
-                    res = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
-                }
-
-                bool canWrite = CheckDirectoryForWritePermission(res, PreferencesState.SaveDataDirectoryUriIsFromTree, "download");
-                if (!canWrite)
-                {
-                    var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
-                    b.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
-                    b.SetMessage(this.GetString(Resource.String.seeker_needs_dl_dir_content));
-                    ManualResetEvent mre = new ManualResetEvent(false);
-                    EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
+                    var storageManager = Android.OS.Storage.StorageManager.FromContext(this);
+                    var intent = storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent();
+                    intent.PutExtra(DocumentsContract.ExtraInitialUri, res);
+                    intent.AddFlags(ActivityFlags.GrantPersistableUriPermission | ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantPrefixUriPermission);
+                    try
                     {
-                        var storageManager = Android.OS.Storage.StorageManager.FromContext(this);
-                        var intent = storageManager.PrimaryStorageVolume.CreateOpenDocumentTreeIntent();
-                        intent.PutExtra(DocumentsContract.ExtraInitialUri, res);
-                        intent.AddFlags(ActivityFlags.GrantPersistableUriPermission | ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantPrefixUriPermission);
-                        try
-                        {
-                            this.StartActivityForResult(intent, NEW_WRITE_EXTERNAL);
-                        }
-                        catch (Exception ex)
-                        {
-                            if (ex.Message.Contains(SimpleHelpers.NoDocumentOpenTreeToHandle))
-                            {
-                                FallbackFileSelectionEntry(false);
-                            }
-                            else
-                            {
-                                throw ex;
-                            }
-                        }
-                    });
-                    b.SetPositiveButton(Resource.String.okay, eventHandler);
-                    b.SetCancelable(false);
-                    b.Show();
-                }
-                else
-                {
-                    if (PreferencesState.SaveDataDirectoryUriIsFromTree)
-                    {
-                        SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, res);
-
+                        this.StartActivityForResult(intent, NEW_WRITE_EXTERNAL);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(res.Path));
-                    }
-                }
-
-                bool manualSet = false;
-                //for incomplete case
-                Android.Net.Uri incompleteRes = null; //var y = MediaStore.Audio.Media.ExternalContentUri.ToString();
-                if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
-                {
-                    manualSet = true;
-                    // an example of a random bad url that passes parsing but fails FromTreeUri: "file:/media/storage/sdcard1/data/example.externalstorage/files/"
-                    incompleteRes = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
-                }
-                else
-                {
-                    manualSet = false;
-                }
-
-                if (manualSet)
-                {
-                    bool canWriteIncomplete = CheckDirectoryForWritePermission(incompleteRes, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "incomplete");
-                    if (canWriteIncomplete)
-                    {
-                        if (SeekerState.PreOpenDocumentTree() || !PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
+                        if (ex.Message.Contains(SimpleHelpers.NoDocumentOpenTreeToHandle))
                         {
-                            SeekerState.RootIncompleteDocumentFile = DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path));
+                            FallbackFileSelectionEntry(false);
                         }
                         else
                         {
-                            SeekerState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, incompleteRes);
+                            throw;
                         }
                     }
-                }
+                });
+                b.SetPositiveButton(Resource.String.okay, eventHandler);
+                b.SetCancelable(false);
+                b.Show();
             }
         }
 
-        private bool CheckDirectoryForWritePermission(Android.Net.Uri chosenUri, bool directoryUriFromTree, string context)
-        {
-            bool canWrite = false;
-            try
-            {
-                if (SeekerState.PreOpenDocumentTree() || !directoryUriFromTree)
-                {
-                    canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite();
-                }
-                else
-                {
-                    canWrite = DocumentFile.FromTreeUri(this, chosenUri).CanWrite();
-                }
-            }
-            catch (Exception e)
-            {
-                if (chosenUri != null)
-                {
-                    Logger.Firebase($"{context} DocumentFile.FromTreeUri failed with URI: " + chosenUri.ToString() + " " + e.Message + " scheme " + chosenUri.Scheme);
-                }
-                else
-                {
-                    Logger.Firebase($"{context} DocumentFile.FromTreeUri failed with null URI");
-                }
-            }
-            if (!canWrite)
-            {
-                Logger.Firebase($"canWrite = false for {context} Uri: " + chosenUri.ToString());
-            }
-            return canWrite;
-        }
 
         private void HandleWishlistIntent()
         {
@@ -663,20 +559,20 @@ namespace Seeker
             {
                 HandleWishlistIntent();
             }
-            else if (((Intent.GetIntExtra(UploadForegroundService.FromTransferUploadString, -1) == 2) || (Intent.GetIntExtra(UPLOADS_NOTIF_EXTRA, -1) == 2))) //else every rotation will change Downloads to Uploads.
+            else if ((Intent.GetBooleanExtra(GoToUploadsForegroundExtra, false) || Intent.GetBooleanExtra(GoToUploadsExtra, false))) //else every rotation will change Downloads to Uploads.
             {
                 HandleFromNotificationUploadIntent();
             }
-            else if (Intent.GetIntExtra(SettingsActivity.FromBrowseSelf, -1) == 3)
+            else if (Intent.GetBooleanExtra(GoToBrowseSelfExtra, false))
             {
                 Logger.InfoFirebase("from browse self");
                 pager.SetCurrentItem(3, false);
             }
-            else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToBrowse, -1) == 3)
+            else if (Intent.GetBooleanExtra(GoToBrowseExtra, false))
             {
                 pager.SetCurrentItem(3, false);
             }
-            else if (Intent.GetIntExtra(UserListActivity.IntentUserGoToSearch, -1) == 1)
+            else if (Intent.GetBooleanExtra(GoToSearchExtra, false))
             {
                 //var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
                 //navigator.NavigationItemReselected += Navigator_NavigationItemReselected;
@@ -688,7 +584,7 @@ namespace Seeker
             {
                 pager.SetCurrentItem(2, false);
             }
-            else if (Intent.GetIntExtra(SeekerApplication.FromFolderAlert, -1) == 2)
+            else if (Intent.GetBooleanExtra(FolderAlertExtra, false))
             {
                 pager.SetCurrentItem(2, false);
             }
@@ -786,7 +682,16 @@ namespace Seeker
 
         public const string UPLOADS_CHANNEL_ID = "upload channel ID";
         public const string UPLOADS_CHANNEL_NAME = "Upload Notifications";
-        public const string UPLOADS_NOTIF_EXTRA = "From Upload";
+
+        // Intent extra keys — all intent extras targeting MainActivity are defined here.
+        public const string GoToBrowseExtra = "GoToBrowse";
+        public const string GoToSearchExtra = "GoToSearch";
+        public const string GoToUploadsExtra = "GoToUploads";
+        public const string GoToUploadsForegroundExtra = "GoToUploadsForeground";
+        public const string GoToBrowseSelfExtra = "GoToBrowseSelf";
+        public const string FolderAlertExtra = "FolderAlert";
+        public const string FolderAlertUsernameExtra = "FolderAlertUsername";
+        public const string FolderAlertFoldernameExtra = "FolderAlertFoldername";
 
         /// <summary>
         ///     Creates and returns an <see cref="IEnumerable{T}"/> of <see cref="Soulseek.Directory"/> in response to a remote request.
@@ -913,24 +818,18 @@ namespace Seeker
                 Action showDirectoryButton = new Action(() =>
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.seeker_needs_dl_dir_error), ToastLength.Long);
-                    AddLoggedInLayout(StaticHacks.LoginFragment.View); //todo: nullref
-                    if (!PreferencesState.CurrentlyLoggedIn)
+                    var loginFrag = SeekerState.LoginFragmentRef;
+                    if (loginFrag == null || loginFrag.View == null)
                     {
-                        MainActivity.BackToLogInLayout(StaticHacks.LoginFragment.View, (StaticHacks.LoginFragment as LoginFragment).LogInClick);
-                    }
-                    if (StaticHacks.LoginFragment.View == null)//this can happen...
-                    {   //.View is a method so it can return null.  I tested it on MainActivity.OnPause and it was in fact null.
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.seeker_needs_dl_dir_choose_settings), ToastLength.Long);
-                        Logger.Firebase("StaticHacks.LoginFragment.View is null");
+                        Logger.Firebase("LoginFragmentRef or its View is null");
                         return;
                     }
-                    Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
-                    Button bttnLogout = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.buttonLogout);
-                    if (bttn != null)
+                    if (!PreferencesState.CurrentlyLoggedIn)
                     {
-                        bttn.Visibility = ViewStates.Visible;
-                        bttn.Click += MustSelectDirectoryClick;
+                        loginFrag.ShowLoginForm(prefill: true);
                     }
+                    loginFrag.ShowMustSelectDirectoryButton(MustSelectDirectoryClick);
                 });
 
                 if (NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
@@ -1002,8 +901,7 @@ namespace Seeker
 
                 Action hideButton = new Action(() =>
                 {
-                    Button bttn = StaticHacks.LoginFragment.View.FindViewById<Button>(Resource.Id.mustSelectDirectory);
-                    bttn.Visibility = ViewStates.Gone;
+                    SeekerState.LoginFragmentRef?.HideMustSelectDirectoryButton();
                 });
 
                 if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen == requestCode)
@@ -1106,9 +1004,9 @@ namespace Seeker
                 //}
                 //catch
                 //{
-                //    res = Android.Net.Uri.Parse(defaultMusicUri);//TryCreate("content://com.android.externalstorage.documents/tree/primary%3AMusic", UriKind.Absolute,out res);
+                //    res = Android.Net.Uri.Parse(SeekerState.DefaultMusicUri);//TryCreate("content://com.android.externalstorage.documents/tree/primary%3AMusic", UriKind.Absolute,out res);
                 //}
-                res = Android.Net.Uri.Parse(defaultMusicUri);
+                res = Android.Net.Uri.Parse(SeekerState.DefaultMusicUri);
             }
             else
             {
@@ -1132,7 +1030,7 @@ namespace Seeker
                 }
                 else
                 {
-                    throw ex;
+                    throw;
                 }
             }
         }
@@ -1178,148 +1076,7 @@ namespace Seeker
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="rootView"></param>
-        /// <param name="force">the log in layout is full of hacks. that being said force 
-        ///   makes it so that if we are currently logged in to still add the logged in fragment
-        ///   if not there, which makes sense. </param>
-        public static void AddLoggedInLayout(View rootView = null, bool force = false)
-        {
-            View bttn = StaticHacks.RootView?.FindViewById<Button>(Resource.Id.buttonLogout);
-            View bttnTryTwo = rootView?.FindViewById<Button>(Resource.Id.buttonLogout);
-            bool bttnIsAttached = false;
-            bool bttnTwoIsAttached = false;
-            if (bttn != null && bttn.IsAttachedToWindow)
-            {
-                bttnIsAttached = true;
-            }
-            if (bttnTryTwo != null && bttnTryTwo.IsAttachedToWindow)
-            {
-                bttnTwoIsAttached = true;
-            }
 
-            if (!bttnIsAttached && !bttnTwoIsAttached && (!PreferencesState.CurrentlyLoggedIn || force))
-            {
-                //THIS MEANS THAT WE STILL HAVE THE LOGINFRAGMENT NOT THE LOGGEDIN FRAGMENT
-                //ViewGroup relLayout = SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, rootView as ViewGroup, false) as ViewGroup;
-                //relLayout.LayoutParameters = new ViewGroup.LayoutParams(rootView.LayoutParameters);
-                var action1 = new Action(() =>
-                {
-                    (rootView as ViewGroup).AddView(SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.loggedin, rootView as ViewGroup, false));
-                });
-                if (OnUIthread())
-                {
-                    action1();
-                }
-                else
-                {
-                    SeekerState.MainActivityRef.RunOnUiThread(action1);
-                }
-            }
-        }
-
-        // TODO2026 fix the whole hacks
-        public static void UpdateUIForLoggedIn(View rootView = null, EventHandler BttnClick = null, View cWelcome = null, View cbttn = null, ViewGroup cLoading = null, EventHandler SettingClick = null)
-        {
-            var action = new Action(() =>
-            {
-                //this is the case where it already has the loggedin fragment loaded.
-                Button bttn = null;
-                TextView welcome = null;
-                ViewGroup loggingInLayout = null;
-                ViewGroup logInLayout = null;
-
-                Button settings = null;
-                try
-                {
-                    if (StaticHacks.RootView != null && StaticHacks.RootView.IsAttachedToWindow)
-                    {
-                        bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-
-                        logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-
-                        settings = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
-                    }
-                    else
-                    {
-                        bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-
-                        logInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-
-                        settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
-                    }
-                }
-                catch
-                {
-
-                }
-                if (welcome != null)
-                {
-                    //meanwhile: rootView.FindViewById<TextView>(Resource.Id.userNameView).  so I dont think that the welcome here is the right one.. I dont think it exists.
-                    //try checking properties such as isAttachedToWindow, getWindowVisiblity etx...
-                    welcome.Visibility = ViewStates.Visible;
-
-                    bool isShown = welcome.IsShown;
-                    bool isAttachedToWindow = welcome.IsAttachedToWindow;
-                    bool isActivated = welcome.Activated;
-                    ViewStates viewState = welcome.WindowVisibility;
-
-
-                    //welcome = rootView.FindViewById(Resource.Id.userNameView) as Android.Widget.TextView;
-                    //if(welcome!=null)
-                    //{
-                    //isShown = welcome.IsShown;
-                    //isAttachedToWindow = welcome.IsAttachedToWindow;
-                    //isActivated = welcome.Activated;
-                    //viewState = welcome.WindowVisibility;
-                    //}
-
-
-                    bttn.Visibility = ViewStates.Visible;
-                    settings.Visibility = ViewStates.Visible;
-
-
-                    settings.Click -= SettingClick;
-                    settings.Click += SettingClick;
-                   AndroidX.Core.View.ViewCompat.SetTranslationZ(bttn, 90);
-                    bttn.Click -= BttnClick;
-                    bttn.Click += BttnClick;
-                    loggingInLayout.Visibility = ViewStates.Gone;
-                    welcome.Text = String.Format(SeekerApplication.GetString(Resource.String.welcome), PreferencesState.Username);
-                }
-                else if (cWelcome != null)
-                {
-                    cWelcome.Visibility = ViewStates.Visible;
-                    cbttn.Visibility = ViewStates.Visible;
-                   AndroidX.Core.View.ViewCompat.SetTranslationZ(cbttn, 90);
-                    cLoading.Visibility = ViewStates.Gone;
-                }
-                else
-                {
-                    StaticHacks.UpdateUI = true;//if we arent ready rn then do it when we are..
-                }
-                if (logInLayout != null)
-                {
-                    logInLayout.Visibility = ViewStates.Gone;
-                   AndroidX.Core.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
-                }
-
-            });
-            if (OnUIthread())
-            {
-                action();
-            }
-            else
-            {
-                SeekerState.MainActivityRef.RunOnUiThread(action);
-            }
-        }
 
 
         /// <summary>
@@ -1339,203 +1096,13 @@ namespace Seeker
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="rootView"></param>
-        public static void BackToLogInLayout(View rootView, EventHandler LogInClick, bool clearUserPass = true)
-        {
-            var action = new Action(() =>
-            {
-                //this is the case where it already has the loggedin fragment loaded.
-                Button bttn = null;
-                TextView welcome = null;
-                TextView loading = null;
-                //EditText editText = null;
-                //EditText editText2 = null;
-                //TextView textView = null;
-                ViewGroup loggingInLayout = null;
-                ViewGroup logInLayout = null;
-                Button buttonLogin = null;
-                //View noAccountHelp = null;
-                Button settings = null;
-                Logger.Debug("BackToLogInLayout");
-                try
-                {
-                    if (StaticHacks.RootView != null && StaticHacks.RootView.IsAttachedToWindow)
-                    {
-                        Logger.Debug("StaticHacks.RootView != null");
-                        bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-
-                        //this is the case we have a bad SAVED user pass....
-                        try
-                        {
-                            logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-                            //editText2 = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.etPassword);
-                            //textView = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.textView);
-                            buttonLogin = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                            //noAccountHelp = StaticHacks.RootView.FindViewById(Resource.Id.noAccount);
-                            if (logInLayout == null)
-                            {
-                                ViewGroup relLayout = SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login, StaticHacks.RootView as ViewGroup, false) as ViewGroup;
-                                relLayout.LayoutParameters = new ViewGroup.LayoutParams(StaticHacks.RootView.LayoutParameters);
-                                //var action1 = new Action(() => {
-                                (StaticHacks.RootView as ViewGroup).AddView(SeekerState.MainActivityRef.LayoutInflater.Inflate(Resource.Layout.login, StaticHacks.RootView as ViewGroup, false));
-                                //});
-                            }
-                            //editText = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.etUsername);
-                            //editText2 = StaticHacks.RootView.FindViewById<EditText>(Resource.Id.etPassword);
-                            //textView = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.textView);
-                            settings = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
-                            buttonLogin = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                            //noAccountHelp = StaticHacks.RootView.FindViewById(Resource.Id.noAccount);
-                            logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-                            buttonLogin.Click -= LogInClick;
-                            (StaticHacks.LoginFragment as Seeker.LoginFragment).rootView = StaticHacks.RootView;
-                            (StaticHacks.LoginFragment as Seeker.LoginFragment).SetUpLogInLayout();
-                            //buttonLogin.Click += LogInClick;
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.Debug("BackToLogInLayout" + ex.Message);
-                        }
-
-                    }
-                    else
-                    {
-                        Logger.Debug("StaticHacks.RootView == null");
-                        bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                        logInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-                        buttonLogin = rootView.FindViewById<Button>(Resource.Id.buttonLogin);
-                        settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
-                    }
-                }
-                catch
-                {
-
-                }
-                Logger.Debug("logInLayout is here? " + (logInLayout != null).ToString());
-                if (logInLayout != null)
-                {
-                    logInLayout.Visibility = ViewStates.Visible;
-                    if (!clearUserPass && !string.IsNullOrEmpty(PreferencesState.Username))
-                    {
-                        logInLayout.FindViewById<EditText>(Resource.Id.etUsername).Text = PreferencesState.Username;
-                        logInLayout.FindViewById<EditText>(Resource.Id.etPassword).Text = PreferencesState.Password;
-                    }
-                   AndroidX.Core.View.ViewCompat.SetTranslationZ(buttonLogin, 90);
-
-                    if (loading == null)
-                    {
-                        MainActivity.AddLoggedInLayout(rootView);
-                        if (rootView != null)
-                        {
-                            bttn = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                            welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                            loggingInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                            settings = rootView.FindViewById<Button>(Resource.Id.settingsButton);
-                        }
-                        if (rootView == null && loading == null && StaticHacks.RootView != null)
-                        {
-                            bttn = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                            welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                            loggingInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                            settings = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
-                        }
-                    }
-                    loggingInLayout.Visibility = ViewStates.Gone; //can get nullref here!!! (at least before the .AddLoggedInLayout code..
-                    welcome.Visibility = ViewStates.Gone;
-                    settings.Visibility = ViewStates.Gone;
-                    bttn.Visibility = ViewStates.Gone;
-                   AndroidX.Core.View.ViewCompat.SetTranslationZ(bttn, 0);
-
-
-                }
-
-            });
-            if (OnUIthread())
-            {
-                action();
-            }
-            else
-            {
-                SeekerState.MainActivityRef.RunOnUiThread(action);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="rootView"></param>
-        public static void UpdateUIForLoggingInLoading(View rootView = null)
-        {
-            Logger.Debug("UpdateUIForLoggingInLoading");
-            var action = new Action(() =>
-            {
-                //this is the case where it already has the loggedin fragment loaded.
-                Button logoutButton = null;
-                TextView welcome = null;
-                ViewGroup loggingInView = null;
-                ViewGroup logInLayout = null;
-                Button settingsButton = null;
-                try
-                {
-                    if (StaticHacks.RootView != null && rootView == null)
-                    {
-                        logoutButton = StaticHacks.RootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        settingsButton = StaticHacks.RootView.FindViewById<Button>(Resource.Id.settingsButton);
-                        welcome = StaticHacks.RootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loggingInView = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                        logInLayout = StaticHacks.RootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-
-                    }
-                    else
-                    {
-                        logoutButton = rootView.FindViewById<Button>(Resource.Id.buttonLogout);
-                        settingsButton = rootView.FindViewById<Button>(Resource.Id.settingsButton);
-                        welcome = rootView.FindViewById<TextView>(Resource.Id.userNameView);
-                        loggingInView = rootView.FindViewById<ViewGroup>(Resource.Id.loggingInLayout);
-                        logInLayout = rootView.FindViewById<ViewGroup>(Resource.Id.logInLayout);
-                    }
-                }
-                catch
-                {
-
-                }
-                if (logInLayout != null)
-                {
-                    logInLayout.Visibility = ViewStates.Gone; //todo change back.. //basically when we AddChild we add it UNDER the logInLayout.. so making it gone makes everything gone... we need a root layout for it...
-                   AndroidX.Core.View.ViewCompat.SetTranslationZ(logInLayout.FindViewById<Button>(Resource.Id.buttonLogin), 0);
-                    loggingInView.Visibility = ViewStates.Visible;
-                    welcome.Visibility = ViewStates.Gone; //WE GET NULLREF HERE. FORCE connection already established exception and maybe see what is going on here...
-                    logoutButton.Visibility = ViewStates.Gone;
-                    settingsButton.Visibility = ViewStates.Gone;
-                   AndroidX.Core.View.ViewCompat.SetTranslationZ(logoutButton, 0);
-                }
-
-            });
-            if (OnUIthread())
-            {
-                action();
-            }
-            else
-            {
-                SeekerState.MainActivityRef.RunOnUiThread(action);
-            }
-        }
 
         protected override void OnPause()
         {
-            //Logger.Debug(".view is null " + (StaticHacks.LoginFragment.View==null).ToString()); it is null
             base.OnPause();
 
-            TransfersFragment.SaveTransferItems(sharedPreferences);
-            string userListSerialized = SeekerState.UserList != null
-                ? SerializationHelper.SaveUserListToString(SeekerState.UserList)
+            string userListSerialized = CommonState.UserList != null
+                ? SerializationHelper.SaveUserListToString(CommonState.UserList)
                 : null;
             PreferencesManager.SaveOnPauseState(userListSerialized);
         }
@@ -1566,9 +1133,9 @@ namespace Seeker
             //outState.PutString(KeyConsts.M_UploadDirectoryUri, SeekerState.UploadDataDirectoryUri);
             outState.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, PreferencesState.AllowPrivateRoomInvitations);
             outState.PutBoolean(KeyConsts.M_SharingOn, PreferencesState.SharingOn);
-            if (SeekerState.UserList != null)
+            if (CommonState.UserList != null)
             {
-                outState.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(SeekerState.UserList));
+                outState.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(CommonState.UserList));
             }
 
         }
@@ -1598,6 +1165,10 @@ namespace Seeker
             {
                 TransfersFragment.TransfersActionMode.Finish();
             }
+            if (BrowseFragment.BrowseActionMode != null)
+            {
+                BrowseFragment.BrowseActionMode.Finish();
+            }
             //in addition each fragment is responsible for expanding their menu...
             switch (e.Position)
             {
@@ -1608,6 +1179,7 @@ namespace Seeker
                     this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
                     this.SupportActionBar.Title = this.GetString(Resource.String.home_tab);
+                    this.SupportActionBar.SubtitleFormatted = null;
                     this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
                     break;
                 case 1:
@@ -1649,14 +1221,7 @@ namespace Seeker
 
                     this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
-                    if (string.IsNullOrEmpty(BrowseFragment.CurrentUsername))
-                    {
-                        this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab);
-                    }
-                    else
-                    {
-                        this.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
-                    }
+                    BrowseFragment.SetActionBarTitle();
                     this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.transfers_menu);
                     break;
             }
@@ -1669,12 +1234,14 @@ namespace Seeker
                 if (TransfersViewState.Instance.CurrentlySelectedUploadFolder == null)
                 {
                     this.SupportActionBar.Title = this.GetString(Resource.String.Uploads);
+                    this.SupportActionBar.SubtitleFormatted = null;
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                     this.SupportActionBar.SetHomeButtonEnabled(false);
                 }
                 else
                 {
-                    this.SupportActionBar.Title = TransfersViewState.Instance.CurrentlySelectedUploadFolder.FolderName;
+                    this.SupportActionBar.Title = TransfersViewState.Instance.CurrentlySelectedUploadFolder.GetDisplayFolderName();
+                    this.SupportActionBar.SubtitleFormatted = GetFolderSubtitle(TransfersViewState.Instance.CurrentlySelectedUploadFolder);
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
                     this.SupportActionBar.SetHomeButtonEnabled(true);
                 }
@@ -1684,16 +1251,29 @@ namespace Seeker
                 if (TransfersViewState.Instance.CurrentlySelectedDLFolder == null)
                 {
                     this.SupportActionBar.Title = this.GetString(Resource.String.Downloads);
+                    this.SupportActionBar.SubtitleFormatted = null;
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                     this.SupportActionBar.SetHomeButtonEnabled(false);
                 }
                 else
                 {
-                    this.SupportActionBar.Title = TransfersViewState.Instance.CurrentlySelectedDLFolder.FolderName;
+                    this.SupportActionBar.Title = TransfersViewState.Instance.CurrentlySelectedDLFolder.GetDisplayFolderName();
+                    this.SupportActionBar.SubtitleFormatted = GetFolderSubtitle(TransfersViewState.Instance.CurrentlySelectedDLFolder);
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
                     this.SupportActionBar.SetHomeButtonEnabled(true);
                 }
             }
+        }
+
+        private static Android.Text.SpannableString GetFolderSubtitle(FolderItem folder)
+        {
+            int numFiles = folder.TransferItems.Count;
+            folder.GetFolderProgress(out long totalBytes, out _);
+            string sizeStr = SimpleHelpers.GetHumanReadableSize(totalBytes);
+            string subtitle = string.Format("{0} \u00b7 {1} files \u00b7 {2}", folder.Username, numFiles, sizeStr);
+            var s = new Android.Text.SpannableString(subtitle);
+            s.SetSpan(new Android.Text.Style.RelativeSizeSpan(0.8f), 0, s.Length(), Android.Text.SpanTypes.ExclusiveExclusive);
+            return s;
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)
@@ -1743,6 +1323,54 @@ namespace Seeker
             return true;
         }
 
-    }
+        #if DEBUG
+        public override bool DispatchKeyEvent(KeyEvent e)
+        {
+            if (e.KeyCode == Keycode.VolumeUp)
+            {
+                TestEnqueueSharedFolder();
+            }
+            else if (e.KeyCode == Keycode.VolumeDown)
+            {
+                SeekerState.SoulseekClient.ConnectAsync("slowtest", "slowpass");
+            }
+            return base.DispatchKeyEvent(e);
+        }
 
+        private void TestEnqueueSharedFolder()
+        {
+            var cache = SeekerState.SharedFileCache;
+            if (cache?.FullInfo == null || cache.FullInfo.Count == 0)
+            {
+                Logger.Debug("TestEnqueue: no shared files");
+                return;
+            }
+
+            // group files by directory (everything before the last backslash)
+            var filesByDir = cache.FullInfo.Keys
+                .GroupBy(f => f.Substring(0, f.LastIndexOf('\\')))
+                .ToList();
+
+            var rand = new Random();
+            var chosenDir = filesByDir[rand.Next(filesByDir.Count)];
+            string fakeUsername = "testuser_" + rand.Next(1000, 9999);
+            var fakeEndpoint = new IPEndPoint(IPAddress.Loopback, 0);
+
+            Logger.Debug($"TestEnqueue: dir '{chosenDir.Key}' ({chosenDir.Count()} files) user '{fakeUsername}'");
+
+            foreach (string filename in chosenDir)
+            {
+                try
+                {
+                    UploadService.EnqueueDownloadAction(fakeUsername, fakeEndpoint, filename);
+                    Logger.Debug($"TestEnqueue: enqueued '{filename}'");
+                }
+                catch (Exception ex)
+                {
+                    Logger.Debug($"TestEnqueue: failed '{filename}': {ex.Message}");
+                }
+            }
+        }
+        #endif
+    }
 }

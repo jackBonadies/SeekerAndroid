@@ -110,17 +110,21 @@ namespace Seeker.Serialization
             Debug.Assert(infos[0].UploadDataDirectoryUri == uploadDirInfo.UploadDataDirectoryUri);
             Debug.Assert(infos[0].ErrorState != uploadDirInfo.ErrorState);
 
-            ConcurrentDictionary<string, byte> unreadUsernames = new ConcurrentDictionary<string, byte>();
-            unreadUsernames["testuser1"] = 0;
-            unreadUsernames["testuser2"] = 0;
-            unreadUsernames["testuser3"] = 1;
-            unreadUsernames["testuser4"] = 0;
+            ConcurrentDictionary<string, int> innerCounts = new ConcurrentDictionary<string, int>();
+            innerCounts["testuser1"] = 0;
+            innerCounts["testuser2"] = 5;
+            innerCounts["testuser3"] = 10;
+            innerCounts["testuser4"] = 0;
 
-            var ser = SerializationHelper.SaveUnreadUsernamesToString(unreadUsernames);
-            var restored = SerializationHelper.RestoreUnreadUsernamesFromString(ser);
+            var rootLastRead = new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
+            rootLastRead["myaccount"] = innerCounts;
 
-            Debug.Assert(unreadUsernames.Count == restored.Count);
-            Debug.Assert(unreadUsernames["testuser1"] == restored["testuser1"]);
+            var ser = SerializationHelper.SaveLastReadCountsToString(rootLastRead);
+            var restored = SerializationHelper.RestoreLastReadCountsFromString(ser);
+
+            Debug.Assert(restored.Count == 1);
+            Debug.Assert(restored["myaccount"].Count == innerCounts.Count);
+            Debug.Assert(restored["myaccount"]["testuser1"] == innerCounts["testuser1"]);
 
             ConcurrentDictionary<string, List<string>> notifyRooms = new ConcurrentDictionary<string, List<string>>();
             notifyRooms["testuser1"] = new List<string>() { "music", "music2", "music3" };
@@ -415,8 +419,7 @@ namespace Seeker.Serialization
                 Resource.Layout.import_item_view_dummy                            ,
                 Resource.Layout.import_list_layout                                ,
                 Resource.Layout.import_start_page                                 ,
-                Resource.Layout.loggedin                                          ,
-                Resource.Layout.login                                             ,
+                Resource.Layout.login_viewflipper                                  ,
                 Resource.Layout.material_progress_bar_pass_through                ,
                 //Resource.Layout.material_progress_bar_pass_through_dummy          ,
                 Resource.Layout.messages_inner_item_fromMe                        ,

@@ -1,10 +1,11 @@
-﻿using Android.App;
+using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.RecyclerView.Widget;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,67 +14,133 @@ using static Seeker.BrowseFragment;
 
 namespace Seeker
 {
-    public class BrowseAdapter : ArrayAdapter<DataItem>
+    public class BrowseAdapter : RecyclerView.Adapter
     {
         public List<int> SelectedPositions = new List<int>();
+        public bool IsInBatchSelectMode = false;
         public BrowseFragment Owner = null;
-        public BrowseAdapter(Context c, List<DataItem> items, BrowseFragment owner) : base(c, 0, items)
+        private List<DataItem> localDataSet;
+
+        public BrowseAdapter(List<DataItem> items, BrowseFragment owner)
         {
             Owner = owner;
+            localDataSet = items;
         }
 
-        public BrowseAdapter(Context c, List<DataItem> items, BrowseFragment owner, int[]? selectedPos) : base(c, 0, items)
+        public BrowseAdapter(List<DataItem> items, BrowseFragment owner, int[]? selectedPos)
         {
             Owner = owner;
-            if (selectedPos != null && selectedPos.Count() != 0)
+            localDataSet = items;
+            if (selectedPos != null && selectedPos.Length != 0)
             {
                 SelectedPositions = selectedPos.ToList();
             }
         }
 
-        public override View GetView(int position, View convertView, ViewGroup parent)
+        public override int ItemCount => localDataSet.Count;
+
+        public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
         {
-            BrowseResponseItemView itemView = (BrowseResponseItemView)convertView;
-            if (null == itemView) //we do this once
+            BrowseResponseItemView itemView = BrowseResponseItemView.inflate(parent);
+            itemView.setupChildren();
+            if (SeekerState.InDarkModeCache)
             {
-                itemView = BrowseResponseItemView.inflate(parent);
-                itemView.setupChildren();
-                if (SeekerState.InDarkModeCache)
-                {
-                    itemView.DisplayName.SetTextColor(Android.Graphics.Color.White);
-                }
-                else
-                {
-                    itemView.DisplayName.SetTextColor(Android.Graphics.Color.Black);
-                }
+                itemView.DisplayName.SetTextColor(Android.Graphics.Color.White);
             }
+            else
+            {
+                itemView.DisplayName.SetTextColor(Android.Graphics.Color.Black);
+            }
+            BrowseResponseItemViewHolder holder = new BrowseResponseItemViewHolder(itemView);
+            itemView.Click += (sender, e) =>
+            {
+                int pos = holder.BindingAdapterPosition;
+                if (pos != RecyclerView.NoPosition)
+                {
+                    Owner.OnItemClick(pos);
+                }
+            };
+            itemView.LongClick += (sender, e) =>
+            {
+                int pos = holder.BindingAdapterPosition;
+                if (pos != RecyclerView.NoPosition)
+                {
+                    Owner.OnItemLongClick(pos, itemView);
+                }
+            };
+            itemView.FolderIndicator.Click += (sender, e) =>
+            {
+                int pos = holder.BindingAdapterPosition;
+                if (pos != RecyclerView.NoPosition)
+                {
+                    Owner.OnActionButtonClick(pos, itemView);
+                }
+            };
+            return holder;
+        }
+
+        public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
+        {
+            BrowseResponseItemViewHolder browseHolder = (BrowseResponseItemViewHolder)holder;
+            BrowseResponseItemView itemView = browseHolder.browseItemView;
 
             if (SelectedPositions.Contains(position))
             {
                 itemView.SetSelectedBackground(true);
-
             }
             else
             {
                 itemView.SetSelectedBackground(false);
             }
-            var dataItem = GetItem(position);
+
+            var dataItem = localDataSet[position];
             if (dataItem.IsDirectory())
             {
+                itemView.FolderIcon.Visibility = ViewStates.Visible;
+                itemView.ActionContainer.Visibility = ViewStates.Visible;
                 itemView.FolderIndicator.Visibility = ViewStates.Visible;
                 itemView.FileDetails.Visibility = ViewStates.Gone;
-                //itemView.ContainingViewGroup.SetPadding(0, SeekerState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_no_details_top_bottom), 0, SeekerState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_no_details_top_bottom));
             }
             else
             {
-                itemView.FolderIndicator.Visibility = ViewStates.Gone;
+                itemView.FolderIcon.Visibility = ViewStates.Gone;
+                itemView.ActionContainer.Visibility = ViewStates.Gone;
+                itemView.FolderIndicator.Visibility = ViewStates.Invisible;
                 itemView.FileDetails.Visibility = ViewStates.Visible;
                 itemView.FileDetails.Text = SimpleHelpers.GetSizeLengthAttrString(dataItem.File);
-                //itemView.ContainingViewGroup.SetPadding(0,SeekerState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_details_top),0, SeekerState.ActiveActivityRef.Resources.GetDimensionPixelSize(Resource.Dimension.browse_details_bottom));
             }
+
+            if (IsInBatchSelectMode)
+            {
+                itemView.ActionContainer.Visibility = ViewStates.Visible;
+                itemView.FolderIndicator.Visibility = ViewStates.Invisible;
+                itemView.SelectionCheckbox.Visibility = ViewStates.Visible;
+                if (SelectedPositions.Contains(position))
+                {
+                    itemView.SelectionCheckbox.SetImageResource(Resource.Drawable.check_circle);
+                }
+                else
+                {
+                    itemView.SelectionCheckbox.SetImageResource(Resource.Drawable.check_circle_outline);
+                }
+            }
+            else
+            {
+                itemView.SelectionCheckbox.Visibility = ViewStates.Invisible;
+            }
+
             itemView.DisplayName.Text = dataItem.GetDisplayName();
-            return itemView;
-            //return base.GetView(position, convertView, parent);
+        }
+    }
+
+
+    public class BrowseResponseItemViewHolder : RecyclerView.ViewHolder
+    {
+        public BrowseResponseItemView browseItemView;
+        public BrowseResponseItemViewHolder(View view) : base(view)
+        {
+            browseItemView = (BrowseResponseItemView)view;
+            browseItemView.ViewHolder = this;
         }
     }
 
@@ -83,7 +150,11 @@ namespace Seeker
         public TextView DisplayName;
         public TextView FileDetails;
         public ImageView FolderIndicator;
+        public ImageView FolderIcon;
+        public ImageView SelectionCheckbox;
+        public FrameLayout ActionContainer;
         public LinearLayout ContainingViewGroup;
+        public BrowseResponseItemViewHolder ViewHolder { get; set; }
         public BrowseResponseItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.browse_response_item, this, true);
@@ -105,32 +176,23 @@ namespace Seeker
         {
             DisplayName = FindViewById<TextView>(Resource.Id.displayName);
             FolderIndicator = FindViewById<ImageView>(Resource.Id.folderIndicator);
+            FolderIcon = FindViewById<ImageView>(Resource.Id.folderIcon);
+            SelectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
+            ActionContainer = FindViewById<FrameLayout>(Resource.Id.actionContainer);
             FileDetails = FindViewById<TextView>(Resource.Id.fileDetails);
             ContainingViewGroup = FindViewById<LinearLayout>(Resource.Id.containingViewGroup);
         }
 
         public void SetSelectedBackground(bool isSelected)
         {
-#pragma warning disable 0618
             if (isSelected)
             {
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
-                    //this.DisplayName.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
-                }
-                else
-                {
-                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                    //this.DisplayName.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                }
+                this.Background = Resources.GetDrawable(Resource.Color.batchSelectHighlight, null);
             }
             else
             {
                 this.Background = null;
-                //this.DisplayName.Background = null;
             }
-#pragma warning restore 0618
         }
     }
 

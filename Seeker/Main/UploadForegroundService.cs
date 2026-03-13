@@ -21,7 +21,7 @@ namespace Seeker
         public const int NonZeroRequestCode = 7671;
         public const string CHANNEL_ID = "my channel id - upload";
         public const string CHANNEL_NAME = "Foreground Upload Service";
-        public const string FromTransferUploadString = "FromTransfer_UPLOAD"; //todo update for onclick...
+
         public override IBinder OnBind(Intent intent)
         {
             return null; //does not allow binding. 
@@ -34,7 +34,7 @@ namespace Seeker
             Intent notifIntent = new Intent(context, typeof(MainActivity));
             //notifIntent.
             notifIntent.AddFlags(ActivityFlags.SingleTop);
-            notifIntent.PutExtra(FromTransferUploadString, 2);
+            notifIntent.PutExtra(MainActivity.GoToUploadsForegroundExtra, true);
 
             PendingIntent pendingIntent =
                 PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, CommonHelpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
@@ -74,8 +74,8 @@ namespace Seeker
 
             CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = null;
-            int cnt = SeekerApplication.UPLOAD_COUNT;
-            if (cnt == -1)
+            int cnt = SeekerApplication.ActiveUploadCount;
+            if (cnt <= 0)
             {
                 notification = CreateNotification(this, this.GetString(Resource.String.transfers_in_progress));
             }
@@ -109,7 +109,7 @@ namespace Seeker
         {
             SeekerState.UploadKeepAliveServiceRunning = false;
             SeekerApplication.ReleaseTransferLocksIfServicesComplete();
-
+            TransferPersistenceWrapper.SaveTransferItems();
             base.OnDestroy();
         }
 

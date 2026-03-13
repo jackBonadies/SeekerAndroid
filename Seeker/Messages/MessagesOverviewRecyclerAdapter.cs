@@ -146,7 +146,7 @@ namespace Seeker.Messages
 
         private void MessageOverviewClick(object sender, EventArgs e)
         {
-            setPosition((sender as MessageOverviewView).ViewHolder.AdapterPosition);
+            setPosition((sender as MessageOverviewView).ViewHolder.BindingAdapterPosition);
             MessagesActivity.MessagesActivityRef.ChangeToInnerFragment(localDataSet[position]);
         }
 
@@ -220,7 +220,7 @@ namespace Seeker.Messages
         private TextView viewUsername;
         private TextView viewMessage;
         private TextView viewDateTimeAgo;
-        private ImageView unreadImageView;
+        private TextView unreadBadge;
 
         public MessageOverviewView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
@@ -244,7 +244,7 @@ namespace Seeker.Messages
             viewUsername = FindViewById<TextView>(Resource.Id.username);
             viewMessage = FindViewById<TextView>(Resource.Id.message);
             viewDateTimeAgo = FindViewById<TextView>(Resource.Id.dateTimeAgo);
-            unreadImageView = FindViewById<ImageView>(Resource.Id.unreadImageView);
+            unreadBadge = FindViewById<TextView>(Resource.Id.unreadBadge);
         }
 
         public void setItem(string username)
@@ -254,9 +254,11 @@ namespace Seeker.Messages
 
             viewDateTimeAgo.Text = SimpleHelpers.GetDateTimeSinceAbbrev(m.LocalDateTime);
 
-            if (MessageController.UnreadUsernames.ContainsKey(username))
+            int unreadCount = MessageController.GetUnreadCount(username);
+            if (unreadCount > 0)
             {
-                unreadImageView.Visibility = ViewStates.Visible;
+                unreadBadge.Visibility = ViewStates.Visible;
+                unreadBadge.Text = unreadCount > 99 ? "99+" : unreadCount.ToString();
                 viewUsername.SetTypeface(viewUsername.Typeface, TypefaceStyle.Bold);
                 viewDateTimeAgo.SetTypeface(viewDateTimeAgo.Typeface, TypefaceStyle.Bold);
                 viewMessage.SetTypeface(viewMessage.Typeface, TypefaceStyle.Bold);
@@ -266,13 +268,13 @@ namespace Seeker.Messages
             }
             else
             {
-                unreadImageView.Visibility = ViewStates.Gone;
+                unreadBadge.Visibility = ViewStates.Gone;
                 viewUsername.SetTypeface(viewUsername.Typeface, TypefaceStyle.Normal);
                 viewDateTimeAgo.SetTypeface(viewDateTimeAgo.Typeface, TypefaceStyle.Normal);
                 viewMessage.SetTypeface(viewMessage.Typeface, TypefaceStyle.Normal);
-                viewUsername.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
-                viewDateTimeAgo.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
-                viewMessage.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
+                viewUsername.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
+                viewDateTimeAgo.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
+                viewMessage.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
             }
 
             string msgText = m.MessageText;

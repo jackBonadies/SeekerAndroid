@@ -7,6 +7,7 @@ using Android.Graphics;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Core.Content;
 using AndroidX.ConstraintLayout.Widget;
 using AndroidX.RecyclerView.Widget;
 using System;
@@ -170,6 +171,7 @@ namespace Seeker
             {
                 MessageInnerViewSent view = MessageInnerViewSent.inflate(parent);
                 view.setupChildren();
+                view.IsGroupChat = true;
                 (view as View).LongClick += ChatroomReceivedAdapter_LongClick;
                 return new MessageInnerViewSentHolder(view as View);
             }
@@ -397,7 +399,7 @@ namespace Seeker
 
         private void ChatroomOverviewClick(object sender, EventArgs e)
         {
-            setPosition((sender as IChatroomOverviewBase).ViewHolder.AdapterPosition);
+            setPosition((sender as IChatroomOverviewBase).ViewHolder.BindingAdapterPosition);
             ChatroomActivity.ChatroomActivityRef.ChangeToInnerFragment(localDataSet[position]);
         }
 
@@ -444,9 +446,9 @@ namespace Seeker
 
         private void ChatroomOverviewRecyclerAdapter_Click(object sender, EventArgs e)
         {
-            setPosition(((sender as View).Parent.Parent as IChatroomOverviewBase).ViewHolder.AdapterPosition);
+            setPosition(((sender as View).Parent.Parent as IChatroomOverviewBase).ViewHolder.BindingAdapterPosition);
             string roomName = localDataSet[position].Name;
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.Instance.CurrentlyLoggedInButDisconnectedState())
             {
                 ChatroomController.RemoveRoomFromJoinedAndOthers(roomName);
                 SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.leaving_room), roomName), ToastLength.Short);
@@ -656,8 +658,8 @@ namespace Seeker
 
                 viewRoomName.SetTypeface(null, TypefaceStyle.Normal);
                 viewUsersInRoom.SetTypeface(null, TypefaceStyle.Normal);
-                viewRoomName.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
-                viewUsersInRoom.SetTextColor(SeekerState.ActiveActivityRef.Resources.GetColor(Resource.Color.defaultTextColor));
+                viewRoomName.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
+                viewUsersInRoom.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
             }
 
             if (ChatroomController.CurrentlyJoinedRoomNames.ContainsKey(roomInfo.Name))

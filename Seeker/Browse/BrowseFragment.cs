@@ -17,77 +17,67 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Seeker.Browse;
 using Android.Content;
 using Android.OS;
 using Android.Text;
+using Android.Text.Style;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Fragment.App;
 using AndroidX.RecyclerView.Widget;
 using Common;
+using Common.Browse;
 using Google.Android.Material.BottomNavigation;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.FloatingActionButton;
+using Seeker.Browse;
+using Seeker.Helpers;
 using Seeker.Services;
-using Seeker.Transfers;
 using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Seeker.Helpers;
-using Common.Browse;
 
 namespace Seeker
 {
-    public class BrowseFragment : Fragment
+    public partial class BrowseFragment : Fragment
     {
         //for filtering - we always just get the filtered copy from the main copy on the fly.
         //the main copy will move up, down, etc.  so no need for the filtered copy to keep track of any of that
         //just do what we normally do and then generate the filtered copy as the very last step
 
-        //private static IParcelable listViewState = null; restoring this did not restore scroll pos
-        public View rootView;
+        private const int BROWSE_TAB_INDEX = 3;
+        private const int BOTTOM_SHEET_PEEK_HEIGHT = 320;
 
-        private ListView listViewDirectories;
+        private static BrowseState state = new BrowseState();
+        private DataItem DataItemSelectedForLongClick = null;
+        private BrowseAdapter BrowseAdapterInstance => recyclerViewDirectories?.GetAdapter() as BrowseAdapter;
+
+        public View rootView;
+        private RecyclerView recyclerViewDirectories;
+        private LinearLayoutManager browseLayoutManager;
         private RecyclerView treePathRecyclerView;
         private LinearLayoutManager treePathLayoutManager;
         private TreePathRecyclerAdapter treePathRecyclerAdapter;
 
-        private static List<DataItem> dataItemsForListView = new List<DataItem>();
-        private static List<PathItem> pathItems = new List<PathItem>();
-        public static string CurrentUsername;
-        private static Tuple<string, List<DataItem>> cachedFilteredDataItemsForListView = null;//to help with superSetQueries new Tuple<string, List<DataItem>>; 
-        private static int diagnostics_count;
-        private static List<DataItem> filteredDataItemsForListView = new List<DataItem>();
+        private static Stack<Tuple<int, int>> ScrollPositionRestore = new Stack<Tuple<int, int>>();
+        private static Tuple<int, int> ScrollPositionRestoreRotate = null;
 
-        private static List<DataItem> dataItemsForDownload = null;
-        private static List<DataItem> filteredDataItemsForDownload = null;
 
-        private static bool refreshOnCreate = false;
-        private bool tempHackItemClick = false;
-        private static string username = "";
         private bool isPaused = true;
         private View noBrowseView = null;
         private View separator = null;
-        public static Stack<Tuple<int, int>> ScrollPositionRestore = new Stack<Tuple<int, int>>(); //indexOfItem, topmargin. for going up/down dirs.
-        public static Tuple<int, int> ScrollPositionRestoreRotate = null; //for rotating..
 
-
-        private static TextFilter BrowseFilter = new TextFilter();
-        public static List<int> SelectedPositionsState = new List<int>(); //this is used for restoring our state.  if its an empty list then thats fine, its just like if we didnt have one..
-        public static System.Timers.Timer DebounceTimer = null;
-        public static System.Diagnostics.Stopwatch DiagStopWatch = new System.Diagnostics.Stopwatch();
-        public static long lastTime = -1;
+        private System.Timers.Timer DebounceTimer = null;
+        private System.Diagnostics.Stopwatch DiagStopWatch = new System.Diagnostics.Stopwatch();
+        private long lastTime = -1;
 
         public BrowseFragment() : base()
         {
             if (DebounceTimer == null)
             {
                 DebounceTimer = new System.Timers.Timer(250);
-
                 DebounceTimer.AutoReset = false;
             }
             DiagStopWatch.Start();
@@ -100,9 +90,9 @@ namespace Seeker
         {
             try
             {
-                int index = listViewDirectories.FirstVisiblePosition;
-                View v = listViewDirectories.GetChildAt(0);
-                int top = (v == null) ? 0 : (v.Top - listViewDirectories.PaddingTop);
+                int index = browseLayoutManager.FindFirstVisibleItemPosition();
+                View v = browseLayoutManager.FindViewByPosition(index);
+                int top = (v == null) ? 0 : (v.Top - recyclerViewDirectories.PaddingTop);
                 ScrollPositionRestore.Push(new Tuple<int, int>(index, top));
             }
             catch (Exception e)
@@ -118,9 +108,9 @@ namespace Seeker
         {
             try
             {
-                int index = listViewDirectories.FirstVisiblePosition;
-                View v = listViewDirectories.GetChildAt(0);
-                int top = (v == null) ? 0 : (v.Top - listViewDirectories.PaddingTop);
+                int index = browseLayoutManager.FindFirstVisibleItemPosition();
+                View v = browseLayoutManager.FindViewByPosition(index);
+                int top = (v == null) ? 0 : (v.Top - recyclerViewDirectories.PaddingTop);
                 ScrollPositionRestoreRotate = new Tuple<int, int>(index, top);
             }
             catch (Exception e)
@@ -137,7 +127,7 @@ namespace Seeker
             try
             {
                 Tuple<int, int> pos = ScrollPositionRestore.Pop();
-                listViewDirectories.SetSelectionFromTop(pos.Item1, pos.Item2);
+                browseLayoutManager.ScrollToPositionWithOffset(pos.Item1, pos.Item2);
             }
             catch (Exception e)
             {
@@ -148,16 +138,16 @@ namespace Seeker
 
         private void DebounceTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            UpdateFilteredResponses(); // this is the expensive function...
+            state.UpdateFilteredResponses(); // this is the expensive function...
             SeekerState.MainActivityRef.RunOnUiThread(() =>
             {
-                lock (filteredDataItemsForListView)
+                lock (state.FilteredDataItems)
                 {
-                    BrowseAdapter customAdapter = new BrowseAdapter(SeekerState.MainActivityRef, filteredDataItemsForListView, this); //enumeration exception (that is, before I added the lock)
-                    ListView lv = rootView?.FindViewById<ListView>(Resource.Id.listViewDirectories);
-                    if (lv != null)
+                    BrowseAdapter customAdapter = new BrowseAdapter(state.FilteredDataItems, this); //enumeration exception (that is, before I added the lock)
+                    RecyclerView rv = rootView?.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
+                    if (rv != null)
                     {
-                        lv.Adapter = (customAdapter);
+                        rv.SetAdapter(customAdapter);
                     }
                 }
             });
@@ -165,7 +155,7 @@ namespace Seeker
 
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
         {
-            if (IsResponseLoaded())
+            if (state.HasResponse())
             {
                 inflater.Inflate(Resource.Menu.browse_menu_full, menu);
             }
@@ -178,35 +168,12 @@ namespace Seeker
 
         public override void OnPrepareOptionsMenu(IMenu menu)
         {
-            int numSelected = (listViewDirectories?.Adapter as BrowseAdapter)?.SelectedPositions?.Count ?? 0;
-
-            UiHelpers.SetMenuTitles(menu, username);
-
-            if (menu.FindItem(Resource.Id.action_up_directory) != null) //lets just make sure we are using the full menu.  o.w. the menu is empty so these guys dont exist.
+            UiHelpers.SetMenuTitles(menu, state.CurrentUsername);
+            var upItem = menu.FindItem(Resource.Id.action_up_directory);
+            if (upItem != null)
             {
-                if (numSelected == 0)
-                {
-                    menu.FindItem(Resource.Id.action_download_selected_files).SetVisible(false);
-                    menu.FindItem(Resource.Id.action_queue_selected_paused).SetVisible(false);
-                    menu.FindItem(Resource.Id.action_copy_selected_url).SetVisible(false);
-                }
-                else if (numSelected > 0)
-                {
-                    menu.FindItem(Resource.Id.action_download_selected_files).SetVisible(true);
-                    menu.FindItem(Resource.Id.action_queue_selected_paused).SetVisible(true);
-                    menu.FindItem(Resource.Id.action_copy_selected_url).SetVisible(true);
-                    if (numSelected > 1)
-                    {
-                        menu.FindItem(Resource.Id.action_copy_selected_url).SetTitle(Resource.String.CopySelectedURLs);
-                    }
-                    else
-                    {
-                        menu.FindItem(Resource.Id.action_copy_selected_url).SetTitle(Resource.String.CopySelectedURL);
-                    }
-                }
+                upItem.SetVisible(!state.IsAtRoot());
             }
-
-
             base.OnPrepareOptionsMenu(menu);
         }
 
@@ -214,7 +181,7 @@ namespace Seeker
         {
             if (item.ItemId != Resource.Id.action_browse_user) //special handling (this browse user means browse user dialog).
             {
-                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SeekerState.ActiveActivityRef, null))
+                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), state.CurrentUsername, SeekerState.ActiveActivityRef, null))
                 {
                     return true;
                 }
@@ -233,36 +200,22 @@ namespace Seeker
                 case Resource.Id.action_download_files:
                     DownloadUserFilesEntry(false, true);
                     return true;
-                case Resource.Id.action_download_selected_files:
-                    DownloadSelectedFiles(false);
-                    (listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Clear();
-                    ClearAllSelectedPositions();
-                    return true;
                 case Resource.Id.action_show_folder_info:
-                    var folderSummary = BrowseUtils.GetFolderSummary(dataItemsForListView);
-                    ShowFolderSummaryDialog(folderSummary);
-                    return true;
-                case Resource.Id.action_queue_selected_paused:
-                    DownloadSelectedFiles(true);
-                    (listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Clear();
-                    ClearAllSelectedPositions();
+                    var folderSummary = BrowseUtils.GetFolderSummary(state.DataItems);
+                    string currentFolderName = state.PathItems.Count > 0 ? state.PathItems[state.PathItems.Count - 1].DisplayName : null;
+                    ShowFolderSummaryDialog(folderSummary, currentFolderName);
                     return true;
                 case Resource.Id.action_copy_folder_url:
-                    string fullDirName = dataItemsForListView[0].Node.Data.Name;
-                    string slskLink = CommonHelpers.CreateSlskLink(true, fullDirName, this.currentUsernameUI);
+                    string fullDirName = state.DataItems[0].Node.Data.Name;
+                    string slskLink = CommonHelpers.CreateSlskLink(true, fullDirName, state.CurrentUsername);
                     CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
                     return true;
-                case Resource.Id.action_copy_selected_url:
-                    CopySelectedURLs();
-                    (listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Clear();
-                    ClearAllSelectedPositions();
-                    return true;
                 case Resource.Id.action_add_user:
-                    UserListService.AddUserAPI(SeekerState.MainActivityRef, username, null);
+                    UserListService.AddUserAPI(SeekerState.MainActivityRef, state.CurrentUsername, null);
                     return true;
                 case Resource.Id.action_get_user_info:
-                    RequestedUserInfoHelper.RequestUserInfoApi(username);
+                    RequestedUserInfoHelper.RequestUserInfoApi(state.CurrentUsername);
                     return true;
             }
             return base.OnOptionsItemSelected(item);
@@ -276,8 +229,8 @@ namespace Seeker
                 var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
                 if (navigator != null)
                 {
-                    navigator.Menu.GetItem(3).SetCheckable(true);
-                    navigator.Menu.GetItem(3).SetChecked(true);
+                    navigator.Menu.GetItem(BROWSE_TAB_INDEX).SetCheckable(true);
+                    navigator.Menu.GetItem(BROWSE_TAB_INDEX).SetChecked(true);
                 }
             }
             base.SetMenuVisibility(menuVisible);
@@ -285,25 +238,11 @@ namespace Seeker
 
         public override void OnDestroyView()
         {
+            BrowseActionMode?.Finish();
             DebounceTimer.Elapsed -= DebounceTimer_Elapsed; //the timer is static...
             base.OnDestroyView();
         }
 
-        //public override void OnDestroy() //this never gets called.
-        //{
-        //    DebounceTimer.Elapsed -= DebounceTimer_Elapsed; 
-        //    base.OnDestroy();
-        //}
-
-        /// <summary>
-        /// This is used to determine whether we should show the "No browse, to get started" message and whether we should use the browse full or empty.  
-        /// I changed it from dataItems!=0 because its too confusing if you browse someone who is sharing an empty directory.
-        /// </summary>
-        /// <returns></returns>
-        public bool IsResponseLoaded()
-        {
-            return !string.IsNullOrEmpty(username); //(dataItemsForListView.Count != 0);
-        }
         public static BrowseFragment Instance = null;
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
@@ -312,18 +251,10 @@ namespace Seeker
             SeekerState.InDarkModeCache = DownloadDialog.InNightMode(this.Context);
             Logger.Debug("BrowseFragmentOnCreateView");
             this.rootView = inflater.Inflate(Resource.Layout.browse, container, false);
-            UpdateForScreenSize();
-            //this.rootView.FindViewById<Button>(Resource.Id.button2).Click += UpDirectory;
-            //this.rootView.FindViewById<Button>(Resource.Id.dlFiles).Click += BrowseFragment_Click;
-            //Java.Lang.IllegalStateException: 'The specified child already has a parent. You must call removeView() on the child's parent first.' if third param is not false above...
-            //if(!refreshOnCreate)
-            //{
-            listViewDirectories = this.rootView.FindViewById<ListView>(Resource.Id.listViewDirectories);
-            listViewDirectories.ItemClick -= ListViewDirectories_ItemClick; //there may be a change of this not getting attached which would be bad
-            listViewDirectories.ItemClick += ListViewDirectories_ItemClick; //there may be a change of this not getting attached which would be bad
-            listViewDirectories.ItemLongClick -= ListViewDirectories_ItemLongClick;
-            listViewDirectories.ItemLongClick += ListViewDirectories_ItemLongClick;
-            this.RegisterForContextMenu(listViewDirectories);
+            recyclerViewDirectories = this.rootView.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
+            browseLayoutManager = new LinearLayoutManager(this.Context);
+            recyclerViewDirectories.SetLayoutManager(browseLayoutManager);
+            recyclerViewDirectories.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
             DebounceTimer.Elapsed += DebounceTimer_Elapsed;
 
             treePathRecyclerView = this.rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewHorizontalPath);
@@ -334,58 +265,48 @@ namespace Seeker
             //savedInstanceState can be null if first time.
             int[]? selectedPos = savedInstanceState?.GetIntArray("selectedPositions");
 
-            if (BrowseFilter.IsFiltered)
+            if (state.Filter.IsFiltered)
             {
-                //tempHackItemClick = true;
-                lock (filteredDataItemsForListView)
+                lock (state.FilteredDataItems)
                 { //on ui thread.
-                    currentUsernameUI = CurrentUsername;
-                    listViewDirectories.Adapter = new BrowseAdapter(this.Context, filteredDataItemsForListView, this, selectedPos);
+                    currentUsernameUI = state.CurrentUsername;
+                    recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.FilteredDataItems, this, selectedPos));
                 }
             }
             else
             {
-                //tempHackItemClick = true;
-                lock (dataItemsForListView)
+                lock (state.DataItems)
                 { //on ui thread.
-                    currentUsernameUI = CurrentUsername;
-                    listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this, selectedPos);
+                    currentUsernameUI = state.CurrentUsername;
+                    recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.DataItems, this, selectedPos));
                 }
             }
 
-            if (dataItemsForListView.Count != 0)
+            if (state.DataItems.Count != 0)
             {
-                pathItems = BrowseUtils.GetPathItems(dataItemsForListView);
+                state.PathItems = BrowseUtils.GetPathItems(state.DataItems);
             }
 
-            treePathRecyclerAdapter = new TreePathRecyclerAdapter(pathItems, this);
+            treePathRecyclerAdapter = new TreePathRecyclerAdapter(state.PathItems, this);
             treePathRecyclerView.SetAdapter(treePathRecyclerAdapter);
 
-            //}
             this.noBrowseView = this.rootView.FindViewById<TextView>(Resource.Id.noBrowseView);
             this.separator = this.rootView.FindViewById<View>(Resource.Id.recyclerViewHorizontalPathSep);
             this.separator.Visibility = ViewStates.Gone;
-            if (BrowseFilter.IsFiltered || IsResponseLoaded()) // if we are filtering then we already know how it works..
+            if (state.HasResponse())
             {
                 noBrowseView.Visibility = ViewStates.Gone;
                 separator.Visibility = ViewStates.Visible;
             }
 
-
             View v = rootView.FindViewById<View>(Resource.Id.relativeLayout1);
             v.Focusable = true;
-            //SetFocusable(int) was added in API26. bool was there since API1
             if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 v.SetFocusable(ViewFocusability.Focusable);
             }
-            else
-            {
-                //v.SetFocusable(true); no bool method in xamarin...
-            }
 
             v.FocusableInTouchMode = true;
-
 
             EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
             filterText.TextChanged += FilterText_TextChanged;
@@ -395,19 +316,16 @@ namespace Seeker
             SearchFragment.UpdateDrawableState(filterText, true);
 
             RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
-            BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
-            bsb.Hideable = true;
-            bsb.PeekHeight = 320;
-            bsb.State = BottomSheetBehavior.StateHidden;
-            View b = rootView.FindViewById<View>(Resource.Id.bsbutton);
-            (b as FloatingActionButton).SetImageResource(Resource.Drawable.ic_filter_list_white_24dp);
-            b.Click += B_Click;
-
+            BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.From(rel);
+            bottomSheetBehavior.Hideable = true;
+            bottomSheetBehavior.PeekHeight = BOTTOM_SHEET_PEEK_HEIGHT;
+            bottomSheetBehavior.State = BottomSheetBehavior.StateHidden;
+            View floatingActionButton = rootView.FindViewById<View>(Resource.Id.bsbutton);
+            (floatingActionButton as FloatingActionButton).SetImageResource(Resource.Drawable.ic_filter_list_white_24dp);
+            floatingActionButton.Click += FloatingActionButtonClick;
 
             return this.rootView;
         }
-
-
 
         private void FilterText_Touch(object sender, View.TouchEventArgs e)
         {
@@ -420,9 +338,6 @@ namespace Seeker
                     //e.Handled = true;
                     editText.Text = string.Empty;
                     SearchFragment.UpdateDrawableState(editText, true);
-
-
-                    //editText.RequestFocus();
                 }
             }
         }
@@ -442,12 +357,9 @@ namespace Seeker
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
             base.OnViewCreated(view, savedInstanceState);
-
         }
 
-
-
-        private void B_Click(object sender, EventArgs e)
+        private void FloatingActionButtonClick(object sender, EventArgs e)
         {
             RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
             BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
@@ -457,32 +369,7 @@ namespace Seeker
             }
             else
             {
-                //if the keyboard is up and the edittext is in focus then maybe just put the keyboard down
-                //else put the bottom sheet down.  
-                //so make it two tiered.
-                //or maybe just unset the focus...
                 EditText test = rootView.FindViewById<EditText>(Resource.Id.filterText);
-                //Android.Views.InputMethods.InputMethodManager IMM = context.GetSystemService(Context.InputMethodService) as Android.Views.InputMethods.InputMethodManager;
-                //Rect outRect = new Rect();
-                //this.rootView.GetWindowVisibleDisplayFrame(outRect);
-                //Logger.Debug("Window Visible Display Frame " + outRect.Height());
-                //Logger.Debug("Actual Height " + this.rootView.Height);
-                //Type immType = IMM.GetType();
-
-                //Logger.Debug("Y Position " + rel.GetY());
-                //int[] location = new int[2];
-                //rel.GetLocationOnScreen(location);
-                //Logger.Debug("X Pos: " + location[0] + "  Y Pos: " + location[1]);
-                //var method = immType.GetProperty("InputMethodWindowVisibleHeight", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                //foreach (var prop in immType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                //{
-                //    Logger.Debug(string.Format("Property Name: {0}", prop.Name));
-                //}
-                //foreach(var meth in immType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-                //{
-                //    Logger.Debug(string.Format("Property Name: {0}", meth.Name));
-                //}
-
                 Logger.Debug(this.Resources.Configuration.HardKeyboardHidden.ToString()); //on pixel2 it is YES. on emulator with HW Keyboard = true it is NO
 
                 if (test.IsFocused && (this.Resources.Configuration.HardKeyboardHidden == Android.Content.Res.HardKeyboardHidden.Yes)) //it can still be focused without the keyboard up...
@@ -508,11 +395,7 @@ namespace Seeker
                     //we still want to change focus as otherwise one can still type into it...
                     test.ClearFocus();
                     rootView.FindViewById<View>(Resource.Id.relativeLayout1).RequestFocus();
-                    bsb.State = BottomSheetBehavior.StateHidden;
-
                 }
-                //test.ClearFocus(); //doesnt do anything. //maybe focus the search text.
-
                 bsb.State = BottomSheetBehavior.StateHidden;
             }
         }
@@ -545,17 +428,9 @@ namespace Seeker
             }
         }
 
-
-        private void ClearFilter_Click(object sender, EventArgs e)
-        {
-            //CheckBox filterSticky = rootView.FindViewById<CheckBox>(Resource.Id.stickyFilterCheckbox);
-            //filterSticky.Checked = false;
-            ClearFilterStringAndCached(true);
-        }
-
         public override void OnSaveInstanceState(Bundle outState)
         {
-            outState.PutIntArray("selectedPositions", (this.listViewDirectories?.Adapter as BrowseAdapter)?.SelectedPositions?.ToArray());
+            outState.PutIntArray("selectedPositions", BrowseAdapterInstance?.SelectedPositions?.ToArray());
             base.OnSaveInstanceState(outState);
         }
 
@@ -568,60 +443,79 @@ namespace Seeker
             //cant do this OnViewCreated since filterText.Text will always be empty...
             DebounceTimer.Stop();
             EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
-            filterText.Text = BrowseFilter.FilterString;  //this will often be empty (which is good) if we got a new response... otherwise (on screen rotate, it will be the same as it otherwise was).
+            filterText.Text = state.Filter.FilterString;  //this will often be empty (which is good) if we got a new response... otherwise (on screen rotate, it will be the same as it otherwise was).
             SearchFragment.UpdateDrawableState(filterText, true);
         }
 
+        // this is on the fragment in case we go back to the old mainActivity on the backstack
         private string currentUsernameUI;
         public static EventHandler<EventArgs> BrowseResponseReceivedUI;
+
+        public static string GetTabTitle(Android.Content.Context context)
+        {
+            if (string.IsNullOrEmpty(state.CurrentUsername))
+            {
+                return context.GetString(Resource.String.browse_tab);
+            }
+            return context.GetString(Resource.String.browse_tab) + ": " + state.CurrentUsername;
+        }
 
         public void BrowseResponseReceivedUI_Handler(object sender, EventArgs args)
         {
             //if the fragment was never created then this.Context will be null
             SeekerState.MainActivityRef.RunOnUiThread(() =>
             {
-
-                lock (dataItemsForListView)
+                lock (state.DataItems)
                 {
-                    if (BrowseFragment.Instance == null || BrowseFragment.Instance.Context == null || BrowseFragment.Instance.rootView == null)
-                    {
-                        refreshOnCreate = true;
-                    }
-                    else
+                    if (BrowseFragment.Instance?.Context != null && BrowseFragment.Instance?.rootView != null)
                     {
                         BrowseFragment.Instance.RefreshOnRecieved();
                     }
                 }
                 var pager = (AndroidX.ViewPager.Widget.ViewPager)SeekerState.MainActivityRef?.FindViewById(Resource.Id.pager);
-                if (pager != null && pager.CurrentItem == 3)
+                if (pager != null && pager.CurrentItem == BROWSE_TAB_INDEX)
                 {
-                    SeekerState.MainActivityRef.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
+                    SetActionBarTitle();
                     SeekerState.MainActivityRef.InvalidateOptionsMenu();
                 }
-
             });
+        }
+
+        public static void SetActionBarTitle()
+        {
+            SeekerState.MainActivityRef.SupportActionBar.Title = GetTabTitle(SeekerState.MainActivityRef);
+            if (string.IsNullOrEmpty(state.CurrentUsername))
+            {
+                SeekerState.MainActivityRef.SupportActionBar.SubtitleFormatted = null;
+            } 
+            else
+            {
+                var s = new SpannableString($"{state.Stats.NumFolders} folders, {state.Stats.NumFiles} files");
+                s.SetSpan(new RelativeSizeSpan(0.8f), 0, s.Length(), SpanTypes.ExclusiveExclusive);
+                SeekerState.MainActivityRef.SupportActionBar.SubtitleFormatted = s;
+            }
         }
 
         public override void OnResume()
         {
             base.OnResume();
-            if (SeekerState.MainActivityRef?.SupportActionBar?.Title != null && !string.IsNullOrEmpty(CurrentUsername)
-                && !SeekerState.MainActivityRef.SupportActionBar.Title.EndsWith(": " + CurrentUsername)
+            if (SeekerState.MainActivityRef?.SupportActionBar?.Title != null && !string.IsNullOrEmpty(state.CurrentUsername)
+                && !SeekerState.MainActivityRef.SupportActionBar.Title.EndsWith(": " + state.CurrentUsername)
                 && SeekerState.MainActivityRef.OnBrowseTab())
             {
-                SeekerState.MainActivityRef.SupportActionBar.Title = this.GetString(Resource.String.browse_tab) + ": " + BrowseFragment.CurrentUsername;
+                SetActionBarTitle();
             }
             BrowseResponseReceivedUI += BrowseResponseReceivedUI_Handler;
-            if (currentUsernameUI != CurrentUsername)
+            if (currentUsernameUI != state.CurrentUsername)
             {
-                currentUsernameUI = CurrentUsername;
+                currentUsernameUI = state.CurrentUsername;
                 BrowseResponseReceivedUI_Handler(null, new EventArgs());
             }
             Instance = this;
-            if (listViewDirectories != null && ScrollPositionRestoreRotate != null)
+            if (recyclerViewDirectories != null && browseLayoutManager != null && ScrollPositionRestoreRotate != null)
             {
                 //restore scroll
-                listViewDirectories.SetSelectionFromTop(ScrollPositionRestoreRotate.Item1, ScrollPositionRestoreRotate.Item2);
+                browseLayoutManager.ScrollToPositionWithOffset(ScrollPositionRestoreRotate.Item1, ScrollPositionRestoreRotate.Item2);
             }
             isPaused = false;
         }
@@ -639,7 +533,8 @@ namespace Seeker
 
         private void FilterText_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string oldFilterString = BrowseFilter.IsFiltered ? BrowseFilter.FilterString : string.Empty;
+            BrowseActionMode?.Finish();
+            string oldFilterString = state.Filter.IsFiltered ? state.Filter.FilterString : string.Empty;
             Logger.Debug("time between typing: " + (DiagStopWatch.ElapsedMilliseconds - lastTime).ToString());
             lastTime = DiagStopWatch.ElapsedMilliseconds;
             if (e.Text != null && e.Text.ToString() != string.Empty && isPaused)
@@ -650,24 +545,20 @@ namespace Seeker
             Logger.Debug("Text Changed: " + e.Text);
             if (e.Text != null && e.Text.ToString() != string.Empty)
             {
-                BrowseFilter.Set(e.Text.ToString());
+                state.Filter.Set(e.Text.ToString());
 
                 DebounceTimer.Stop(); //average time bewteen typing is around 150-250 ms (if you know what you are going to type etc).  backspacing (i.e. holding it down) is about 50 ms.
                 DebounceTimer.Start();
-                //UpdateFilteredResponses(); // this is the expensive function...
-                //BrowseAdapter customAdapter = new BrowseAdapter(SeekerState.MainActivityRef, filteredDataItemsForListView);
-                //ListView lv = rootView.FindViewById<ListView>(Resource.Id.listViewDirectories);
-                //lv.Adapter = (customAdapter);
             }
             else
             {
                 DebounceTimer.Stop();
-                BrowseFilter.Reset();
-                lock (dataItemsForListView) //collection was modified exception here...
+                state.Filter.Reset();
+                lock (state.DataItems) //collection was modified exception here...
                 {
-                    BrowseAdapter customAdapter = new BrowseAdapter(SeekerState.MainActivityRef, dataItemsForListView, this);
-                    ListView lv = rootView.FindViewById<ListView>(Resource.Id.listViewDirectories);
-                    lv.Adapter = (customAdapter);
+                    BrowseAdapter customAdapter = new BrowseAdapter(state.DataItems, this);
+                    RecyclerView rv = rootView.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
+                    rv.SetAdapter(customAdapter);
                 }
             }
 
@@ -681,100 +572,31 @@ namespace Seeker
             }
         }
 
-
-        private void UpdateFilteredResponses()
+        private List<FullFileInfo> GetSelectedFileInfos()
         {
-            lock (filteredDataItemsForListView)
+            var result = new List<FullFileInfo>();
+            var selectedPositions = BrowseAdapterInstance.SelectedPositions;
+            var sourceList = state.Filter.IsFiltered ? state.FilteredDataItems : state.DataItems;
+            lock (sourceList)
             {
-                filteredDataItemsForListView.Clear();
-                //filteredBrowseTree = DownloadDialog.CreateTree(OriginalBrowseResponse,true,WordsToAvoid,WordsToInclude);
-                //string nameToFindInTheFilteredTree = OurCurrentLocation.Data.Name;
-                //TreeNode<Directory> item = GetNodeByName(filteredBrowseTree, nameToFindInTheFilteredTree);
-                if (cachedFilteredDataItemsForListView != null && BrowseUtils.IsCurrentSearchMoreRestrictive(BrowseFilter.FilterString, cachedFilteredDataItemsForListView.Item1))//is less restrictive than the current search)
-                {
-                    //Logger.Debug("current filter is more restrictive: " + FilterString + " vs " + cachedFilteredDataItemsForListView.Item1);
-                    var test = BrowseUtils.FilterBrowseList(cachedFilteredDataItemsForListView.Item2, BrowseFilter);
-                    filteredDataItemsForListView.AddRange(test);//FilterBrowseList(cachedFilteredDataItemsForListView.Item2);
-                }
-                else
-                {
-                    //Logger.Debug("current filter is less restrictive: " + FilterString);
-                    var test = BrowseUtils.FilterBrowseList(dataItemsForListView, BrowseFilter);
-                    filteredDataItemsForListView.AddRange(test);
-                }
-                cachedFilteredDataItemsForListView = new Tuple<string, List<DataItem>>(BrowseFilter.FilterString, filteredDataItemsForListView.ToList());
+                result = selectedPositions.Where(i => i < sourceList.Count).Select(i => sourceList[i]).Select(item => BrowseUtils.ToFullFileInfo(item)).ToList();
             }
-        }
-
-        private void UpdateForScreenSize()
-        {
-            if (!SeekerState.IsLowDpi()) return;
-            try
-            {
-                //this.rootView.FindViewById<TextView>(Resource.Id.browseQueue).SetTextSize(ComplexUnitType.Dip, 8);
-                //this.rootView.FindViewById<TextView>(Resource.Id.browseKbs).SetTextSize(ComplexUnitType.Dip, 8);
-            }
-            catch
-            {
-                //not worth throwing over
-            }
+            return result;
         }
 
         private void CopySelectedURLs()
         {
-            if ((!BrowseFilter.IsFiltered && dataItemsForListView.Count == 0) || (BrowseFilter.IsFiltered && filteredDataItemsForListView.Count == 0))
+            if ((!state.Filter.IsFiltered && state.DataItems.Count == 0) || (state.Filter.IsFiltered && state.FilteredDataItems.Count == 0))
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.NothingToCopy), ToastLength.Long);
             }
-            else if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count == 0)
+            else if (BrowseAdapterInstance.SelectedPositions.Count == 0)
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.nothing_selected), ToastLength.Long);
             }
             else
             {
-                List<FullFileInfo> slskFile = new List<FullFileInfo>();
-                if (BrowseFilter.IsFiltered)
-                {
-                    lock (filteredDataItemsForListView)
-                    {
-                        for (int i = 0; i < filteredDataItemsForListView.Count; i++)
-                        {
-                            if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains(i))
-                            {
-                                DataItem d = filteredDataItemsForListView[i];
-                                FullFileInfo f = new FullFileInfo();
-                                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                                f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                                f.Size = d.File.Size;
-                                slskFile.Add(f);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    //List<Soulseek.File> slskFile = new List<File>();
-                    //List<UserFilename> = new List<UserFilename>();
-
-                    lock (dataItemsForListView)
-                    {
-                        for (int i = 0; i < dataItemsForListView.Count; i++)
-                        {
-                            if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains(i))
-                            {
-                                DataItem d = dataItemsForListView[i];
-                                FullFileInfo f = new FullFileInfo();
-                                f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                                f.Size = d.File.Size;
-                                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                                slskFile.Add(f);
-                            }
-                        }
-                    }
-                }
-
+                List<FullFileInfo> slskFile = GetSelectedFileInfos();
 
                 string linkToCopy = string.Empty;
                 foreach (FullFileInfo ffi in slskFile)
@@ -784,10 +606,10 @@ namespace Seeker
                     {
                         linkToCopy = linkToCopy + " \n";
                     }
-                    linkToCopy = linkToCopy + CommonHelpers.CreateSlskLink(false, ffi.FullFileName, this.currentUsernameUI);
+                    linkToCopy = linkToCopy + CommonHelpers.CreateSlskLink(false, ffi.FullFileName, state.CurrentUsername);
                 }
                 CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, linkToCopy);
-                if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count > 1)
+                if (BrowseAdapterInstance.SelectedPositions.Count > 1)
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinksCopied), ToastLength.Short);
                 }
@@ -802,203 +624,54 @@ namespace Seeker
 
         private void DownloadSelectedFiles(bool queuePaused)
         {
-            if ((!BrowseFilter.IsFiltered && dataItemsForListView.Count == 0) || (BrowseFilter.IsFiltered && filteredDataItemsForListView.Count == 0))
+            if ((!state.Filter.IsFiltered && state.DataItems.Count == 0) || (state.Filter.IsFiltered && state.FilteredDataItems.Count == 0))
             {
                 SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
             }
-            else if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Count == 0)
+            else if (BrowseAdapterInstance.SelectedPositions.Count == 0)
             {
                 SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_selected), ToastLength.Long);
             }
             else
             {
-                List<FullFileInfo> slskFile = new List<FullFileInfo>();
-                if (BrowseFilter.IsFiltered)
-                {
-                    lock (filteredDataItemsForListView)
-                    {
-                        for (int i = 0; i < filteredDataItemsForListView.Count; i++)
-                        {
-                            if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains(i))
-                            {
-                                DataItem d = filteredDataItemsForListView[i];
-                                FullFileInfo f = new FullFileInfo();
-                                f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                                f.Size = d.File.Size;
-                                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                                slskFile.Add(f);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    //List<Soulseek.File> slskFile = new List<File>();
-                    //List<UserFilename> = new List<UserFilename>();
-
-                    lock (dataItemsForListView)
-                    {
-                        for (int i = 0; i < dataItemsForListView.Count; i++)
-                        {
-                            if ((listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains(i))
-                            {
-                                DataItem d = dataItemsForListView[i];
-                                FullFileInfo f = new FullFileInfo();
-                                f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                                f.Size = d.File.Size;
-                                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                                slskFile.Add(f);
-                            }
-                        }
-                    }
-                }
-                if (SessionService.CurrentlyLoggedInButDisconnectedState())
-                {
-                    //we disconnected. login then do the rest.
-                    //this is due to temp lost connection
-                    Task t;
-                    if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                    {
-                        return;
-                    }
-
-                    t.ContinueWith(new Action<Task>((Task t) =>
-                    {
-                        if (t.IsFaulted)
-                        {
-                            SeekerApplication.Toaster.ShowToast(Resources.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                            return;
-                        }
-                        DownloadService.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
-                    }));
-                }
-                else
-                {
-                    DownloadService.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, username).Start();
-                }
+                List<FullFileInfo> slskFile = GetSelectedFileInfos();
+                SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, state.CurrentUsername).Start());
             }
         }
 
-        private void DownloadUserFilesEntryStage3(bool downloadSubfolders, List<FullFileInfo> recusiveFullFileInfo, List<FullFileInfo> topLevelFullFileInfoOnly, bool queuePaused)
+        private void DownloadUserFilesEntryStage3(bool downloadSubfolders, List<FullFileInfo> recursiveFullFileInfo, List<FullFileInfo> topLevelFullFileInfoOnly, bool queuePaused)
         {
-            if (downloadSubfolders)
+            var filesToDownload = downloadSubfolders ? recursiveFullFileInfo : topLevelFullFileInfoOnly;
+            if (filesToDownload.Count == 0)
             {
-                if (recusiveFullFileInfo.Count == 0) //this is possible if they have a tree of folders with no files in them at all.  which would be rare but possible.
-                {
-                    SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
-                    return;
-                }
-                Browse.BrowseService.DownloadListOfFiles(recusiveFullFileInfo, queuePaused, username);
+                SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
+                return;
             }
-            else
-            {
-                if (topLevelFullFileInfoOnly.Count == 0)
-                {
-                    SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
-                    return;
-                }
-                Browse.BrowseService.DownloadListOfFiles(topLevelFullFileInfoOnly, queuePaused, username);
-            }
+            Browse.BrowseService.DownloadListOfFiles(filesToDownload, queuePaused, state.CurrentUsername);
         }
 
-        private void DownloadUserFilesEntryStage2(bool justFilteredItems, bool queuePaused)
+        private void DownloadUserFilesEntryStage2(List<DataItem> dataItemsForDownload, List<DataItem> filteredDataItemsForDownload, bool justFilteredItems, bool queuePaused)
         {
-            if (justFilteredItems && filteredDataItemsForDownload.Count == 0)
+            var sourceList = justFilteredItems ? filteredDataItemsForDownload : dataItemsForDownload;
+            if (sourceList.Count == 0)
             {
                 SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                 return;
             }
 
-            bool containsSubDirs = false;
-            int totalItems = -1; //this one we set.
-            int toplevelItems = 0; //this one we increment.
-            List<FullFileInfo> recusiveFullFileInfo = new List<FullFileInfo>();
-            List<FullFileInfo> topLevelFullFileInfoOnly = new List<FullFileInfo>();
-            if (!justFilteredItems)
-            {
-                lock (dataItemsForDownload)
-                {
-                    foreach (DataItem d in dataItemsForDownload)
-                    {
-                        if (d.IsDirectory())
-                        {
-                            containsSubDirs = true;
-                        }
-                        else
-                        {
-                            FullFileInfo f = new FullFileInfo();
-                            f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                            f.Size = d.File.Size;
-                            f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                            f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                            topLevelFullFileInfoOnly.Add(f);
-                            toplevelItems++;
-                        }
-                    }
-                }
-                if (containsSubDirs)
-                {
-                    recusiveFullFileInfo = BrowseUtils.GetRecursiveFullFileInfo(dataItemsForDownload);
-                    totalItems = recusiveFullFileInfo.Count;
-                }
-            }
-            else
-            {
-                lock (filteredDataItemsForDownload)
-                {
-                    foreach (DataItem d in filteredDataItemsForDownload)
-                    {
-                        if (d.IsDirectory())
-                        {
-                            containsSubDirs = true;
-                        }
-                        else
-                        {
-                            FullFileInfo f = new FullFileInfo();
-                            f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                            f.Size = d.File.Size;
-                            f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                            f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
-                            topLevelFullFileInfoOnly.Add(f);
-                            toplevelItems++;
-                        }
-                    }
-                }
-                if (containsSubDirs)
-                {
-                    recusiveFullFileInfo = BrowseUtils.GetRecursiveFullFileInfo(filteredDataItemsForDownload);
-                    totalItems = recusiveFullFileInfo.Count;
-                }
-            }
+            var (topLevelFullFileInfoOnly, recursiveFullFileInfo, containsSubDirs) = BrowseUtils.BuildDownloadFileInfos(sourceList);
+            int toplevelItems = topLevelFullFileInfoOnly.Count;
+            int totalItems = recursiveFullFileInfo.Count;
 
-            //show message with total num of files...
             if (containsSubDirs)
             {
-                //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
                 var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
                 builder.SetTitle(Resource.String.ThisFolderContainsSubfolders);
 
-                // TODO2026
-                string topLevelStr = string.Empty;
-                if (toplevelItems == 1)
-                {
-                    topLevelStr = string.Format(SeekerApplication.GetString(Resource.String.item_total_singular), toplevelItems);
-                }
-                else
-                {
-                    topLevelStr = string.Format(SeekerApplication.GetString(Resource.String.item_total_plural), toplevelItems);
-                }
-                string recursiveStr = string.Empty;
-                if (totalItems == 1)
-                {
-                    recursiveStr = string.Format(SeekerApplication.GetString(Resource.String.item_total_singular), totalItems);
-                }
-                else
-                {
-                    recursiveStr = string.Format(SeekerApplication.GetString(Resource.String.item_total_plural), totalItems);
-                }
+                string topLevelStr = string.Format(SeekerApplication.GetString(
+                    toplevelItems == 1 ? Resource.String.item_total_singular : Resource.String.item_total_plural), toplevelItems);
+                string recursiveStr = string.Format(SeekerApplication.GetString(
+                    totalItems == 1 ? Resource.String.item_total_singular : Resource.String.item_total_plural), totalItems);
 
                 if (queuePaused)
                 {
@@ -1010,22 +683,12 @@ namespace Seeker
                 }
                 EventHandler<DialogClickEventArgs> eventHandlerCurrentFolder = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    DownloadUserFilesEntryStage3(false, recusiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
+                    DownloadUserFilesEntryStage3(false, recursiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
                 });
                 EventHandler<DialogClickEventArgs> eventHandlerRecursiveFolders = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    if (containsSubDirs)
-                    {
-                        if (!justFilteredItems)
-                        {
-                            BrowseUtils.SetDepthTags(dataItemsForDownload.First(), recusiveFullFileInfo);
-                        }
-                        else
-                        {
-                            BrowseUtils.SetDepthTags(filteredDataItemsForDownload.First(), recusiveFullFileInfo);
-                        }
-                    }
-                    DownloadUserFilesEntryStage3(true, recusiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
+                    BrowseUtils.SetDepthTags(sourceList.First(), recursiveFullFileInfo);
+                    DownloadUserFilesEntryStage3(true, recursiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
                 });
                 builder.SetPositiveButton(Resource.String.all, eventHandlerRecursiveFolders);
                 builder.SetNegativeButton(Resource.String.current_folder_only, eventHandlerCurrentFolder);
@@ -1033,56 +696,56 @@ namespace Seeker
             }
             else
             {
-                DownloadUserFilesEntryStage3(false, recusiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
+                DownloadUserFilesEntryStage3(false, recursiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="queuePaused"></param>
         /// <param name="downloadShownInListView">True if to select everything currently shown in the listview.  False if the user is selecting a single folder.</param>
-        /// <param name="positionOfFolderToDownload"></param>
-        private void DownloadUserFilesEntry(bool queuePaused, bool downloadShownInListView, int positionOfFolderToDownload = -1)
+        private void DownloadUserFilesEntry(bool queuePaused, bool downloadShownInListView, DataItem itemSelected = null)
         {
+            List<DataItem> dataItemsForDownload;
+            List<DataItem> filteredDataItemsForDownload;
+
             if (downloadShownInListView)
             {
-                dataItemsForDownload = dataItemsForListView.ToList();
-                filteredDataItemsForDownload = filteredDataItemsForListView.ToList();
+                lock (state.DataItems)
+                {
+                    dataItemsForDownload = state.DataItems.ToList();
+                }
+                lock (state.FilteredDataItems)
+                {
+                    filteredDataItemsForDownload = state.FilteredDataItems.ToList();
+                }
             }
             else
             {
-                //put the contents of the selected folder into the dataItemsToDownload and then do the functions as normal.
-                dataItemsForDownload = new List<DataItem>();
-                DataItem itemSelected = GetItemSelected(positionOfFolderToDownload, BrowseFilter.IsFiltered);
                 if (itemSelected == null)
                 {
                     UiHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Browse User File Selection Issue");
-                    return; //else nullref
+                    return;
                 }
-                PopulateDataItemsToItemSelected(dataItemsForDownload, itemSelected);
-                filteredDataItemsForDownload = BrowseUtils.FilterBrowseList(dataItemsForDownload.ToList(), BrowseFilter);
+                dataItemsForDownload = BrowseUtils.GetDataItemsForNode(itemSelected.Node);
+                filteredDataItemsForDownload = BrowseUtils.FilterBrowseList(dataItemsForDownload, state.Filter);
             }
-
 
             if (dataItemsForDownload.Count == 0)
             {
                 SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.nothing_to_download), ToastLength.Long);
                 return;
             }
-            if (BrowseFilter.IsFiltered && (dataItemsForDownload.Count != filteredDataItemsForDownload.Count))
+            if (state.Filter.IsFiltered && (dataItemsForDownload.Count != filteredDataItemsForDownload.Count))
             {
-                //this is Android.  There are no WinForm style blocking modal dialogs.  Show() is not synchronous.  It will not block or wait for a response.
                 var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
                 b.SetTitle(Resource.String.filter_is_on);
                 b.SetMessage(Resource.String.filter_is_on_body);
                 EventHandler<DialogClickEventArgs> eventHandlerAll = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    DownloadUserFilesEntryStage2(false, queuePaused);
+                    DownloadUserFilesEntryStage2(dataItemsForDownload, filteredDataItemsForDownload, false, queuePaused);
                 });
                 EventHandler<DialogClickEventArgs> eventHandlerFiltered = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    DownloadUserFilesEntryStage2(true, queuePaused);
+                    DownloadUserFilesEntryStage2(dataItemsForDownload, filteredDataItemsForDownload, true, queuePaused);
                 });
                 b.SetPositiveButton(Resource.String.just_filtered, eventHandlerFiltered);
                 b.SetNegativeButton(Resource.String.all, eventHandlerAll);
@@ -1090,10 +753,8 @@ namespace Seeker
             }
             else
             {
-                DownloadUserFilesEntryStage2(false, queuePaused);
+                DownloadUserFilesEntryStage2(dataItemsForDownload, filteredDataItemsForDownload, false, queuePaused);
             }
-
-
         }
 
 
@@ -1109,253 +770,230 @@ namespace Seeker
             {
                 try
                 {
-                    itemSelected = filteredDataItemsForListView[position];
+                    itemSelected = state.FilteredDataItems[position];
                 }
-                catch (IndexOutOfRangeException) //this did happen to me.... when filtering...
+                catch (ArgumentOutOfRangeException) //this did happen to me.... when filtering...
                 {
-                    string logMsg = $"ListViewDirectories_ItemClick position: {position} filteredDataItemsForListView.Count: {filteredDataItemsForListView.Count}";
+                    string logMsg = $"ListViewDirectories_ItemClick position: {position} state.FilteredDataItems.Count: {state.FilteredDataItems.Count}";
                     Logger.Firebase(logMsg);
                     return null;
                 }
             }
             else
             {
-                //!! firebase -- OnContextItemSelected --- DownloadUserFilesEntry
-                //!! firebase -- ListViewDirectories_ItemClick
                 try
                 {
-                    itemSelected = dataItemsForListView[position]; //out of bounds here...
+                    itemSelected = state.DataItems[position]; //out of bounds here...
                 }
-                catch (IndexOutOfRangeException)
+                catch (ArgumentOutOfRangeException)
                 {
-                    string logMsg = $"ListViewDirectories_ItemClick position: {position} filteredDataItemsForListView.Count: {filteredDataItemsForListView.Count} isFilter {filteredResults}";
+                    string logMsg = $"ListViewDirectories_ItemClick position: {position} state.FilteredDataItems.Count: {state.FilteredDataItems.Count} isFilter {filteredResults}";
                     Logger.Firebase(logMsg);
                     return null;
                 }
             }
             return itemSelected;
         }
-        public static int ItemPositionLongClicked = -1;
-        private void ListViewDirectories_ItemLongClick(object sender, AdapterView.ItemLongClickEventArgs e)
+        public void OnItemLongClick(int position, View view)
         {
-            bool filteredResults = BrowseFilter.IsFiltered;
-            DataItem itemSelected = GetItemSelected(e.Position, filteredResults);
-            if (itemSelected == null)
+            if (BrowseActionMode != null)
             {
+                ToggleBatchSelect(position);
                 return;
             }
-            if (itemSelected.IsDirectory())
+            var adapter = BrowseAdapterInstance;
+            if (adapter == null) return;
+
+            BrowseActionModeCallbackInstance = new BrowseActionModeCallback() { Adapter = adapter, Frag = this };
+            BrowseActionMode = SeekerState.MainActivityRef.StartSupportActionMode(BrowseActionModeCallbackInstance);
+            adapter.IsInBatchSelectMode = true;
+            ToggleBatchSelect(position);
+            adapter.NotifyDataSetChanged();
+        }
+
+        public void OnActionButtonClick(int position, BrowseResponseItemView view)
+        {
+            if (BrowseActionMode != null)
             {
-                e.Handled = true;
-                //show options
-                //SeekerState.ActiveActivityRef.Open
-                //this.RegisterForContextMenu(e.View);
-                ItemPositionLongClicked = e.Position;
-                Logger.InfoFirebase($"{nameof(ItemPositionLongClicked)} {ItemPositionLongClicked}");
-                this.listViewDirectories.ShowContextMenu();
-                //BrowseFragment.Instance.Context
-
-                //e.Handled = true;
-                //e.View.ShowContextMenu(); //causes stack overflow...
-                //this.UnregisterForContextMenu(e.View);
-
+                ToggleBatchSelect(position);
+                return;
             }
-            else
+            DataItemSelectedForLongClick = GetItemSelected(position, state.Filter.IsFiltered);
+            if (DataItemSelectedForLongClick == null) return;
+            if (DataItemSelectedForLongClick.IsDirectory())
             {
-                //no special long click event if file.
-                this.ListViewDirectories_ItemClick(sender, new AdapterView.ItemClickEventArgs(e.Parent, e.View, e.Position, e.Id));
+                ShowFolderContextMenu(DataItemSelectedForLongClick);
             }
         }
 
         private void PopulateDataItemsToItemSelected(List<DataItem> dirs, DataItem itemSelected)
         {
             dirs.Clear();
-            if (itemSelected.Node.Children.Count != 0) //then more directories
-            {
-                foreach (TreeNode<Directory> d in itemSelected.Node.Children)
-                {
-                    dirs.Add(new DataItem(d.Data, d));
-                }
-                //here we do files as well......
-                if (itemSelected.Directory != null && itemSelected.Directory.FileCount != 0)
-                {
-                    foreach (File f in itemSelected.Directory.OrderedFiles)
-                    {
-                        dirs.Add(new DataItem(f, itemSelected.Node));
-                    }
-                }
-            }
-            else
-            {
-                foreach (File f in itemSelected.Directory.OrderedFiles)
-                {
-                    dirs.Add(new DataItem(f, itemSelected.Node));
-                }
-            }
+            dirs.AddRange(BrowseUtils.GetDataItemsForNode(itemSelected.Node));
         }
 
-        private void ListViewDirectories_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
+        public void OnItemClick(int position)
         {
-            cachedFilteredDataItemsForListView = null;
-            bool filteredResults = BrowseFilter.IsFiltered;
-            DataItem itemSelected = GetItemSelected(e.Position, filteredResults);
+            if (BrowseActionMode != null)
+            {
+                ToggleBatchSelect(position);
+                return;
+            }
+
+            state.CachedFilteredDataItems = null;
+            bool filteredResults = state.Filter.IsFiltered;
+            DataItem itemSelected = GetItemSelected(position, filteredResults);
             if (itemSelected == null)
             {
                 return;
             }
 
-            bool isFile = false;
-            lock (dataItemsForListView)
+            lock (state.DataItems)
             {
-                //DataItem itemSelected = dataItemsForListView[e.Position];
                 if (itemSelected.IsDirectory())
                 {
                     if (itemSelected.Node.Children.Count == 0 && (itemSelected.Directory == null || itemSelected.Directory.FileCount == 0))
                     {
-                        //dont let them do this... if this happens then there is no way to get back up...
                         SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.directory_is_empty), ToastLength.Short);
                         return;
                     }
                     SaveScrollPosition();
 
-                    PopulateDataItemsToItemSelected(dataItemsForListView, itemSelected);
+                    PopulateDataItemsToItemSelected(state.DataItems, itemSelected);
 
                     if (!filteredResults)
                     {
-                        SetBrowseAdapters(filteredResults, dataItemsForListView, false, false);
-                        //listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this);
+                        SetBrowseAdapters(filteredResults, state.DataItems, false, false);
                     }
                 }
                 else
                 {
-                    isFile = true;
-
-
-                    bool alreadySelected = (this.listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Contains<int>(e.Position);
-                    if (!alreadySelected)
-                    {
-                        (e.View as BrowseResponseItemView).SetSelectedBackground(true);
-                        (this.listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Add(e.Position);
-                    }
-                    else
-                    {
-                        (e.View as BrowseResponseItemView).SetSelectedBackground(false);
-                        (this.listViewDirectories.Adapter as BrowseAdapter).SelectedPositions.Remove(e.Position);
-                    }
-
+                    ShowFileContextMenu(position, itemSelected);
                 }
-
             }
-            lock (dataItemsForListView)
+            lock (state.DataItems)
             {
-                lock (filteredDataItemsForListView)
+                lock (state.FilteredDataItems)
                 {
-                    if (!isFile && filteredResults)
+                    if (itemSelected.IsDirectory() && filteredResults)
                     {
-                        SetBrowseAdapters(filteredResults, dataItemsForListView, false, false);
+                        SetBrowseAdapters(filteredResults, state.DataItems, false, false);
                     }
                 }
+            }
+        }
+
+        private void ShowFileContextMenu(int position, DataItem dataItem)
+        {
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
+            string[] items = new string[]
+            {
+                SeekerApplication.GetString(Resource.String.DownloadFile),
+                SeekerApplication.GetString(Resource.String.QueueSelectedAsPaused),
+                SeekerApplication.GetString(Resource.String.CopyURL)
+            };
+            int[] icons = new int[]
+            {
+                Resource.Drawable.download,
+                Resource.Drawable.paused,
+                Resource.Drawable.link_variant
+            };
+
+            var typedValue = new TypedValue();
+            Context.Theme.ResolveAttribute(Resource.Attribute.colorOnSurface, typedValue, true);
+            int tintColor = typedValue.Data;
+
+            var adapter = new IconMenuAdapter(this.Context, items, icons, tintColor);
+
+            EventHandler<DialogClickEventArgs> handler = (sender, args) =>
+            {
+                switch (args.Which)
+                {
+                    case 0: // Download File
+                        var ffi = BrowseUtils.ToFullFileInfo(dataItem);
+                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(new[] { ffi }, false, state.CurrentUsername).Start());
+                        break;
+                    case 1: // Queue as Paused
+                        var ffi2 = BrowseUtils.ToFullFileInfo(dataItem);
+                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(new[] { ffi2 }, true, state.CurrentUsername).Start());
+                        break;
+                    case 2: // Copy URL
+                        var ffi3 = BrowseUtils.ToFullFileInfo(dataItem);
+                        string slskLink = CommonHelpers.CreateSlskLink(false, ffi3.FullFileName, state.CurrentUsername);
+                        CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
+                        break;
+                }
+            };
+
+            builder.SetAdapter(adapter, handler);
+            builder.Show();
+        }
+
+        private class IconMenuAdapter : ArrayAdapter<string>
+        {
+            private readonly int[] iconRes;
+            private readonly int tintColor;
+
+            public IconMenuAdapter(Context context, string[] items, int[] iconRes, int tintColor)
+                : base(context, 0, items)
+            {
+                this.iconRes = iconRes;
+                this.tintColor = tintColor;
+            }
+
+            public override View GetView(int position, View convertView, ViewGroup parent)
+            {
+                if (convertView == null)
+                {
+                    convertView = LayoutInflater.From(Context).Inflate(Resource.Layout.icon_menu_item, parent, false);
+                }
+
+                var icon = convertView.FindViewById<ImageView>(Resource.Id.menuIcon);
+                var text = convertView.FindViewById<TextView>(Resource.Id.menuText);
+
+                text.Text = GetItem(position);
+
+                var drawable = AndroidX.Core.Content.ContextCompat.GetDrawable(Context, iconRes[position]).Mutate();
+                AndroidX.Core.Graphics.Drawable.DrawableCompat.SetTint(drawable, new Android.Graphics.Color(tintColor));
+                icon.SetImageDrawable(drawable);
+
+                return convertView;
             }
         }
 
         private void ClearAllSelectedPositions()
         {
             //nullref crash was here.. not worth crashing over...
-            if (listViewDirectories == null)
+            if (recyclerViewDirectories == null)
             {
                 return;
             }
-            for (int i = 0; i < listViewDirectories.Count; i++)
+            var adapter = BrowseAdapterInstance;
+            if (adapter != null)
             {
-                View v = listViewDirectories.GetChildAt(i);
-                if (v != null)
-                {
-                    listViewDirectories.GetChildAt(i).Background = null;
-                }
+                adapter.NotifyDataSetChanged();
             }
         }
 
         public bool BackButton()
         {
+            if (BrowseActionMode != null)
+            {
+                BrowseActionMode.Finish();
+                return true;
+            }
             return GoUpDirectory();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>whether we can successfully go up.</returns>
         public bool GoUpDirectory(int additionalLevels = 0)
         {
-            cachedFilteredDataItemsForListView = null;
-            bool filteredResults = BrowseFilter.IsFiltered;
-            lock (dataItemsForListView)
+            bool res = state.GoUpDirectory(SetBrowseAdapters, additionalLevels);
+            if (res)
             {
-                TreeNode<Directory> item = null;
-                try
-                {
-                    //var testItem = dataItemsForListView[0]?.Node;
-                    if (dataItemsForListView[0].File != null)
-                    {
-                        item = dataItemsForListView[0]?.Node?.Parent;  //?.Parent; //This used to do grandparent.  Which is a bug I think, so I changed it.
-                    }
-                    else if (dataItemsForListView[0].Directory != null)
-                    {
-                        item = dataItemsForListView[0]?.Node?.Parent?.Parent;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                catch
-                {
-                    return false; //bad... 
-                }
-                if (item == null)
-                {
-                    return false; //we must be at or near the highest
-                }
-                for (int i = 0; i < additionalLevels; i++)
-                {
-                    item = item.Parent;
-                }
-                dataItemsForListView.Clear();
-
-                foreach (TreeNode<Directory> d in item.Children) //nullref TODO TODO
-                {
-                    dataItemsForListView.Add(new DataItem(d.Data, d));
-                }
-
-                //here we do files as well......
-                if (item.Data != null && item.Data.FileCount != 0)
-                {
-                    foreach (File f in item.Data.OrderedFiles)
-                    {
-                        dataItemsForListView.Add(new DataItem(f, item));
-                    }
-                }
-                if (!filteredResults)
-                {
-                    SetBrowseAdapters(filteredResults, dataItemsForListView, false, true);
-                    //listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this);
-                }
-
+                RestoreScrollPosition();
             }
-            lock (dataItemsForListView)
-            {
-                lock (filteredDataItemsForListView)
-                {
-                    SetBrowseAdapters(filteredResults, dataItemsForListView, false, true);
-                    //if (filteredResults)
-                    //{
-                    //    filteredDataItemsForListView = FilterBrowseList(dataItemsForListView);
-                    //    listViewDirectories.Adapter = new BrowseAdapter(this.Context, filteredDataItemsForListView, this);
-                    //}
-                }
-            }
-            RestoreScrollPosition();
-
-            return true;
+            return res;
         }
 
         /// <summary>
@@ -1365,138 +1003,165 @@ namespace Seeker
         /// <param name="nonFilteredItems"></param>
         public void SetBrowseAdapters(bool toFilter, List<DataItem> nonFilteredItems, bool fullRefreshOfPathItems, bool goingUp = false)
         {
+            BrowseActionMode?.Finish();
             if (toFilter)
             {
-                filteredDataItemsForListView = BrowseUtils.FilterBrowseList(dataItemsForListView, BrowseFilter);
-                listViewDirectories.Adapter = new BrowseAdapter(this.Context, filteredDataItemsForListView, this);
+                state.FilteredDataItems = BrowseUtils.FilterBrowseList(state.DataItems, state.Filter);
+                recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.FilteredDataItems, this));
             }
             else
             {
-                listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this);
+                recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.DataItems, this));
             }
 
-            var items = BrowseUtils.GetPathItems(dataItemsForListView);
-            pathItems.Clear();
-            pathItems.AddRange(items);
+            var items = BrowseUtils.GetPathItems(state.DataItems);
+            state.PathItems.Clear();
+            state.PathItems.AddRange(items);
             if (fullRefreshOfPathItems)
             {
                 treePathRecyclerAdapter.NotifyDataSetChanged();
             }
             else if (goingUp)
             {
-                treePathRecyclerAdapter.NotifyDataSetChanged(); //removed individual updates due to weird graphical glitches...
-                //treePathRecyclerAdapter.NotifyItemChanged(pathItems.Count-1); //since now the last node (remove separator)
-                //treePathRecyclerAdapter.NotifyItemRemoved(pathItems.Count);
+                treePathRecyclerAdapter.NotifyDataSetChanged();
             }
             else
             {
                 treePathRecyclerAdapter.NotifyDataSetChanged();
-                //treePathRecyclerAdapter.NotifyItemChanged(pathItems.Count - 2); //since now no longer the last node (add separator)
-                //treePathRecyclerAdapter.NotifyItemInserted(pathItems.Count - 1);
-                treePathRecyclerView.ScrollToPosition(pathItems.Count - 1);
+                treePathRecyclerView.ScrollToPosition(state.PathItems.Count - 1);
             }
-            //List<PathItem> pathItems = GetPathItems(dataItemsForListView);
-
+            SeekerState.MainActivityRef?.InvalidateOptionsMenu();
         }
 
 
 
-        //https://stackoverflow.com/questions/5297842/how-to-handle-oncontextitemselected-in-a-multi-fragment-activity
-        //onContextItemSelected() is called for all currently existing fragments starting with the first added one.
-        public const int UNIQUE_BROWSE_GROUP_ID = 304;
-        public override void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
+        private void ShowFolderContextMenu(DataItem dataItem)
         {
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, 0, 0, Resource.String.download_folder);
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, 1, 1, Resource.String.QueueFolderAsPaused);
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, 2, 2, Resource.String.ShowFolderInfo);
-            menu.Add(UNIQUE_BROWSE_GROUP_ID, 3, 3, Resource.String.CopyURL);
-            base.OnCreateContextMenu(menu, v, menuInfo);
-        }
-
-        public override bool OnContextItemSelected(IMenuItem item)
-        {
-            if (item.GroupId == UNIQUE_BROWSE_GROUP_ID)
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
+            string[] items = new string[]
             {
-                switch (item.ItemId)
+                SeekerApplication.GetString(Resource.String.download_folder),
+                SeekerApplication.GetString(Resource.String.QueueFolderAsPaused),
+                SeekerApplication.GetString(Resource.String.ShowFolderInfo),
+                SeekerApplication.GetString(Resource.String.CopyURL)
+            };
+            int[] icons = new int[]
+            {
+                Resource.Drawable.download,
+                Resource.Drawable.paused,
+                Resource.Drawable.information_outline,
+                Resource.Drawable.link_variant
+            };
+
+            var typedValue = new TypedValue();
+            Context.Theme.ResolveAttribute(Resource.Attribute.colorOnSurface, typedValue, true);
+            int tintColor = typedValue.Data;
+
+            var adapter = new IconMenuAdapter(this.Context, items, icons, tintColor);
+
+            EventHandler<DialogClickEventArgs> handler = (sender, args) =>
+            {
+                switch (args.Which)
                 {
-                    case 0:
-                        DownloadUserFilesEntry(false, false, ItemPositionLongClicked);
-                        return true;
-                    case 1:
-                        DownloadUserFilesEntry(true, false, ItemPositionLongClicked);
-                        return true;
-                    case 2:
-                        DataItem itemSelected = GetItemSelected(ItemPositionLongClicked, BrowseFilter.IsFiltered);
-                        var folderSummary = BrowseUtils.GetFolderSummary(itemSelected);
-                        ShowFolderSummaryDialog(folderSummary);
-                        return true;
-                    case 3:
-                        DataItem _itemSelected = GetItemSelected(ItemPositionLongClicked, BrowseFilter.IsFiltered);
-                        //bool isDir = itemSelected.IsDirectory();
-                        string slskLink = CommonHelpers.CreateSlskLink(true, _itemSelected.Directory.Name, currentUsernameUI);
+                    case 0: // Download Folder
+                        DownloadUserFilesEntry(false, false, dataItem);
+                        break;
+                    case 1: // Queue Folder as Paused
+                        DownloadUserFilesEntry(true, false, dataItem);
+                        break;
+                    case 2: // Show Folder Info
+                        var folderSummary = BrowseUtils.GetFolderSummary(dataItem);
+                        ShowFolderSummaryDialog(folderSummary, dataItem.GetDisplayName());
+                        break;
+                    case 3: // Copy URL
+                        string slskLink = CommonHelpers.CreateSlskLink(true, dataItem.Directory.Name, state.CurrentUsername);
                         CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
-                        return true;
+                        break;
                 }
-            }
-            return base.OnContextItemSelected(item);
+            };
+
+            builder.SetAdapter(adapter, handler);
+            builder.Show();
         }
 
-        public void ShowFolderSummaryDialog(FolderSummary folderSummary)
+        public void ShowFolderSummaryDialog(FolderSummary folderSummary, string folderName = null)
         {
-            string lengthTimePt2 = (folderSummary.LengthSeconds == 0) ? ": -" : string.Format(": {0}", SimpleHelpers.GetHumanReadableTime(folderSummary.LengthSeconds));
-            string lengthTime = SeekerApplication.GetString(Resource.String.Length) + lengthTimePt2;
-
-            string sizeString = SeekerApplication.GetString(Resource.String.size_column) + string.Format(" {0}", SimpleHelpers.GetHumanReadableSize(folderSummary.SizeBytes));
-
-            string numFilesString = SeekerApplication.GetString(Resource.String.NumFiles) + string.Format(": {0}", folderSummary.NumFiles);
-            string numSubFoldersString = SeekerApplication.GetString(Resource.String.NumSubfolders) + string.Format(": {0}", folderSummary.NumSubFolders);
+            var metrics = this.Context.Resources.DisplayMetrics;
+            int dp24 = (int)Android.Util.TypedValue.ApplyDimension(Android.Util.ComplexUnitType.Dip, 24, metrics);
+            int dp20 = (int)Android.Util.TypedValue.ApplyDimension(Android.Util.ComplexUnitType.Dip, 20, metrics);
+            int dp8 = (int)Android.Util.TypedValue.ApplyDimension(Android.Util.ComplexUnitType.Dip, 8, metrics);
 
             var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
+
+            if (!string.IsNullOrEmpty(folderName))
+            {
+                var titleView = new Android.Widget.TextView(this.Context);
+                titleView.Text = folderName;
+                titleView.SetPadding(dp24, dp20, dp24, 0);
+                titleView.SetTextSize(Android.Util.ComplexUnitType.Sp, 20);
+                titleView.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor));
+                titleView.SetMaxLines(2);
+                titleView.Ellipsize = Android.Text.TextUtils.TruncateAt.End;
+                builder.SetCustomTitle(titleView);
+            }
+
+            var labelColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued);
+            var valueColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor);
+
+            string lengthValue = (folderSummary.LengthSeconds == 0) ? "-" : SimpleHelpers.GetHumanReadableTime(folderSummary.LengthSeconds, true);
+
+            var rows = new (string label, string value)[]
+            {
+                (SeekerApplication.GetString(Resource.String.NumFiles), folderSummary.NumFiles.ToString()),
+                (SeekerApplication.GetString(Resource.String.NumSubfolders), folderSummary.NumSubFolders.ToString()),
+                (SeekerApplication.GetString(Resource.String.size_column), SimpleHelpers.GetHumanReadableSize(folderSummary.SizeBytes)),
+                (SeekerApplication.GetString(Resource.String.Length), lengthValue),
+            };
+
+            var container = new Android.Widget.LinearLayout(this.Context);
+            container.Orientation = Android.Widget.Orientation.Vertical;
+            container.SetPadding(dp24, dp20, dp24, dp8);
+
+            foreach (var (label, value) in rows)
+            {
+                var row = new Android.Widget.LinearLayout(this.Context);
+                row.Orientation = Android.Widget.Orientation.Horizontal;
+                row.SetPadding(0, 0, 0, dp8);
+
+                var labelView = new Android.Widget.TextView(this.Context);
+                labelView.Text = label;
+                labelView.SetTextSize(Android.Util.ComplexUnitType.Sp, 16);
+                labelView.SetTextColor(labelColor);
+                labelView.LayoutParameters = new Android.Widget.LinearLayout.LayoutParams(0, Android.Views.ViewGroup.LayoutParams.WrapContent, 1f);
+
+                var valueView = new Android.Widget.TextView(this.Context);
+                valueView.Text = value;
+                valueView.SetTextSize(Android.Util.ComplexUnitType.Sp, 16);
+                valueView.SetTextColor(valueColor);
+                valueView.SetTypeface(valueView.Typeface, Android.Graphics.TypefaceStyle.Bold);
+                valueView.LayoutParameters = new Android.Widget.LinearLayout.LayoutParams(
+                    Android.Views.ViewGroup.LayoutParams.WrapContent, Android.Views.ViewGroup.LayoutParams.WrapContent);
+
+                row.AddView(labelView);
+                row.AddView(valueView);
+                container.AddView(row);
+            }
+
+            builder.SetView(container);
 
             void OnCloseClick(object sender, DialogClickEventArgs e)
             {
                 (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
             }
 
-            var diag = builder.SetMessage(numFilesString +
-                System.Environment.NewLine +
-                System.Environment.NewLine +
-                numSubFoldersString +
-                System.Environment.NewLine +
-                System.Environment.NewLine +
-                sizeString +
-                System.Environment.NewLine +
-                System.Environment.NewLine +
-                lengthTime).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+            var diag = builder.SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
             diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
         }
 
-        public static TreeNode<Directory> GetNodeByName(TreeNode<Directory> rootTree, string nameToFindDirName)
+        private static void ClearFilterUIString(bool force = false)
         {
-            if (rootTree.Data.Name == nameToFindDirName)
-            {
-                return rootTree;
-            }
-            else
-            {
-                foreach (TreeNode<Directory> d in rootTree.Children)
-                {
-                    var node = GetNodeByName(d, nameToFindDirName);
-                    if (node != null)
-                    {
-                        return node;
-                    }
-                }
-            }
-            return null;
-        }
-
-        private static void ClearFilterStringAndCached(bool force = false)
-        {
-            BrowseFilter.Reset();
-            //FilterSpecialFlags.Clear();
             if (BrowseFragment.Instance != null && BrowseFragment.Instance.rootView != null) //if you havent been there it will be null.
             {
                 SeekerState.MainActivityRef.RunOnUiThread(() =>
@@ -1510,63 +1175,15 @@ namespace Seeker
 
         public static void SeekerState_BrowseResponseReceived(object sender, BrowseResponseEvent e)
         {
-            ClearFilterStringAndCached();
+            ClearFilterUIString();
             ScrollPositionRestore?.Clear();
             ScrollPositionRestoreRotate = null;
-            filteredDataItemsForListView = new List<DataItem>();
-            cachedFilteredDataItemsForListView = null;
-            CurrentUsername = e.Username;
-            diagnostics_count = e.OriginalBrowseResponse.DirectoryCount;
-            //OriginalBrowseResponse = e.OriginalBrowseResponse;
-            //OurCurrentLocation = e.BrowseResponseTree; //aka root
-            lock (dataItemsForListView) //on non UI thread.
+            var errorCode = state.SetBrowseResponse(e.Username, e.BrowseResponseTree, e.OriginalBrowseResponse, e.StartingLocation);
+            if (errorCode == BrowseStateError.CannotFindStartDirectory)
             {
-                dataItemsForListView.Clear();//clear old
-                //originalBrowseTree = e.BrowseResponseTree; //the already parsed tree
-                username = e.Username;
-                if (e.StartingLocation != null && e.StartingLocation != string.Empty)
-                {
-                    var staringPoint = BrowseFragment.GetNodeByName(e.BrowseResponseTree, e.StartingLocation);
-
-                    if (staringPoint == null)
-                    {
-                        Logger.Firebase("SeekerState_BrowseResponseReceived: startingPoint is null");
-                        SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long);
-                        return; //we might be in a bad state just returning like this... idk...
-                    }
-
-                    //**added bc if someone wants to browse at folder and there are other folders then they will not see them....
-                    foreach (TreeNode<Directory> d in staringPoint.Children)
-                    {
-                        dataItemsForListView.Add(new DataItem(d.Data, d));
-                    }
-                    //**added bc if someone wants to browse at folder and there are other folders then they will not see them....
-
-
-                    foreach (File f in staringPoint.Data.OrderedFiles)
-                    {
-                        dataItemsForListView.Add(new DataItem(f, staringPoint));
-                    }
-                }
-                else
-                {
-                    foreach (TreeNode<Directory> d in e.BrowseResponseTree.Children)
-                    {
-                        dataItemsForListView.Add(new DataItem(d.Data, d));
-                    }
-
-                    //here we do files as well......  **I added this bc on your first browse you will not get any root dir files....
-                    if (e.BrowseResponseTree.Data != null && e.BrowseResponseTree.Data.FileCount != 0)
-                    {
-                        foreach (File f in e.BrowseResponseTree.Data.OrderedFiles)
-                        {
-                            dataItemsForListView.Add(new DataItem(f, e.BrowseResponseTree));
-                        }
-                    }
-                    //**I added this bc on your first browse you will not get any root dir files....
-                }
+                Logger.Firebase("SeekerState_BrowseResponseReceived: startingPoint is null " + e.StartingLocation);
+                SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long);
             }
-
             BrowseResponseReceivedUI?.Invoke(null, new EventArgs());
         }
 
@@ -1577,35 +1194,36 @@ namespace Seeker
                 noBrowseView.Visibility = ViewStates.Gone;
                 separator.Visibility = ViewStates.Visible;
             }
-            listViewDirectories = rootView.FindViewById<ListView>(Resource.Id.listViewDirectories);
-            //if(!tempHackItemClick)
-            //{
-            listViewDirectories.ItemClick -= ListViewDirectories_ItemClick;
-            listViewDirectories.ItemClick += ListViewDirectories_ItemClick;
-            listViewDirectories.ItemLongClick -= ListViewDirectories_ItemLongClick;
-            listViewDirectories.ItemLongClick += ListViewDirectories_ItemLongClick;
+            recyclerViewDirectories = rootView.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
+            if (browseLayoutManager == null)
+            {
+                browseLayoutManager = new LinearLayoutManager(this.Context);
+                recyclerViewDirectories.SetLayoutManager(browseLayoutManager);
+                recyclerViewDirectories.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
+            }
 
-
-
-            //tempHackItemClick =true; 
-            //}
-
-            Logger.InfoFirebase("RefreshOnRecieved " + CurrentUsername);
-            //!!!collection was modified exception!!!
-            //guessing from modifying dataItemsForListView which can happen in this method and in others...
-            currentUsernameUI = CurrentUsername;
-            SetBrowseAdapters(false, dataItemsForListView, true);
-            //listViewDirectories.Adapter = new BrowseAdapter(this.Context, dataItemsForListView, this); //on UI thread. in a lock.
+            Logger.InfoFirebase("RefreshOnRecieved " + state.CurrentUsername);
+            currentUsernameUI = state.CurrentUsername;
+            SetBrowseAdapters(false, state.DataItems, true);
         }
 
-
- 
+        private void DismissKeyboard()
+        {
+            try
+            {
+                Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
+                imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
+            }
+            catch (System.Exception ex)
+            {
+                Logger.Firebase(ex.Message + " error closing keyboard");
+            }
+        }
 
         private static AndroidX.AppCompat.App.AlertDialog browseUserDialog = null;
 
         public void ShowEditTextBrowseUserDialog()
         {
-            //AndroidX.AppCompat.App.AlertDialog.Builder builder = new AndroidX.AppCompat.App.AlertDialog.Builder(); //failed to bind....
             FragmentActivity c = this.Activity != null ? this.Activity : SeekerState.MainActivityRef;
             Logger.InfoFirebase("ShowEditTextBrowseUserDialog" + c.IsDestroyed + c.IsFinishing);
             var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(c);
@@ -1620,7 +1238,7 @@ namespace Seeker
 
             Action<View> goSnackBarAction = new Action<View>((View v) =>
             {
-                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(BROWSE_TAB_INDEX, true);
             });
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
@@ -1665,25 +1283,13 @@ namespace Seeker
 
             System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
             {
-                if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
+                if (e.ActionId == Android.Views.InputMethods.ImeAction.Done ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
                     e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Search)
                 {
                     Logger.Debug("IME ACTION: " + e.ActionId.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Logger.Firebase(ex.Message + " error closing keyboard");
-                    }
-                    //Do the Browse Logic...
+                    DismissKeyboard();
                     eventHandler(sender, null);
                 }
             };
@@ -1693,19 +1299,7 @@ namespace Seeker
                 if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
                 {
                     Logger.Debug("keypress: " + e.Event.KeyCode.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Logger.Firebase(ex.Message + " error closing keyboard");
-                    }
-                    //Do the Browse Logic...
+                    DismissKeyboard();
                     eventHandler(sender, null);
                 }
                 else
@@ -1769,7 +1363,5 @@ namespace Seeker
                 Logger.Firebase("MainActivity_FocusChange" + err.Message);
             }
         }
-
     }
-
 }

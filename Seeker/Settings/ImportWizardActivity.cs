@@ -7,6 +7,7 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Core.Content;
 using AndroidX.Fragment.App;
 using AndroidX.RecyclerView.Widget;
 using AndroidX.ViewPager.Widget;
@@ -261,14 +262,14 @@ namespace Seeker
         {
             foreach (string uname in selectedData.IgnoredBanned)
             {
-                lock (SeekerState.IgnoreUserList)
+                lock (CommonState.IgnoreUserList)
                 {
-                    SeekerState.IgnoreUserList.Add(new UserListItem(uname, UserRole.Ignored));
+                    CommonState.IgnoreUserList.Add(new UserListItem(uname, UserRole.Ignored));
                 }
             }
             foreach (string uname in selectedData.UserList)
             {
-                lock (SeekerState.UserList)
+                lock (CommonState.UserList)
                 {
                     UserListService.AddUserAPI(this, uname, null, true);
                 }
@@ -285,13 +286,13 @@ namespace Seeker
             SearchTabHelper.SaveHeadersToSharedPrefs();
             //SearchTabHelper.SaveAllSearchTabsToDisk(SeekerState.ActiveActivityRef); //there are no additional results...
             CommonHelpers.SaveUserNotes();
-            if (SeekerState.SharedPreferences != null && SeekerState.UserList != null)
+            if (SeekerState.SharedPreferences != null && CommonState.UserList != null)
             {
-                PreferencesManager.SaveUserList(SerializationHelper.SaveUserListToString(SeekerState.UserList));
+                PreferencesManager.SaveUserList(SerializationHelper.SaveUserListToString(CommonState.UserList));
             }
-            if (SeekerState.SharedPreferences != null && SeekerState.IgnoreUserList != null)
+            if (SeekerState.SharedPreferences != null && CommonState.IgnoreUserList != null)
             {
-                PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
+                PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList));
             }
         }
 
@@ -446,7 +447,6 @@ namespace Seeker
 
         public List<ImportItem> localDataSet; //tab id's
         public override int ItemCount => localDataSet.Count;
-        private int position = -1;
         //public BrowseFragment Owner;
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {
@@ -464,13 +464,13 @@ namespace Seeker
 
         private void ImportItemCheckbox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            int pos = ((sender as TextView).Parent.Parent as ImportItemView).ViewHolder.AdapterPosition;
+            int pos = ((sender as TextView).Parent.Parent as ImportItemView).ViewHolder.BindingAdapterPosition;
             localDataSet[pos].isChecked = e.IsChecked;
         }
 
         //private void View_Click(object sender, EventArgs e)
         //{
-        //    int pos = ((sender as TextView).Parent.Parent as TreePathItemView).ViewHolder.AdapterPosition;
+        //    int pos = ((sender as TextView).Parent.Parent as TreePathItemView).ViewHolder.BindingAdapterPosition;
         //    Owner.GoUpDirectory(localDataSet.Count - pos - 2);
         //}
 
@@ -482,7 +482,7 @@ namespace Seeker
 
         //private void SearchTabLayout_Click(object sender, EventArgs e)
         //{
-        //    position = ((sender as View).Parent.Parent as SearchTabView).ViewHolder.AdapterPosition;
+        //    position = ((sender as View).Parent.Parent as SearchTabView).ViewHolder.BindingAdapterPosition;
         //    int tabToGoTo = localDataSet[position];
         //    SearchFragment.Instance.GoToTab(tabToGoTo, false);
         //    SearchTabDialog.Instance.Dismiss();
@@ -723,7 +723,7 @@ namespace Seeker
                         noneFound.Visibility = ViewStates.Gone;
                     }
                     //todo already present
-                    var currentlyHave = SeekerState.UserList.Select(item => item.Username).ToList();
+                    var currentlyHave = CommonState.UserList.Select(item => item.Username).ToList();
                     var notYetAdded = data.UserList.Except(currentlyHave).ToList();
                     var alreadyAddedList = data.UserList.Except(notYetAdded).ToList();
                     if (alreadyAddedList.Count == 0)
@@ -773,7 +773,7 @@ namespace Seeker
                         noneFound.Visibility = ViewStates.Gone;
                     }
                     //todo already present
-                    var currentlyHaveIgnored = SeekerState.IgnoreUserList.Select(item => item.Username).ToList();
+                    var currentlyHaveIgnored = CommonState.IgnoreUserList.Select(item => item.Username).ToList();
                     var notYetIgnored = data.IgnoredBanned.Except(currentlyHaveIgnored).ToList();
                     var alreadyIgnoredList = data.IgnoredBanned.Except(notYetIgnored).ToList();
                     if (alreadyIgnoredList.Count == 0)
@@ -1058,16 +1058,16 @@ namespace Seeker
             mTabSpacing = this.Resources.GetDimensionPixelSize(Resource.Dimension.step_pager_tab_spacing);
 
             mPrevTabPaint = new Paint();
-            mPrevTabPaint.Color = this.Resources.GetColor(Resource.Color.prevPage);
+            mPrevTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(context, Resource.Color.prevPage));
 
             mSelectedTabPaint = new Paint();
-            mSelectedTabPaint.Color = this.Resources.GetColor(Resource.Color.currentPage);
+            mSelectedTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(context, Resource.Color.currentPage));
 
             mSelectedLastTabPaint = new Paint();
             mSelectedLastTabPaint = mSelectedTabPaint;//Color.Red;
 
             mNextTabPaint = new Paint();
-            mNextTabPaint.Color = this.Resources.GetColor(Resource.Color.nextPage);
+            mNextTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(context, Resource.Color.nextPage));
         }
 
         //public void setOnPageSelectedListener(OnPageSelectedListener onPageSelectedListener)

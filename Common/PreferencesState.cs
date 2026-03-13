@@ -1,4 +1,6 @@
 using Common.Messages;
+using Seeker;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,9 +9,38 @@ namespace Common
     public static class PreferencesState
     {
         // Account
+        // if user logged in (regardless of connection status)
         public static bool CurrentlyLoggedIn = false;
-        public static string Username = null;
-        public static string Password = null;
+
+        private static string? _username;
+        public static string? Username
+        {
+            get => _username;
+            set
+            {
+                if (_username != value)
+                {
+                    _username = value;
+                    UsernameChanged?.Invoke(value);
+                }
+            }
+        }
+        public static event Action<string?>? UsernameChanged;
+
+        public static string? Password = null;
+
+        public static void SetCredentials(string username, string password)
+        {
+            Password = password;
+            Username = username; // fires event last, after Password is set
+        }
+
+        public static void ClearCredentials()
+        {
+            CurrentlyLoggedIn = false;
+            Password = null;
+            Username = null; // fires event last
+        }
 
         // Data directories
         public static string SaveDataDirectoryUri = null;
@@ -27,6 +58,7 @@ namespace Common
         public static Seeker.SearchResultSorting DefaultSearchResultSortAlgorithm = Seeker.SearchResultSorting.Available;
         public static bool FilterSticky = false;
         public static string FilterStickyString = string.Empty;
+        public static List<string> SearchHistory = new List<string>();
         public static int SearchResultStyle = 1; // Medium
 
         // UI / Theme
@@ -60,6 +92,7 @@ namespace Common
         public const string FieldLangZhCn = "zh-rCN";
 
         // Transfers
+        public const bool AutoRetryDownload = true;
         public static bool AutoClearCompleteDownloads = false;
         public static bool AutoClearCompleteUploads = false;
         public static bool NotifyOnFolderCompleted = true;
@@ -67,6 +100,8 @@ namespace Common
         public static bool MemoryBackedDownload = false;
         public static bool TransferViewShowSizes = false;
         public static bool TransferViewShowSpeed = false;
+        public static bool TransferViewGroupByFolder = false;
+        public static volatile bool TransferViewInUploadsMode = false;
         public static bool AutoRetryBackOnline = true;
         public static bool NoSubfolderForSingle = false;
         public static bool CreateCompleteAndIncompleteFolders = true;
@@ -100,7 +135,7 @@ namespace Common
         public static bool PutFriendsOnTop = false;
 
         // User list
-        public static int UserListSortOrder = 0; // DateAddedAsc
+        public static SortOrder UserListSortOrder = SortOrder.DateAddedAsc;
 
         // Smart filters
         public static bool ShowSmartFilters = true;

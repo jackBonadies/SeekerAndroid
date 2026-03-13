@@ -513,7 +513,7 @@ namespace Seeker
                 SearchTabHelper.SearchTargetChosenUser = usernameInQuestion;
                 //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
                 Intent intent = new Intent(activity, typeof(MainActivity));
-                intent.PutExtra(UserListActivity.IntentUserGoToSearch, 1);
+                intent.PutExtra(MainActivity.GoToSearchExtra, true);
                 intent.AddFlags(ActivityFlags.SingleTop); //??
                 activity.StartActivity(intent);
                 return true;
@@ -523,7 +523,7 @@ namespace Seeker
                 Action<View> action = new Action<View>((v) =>
                 {
                     Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
+                    intent.PutExtra(MainActivity.GoToBrowseExtra, true);
                     intent.AddFlags(ActivityFlags.SingleTop); //??
                     activity.StartActivity(intent);
                     //((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);

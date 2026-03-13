@@ -36,11 +36,11 @@ namespace Seeker.Transfers
 
             if (SeekerState.AutoRequeueDownloadsAtStartup)
             {
-                var queuedTransfers = TransfersFragment.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
+                var queuedTransfers = TransferItems.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
                 if (queuedTransfers.Count > 0)
                 {
                     Logger.Debug("TransfersTimerElapsed - Lets redownload and/or get position of queued transfers...");
-                    DownloadService.GetDownloadPlaceInQueueBatch(queuedTransfers, true);
+                    DownloadService.Instance.GetDownloadPlaceInQueueBatch(queuedTransfers, true);
                 }
             }
 
@@ -55,15 +55,15 @@ namespace Seeker.Transfers
         private static void TransfersTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             Logger.Debug("TransfersTimerElapsed");
-            if (SessionService.IsNotLoggedIn())
+            if (SessionService.Instance.IsNotLoggedIn())
             {
                 return;
             }
-            var queuedTransfers = TransfersFragment.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
+            var queuedTransfers = TransferItems.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
             if (queuedTransfers.Count > 0)
             {
                 Logger.Debug("TransfersTimerElapsed - Lets get position of queued transfers...");
-                DownloadService.GetDownloadPlaceInQueueBatch(queuedTransfers, false);
+                DownloadService.Instance.GetDownloadPlaceInQueueBatch(queuedTransfers, false);
             }
 
         }

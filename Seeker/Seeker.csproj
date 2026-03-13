@@ -48,6 +48,9 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release IzzySoft|AnyCPU'">
 	  <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
 	  <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
+	  <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
+	  <PublishTrimmed>true</PublishTrimmed>
+	  <AndroidLinkMode>SdkOnly</AndroidLinkMode>
 	  <RunAOTCompilation>false</RunAOTCompilation>
 	  <EnableLLVM>false</EnableLLVM>
 	  <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
@@ -57,7 +60,19 @@
 	  <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
 	  <DefineConstants>IzzySoft</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
+  <PropertyGroup Condition="$(Configuration.StartsWith('Release'))">
+	<AndroidKeyStore>true</AndroidKeyStore>
+	<AndroidSigningKeyStore>$(AndroidSigningKeyStore)</AndroidSigningKeyStore>
+	<AndroidSigningKeyAlias>$(AndroidSigningKeyAlias)</AndroidSigningKeyAlias>
+	<AndroidSigningKeyPass>$(AndroidSigningKeyPass)</AndroidSigningKeyPass>
+	<AndroidSigningStorePass>$(AndroidSigningStorePass)</AndroidSigningStorePass>
+  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release IzzySoft|AnyCPU'">
+	<AndroidKeyStore>true</AndroidKeyStore>
+	<AndroidSigningKeyStore>C:\Users\jack\AppData\Local\Xamarin\Mono for Android\Keystore\Jack\Jack.keystore</AndroidSigningKeyStore>
+	<AndroidSigningKeyAlias>jack</AndroidSigningKeyAlias>
+  </PropertyGroup>
+	<ItemGroup>
     <GoogleServicesJson Include="google-services.json" Condition="Exists('google-services.json') And '$(Configuration)|$(Platform)' != 'Release IzzySoft|AnyCPU'" />
   </ItemGroup>
   <Choose>

@@ -5,6 +5,7 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Core.Content;
 using AndroidX.Core.Graphics.Drawable;
 using AndroidX.RecyclerView.Widget;
 using System;
@@ -168,6 +169,38 @@ namespace Seeker.Users
         }
     }
 
+    public class UserListDiffCallback : DiffUtil.Callback
+    {
+        private List<UserListItem> oldList;
+        private List<UserListItem> newList;
+
+        public UserListDiffCallback(List<UserListItem> _oldList, List<UserListItem> _newList)
+        {
+            oldList = _oldList;
+            newList = _newList;
+        }
+
+        public override int NewListSize => newList.Count;
+        public override int OldListSize => oldList.Count;
+
+        /// <summary>
+        /// Doesnt seem to do anything.  still need to notify item changed, else it will be stale...
+        /// </summary>
+        /// <param name="oldItemPosition"></param>
+        /// <param name="newItemPosition"></param>
+        /// <returns></returns>
+        public override bool AreContentsTheSame(int oldItemPosition, int newItemPosition)
+        {
+            var oldItem = oldList[oldItemPosition];
+            var newItem = newList[newItemPosition];
+            return oldItem.Username.Equals(newItem.Username) && oldItem.GetStatusFromItem(out _) == newItem.GetStatusFromItem(out _);
+        }
+
+        public override bool AreItemsTheSame(int oldItemPosition, int newItemPosition)
+        {
+            return oldList[oldItemPosition].Username.Equals(newList[newItemPosition].Username);
+        }
+    }
 
     public class UserRowView : RelativeLayout
     {
@@ -200,13 +233,13 @@ namespace Seeker.Users
 
         public void UserRowView_LongClick(object sender, View.LongClickEventArgs e)
         {
-            (ViewHolder.BindingAdapter as RecyclerUserListAdapter).setPosition((sender as UserRowView).ViewHolder.AdapterPosition);
+            (ViewHolder.BindingAdapter as RecyclerUserListAdapter).setPosition((sender as UserRowView).ViewHolder.BindingAdapterPosition);
             (sender as View).ShowContextMenu();
         }
 
         public void UserRowView_Click(object sender, EventArgs e)
         {
-            (ViewHolder.BindingAdapter as RecyclerUserListAdapter).setPosition((sender as UserRowView).ViewHolder.AdapterPosition);
+            (ViewHolder.BindingAdapter as RecyclerUserListAdapter).setPosition((sender as UserRowView).ViewHolder.BindingAdapterPosition);
             (sender as View).ShowContextMenu();
         }
 
@@ -242,23 +275,6 @@ namespace Seeker.Users
             SeekerApplication.Toaster.ShowToast((sender as ImageView).TooltipText, ToastLength.Short);
         }
 
-        //both item.UserStatus and item.UserData have status
-        public static Soulseek.UserPresence GetStatusFromItem(UserListItem uli, out bool statusExists)
-        {
-            statusExists = false;
-            Soulseek.UserPresence status = Soulseek.UserPresence.Away;
-            if (uli.UserStatus != null)
-            {
-                statusExists = true;
-                status = uli.UserStatus.Presence;
-            }
-            else if (uli.UserData != null)
-            {
-                statusExists = true;
-                status = uli.UserData.Status;
-            }
-            return status;
-        }
 
         public void setItem(UserListItem item)
         {
@@ -296,7 +312,7 @@ namespace Seeker.Users
                     viewOnlineAlerts.Visibility = ViewStates.Invisible;
                 }
 
-                Soulseek.UserPresence status = GetStatusFromItem(item, out bool statusExists);
+                Soulseek.UserPresence status = item.GetStatusFromItem(out bool statusExists);
 
                 if (item.Role == UserRole.Ignored)
                 {
@@ -317,7 +333,7 @@ namespace Seeker.Users
                     switch (status)
                     {
                         case Soulseek.UserPresence.Away:
-                            viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.away));
+                            viewUserStatus.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.away)));
                             string awayString = SeekerState.ActiveActivityRef.GetString(Resource.String.away);
                             if (OperatingSystem.IsAndroidVersionAtLeast(26))
                             {
@@ -329,7 +345,7 @@ namespace Seeker.Users
                             }
                             break;
                         case Soulseek.UserPresence.Online:
-                            viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.online)); //added in api 8 :) SetTint made it a weird dark color..
+                            viewUserStatus.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.online))); //added in api 8 :) SetTint made it a weird dark color..
                             string onlineString = SeekerState.ActiveActivityRef.GetString(Resource.String.online);
                             if (OperatingSystem.IsAndroidVersionAtLeast(26))
                             {
@@ -341,7 +357,7 @@ namespace Seeker.Users
                             }
                             break;
                         case Soulseek.UserPresence.Offline:
-                            viewUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.offline));
+                            viewUserStatus.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.offline)));
                             string offlineString = SeekerState.ActiveActivityRef.GetString(Resource.String.offline);
                             if (OperatingSystem.IsAndroidVersionAtLeast(26))
                             {

@@ -805,11 +805,13 @@ namespace Seeker.Services
                         //ape and aiff always fail with built in metadata retreiver.
                         if (System.IO.Path.GetExtension(presentableName).ToLower() == ".ape")
                         {
-                            MicroTagReader.GetApeMetadata(contentResolver, childUri, out sampleRate, out bitDepth, out duration);
+                            using var stream = contentResolver.OpenInputStream(childUri);
+                            MicroTagReader.Instance.GetApeMetadata(stream, out sampleRate, out bitDepth, out duration);
                         }
                         else if (System.IO.Path.GetExtension(presentableName).ToLower() == ".aiff")
                         {
-                            MicroTagReader.GetAiffMetadata(contentResolver, childUri, out sampleRate, out bitDepth, out duration);
+                            using var stream = contentResolver.OpenInputStream(childUri);
+                            MicroTagReader.Instance.GetAiffMetadata(stream, out sampleRate, out bitDepth, out duration);
                         }
 
                         //if still not fixed
@@ -829,7 +831,8 @@ namespace Seeker.Services
                 {
                     if (PreferencesState.PerformDeepMetadataSearch)
                     {
-                        MicroTagReader.GetMp3Metadata(contentResolver, childUri, duration, size, out bitrate);
+                        using var mp3Stream = contentResolver.OpenInputStream(childUri);
+                        MicroTagReader.Instance.GetMp3Metadata(mp3Stream, duration, size, out bitrate);
                     }
                     else
                     {
@@ -842,7 +845,8 @@ namespace Seeker.Services
 
                 if (PreferencesState.PerformDeepMetadataSearch && System.IO.Path.GetExtension(presentableName) == ".flac" && size != 0)
                 {
-                    MicroTagReader.GetFlacMetadata(contentResolver, childUri, out sampleRate, out bitDepth);
+                    using var flacStream = contentResolver.OpenInputStream(childUri);
+                    MicroTagReader.Instance.GetFlacMetadata(flacStream, out sampleRate, out bitDepth);
                 }
 
                 //if uncompressed we can use this simple formula

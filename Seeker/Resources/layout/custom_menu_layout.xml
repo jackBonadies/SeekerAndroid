@@ -37,7 +37,7 @@
         android:imeOptions="actionSearch"
         android:textColorHighlight="@android:color/white"
         android:textColorHint="@android:color/white"
-        android:popupBackground="?attr/colorOnPrimary"
+        android:popupBackground="?attr/colorSurface"
     />
     <!--    <ImageView
         android:layout_height="wrap_content"

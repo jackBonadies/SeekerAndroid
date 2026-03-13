@@ -472,7 +472,7 @@ namespace Seeker
                             result.Append((char)entityValue);
                         }
                     }
-                    catch (Exception ignored)
+                    catch (Exception)
                     {
                         escStart++;
                         continue;

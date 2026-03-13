@@ -3,7 +3,9 @@
     <color name="colorPrimary">#437eab</color>
     <color name="colorPrimaryDark">#1B3147</color>
     <color name="colorAccent">#3498db</color>
+    <color name="colorSurface">#FF0000</color>
     <color name="cellbackSelected">#3498db</color>
+    <color name="batchSelectHighlight">#BAD3F2</color>
 
     <color name="mainPurpleTransparent">#994f58c4</color>
     <!--light transparency-->
@@ -39,4 +41,34 @@
     <color name="absoluteBackColor1">#ff000000</color>
     <color name="absoluteBackColor2">#ff303030</color>
     <color name="absoluteBackColor3">#ffffff</color>
+
+    <color name="checkCircleSelected">#303030</color>
+    <color name="checkCircleUnselected">#303030</color>
+
+    <color name="transferChipCompletedText">#2E9E5E</color>
+    <color name="transferChipCompletedBg">#1A2E9E5E</color>
+    <color name="transferChipDownloadingText">#2A7DE1</color>
+    <color name="transferChipDownloadingBg">#1A2A7DE1</color>
+    <color name="transferChipQueuedText">#E8A000</color>
+    <color name="transferChipQueuedBg">#1AFFA726</color>
+    <color name="transferChipPausedText">#5C6BC0</color>
+    <color name="transferChipPausedBg">#1A5C6BC0</color>
+    <color name="transferChipFailedText">#C62828</color>
+    <color name="transferChipFailedBg">#1AF44336</color>
+
+    <color name="transferProgressTrack">#1A000000</color>
+    <color name="transferSpeedSubdued">#707070</color>
+    <color name="transferUsernameSubdued">#999999</color>
+
+    <color name="statusConnectedDot">#4CAF50</color>
+    <color name="statusConnectedText">#2E7D32</color>
+    <color name="statusConnectedChipBg">#1A4CAF50</color>
+    <color name="statusConnectingDot">#FFA726</color>
+    <color name="statusConnectingText">#E65100</color>
+    <color name="statusConnectingChipBg">#1AFFA726</color>
+    <color name="statusDisconnectedDot">#F44336</color>
+    <color name="statusDisconnectedText">#C62828</color>
+    <color name="statusDisconnectedChipBg">#1AF44336</color>
+
+    <color name="unreadBadgeText">#FFFFFF</color>
 </resources>

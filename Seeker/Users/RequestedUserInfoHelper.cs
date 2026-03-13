@@ -82,30 +82,7 @@ namespace Seeker
                 return;
             }
 
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
-                    {
-                        RequestUserInfoLogic(uname);
-                    }));
-                }));
-            }
-            else
-            {
-                RequestUserInfoLogic(uname);
-            }
+            SessionService.Instance.RunWithReconnect(() => RequestUserInfoLogic(uname));
         }
 
         public static void RequestUserInfoLogic(string uname)

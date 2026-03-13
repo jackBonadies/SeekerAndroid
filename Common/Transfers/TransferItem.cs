@@ -30,7 +30,6 @@ namespace Seeker
 
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public TimeSpan? RemainingTime;
-        [System.Xml.Serialization.XmlIgnoreAttribute]
         public double AvgSpeed = 0;
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public bool CancelAndClearFlag = false;
@@ -59,27 +58,6 @@ namespace Seeker
         public string GetFolderName()
         {
             return FolderName;
-        }
-
-        public string GetDisplayFolderName()
-        {
-            //this is similar to QT (in the case of Seeker multiple subdirectories)
-            //but not quite.
-            //QT will show subdirs/complete/Soulseek Downloads/Music/H: (where everything after subdirs is your download folder)
-            //whereas we just show subdirs
-            //subdirs is folder name in both cases for single folder, 
-            // and say (01 / 2020 / test_folder) for nested.
-            if (GetDirectoryLevel() == 1)
-            {
-                //they are the same
-                return FolderName;
-            }
-            else
-            {
-                //split reverse.
-                var reversedArray = this.FolderName.Split('\\').Reverse();
-                return string.Join('\\', reversedArray);
-            }
         }
 
         public int GetDirectoryLevel()
@@ -139,6 +117,19 @@ namespace Seeker
         public bool ShouldEncodeFileLatin1()
         {
             return WasFilenameLatin1Decoded;
+        }
+
+        public string GetThrottleKey()
+        {
+            return Username + " : " + FullFilename;
+        }
+
+        public void ClearStateForRetry()
+        {
+            Progress = 0; //no longer red... some good user feedback
+            QueueLength = int.MaxValue; //let the State Changed update this for us...
+            Failed = false;
+            TransferItemExtra &= ~TransferItemExtras.DirNotSet;
         }
     }
 }

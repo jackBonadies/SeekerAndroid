@@ -397,46 +397,6 @@ namespace Seeker
 
         }
 
-        /// <summary>
-        /// TODO everything should probably use this wrapper
-        /// </summary>
-        /// <returns></returns>
-        public static bool PerformConnectionRequiredAction(Action action, string notLoggedInToast = null)
-        {
-            if (!PreferencesState.CurrentlyLoggedIn)
-            {
-                if(string.IsNullOrEmpty(notLoggedInToast))
-                {
-                    notLoggedInToast = SeekerState.ActiveActivityRef.GetString(Resource.String.must_be_logged_in_generic);
-                }
-                SeekerApplication.Toaster.ShowToast(notLoggedInToast, ToastLength.Short);
-                return false;
-            }
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return false; //if we get here we already did a toast message.
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { action(); });
-                }));
-                return true;
-            }
-            else
-            {
-                action();
-                return true;
-            }
-        }
-
         public static void ChangePasswordLogic(string newPassword)
         {
             SeekerState.SoulseekClient.ChangePasswordAsync(newPassword).ContinueWith(new Action<Task>
@@ -498,29 +458,7 @@ namespace Seeker
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_give_privileges), ToastLength.Short);
                 return false;
             }
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return false; //if we get here we already did a toast message.
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { GivePrivilegesLogic(username, numDaysInt); });
-                }));
-                return true;
-            }
-            else
-            {
-                GivePrivilegesLogic(username, numDaysInt);
-                return true;
-            }
+            return SessionService.Instance.RunWithReconnect(() => GivePrivilegesLogic(username, numDaysInt));
         }
 
 

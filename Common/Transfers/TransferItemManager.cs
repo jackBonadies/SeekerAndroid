@@ -10,6 +10,13 @@ namespace Seeker
     [Serializable]
     public class TransferItemManager
     {
+        public static volatile bool TransfersDirty = false;
+
+        public static void MarkTransfersDirty()
+        {
+            TransfersDirty = true;
+        }
+
         private bool isUploads;
         /// <summary>
         /// Do not use directly.  This is public only for default serialization.
@@ -43,9 +50,8 @@ namespace Seeker
         }
 
         /// <summary>
-        /// transfers that were previously InProgress before we shut down should now be considered paused (cancelled)
-        /// add users where failure occured due to them being offline to dict so we can efficiently check it in response
-        /// to status changed events AND we can AddUser to get their status updates.
+        /// On relaunch, cancel any transfers that were active or pending before shutdown,
+        /// and track users whose transfers failed due to being offline.
         /// </summary>
         public void OnRelaunch()
         {
@@ -53,13 +59,14 @@ namespace Seeker
             {
                 foreach (var ti in AllTransferItems)
                 {
-                    if (ti.State.HasFlag(TransferStates.InProgress))
-                    {
-                        ti.State = TransferStates.Cancelled;
-                        ti.RemainingTime = null;
-                    }
+                    const TransferStates activeOrAborted =
+                        TransferStates.InProgress |
+                        TransferStates.Initializing |
+                        TransferStates.Queued |
+                        TransferStates.Requested |
+                        TransferStates.Aborted;
 
-                    if (ti.State.HasFlag(TransferStates.Aborted))
+                    if ((ti.State & activeOrAborted) != 0)
                     {
                         ti.State = TransferStates.Cancelled;
                         ti.RemainingTime = null;
@@ -173,6 +180,43 @@ namespace Seeker
                 }
             }
             return transferItemConditionList;
+        }
+
+        public List<TransferItem> GetBatchSelectedForRetryCondition(TransferUIState uiState, bool selectFailed)
+        {
+            bool folderItems = uiState.GroupByFolder && uiState.CurrentlySelectedFolder == null;
+            List<TransferItem> tis = new List<TransferItem>();
+            foreach (int pos in uiState.BatchSelectedItems)
+            {
+                if (folderItems)
+                {
+                    var fi = GetItemAtUserIndex(pos, uiState) as FolderItem;
+                    foreach (TransferItem ti in fi.TransferItems)
+                    {
+                        if (selectFailed && ti.Failed)
+                        {
+                            tis.Add(ti);
+                        }
+                        else if (!selectFailed && (ti.State.HasFlag(TransferStates.Cancelled) || ti.State.HasFlag(TransferStates.Queued)))
+                        {
+                            tis.Add(ti);
+                        }
+                    }
+                }
+                else
+                {
+                    var ti = GetItemAtUserIndex(pos, uiState) as TransferItem;
+                    if (selectFailed && ti.Failed)
+                    {
+                        tis.Add(ti);
+                    }
+                    else if (!selectFailed && (ti.State.HasFlag(TransferStates.Cancelled) || ti.State.HasFlag(TransferStates.Queued)))
+                    {
+                        tis.Add(ti);
+                    }
+                }
+            }
+            return tis;
         }
 
         public List<TransferItem> GetListOfCondition(TransferStates state)
@@ -486,10 +530,10 @@ namespace Seeker
             }
             else
             {
-                FolderItem folder = null;
+                FolderItem? folder = null;
                 lock (AllFolderItems)
                 {
-                    folder = GetMatchingFolder(ti).FirstOrDefault();
+                    folder = GetMatchingFolder(ti);
                 }
                 if (folder == null)
                 {
@@ -510,20 +554,16 @@ namespace Seeker
             return true;
         }
 
-        private IEnumerable<FolderItem> GetMatchingFolder(TransferItem ti)
+        private FolderItem? GetMatchingFolder(TransferItem ti)
         {
             lock (AllFolderItems)
             {
-                string foldername = string.Empty;
-                if (string.IsNullOrEmpty(ti.FolderName))
-                {
-                    foldername = Common.Helpers.GetFolderNameFromFile(ti.FullFilename);
-                }
-                else
-                {
-                    foldername = ti.FolderName;
-                }
-                return AllFolderItems.Where((folder) => folder.FolderName == foldername && folder.Username == ti.Username);
+                var foldername = string.IsNullOrEmpty(ti.FolderName)
+                    ? Common.Helpers.GetFolderNameFromFile(ti.FullFilename)
+                    : ti.FolderName;
+
+                return AllFolderItems.FirstOrDefault(f =>
+                    f.FolderName == foldername && f.Username == ti.Username);
             }
         }
 
@@ -575,16 +615,16 @@ namespace Seeker
             lock (AllFolderItems)
             {
                 var matchingFolder = GetMatchingFolder(ti);
-                if (matchingFolder.Count() == 0)
+                if (matchingFolder == null)
                 {
                     AllFolderItems.Add(new FolderItem(ti.FolderName, ti.Username, ti));
                 }
                 else
                 {
-                    var folderItem = matchingFolder.First();
-                    folderItem.Add(ti);
+                    matchingFolder.Add(ti);
                 }
             }
+            MarkTransfersDirty();
         }
 
         public void ClearAllComplete()
@@ -605,6 +645,7 @@ namespace Seeker
                 }
                 AllFolderItems.RemoveAll((FolderItem f) => { return f.IsEmpty(); });
             }
+            MarkTransfersDirty();
         }
 
         public void ClearAllCompleteFromFolder(FolderItem fi)
@@ -618,6 +659,7 @@ namespace Seeker
             {
                 AllFolderItems.Remove(fi);
             }
+            MarkTransfersDirty();
         }
 
         private static string GetFolderNameFromTransferItem(TransferItem ti)
@@ -653,6 +695,7 @@ namespace Seeker
             {
                 AllFolderItems.Clear();
             }
+            MarkTransfersDirty();
             return tisNeedingCleanup;
         }
 
@@ -689,6 +732,7 @@ namespace Seeker
                     }
                 }
             }
+            MarkTransfersDirty();
             return toCleanUp;
         }
 
@@ -702,6 +746,7 @@ namespace Seeker
             {
                 AllFolderItems.Clear();
             }
+            MarkTransfersDirty();
         }
 
         public void ClearAllFromFolder(FolderItem fi)
@@ -715,6 +760,7 @@ namespace Seeker
             }
             fi.TransferItems.Clear();
             AllFolderItems.Remove(fi);
+            MarkTransfersDirty();
         }
 
         public List<TransferItem> ClearAllFromFolderReturnCleanupItems(FolderItem fi)
@@ -729,6 +775,7 @@ namespace Seeker
             }
             fi.TransferItems.Clear();
             AllFolderItems.Remove(fi);
+            MarkTransfersDirty();
             return tisNeedingCleanup;
         }
 
@@ -753,6 +800,7 @@ namespace Seeker
                 }
                 TransferState.CancellationTokens.Clear();
             }
+            MarkTransfersDirty();
         }
 
         public void CancelSelectedItems(TransferUIState uiState, bool prepareForClear = false)
@@ -787,6 +835,7 @@ namespace Seeker
                     }
                 }
             }
+            MarkTransfersDirty();
         }
 
         public void CancelFolder(FolderItem fi, bool prepareForClear = false)
@@ -801,15 +850,10 @@ namespace Seeker
                     {
                         ti.CancelAndClearFlag = true;
                     }
-                    var key = TransferState.ProduceCancellationTokenKey(ti);
-                    TransferState.CancellationTokens.TryGetValue(key, out CancellationTokenSource token);
-                    if (token != null)
-                    {
-                        token.Cancel();
-                        TransferState.CancellationTokens.Remove(key, out _);
-                    }
+                    TransferState.CancelAndRemoveToken(ti);
                 }
             }
+            MarkTransfersDirty();
         }
 
         /// <summary>
@@ -825,20 +869,20 @@ namespace Seeker
             lock (AllFolderItems)
             {
                 var matchingFolder = GetMatchingFolder(ti);
-                if (matchingFolder.Count() == 0)
+                if (matchingFolder == null)
                 {
                     //error folder not found...
                 }
                 else
                 {
-                    var folderItem = matchingFolder.First();
-                    folderItem.Remove(ti);
-                    if (folderItem.IsEmpty())
+                    matchingFolder.Remove(ti);
+                    if (matchingFolder.IsEmpty())
                     {
-                        AllFolderItems.Remove(folderItem);
+                        AllFolderItems.Remove(matchingFolder);
                     }
                 }
             }
+            MarkTransfersDirty();
         }
 
         /// <summary>

@@ -238,20 +238,20 @@ namespace Seeker
             return DeserializeFromString<ConcurrentDictionary<string, List<string>>>(notifyRoomsListString);
         }
 
-        public static string SaveUnreadUsernamesToString(ConcurrentDictionary<string, byte> unreadUsernames)
+        public static string SaveLastReadCountsToString(ConcurrentDictionary<string, ConcurrentDictionary<string, int>> rootLastReadCounts)
         {
-            return SerializeToString(unreadUsernames);
+            return SerializeToString(rootLastReadCounts);
         }
 
-        public static ConcurrentDictionary<string, byte> RestoreUnreadUsernamesFromString(string unreadUsernames)
+        public static ConcurrentDictionary<string, ConcurrentDictionary<string, int>> RestoreLastReadCountsFromString(string lastReadCounts)
         {
-            if (string.IsNullOrEmpty(unreadUsernames))
+            if (string.IsNullOrEmpty(lastReadCounts))
             {
-                return new ConcurrentDictionary<string, byte>();
+                return new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
             }
             else
             {
-                return DeserializeFromString<ConcurrentDictionary<string, byte>>(unreadUsernames);
+                return DeserializeFromString<ConcurrentDictionary<string, ConcurrentDictionary<string, int>>>(lastReadCounts);
             }
         }
 

@@ -239,7 +239,6 @@ namespace Seeker
         private CheckBox manuallyChooseIncompleteFolderView;
         private TextView currentCompleteFolderView;
         private TextView currentIncompleteFolderView;
-        private TextView currentSharedFolderView;
 
         private ViewGroup incompleteFolderViewLayout;
         private Button changeIncompleteDirectory;
@@ -272,7 +271,6 @@ namespace Seeker
 
         TextView noSharedFoldersView;
         RecyclerView recyclerViewFolders;
-        LinearLayoutManager recyclerViewFoldersLayoutManager;
         ReyclerUploadsAdapter recyclerViewFoldersAdapter;
 
         Button browseSelfButton;
@@ -1030,12 +1028,12 @@ namespace Seeker
         private void ClearRecentUserHistory_Click(object sender, EventArgs e)
         {
             //set to just the added users....
-            int count = SeekerState.UserList?.Count ?? 0;
+            int count = CommonState.UserList?.Count ?? 0;
             if (count > 0)
             {
-                lock (SeekerState.UserList)
+                lock (CommonState.UserList)
                 {
-                    SeekerState.RecentUsersManager.SetRecentUserList(SeekerState.UserList.Select(uli => uli.Username).ToList());
+                    SeekerState.RecentUsersManager.SetRecentUserList(CommonState.UserList.Select(uli => uli.Username).ToList());
                 }
             }
             else
@@ -1255,7 +1253,7 @@ namespace Seeker
 
         private void GetPriv_Click(object sender, EventArgs e)
         {
-            if (SessionService.IsNotLoggedIn())
+            if (SessionService.Instance.IsNotLoggedIn())
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_get_privileges), ToastLength.Long);
                 return;
@@ -1284,7 +1282,7 @@ namespace Seeker
 
             void OkayAction(object sender, string textInput)
             {
-                CommonHelpers.PerformConnectionRequiredAction(() => CommonHelpers.ChangePasswordLogic(textInput), SeekerApplication.GetString(Resource.String.must_be_logged_in_to_change_password));
+                SessionService.Instance.RunWithReconnect(() => CommonHelpers.ChangePasswordLogic(textInput));
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
                     aDiag.Dismiss();
@@ -1370,7 +1368,7 @@ namespace Seeker
 
         public void ClearIncompleteFolder()
         {
-            List<string> doNotDelete = TransfersFragment.TransferItemManagerDL.GetInUseIncompleteFolderNames();
+            List<string> doNotDelete = TransferItems.TransferItemManagerDL.GetInUseIncompleteFolderNames();
 
             bool useDownloadDir = false;
             if (PreferencesState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
@@ -1835,7 +1833,6 @@ namespace Seeker
             }
         }
 
-        public const string FromBrowseSelf = "FromBrowseSelf";
         private void BrowseSelfButton_Click(object sender, EventArgs e)
         {
             BrowseSelf(false, false);
@@ -1897,7 +1894,7 @@ namespace Seeker
 
             Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
             intent.AddFlags(ActivityFlags.SingleTop);
-            intent.PutExtra(FromBrowseSelf, 3); //the tab to go to
+            intent.PutExtra(MainActivity.GoToBrowseSelfExtra, true);
             this.StartActivity(intent);
         }
 
@@ -1966,28 +1963,13 @@ namespace Seeker
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_toggle_priv_invites), ToastLength.Short);
                 return;
             }
-            if (SessionService.CurrentlyLoggedInButDisconnectedState() && requiresConnection)
+            if (requiresConnection)
             {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { Seeker.Services.SessionService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort); }));
-                }));
+                SessionService.Instance.RunWithReconnect(() => SessionService.Instance.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort));
             }
             else
             {
-                Seeker.Services.SessionService.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
+                SessionService.Instance.ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
             }
         }
 
@@ -2739,7 +2721,7 @@ namespace Seeker
                     else
                     {
                         Logger.Firebase("showDirSettings: " + e.Message + e.StackTrace);
-                        throw e;
+                        throw;
                     }
                 }
             }
@@ -2785,7 +2767,7 @@ namespace Seeker
                     else
                     {
                         Logger.Firebase("showDirSettings: " + e.Message + e.StackTrace);
-                        throw e;
+                        throw;
                     }
                 }
             }
@@ -3399,8 +3381,8 @@ namespace Seeker
         private SeekerImportExportData GetCurrentExportData()
         {
             var seekerImportExportData = new SeekerImportExportData();
-            seekerImportExportData.Userlist = SeekerState.UserList.Select(uli => uli.Username).ToList();
-            seekerImportExportData.BanIgnoreList = SeekerState.IgnoreUserList.Select(uli => uli.Username).ToList();
+            seekerImportExportData.Userlist = CommonState.UserList.Select(uli => uli.Username).ToList();
+            seekerImportExportData.BanIgnoreList = CommonState.IgnoreUserList.Select(uli => uli.Username).ToList();
             seekerImportExportData.Wishlist = SearchTabHelper.SearchTabCollection.Where((pair1) => pair1.Value.SearchTarget == SearchTarget.Wishlist).Select((pair1) => pair1.Value.LastSearchTerm).ToList();
             List<KeyValueEl> userNotes = new List<KeyValueEl>();
             foreach (KeyValuePair<string, string> pair in SeekerState.UserNotes)

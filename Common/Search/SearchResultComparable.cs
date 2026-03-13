@@ -16,21 +16,29 @@ namespace Seeker.Search
 
         }
 
+        // discard if responses are essentially the same (i.e. the users upload speed / queue length maybe have changed (and thats okay)
+        //   but if its the same user with the same files -> its the same)
+        private bool areResponsesEssentiallyTheSame(SearchResponse x, SearchResponse y)
+        {
+            if (x.Username == y.Username && x.FileCount == y.FileCount && x.LockedFileCount == y.LockedFileCount)
+            {
+                if (x.FileCount != 0 && x.Files.First().Filename == y.Files.First().Filename)
+                {
+                    return true;
+                }
+                if (x.LockedFileCount != 0 && x.LockedFiles.First().Filename == y.LockedFiles.First().Filename)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public override int Compare(SearchResponse x, SearchResponse y)
         {
-            if (x.Username == y.Username)
+            if (areResponsesEssentiallyTheSame(x, y))
             {
-                if ((x.FileCount == y.FileCount) && (x.LockedFileCount == y.LockedFileCount))
-                {
-                    if (x.FileCount != 0 && (x.Files.First().Filename == y.Files.First().Filename))
-                    {
-                        return 0;
-                    }
-                    if (x.LockedFileCount != 0 && (x.LockedFiles.First().Filename == y.LockedFiles.First().Filename))
-                    {
-                        return 0;
-                    }
-                }
+                return 0;
             }
             return base.Compare(x, y); //the actual comparison for which is "better"
         }
@@ -45,62 +53,14 @@ namespace Seeker.Search
             searchResultSorting = _searchResultSorting;
         }
 
-        private int CompareByAvailable(SearchResponse x, SearchResponse y)
+        private static int CompareBySpeed(SearchResponse x, SearchResponse y)
         {
-            //highest precedence. locked files.
-            //so if any of the search responses have 0 unlocked files, they are considered the worst.
-            if ((x.FileCount != 0 && y.FileCount == 0) || (x.FileCount == 0 && y.FileCount != 0))
-            {
-                if (y.FileCount == 0)
-                {
-                    //x is better
-                    return -1;
-                }
-                else
-                {
-                    return 1;
-                }
-            }
-            //next highest - free upload slots. for now just they are free or not.
-            if (x.HasFreeUploadSlot != y.HasFreeUploadSlot)
-            {
-                if (!x.HasFreeUploadSlot)
-                {
-                    //x is worse
-                    return 1;
-                }
-                else
-                {
-                    return -1;
-                }
-            }
-            //next highest - queue length
-            if (x.QueueLength != y.QueueLength)
-            {
-                if (x.QueueLength > y.QueueLength)
-                {
-                    //x is worse
-                    return 1;
-                }
-                else
-                {
-                    return -1;
-                }
-            }
-            //next speed (MOST should fall here, from my testing at least).
-            if (x.UploadSpeed != y.UploadSpeed)
-            {
-                if (x.UploadSpeed > y.UploadSpeed)
-                {
-                    //x is better
-                    return -1;
-                }
-                else
-                {
-                    return 1;
-                }
-            }
-            //VERY FEW, should go here
+            // descending — faster is better
+            return -x.UploadSpeed.CompareTo(y.UploadSpeed);
+        }
+
+        private static int CompareByFiles(SearchResponse x, SearchResponse y)
+        {
             if (x.Files.Count != 0 && y.Files.Count != 0)
             {
                 return x.Files.First().Filename.CompareTo(y.Files.First().Filename);
@@ -109,7 +69,56 @@ namespace Seeker.Search
             {
                 return x.LockedFiles.First().Filename.CompareTo(y.LockedFiles.First().Filename);
             }
+            if (x.Files.Count != 0 && y.LockedFiles.Count != 0)
+            {
+                return x.Files.First().Filename.CompareTo(y.LockedFiles.First().Filename);
+            }
+            if (x.LockedFiles.Count != 0 && y.Files.Count != 0)
+            {
+                return x.LockedFiles.First().Filename.CompareTo(y.Files.First().Filename);
+            }
             return 0;
+        }
+
+        private int CompareByAvailable(SearchResponse x, SearchResponse y)
+        {
+            int cmp;
+
+            // having unlocked files beats locked-only (descending)
+            cmp = (x.FileCount != 0).CompareTo(y.FileCount != 0);
+            if (cmp != 0) return -cmp;
+
+            // free upload slot (descending)
+            cmp = x.HasFreeUploadSlot.CompareTo(y.HasFreeUploadSlot);
+            if (cmp != 0) return -cmp;
+
+            // queue length (ascending — shorter is better)
+            cmp = x.QueueLength.CompareTo(y.QueueLength);
+            if (cmp != 0) return cmp;
+
+            // speed (most results differentiate here)
+            cmp = CompareBySpeed(x, y);
+            if (cmp != 0) return cmp;
+
+            cmp = CompareByFiles(x, y);
+            if (cmp != 0) return cmp;
+            return x.Username.CompareTo(y.Username);
+        }
+
+        private string getFolderName(SearchResponse searchResponse)
+        {
+            if (searchResponse.Files.Count != 0)
+            {
+                return Common.Helpers.GetFolderNameFromFile(searchResponse.Files.First().Filename);
+            }
+            else if (searchResponse.LockedFiles.Count != 0)
+            {
+                return Common.Helpers.GetFolderNameFromFile(searchResponse.LockedFiles.First().Filename);
+            }
+            else
+            {
+                return string.Empty;
+            }
         }
 
         public virtual int Compare(SearchResponse x, SearchResponse y)
@@ -120,78 +129,25 @@ namespace Seeker.Search
             }
             else if (searchResultSorting == SearchResultSorting.Fastest)
             {
-                //for fastest, only speed matters. if they pick this then even locked files are in the running.
-                if (x.UploadSpeed != y.UploadSpeed)
-                {
-                    if (x.UploadSpeed > y.UploadSpeed)
-                    {
-                        //x is better
-                        return -1;
-                    }
-                    else
-                    {
-                        return 1;
-                    }
-                }
-                if (x.Files.Count != 0 && y.Files.Count != 0)
-                {
-                    return x.Files.First().Filename.CompareTo(y.Files.First().Filename);
-                }
-                if (x.LockedFiles.Count != 0 && y.LockedFiles.Count != 0)
-                {
-                    return x.LockedFiles.First().Filename.CompareTo(y.LockedFiles.First().Filename);
-                }
-                return 0;
+                int cmp = CompareBySpeed(x, y);
+                if (cmp != 0) return cmp;
+                return CompareByAvailable(x, y);
             }
             else if (searchResultSorting == SearchResultSorting.BitRate)
             {
-                //for fastest, only speed matters. if they pick this then even locked files are in the running.
                 x.GetDominantFileTypeAndBitRate(PreferencesState.HideLockedResultsInSearch, out double xbitRate);
                 y.GetDominantFileTypeAndBitRate(PreferencesState.HideLockedResultsInSearch, out double ybitRate);
-                if (xbitRate != ybitRate)
-                {
-                    if (xbitRate > ybitRate)
-                    {
-                        //x is better
-                        return -1;
-                    }
-                    else
-                    {
-                        return 1;
-                    }
-                }
-                // known issue (though more an an issue with the GetDominantFileType call) is when
-                // the first 2 files are mp3 - no info, and later files are mp3 (320).
-                // then it is considered mp3 - no info.
-                // if someone sends a flac without length, bitrate, or sample rate info, then 
-                // we treat that as no info and its at the bottom of the sort. I can see this 
-                // being user unfriendly or counterintuitive.
-
+                // descending — higher bitrate is better
+                int cmp = -xbitRate.CompareTo(ybitRate);
+                if (cmp != 0) return cmp;
                 return CompareByAvailable(x, y);
             }
             else if (searchResultSorting == SearchResultSorting.FolderAlphabetical)
             {
-                string xFolder = null;
-                string yFolder = null;
-                if (x.Files.Count != 0)
-                {
-                    xFolder = Common.Helpers.GetFolderNameFromFile(x.Files.First().Filename);
-                }
-                else if (x.LockedFiles.Count != 0)
-                {
-                    xFolder = Common.Helpers.GetFolderNameFromFile(x.LockedFiles.First().Filename);
-                }
+                string xFolder = getFolderName(x);
+                string yFolder = getFolderName(y);
 
-                if (y.Files.Count != 0)
-                {
-                    yFolder = Common.Helpers.GetFolderNameFromFile(y.Files.First().Filename);
-                }
-                else if (y.LockedFiles.Count != 0)
-                {
-                    yFolder = Common.Helpers.GetFolderNameFromFile(y.LockedFiles.First().Filename);
-                }
-
-                if (xFolder != null && yFolder != null)
+                if (!string.IsNullOrEmpty(xFolder) && !string.IsNullOrEmpty(yFolder))
                 {
                     int ret = xFolder.CompareTo(yFolder);
                     if (ret != 0)
@@ -203,15 +159,7 @@ namespace Seeker.Search
                 {
                     // should not happen
                 }
-
-                //if its a tie (which is probably pretty common)
-                //both username and foldername cant be same, so we are safe doing this..
-                int userRet = x.Username.CompareTo(y.Username);
-                if (userRet != 0)
-                {
-                    return userRet;
-                }
-                return 0;
+                return CompareByAvailable(x, y);
             }
             else
             {

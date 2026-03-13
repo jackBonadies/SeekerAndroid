@@ -10,7 +10,6 @@ namespace Seeker
     public class MaterialProgressBarPassThrough : LinearLayout
     {
         private bool disposed = false;
-        private bool init = false;
         public MaterialProgressBarPassThrough(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
         }

@@ -1,13 +1,15 @@
 using Android.Content;
 using Common;
 using Common.Messages;
-using Seeker.Transfers;
+using System.Collections.Generic;
 
 namespace Seeker
 {
     public static class PreferencesManager
     {
         private static object SharedPrefLock = new object();
+        private static object TransferStateSaveLock = new object();
+
         /// <summary>
         /// Restores all persisted preferences from the given shared preferences.
         /// Side-effect restores (UploadDirectoryManager, SearchTabHelper, TransfersFragment, etc.)
@@ -51,6 +53,8 @@ namespace Seeker
             PreferencesState.AutoClearCompleteUploads = prefs.GetBoolean(KeyConsts.M_AutoClearCompleteUploads, false);
             PreferencesState.TransferViewShowSizes = prefs.GetBoolean(KeyConsts.M_TransfersShowSizes, true);
             PreferencesState.TransferViewShowSpeed = prefs.GetBoolean(KeyConsts.M_TransfersShowSpeed, true);
+            PreferencesState.TransferViewGroupByFolder = prefs.GetBoolean(KeyConsts.M_TransfersGroupByFolder, false);
+            PreferencesState.TransferViewInUploadsMode = prefs.GetBoolean(KeyConsts.M_TransfersInUploadsMode, false);
             PreferencesState.DisableDownloadToastNotification = prefs.GetBoolean(KeyConsts.M_DisableToastNotifications, true);
             PreferencesState.MemoryBackedDownload = prefs.GetBoolean(KeyConsts.M_MemoryBackedDownload, false);
             PreferencesState.NoSubfolderForSingle = prefs.GetBoolean(KeyConsts.M_NoSubfolderForSingle, false);
@@ -82,6 +86,22 @@ namespace Seeker
             PreferencesState.FilterStickyString = prefs.GetString(KeyConsts.M_FilterStickyString, string.Empty);
             PreferencesState.SearchResultStyle = prefs.GetInt(KeyConsts.M_SearchResultStyle, 1);
             PreferencesState.DefaultSearchResultSortAlgorithm = (SearchResultSorting)(prefs.GetInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, 0));
+
+            PreferencesState.SearchHistory = GetSearchHistory(prefs);
+        }
+
+        private static List<string> GetSearchHistory(ISharedPreferences prefs)
+        {
+            string searchHistoryXml = prefs.GetString(KeyConsts.M_SearchHistory, string.Empty);
+            if (!string.IsNullOrEmpty(searchHistoryXml))
+            {
+                using (var stream = new System.IO.StringReader(searchHistoryXml))
+                {
+                    var serializer = new System.Xml.Serialization.XmlSerializer(typeof(List<string>));
+                    return serializer.Deserialize(stream) as List<string> ?? new List<string>();
+                }
+            }
+            return new List<string>();
         }
 
         public static void RestoreSocialSettings(ISharedPreferences prefs)
@@ -102,7 +122,7 @@ namespace Seeker
             PreferencesState.SharingOn = prefs.GetBoolean(KeyConsts.M_SharingOn, false);
             PreferencesState.UploadSpeed = prefs.GetInt(KeyConsts.M_UploadSpeed, -1);
             PreferencesState.AllowUploadsOnMetered = prefs.GetBoolean(KeyConsts.M_AllowUploadsOnMetered, true);
-            PreferencesState.UserListSortOrder = prefs.GetInt(KeyConsts.M_UserListSortOrder, 0);
+            PreferencesState.UserListSortOrder = (SortOrder)prefs.GetInt(KeyConsts.M_UserListSortOrder, 0);
             PreferencesState.LogDiagnostics = prefs.GetBoolean(KeyConsts.M_LOG_DIAGNOSTICS, false);
             PreferencesState.LimitSimultaneousDownloads = prefs.GetBoolean(KeyConsts.M_LimitSimultaneousDownloads, false);
             PreferencesState.MaxSimultaneousLimit = prefs.GetInt(KeyConsts.M_MaxSimultaneousLimit, 1);
@@ -135,7 +155,7 @@ namespace Seeker
                 editor.PutBoolean(KeyConsts.M_ListenerEnabled, PreferencesState.ListenerEnabled);
                 editor.PutInt(KeyConsts.M_ListenerPort, PreferencesState.ListenerPort);
                 editor.PutBoolean(KeyConsts.M_ListenerUPnpEnabled, PreferencesState.ListenerUPnpEnabled);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -150,7 +170,7 @@ namespace Seeker
                 editor.PutBoolean(KeyConsts.M_UploadLimitEnabled, PreferencesState.SpeedLimitUploadOn);
                 editor.PutBoolean(KeyConsts.M_UploadPerTransfer, PreferencesState.SpeedLimitUploadIsPerTransfer);
                 editor.PutInt(KeyConsts.M_UploadSpeedLimitBytes, PreferencesState.SpeedLimitUploadBytesSec);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -165,7 +185,7 @@ namespace Seeker
                 editor.PutInt(KeyConsts.M_SmartFilter_KeywordsOrder, PreferencesState.SmartFilterOptions.KeywordsOrder);
                 editor.PutInt(KeyConsts.M_SmartFilter_TypesOrder, PreferencesState.SmartFilterOptions.FileTypesOrder);
                 editor.PutInt(KeyConsts.M_SmartFilter_CountsOrder, PreferencesState.SmartFilterOptions.NumFilesOrder);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -175,7 +195,27 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_ShowTickerView, PreferencesState.ShowTickerView);
-                editor.Commit();
+                editor.Apply();
+            }
+        }
+
+        public static void SaveTransferViewGroupByFolder()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_TransfersGroupByFolder, PreferencesState.TransferViewGroupByFolder);
+                editor.Apply();
+            }
+        }
+
+        public static void SaveTransferViewInUploadsMode()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_TransfersInUploadsMode, PreferencesState.TransferViewInUploadsMode);
+                editor.Apply();
             }
         }
 
@@ -185,7 +225,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_ShowStatusesView, PreferencesState.ShowStatusesView);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -195,7 +235,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_RoomUserListShowFriendsAtTop, PreferencesState.PutFriendsOnTop);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -205,7 +245,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_RoomUserListSortOrder, (int)PreferencesState.SortChatroomUsersBy);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -215,7 +255,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_Password, PreferencesState.Password);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -225,7 +265,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, (int)PreferencesState.DefaultSearchResultSortAlgorithm);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -235,7 +275,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_Lanuage, PreferencesState.Language);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -245,7 +285,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_AllowUploadsOnMetered, PreferencesState.AllowUploadsOnMetered);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -255,7 +295,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_NotifyFolderComplete, PreferencesState.NotifyOnFolderCompleted);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -265,7 +305,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_AutoRetryBackOnline, PreferencesState.AutoRetryBackOnline);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -275,7 +315,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_AutoSetAwayOnInactivity, PreferencesState.AutoAwayOnInactivity);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -285,7 +325,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_ShowSmartFilters, PreferencesState.ShowSmartFilters);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -295,7 +335,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_LOG_DIAGNOSTICS, PreferencesState.LogDiagnostics);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -305,7 +345,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_ServiceOnStartup, PreferencesState.StartServiceOnStartup);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -315,7 +355,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, PreferencesState.AllowPrivateRoomInvitations);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -325,7 +365,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_DayVariant, (int)PreferencesState.DayModeVariant);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -335,7 +375,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_NightVariant, (int)PreferencesState.NightModeVariant);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -345,7 +385,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_DayNightMode, PreferencesState.DayNightMode);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -355,7 +395,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserInfoPicture, PreferencesState.UserInfoPictureName);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -364,8 +404,8 @@ namespace Seeker
             lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutInt(KeyConsts.M_UserListSortOrder, PreferencesState.UserListSortOrder);
-                editor.Commit();
+                editor.PutInt(KeyConsts.M_UserListSortOrder, (int)PreferencesState.UserListSortOrder);
+                editor.Apply();
             }
         }
 
@@ -375,7 +415,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_LegacyLanguageMigrated, PreferencesState.LegacyLanguageMigrated);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -386,7 +426,7 @@ namespace Seeker
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_ManualIncompleteDirectoryUri, PreferencesState.ManualIncompleteDataDirectoryUri);
                 editor.PutBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -401,7 +441,7 @@ namespace Seeker
                 editor.PutBoolean(KeyConsts.M_NoSubfolderForSingle, PreferencesState.NoSubfolderForSingle);
                 editor.PutString(KeyConsts.M_ManualIncompleteDirectoryUri, PreferencesState.ManualIncompleteDataDirectoryUri);
                 editor.PutBoolean(KeyConsts.M_ManualIncompleteDirectoryUriIsFromTree, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -424,7 +464,7 @@ namespace Seeker
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_LimitSimultaneousDownloads, restrict);
                 editor.PutInt(KeyConsts.M_MaxSimultaneousLimit, max);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -437,7 +477,7 @@ namespace Seeker
                 editor.PutInt(KeyConsts.M_LifetimeSeconds, lifetime);
                 editor.PutInt(KeyConsts.M_PortMapped, port);
                 editor.PutString(KeyConsts.M_LastSetLocalIP, localIP);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -459,7 +499,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserInfoBio, bio);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -469,7 +509,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserList, serialized);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -479,7 +519,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_IgnoreUserList, serialized);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -489,7 +529,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserNotes, serialized);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -499,7 +539,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_UserOnlineAlerts, serialized);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -509,7 +549,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_AutoJoinRooms, joinedRoomsString);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -519,7 +559,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_chatroomsToNotify, notifyRoomsString);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -529,7 +569,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_SearchTabsState_Headers, serialized);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -539,17 +579,17 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_Messages, serialized);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
-        public static void SaveUnreadMessageUsernames(string serialized)
+        public static void SaveLastReadMessageCounts(string serialized)
         {
             lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_UnreadMessageUsernames, serialized);
-                editor.Commit();
+                editor.PutString(KeyConsts.M_LastReadMessageCounts, serialized);
+                editor.Apply();
             }
         }
 
@@ -559,7 +599,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_RecentUsersList, serialized);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -569,7 +609,24 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_SearchHistory, string.Empty);
-                editor.Commit();
+                editor.Apply();
+            }
+        }
+
+        public static void SaveSearchHistory()
+        {
+            lock (SharedPrefLock)
+            {
+                string serialized;
+                using (var writer = new System.IO.StringWriter())
+                {
+                    var serializer = new System.Xml.Serialization.XmlSerializer(typeof(List<string>));
+                    serializer.Serialize(writer, PreferencesState.SearchHistory);
+                    serialized = writer.ToString();
+                }
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_SearchHistory, serialized);
+                editor.Apply();
             }
         }
 
@@ -579,7 +636,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_PostNotificationRequestAlreadyShown, true);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -598,7 +655,7 @@ namespace Seeker
                 editor.Remove(KeyConsts.M_CACHE_friendlyDirNameToUriMapping_v2);
                 editor.Remove(KeyConsts.M_CACHE_tokenIndex_v2);
                 editor.Remove(KeyConsts.M_CACHE_intHelperIndex_v2);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -608,7 +665,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_CACHE_nonHiddenFileCount_v3, count);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -642,6 +699,8 @@ namespace Seeker
                 editor.PutBoolean(KeyConsts.M_RememberUserHistory, PreferencesState.ShowRecentUsers);
                 editor.PutBoolean(KeyConsts.M_TransfersShowSizes, PreferencesState.TransferViewShowSizes);
                 editor.PutBoolean(KeyConsts.M_TransfersShowSpeed, PreferencesState.TransferViewShowSpeed);
+                editor.PutBoolean(KeyConsts.M_TransfersGroupByFolder, PreferencesState.TransferViewGroupByFolder);
+                editor.PutBoolean(KeyConsts.M_TransfersInUploadsMode, PreferencesState.TransferViewInUploadsMode);
                 editor.PutBoolean(KeyConsts.M_OnlyFreeUploadSlots, PreferencesState.FreeUploadSlotsOnly);
                 editor.PutBoolean(KeyConsts.M_HideLockedSearch, PreferencesState.HideLockedResultsInSearch);
                 editor.PutBoolean(KeyConsts.M_HideLockedBrowse, PreferencesState.HideLockedResultsInBrowse);
@@ -659,26 +718,25 @@ namespace Seeker
                     editor.PutString(KeyConsts.M_UserList, userListSerialized);
                 }
 
-                editor.Commit();
+                editor.Apply();
             }
         }
 
         /// <summary>
-        /// Saves search history and optionally the sticky filter state from SearchFragment.OnPause.
+        /// Saves the sticky filter state and search result style from SearchFragment.OnPause.
         /// </summary>
-        public static void SaveSearchFragmentState(string searchHistory, bool filterSticky, string filterStickyString, int searchResultStyle)
+        public static void SaveSearchFragmentFilterState(bool filterSticky, string filterStickyString, int searchResultStyle)
         {
             lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
-                editor.PutString(KeyConsts.M_SearchHistory, searchHistory);
                 if (filterSticky)
                 {
                     editor.PutBoolean(KeyConsts.M_FilterSticky, filterSticky);
                     editor.PutString(KeyConsts.M_FilterStickyString, filterStickyString);
                 }
                 editor.PutInt(KeyConsts.M_SearchResultStyle, searchResultStyle);
-                editor.Commit();
+                editor.Apply();
             }
         }
 
@@ -688,12 +746,12 @@ namespace Seeker
         public static void SaveTransferItems(string downloads, string uploads)
         {
             lock (SharedPrefLock)
-                lock (TransfersFragment.TransferStateSaveLock)
+                lock (TransferStateSaveLock)
                 {
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_TransferList, downloads);
                     editor.PutString(KeyConsts.M_TransferListUpload, uploads);
-                    editor.Commit();
+                    editor.Apply();
                 }
         }
 
@@ -707,7 +765,7 @@ namespace Seeker
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutString(KeyConsts.M_CACHE_stringUriPairs_v2, string.Empty);
                 editor.PutString(KeyConsts.M_CACHE_stringUriPairs_v3, v3Data);
-                editor.Commit();
+                editor.Apply();
             }
         }
     }

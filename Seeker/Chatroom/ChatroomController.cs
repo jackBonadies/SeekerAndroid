@@ -881,29 +881,7 @@ namespace Seeker.Chatroom
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.requesting_room_list), ToastLength.Short);
                 }
             }
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { GetRoomListLogic(feedback); }));
-                }));
-            }
-            else
-            {
-                GetRoomListLogic(feedback);
-            }
+            SessionService.Instance.RunWithReconnect(() => GetRoomListLogic(feedback));
         }
 
         public static void GetRoomListLogic(bool feedback)
@@ -913,7 +891,7 @@ namespace Seeker.Chatroom
             {
                 task = SeekerState.SoulseekClient.GetRoomListAsync();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return;
             }
@@ -962,29 +940,7 @@ namespace Seeker.Chatroom
                     }
                 }
             }
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { CreateRoomLogic(roomName, isPrivate, feedback); }));
-                }));
-            }
-            else
-            {
-                CreateRoomLogic(roomName, isPrivate, feedback);
-            }
+            SessionService.Instance.RunWithReconnect(() => CreateRoomLogic(roomName, isPrivate, feedback));
         }
 
         public static void AddRemoveUserToPrivateRoomAPI(string roomName, string userToAdd, bool feedback, bool asMod, bool removeInstead = false)
@@ -1024,29 +980,7 @@ namespace Seeker.Chatroom
                     });
                 }
             }
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { AddUserToPrivateRoomLogic(roomName, userToAdd, feedback, asMod, removeInstead); }));
-                }));
-            }
-            else
-            {
-                AddUserToPrivateRoomLogic(roomName, userToAdd, feedback, asMod, removeInstead);
-            }
+            SessionService.Instance.RunWithReconnect(() => AddUserToPrivateRoomLogic(roomName, userToAdd, feedback, asMod, removeInstead));
         }
 
 
@@ -1172,29 +1106,7 @@ namespace Seeker.Chatroom
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.dropping_MEMBERSHIP_of_ROOMNAME), ToastLength.Short);
                 }
             }
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { DropMembershipOrOwnershipLogic(roomName, ownership, feedback); }));
-                }));
-            }
-            else
-            {
-                DropMembershipOrOwnershipLogic(roomName, ownership, feedback);
-            }
+            SessionService.Instance.RunWithReconnect(() => DropMembershipOrOwnershipLogic(roomName, ownership, feedback));
         }
 
         public static void DropMembershipOrOwnershipLogic(string roomName, bool ownership, bool feedback)
@@ -1262,29 +1174,7 @@ namespace Seeker.Chatroom
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.setting_ticker), ToastLength.Short);
                 }
             }
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { SetTickerLogic(roomName, tickerMessage, feedback); }));
-                }));
-            }
-            else
-            {
-                SetTickerLogic(roomName, tickerMessage, feedback);
-            }
+            SessionService.Instance.RunWithReconnect(() => SetTickerLogic(roomName, tickerMessage, feedback));
         }
 
         public static void SetTickerLogic(string roomName, string tickerMessage, bool feedback)
@@ -1339,29 +1229,7 @@ namespace Seeker.Chatroom
                     SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.leaving_room), roomName), ToastLength.Short);
                 }
             }
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                t.ContinueWith(new Action<Task>((Task t) =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
-                    }
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { JoinRoomLogic(roomName, joining, refreshViewAfter, feedback, fromAutoJoin); }));
-                }));
-            }
-            else
-            {
-                JoinRoomLogic(roomName, joining, refreshViewAfter, feedback, fromAutoJoin);
-            }
+            SessionService.Instance.RunWithReconnect(() => JoinRoomLogic(roomName, joining, refreshViewAfter, feedback, fromAutoJoin));
         }
 
         public static void JoinRoomLogic(string roomName, bool joining, bool refreshViewAfter, bool feedback, bool fromAutoJoin)

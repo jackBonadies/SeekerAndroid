@@ -33,14 +33,14 @@
             android:elevation="4dp"
             android:layout_height="1dp"
         />
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:layout_below="@id/recyclerViewHorizontalPathSep"
             android:minWidth="25px"
             android:minHeight="25px"
             android:paddingBottom="120dp"
             android:clipToPadding="false"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:id="@+id/listViewDirectories"
         />
         <TextView

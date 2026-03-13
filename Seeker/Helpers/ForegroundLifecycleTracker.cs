@@ -122,7 +122,7 @@ namespace Seeker
             if (SeekerState.OurCurrentStatusIsAway)
             {
                 Logger.Debug("Our current status is away, lets set it back to online!");
-                SessionService.SetStatusApi(false);
+                SessionService.Instance.SetStatusApi(false);
             }
         }
 
@@ -186,7 +186,7 @@ namespace Seeker
         private void AutoAwayTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             Logger.Debug("We were away for the interval specified.  time to set status to away.");
-            SessionService.SetStatusApi(true);
+            SessionService.Instance.SetStatusApi(true);
         }
 
         public static bool IsBackground()

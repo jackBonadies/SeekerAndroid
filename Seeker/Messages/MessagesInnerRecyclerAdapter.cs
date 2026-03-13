@@ -196,6 +196,7 @@ namespace Seeker.Messages
     public class MessageInnerViewSent : LinearLayout
     {
         public MessageInnerViewSentHolder ViewHolder { get; set; }
+        public bool IsGroupChat { get; set; }
         private TextView viewTimeStamp;
         private TextView viewMessage;
         private AndroidX.CardView.Widget.CardView cardView;
@@ -239,14 +240,7 @@ namespace Seeker.Messages
                     return SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainPurple);
                 case SentStatus.Failed:
                     resourceIntColor = Resource.Color.hardErrorRed;
-                    if (OperatingSystem.IsAndroidVersionAtLeast(23))
-                    {
-                        return GetColorFromInteger(ContextCompat.GetColor(SeekerState.ActiveActivityRef, resourceIntColor));
-                    }
-                    else
-                    {
-                        return SeekerState.ActiveActivityRef.Resources.GetColor(resourceIntColor);
-                    }
+                    return GetColorFromInteger(ContextCompat.GetColor(SeekerState.ActiveActivityRef, resourceIntColor));
                 case SentStatus.None:
                     throw new Exception("Sent status should not be none");
             }
@@ -267,7 +261,9 @@ namespace Seeker.Messages
             }
             else
             {
-                viewTimeStamp.Text = CommonHelpers.GetNiceDateTime(msg.LocalDateTime);
+                viewTimeStamp.Text = IsGroupChat
+                    ? CommonHelpers.GetNiceDateTimeGroupChat(msg.LocalDateTime)
+                    : CommonHelpers.GetNiceDateTime(msg.LocalDateTime);
             }
             UiHelpers.SetMessageTextView(viewMessage, msg);
         }

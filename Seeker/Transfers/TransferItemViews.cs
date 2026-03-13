@@ -2,6 +2,7 @@
 using Android.Content;
 using Android.Content.Res;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Runtime;
 using Android.Util;
@@ -13,6 +14,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Android.Text;
+using Android.Text.Style;
 
 namespace Seeker
 {
@@ -41,7 +44,13 @@ namespace Seeker
 
         public TextView GetAdditionalStatusInfoView();
 
-        public TextView GetProgressSizeTextView();
+        public View GetStatusDot();
+
+        public TextView GetSizeTextView();
+
+        public TextView GetSpeedTextView();
+
+        public TextView GetSizeSeparatorView();
 
         public bool GetShowProgressSize();
 
@@ -56,22 +65,42 @@ namespace Seeker
         private TextView viewCurrentFilename;
         private TextView viewNumRemaining;
 
-        private TextView viewProgressSize;
-        private TextView viewStatus; //In Queue, Failed, Done, In Progress
         private TextView viewStatusAdditionalInfo; //if in Queue then show position, if In Progress show time remaining.
+        private View statusDot;
+        private TextView viewSize;
+        private TextView viewSpeed;
+        private TextView viewSizeSeparator;
+        private ImageView selectionCheckbox;
+        private FrameLayout actionContainer;
 
         public ITransferItem InnerTransferItem { get; set; }
         //private TextView viewQueue;
         public ProgressBar progressBar { get; set; }
+        public Transfers.SegmentedProgressBar segmentedProgressBar;
 
         public TextView GetAdditionalStatusInfoView()
         {
             return viewStatusAdditionalInfo;
         }
 
-        public TextView GetProgressSizeTextView()
+        public View GetStatusDot()
         {
-            return viewProgressSize;
+            return statusDot;
+        }
+
+        public TextView GetSizeTextView()
+        {
+            return viewSize;
+        }
+
+        public TextView GetSpeedTextView()
+        {
+            return viewSpeed;
+        }
+
+        public TextView GetSizeSeparatorView()
+        {
+            return viewSizeSeparator;
         }
 
         public bool showSize;
@@ -91,14 +120,7 @@ namespace Seeker
         {
             bool _showSizes = attrs.GetAttributeBooleanValue("http://schemas.android.com/apk/res-auto", "show_progress_size", false);
 
-            if (_showSizes)
-            {
                 LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder_showProgressSize, this, true);
-            }
-            else
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder, this, true);
-            }
 
             setupChildren();
         }
@@ -106,14 +128,7 @@ namespace Seeker
         {
             bool _showSizes = attrs.GetAttributeBooleanValue("http://schemas.android.com/apk/res-auto", "show_progress_size", false);
 
-            if (_showSizes)
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder_showProgressSize, this, true);
-            }
-            else
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder, this, true);
-            }
+            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder_showProgressSize, this, true);
 
             setupChildren();
         }
@@ -121,14 +136,7 @@ namespace Seeker
         public static TransferItemViewFolder inflate(ViewGroup parent, bool _showSize, bool _showSpeed)
         {
             TransferItemViewFolder itemView = null;
-            if (_showSize)
-            {
-                itemView = (TransferItemViewFolder)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_view_folder_dummy_showSizeProgress, parent, false);
-            }
-            else
-            {
-                itemView = (TransferItemViewFolder)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_view_folder_dummy, parent, false);
-            }
+            itemView = (TransferItemViewFolder)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_view_folder_dummy_showSizeProgress, parent, false);
             itemView.showSpeed = _showSpeed;
             itemView.showSize = _showSize;
             return itemView;
@@ -138,13 +146,25 @@ namespace Seeker
         {
             viewUsername = FindViewById<TextView>(Resource.Id.textViewUser);
             viewFoldername = FindViewById<TextView>(Resource.Id.textViewFoldername);
-            progressBar = FindViewById<ProgressBar>(Resource.Id.simpleProgressBar);
-            viewProgressSize = FindViewById<TextView>(Resource.Id.textViewProgressSize);
+            segmentedProgressBar = FindViewById<Transfers.SegmentedProgressBar>(Resource.Id.segmentedProgressBar);
+            progressBar = null;
 
-            viewStatus = FindViewById<TextView>(Resource.Id.textViewStatus);
             viewStatusAdditionalInfo = FindViewById<TextView>(Resource.Id.textViewStatusAdditionalInfo);
             viewNumRemaining = FindViewById<TextView>(Resource.Id.filesRemaining);
             viewCurrentFilename = FindViewById<TextView>(Resource.Id.currentFile);
+
+            statusDot = FindViewById<View>(Resource.Id.statusDot);
+            viewSize = FindViewById<TextView>(Resource.Id.textViewSize);
+            viewSpeed = FindViewById<TextView>(Resource.Id.textViewSpeed);
+            viewSizeSeparator = FindViewById<TextView>(Resource.Id.textViewSizeSeparator);
+
+            selectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
+            actionContainer = FindViewById<FrameLayout>(Resource.Id.actionContainer);
+
+            if (OperatingSystem.IsAndroidVersionAtLeast(28))
+            {
+                viewFoldername.Typeface = Typeface.Create(viewFoldername.Typeface, 600, false);
+            }
         }
 
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
@@ -159,81 +179,25 @@ namespace Seeker
             viewFoldername.Text = folderItem.GetDisplayFolderName();
             var state = folderItem.GetState(out bool isFailed, out _);
 
-
-            TransferViewHelper.SetViewStatusText(viewStatus, state, item.IsUpload(), true);
-            TransferViewHelper.SetAdditionalStatusText(viewStatusAdditionalInfo, item, state, true); //TODOTODO
+            TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSizeSeparator, viewSize, viewSpeed, item, state, this.showSize, this.showSpeed, isFolder: true);
             TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state);
-            int prog = folderItem.GetFolderProgress(out long totalBytes, out _);
-            progressBar.Progress = prog;
-            if (this.showSize)
-            {
-                (viewProgressSize as TransfersFragment.ProgressSizeTextView).Progress = prog;
-                TransferViewHelper.SetSizeText(viewProgressSize, prog, totalBytes);
-            }
-
+            TransferViewHelper.UpdateSegmentedProgressBar(segmentedProgressBar, folderItem);
 
             viewUsername.Text = folderItem.Username;
-            if (item.IsUpload() && state.HasFlag(TransferStates.Cancelled))
+
+            if (isInBatchMode)
             {
-                isFailed = true;
-            }
-            if (isFailed)//state.HasFlag(TransferStates.Errored) || state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut))
-            {
-                progressBar.Progress = 100;
-                if (this.showSize)
-                {
-                    (viewProgressSize as Seeker.TransfersFragment.ProgressSizeTextView).Progress = 100;
-                }
-#pragma warning disable 0618
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    progressBar.ProgressTintList = ColorStateList.ValueOf(Color.Red);
-                }
-                else
-                {
-                    progressBar.ProgressDrawable.SetColorFilter(Color.Red, PorterDuff.Mode.Multiply);
-                }
-#pragma warning restore 0618
+                actionContainer.Visibility = ViewStates.Visible;
+                selectionCheckbox.Visibility = ViewStates.Visible;
+                bool isSelected = TransfersViewState.Instance.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition);
+                selectionCheckbox.SetImageResource(isSelected ? Resource.Drawable.check_circle : Resource.Drawable.check_circle_outline);
+                this.Background = isSelected ? Resources.GetDrawable(Resource.Color.batchSelectHighlight, null) : null;
             }
             else
             {
-#pragma warning disable 0618
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    progressBar.ProgressTintList = ColorStateList.ValueOf(Color.DodgerBlue);
-                }
-                else
-                {
-                    progressBar.ProgressDrawable.SetColorFilter(Color.DodgerBlue, PorterDuff.Mode.Multiply);
-                }
-#pragma warning restore 0618
-            }
-            if (isInBatchMode && TransfersViewState.Instance.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition))
-            {
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
-                    //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                }
-                else
-                {
-                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                    //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
-                }
-            }
-            else
-            {
-                //this.Background
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    this.Background = null;//Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                                           //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                }
-                else
-                {
-                    this.Background = null;//Resources.GetDrawable(Resource.Color.cellback);
-                                           //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
-                }
+                actionContainer.Visibility = ViewStates.Gone;
+                selectionCheckbox.Visibility = ViewStates.Invisible;
+                this.Background = null;
             }
         }
     }
@@ -290,155 +254,92 @@ namespace Seeker
 
         public static void SetAdditionalFolderInfoState(TextView filesLongStatus, TextView currentFile, FolderItem fi, TransferStates folderState)
         {
-            //if in progress, X files remaining, Current File:
-            //if in queue, ^ ^ (or initializing, requesting, basically if in progress in the literal sense)
-            //if completed, X files suceeded - hide p2
-            //if failed, X files suceeded (if applicable), X files failed. - hide p2
-            //if paused, X files suceeded, X failed, X paused. - hide p2
-            if (folderState.HasFlag(TransferStates.InProgress) || folderState.HasFlag(TransferStates.Queued) || folderState.HasFlag(TransferStates.Initializing) || folderState.HasFlag(TransferStates.Requested) || folderState.HasFlag(TransferStates.Aborted))
+            SetFolderStatusSpannable(filesLongStatus, fi);
+
+            if (folderState.HasFlag(TransferStates.InProgress) || folderState.HasFlag(TransferStates.Initializing) || folderState.HasFlag(TransferStates.Requested) || folderState.HasFlag(TransferStates.Aborted))
             {
-                int numRemaining = 0;
                 string currentFilename = string.Empty;
-                int total = 0;
                 lock (fi.TransferItems)
                 {
                     foreach (var ti in fi.TransferItems)
                     {
-                        total++;
-                        if (!(ti.State.HasFlag(TransferStates.Completed)))
-                        {
-                            numRemaining++;
-                        }
                         if (ti.State.HasFlag(TransferStates.InProgress))
                         {
                             currentFilename = ti.Filename;
                         }
                     }
-                    if (currentFilename == string.Empty) //init or requested case
+                    if (currentFilename == string.Empty)
                     {
                         currentFilename = fi.TransferItems.First().Filename;
                     }
                 }
 
-                filesLongStatus.Text = string.Format(SeekerApplication.GetString(Resource.String.X_of_Y_Remaining), numRemaining, total);
                 currentFile.Visibility = ViewStates.Visible;
-                currentFile.Text = string.Format("Current: {0}", currentFilename);
-            }
-            else if (folderState.HasFlag(TransferStates.Succeeded))
-            {
-                int numSucceeded = fi.TransferItems.Count;
+                currentFile.Text = currentFilename;
 
-                filesLongStatus.Text = string.Format("{0} {1} {2}", SeekerApplication.GetString(Resource.String.all), numSucceeded, SeekerApplication.GetString(Resource.String.Succeeded).ToLower());
-                currentFile.Visibility = ViewStates.Gone;
-            }
-            else if (folderState.HasFlag(TransferStates.Errored) || folderState.HasFlag(TransferStates.Rejected) || folderState.HasFlag(TransferStates.TimedOut))
-            {
-                int numFailed = 0;
-                int numSucceeded = 0;
-                int numPaused = 0;
-                lock (fi.TransferItems)
-                {
+                var resources = currentFile.Context.Resources;
+                var theme = currentFile.Context.Theme;
+                int dlColor = resources.GetColor(Resource.Color.transferChipDownloadingText, theme);
+                currentFile.SetTextColor(new Color(dlColor));
 
-                    foreach (var ti in fi.TransferItems)
-                    {
-                        if (ti.State.HasFlag(TransferStates.Succeeded))
-                        {
-                            numSucceeded++;
-                        }
-                        else if (ti.State.HasFlag(TransferStates.Errored) || ti.State.HasFlag(TransferStates.Rejected) || ti.State.HasFlag(TransferStates.TimedOut))
-                        {
-                            numFailed++;
-                        }
-                        else if (ti.State.HasFlag(TransferStates.Cancelled))
-                        {
-                            numPaused++;
-                        }
-                    }
-                }
-
-                SetFilesLongStatusIfNotInProgress(filesLongStatus, fi, numFailed, numSucceeded, numPaused);
-                currentFile.Visibility = ViewStates.Gone;
-                //set views + visi
-            }
-            else if (folderState.HasFlag(TransferStates.Cancelled))
-            {
-                int numFailed = 0;
-                int numSucceeded = 0;
-                int numPaused = 0;
-                lock (fi.TransferItems)
-                {
-
-                    foreach (var ti in fi.TransferItems)
-                    {
-                        if (ti.State.HasFlag(TransferStates.Succeeded))
-                        {
-                            numSucceeded++;
-                        }
-                        else if (ti.State.HasFlag(TransferStates.Cancelled))
-                        {
-                            numPaused++;
-                        }
-                        else if (ti.State.HasFlag(TransferStates.Errored))
-                        {
-                            numFailed++;
-                        }
-                    }
-                }
-
-                if (numPaused == 0)
-                {
-                    //error
-                }
-
-                SetFilesLongStatusIfNotInProgress(filesLongStatus, fi, numFailed, numSucceeded, numPaused);
-                currentFile.Visibility = ViewStates.Gone;
-                //set views + visi
+                var arrow = resources.GetDrawable(Resource.Drawable.arrow_down, theme);
+                int iconSize = (int)(10 * resources.DisplayMetrics.Density);
+                arrow.SetBounds(0, 0, iconSize, iconSize);
+                arrow.SetTint(dlColor);
+                currentFile.SetCompoundDrawables(arrow, null, null, null);
+                currentFile.CompoundDrawablePadding = (int)(2 * resources.DisplayMetrics.Density);
             }
             else
             {
-                //i.e. None, can be due to uploading 0 byte files. or for transfers that never got initialized.
-                //     dont leave this as is bc it will display "3 files remaining and Current: filename..." always.
                 currentFile.Visibility = ViewStates.Gone;
-                filesLongStatus.Text = string.Format(SeekerApplication.GetString(Resource.String.Num_FilesRemaining), fi.TransferItems.Count);
+                currentFile.SetCompoundDrawables(null, null, null, null);
             }
-
         }
 
-        private static void SetFilesLongStatusIfNotInProgress(TextView filesLongStatus, FolderItem fi, int numFailed, int numSucceeded, int numPaused)
+        private static void SetFolderStatusSpannable(TextView view, FolderItem fi)
         {
-            string failedString = SeekerApplication.GetString(Resource.String.failed).ToLower();
-            string succeededString = SeekerApplication.GetString(Resource.String.Succeeded).ToLower();
-            string AllString = SeekerApplication.GetString(Resource.String.all);
-            string cancelledString = fi.IsUpload() ? SeekerApplication.GetString(Resource.String.Aborted).ToLower() : SeekerApplication.GetString(Resource.String.paused).ToLower();
-            // 0 0 0 isnt one.
-            if (numSucceeded == 0 && numFailed == 0 && numPaused != 0) //all paused
+            GetStatusNumbers(fi.TransferItems, out int numInProgress, out int numFailed,
+                out int numPaused, out int numSucceeded, out int numQueued);
+            int total = fi.TransferItems.Count;
+
+            var resources = view.Context.Resources;
+            var theme = view.Context.Theme;
+            var sb = new SpannableStringBuilder();
+            bool first = true;
+
+            if (numSucceeded > 0) AppendStatusSegment(sb, $"{numSucceeded} done", Resource.Color.transferChipCompletedText, resources, theme, ref first);
+            if (numInProgress > 0) AppendStatusSegment(sb, $"{numInProgress} active", Resource.Color.transferChipDownloadingText, resources, theme, ref first);
+            if (numFailed > 0) AppendStatusSegment(sb, $"{numFailed} failed", Resource.Color.transferChipFailedText, resources, theme, ref first);
+            if (numPaused > 0) AppendStatusSegment(sb, $"{numPaused} paused", Resource.Color.transferChipPausedText, resources, theme, ref first);
+            if (numQueued > 0) AppendStatusSegment(sb, $"{numQueued} queued", Resource.Color.transferChipQueuedText, resources, theme, ref first);
+
+            string ofTotal = $" of {total}";
+            int subduedColor = resources.GetColor(Resource.Color.transferSpeedSubdued, theme);
+            var ofTotalSpan = new SpannableString(ofTotal);
+            ofTotalSpan.SetSpan(new ForegroundColorSpan(new Color(subduedColor)), 0, ofTotal.Length, SpanTypes.ExclusiveExclusive);
+            sb.Append(ofTotalSpan);
+
+            view.SetText(sb, TextView.BufferType.Spannable);
+        }
+
+        private static void AppendStatusSegment(SpannableStringBuilder sb, string text, int colorResId,
+            Android.Content.Res.Resources resources, Android.Content.Res.Resources.Theme theme, ref bool first)
+        {
+            if (!first)
             {
-                filesLongStatus.Text = string.Format(AllString + " {0} {1}", numPaused, cancelledString);
+                string sep = " \u00b7 ";
+                int subduedColor = resources.GetColor(Resource.Color.transferSpeedSubdued, theme);
+                var sepSpan = new SpannableString(sep);
+                sepSpan.SetSpan(new ForegroundColorSpan(new Color(subduedColor)), 0, sep.Length, SpanTypes.ExclusiveExclusive);
+                sb.Append(sepSpan);
             }
-            else if (numSucceeded == 0 && numFailed != 0 && numPaused == 0) //all failed
-            {
-                filesLongStatus.Text = string.Format(AllString + " {0} {1}", numFailed, failedString);
-            }
-            else if (numSucceeded == 0 && numFailed != 0 && numPaused != 0) //all failed or paused
-            {
-                filesLongStatus.Text = string.Format("{0} {1}, {2} {3}", numPaused, cancelledString, numFailed, failedString);
-            }
-            else if (numSucceeded != 0 && numFailed == 0 && numPaused == 0) //all succeeded
-            {
-                filesLongStatus.Text = string.Format(AllString + " {0} {1}", numSucceeded, succeededString);
-            }
-            else if (numSucceeded != 0 && numFailed == 0 && numPaused != 0) //all succeeded or paused
-            {
-                filesLongStatus.Text = string.Format("{0} {1}, {2} {3}", numPaused, cancelledString, numSucceeded, succeededString);
-            }
-            else if (numSucceeded != 0 && numFailed != 0 && numPaused == 0) //all succeeded or failed
-            {
-                filesLongStatus.Text = string.Format("{0} {1}, {2} {3}", numFailed, failedString, numSucceeded, succeededString);
-            }
-            else //all
-            {
-                filesLongStatus.Text = string.Format("{0} {1}, {2} {3}, {4} {5}", numPaused, cancelledString, numSucceeded, succeededString, numFailed, failedString);
-            }
+            first = false;
+
+            int color = resources.GetColor(colorResId, theme);
+            var segment = new SpannableString(text);
+            segment.SetSpan(new ForegroundColorSpan(new Color(color)), 0, text.Length, SpanTypes.ExclusiveExclusive);
+            segment.SetSpan(new StyleSpan(TypefaceStyle.Bold), 0, text.Length, SpanTypes.ExclusiveExclusive);
+            sb.Append(segment);
         }
 
 
@@ -447,34 +348,12 @@ namespace Seeker
         {
             if (progress == 100)
             {
-                if (sizeBytes > 1024 * 1024)
-                {
-                    size.Text = System.String.Format("{0:F1}mb", sizeBytes / 1048576.0);
-                }
-                else if (sizeBytes >= 0)
-                {
-                    size.Text = System.String.Format("{0:F1}kb", sizeBytes / 1024.0);
-                }
-                else
-                {
-                    size.Text = "??";
-                }
+                size.Text = SimpleHelpers.GetHumanReadableSize(sizeBytes);
             }
             else
             {
                 long bytesTransferred = progress * sizeBytes;
-                if (sizeBytes > 1024 * 1024)
-                {
-                    size.Text = System.String.Format("{0:F1}/{1:F1}mb", bytesTransferred / (1048576.0 * 100.0), sizeBytes / 1048576.0);
-                }
-                else if (sizeBytes >= 0)
-                {
-                    size.Text = System.String.Format("{0:F1}/{1:F1}kb", bytesTransferred / (1024.0 * 100.0), sizeBytes / 1024.0);
-                }
-                else
-                {
-                    size.Text = "??";
-                }
+                size.Text = SimpleHelpers.GetHumanReadableProgressSize(bytesTransferred / 100, sizeBytes);
             }
         }
 
@@ -594,62 +473,346 @@ namespace Seeker
             }
         }
 
-        public static void SetAdditionalStatusText(TextView viewStatusAdditionalInfo, ITransferItem item, TransferStates state, bool showSpeed)
+        private enum TransferChipType
         {
-            if (state.HasFlag(TransferStates.InProgress))
+            Completed,
+            Downloading,
+            Queued,
+            Paused,
+            Failed
+        }
+
+        private static int GetChipTextColorResId(TransferChipType chipType)
+        {
+            switch (chipType)
             {
-                //Helpers.GetTransferSpeedString(avgSpeedBytes);
-                if (showSpeed)
-                {
-                    viewStatusAdditionalInfo.Text = SimpleHelpers.GetTransferSpeedString(item.GetAvgSpeed()) + "  •  " + GetTimeRemainingString(item.GetRemainingTime());
-                }
-                else
-                {
-                    viewStatusAdditionalInfo.Text = GetTimeRemainingString(item.GetRemainingTime());
-                }
+                case TransferChipType.Completed:
+                    return Resource.Color.transferChipCompletedText;
+                case TransferChipType.Downloading:
+                    return Resource.Color.transferChipDownloadingText;
+                case TransferChipType.Queued:
+                    return Resource.Color.transferChipQueuedText;
+                case TransferChipType.Paused:
+                    return Resource.Color.transferChipPausedText;
+                case TransferChipType.Failed:
+                default:
+                    return Resource.Color.transferChipFailedText;
             }
-            else if (state.HasFlag(TransferStates.Queued) && !(item.IsUpload()))
+        }
+
+        private static int GetChipBgColorResId(TransferChipType chipType)
+        {
+            switch (chipType)
             {
-                int queueLen = item.GetQueueLength();
-                if (queueLen == int.MaxValue) //i.e. unknown
-                {
-                    viewStatusAdditionalInfo.Text = string.Empty;
-                }
-                else
-                {
-                    viewStatusAdditionalInfo.Text = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.position_), queueLen.ToString());
-                }
+                case TransferChipType.Completed:
+                    return Resource.Color.transferChipCompletedBg;
+                case TransferChipType.Downloading:
+                    return Resource.Color.transferChipDownloadingBg;
+                case TransferChipType.Queued:
+                    return Resource.Color.transferChipQueuedBg;
+                case TransferChipType.Paused:
+                    return Resource.Color.transferChipPausedBg;
+                case TransferChipType.Failed:
+                default:
+                    return Resource.Color.transferChipFailedBg;
             }
-            else if (item is TransferItem && state.HasFlag(TransferStates.Rejected))
+        }
+
+        private static void StyleStatusChip(View dot, TextView text, string label, TransferChipType chipType)
+        {
+            if (label == string.Empty)
             {
-                if (item.IsUpload())
-                {
-                    viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.Cancelled);
-                }
-                else
-                {
-                    viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.denied);
-                }
+                dot.Visibility = ViewStates.Gone;
+                text.Visibility = ViewStates.Gone;
+                return;
             }
-            else if (item is TransferItem && state.HasFlag(TransferStates.TimedOut))
+            dot.Visibility = ViewStates.Gone;
+            text.Visibility = ViewStates.Visible;
+            text.Text = label;
+
+            var resources = text.Context.Resources;
+            var theme = text.Context.Theme;
+            int textColor = resources.GetColor(GetChipTextColorResId(chipType), theme);
+            int bgColor = resources.GetColor(GetChipBgColorResId(chipType), theme);
+
+            text.SetTextColor(new Color(textColor));
+            text.SetTypeface(text.Typeface, Android.Graphics.TypefaceStyle.Bold);
+            text.SetTextSize(ComplexUnitType.Sp, 10);
+
+            var bg = text.Background?.Mutate() as GradientDrawable;
+            if (bg != null)
             {
-                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.TimedOut);
+                bg.SetColor(bgColor);
+                int strokeWidth = (int)(1 * resources.DisplayMetrics.Density);
+                bg.SetStroke(strokeWidth, new Color(textColor));
             }
-            else if (item is TransferItem && state.HasFlag(TransferStates.UserOffline))
+        }
+
+        private static void StyleStatusIndicator(View dot, TextView text, string label, TransferChipType chipType)
+        {
+            if (label == string.Empty)
             {
-                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.UserIsOffline);
+                dot.Visibility = ViewStates.Gone;
+                text.Visibility = ViewStates.Gone;
+                return;
             }
-            else if (item is TransferItem && state.HasFlag(TransferStates.CannotConnect))
+            dot.Visibility = ViewStates.Visible;
+            text.Visibility = ViewStates.Visible;
+            text.Text = label;
+
+            int textColorResId = GetChipTextColorResId(chipType);
+
+            var resources = text.Context.Resources;
+            var theme = text.Context.Theme;
+            int color = resources.GetColor(textColorResId, theme);
+
+            text.SetTextColor(new Color(color));
+            text.SetBackgroundColor(Color.Transparent);
+            text.SetTypeface(text.Typeface, Android.Graphics.TypefaceStyle.Bold);
+            text.SetTextSize(ComplexUnitType.Sp, 10);
+
+            var bg = dot.Background?.Mutate() as GradientDrawable;
+            if (bg != null)
             {
-                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.CannotConnect);
+                bg.SetColor(color);
             }
-            else if (item is TransferItem ti2 && ti2.TransferItemExtra.HasFlag(TransferItemExtras.DirNotSet))
+        }
+
+        public static void SetSpeedText(TextView speedView, ITransferItem item, TransferStates state)
+        {
+            double avgSpeed = item.GetAvgSpeed();
+            var resources = speedView.Context.Resources;
+            var theme = speedView.Context.Theme;
+            if ((state.HasFlag(TransferStates.InProgress) || state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested)) && avgSpeed > 0)
             {
-                viewStatusAdditionalInfo.Text = SeekerApplication.GetString(Resource.String.DirectoryNotSet);
+                speedView.Visibility = ViewStates.Visible;
+                speedView.Text = SimpleHelpers.GetTransferSpeedString(avgSpeed);
+                int color = resources.GetColor(Resource.Color.transferChipDownloadingText, theme);
+                speedView.SetTextColor(new Color(color));
+                speedView.SetTypeface(speedView.Typeface, TypefaceStyle.Bold);
+            }
+            else if (state.HasFlag(TransferStates.Succeeded) && avgSpeed > 0)
+            {
+                speedView.Visibility = ViewStates.Visible;
+                speedView.Text = SimpleHelpers.GetTransferSpeedString(avgSpeed);
+                //speedView.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(speedView.Context, Resource.Attribute.transferSpeedSubdued));
+                int color = resources.GetColor(Resource.Color.transferSpeedSubdued, theme);
+                speedView.SetTextColor(new Color(color));
+                speedView.SetTypeface(speedView.Typeface, TypefaceStyle.Normal);
             }
             else
             {
-                viewStatusAdditionalInfo.Text = "";
+                speedView.Visibility = ViewStates.Gone;
+            }
+        }
+
+        public static void UpdateSegmentedProgressBar(Transfers.SegmentedProgressBar bar, FolderItem fi)
+        {
+            long bytesSucceeded = 0;
+            long bytesInProgress = 0;
+            long bytesFailed = 0;
+            long bytesNotYet = 0;
+            long bytesPaused = 0;
+
+            lock (fi.TransferItems)
+            {
+                foreach (var ti in fi.TransferItems)
+                {
+                    long size = ti.Size;
+                    if (ti.State.HasFlag(TransferStates.Succeeded))
+                    {
+                        bytesSucceeded += size;
+                    }
+                    else if (ti.State.HasFlag(TransferStates.InProgress) || ti.State.HasFlag(TransferStates.Initializing) || ti.State.HasFlag(TransferStates.Requested) || ti.State.HasFlag(TransferStates.Aborted))
+                    {
+                        long completedBytes = (long)((ti.Progress / 100.0) * size);
+                        bytesInProgress += completedBytes;
+                        bytesNotYet += size - completedBytes;
+                    }
+                    else if (ti.State.HasFlag(TransferStates.Errored) || ti.State.HasFlag(TransferStates.Rejected) || ti.State.HasFlag(TransferStates.TimedOut))
+                    {
+                        bytesFailed += size;
+                    }
+                    else if (ti.State.HasFlag(TransferStates.Cancelled))
+                    {
+                        long completedBytes = (long)((ti.Progress / 100.0) * size);
+                        bytesPaused += completedBytes;
+                        bytesNotYet += size - completedBytes;
+                    }
+                    else
+                    {
+                        bytesNotYet += size;
+                    }
+                }
+            }
+
+            bar.SetSegments(bytesSucceeded, bytesInProgress, bytesNotYet, bytesFailed, bytesPaused);
+        }
+
+        public static void SetProgressBarTint(ProgressBar pb, TransferStates state, bool isFailed)
+        {
+            int colorResId;
+            if (isFailed)
+            {
+                colorResId = Resource.Color.transferChipFailedText;
+            }
+            else if (state.HasFlag(TransferStates.Succeeded))
+            {
+                colorResId = Resource.Color.transferChipCompletedText;
+            }
+            else if (state.HasFlag(TransferStates.Cancelled))
+            {
+                colorResId = Resource.Color.transferChipPausedText;
+            }
+            else if (state.HasFlag(TransferStates.Queued))
+            {
+                colorResId = Resource.Color.transferChipQueuedText;
+            }
+            else
+            {
+                colorResId = Resource.Color.transferChipDownloadingText;
+            }
+
+            var resources = pb.Context.Resources;
+            var theme = pb.Context.Theme;
+            int color = resources.GetColor(colorResId, theme);
+
+#pragma warning disable 0618
+            if (OperatingSystem.IsAndroidVersionAtLeast(21))
+            {
+                pb.ProgressTintList = ColorStateList.ValueOf(new Color(color));
+            }
+            else
+            {
+                pb.ProgressDrawable.SetColorFilter(new Color(color), PorterDuff.Mode.Multiply);
+            }
+#pragma warning restore 0618
+        }
+
+        public static void SetAdditionalStatusText(
+            View statusDot, TextView statusText, TextView sizeSeparator,
+            TextView sizeView, TextView speedView,
+            ITransferItem item, TransferStates state, bool showSize, bool showSpeed, bool isFolder = false)
+        {
+            Action<View, TextView, string, TransferChipType> StyleStatus = isFolder
+                ? (Action<View, TextView, string, TransferChipType>)StyleStatusChip
+                : StyleStatusIndicator;
+
+            // Status label + dot
+            if (state.HasFlag(TransferStates.Succeeded))
+            {
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.completed), TransferChipType.Completed);
+            }
+            else if (state.HasFlag(TransferStates.InProgress))
+            {
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.in_progress), TransferChipType.Downloading);
+            }
+            else if (state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested))
+            {
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.not_started), TransferChipType.Downloading);
+            }
+            else if (state.HasFlag(TransferStates.Queued))
+            {
+                string label = SeekerApplication.GetString(Resource.String.in_queue);
+                if (!item.IsUpload())
+                {
+                    int queueLen = item.GetQueueLength();
+                    if (queueLen != int.MaxValue)
+                    {
+                        label += " " + string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.position_), queueLen.ToString());
+                    }
+                }
+                StyleStatus(statusDot, statusText, label, TransferChipType.Queued);
+            }
+            else if (state.HasFlag(TransferStates.Cancelled))
+            {
+                string label = item.IsUpload() ? SeekerApplication.GetString(Resource.String.Aborted) : SeekerApplication.GetString(Resource.String.paused);
+                StyleStatus(statusDot, statusText, label, TransferChipType.Paused);
+            }
+            else if (state.HasFlag(TransferStates.Rejected))
+            {
+                string label;
+                if (item.IsUpload())
+                {
+                    label = SeekerApplication.GetString(Resource.String.Cancelled);
+                }
+                else
+                {
+                    label = SeekerApplication.GetString(Resource.String.denied);
+                }
+                StyleStatus(statusDot, statusText, label, TransferChipType.Failed);
+            }
+            else if (state.HasFlag(TransferStates.TimedOut))
+            {
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.TimedOut), TransferChipType.Failed);
+            }
+            else if (state.HasFlag(TransferStates.UserOffline))
+            {
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.UserIsOffline), TransferChipType.Failed);
+            }
+            else if (state.HasFlag(TransferStates.CannotConnect))
+            {
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.CannotConnect), TransferChipType.Failed);
+            }
+            else if (item is TransferItem ti2 && ti2.TransferItemExtra.HasFlag(TransferItemExtras.DirNotSet))
+            {
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.DirectoryNotSet), TransferChipType.Failed);
+            }
+            else if (state.HasFlag(TransferStates.Aborted))
+            {
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.re_requesting), TransferChipType.Downloading);
+            }
+            else if (state.HasFlag(TransferStates.Errored))
+            {
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.failed), TransferChipType.Failed);
+            }
+            else if (!item.IsUpload() && state == TransferStates.None)
+            {
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.paused), TransferChipType.Paused);
+            }
+            else
+            {
+                StyleStatus(statusDot, statusText, "", TransferChipType.Queued);
+            }
+
+            // Inline size text
+            if (showSize && sizeView != null)
+            {
+                sizeView.Visibility = ViewStates.Visible;
+                if (sizeSeparator != null)
+                {
+                    sizeSeparator.Visibility = ViewStates.Visible;
+                }
+                if (item is TransferItem ti)
+                {
+                    SetSizeText(sizeView, ti.Progress, ti.Size);
+                }
+                else if (item is FolderItem fi)
+                {
+                    int prog = fi.GetFolderProgress(out long totalBytes, out _);
+                    SetSizeText(sizeView, prog, totalBytes);
+                }
+            }
+            else
+            {
+                if (sizeView != null)
+                {
+                    sizeView.Visibility = ViewStates.Gone;
+                }
+                if (sizeSeparator != null)
+                {
+                    sizeSeparator.Visibility = ViewStates.Gone;
+                }
+            }
+
+            // Speed text
+            if (showSpeed && speedView != null)
+            {
+                SetSpeedText(speedView, item, state);
+            }
+            else if (speedView != null)
+            {
+                speedView.Visibility = ViewStates.Gone;
             }
         }
     }
@@ -659,12 +822,15 @@ namespace Seeker
     {
         public TransfersFragment.TransferViewHolder ViewHolder { get; set; }
         private TextView viewUsername;
-        private TextView viewFoldername;
         private TextView viewFilename;
 
-        private TextView viewStatus; //In Queue, Failed, Done, In Progress
         private TextView viewStatusAdditionalInfo; //if in Queue then show position, if In Progress show time remaining.
-        private TextView progressSize; //if in Queue then show position, if In Progress show time remaining.
+        private View statusDot;
+        private TextView viewSize;
+        private TextView viewSpeed;
+        private TextView viewSizeSeparator;
+        private ImageView selectionCheckbox;
+        private FrameLayout actionContainer;
 
         public ITransferItem InnerTransferItem { get; set; }
         //private TextView viewQueue;
@@ -675,9 +841,24 @@ namespace Seeker
             return viewStatusAdditionalInfo;
         }
 
-        public TextView GetProgressSizeTextView()
+        public View GetStatusDot()
         {
-            return progressSize;
+            return statusDot;
+        }
+
+        public TextView GetSizeTextView()
+        {
+            return viewSize;
+        }
+
+        public TextView GetSpeedTextView()
+        {
+            return viewSpeed;
+        }
+
+        public TextView GetSizeSeparatorView()
+        {
+            return viewSizeSeparator;
         }
 
         public bool GetShowProgressSize()
@@ -694,32 +875,12 @@ namespace Seeker
         public bool showSizes;
         public TransferItemViewDetails(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
-            bool _showSizes = attrs.GetAttributeBooleanValue("http://schemas.android.com/apk/res-auto", "show_progress_size", false);
-
-            if (_showSizes)
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
-            }
-            else
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed, this, true);
-            }
-
+            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
             setupChildren();
         }
         public TransferItemViewDetails(Context context, IAttributeSet attrs) : base(context, attrs)
         {
-            bool _showSizes = attrs.GetAttributeBooleanValue("http://schemas.android.com/apk/res-auto", "show_progress_size", false);
-
-            if (_showSizes)
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
-            }
-            else
-            {
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed, this, true);
-            }
-
+            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
             setupChildren();
         }
 
@@ -727,14 +888,7 @@ namespace Seeker
         {
 
             TransferItemViewDetails itemView = null;
-            if (_showSizes)
-            {
-                itemView = (TransferItemViewDetails)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_details_dummy_showProgressSize, parent, false);
-            }
-            else
-            {
-                itemView = (TransferItemViewDetails)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_details_dummy, parent, false);
-            }
+            itemView = (TransferItemViewDetails)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_details_dummy_showProgressSize, parent, false);
             itemView.showSpeed = _showSpeed;
             itemView.showSizes = _showSizes;
             return itemView;
@@ -746,12 +900,20 @@ namespace Seeker
             viewFilename = FindViewById<TextView>(Resource.Id.textViewFileName);
             progressBar = FindViewById<ProgressBar>(Resource.Id.simpleProgressBar);
 
-            viewStatus = FindViewById<TextView>(Resource.Id.textViewStatus);
             viewStatusAdditionalInfo = FindViewById<TextView>(Resource.Id.textViewStatusAdditionalInfo);
 
-            progressSize = FindViewById<TextView>(Resource.Id.textViewProgressSize);
-            //viewQueue = FindViewById<TextView>(Resource.Id.textView4);
+            statusDot = FindViewById<View>(Resource.Id.statusDot);
+            viewSize = FindViewById<TextView>(Resource.Id.textViewSize);
+            viewSpeed = FindViewById<TextView>(Resource.Id.textViewSpeed);
+            viewSizeSeparator = FindViewById<TextView>(Resource.Id.textViewSizeSeparator);
 
+            selectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
+            actionContainer = FindViewById<FrameLayout>(Resource.Id.actionContainer);
+
+            if (OperatingSystem.IsAndroidVersionAtLeast(28))
+            {
+                viewFilename.Typeface = Typeface.Create(viewFilename.Typeface, 600, false);
+            }
         }
 
 
@@ -763,12 +925,7 @@ namespace Seeker
             TransferItem ti = item as TransferItem;
             viewFilename.Text = ti.Filename;
             progressBar.Progress = ti.Progress;
-            if (this.showSizes)
-            {
-                TransferViewHelper.SetSizeText(progressSize, ti.Progress, ti.Size);
-            }
-            TransferViewHelper.SetViewStatusText(viewStatus, ti.State, ti.IsUpload(), false);
-            TransferViewHelper.SetAdditionalStatusText(viewStatusAdditionalInfo, ti, ti.State, this.showSpeed);
+            TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSizeSeparator, viewSize, viewSpeed, ti, ti.State, this.showSizes, this.showSpeed);
             viewUsername.Text = ti.Username;
             bool isFailedOrAborted = ti.Failed;
             if (item.IsUpload() && ti.State.HasFlag(TransferStates.Cancelled))
@@ -778,58 +935,22 @@ namespace Seeker
             if (isFailedOrAborted)
             {
                 progressBar.Progress = 100;
-#pragma warning disable 0618
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    progressBar.ProgressTintList = ColorStateList.ValueOf(Color.Red);
-                }
-                else
-                {
-                    progressBar.ProgressDrawable.SetColorFilter(Color.Red, PorterDuff.Mode.Multiply);
-                }
-#pragma warning restore 0618
+            }
+            TransferViewHelper.SetProgressBarTint(progressBar, ti.State, isFailedOrAborted);
+
+            if (isInBatchMode)
+            {
+                actionContainer.Visibility = ViewStates.Visible;
+                selectionCheckbox.Visibility = ViewStates.Visible;
+                bool isSelected = TransfersViewState.Instance.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition);
+                selectionCheckbox.SetImageResource(isSelected ? Resource.Drawable.check_circle : Resource.Drawable.check_circle_outline);
+                this.Background = isSelected ? Resources.GetDrawable(Resource.Color.batchSelectHighlight, null) : null;
             }
             else
             {
-#pragma warning disable 0618
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    progressBar.ProgressTintList = ColorStateList.ValueOf(Color.DodgerBlue);
-                }
-                else
-                {
-                    progressBar.ProgressDrawable.SetColorFilter(Color.DodgerBlue, PorterDuff.Mode.Multiply);
-                }
-#pragma warning restore 0618
-
-            }
-
-            if (isInBatchMode && TransfersViewState.Instance.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition))
-            {
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, null);
-                    //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                }
-                else
-                {
-                    this.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                    //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
-                }
-            }
-            else
-            {
-                //this.Background
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    this.Background = null;//Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                                           //e.View.Background = Resources.GetDrawable(Resource.Drawable.cell_shape_dldiag, null);
-                }
-                else
-                {
-                    this.Background = null;//Resources.GetDrawable(Resource.Color.cellback);
-                                           //e.View.Background = Resources.GetDrawable(Resource.Color.cellback);
-                }
+                actionContainer.Visibility = ViewStates.Gone;
+                selectionCheckbox.Visibility = ViewStates.Invisible;
+                this.Background = null;
             }
         }
 

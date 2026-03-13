@@ -21,7 +21,6 @@ namespace Seeker.Chatroom
         private SearchView filterChatroomView;
         private Soulseek.RoomList internalList = null;
         private List<Soulseek.RoomInfo> internalListParsed = null;
-        private List<Soulseek.RoomInfo> internalListParsedFiltered = null;
         private static string FilterString = string.Empty;
         private TextView chatroomsListLoadingView = null;
         private bool created = false;

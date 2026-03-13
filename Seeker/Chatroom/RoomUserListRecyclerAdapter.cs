@@ -5,6 +5,7 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Core.Content;
 using AndroidX.RecyclerView.Widget;
 using Common.Messages;
 using System;
@@ -286,13 +287,13 @@ namespace Seeker.Chatroom
             switch (userData.Status)
             {
                 case Soulseek.UserPresence.Online:
-                    imageUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.online));
+                    imageUserStatus.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.online)));
                     break;
                 case Soulseek.UserPresence.Away:
-                    imageUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.away));
+                    imageUserStatus.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.away)));
                     break;
                 case Soulseek.UserPresence.Offline: //should NEVER happen
-                    imageUserStatus.SetColorFilter(Resources.GetColor(Resource.Color.offline));
+                    imageUserStatus.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.offline)));
                     break;
             }
         }

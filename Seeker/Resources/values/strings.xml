@@ -9,6 +9,16 @@
     <string name="searches_tab">Searches</string>
     <string name="searches_tab2">Search</string>
 
+	<string name="signin">Sign In</string>
+	<string name="signin_or_create_account">Sign in or create new account</string>
+
+    <string name="set_up_sharing">Set Up Sharing</string>
+    <string name="manage_user_list">Manage User List</string>
+    <string name="unread_count">{0} unread</string>
+    <string name="section_caps_setup">SETUP</string>
+    <string name="section_caps_communication">COMMUNICATION</string>
+    <string name="section_caps_account">ACCOUNT</string>
+
     <string name="new_result">new result</string>
     <string name="new_results">new results</string>
 
@@ -221,6 +231,9 @@ Directory Count: {5}"
     <string name="search_result_style_minimal">Minimal</string>
 
     <string name="new_search_tab">New Search</string>
+    <string name="search_tabs_header">SEARCH TABS</string>
+    <string name="wishlist_header">WISHLIST</string>
+    <string name="wishlist_empty_header">WISHLIST (EMPTY)</string>
     <string name="filter_search_results_here">Filter Results Here</string>
     <string name="persist_it">Sticky</string>
     <string name="type_chatroom_ticker_message">Type Ticker Message</string>
@@ -604,6 +617,11 @@ Directory Count: {5}"
         Deleted Message History with {0}
     </string>
     <string name="welcome">Welcome, {0}</string>
+    <string name="logged_in_as">Logged in as</string>
+    <string name="status_connected">Connected</string>
+    <string name="status_connecting">Connecting</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="status_disconnecting">Disconnecting</string>
 
     <string name="failed_to_establish_direct_or_indirect">
         Failed to establish a direct or indirect message connection to user
@@ -959,6 +977,7 @@ The standard way of requesting folder access does not always persist permissions
     <string name="LinkCopied">Link Copied</string>
     <string name="LinksCopied">Links Copied</string>
     <string name="ShowFolderInfo">Show Folder Info</string>
+    <string name="ShowSelectedInfo">Show Selected Info</string>
 
     <string name="NothingToCopy">Nothing to Copy</string>
     <string name="ThisFolderContainsSubfolders">

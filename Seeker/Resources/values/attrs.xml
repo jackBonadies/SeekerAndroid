@@ -19,6 +19,7 @@
     <attr name="whitePurpleForNavBar" format="color" />
     <attr name="slskAccent" format="color" />
     <attr name="mainTextColorHinted" format="color" />
+    <attr name="searchTabButtonColor" format="color" />
     <attr name="cellStroke" format="color" />
     <attr name="checkBoxColor" format="color" />
     <attr name="expandIconColor" format="color" />
@@ -44,20 +45,12 @@
         name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
         format="reference"
     />
-    <attr name="buttonEnabledDisabledTextColor" format="reference" />
-    <attr name="header_cell_shape_bottom" format="reference" />
-    <attr name="CustomSelector" format="reference" />
-    <attr name="cell_shape_end" format="reference" />
-    <attr name="cell_shape" format="reference" />
-    <attr name="cell_shape_end_dldiag" format="reference" />
-    <attr name="cell_shape_dldiag" format="reference" />
 
-    <attr name="buttonStyle" format="reference" />
-    <attr name="rounded_bottom_left_purple" format="reference" />
-    <attr name="rounded_button" format="reference" />
-    <attr name="rounded_bottom_right_purple" format="reference" />
-    <attr name="rounded_top_purple" format="reference" />
+    <attr name="CustomSelector" format="reference" />
+
     <attr name="rounded_input_edit" format="reference" />
+    <attr name="chatInputBackground" format="reference" />
 
     <attr name="show_progress_size" format="boolean" />
+    <attr name="colorSurfaceLogin" format="color" />
 </resources>

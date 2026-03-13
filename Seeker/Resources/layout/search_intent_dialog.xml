@@ -74,7 +74,7 @@
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
             android:foreground="@drawable/button"
-            android:background="?attr/rounded_bottom_left_purple"
+            android:background="@drawable/rounded_bottom_left_purple"
             style="@style/SeekerButtonStyle"
             android:text="@string/cancel"
         />
@@ -87,7 +87,7 @@
             android:layout_marginStart="4dp"
             android:foreground="@drawable/button"
             style="@style/SeekerButtonStyle"
-            android:background="?attr/rounded_bottom_right_purple"
+            android:background="@drawable/rounded_bottom_right_purple"
             android:text="@string/searches_tab2"
         />
     </LinearLayout>

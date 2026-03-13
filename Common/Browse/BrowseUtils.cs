@@ -22,6 +22,10 @@ namespace Common.Browse
             foreach (var childNode in di)
             {
                 SumFiles(folderSummary, childNode);
+                if (childNode.IsDirectory())
+                {
+                    folderSummary.NumSubFolders++;
+                }
             }
             return folderSummary;
         }
@@ -107,19 +111,6 @@ namespace Common.Browse
         /// <param name="currentSearch"></param>
         /// <param name="previousSearch"></param>
         /// <returns></returns>
-        /// <remarks>
-        /// examples: 
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -ex","hello how are yo -excludeTerms");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms", "hello how are yo -excludeTerms");
-        /// bool no = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms", "hello how are yo -excludeTerms -a");
-        /// bool no = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -b -c", "hello how are yo -excludeTerms -a");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -a -b -c", "hello how are yo -excludeTerms -a");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -", "hello how are yo -excludeTerms");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -a", "hello how are yo -excludeTerms -");
-        /// bool no = IsCurrentSearchMoreRestrictive("hello how are you -excludeTerms -aa", "hello how are yo -excludeTerms -a");
-        /// bool no = IsCurrentSearchMoreRestrictive("hell", "hello");
-        /// bool yes = IsCurrentSearchMoreRestrictive("hello", "hell");
-        /// </remarks>
         public static bool IsCurrentSearchMoreRestrictive(string currentSearch, string previousSearch)
         {
             var currentWords = currentSearch.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -147,6 +138,17 @@ namespace Common.Browse
             }
 
             return currentIncludeString.Contains(previousIncludeString);
+        }
+
+        public static FullFileInfo ToFullFileInfo(DataItem d)
+        {
+            return new FullFileInfo
+            {
+                FullFileName = d.Node.Data.Name + @"\" + d.File.Filename,
+                Size = d.File.Size,
+                wasFilenameLatin1Decoded = d.File.IsLatin1Decoded,
+                wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1
+            };
         }
 
         public static FullFileInfo[] GetFullFileInfos(IEnumerable<Soulseek.File> files)
@@ -309,6 +311,77 @@ namespace Common.Browse
                 }
             }
             return count;
+        }
+
+        public record struct BrowseStats(double NumFolders, double NumFiles);
+
+        public static BrowseStats GetBrowseStats(BrowseResponse browseResponse)
+        {
+            if (PreferencesState.HideLockedResultsInBrowse)
+            {
+                return new BrowseStats(browseResponse.DirectoryCount, browseResponse.Directories.Sum(it => it.FileCount));
+            } 
+            else
+            {
+                return new BrowseStats(browseResponse.DirectoryCount + browseResponse.LockedDirectoryCount, 
+                    browseResponse.Directories.Sum(it => it.FileCount) + browseResponse.LockedDirectories.Sum(it => it.FileCount));
+            }
+        }
+
+        public static List<DataItem> GetDataItemsForNode(TreeNode<Directory> node)
+        {
+            var items = new List<DataItem>();
+            foreach (TreeNode<Directory> child in node.Children)
+            {
+                items.Add(new DataItem(child.Data, child));
+            }
+            if (node.Data != null && node.Data.FileCount != 0)
+            {
+                foreach (Soulseek.File f in node.Data.OrderedFiles)
+                {
+                    items.Add(new DataItem(f, node));
+                }
+            }
+            return items;
+        }
+
+        public static (List<FullFileInfo> topLevel, List<FullFileInfo> recursive, bool containsSubDirs) BuildDownloadFileInfos(List<DataItem> sourceList)
+        {
+            bool containsSubDirs = false;
+            var topLevel = new List<FullFileInfo>();
+            foreach (DataItem d in sourceList)
+            {
+                if (d.IsDirectory())
+                {
+                    containsSubDirs = true;
+                }
+                else
+                {
+                    topLevel.Add(ToFullFileInfo(d));
+                }
+            }
+            var recursive = containsSubDirs ? GetRecursiveFullFileInfo(sourceList) : new List<FullFileInfo>();
+            return (topLevel, recursive, containsSubDirs);
+        }
+
+        public static TreeNode<Directory> GetNodeByName(TreeNode<Directory> rootTree, string nameToFindDirName)
+        {
+            if (rootTree.Data.Name == nameToFindDirName)
+            {
+                return rootTree;
+            }
+            else
+            {
+                foreach (TreeNode<Directory> d in rootTree.Children)
+                {
+                    var node = GetNodeByName(d, nameToFindDirName);
+                    if (node != null)
+                    {
+                        return node;
+                    }
+                }
+            }
+            return null;
         }
     }
 }

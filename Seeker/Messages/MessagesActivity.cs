@@ -74,7 +74,6 @@ namespace Seeker
             }
         }
 
-        bool savedStateAtInner = false;
         protected override void OnSaveInstanceState(Bundle outState)
         {
             var f = SupportFragmentManager.FindFragmentByTag("InnerUserFragment");
@@ -140,14 +139,14 @@ namespace Seeker
                     SearchTabHelper.SearchTargetChosenUser = MessagesInnerFragment.Username;
                     //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
                     Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(UserListActivity.IntentUserGoToSearch, 1);
+                    intent.PutExtra(MainActivity.GoToSearchExtra, true);
                     this.StartActivity(intent);
                     return true;
                 case Resource.Id.action_browse_files:
                     Action<View> action = new Action<View>((v) =>
                     {
                         Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
+                        intent.PutExtra(MainActivity.GoToBrowseExtra, true);
                         this.StartActivity(intent);
                     });
                     View snackView = this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId);
@@ -219,7 +218,7 @@ namespace Seeker
 
         public void ShowEditTextMessageUserDialog()
         {
-            if (SessionService.IsNotLoggedIn())
+            if (SessionService.Instance.IsNotLoggedIn())
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_send_message), ToastLength.Short);
                 return;
@@ -459,11 +458,6 @@ namespace Seeker
 
         protected override void OnResume()
         {
-            if (PreferencesState.Username != MessageController.MessagesUsername && MessageController.RootMessages != null)
-            {
-                MessageController.MessagesUsername = PreferencesState.Username;
-                MessageController.Messages = MessageController.RootMessages[PreferencesState.Username]; //username can be null here... perhaps restarting the app without internet or such...
-            }
             base.OnResume();
         }
 
@@ -474,14 +468,12 @@ namespace Seeker
             var backPressedCallback = new GenericOnBackPressedCallback(true, onBackPressedAction);
             OnBackPressedDispatcher.AddCallback(backPressedCallback);
 
-            bool reborn = false;
             if (savedInstanceState == null)
             {
                 Logger.Debug("Messages Activity On Create NEW");
             }
             else
             {
-                reborn = true;
                 Logger.Debug("Messages Activity On Create REBORN");
             }
 
@@ -498,43 +490,6 @@ namespace Seeker
             this.SupportActionBar.SetHomeButtonEnabled(true);
             //this.SupportActionBar.SetDisplayShowHomeEnabled(true);
 
-            if (MessageController.RootMessages == null)
-            {
-                var sharedPref = this.GetSharedPreferences(Constants.SharedPrefFile, 0);
-                MessageController.RestoreMessagesFromSharedPrefs(sharedPref);
-                if (PreferencesState.Username != null && PreferencesState.Username != string.Empty)
-                {
-                    MessageController.MessagesUsername = PreferencesState.Username;
-                    if (!MessageController.RootMessages.ContainsKey(PreferencesState.Username))
-                    {
-                        MessageController.RootMessages[PreferencesState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-                    }
-                    else
-                    {
-                        MessageController.Messages = MessageController.RootMessages[PreferencesState.Username];
-                    }
-                }
-            }
-            else if (PreferencesState.Username != MessageController.MessagesUsername)
-            {
-                MessageController.MessagesUsername = PreferencesState.Username;
-                if (PreferencesState.Username == null || PreferencesState.Username == string.Empty)
-                {
-                    MessageController.Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-                }
-                else
-                {
-                    if (MessageController.RootMessages.ContainsKey(PreferencesState.Username))
-                    {
-                        MessageController.Messages = MessageController.RootMessages[PreferencesState.Username];
-                    }
-                    else
-                    {
-                        MessageController.RootMessages[PreferencesState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-                        MessageController.Messages = MessageController.RootMessages[PreferencesState.Username];
-                    }
-                }
-            }
             bool startWithUserFragment = false;
 
             if (savedInstanceState != null && savedInstanceState.GetBoolean("SaveStateAtInner"))
@@ -609,7 +564,7 @@ namespace Seeker
 
             if (markAsRead)
             {
-                MessageController.UnreadUsernames.TryRemove(uname, out _);
+                MessageController.UnsetAsUnreadAndSaveIfApplicable(uname);
 
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.From(context);
                 // notificationId is a unique int for each notification that you must define
@@ -623,7 +578,8 @@ namespace Seeker
             Bundle remoteInputBundle = AndroidX.Core.App.RemoteInput.GetResultsFromIntent(intent);
             if (directReply)
             {
-                MessageController.UnreadUsernames.TryRemove(uname, out _);
+                MessageController.UnsetAsUnreadAndSaveIfApplicable(uname);
+                MarkAsReadFromNotification?.Invoke(null, uname);
                 if (remoteInputBundle != null)
                 {
                     string replyText = remoteInputBundle.GetString("key_text_result");

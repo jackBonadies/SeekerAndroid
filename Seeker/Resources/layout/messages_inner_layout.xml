@@ -28,15 +28,21 @@
         android:layout_width="match_parent"
         android:layout_weight="0"
         android:layout_height="wrap_content"
+        android:paddingStart="12dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
     >
         <EditText
-            android:layout_marginStart="16dp"
             android:id="@+id/edit_gchat_message"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:layout_centerVertical="true"
             android:layout_toStartOf="@+id/button_gchat_send"
-            android:background="@android:color/transparent"
+            android:layout_marginEnd="8dp"
+            android:background="?attr/chatInputBackground"
+            android:paddingStart="16dp"
+            android:paddingEnd="12dp"
             android:hint="@string/chatroom_enter_message"
             android:inputType="text"
             android:singleLine="true"
@@ -44,15 +50,17 @@
             tools:ignore="Autofill"
         />
 
-        <Button
+        <ImageButton
             android:id="@+id/button_gchat_send"
-            android:layout_width="84dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_alignParentEnd="true"
-            android:background="?attr/selectableItemBackground"
-            app:backgroundTint="@null"
-            android:text="@string/send_message"
-            android:textColor="?attr/buttonEnabledDisabledTextColor"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_send"
+            android:tint="?attr/mainTextColor"
+            android:contentDescription="@string/send_message"
+            android:enabled="false"
         />
     </RelativeLayout>
 </LinearLayout>

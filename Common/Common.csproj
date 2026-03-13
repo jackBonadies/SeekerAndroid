@@ -5,6 +5,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+<PropertyGroup>
+	<LangVersion>10.0</LangVersion>
+</PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="MessagePack" Version="2.5.198" />
     <PackageReference Include="MessagePackAnalyzer" Version="2.5.198">

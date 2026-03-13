@@ -5,7 +5,7 @@ namespace Seeker
     public class TransferUIState
     {
         public bool GroupByFolder;
-        public FolderItem CurrentlySelectedFolder;
-        public List<int> BatchSelectedItems;
+        public FolderItem? CurrentlySelectedFolder;
+        public List<int>? BatchSelectedItems;
     }
 }

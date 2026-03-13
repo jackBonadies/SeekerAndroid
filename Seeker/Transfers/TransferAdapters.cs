@@ -29,7 +29,6 @@ namespace Seeker
 
             public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
             {
-                bool TYPE_TO_USE = true;
                 ITransferItemView view = TransferItemViewDetails.inflate(parent, this.showSizes, this.showSpeed);
 
                 view.setupChildren();
@@ -43,7 +42,7 @@ namespace Seeker
             {
                 if (IsInBatchSelectMode)
                 {
-                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
+                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.BindingAdapterPosition);
                 }
             }
 
@@ -56,7 +55,7 @@ namespace Seeker
                 }
                 else
                 {
-                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
+                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.BindingAdapterPosition);
                 }
             }
 
@@ -89,7 +88,7 @@ namespace Seeker
             {
                 if (IsInBatchSelectMode)
                 {
-                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
+                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.BindingAdapterPosition);
                 }
                 else
                 {
@@ -115,7 +114,7 @@ namespace Seeker
             {
                 if (IsInBatchSelectMode)
                 {
-                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.AdapterPosition);
+                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.BindingAdapterPosition);
                 }
                 else
                 {
@@ -176,8 +175,8 @@ namespace Seeker
             public void SelectedDebugInfo(ITransferItem iti)
             {
 
-                int position = TransferItemManagerWrapped.GetUserIndexForITransferItem(iti);
-                Logger.Debug($"position: {position} ti name: {iti.GetDisplayName()}");
+                int position = TransferItems.TransferItemManagerWrapped.GetUserIndexForITransferItem(iti);
+                Logger.Debug($"position: {position} ti name: {iti.GetFolderName()}");
 
             }
 #endif
@@ -297,32 +296,7 @@ namespace Seeker
 
                 //if somehow we got here without setting the transfer item. then set it now...  you have menuInfo.Position, AND tvh.InnerTransferItem. and recyclerTransfer.GetSelectedItem() to check for null.
 
-                if (!isUpload)
-                {
-                    if (isTransferItem)
-                    {
-                        if (tvh != null && ti != null && ti.State.HasFlag(TransferStates.Cancelled) /*&& ti.Progress > 0*/) //progress > 0 doesnt work if someone queues an item as paused...
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.RetryResumeDownload, 0, Resource.String.resume_dl);
-                        }
-                        else
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.RetryResumeDownload, 0, Resource.String.retry_dl);
-                        }
-                    }
-                    else
-                    {
-                        if (tvh != null && fi != null && folderItemState.HasFlag(TransferStates.Cancelled)  /*&& fi.GetFolderProgress() > 0*/)
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ResumeFolder, 0, Resource.String.ResumeFolder);
-                        }
-                        else if (tvh != null && fi != null && (!folderItemState.HasFlag(TransferStates.Completed) && !folderItemState.HasFlag(TransferStates.Succeeded) && !folderItemState.HasFlag(TransferStates.Errored) && !folderItemState.HasFlag(TransferStates.TimedOut) && !folderItemState.HasFlag(TransferStates.Rejected)))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.PauseFolderOrAbortUploads, 0, Resource.String.PauseFolder);
-                        }
-                    }
-                }
-                else
+                if (isUpload)
                 {
                     if (isTransferItem)
                     {
@@ -339,33 +313,32 @@ namespace Seeker
                         }
                     }
                 }
-                if (!isUpload)
+                else
                 {
                     if (isTransferItem)
                     {
-                        if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)))
+                        if (tvh != null && ti != null && ti.State.HasFlag(TransferStates.Cancelled) /*&& ti.Progress > 0*/) //progress > 0 doesnt work if someone queues an item as paused...
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ClearFromList, 1, Resource.String.clear_from_list);
-                            //if completed then we dont need to show the cancel option...
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.RetryResumeDownload, 0, Resource.String.resume_dl);
                         }
-                        else
+                        else if (ti == null || (tvh != null && ti != null && (!ti.State.HasFlag(TransferStates.Succeeded)))) // i.e. if null its fine to show.
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.CancelAndClear, 2, Resource.String.cancel_and_clear);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.RetryResumeDownload, 0, Resource.String.retry_dl);
                         }
                     }
                     else
                     {
-                        if (tvh != null && fi != null && (folderItemState.HasFlag(TransferStates.Succeeded)))
+                        if (tvh != null && fi != null && folderItemState.HasFlag(TransferStates.Cancelled)  /*&& fi.GetFolderProgress() > 0*/)
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ClearFromList, 1, Resource.String.clear_from_list);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ResumeFolder, 0, Resource.String.ResumeFolder);
                         }
-                        else
+                        else if (tvh != null && fi != null && (!folderItemState.HasFlag(TransferStates.Completed) && !folderItemState.HasFlag(TransferStates.Succeeded) && !folderItemState.HasFlag(TransferStates.Errored) && !folderItemState.HasFlag(TransferStates.TimedOut) && !folderItemState.HasFlag(TransferStates.Rejected)))
                         {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.CancelAndClear, 2, Resource.String.cancel_and_clear);
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.PauseFolderOrAbortUploads, 0, Resource.String.PauseFolder);
                         }
                     }
                 }
-                else
+                if (isUpload)
                 {
                     if (isTransferItem)
                     {
@@ -388,6 +361,32 @@ namespace Seeker
                         else
                         {
                             menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.CancelAndClear, 2, Resource.String.AbortandClearUploads);
+                        }
+                    }
+                }
+                else
+                {
+                    if (isTransferItem)
+                    {
+                        if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)))
+                        {
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ClearFromList, 1, Resource.String.clear_from_list);
+                            //if completed then we dont need to show the cancel option...
+                        }
+                        else
+                        {
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.CancelAndClear, 2, Resource.String.cancel_and_clear);
+                        }
+                    }
+                    else
+                    {
+                        if (tvh != null && fi != null && (folderItemState.HasFlag(TransferStates.Succeeded)))
+                        {
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ClearFromList, 1, Resource.String.clear_from_list);
+                        }
+                        else
+                        {
+                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.CancelAndClear, 2, Resource.String.cancel_and_clear);
                         }
                     }
                 }

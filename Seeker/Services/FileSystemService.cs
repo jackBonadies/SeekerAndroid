@@ -9,12 +9,21 @@ using static Android.Provider.DocumentsContract;
 using Common;
 namespace Seeker.Services
 {
-    public static class FileSystemService
+    public class FileSystemService : IFileSystemService
     {
-        public static object lock_toplevel_ifexist_create = new object();
-        public static object lock_album_ifexist_create = new object();
+        public static FileSystemService Instance { get; set; }
 
-        public static void GetOrCreateIncompleteLocation(string username, string fullfilename, int depth, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
+        private readonly object lock_toplevel_ifexist_create = new object();
+        private readonly object lock_album_ifexist_create = new object();
+
+        public void GetOrCreateIncompleteLocation(string username, string fullfilename, int depth, out string incompleteUri, out string parentUri, out long partialLength)
+        {
+            GetOrCreateIncompleteLocationInternal(username, fullfilename, depth, out var incompleteUriNative, out var parentUriNative, out partialLength);
+            incompleteUri = incompleteUriNative?.ToString();
+            parentUri = parentUriNative?.ToString();
+        }
+
+        private void GetOrCreateIncompleteLocationInternal(string username, string fullfilename, int depth, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
         {
             string name = SimpleHelpers.GetFileNameFromFile(fullfilename);
             //string dir = Helpers.GetFolderNameFromFile(fullfilename);
@@ -283,7 +292,12 @@ namespace Seeker.Services
         /// <summary>
         /// Opens a stream for writing to the incomplete file. Call after GetOrCreateIncompleteLocation.
         /// </summary>
-        public static System.IO.Stream OpenIncompleteStream(Android.Net.Uri incompleteUri, long partialLength)
+        public System.IO.Stream OpenIncompleteStream(string incompleteUri, long partialLength)
+        {
+            return OpenIncompleteStreamInternal(Android.Net.Uri.Parse(incompleteUri), partialLength);
+        }
+
+        private System.IO.Stream OpenIncompleteStreamInternal(Android.Net.Uri incompleteUri, long partialLength)
         {
             if (SeekerState.UseLegacyStorage() && incompleteUri.Scheme == "file")
             {
@@ -318,7 +332,7 @@ namespace Seeker.Services
         /// </summary>
         /// <param name="folder"></param>
         /// <returns></returns>
-        public static string CheckPermissions(Android.Net.Uri folder)
+        public string CheckPermissions(Android.Net.Uri folder)
         {
             if (SeekerState.ActiveActivityRef != null)
             {
@@ -351,7 +365,25 @@ namespace Seeker.Services
             return string.Empty;
         }
 
-        public static string SaveToFile(
+        public string SaveToFile(
+            string fullfilename,
+            string username,
+            byte[] bytes,
+            string uriOfIncomplete,
+            string parentUriOfIncomplete,
+            bool memoryMode,
+            int depth,
+            bool noSubFolder,
+            out string finalUri)
+        {
+            return SaveToFileInternal(
+                fullfilename, username, bytes,
+                uriOfIncomplete != null ? Android.Net.Uri.Parse(uriOfIncomplete) : null,
+                parentUriOfIncomplete != null ? Android.Net.Uri.Parse(parentUriOfIncomplete) : null,
+                memoryMode, depth, noSubFolder, out finalUri);
+        }
+
+        private string SaveToFileInternal(
             string fullfilename,
             string username,
             byte[] bytes,
@@ -502,8 +534,6 @@ namespace Seeker.Services
                         slskDir1 = rootdir;
                     }
 
-                    bool diagUsernameDirExistsAfterCreation = false;
-                    bool diagDidWeCreateUsernameDir = false;
                     if (PreferencesState.CreateUsernameSubfolders)
                     {
                         DocumentFile tempUsernameDir1 = null;
@@ -514,22 +544,9 @@ namespace Seeker.Services
                             {
                                 tempUsernameDir1 = slskDir1.CreateDirectory(username);
                                 Logger.Debug(string.Format("Creating {0} dir", username));
-                                diagDidWeCreateUsernameDir = true;
                             }
                         }
 
-                        if (tempUsernameDir1 == null)
-                        {
-                            diagUsernameDirExistsAfterCreation = false;
-                        }
-                        else if (!slskDir1.Exists())
-                        {
-                            diagUsernameDirExistsAfterCreation = false;
-                        }
-                        else
-                        {
-                            diagUsernameDirExistsAfterCreation = true;
-                        }
                         slskDir1 = tempUsernameDir1;
                     }
 
@@ -752,7 +769,7 @@ namespace Seeker.Services
             return filePath;
         }
 
-        public static void MoveFile(System.IO.Stream from, System.IO.Stream to, Android.Net.Uri toDelete, Android.Net.Uri parentToDelete)
+        public void MoveFile(System.IO.Stream from, System.IO.Stream to, Android.Net.Uri toDelete, Android.Net.Uri parentToDelete)
         {
             byte[] buffer = new byte[4096];
             int read;
@@ -800,7 +817,7 @@ namespace Seeker.Services
             DeleteParentIfEmpty(parent);
         }
 
-        public static void DeleteParentIfEmpty(DocumentFile parent)
+        public void DeleteParentIfEmpty(DocumentFile parent)
         {
             if (parent == null)
             {
@@ -836,13 +853,13 @@ namespace Seeker.Services
                 }
                 else
                 {
-                    throw ex; //this might be important..
+                    throw; //this might be important..
                 }
             }
         }
 
 
-        public static void DeleteParentIfEmpty(Java.IO.File parent)
+        public void DeleteParentIfEmpty(Java.IO.File parent)
         {
             if (parent.ListFiles().Length == 1 && parent.ListFiles()[0].Name == ".nomedia")
             {
@@ -858,7 +875,7 @@ namespace Seeker.Services
         }
 
 
-        public static void MoveFile(Java.IO.FileInputStream from, Java.IO.FileOutputStream to, Java.IO.File toDelete, Java.IO.File parent)
+        public void MoveFile(Java.IO.FileInputStream from, Java.IO.FileOutputStream to, Java.IO.File toDelete, Java.IO.File parent)
         {
             byte[] buffer = new byte[4096];
             int read;
@@ -877,7 +894,7 @@ namespace Seeker.Services
             //Logger.Debug(toDelete.ParentFile.Name + ":" + toDelete.ParentFile.ListFiles().Length.ToString());
         }
 
-        internal static void SaveFileToMediaStore(string path)
+        public void SaveFileToMediaStore(string path)
         {
             //ContentValues contentValues = new ContentValues();
             //contentValues.Put(MediaStore.MediaColumns.DateAdded, Helpers.GetDateTimeNowSafe().Ticks / TimeSpan.TicksPerMillisecond);

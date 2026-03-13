@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#1B3147</color>
     <color name="colorAccent">#3498db</color>
     <color name="cellbackSelected">#3498db</color>
+    <color name="batchSelectHighlight">#3498db</color>
 
     <color name="mainPurpleTransparent">#994f58c4</color>
     <!--light transparency-->
@@ -31,4 +32,34 @@
     <color name="subTextColorAgainstPurple">#ffC7C7C7</color>
 
     <color name="chipSeparatorColor">#ffe0e0e0</color>
+
+    <color name="checkCircleSelected">#FFFFFF</color>
+    <color name="checkCircleUnselected">#999999</color>
+
+    <color name="transferChipCompletedText">#5EC98E</color>
+    <color name="transferChipCompletedBg">#265EC98E</color>
+    <color name="transferChipDownloadingText">#6AADFF</color>
+    <color name="transferChipDownloadingBg">#266AADFF</color>
+    <color name="transferChipQueuedText">#FFD54F</color>
+    <color name="transferChipQueuedBg">#26FFA726</color>
+    <color name="transferChipPausedText">#9FA8DA</color>
+    <color name="transferChipPausedBg">#269E9E9E</color>
+    <color name="transferChipFailedText">#E57373</color>
+    <color name="transferChipFailedBg">#26F44336</color>
+
+    <color name="transferProgressTrack">#1Affffff</color>
+    <color name="transferSpeedSubdued">#909090</color>
+    <color name="transferUsernameSubdued">#B0B0B0</color>
+
+    <color name="statusConnectedDot">#81C784</color>
+    <color name="statusConnectedText">#A5D6A7</color>
+    <color name="statusConnectedChipBg">#2681C784</color>
+    <color name="statusConnectingDot">#FFB74D</color>
+    <color name="statusConnectingText">#FFCC80</color>
+    <color name="statusConnectingChipBg">#26FFB74D</color>
+    <color name="statusDisconnectedDot">#E57373</color>
+    <color name="statusDisconnectedText">#EF9A9A</color>
+    <color name="statusDisconnectedChipBg">#26E57373</color>
+
+    <color name="unreadBadgeText">#303030</color>
 </resources>

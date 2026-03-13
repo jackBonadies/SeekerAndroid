@@ -82,10 +82,8 @@ namespace Seeker
                 BottomNavigationView navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
                 if (position != -1 && navigator != null)
                 {
-                    AndroidX.AppCompat.View.Menu.MenuBuilder menu = navigator.Menu as AndroidX.AppCompat.View.Menu.MenuBuilder;
-
-                    menu.GetItem(position).SetCheckable(true); //this is necessary if side scrolling...
-                    menu.GetItem(position).SetChecked(true);
+                    navigator.Menu.GetItem(position).SetCheckable(true); //this is necessary if side scrolling...
+                    navigator.Menu.GetItem(position).SetChecked(true);
                 }
             }
         }

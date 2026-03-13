@@ -33,15 +33,21 @@
             android:textSize="14sp"
             android:layout_gravity="center_vertical"
         />
-        <ImageView
-            android:layout_width="16sp"
-            android:layout_height="16sp"
-            android:layout_marginStart="12dp"
-            android:id="@+id/unreadImageView"
+        <TextView
+            android:id="@+id/unreadBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:minWidth="20dp"
+            android:layout_marginStart="8dp"
             android:layout_gravity="center_vertical"
+            android:gravity="center"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:background="@drawable/unread_badge_background"
+            android:textColor="@color/unreadBadgeText"
+            android:textSize="11sp"
+            android:textStyle="bold"
             android:visibility="gone"
-            android:tint="@color/androidStockMessagesNewBlue"
-            app:srcCompat="@drawable/checkbox_blank_circle"
         />
     </LinearLayout>
     <TextView

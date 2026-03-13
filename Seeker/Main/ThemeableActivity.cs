@@ -20,12 +20,11 @@ namespace Seeker
             if (SeekerApplication.Activities.Count == 0)
             {
                 Logger.Debug("----- On Destory ------ Last Activity ------");
-                TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, true);
+                TransferPersistenceWrapper.SaveTransferItems();
             }
             else
             {
                 Logger.Debug("----- On Destory ------ NOT Last Activity ------");
-                TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, false, 0);
             }
         }
 

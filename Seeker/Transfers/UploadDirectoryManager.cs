@@ -84,7 +84,7 @@ namespace Seeker
                     SaveToSharedPreferences(sharedPreferences);
                     var editor = sharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_UploadDirectoryUri, string.Empty);
-                    editor.Commit();
+                    editor.Apply();
                 }
                 else
                 {
@@ -107,7 +107,7 @@ namespace Seeker
                 {
                     var editor = sharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_SharedDirectoryInfo, userDirsString);
-                    editor.Commit();
+                    editor.Apply();
                 }
             }
         }

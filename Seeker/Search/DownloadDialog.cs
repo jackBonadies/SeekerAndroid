@@ -308,8 +308,8 @@ namespace Seeker
 #pragma warning disable 0618
                 if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
-                    e.View.Background = SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
+                    e.View.Background = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
+                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
                 }
                 else
                 {
@@ -380,12 +380,12 @@ namespace Seeker
 
         private void DownloadWithContinuation(FullFileInfo[] filesToDownload, string username)
         {
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
+            if (SessionService.Instance.CurrentlyLoggedInButDisconnectedState())
             {
                 //we disconnected. login then do the rest.
                 //this is due to temp lost connection
                 Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
+                if (!SessionService.Instance.ShowMessageAndCreateReconnectTask(false, out t))
                 {
                     return;
                 }
@@ -440,7 +440,7 @@ namespace Seeker
 
         private void DownloadFiles(FullFileInfo[] files, string username, bool queuePaused)
         {
-            var task = DownloadService.CreateDownloadAllTask(files, queuePaused, username);
+            var task = DownloadService.Instance.CreateDownloadAllTask(files, queuePaused, username);
             task.Start(); //start task immediately
             task.Wait(); //it only waits for the downloadasync (and optionally connectasync tasks).
         }
@@ -682,7 +682,7 @@ namespace Seeker
 #pragma warning disable 0618
                 if (OperatingSystem.IsAndroidVersionAtLeast(21))
                 {
-                    var cellbackNormal = SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cell_shape_end_dldiag);
+                    var cellbackNormal = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
                     itemView.Background = cellbackNormal;
                     itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = cellbackNormal;
                 }

@@ -261,7 +261,6 @@ namespace Seeker
                         string currentBase = null;
                         int currentMax = -1;
                         int counter = 0;
-                        bool cutoffConditionReached = false;
                         int variantsPastCutoff = 0;
                         foreach (string ftype in sortedListPass1str)
                         {
@@ -956,7 +955,6 @@ namespace Seeker
     {
         private List<ChipDataItem> localDataSet; //tab id's
         public override int ItemCount => localDataSet.Count;
-        private int position = -1;
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {
 
@@ -981,7 +979,7 @@ namespace Seeker
         private void Chip_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             //results need to update.
-            int pos = ((sender as View).Parent.Parent as ChipItemView).ViewHolder.AdapterPosition;
+            int pos = ((sender as View).Parent.Parent as ChipItemView).ViewHolder.BindingAdapterPosition;
             bool prevValue = localDataSet[pos].IsChecked;
             localDataSet[pos].IsChecked = e.IsChecked;
             if (prevValue != e.IsChecked)
@@ -1025,7 +1023,7 @@ namespace Seeker
 
         //private void SearchTabLayout_Click(object sender, EventArgs e)
         //{
-        //    position = ((sender as View).Parent.Parent as SearchTabView).ViewHolder.AdapterPosition;
+        //    position = ((sender as View).Parent.Parent as SearchTabView).ViewHolder.BindingAdapterPosition;
         //    int tabToGoTo = localDataSet[position];
         //    SearchFragment.Instance.GoToTab(tabToGoTo, false);
         //    SearchTabDialog.Instance.Dismiss();

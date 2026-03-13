@@ -293,14 +293,7 @@ namespace Seeker
             }
             else
             {
-                if (OperatingSystem.IsAndroidVersionAtLeast(23))
-                {
-                    return GetColorFromInteger(ContextCompat.GetColor(c, typedValue.ResourceId));
-                }
-                else
-                {
-                    return c.Resources.GetColor(typedValue.ResourceId);
-                }
+                return GetColorFromInteger(ContextCompat.GetColor(c, typedValue.ResourceId));
             }
         }
 

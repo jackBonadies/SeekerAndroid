@@ -12,22 +12,22 @@ namespace Seeker.Services
     /// <summary>
     /// Session lifecycle: login state, reconnect, status, and client configuration.
     /// </summary>
-    public static class SessionService
+    public class SessionService : ISessionService
     {
-        public static bool CurrentlyLoggedInButDisconnectedState()
+        public static SessionService Instance { get; set; }
+
+        public bool CurrentlyLoggedInButDisconnectedState()
         {
             return (PreferencesState.CurrentlyLoggedIn &&
                 (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnected) || SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Disconnecting)));
         }
 
-        public static bool ShowMessageAndCreateReconnectTask(bool silent, out Task connectTask)
+        public bool ShowMessageAndCreateReconnectTask(bool silent, out Task connectTask)
         {
             if (!silent)
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.temporary_disconnected), ToastLength.Short);
             }
-            //if we are still not connected then creating the task will throw.
-            //also if the async part of the task fails we will get task.faulted.
             try
             {
                 connectTask = SeekerApplication.ConnectAndPerformPostConnectTasks(PreferencesState.Username, PreferencesState.Password);
@@ -44,7 +44,7 @@ namespace Seeker.Services
             return false;
         }
 
-        public static bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(Action<Task> action, string msg = null, Context contextToUseForMessage = null)
+        public bool IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(Action<Task> action, string msg = null, Context contextToUseForMessage = null)
         {
             lock (SeekerApplication.OurCurrentLoginTaskSyncObject)
             {
@@ -71,7 +71,65 @@ namespace Seeker.Services
             }
         }
 
-        public static void SetStatusApi(bool away)
+        /// <summary>
+        /// Standard reconnect-then-act pattern. If disconnected, reconnects and runs action on success.
+        /// If already connected, runs action immediately.
+        /// </summary>
+        /// <returns>true if action was run or will be run after reconnect; false if reconnect could not be started.</returns>
+        public bool RunWithReconnect(Action action, bool silent = false)
+        {
+            if (CurrentlyLoggedInButDisconnectedState())
+            {
+                Task t;
+                if (!ShowMessageAndCreateReconnectTask(silent, out t))
+                {
+                    return false;
+                }
+                t.ContinueWith(new Action<Task>((Task t) =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        if (!silent)
+                        {
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
+                        }
+                        return;
+                    }
+                    SeekerState.ActiveActivityRef.RunOnUiThread(() => { action(); });
+                }));
+                return true;
+            }
+            else
+            {
+                action();
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Extended reconnect-then-act pattern. Handles disconnected, mid-login, and connected states.
+        /// The caller provides a continuation that handles both fault propagation and the real action.
+        /// </summary>
+        public void RunWithReconnect(Action<Task> continuationAction, string loggingInMsg = null, Context contextForMsg = null)
+        {
+            if (CurrentlyLoggedInButDisconnectedState())
+            {
+                Task t;
+                if (!ShowMessageAndCreateReconnectTask(false, out t))
+                    return;
+                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(continuationAction);
+            }
+            else if (IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(continuationAction, loggingInMsg, contextForMsg))
+            {
+                // chained onto login task
+            }
+            else
+            {
+                continuationAction(Task.CompletedTask);
+            }
+        }
+
+        public void SetStatusApi(bool away)
         {
             if (IsNotLoggedIn())
             {
@@ -108,12 +166,12 @@ namespace Seeker.Services
             }
         }
 
-        public static bool IsNotLoggedIn()
+        public bool IsNotLoggedIn()
         {
             return (!PreferencesState.CurrentlyLoggedIn) || PreferencesState.Username == null || PreferencesState.Password == null || PreferencesState.Username == string.Empty;
         }
 
-        public static void ReconfigureOptionsLogic(bool? allowPrivateInvites, bool? enableTheListener, int? listenerPort)
+        public void ReconfigureOptionsLogic(bool? allowPrivateInvites, bool? enableTheListener, int? listenerPort)
         {
             Task<bool> reconfigTask = null;
             try

@@ -502,7 +502,7 @@ namespace Seeker.Chatroom
                     Action<View> action = new Action<View>((v) =>
                     {
                         Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(UserListActivity.IntentUserGoToBrowse, 3);
+                        intent.PutExtra(MainActivity.GoToBrowseExtra, true);
                         this.StartActivity(intent);
                     });
                     View snackView = this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom);
@@ -513,7 +513,7 @@ namespace Seeker.Chatroom
                     SearchTabHelper.SearchTargetChosenUser = userdata.Username;
                     //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
                     Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(UserListActivity.IntentUserGoToSearch, 1);
+                    intent.PutExtra(MainActivity.GoToSearchExtra, true);
                     this.StartActivity(intent);
                     return true;
                 case 7: //message user

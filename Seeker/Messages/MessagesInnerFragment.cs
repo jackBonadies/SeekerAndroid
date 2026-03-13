@@ -26,7 +26,7 @@ namespace Seeker.Messages
         private bool created = false;
         private View rootView = null;
         private EditText editTextEnterMessage = null;
-        private Button sendMessage = null;
+        private ImageButton sendMessage = null;
         public static string Username = null;
         public static bool currentlyResumed = false;
 
@@ -60,15 +60,17 @@ namespace Seeker.Messages
 
 
             editTextEnterMessage = rootView.FindViewById<EditText>(Resource.Id.edit_gchat_message);
-            sendMessage = rootView.FindViewById<Button>(Resource.Id.button_gchat_send);
+            sendMessage = rootView.FindViewById<ImageButton>(Resource.Id.button_gchat_send);
 
             if (editTextEnterMessage.Text == null || editTextEnterMessage.Text.ToString() == string.Empty)
             {
                 sendMessage.Enabled = false;
+                sendMessage.Alpha = 0.38f;
             }
             else
             {
                 sendMessage.Enabled = true;
+                sendMessage.Alpha = 1.0f;
             }
             editTextEnterMessage.TextChanged += EditTextEnterMessage_TextChanged;
             editTextEnterMessage.EditorAction += EditTextEnterMessage_EditorAction;
@@ -161,10 +163,12 @@ namespace Seeker.Messages
             if (e.Text != null && e.Text.ToString() != string.Empty) //ICharSequence..
             {
                 sendMessage.Enabled = true;
+                sendMessage.Alpha = 1.0f;
             }
             else
             {
                 sendMessage.Enabled = false;
+                sendMessage.Alpha = 0.38f;
             }
         }
 
@@ -227,6 +231,11 @@ namespace Seeker.Messages
                 if (messagesInternal.Count != 0)
                 {
                     recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
+                }
+                // If we're currently viewing this conversation, keep it marked as read
+                if (currentlyResumed && msg.Username == Username)
+                {
+                    MessageController.MarkAsRead(Username);
                 }
             }));
         }

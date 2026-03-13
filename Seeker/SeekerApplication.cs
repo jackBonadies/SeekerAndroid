@@ -124,12 +124,14 @@ namespace Seeker
             set => Common.PreferencesState.LogDiagnostics = value;
         }
 
-        public static IToaster Toaster { get; private set; }
+        public static AndroidToaster Toaster { get; private set; }
         public override void OnCreate()
         {
             base.OnCreate();
             ApplicationContext = this;
             Toaster = new AndroidToaster();
+            Services.SessionService.Instance = new Services.SessionService();
+            Services.FileSystemService.Instance = new Services.FileSystemService();
 
             var loggerBackend = new AndroidLoggerBackend();
 #if !IzzySoft
@@ -140,6 +142,30 @@ namespace Seeker
             }
 #endif
             Logger.Backend = loggerBackend;
+            MicroTagReader.Instance = new MicroTagReader(loggerBackend);
+
+            Services.DownloadService.Instance = new Services.DownloadService(Toaster, Services.FileSystemService.Instance, Services.SessionService.Instance, new Services.MainThreadRunner(), () => SeekerState.SoulseekClient, loggerBackend, new Services.AndroidNetworkStatus());
+
+#if DEBUG
+            Android.OS.StrictMode.SetThreadPolicy(
+                new Android.OS.StrictMode.ThreadPolicy.Builder()
+                    .DetectDiskReads()
+                    .DetectDiskWrites()
+                    .DetectNetwork()
+                    .DetectCustomSlowCalls()
+                    .PenaltyLog()
+                    .PenaltyFlashScreen()
+                    .PenaltyDeathOnNetwork()
+                    .Build());
+
+            Android.OS.StrictMode.SetVmPolicy(
+                new Android.OS.StrictMode.VmPolicy.Builder()
+                    .DetectLeakedClosableObjects()
+                    .DetectLeakedSqlLiteObjects()
+                    .DetectActivityLeaks()
+                    .PenaltyLog()
+                    .Build());
+#endif
 
             this.RegisterActivityLifecycleCallbacks(new ForegroundLifecycleTracker());
             this.RegisterReceiver(new ConnectionReceiver(), new IntentFilter(ConnectivityManager.ConnectivityAction));
@@ -149,6 +175,7 @@ namespace Seeker
             //SerializationTests.PopulateSharedPreferencesFromFile(this, sharedPrefs);
 
             RestoreSeekerState(sharedPrefs, this);
+            InitializeDocumentFiles(this);
             PreferencesManager.RestoreListeningStateLocked();
             UPnpManager.RestoreUpnpState();
 
@@ -217,56 +244,69 @@ namespace Seeker
 
             SeekerApplication.SetNetworkState(this);
 
-            if (SeekerState.SoulseekClient == null)
-            {
-                //need search response and enqueue download action...
-                //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:PreferencesState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
-                SeekerState.SoulseekClient = new SoulseekClient(
-                    128,
-                    new SoulseekClientOptions(
-                        minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info,
-                        messageTimeout: 30000,
-                        enableListener: PreferencesState.ListenerEnabled,
-                        autoAcknowledgePrivateMessages: false,
-                        acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations,
-                        listenPort: PreferencesState.ListenerPort,
-                        maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue,
-                        serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
-                        addressResolver: ResolveAddressAsync,
-                        userInfoResolver: UserInfoResponseHandler));
-                SetDiagnosticState(LOG_DIAGNOSTICS);
-                SeekerState.SoulseekClient.UserStatisticsChanged += SoulseekClient_UserDataReceived;
-                SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
-                SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
-                //SeekerState.SoulseekClient.TransferProgressUpdated += Upload_TransferProgressUpdated;
-                SeekerState.SoulseekClient.TransferStateChanged += Upload_TransferStateChanged;
+            //need search response and enqueue download action...
+            //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:PreferencesState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
+            #if DEBUG
+            SeekerState.SoulseekClient = new MockSoulseekClient();
+            //128,
+            //new SoulseekClientOptions(
+            //    minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info,
+            //    messageTimeout: 30000,
+            //    enableListener: PreferencesState.ListenerEnabled,
+            //    autoAcknowledgePrivateMessages: false,
+            //    acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations,
+            //    listenPort: PreferencesState.ListenerPort,
+            //    maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue,
+            //    maximumConcurrentSearches: 5,
+            //    serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
+            //    addressResolver: ResolveAddressAsync,
+            //    userInfoResolver: UserInfoResponseHandler));
+            #else
+            SeekerState.SoulseekClient = new SoulseekClient(
+                128,
+                new SoulseekClientOptions(
+                    minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info,
+                    messageTimeout: 30000,
+                    enableListener: PreferencesState.ListenerEnabled,
+                    autoAcknowledgePrivateMessages: false,
+                    acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations,
+                    listenPort: PreferencesState.ListenerPort,
+                    maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue,
+                    maximumConcurrentSearches: 5,
+                    serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
+                    addressResolver: ResolveAddressAsync,
+                    userInfoResolver: UserInfoResponseHandler));
+            #endif
+            SetDiagnosticState(LOG_DIAGNOSTICS);
+            SeekerState.SoulseekClient.UserStatisticsChanged += SoulseekClient_UserDataReceived;
+            SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
+            SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
+            //SeekerState.SoulseekClient.TransferProgressUpdated += Upload_TransferProgressUpdated;
+            SeekerState.SoulseekClient.TransferStateChanged += Upload_TransferStateChanged;
 
-                SeekerState.SoulseekClient.TransferProgressUpdated += SoulseekClient_TransferProgressUpdated;
-                SeekerState.SoulseekClient.TransferStateChanged += SoulseekClient_TransferStateChanged;
+            SeekerState.SoulseekClient.TransferProgressUpdated += SoulseekClient_TransferProgressUpdated;
+            SeekerState.SoulseekClient.TransferStateChanged += SoulseekClient_TransferStateChanged;
 
-                SeekerState.SoulseekClient.Connected += SoulseekClient_Connected;
-                SeekerState.SoulseekClient.StateChanged += SoulseekClient_StateChanged;
-                SeekerState.SoulseekClient.LoggedIn += SoulseekClient_LoggedIn;
-                SeekerState.SoulseekClient.Disconnected += SoulseekClient_Disconnected;
-                SeekerState.SoulseekClient.ServerInfoReceived += SoulseekClient_ServerInfoReceived;
-                SeekerState.BrowseResponseReceived += BrowseFragment.SeekerState_BrowseResponseReceived;
+            SeekerState.SoulseekClient.Connected += SoulseekClient_Connected;
+            SeekerState.SoulseekClient.StateChanged += SoulseekClient_StateChanged;
+            SeekerState.SoulseekClient.LoggedIn += SoulseekClient_LoggedIn;
+            SeekerState.SoulseekClient.Disconnected += SoulseekClient_Disconnected;
+            SeekerState.SoulseekClient.ServerInfoReceived += SoulseekClient_ServerInfoReceived;
+            SeekerState.BrowseResponseReceived += BrowseFragment.SeekerState_BrowseResponseReceived;
 
-                SeekerState.SoulseekClient.PrivilegedUserListReceived += SoulseekClient_PrivilegedUserListReceived;
-                SeekerState.SoulseekClient.ExcludedSearchPhrasesReceived += SoulseekClient_ExcludedSearchPhrasesReceived;
+            SeekerState.SoulseekClient.PrivilegedUserListReceived += SoulseekClient_PrivilegedUserListReceived;
+            SeekerState.SoulseekClient.ExcludedSearchPhrasesReceived += SoulseekClient_ExcludedSearchPhrasesReceived;
 
-                MessageController.Initialize();
-                ChatroomController.Initialize();
+            MessageController.Initialize();
+            ChatroomController.Initialize();
 
 
-                SoulseekClient.OnTransferSizeMismatchFunc = OnTransferSizeMismatchFunc;
-                #if DEBUG
-                SoulseekClient.ErrorLogHandler += SoulseekClient_ErrorLogHandler;
-                SoulseekClient.DebugLogHandler += DebugLogHandler;
-                #endif
+            SoulseekClient.OnTransferSizeMismatchFunc = OnTransferSizeMismatchFunc;
+            #if DEBUG
+            SoulseekClient.ErrorLogHandler += SoulseekClient_ErrorLogHandler;
+            SoulseekClient.DebugLogHandler += DebugLogHandler;
+            #endif
 
-                SoulseekClient.DownloadAddedRemovedInternal += SoulseekClient_DownloadAddedRemovedInternal;
-                SoulseekClient.UploadAddedRemovedInternal += SoulseekClient_UploadAddedRemovedInternal;
-            }
 
             UPnpManager.Context = this;
             UPnpManager.Instance.SearchAndSetMappingIfRequired();
@@ -274,6 +314,90 @@ namespace Seeker
             SimpleHelpers.STRINGS_KHZ = this.Resources.GetString(Resource.String.kilohertz);
 
             SimpleHelpers.UserListService = UserListService.Instance;
+        }
+
+        private static bool CheckDirectoryForWritePermission(Context context, Android.Net.Uri chosenUri, bool directoryUriFromTree, string logContext)
+        {
+            bool canWrite = false;
+            try
+            {
+                if (SeekerState.PreOpenDocumentTree() || !directoryUriFromTree)
+                {
+                    canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite();
+                }
+                else
+                {
+                    canWrite = DocumentFile.FromTreeUri(context, chosenUri).CanWrite();
+                }
+            }
+            catch (Exception e)
+            {
+                if (chosenUri != null)
+                {
+                    Logger.Firebase($"{logContext} DocumentFile.FromTreeUri failed with URI: " + chosenUri.ToString() + " " + e.Message + " scheme " + chosenUri.Scheme);
+                }
+                else
+                {
+                    Logger.Firebase($"{logContext} DocumentFile.FromTreeUri failed with null URI");
+                }
+            }
+            if (!canWrite)
+            {
+                Logger.Firebase($"canWrite = false for {logContext} Uri: " + chosenUri.ToString());
+            }
+            return canWrite;
+        }
+
+        // Runs once per process in OnCreate. Sets SeekerState.RootDocumentFile and
+        // RootIncompleteDocumentFile. For non-legacy, leaves RootDocumentFile null if the
+        // download directory permission has been revoked; MainActivity checks for null and
+        // shows the re-selection dialog.
+        private static void InitializeDocumentFiles(Context context)
+        {
+            if (SeekerState.UseLegacyStorage())
+            {
+                if (!string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
+                {
+                    var chosenUri = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
+                    if (CheckDirectoryForWritePermission(context, chosenUri, PreferencesState.SaveDataDirectoryUriIsFromTree, "legacy download"))
+                    {
+                        SeekerState.RootDocumentFile = SeekerState.OpenRootFile(context, chosenUri);
+                    }
+                }
+                if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
+                {
+                    var chosenUri = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
+                    if (CheckDirectoryForWritePermission(context, chosenUri, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "legacy incomplete"))
+                    {
+                        SeekerState.RootIncompleteDocumentFile = SeekerState.OpenRootFile(context, chosenUri);
+                    }
+                }
+            }
+            else
+            {
+                Android.Net.Uri res = string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri)
+                    ? Android.Net.Uri.Parse(SeekerState.DefaultMusicUri)
+                    : Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
+
+                if (CheckDirectoryForWritePermission(context, res, PreferencesState.SaveDataDirectoryUriIsFromTree, "download"))
+                {
+                    SeekerState.RootDocumentFile = PreferencesState.SaveDataDirectoryUriIsFromTree
+                        ? DocumentFile.FromTreeUri(context, res)
+                        : DocumentFile.FromFile(new Java.IO.File(res.Path));
+                }
+                // else: RootDocumentFile stays null — MainActivity will detect this and show the re-selection dialog
+
+                if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
+                {
+                    var incompleteRes = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
+                    if (CheckDirectoryForWritePermission(context, incompleteRes, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "incomplete"))
+                    {
+                        SeekerState.RootIncompleteDocumentFile = (SeekerState.PreOpenDocumentTree() || !PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
+                            ? DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path))
+                            : DocumentFile.FromTreeUri(context, incompleteRes);
+                    }
+                }
+            }
         }
 
         private void SoulseekClient_ExcludedSearchPhrasesReceived(object sender, IReadOnlyCollection<string> exludedPhrasesList)
@@ -716,18 +840,19 @@ namespace Seeker
             return false;
         }
 
-        public static bool TransfersDownloadsCompleteStale = false; //whether a dl completes since we have last saved transfers to disk.
-        public static DateTime TransfersLastSavedTime = DateTime.MinValue; //whether a dl completes since we have last saved transfers to disk.
 
 
-        public static volatile int UPLOAD_COUNT = -1; // a hack see below
+        private static int _activeUploadCount = 0;
+        public static int ActiveUploadCount => _activeUploadCount;
 
-        private void SoulseekClient_UploadAddedRemovedInternal(object sender, SoulseekClient.TransferAddedRemovedInternalEventArgs e)
+        private static int _activeDownloadCount = 0;
+        public static int ActiveDownloadCount => _activeDownloadCount;
+
+        private void OnUploadCountChanged(int count)
         {
             bool abortAll = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.AbortAllWasPressedDebouncer) < 750;
-            if (e.Count == 0 || abortAll)
+            if (count <= 0 || abortAll)
             {
-                UPLOAD_COUNT = -1;
                 Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
                 Logger.Debug("Stop Service");
                 this.StopService(uploadServiceIntent);
@@ -735,72 +860,37 @@ namespace Seeker
             }
             else if (!SeekerState.UploadKeepAliveServiceRunning)
             {
-                UPLOAD_COUNT = e.Count;
                 Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
                 if (OperatingSystem.IsAndroidVersionAtLeast(26))
                 {
                     bool? isForeground = SeekerState.ActiveActivityRef?.IsResumed();
-
-                    //LogDebug("IsForeground: " + isForeground + " current state: " + this.Lifecycle.CurrentState.ToString()); //REMOVE THIS!!!
                     if (isForeground ?? false)
                     {
-                        this.StartService(uploadServiceIntent); //this will throw if the app is in background.
-                    }
-                    else
-                    {
-                        //only do this if we absolutely must
-                        //this will throw in api 31 if the app is in background. so now it is out of the question.  no way to start foreground service if in background.
-                        //this.StartForegroundService(uploadServiceIntent);
+                        this.StartService(uploadServiceIntent);
                     }
                 }
                 else
                 {
-                    //even when targetting and compiling for api 31, old devices can still do this just fine.
-                    this.StartService(uploadServiceIntent); //this will throw if the app is in background.
+                    this.StartService(uploadServiceIntent);
                 }
                 SeekerState.UploadKeepAliveServiceRunning = true;
             }
-            else if (SeekerState.UploadKeepAliveServiceRunning && e.Count != 0)
+            else
             {
-                UPLOAD_COUNT = e.Count;
-                //for two downloads, this notification will go up before the service is started...
-
-                //requires run on ui thread? NOPE
-                string msg = string.Empty;
-                if (e.Count == 1)
-                {
-                    msg = string.Format(UploadForegroundService.SingularUploadRemaining, e.Count);
-                }
-                else
-                {
-                    msg = string.Format(UploadForegroundService.PluralUploadsRemaining, e.Count);
-                }
+                string msg = count == 1
+                    ? string.Format(UploadForegroundService.SingularUploadRemaining, count)
+                    : string.Format(UploadForegroundService.PluralUploadsRemaining, count);
                 var notif = UploadForegroundService.CreateNotification(this, msg);
                 NotificationManager manager = GetSystemService(Context.NotificationService) as NotificationManager;
                 manager.Notify(UploadForegroundService.NOTIF_ID, notif);
             }
-            //});
-
-
         }
 
-
-        public static volatile int DL_COUNT = -1; // a hack see below
-
-        //it works in the case of successfully finished, cancellation token used, etc.
-        private void SoulseekClient_DownloadAddedRemovedInternal(object sender, SoulseekClient.TransferAddedRemovedInternalEventArgs e)
+        private void OnDownloadCountChanged(int count)
         {
-            //even with them all going onto same thread here you will still have (ex) a 16 count coming in after a 0 count sometimes.
-            //SeekerState.MainActivityRef.RunOnUiThread(()=>
-            //{
-            Logger.Debug("SoulseekClient_DownloadAddedRemovedInternal with count:" + e.Count);
-            Logger.Debug("the thread is: " + System.Threading.Thread.CurrentThread.ManagedThreadId);
-
             bool cancelAndClear = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.CancelAndClearAllWasPressedDebouncer) < 750;
-            Logger.Debug("SoulseekClient_DownloadAddedRemovedInternal cancel and clear:" + cancelAndClear);
-            if (e.Count == 0 || cancelAndClear)
+            if (count <= 0 || cancelAndClear)
             {
-                DL_COUNT = -1;
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
                 Logger.Debug("Stop Service");
                 this.StopService(downloadServiceIntent);
@@ -808,51 +898,30 @@ namespace Seeker
             }
             else if (!SeekerState.DownloadKeepAliveServiceRunning)
             {
-                DL_COUNT = e.Count;
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
                 if (OperatingSystem.IsAndroidVersionAtLeast(26))
                 {
                     bool? isForeground = SeekerState.ActiveActivityRef?.IsResumed();
-
-                    //LogDebug("IsForeground: " + isForeground + " current state: " + this.Lifecycle.CurrentState.ToString()); //REMOVE THIS!!!
                     if (isForeground ?? false)
                     {
-                        this.StartService(downloadServiceIntent); //this will throw if the app is in background.
-                    }
-                    else
-                    {
-                        //only do this if we absolutely must
-                        //this will throw in api 31 if the app is in background. so now it is out of the question.  no way to start foreground service if in background.
-                        //this.StartForegroundService(downloadServiceIntent);
+                        this.StartService(downloadServiceIntent);
                     }
                 }
                 else
                 {
-                    //even when targetting and compiling for api 31, old devices can still do this just fine.
-                    this.StartService(downloadServiceIntent); //this will throw if the app is in background.
+                    this.StartService(downloadServiceIntent);
                 }
                 SeekerState.DownloadKeepAliveServiceRunning = true;
             }
-            else if (SeekerState.DownloadKeepAliveServiceRunning && e.Count != 0)
+            else
             {
-                DL_COUNT = e.Count;
-                //for two downloads, this notification will go up before the service is started...
-
-                //requires run on ui thread? NOPE
-                string msg = string.Empty;
-                if (e.Count == 1)
-                {
-                    msg = string.Format(DownloadForegroundService.SingularDownloadRemaining, e.Count);
-                }
-                else
-                {
-                    msg = string.Format(DownloadForegroundService.PluralDownloadsRemaining, e.Count);
-                }
+                string msg = count == 1
+                    ? string.Format(DownloadForegroundService.SingularDownloadRemaining, count)
+                    : string.Format(DownloadForegroundService.PluralDownloadsRemaining, count);
                 var notif = DownloadForegroundService.CreateNotification(this, msg);
                 NotificationManager manager = GetSystemService(Context.NotificationService) as NotificationManager;
                 manager.Notify(DownloadForegroundService.NOTIF_ID, notif);
             }
-            //});
         }
 
 
@@ -894,19 +963,52 @@ namespace Seeker
 
             bool isUpload = e.Transfer.Direction == TransferDirection.Upload;
 
+            // Track active transfer counts via atomic counters.
+            // Increment when a transfer first appears (previous state is None).
+            // Decrement when a transfer reaches a terminal state (Completed flag set).
+            if (e.PreviousState == TransferStates.None)
+            {
+                TransferItemManager.MarkTransfersDirty();
+                if (isUpload)
+                {
+                    int count = System.Threading.Interlocked.Increment(ref _activeUploadCount);
+                    OnUploadCountChanged(count);
+                }
+                else
+                {
+                    int count = System.Threading.Interlocked.Increment(ref _activeDownloadCount);
+                    OnDownloadCountChanged(count);
+                }
+            }
+            else if (e.Transfer.State.HasFlag(TransferStates.Completed) && !e.PreviousState.HasFlag(TransferStates.Completed))
+            {
+                TransferItemManager.MarkTransfersDirty();
+                if (isUpload)
+                {
+                    int count = Math.Max(0, System.Threading.Interlocked.Decrement(ref _activeUploadCount));
+                    OnUploadCountChanged(count);
+                }
+                else
+                {
+                    int count = Math.Max(0, System.Threading.Interlocked.Decrement(ref _activeDownloadCount));
+                    OnDownloadCountChanged(count);
+                }
+            }
+
             if (!isUpload && e.Transfer.State.HasFlag(TransferStates.UserOffline))
             {
                 //user offline.
-                Seeker.Services.DownloadService.AddToUserOffline(e.Transfer.Username);
+                Seeker.Services.DownloadService.Instance.AddToUserOffline(e.Transfer.Username);
             }
 
-            TransferItem relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, isUpload, out _);
+            TransferItem relevantItem = TransferItems.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, isUpload, out _);
             if (relevantItem == null)
             {
                 Logger.InfoFirebase("relevantItem==null. state: " + e.Transfer.State.ToString());
             }
             Logger.Debug("TransferStateChanged for user: " + e.Transfer.Username + " file: " + e.Transfer.Filename + " new state: " + e.Transfer.State.ToString());
-            //TransferItem relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItemWithIndexFromAll(e.Transfer?.Filename, e.Transfer?.Username, out _);  //upload / download branch here
+            TransferItemManager.MarkTransfersDirty();
+            TransferPersistenceWrapper.SaveTransferItems(false, 30);
             if (relevantItem != null)
             {
                 //if the incoming transfer is not canclled, i.e. requested, then we replace the state (the user retried).
@@ -955,11 +1057,11 @@ namespace Seeker
                     // TODO why is queue length max value
                     if (relevantItem.QueueLength != 0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
                     {
-                        Seeker.Services.DownloadService.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
+                        Seeker.Services.DownloadService.Instance.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
                     }
                     else //this means that it came from a browse response where we may not know the users initial queue length... or if its unexpectedly queued.
                     {
-                        Seeker.Services.DownloadService.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
+                        Seeker.Services.DownloadService.Instance.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
                     }
                 }
                 StateChangedForItem?.Invoke(null, relevantItem);
@@ -984,8 +1086,6 @@ namespace Seeker
                 if (!e.Transfer.State.HasFlag(TransferStates.Cancelled))
                 {
                     //clear queued flag...
-                    SeekerApplication.TransfersDownloadsCompleteStale = true;
-                    TransfersFragment.SaveTransferItems(SeekerState.SharedPreferences, false, 60);
                     relevantItem.Progress = 100;
                     StateChangedForItem?.Invoke(null, relevantItem);
                 }
@@ -1001,7 +1101,7 @@ namespace Seeker
                 {
                     if (PreferencesState.NotifyOnFolderCompleted && !isUpload)
                     {
-                        if (TransfersFragment.TransferItemManagerDL.IsFolderNowComplete(relevantItem, false))
+                        if (TransferItems.TransferItemManagerDL.IsFolderNowComplete(relevantItem, false))
                         {
                             //relevantItem.TransferItemExtra // if single then change the notif text.
                             // RetryDL is on completed Succeeded dl?
@@ -1031,7 +1131,7 @@ namespace Seeker
             newStream = null;
             try
             {
-                var relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(fullFilename, username, false, out _);
+                var relevantItem = TransferItems.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(fullFilename, username, false, out _);
                 if (startOffset == 0)
                 {
                     // all we need to do is update the size.
@@ -1096,25 +1196,27 @@ namespace Seeker
                 Logger.Firebase("timer issue2: " + err.Message + err.StackTrace); //remember at worst the locks will get released early which is fine.
             }
             TransferItem relevantItem = null;
-            if (TransfersFragment.TransferItemManagerDL == null)
+            if (TransferItems.TransferItemManagerDL == null)
             {
                 Logger.Debug("transferItems Null " + e.Transfer.Filename);
                 return;
             }
 
+            TransferPersistenceWrapper.SaveTransferItems(false, 30);
             bool isUpload = e.Transfer.Direction == TransferDirection.Upload;
-            relevantItem = TransfersFragment.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer.Filename, e.Transfer.Username, e.Transfer.Direction == TransferDirection.Upload, out _);
-            //relevantItem = TransfersFragment.TransferItemManagerDL.GetTransferItem(e.Transfer.Filename);
+            relevantItem = TransferItems.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(e.Transfer.Filename, e.Transfer.Username, e.Transfer.Direction == TransferDirection.Upload, out _);
+            //relevantItem = TransferItems.TransferItemManagerDL.GetTransferItem(e.Transfer.Filename);
 
             if (relevantItem == null)
             {
                 //this happens on Clear and Cancel All.
                 Logger.Debug("Relevant Item Null " + e.Transfer.Filename);
-                Logger.Debug("transferItems.IsEmpty " + TransfersFragment.TransferItemManagerDL.IsEmpty());
+                Logger.Debug("transferItems.IsEmpty " + TransferItems.TransferItemManagerDL.IsEmpty());
                 return;
             }
             else
             {
+                TransferItemManager.MarkTransfersDirty();
                 bool fullRefresh = false;
                 double percentComplete = e.Transfer.PercentComplete;
                 relevantItem.Progress = (int)percentComplete;
@@ -1129,7 +1231,7 @@ namespace Seeker
                     {
                         //int before = TransfersFragment.transferItems.Count;
                         TransfersFragment.UpdateBatchSelectedItemsIfApplicable(relevantItem);
-                        TransfersFragment.TransferItemManagerWrapped.Remove(relevantItem);//TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt. //this one doesnt need cleaning up, its successful..
+                        TransferItems.TransferItemManagerWrapped.Remove(relevantItem);//TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt. //this one doesnt need cleaning up, its successful..
                         //int after = TransfersFragment.transferItems.Count;
                         //Logger.Debug("transferItems.Remove(relevantItem): before: " + before + "after: " + after);
                     });
@@ -1281,9 +1383,9 @@ namespace Seeker
                 //this is a "true" connected to disconnected
                 ChatroomController.ClearAndCacheJoined();
                 Logger.Debug("disconnected " + DateTime.UtcNow.ToString());
-                if (SeekerState.logoutClicked)
+                if (e.Message == LoginFragment.LogoutMessage)
                 {
-                    SeekerState.logoutClicked = false;
+                    // User intentionally logged out — do not reconnect
                 }
                 else if (AUTO_CONNECT_ON && PreferencesState.CurrentlyLoggedIn)
                 {
@@ -1480,9 +1582,9 @@ namespace Seeker
             {
                 try
                 {
-                    lock (SeekerState.UserList)
+                    lock (CommonState.UserList)
                     {
-                        foreach (UserListItem item in SeekerState.UserList)
+                        foreach (UserListItem item in CommonState.UserList)
                         {
                             Logger.Debug("adding user: " + item.Username);
                             SeekerState.SoulseekClient.WatchUserAsync(item.Username).ContinueWith(UpdateUserInfo);
@@ -1525,7 +1627,7 @@ namespace Seeker
                         }
                         else
                         {
-                            SessionService.SetStatusApi(true);
+                            SessionService.Instance.SetStatusApi(true);
                         }
                     }
 
@@ -1666,18 +1768,18 @@ namespace Seeker
                 UserListService.Instance.RemoveUser(username);
             }
 
-            lock (SeekerState.IgnoreUserList)
+            lock (CommonState.IgnoreUserList)
             {
-                if (SeekerState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
+                if (CommonState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
                 {
                     return false;
                 }
                 else
                 {
-                    SeekerState.IgnoreUserList.Add(new UserListItem(username, UserRole.Ignored));
+                    CommonState.IgnoreUserList.Add(new UserListItem(username, UserRole.Ignored));
                 }
             }
-            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
+            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList));
             return true;
         }
 
@@ -1700,26 +1802,26 @@ namespace Seeker
         /// <returns></returns>
         public static bool RemoveFromIgnoreList(string username)
         {
-            lock (SeekerState.IgnoreUserList)
+            lock (CommonState.IgnoreUserList)
             {
-                if (!SeekerState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
+                if (!CommonState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
                 {
                     return false;
                 }
                 else
                 {
-                    SeekerState.IgnoreUserList = SeekerState.IgnoreUserList.Where(userListItem => { return userListItem.Username != username; }).ToList();
+                    CommonState.IgnoreUserList = CommonState.IgnoreUserList.Where(userListItem => { return userListItem.Username != username; }).ToList();
                 }
             }
-            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(SeekerState.IgnoreUserList));
+            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList));
             return true;
         }
 
         public static bool IsUserInIgnoreList(string username)
         {
-            lock (SeekerState.IgnoreUserList)
+            lock (CommonState.IgnoreUserList)
             {
-                return SeekerState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; });
+                return CommonState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; });
             }
         }
 
@@ -1756,6 +1858,8 @@ namespace Seeker
             {
                 return;
             }
+            TransferItemManager.MarkTransfersDirty();
+            TransferPersistenceWrapper.SaveTransferItems(false, 30);
             if (e.Transfer.State == TransferStates.InProgress)
             {
                 Logger.Debug("transfer state changed to in progress" + e.Transfer.Filename);
@@ -1817,10 +1921,10 @@ namespace Seeker
         {
             UserPresence? prevStatus = UserPresence.Offline;
             bool found = false;
-            lock (SeekerState.UserList)
+            lock (CommonState.UserList)
             {
 
-                foreach (UserListItem item in SeekerState.UserList)
+                foreach (UserListItem item in CommonState.UserList)
                 {
                     if (item.Username == username)
                     {
@@ -1908,9 +2012,7 @@ namespace Seeker
 
         public const string CHANNEL_ID_FOLDER_ALERT = "Folder Finished Downloading Alerts ID";
         public const string CHANNEL_NAME_FOLDER_ALERT = "Folder Finished Downloading Alerts";
-        public const string FromFolderAlert = "FromFolderAlert";
-        public const string FromFolderAlertUsername = "FromFolderAlertUsername";
-        public const string FromFolderAlertFoldername = "FromFolderAlertFoldername";
+
         public static void ShowNotificationForCompletedFolder(string foldername, string username)
         {
             SeekerState.ActiveActivityRef.RunOnUiThread(() =>
@@ -1920,9 +2022,9 @@ namespace Seeker
                     CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, CHANNEL_ID_FOLDER_ALERT, CHANNEL_NAME_FOLDER_ALERT, NotificationImportance.High); //only high will "peek"
                     Intent notifIntent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                     notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
-                    notifIntent.PutExtra(FromFolderAlert, 2);
-                    notifIntent.PutExtra(FromFolderAlertUsername, username);
-                    notifIntent.PutExtra(FromFolderAlertFoldername, foldername);
+                    notifIntent.PutExtra(MainActivity.FolderAlertExtra, true);
+                    notifIntent.PutExtra(MainActivity.FolderAlertUsernameExtra, username);
+                    notifIntent.PutExtra(MainActivity.FolderAlertFoldernameExtra, foldername);
                     PendingIntent pendingIntent =
                         PendingIntent.GetActivity(SeekerState.ActiveActivityRef, (foldername + username).GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
                     Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, CHANNEL_ID_FOLDER_ALERT, SeekerApplication.GetString(Resource.String.FolderFinishedDownloading), string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.folder_X_from_user_Y_finished), foldername, username), false);
@@ -1950,9 +2052,9 @@ namespace Seeker
                 // Side-effect restores that depend on Android APIs
                 UploadDirectoryManager.RestoreFromSavedState(sharedPreferences);
 
-                SeekerState.UserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_UserList, string.Empty));
+                CommonState.UserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_UserList, string.Empty));
                 RestoreRecentUsersManagerFromString(sharedPreferences.GetString(KeyConsts.M_RecentUsersList, string.Empty));
-                SeekerState.IgnoreUserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
+                CommonState.IgnoreUserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
 
                 SeekerState.UserNotes = SerializationHelper.RestoreUserNotesFromString(sharedPreferences.GetString(KeyConsts.M_UserNotes, string.Empty));
                 SeekerState.UserOnlineAlerts = SerializationHelper.RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(KeyConsts.M_UserOnlineAlerts, string.Empty));
@@ -1960,11 +2062,11 @@ namespace Seeker
                 SearchTabHelper.RestoreHeadersFromSharedPreferences();
                 SettingsActivity.RestoreAdditionalDirectorySettingsFromSharedPreferences();
 
-                if (TransfersFragment.TransferItemManagerDL == null)
+                if (TransferItems.TransferItemManagerDL == null)
                 {
-                    TransfersFragment.RestoreDownloadTransferItems(sharedPreferences);
-                    TransfersFragment.RestoreUploadTransferItems(sharedPreferences);
-                    TransfersFragment.TransferItemManagerWrapped = new TransferItemManagerWrapper(TransfersFragment.TransferItemManagerUploads, TransfersFragment.TransferItemManagerDL);
+                    TransferPersistenceWrapper.RestoreDownloadTransferItems(sharedPreferences);
+                    TransferPersistenceWrapper.RestoreUploadTransferItems(sharedPreferences);
+                    TransferItems.TransferItemManagerWrapped = new TransferItemManagerWrapper(TransferItems.TransferItemManagerUploads, TransferItems.TransferItemManagerDL, TransferCleanup.PerformCleanupItem);
                 }
             }
         }
@@ -1977,9 +2079,9 @@ namespace Seeker
                 {
                     //dont show people that we have already added...
                     var recents = SeekerState.RecentUsersManager.GetRecentUserList();
-                    lock (SeekerState.UserList)
+                    lock (CommonState.UserList)
                     {
-                        foreach (var uli in SeekerState.UserList)
+                        foreach (var uli in CommonState.UserList)
                         {
                             recents.Remove(uli.Username);
                         }
@@ -2009,10 +2111,10 @@ namespace Seeker
             SeekerState.RecentUsersManager = new RecentUserManager();
             if (xmlRecentUsersList == string.Empty)
             {
-                int count = SeekerState.UserList?.Count ?? 0;
+                int count = CommonState.UserList?.Count ?? 0;
                 if (count > 0)
                 {
-                    SeekerState.RecentUsersManager.SetRecentUserList(SeekerState.UserList.Select(uli => uli.Username).ToList());
+                    SeekerState.RecentUsersManager.SetRecentUserList(CommonState.UserList.Select(uli => uli.Username).ToList());
                 }
                 else
                 {
@@ -2061,7 +2163,7 @@ namespace Seeker
             }
             else
             {
-                if (SeekerState.UserList == null)
+                if (CommonState.UserList == null)
                 {
                     Logger.Firebase("UserList is null on user data receive");
                 }
@@ -2103,7 +2205,7 @@ namespace Seeker
                     {
                         Logger.Debug("the user came back who we previously dl from " + username);
                         //retry all failed downloads from them..
-                        List<TransferItem> items = TransfersFragment.TransferItemManagerDL.GetTransferItemsFromUser(username, true, true);
+                        List<TransferItem> items = TransferItems.TransferItemManagerDL.GetTransferItemsFromUser(username, true, true);
                         if (items.Count == 0)
                         {
                             //no offline, then remove this user.
@@ -2116,7 +2218,7 @@ namespace Seeker
                         {
                             try
                             {
-                                Seeker.Services.DownloadService.DownloadRetryAllConditionLogic(false, false, null, true, items);
+                                Seeker.Services.DownloadService.Instance.DownloadRetryAll(items);
                             }
                             catch (Exception e)
                             {
@@ -2140,7 +2242,7 @@ namespace Seeker
             else
             {
                 //we get user status changed for those we are in the same room as us
-                if (SeekerState.UserList != null)
+                if (CommonState.UserList != null)
                 {
                     bool found = UserListAddIfContainsUser(e.Username, null, new UserStatus(e.Username, e.Presence, e.IsPrivileged));
                     if (found)

@@ -24,11 +24,11 @@ namespace Seeker.Messages
         public static bool IsInitialized = false;
         public static EventHandler<Message> MessageReceived;
         public static System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>> RootMessages = null; //this is for when the user logs in as different people
-        public static System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>> Messages = null;//new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>> Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
         public static string MessagesUsername = string.Empty;
 
-
-        public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> UnreadUsernames = null;//basically a concurrent hashset.
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Concurrent.ConcurrentDictionary<string, int>> RootLastReadMessageCounts = null;
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, int> LastReadMessageCounts = null;
 
 
         //static MessageController()
@@ -42,15 +42,90 @@ namespace Seeker.Messages
 
         public static void Initialize()
         {
+            if (IsInitialized)
+            {
+                return;
+            }
             SeekerState.SoulseekClient.PrivateMessageReceived += Client_PrivateMessageReceived;
             lock (MessageListLockObject)
             {
                 //SerializationHelper.MigratedMessages(SeekerState.SharedPreferences, KeyConsts.M_Messages_Legacy, KeyConsts.M_Messages);
                 RestoreMessagesFromSharedPrefs(SeekerState.SharedPreferences);
             }
-            //SerializationHelper.MigrateUnreadUsernames(SeekerState.SharedPreferences, KeyConsts.M_UnreadMessageUsernames_Legacy, KeyConsts.M_UnreadMessageUsernames);
-            RestoreUnreadStateDict(SeekerState.SharedPreferences);
+            RestoreLastReadCountsFromSharedPrefs(SeekerState.SharedPreferences);
+            bool isFirstTimeInit = !SeekerState.SharedPreferences.Contains(KeyConsts.M_LastReadMessageCounts);
+            if (isFirstTimeInit && RootMessages != null)
+            {
+                foreach (var account in RootMessages)
+                {
+                    if (!RootLastReadMessageCounts.ContainsKey(account.Key))
+                    {
+                        RootLastReadMessageCounts[account.Key] = new System.Collections.Concurrent.ConcurrentDictionary<string, int>();
+                    }
+                    foreach (var conv in account.Value)
+                    {
+                        RootLastReadMessageCounts[account.Key][conv.Key] = conv.Value.Count;
+                    }
+                }
+                // Re-point current user's dict
+                if (!string.IsNullOrEmpty(PreferencesState.Username)
+                    && RootLastReadMessageCounts.ContainsKey(PreferencesState.Username))
+                {
+                    LastReadMessageCounts = RootLastReadMessageCounts[PreferencesState.Username];
+                }
+            }
+            // Persist so the key exists on next launch (even if empty), preventing re-seeding.
+            if (isFirstTimeInit)
+            {
+                SaveLastReadCounts(SeekerState.SharedPreferences);
+            }
             IsInitialized = true;
+            PreferencesState.UsernameChanged += (u) => SwitchUser(u);
+        }
+
+        public static void SwitchUser(string username)
+        {
+            lock (MessageListLockObject)
+            {
+                if (username == MessagesUsername)
+                {
+                    return;
+                }
+
+                MessagesUsername = username;
+
+                if (RootMessages != null)
+                {
+                    if (string.IsNullOrEmpty(username))
+                    {
+                        Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+                    }
+                    else
+                    {
+                        if (!RootMessages.ContainsKey(username))
+                        {
+                            RootMessages[username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+                        }
+                        Messages = RootMessages[username];
+                    }
+                }
+
+                if (RootLastReadMessageCounts != null)
+                {
+                    if (string.IsNullOrEmpty(username))
+                    {
+                        LastReadMessageCounts = new System.Collections.Concurrent.ConcurrentDictionary<string, int>();
+                    }
+                    else
+                    {
+                        if (!RootLastReadMessageCounts.ContainsKey(username))
+                        {
+                            RootLastReadMessageCounts[username] = new System.Collections.Concurrent.ConcurrentDictionary<string, int>();
+                        }
+                        LastReadMessageCounts = RootLastReadMessageCounts[username];
+                    }
+                }
+            }
         }
 
         private static void Client_PrivateMessageReceived(object sender, Soulseek.PrivateMessageReceivedEventArgs e)
@@ -67,19 +142,9 @@ namespace Seeker.Messages
                 Message msg = new Message(e.Username, e.Id, e.Replayed, e.Timestamp.ToLocalTime(), e.Timestamp, e.Message, false);
                 lock (MessageListLockObject)
                 {
-                    if (PreferencesState.Username == null || PreferencesState.Username == string.Empty)
+                    if (string.IsNullOrEmpty(PreferencesState.Username))
                     {
                         Logger.Firebase("we received a message while our username is still null");
-                    }
-                    else if (!RootMessages.ContainsKey(PreferencesState.Username))
-                    {
-                        RootMessages[PreferencesState.Username] = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
-                        MessagesUsername = PreferencesState.Username;
-                        Messages = RootMessages[PreferencesState.Username];
-                    }
-                    else if (RootMessages.ContainsKey(PreferencesState.Username))
-                    {
-                        Messages = RootMessages[PreferencesState.Username];
                     }
 
                     if (Messages.ContainsKey(e.Username))
@@ -548,64 +613,103 @@ namespace Seeker.Messages
             }
         }
 
-        public static void RestoreUnreadStateDict(ISharedPreferences sharedPrefs)
+        public static void RestoreLastReadCountsFromSharedPrefs(ISharedPreferences sharedPrefs)
         {
-            string unreadMessageUsernames = sharedPrefs.GetString(KeyConsts.M_UnreadMessageUsernames, string.Empty);
-            UnreadUsernames = SerializationHelper.RestoreUnreadUsernamesFromString(unreadMessageUsernames);
-        }
+            string lastReadCounts = sharedPrefs.GetString(KeyConsts.M_LastReadMessageCounts, string.Empty);
+            RootLastReadMessageCounts = SerializationHelper.RestoreLastReadCountsFromString(lastReadCounts);
 
-        public static void SaveUnreadStateDict(ISharedPreferences sharedPrefs)
-        {
-            //For some reason, the generic Dictionary in .net 2.0 is not XML serializable.
-            if (UnreadUsernames == null)
+            if (!string.IsNullOrEmpty(PreferencesState.Username))
             {
-                return;
-            }
-            if (UnreadUsernames.IsEmpty)
-            {
-                PreferencesManager.SaveUnreadMessageUsernames(String.Empty);
+                if (RootLastReadMessageCounts.ContainsKey(PreferencesState.Username))
+                {
+                    LastReadMessageCounts = RootLastReadMessageCounts[PreferencesState.Username];
+                }
+                else
+                {
+                    LastReadMessageCounts = new System.Collections.Concurrent.ConcurrentDictionary<string, int>();
+                    RootLastReadMessageCounts[PreferencesState.Username] = LastReadMessageCounts;
+                }
             }
             else
             {
-                var messagesString = SerializationHelper.SaveUnreadUsernamesToString(UnreadUsernames);
+                LastReadMessageCounts = new System.Collections.Concurrent.ConcurrentDictionary<string, int>();
+            }
+        }
+
+        public static void SaveLastReadCounts(ISharedPreferences sharedPrefs)
+        {
+            if (RootLastReadMessageCounts == null)
+            {
+                return;
+            }
+            if (RootLastReadMessageCounts.IsEmpty)
+            {
+                PreferencesManager.SaveLastReadMessageCounts(String.Empty);
+            }
+            else
+            {
+                var messagesString = SerializationHelper.SaveLastReadCountsToString(RootLastReadMessageCounts);
                 if (!string.IsNullOrEmpty(messagesString))
                 {
-                    PreferencesManager.SaveUnreadMessageUsernames(messagesString);
+                    PreferencesManager.SaveLastReadMessageCounts(messagesString);
                 }
             }
+        }
+
+        public static int GetUnreadCount(string username)
+        {
+            var messages = Messages;
+            var lastReadCounts = LastReadMessageCounts;
+            if (messages == null || !messages.TryGetValue(username, out var msgList))
+            {
+                return 0;
+            }
+            int currentCount = msgList.Count;
+            int lastRead = lastReadCounts != null && lastReadCounts.TryGetValue(username, out int val) ? val : 0;
+            return Math.Max(currentCount - lastRead, 0);
+        }
+
+        public static int GetTotalUnreadCount()
+        {
+            var messages = Messages;
+            var lastReadCounts = LastReadMessageCounts;
+            if (messages == null || lastReadCounts == null)
+            {
+                return 0;
+            }
+            int total = 0;
+            foreach (var kvp in messages)
+            {
+                int currentCount = kvp.Value.Count;
+                int lastRead = lastReadCounts.TryGetValue(kvp.Key, out int val) ? val : 0;
+                total += Math.Max(currentCount - lastRead, 0);
+            }
+            return total;
         }
 
         public static void SetAsUnreadAndSaveIfApplicable(string username)
         {
-            if (UnreadUsernames.ContainsKey(username))
+            if (MessagesInnerFragment.currentlyResumed && MessagesInnerFragment.Username == username)
             {
-                return; //nothing to do.
+                //if we are already at this user then update last-read count to current.
+                MarkAsRead(username);
+                return;
             }
-            else
-            {
-                if (MessagesInnerFragment.currentlyResumed && MessagesInnerFragment.Username == username)
-                {
-                    //if we are already at this user then dont set as unread.
-                    return;
-                }
-                Logger.Debug("set");
-                UnreadUsernames.TryAdd(username, 0);
-                SaveUnreadStateDict(SeekerState.SharedPreferences);
-            }
+            // No action needed — the gap between lastRead and current count IS the unread indicator.
         }
 
         public static void UnsetAsUnreadAndSaveIfApplicable(string username)
         {
-            if (!UnreadUsernames.ContainsKey(username))
+            MarkAsRead(username);
+        }
+
+        public static void MarkAsRead(string username)
+        {
+            if (Messages != null && Messages.TryGetValue(username, out var msgList))
             {
-                return; //nothing to do.
+                LastReadMessageCounts[username] = msgList.Count;
             }
-            else
-            {
-                Logger.Debug("unset");
-                UnreadUsernames.TryRemove(username, out _);
-                SaveUnreadStateDict(SeekerState.SharedPreferences);
-            }
+            SaveLastReadCounts(SeekerState.SharedPreferences);
         }
 
         public static void BroadcastFriendlyRunOnUiThread(Action action)
@@ -673,31 +777,7 @@ namespace Seeker.Messages
                 }));
             });
 
-            if (SessionService.CurrentlyLoggedInButDisconnectedState())
-            {
-                Logger.Debug("currently logged in but disconnected...");
-
-                //we disconnected. login then do the rest.
-                //this is due to temp lost connection
-                Task t;
-                if (!SessionService.ShowMessageAndCreateReconnectTask(false, out t))
-                {
-                    return;
-                }
-                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(actualActionToPerform);
-            }
-            else
-            {
-                if (SessionService.IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(actualActionToPerform, "Message will send on connection re-establishment", contextToUse))
-                {
-                    Logger.Debug("on finish log in we will do it");
-                    return;
-                }
-                else
-                {
-                    SendMessageLogic(msg, fromDirectReplyAction);
-                }
-            }
+            SessionService.Instance.RunWithReconnect(actualActionToPerform, "Message will send on connection re-establishment", contextToUse);
 
         }
 
@@ -715,6 +795,7 @@ namespace Seeker.Messages
                 Messages[usernameToMessage] = new List<Message>(); //our first message to them..
                 Messages[usernameToMessage].Add(msg);
             }
+            MarkAsRead(usernameToMessage);
             SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
             RaiseMessageReceived(msg);
             Action<Task> continueWithAction = new Action<Task>((Task t) =>

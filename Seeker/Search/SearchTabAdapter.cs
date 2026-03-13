@@ -40,7 +40,7 @@ namespace Seeker
 
         private void RemoveSearch_Click(object sender, EventArgs e)
         {
-            position = ((sender as View).Parent.Parent as SearchTabView).ViewHolder.AdapterPosition;
+            position = ((sender as View).Parent.Parent.Parent as SearchTabView).ViewHolder.BindingAdapterPosition;
             if (position == -1) //in my case this happens if you delete too fast...
             {
                 return;
@@ -108,7 +108,7 @@ namespace Seeker
 
         private void SearchTabLayout_Click(object sender, EventArgs e)
         {
-            position = ((sender as View).Parent.Parent as SearchTabView).ViewHolder.AdapterPosition;
+            position = ((sender as View).Parent.Parent.Parent as SearchTabView).ViewHolder.BindingAdapterPosition;
             int tabToGoTo = localDataSet[position];
             SearchFragment.Instance.GoToTab(tabToGoTo, false);
             SearchTabDialog.Instance.Dismiss();
@@ -148,6 +148,8 @@ namespace Seeker
         public ImageView removeSearch;
         private TextView lastSearchTerm;
         private TextView numResults;
+        private View pillIndicator;
+        private View rowBackground;
         public SearchTabViewHolder ViewHolder;
         public int SearchId = int.MaxValue;
         public SearchTabView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -171,6 +173,8 @@ namespace Seeker
             numResults = FindViewById<TextView>(Resource.Id.resultsText);
             removeSearch = FindViewById<ImageView>(Resource.Id.searchTabItemRemove);
             searchTabLayout = FindViewById<LinearLayout>(Resource.Id.searchTabItemMain);
+            pillIndicator = FindViewById<View>(Resource.Id.tabPillIndicator);
+            rowBackground = FindViewById<View>(Resource.Id.searchTabRowBg);
         }
 
         public void setItem(int i)
@@ -193,10 +197,27 @@ namespace Seeker
             if (lastTerm != string.Empty && lastTerm != null)
             {
                 lastSearchTerm.Text = searchTab.LastSearchTerm;
+                lastSearchTerm.SetTypeface(lastSearchTerm.Typeface, Android.Graphics.TypefaceStyle.Normal);
             }
             else
             {
-                lastSearchTerm.Text = "[No Search]";
+                lastSearchTerm.SetText(Resource.String.new_search_tab, TextView.BufferType.Normal);
+                lastSearchTerm.SetTypeface(lastSearchTerm.Typeface, Android.Graphics.TypefaceStyle.Italic);
+            }
+
+            bool isActive = (i == SearchTabHelper.CurrentTab);
+            pillIndicator.SetBackgroundResource(isActive
+                ? Resource.Drawable.search_tab_pill_active
+                : Resource.Drawable.search_tab_pill_inactive);
+            if (isActive)
+            {
+                rowBackground.SetBackgroundResource(Resource.Drawable.search_tab_row_bg);
+                rowBackground.Background.Mutate();
+                rowBackground.Background.Alpha = 40;
+            }
+            else
+            {
+                rowBackground.Background = null;
             }
         }
     }
