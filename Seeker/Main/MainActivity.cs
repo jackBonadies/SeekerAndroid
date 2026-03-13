@@ -1328,13 +1328,48 @@ namespace Seeker
         {
             if (e.KeyCode == Keycode.VolumeUp)
             {
-                SeekerState.SoulseekClient.Disconnect("test");
+                TestEnqueueSharedFolder();
             }
             else if (e.KeyCode == Keycode.VolumeDown)
             {
                 SeekerState.SoulseekClient.ConnectAsync("slowtest", "slowpass");
             }
             return base.DispatchKeyEvent(e);
+        }
+
+        private void TestEnqueueSharedFolder()
+        {
+            var cache = SeekerState.SharedFileCache;
+            if (cache?.FullInfo == null || cache.FullInfo.Count == 0)
+            {
+                Logger.Debug("TestEnqueue: no shared files");
+                return;
+            }
+
+            // group files by directory (everything before the last backslash)
+            var filesByDir = cache.FullInfo.Keys
+                .GroupBy(f => f.Substring(0, f.LastIndexOf('\\')))
+                .ToList();
+
+            var rand = new Random();
+            var chosenDir = filesByDir[rand.Next(filesByDir.Count)];
+            string fakeUsername = "testuser_" + rand.Next(1000, 9999);
+            var fakeEndpoint = new IPEndPoint(IPAddress.Loopback, 0);
+
+            Logger.Debug($"TestEnqueue: dir '{chosenDir.Key}' ({chosenDir.Count()} files) user '{fakeUsername}'");
+
+            foreach (string filename in chosenDir)
+            {
+                try
+                {
+                    UploadService.EnqueueDownloadAction(fakeUsername, fakeEndpoint, filename);
+                    Logger.Debug($"TestEnqueue: enqueued '{filename}'");
+                }
+                catch (Exception ex)
+                {
+                    Logger.Debug($"TestEnqueue: failed '{filename}': {ex.Message}");
+                }
+            }
         }
         #endif
     }

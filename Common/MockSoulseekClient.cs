@@ -592,16 +592,16 @@ namespace Seeker
             try
             {
                 UpdateState(TransferStates.Queued | TransferStates.Locally);
-                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+                await Task.Delay(SimulatedDelayMs * 2, cancellationToken).ConfigureAwait(false);
 
                 await GlobalUploadSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
                 globalSemaphoreAcquired = true;
 
                 UpdateState(TransferStates.Requested);
-                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+                await Task.Delay(SimulatedDelayMs * 2, cancellationToken).ConfigureAwait(false);
 
                 UpdateState(TransferStates.Initializing);
-                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+                await Task.Delay(SimulatedDelayMs * 2, cancellationToken).ConfigureAwait(false);
 
                 UpdateState(TransferStates.InProgress);
                 UpdateProgress(startOffset);
@@ -611,7 +611,11 @@ namespace Seeker
                 for (int i = 1; i <= steps; i++)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    await Task.Delay(200, cancellationToken).ConfigureAwait(false);
+                    await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
+                    if (_random.Next(100) == 0)
+                    {
+                        throw new Exception("Simulated Exception");
+                    }
                     UpdateProgress(startOffset + chunkSize * i);
                 }
 
