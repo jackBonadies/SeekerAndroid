@@ -327,7 +327,7 @@ namespace Seeker
             if (unreadCount > 0)
             {
                 messagesUnreadBadge.Text = string.Format(
-                    SeekerApplication.GetString(Resource.String.unread_count_fmt), unreadCount);
+                    SeekerApplication.GetString(Resource.String.unread_count), unreadCount);
                 messagesUnreadBadge.Visibility = ViewStates.Visible;
             }
             else
