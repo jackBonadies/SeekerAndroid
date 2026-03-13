@@ -16,7 +16,7 @@ namespace Seeker
     public class MockSoulseekClient : ISoulseekClient
     {
         // --- Configurable delay ---
-        public int SimulatedDelayMs { get; set; } = 50;
+        public int SimulatedDelayMs { get; set; } = 200;
 
         // --- Configurable method handlers ---
         public Func<string, string, CancellationToken?, Task>? ConnectAsyncHandler { get; set; }
@@ -509,7 +509,11 @@ namespace Seeker
                 for (int i = 1; i <= steps; i++)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    await Task.Delay(200, cancellationToken).ConfigureAwait(false);
+                    await Task.Delay(500, cancellationToken).ConfigureAwait(false);
+                    if (_random.Next(100) == 0)
+                    {
+                        throw new Exception("Simulated Exception");
+                    }
                     UpdateProgress(startOffset + chunkSize * i);
                 }
 
