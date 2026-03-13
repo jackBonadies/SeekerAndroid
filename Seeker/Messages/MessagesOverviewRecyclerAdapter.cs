@@ -220,7 +220,7 @@ namespace Seeker.Messages
         private TextView viewUsername;
         private TextView viewMessage;
         private TextView viewDateTimeAgo;
-        private ImageView unreadImageView;
+        private TextView unreadBadge;
 
         public MessageOverviewView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
@@ -244,7 +244,7 @@ namespace Seeker.Messages
             viewUsername = FindViewById<TextView>(Resource.Id.username);
             viewMessage = FindViewById<TextView>(Resource.Id.message);
             viewDateTimeAgo = FindViewById<TextView>(Resource.Id.dateTimeAgo);
-            unreadImageView = FindViewById<ImageView>(Resource.Id.unreadImageView);
+            unreadBadge = FindViewById<TextView>(Resource.Id.unreadBadge);
         }
 
         public void setItem(string username)
@@ -254,9 +254,11 @@ namespace Seeker.Messages
 
             viewDateTimeAgo.Text = SimpleHelpers.GetDateTimeSinceAbbrev(m.LocalDateTime);
 
-            if (MessageController.GetUnreadCount(username) > 0)
+            int unreadCount = MessageController.GetUnreadCount(username);
+            if (unreadCount > 0)
             {
-                unreadImageView.Visibility = ViewStates.Visible;
+                unreadBadge.Visibility = ViewStates.Visible;
+                unreadBadge.Text = unreadCount > 99 ? "99+" : unreadCount.ToString();
                 viewUsername.SetTypeface(viewUsername.Typeface, TypefaceStyle.Bold);
                 viewDateTimeAgo.SetTypeface(viewDateTimeAgo.Typeface, TypefaceStyle.Bold);
                 viewMessage.SetTypeface(viewMessage.Typeface, TypefaceStyle.Bold);
@@ -266,7 +268,7 @@ namespace Seeker.Messages
             }
             else
             {
-                unreadImageView.Visibility = ViewStates.Gone;
+                unreadBadge.Visibility = ViewStates.Gone;
                 viewUsername.SetTypeface(viewUsername.Typeface, TypefaceStyle.Normal);
                 viewDateTimeAgo.SetTypeface(viewDateTimeAgo.Typeface, TypefaceStyle.Normal);
                 viewMessage.SetTypeface(viewMessage.Typeface, TypefaceStyle.Normal);
