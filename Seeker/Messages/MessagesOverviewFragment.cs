@@ -79,17 +79,32 @@ namespace Seeker.Messages
                 sb.Show();
             }
             MessagesBroadcastReceiver.MarkAsReadFromNotification += UpdateMarkAsReadFromNotif;
+            SeekerApplication.UserStatusChangedUIEvent += OnUserStatusChanged;
         }
 
         public override void OnPause()
         {
             base.OnPause();
             MessagesBroadcastReceiver.MarkAsReadFromNotification -= UpdateMarkAsReadFromNotif;
+            SeekerApplication.UserStatusChangedUIEvent -= OnUserStatusChanged;
         }
 
         private void UpdateMarkAsReadFromNotif(object o, string uname)
         {
             recyclerAdapter.NotifyNameChanged(uname);
+        }
+
+        private void OnUserStatusChanged(object sender, string username)
+        {
+            if (MainActivity.OnUIthread())
+            {
+                recyclerAdapter.NotifyNameChanged(username);
+            }
+            else
+            {
+                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
+                    recyclerAdapter.NotifyNameChanged(username));
+            }
         }
 
         public class MessageOverviewComparer : IComparer<KeyValuePair<string, List<Message>>>

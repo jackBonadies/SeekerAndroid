@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Common;
 using Seeker.Helpers;
 
 namespace Seeker.Messages
@@ -221,6 +222,7 @@ namespace Seeker.Messages
         private TextView viewMessage;
         private TextView viewDateTimeAgo;
         private TextView unreadBadge;
+        private ImageView viewStatusIndicator;
 
         public MessageOverviewView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
@@ -245,6 +247,58 @@ namespace Seeker.Messages
             viewMessage = FindViewById<TextView>(Resource.Id.message);
             viewDateTimeAgo = FindViewById<TextView>(Resource.Id.dateTimeAgo);
             unreadBadge = FindViewById<TextView>(Resource.Id.unreadBadge);
+            viewStatusIndicator = FindViewById<ImageView>(Resource.Id.statusIndicator);
+        }
+
+        private void SetStatusIndicator(string username)
+        {
+            if (CommonState.UserList == null)
+            {
+                viewStatusIndicator.Visibility = ViewStates.Gone;
+                return;
+            }
+
+            UserListItem foundItem = null;
+            lock (CommonState.UserList)
+            {
+                foreach (UserListItem item in CommonState.UserList)
+                {
+                    if (item.Username == username)
+                    {
+                        foundItem = item;
+                        break;
+                    }
+                }
+            }
+
+            if (foundItem == null)
+            {
+                viewStatusIndicator.Visibility = ViewStates.Gone;
+                return;
+            }
+
+            Soulseek.UserPresence status = foundItem.GetStatusFromItem(out bool statusExists);
+            if (!statusExists)
+            {
+                viewStatusIndicator.Visibility = ViewStates.Gone;
+                return;
+            }
+
+            viewStatusIndicator.Visibility = ViewStates.Visible;
+            int colorRes;
+            switch (status)
+            {
+                case Soulseek.UserPresence.Online:
+                    colorRes = Resource.Color.online;
+                    break;
+                case Soulseek.UserPresence.Away:
+                    colorRes = Resource.Color.away;
+                    break;
+                default:
+                    colorRes = Resource.Color.offline;
+                    break;
+            }
+            viewStatusIndicator.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, colorRes)));
         }
 
         public void setItem(string username)
@@ -254,27 +308,36 @@ namespace Seeker.Messages
 
             viewDateTimeAgo.Text = SimpleHelpers.GetDateTimeSinceAbbrev(m.LocalDateTime);
 
+            SetStatusIndicator(username);
+
+            var cellTextColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColor);
+            var subduedColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued);
+
             int unreadCount = MessageController.GetUnreadCount(username);
             if (unreadCount > 0)
             {
                 unreadBadge.Visibility = ViewStates.Visible;
                 unreadBadge.Text = unreadCount > 99 ? "99+" : unreadCount.ToString();
-                viewUsername.SetTypeface(viewUsername.Typeface, TypefaceStyle.Bold);
-                viewDateTimeAgo.SetTypeface(viewDateTimeAgo.Typeface, TypefaceStyle.Bold);
-                viewMessage.SetTypeface(viewMessage.Typeface, TypefaceStyle.Bold);
-                viewUsername.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
-                viewDateTimeAgo.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
-                viewMessage.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
+
+                // unread: username bold, message bright
+                viewUsername.SetTypeface(null, TypefaceStyle.Bold);
+                viewUsername.SetTextColor(cellTextColor);
+                viewMessage.SetTypeface(null, TypefaceStyle.Normal);
+                viewMessage.SetTextColor(cellTextColor);
+                viewDateTimeAgo.SetTypeface(null, TypefaceStyle.Normal);
+                viewDateTimeAgo.SetTextColor(subduedColor);
             }
             else
             {
                 unreadBadge.Visibility = ViewStates.Gone;
-                viewUsername.SetTypeface(viewUsername.Typeface, TypefaceStyle.Normal);
-                viewDateTimeAgo.SetTypeface(viewDateTimeAgo.Typeface, TypefaceStyle.Normal);
-                viewMessage.SetTypeface(viewMessage.Typeface, TypefaceStyle.Normal);
-                viewUsername.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
-                viewDateTimeAgo.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
-                viewMessage.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
+
+                // read: username normal white, message subdued
+                viewUsername.SetTypeface(null, TypefaceStyle.Normal);
+                viewUsername.SetTextColor(cellTextColor);
+                viewMessage.SetTypeface(null, TypefaceStyle.Normal);
+                viewMessage.SetTextColor(subduedColor);
+                viewDateTimeAgo.SetTypeface(null, TypefaceStyle.Normal);
+                viewDateTimeAgo.SetTextColor(subduedColor);
             }
 
             string msgText = m.MessageText;
@@ -283,8 +346,6 @@ namespace Seeker.Messages
                 msgText = "\u21AA" + msgText;
             }
             viewMessage.Text = msgText;
-            //viewMessage.SetTextColor()
-            //viewMessage.SetTextColor(GetColorFromAttribute(_mContext, Resource.Attribute.normalTextColor))
         }
     }
 
