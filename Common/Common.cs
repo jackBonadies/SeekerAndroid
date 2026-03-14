@@ -96,8 +96,8 @@ namespace Common
             //StringComparer alphabetComparer = StringComparer.Create(new System.Globalization.CultureInfo("en-US"), true); //else 'a' is 26 behind 'A'
             Array.Sort(dirInfoArray, (x, y) =>
             {
-                int len1 = x.Item1.Name.Count();
-                int len2 = y.Item1.Name.Count();
+                int len1 = x.Item1.Name.Length;
+                int len2 = y.Item1.Name.Length;
                 int len = Math.Min(len1, len2);
                 for (int i = 0; i < len; i++)
                 {
@@ -276,8 +276,6 @@ namespace Common
             }
             return new Directory(d.Name, files, d.DecodedViaLatin1);
         }
-
-
     }
 
     public class Helpers

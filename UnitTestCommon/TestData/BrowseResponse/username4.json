@@ -1,0 +1,6215 @@
+{
+  "Directories": [
+    {
+      "Name": "Root A\\Artist A",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album A",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album A\\Sub A",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album B",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album B\\Sub B",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album B\\Sub C",
+      "FileCount": 76,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album C",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album C\\Sub D",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album C\\Sub D\\Sub A",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album D",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album D\\Sub E",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album E",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album E\\Sub F",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album E\\Sub G",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album E\\Sub H",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album E\\Sub H\\Sub B",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album E\\Sub H\\Sub C",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album F",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album F\\Sub I",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album F\\Sub J",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album F\\Sub J\\Sub D",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album F\\Sub J\\Sub E",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album G",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album G\\Sub K",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album G\\Sub L",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album H",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album H\\Sub M",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album H\\Sub N",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album I",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album I\\Sub O",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album I\\Sub P",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album J",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album J\\Sub Q",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album J\\Sub R",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.log"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album J\\Sub S",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album J\\Sub T",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album K",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album K\\Sub U",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album L",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album L\\Sub V",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album L\\Sub V\\Sub F",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album L\\Sub V\\Sub F\\Sub A",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album L\\Sub V\\Sub G",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album L\\Sub V\\Sub H",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album L\\Sub V\\Sub H\\Sub A",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album L\\Sub V\\Sub I",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album L\\Sub V\\Sub I\\Sub A",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album M",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album M\\Sub W",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album M\\Sub X",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album N",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album N\\Sub Y",
+      "FileCount": 25,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album O",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album O\\Sub Z",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album P",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album P\\Sub AA",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album Q",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album Q\\Sub AB",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album R",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album R\\Sub AC",
+      "FileCount": 35,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album S",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album S\\Sub AD",
+      "FileCount": 19,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album T",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album T\\Sub AE",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album T\\Sub AE\\Sub D",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album T\\Sub AE\\Sub E",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album U",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album U\\Sub AF",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album U\\Sub AF\\Sub B",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album U\\Sub AF\\Sub C",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album V",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album V\\Sub AG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album V\\Sub AH",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album W",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album W\\Sub AI",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album W\\Sub AI\\Sub J",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.m4a"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album W\\Sub AI\\Sub K",
+      "FileCount": 21,
+      "FirstFilename": "Track 01.m4a"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album W\\Sub AJ",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.m3u"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album X",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album X\\Sub AK",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album X\\Sub AL",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album X\\Sub AM",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album Y",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album Y\\Sub AN",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album Z",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album Z\\Sub AO",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album Z\\Sub AP",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album Z\\Sub AQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album Z\\Sub AQ\\Sub J",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album Z\\Sub AQ\\Sub K",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AA",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AA\\Sub AR",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AA\\Sub AS",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AB",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AB\\Sub AT",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AC\\Sub AU",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AC\\Sub AV",
+      "FileCount": 20,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AC\\Sub AW",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AD",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AD\\Sub AX",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AD\\Sub AX\\Sub B",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AD\\Sub AX\\Sub C",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AD\\Sub AY",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AD\\Sub AY\\Sub B",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.m4a"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AD\\Sub AY\\Sub C",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.m4a"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AE",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AE\\Sub AZ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AE\\Sub AZ\\Sub J",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AE\\Sub AZ\\Sub K",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AE\\Sub BA",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AE\\Sub BA\\Sub J",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AE\\Sub BA\\Sub L",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AF",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AF\\Sub BB",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AF\\Sub BC",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AG\\Sub BD",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AH",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AH\\Sub BE",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AI",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AI\\Sub BF",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AI\\Sub BG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AJ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AJ\\Sub BH",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AJ\\Sub BI",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AK",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AK\\Sub BJ",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AL",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AL\\Sub BK",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AL\\Sub BL",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AL\\Sub BM",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AL\\Sub BN",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AL\\Sub BO",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AL\\Sub BP",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.cue"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AM",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AM\\Sub BQ",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AN",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AO\\Sub BR",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AP",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AP\\Sub BS",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AQ\\Sub BT",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AQ\\Sub BT\\Sub M",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AR",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AR\\Sub BU",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AS",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AS\\Sub BV",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AT",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AT\\Sub BW",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AT\\Sub BX",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AU",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AU\\Sub BY",
+      "FileCount": 19,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AU\\Sub BZ",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AU\\Sub CA",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AV",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AV\\Sub CB",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AV\\Sub CB\\Sub D",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AV\\Sub CB\\Sub E",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AW",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AW\\Sub CC",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AW\\Sub CD",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.log"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AX",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AX\\Sub CE",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AX\\Sub CE\\Sub N",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AX\\Sub CF",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AY",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AY\\Sub CG",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AZ",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.log"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AZ\\Sub CH",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AZ\\Sub CI",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album AZ\\Sub CJ",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BA",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BA\\Sub CK",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BA\\Sub CL",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BA\\Sub CL\\Sub D",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BA\\Sub CL\\Sub E",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BA\\Sub CM",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BA\\Sub CM\\Sub B",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BA\\Sub CM\\Sub C",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BA\\Sub CN",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BB",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BB\\Sub CO",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BB\\Sub CP",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BB\\Sub CQ",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.txt"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BB\\Sub CR",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BB\\Sub CS",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BB\\Sub CT",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BB\\Sub CU",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BB\\Sub CV",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BB\\Sub CW",
+      "FileCount": 22,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BB\\Sub CX",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BC\\Sub CY",
+      "FileCount": 19,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BD",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BD\\Sub CZ",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BE",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BE\\Sub DA",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BE\\Sub DB",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BF",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BF\\Sub DC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BF\\Sub DD",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BF\\Sub DD\\Sub J",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BF\\Sub DD\\Sub K",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BF\\Sub DD\\Sub O",
+      "FileCount": 21,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BF\\Sub DE",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BF\\Sub DF",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BG\\Sub DG",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BG\\Sub DG\\Sub P",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BG\\Sub DG\\Sub Q",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BG\\Sub DH",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BH",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BH\\Sub DI",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BH\\Sub DI\\Sub R",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BH\\Sub DI\\Sub S",
+      "FileCount": 25,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BH\\Sub DI\\Sub T",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BI",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BI\\Sub DJ",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BJ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BJ\\Sub DK",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BJ\\Sub DL",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BJ\\Sub DM",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BJ\\Sub DN",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BK",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BK\\Sub DO",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BK\\Sub DP",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BK\\Sub DQ",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BK\\Sub DR",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BL",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BL\\Sub DS",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BM",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BM\\Sub DT",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BM\\Sub DU",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.log"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BN",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BN\\Sub DV",
+      "FileCount": 24,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BN\\Sub DW",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BO\\Sub DX",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BO\\Sub DX\\Sub R",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.png"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BP",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BP\\Sub DY",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BP\\Sub DZ",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BP\\Sub EA",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BQ\\Sub EB",
+      "FileCount": 19,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BQ\\Sub EC",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BQ\\Sub ED",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BR",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BR\\Sub EE",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BR\\Sub EF",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BS",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BS\\Sub EG",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BT",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BT\\Sub EH",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BU",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BU\\Sub EI",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BV",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BV\\Sub EJ",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BV\\Sub EK",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BW",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BW\\Sub EL",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BW\\Sub EM",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BW\\Sub EN",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BW\\Sub EO",
+      "FileCount": 20,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BX",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BX\\Sub EP",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BX\\Sub EP\\Sub R",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BX\\Sub EQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BX\\Sub EQ\\Sub J",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BX\\Sub EQ\\Sub K",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BY",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BY\\Sub ER",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BZ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album BZ\\Sub ES",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CA",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CA\\Sub ET",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CB",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CB\\Sub EU",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CC\\Sub EV",
+      "FileCount": 26,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CD",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CD\\Sub EW",
+      "FileCount": 19,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CE",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CE\\Sub EX",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CE\\Sub EY",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CE\\Sub EZ",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CE\\Sub FA",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CF",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CF\\Sub FB",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CG\\Sub FC",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CG\\Sub FD",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CH",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CH\\Sub FE",
+      "FileCount": 28,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CH\\Sub FF",
+      "FileCount": 26,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CH\\Sub FG",
+      "FileCount": 19,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CI",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CI\\Sub FH",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CI\\Sub FI",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CI\\Sub FJ",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CI\\Sub FK",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CJ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CJ\\Sub FL",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CJ\\Sub FL\\Sub J",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CJ\\Sub FL\\Sub K",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CJ\\Sub FM",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CK",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CK\\Sub FN",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CL",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CL\\Sub FO",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FP",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FP\\Sub U",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FP\\Sub V",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FP\\Sub W",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FQ",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FR",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FS",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FT",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FU",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FV",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FW",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FW\\Sub X",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FX",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FY",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CM\\Sub FY\\Sub W",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CN",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CN\\Sub FZ",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CO\\Sub GA",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CO\\Sub GB",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CO\\Sub GB\\Sub R",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CP",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CP\\Sub GC",
+      "FileCount": 21,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CP\\Sub GC\\Sub R",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CP\\Sub GD",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CQ\\Sub GE",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CR",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CR\\Sub GF",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CS",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CS\\Sub GG",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CT",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CT\\Sub GH",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CT\\Sub GI",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CU",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CU\\Sub GJ",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CV",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CV\\Sub GK",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CV\\Sub GL",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CW",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CW\\Sub GM",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CW\\Sub GN",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CX",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CX\\Sub GO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CX\\Sub GP",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CX\\Sub GQ",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CX\\Sub GR",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CY",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CY\\Sub GS",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CY\\Sub GT",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CY\\Sub GT\\Sub B",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CY\\Sub GT\\Sub C",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CY\\Sub GU",
+      "FileCount": 30,
+      "FirstFilename": "Track 01.m3u"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CY\\Sub GV",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CZ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album CZ\\Sub GW",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DA",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DA\\Sub GX",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DB",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DB\\Sub GY",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DB\\Sub GZ",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DB\\Sub HA",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DB\\Sub HB",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DB\\Sub HC",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DB\\Sub HD",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DC\\Sub HE",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DC\\Sub HF",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DC\\Sub HG",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DC\\Sub HH",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DC\\Sub HI",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DC\\Sub HJ",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DC\\Sub HK",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DD",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DD\\Sub HL",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DE",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DE\\Sub HM",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DE\\Sub HN",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DF",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DF\\Sub HO",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DG\\Sub HP",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DG\\Sub HQ",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DG\\Sub HR",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DG\\Sub HS",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DH",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DH\\Sub HT",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DH\\Sub HU",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DI",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DI\\Sub HV",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DI\\Sub HV\\Sub Y",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DJ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DJ\\Sub HW",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DJ\\Sub HX",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DJ\\Sub HY",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DK",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DK\\Sub HZ",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DL",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DL\\Sub IA",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DL\\Sub IB",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DL\\Sub IC",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DL\\Sub ID",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DM",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DM\\Sub IE",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DN",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DN\\Sub IF",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DN\\Sub IG",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DO\\Sub IH",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DO\\Sub II",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DP",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DP\\Sub IJ",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DP\\Sub IJ\\Sub Z",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DP\\Sub IJ\\Sub AA",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DQ\\Sub IK",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DR",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DR\\Sub IL",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DS",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DS\\Sub IM",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DS\\Sub IN",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DT",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DT\\Sub IO",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DU",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DU\\Sub IP",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DU\\Sub IP\\Sub J",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DU\\Sub IP\\Sub K",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DU\\Sub IP\\Sub L",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DV",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DV\\Sub IQ",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DV\\Sub IR",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DW",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DW\\Sub IS",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DW\\Sub IT",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DX",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DX\\Sub IU",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DX\\Sub IV",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DX\\Sub IW",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DY",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DY\\Sub IX",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DZ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album DZ\\Sub IY",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EA",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EA\\Sub IZ",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EB",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EB\\Sub JA",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EC\\Sub JB",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EC\\Sub JC",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EC\\Sub JC\\Sub AB",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EC\\Sub JD",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ED",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ED\\Sub JE",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.Flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ED\\Sub JF",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EE",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EE\\Sub JG",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EE\\Sub JH",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EE\\Sub JH\\Sub J",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EE\\Sub JH\\Sub K",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EE\\Sub JI",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EE\\Sub JI\\Sub B",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EE\\Sub JI\\Sub C",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EE\\Sub JJ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EE\\Sub JJ\\Sub B",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EE\\Sub JJ\\Sub C",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EF",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EF\\Sub JK",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.jpeg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EF\\Sub JL",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EG\\Sub JM",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EG\\Sub JN",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EG\\Sub JO",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EH",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EH\\Sub JP",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EH\\Sub JP\\Sub B",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EH\\Sub JP\\Sub C",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EH\\Sub JQ",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EH\\Sub JR",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EI",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EI\\Sub JS",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EJ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EJ\\Sub JT",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EJ\\Sub JU",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EK",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EK\\Sub JV",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EK\\Sub JW",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EL",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EL\\Sub JX",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EL\\Sub JY",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EL\\Sub JZ",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EM",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EM\\Sub KA",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EN",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EN\\Sub KB",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EN\\Sub KC",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EO\\Sub KD",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EO\\Sub KD\\Sub J",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EO\\Sub KD\\Sub K",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EO\\Sub KE",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EO\\Sub KF",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EP",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EP\\Sub KG",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EQ\\Sub KH",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EQ\\Sub KI",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EQ\\Sub KJ",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ER",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ER\\Sub KK",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ES",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ES\\Sub KG",
+      "FileCount": 22,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ET",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ET\\Sub KL",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ET\\Sub KM",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ET\\Sub KN",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ET\\Sub KO",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ET\\Sub KP",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ET\\Sub KQ",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EU",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EU\\Sub KR",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EV",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EV\\Sub KS",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EW",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EW\\Sub KT",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EW\\Sub KU",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EW\\Sub KV",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EW\\Sub KW",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EX",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EX\\Sub KX",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EX\\Sub KY",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EX\\Sub KZ",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EX\\Sub LA",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EX\\Sub LB",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.png"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EX\\Sub LC",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EX\\Sub LD",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EX\\Sub LE",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EY",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EY\\Sub LF",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EY\\Sub LG",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EZ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EZ\\Sub LH",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EZ\\Sub LI",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EZ\\Sub LJ",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EZ\\Sub LK",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EZ\\Sub LL",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album EZ\\Sub LM",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FA",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FA\\Sub LN",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FA\\Sub LO",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FA\\Sub LP",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FA\\Sub LQ",
+      "FileCount": 21,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FB",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FB\\Sub LR",
+      "FileCount": 26,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FC\\Sub LS",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FC\\Sub LT",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FC\\Sub LU",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FD",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FD\\Sub LV",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FE",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FE\\Sub LW",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FE\\Sub LX",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FE\\Sub LY",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FE\\Sub LY\\Sub B",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FE\\Sub LY\\Sub C",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FE\\Sub LZ",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FE\\Sub MA",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FE\\Sub MB",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FF",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FF\\Sub MC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FF\\Sub MC\\Sub B",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FF\\Sub MC\\Sub C",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FG\\Sub MD",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FG\\Sub ME",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FH",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FH\\Sub MF",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FH\\Sub MG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FH\\Sub MG\\Sub D",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FH\\Sub MG\\Sub E",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FH\\Sub MH",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FH\\Sub MH\\Sub J",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FH\\Sub MH\\Sub K",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FI",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FI\\Sub MI",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FJ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FJ\\Sub MJ",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FK",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FK\\Sub MK",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FL",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FL\\Sub ML",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FM",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FM\\Sub MM",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FM\\Sub MN",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FM\\Sub MO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FM\\Sub MO\\Sub B",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FM\\Sub MO\\Sub C",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FM\\Sub MP",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FM\\Sub MP\\Sub B",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FM\\Sub MP\\Sub C",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FM\\Sub MQ",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FM\\Sub MQ\\Sub AC",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FM\\Sub MQ\\Sub AD",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FM\\Sub MR",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FM\\Sub MS",
+      "FileCount": 19,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FN",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FN\\Sub MT",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FN\\Sub MU",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FN\\Sub MV",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FO\\Sub MW",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FP",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FP\\Sub MX",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FQ\\Sub MY",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FQ\\Sub MY\\Sub R",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FR",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FR\\Sub MZ",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FR\\Sub NA",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FS",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FS\\Sub NB",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FS\\Sub NC",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.jpeg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FS\\Sub ND",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FS\\Sub NE",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FT",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FT\\Sub NF",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FU",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FU\\Sub NG",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FV",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FV\\Sub NH",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FV\\Sub NH\\Sub AE",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.png"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FV\\Sub NI",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FV\\Sub NI\\Sub J",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FV\\Sub NI\\Sub K",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FW",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FW\\Sub NJ",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FW\\Sub NK",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FW\\Sub NL",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FW\\Sub NM",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FW\\Sub NM\\Sub J",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FW\\Sub NM\\Sub K",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FW\\Sub NN",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FW\\Sub NO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FX",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FX\\Sub NP",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FX\\Sub NQ",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FX\\Sub NR",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FY",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FY\\Sub NS",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FY\\Sub NS\\Sub D",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FY\\Sub NS\\Sub E",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FY\\Sub NT",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FY\\Sub NU",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FY\\Sub NV",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FZ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FZ\\Sub NW",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FZ\\Sub NX",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album FZ\\Sub NY",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GA",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GA\\Sub NZ",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GB",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GB\\Sub OA",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GB\\Sub OB",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GB\\Sub OC",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GC\\Sub OD",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GC\\Sub OE",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GD",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GD\\Sub OF",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GD\\Sub OG",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GD\\Sub OH",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GD\\Sub OI",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GD\\Sub OJ",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GE",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GE\\Sub OK",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GF",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GF\\Sub OL",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GF\\Sub OM",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GF\\Sub ON",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GF\\Sub OO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GF\\Sub OO\\Sub B",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GF\\Sub OO\\Sub C",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GG\\Sub OP",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GG\\Sub OP\\Sub AF",
+      "FileCount": 30,
+      "FirstFilename": "Track 01.png"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GG\\Sub OQ",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GH",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GH\\Sub OR",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GI",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GI\\Sub OS",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GJ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GJ\\Sub OT",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GJ\\Sub OU",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.log"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GJ\\Sub OV",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GJ\\Sub OW",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GK",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GK\\Sub OX",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GL",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GM",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GM\\Sub OY",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GL\\Sub OZ",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GL\\Sub PA",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GL\\Sub PB",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GN",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GN\\Sub PC",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GO\\Sub PD",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GP",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GP\\Sub PE",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GP\\Sub PF",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GP\\Sub PG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GP\\Sub PH",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GQ\\Sub PI",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GQ\\Sub PJ",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GR",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GR\\Sub PK",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GS",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GS\\Sub PL",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GS\\Sub PM",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GS\\Sub PM\\Sub J",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GS\\Sub PM\\Sub K",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GT",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GT\\Sub PN",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GT\\Sub PO",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GU",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GU\\Sub PP",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GU\\Sub PQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GU\\Sub PQ\\Sub J",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GU\\Sub PQ\\Sub K",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GV",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GV\\Sub PR",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GV\\Sub PR\\Sub N",
+      "FileCount": 31,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GV\\Sub PS",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GV\\Sub PT",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GW",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GW\\Sub PU",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GX",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GX\\Sub PV",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GY",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GY\\Sub PW",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GZ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album GZ\\Sub PX",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HA",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HA\\Sub PY",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HA\\Sub PZ",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HB",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HB\\Sub QA",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HC\\Sub QB",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HC\\Sub QC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HC\\Sub QC\\Sub B",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HC\\Sub QC\\Sub C",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HD",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HD\\Sub QD",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HD\\Sub QE",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HE",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HE\\Sub QF",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HE\\Sub QF\\Sub J",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HE\\Sub QF\\Sub K",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HF",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HF\\Sub QG",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HG\\Sub QH",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HH",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HH\\Sub QI",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HH\\Sub QI\\Sub J",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HH\\Sub QI\\Sub K",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HI",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HI\\Sub QJ",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HJ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HJ\\Sub QK",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HK",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HK\\Sub QL",
+      "FileCount": 22,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HK\\Sub QM",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HL",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HL\\Sub QN",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HM",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HM\\Sub QO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HM\\Sub QP",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HN",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HN\\Sub QQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HN\\Sub QR",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HN\\Sub QR\\Sub AG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HN\\Sub QR\\Sub AH",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HN\\Sub QR\\Sub W",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HN\\Sub QQ\\Sub J",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HN\\Sub QQ\\Sub K",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HO\\Sub QS",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HP",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HP\\Sub QT",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HQ\\Sub QU",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HQ\\Sub QV",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HR",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HR\\Sub R",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.auCDtect"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HR\\Sub QW",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HR\\Sub QX",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.m3u"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HR\\Sub QY",
+      "FileCount": 25,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HR\\Sub QZ",
+      "FileCount": 21,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HR\\Sub QZ\\Sub AI",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HS",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HS\\Sub RA",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HS\\Sub RB",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HS\\Sub RC",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HT",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HT\\Sub RD",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HU",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HU\\Sub RE",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HU\\Sub RF",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HU\\Sub RG",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HU\\Sub RH",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HU\\Sub RI",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HV",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HV\\Sub RJ",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HV\\Sub RK",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HV\\Sub RL",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HV\\Sub RM",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HV\\Sub RN",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HV\\Sub RN\\Sub J",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HV\\Sub RN\\Sub K",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HW",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HW\\Sub RO",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HW\\Sub RP",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HW\\Sub RQ",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HX",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HX\\Sub RR",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HX\\Sub RS",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.jpeg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HY",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HY\\Sub RT",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HZ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HZ\\Sub RU",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album HZ\\Sub RU\\Sub R",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IA",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IA\\Sub RV",
+      "FileCount": 21,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IA\\Sub RW",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IA\\Sub RW\\Sub J",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IA\\Sub RW\\Sub K",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IA\\Sub RX",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IA\\Sub RX\\Sub B",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IA\\Sub RX\\Sub C",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IB",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IB\\Sub RY",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IB\\Sub RZ",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IC\\Sub SA",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ID",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ID\\Sub SB",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ID\\Sub SB\\Sub J",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ID\\Sub SB\\Sub K",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album ID\\Sub SB\\Sub L",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IE",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IE\\Sub SC",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IE\\Sub SC\\Sub R",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.JPG"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IF",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IF\\Sub SD",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IG\\Sub SE",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IG\\Sub SF",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IH",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IH\\Sub SG",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album II",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album II\\Sub SH",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album II\\Sub SI",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album II\\Sub SJ",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album II\\Sub SK",
+      "FileCount": 19,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IJ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IJ\\Sub SL",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IJ\\Sub SM",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IJ\\Sub SN",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IJ\\Sub SO",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IK",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IK\\Sub SP",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IK\\Sub SQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IK\\Sub SQ\\Sub J",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IK\\Sub SQ\\Sub K",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IK\\Sub SR",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IL",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IL\\Sub SS",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IL\\Sub ST",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.txt"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IM",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IM\\Sub SU",
+      "FileCount": 23,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IM\\Sub SV",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IM\\Sub SW",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IN",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IN\\Sub SX",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IN\\Sub SY",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IN\\Sub SZ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IN\\Sub SZ\\Sub B",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IN\\Sub SZ\\Sub C",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IN\\Sub TA",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IN\\Sub TB",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IO\\Sub TC",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IO\\Sub TD",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.ts"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IO\\Sub TE",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IP",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IP\\Sub TF",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IQ\\Sub TG",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IQ\\Sub TH",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IQ\\Sub TI",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IR",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IR\\Sub TJ",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IR\\Sub TK",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IS",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IS\\Sub TL",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IS\\Sub TM",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IS\\Sub TN",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IT",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IT\\Sub TO",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IT\\Sub TP",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IT\\Sub TQ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IT\\Sub TQ\\Sub J",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IT\\Sub TQ\\Sub K",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IT\\Sub TR",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IT\\Sub TR\\Sub J",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IT\\Sub TR\\Sub K",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IU",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IU\\Sub TS",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IU\\Sub TT",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IU\\Sub TU",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IV",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IV\\Sub TV",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IV\\Sub TV\\Sub B",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IV\\Sub TV\\Sub C",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IW",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IW\\Sub TW",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IW\\Sub TW\\Sub J",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.m4a"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IX",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IX\\Sub TX",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IY",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IY\\Sub TY",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IY\\Sub TZ",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IY\\Sub UA",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IZ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IZ\\Sub UB",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album IZ\\Sub UC",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JA",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JA\\Sub UD",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JB",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JB\\Sub UE",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.nfo"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JB\\Sub UF",
+      "FileCount": 45,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JC\\Sub UG",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JC\\Sub UH",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JC\\Sub UI",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JC\\Sub UI\\Sub AJ",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JC\\Sub UI\\Sub AK",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JD",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JD\\Sub UJ",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JE",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JE\\Sub UK",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JE\\Sub UK\\Sub R",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.JPG"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JE\\Sub UL",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JE\\Sub UL\\Sub R",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.JPG"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JE\\Sub UM",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root A\\Artist A\\Album JE\\Sub UM\\Sub R",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.JPG"
+    },
+    {
+      "Name": "Root B\\Artist A",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JF",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JG",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JG\\Sub UN",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JH",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JI",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JI\\Sub UO",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JJ",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JK",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JL",
+      "FileCount": 25,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JM",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JN",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JO",
+      "FileCount": 35,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JP",
+      "FileCount": 19,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JQ",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JR",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JS",
+      "FileCount": 20,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JT",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.m4a"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JU",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JV",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JW",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JX",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JY",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album JZ",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KA",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KB",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KC",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KC\\Sub UP",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KD",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KE",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KF",
+      "FileCount": 21,
+      "FirstFilename": "Track 01.aiff"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KG",
+      "FileCount": 23,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KH",
+      "FileCount": 31,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KI",
+      "FileCount": 32,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KJ",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KK",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KL",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KM",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KM\\Sub UQ",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KM\\Sub UR",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KM\\Sub US",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.bmp"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KN",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.docx"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KN\\Sub UT",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KN\\Sub UU",
+      "FileCount": 54,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KN\\Sub UV",
+      "FileCount": 36,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KO\\Sub UW",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KO\\Sub UW\\Sub AL",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KO\\Sub UX",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KO\\Sub UX\\Sub AM",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KP",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KP\\Sub UY",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.m3u"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KQ",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KR",
+      "FileCount": 22,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KS",
+      "FileCount": 24,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KT",
+      "FileCount": 20,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KT\\Sub UZ",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.png"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KU",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KV",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KW",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KX",
+      "FileCount": 21,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KY",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album KZ",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LA",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LB",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LC",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LD",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LD\\Sub UZ",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LE",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.m3u"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LF",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LG",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LH",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LI",
+      "FileCount": 28,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LJ",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LK",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LK\\Sub VA",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LL",
+      "FileCount": 21,
+      "FirstFilename": "Track 01.nfo"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LM",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LN",
+      "FileCount": 21,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LN\\Sub UZ",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LO",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LO\\Sub VB",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LO\\Sub VC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LO\\Sub VD",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LO\\Sub VE",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LO\\Sub VE\\Sub R",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LO\\Sub VF",
+      "FileCount": 24,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LO\\Sub VF\\Sub R",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LO\\Sub GD",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LP",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LQ",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LR",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LS",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LT",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LU",
+      "FileCount": 30,
+      "FirstFilename": "Track 01.m3u"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LV",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LW",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LX",
+      "FileCount": 26,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LY",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album LZ",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MA",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MB",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MC",
+      "FileCount": 33,
+      "FirstFilename": "Track 01.cue"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MD",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MD\\Sub VG",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.part"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MD\\Sub VH",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.part"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MD\\Sub VI",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.part"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MD\\Sub VJ",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.mp3"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MD\\Sub VJ\\Sub AN",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.m4a"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MD\\Sub VJ\\Sub O",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.pdf"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MD\\Sub VJ\\Sub O\\Sub B",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MD\\Sub VK",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.part"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album ME",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MF",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.m4a"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MF\\Sub VL",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.png"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MG",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MH",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MI",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MJ",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MK",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album ML",
+      "FileCount": 20,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album ML\\Sub VM",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MM",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MN",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MO",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MO\\Sub VN",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.log"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MO\\Sub VO",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.Flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MO\\Sub VP",
+      "FileCount": 32,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MO\\Sub VQ",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.log"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MO\\Sub VR",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MO\\Sub VR\\Sub AJ",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MO\\Sub VR\\Sub AK",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.log"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MO\\Sub VS",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.log"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MP",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MQ",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MR",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MS",
+      "FileCount": 20,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MT",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MU",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MV",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MW",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MX",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MY",
+      "FileCount": 4,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album MZ",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NA",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NB",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NC",
+      "FileCount": 23,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album ND",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album ND\\Sub VT",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album ND\\Sub VU",
+      "FileCount": 24,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NE",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NF",
+      "FileCount": 19,
+      "FirstFilename": "Track 01.m3u"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NG",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.cue"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NG\\Sub UZ",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.JPG"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NH",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.cue"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NH\\Sub UZ",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.JPG"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NI",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.cue"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NI\\Sub UZ",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.JPG"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NJ",
+      "FileCount": 27,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AO",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AO\\Sub A",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AO\\Sub C",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AO\\Sub D",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AP",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AP\\Sub A",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AQ",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AR",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AS",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AT",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AU",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AV",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AV\\Sub E",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AV\\Sub F",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VV\\Sub AW",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.m3u"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VW",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VW\\Sub AX",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VW\\Sub AY",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub AZ",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.CUE"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub BA",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub BB",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.cue"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub BC",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.cue"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub BD",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub BD\\Sub A",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub BE",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub BF",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub BG",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.cue"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub BG\\Sub G",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub BG\\Sub H",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub BH",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub BH\\Sub A",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub BI",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NK\\Sub VX\\Sub BJ",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NL",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NM",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NN",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NN\\Sub VY",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NN\\Sub VZ",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NO",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NP",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NQ",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NQ\\Sub WA",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NR",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.m3u"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NS",
+      "FileCount": 6,
+      "FirstFilename": "Track 01.txt"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NS\\Sub WB",
+      "FileCount": 25,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NT",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NU",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NV",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NW",
+      "FileCount": 24,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NX",
+      "FileCount": 2,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NY",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album NZ",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OA",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OB",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.m4a"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OC",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OC\\Sub R",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OC\\Sub UO",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OD",
+      "FileCount": 3,
+      "FirstFilename": "Track 01.cue"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OD\\Sub WC",
+      "FileCount": 31,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OE",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OF",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OG",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OH",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OI",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OJ",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OK",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OL",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.m4a"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OM",
+      "FileCount": 21,
+      "FirstFilename": "Track 01.m4a"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album ON",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OO",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OP",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OQ",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OR",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OS",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OT",
+      "FileCount": 22,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OU",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OV",
+      "FileCount": 1,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OW",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OX",
+      "FileCount": 25,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OY",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OZ",
+      "FileCount": 0,
+      "FirstFilename": null
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OZ\\Sub R",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OZ\\Sub UO",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album OZ\\Sub WD",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PA",
+      "FileCount": 14,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PB",
+      "FileCount": 23,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PB\\Sub US",
+      "FileCount": 5,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PC",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PD",
+      "FileCount": 11,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PE",
+      "FileCount": 12,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PF",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PF\\Sub UZ",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PG",
+      "FileCount": 18,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PH",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PI",
+      "FileCount": 16,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PI\\Sub UZ",
+      "FileCount": 9,
+      "FirstFilename": "Track 01.JPG"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PJ",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PK",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PL",
+      "FileCount": 7,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PM",
+      "FileCount": 13,
+      "FirstFilename": "Track 01.jpg"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PN",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PO",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PP",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PQ",
+      "FileCount": 26,
+      "FirstFilename": "Track 01.m4a"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PR",
+      "FileCount": 15,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PS",
+      "FileCount": 8,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PT",
+      "FileCount": 17,
+      "FirstFilename": "Track 01.flac"
+    },
+    {
+      "Name": "Root B\\Artist A\\Album PU",
+      "FileCount": 10,
+      "FirstFilename": "Track 01.jpg"
+    }
+  ],
+  "LockedDirectories": []
+}

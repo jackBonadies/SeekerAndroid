@@ -1,82 +1,85 @@
 using NUnit.Framework;
 using System.IO;
-using Soulseek;
-using File = System.IO.File;
-using Con = System.Console;
+using System.Text;
+using System.Text.Json;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Soulseek;
+using VerifyNUnit;
 
 namespace UnitTestCommon
 {
+    public class BrowseResponseTestData
+    {
+        public List<DirectoryTestData> Directories { get; set; }
+        public List<DirectoryTestData> LockedDirectories { get; set; }
+    }
+
+    public class DirectoryTestData
+    {
+        public string Name { get; set; }
+        public int FileCount { get; set; }
+        public string FirstFilename { get; set; }
+    }
+
     public class Tests
     {
-        public string SeekerTestingDirectory = null;
-        [SetUp]
-        public void Setup()
+        [TestCase("username1")]
+        [TestCase("username2")]
+        [TestCase("username3")]
+        [TestCase("username4")]
+        [TestCase("username5")]
+        [TestCase("username6")]
+        [TestCase("username7")]
+        public async Task TestParsingBrowseResponseTestData(string username)
         {
-            SeekerTestingDirectory = System.Environment.GetEnvironmentVariable("SEEKER_TESTING_DIR");
+            string testDataDir = Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "BrowseResponse");
+            string jsonPath = Path.Combine(testDataDir, $"{username}.json");
+            string json = System.IO.File.ReadAllText(jsonPath);
+            var testData = JsonSerializer.Deserialize<BrowseResponseTestData>(json);
+
+            var directories = testData.Directories.Select(ToDirectory).ToList();
+            var lockedDirectories = testData.LockedDirectories.Select(ToDirectory).ToList();
+            var browseResponse = new BrowseResponse(directories, lockedDirectories);
+
+            Common.TreeNode<Soulseek.Directory> tree = Common.Algorithms.CreateTreeCore(browseResponse, false, null, null, username, false);
+            string result = PrintTreeToString(tree);
+
+            await Verifier.Verify(result).UseParameters(username);
         }
 
-        public void TestParsingBrowseResponse()
+        private static Soulseek.Directory ToDirectory(DirectoryTestData d)
         {
-            StreamReader sw = new StreamReader(System.IO.Path.Join(SeekerTestingDirectory, System.Reflection.MethodBase.GetCurrentMethod().Name + "_spec.txt"));
-           
-            string uname = null;
-            while ((uname = sw.ReadLine()) != null)
+            var files = new List<Soulseek.File>();
+            for (int i = 0; i < d.FileCount; i++)
             {
-                if(uname.StartsWith('#'))
-                {
-                    continue;
-                }
-                Con.WriteLine(uname);
-                var fstream = File.Open($"{SeekerTestingDirectory}\\{uname}_dir_response", FileMode.Open);
-                System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-                BrowseResponse b = formatter.Deserialize(fstream) as BrowseResponse;
-                Common.TreeNode<Soulseek.Directory> tree = Common.Algorithms.CreateTreeCore(b, false, null, null, uname, false);
-                
-                //FileStream ms = File.Open($"{SeekerTestingDirectory}\\{uname}_dir_solution", FileMode.Create); //uncomment to write the solution
-                System.IO.MemoryStream ms = new MemoryStream();
-                var streamWriter = new StreamWriter(ms);
-                PrintTree(tree, 0, streamWriter);
-                streamWriter.Flush();
-                ms.Position = 0;
-                StreamReader ourReader = new StreamReader(ms);
-                FileStream fs = File.Open($"{SeekerTestingDirectory}\\{uname}_dir_solution", FileMode.Open);
-                StreamReader solution = new StreamReader(fs);
-                string solutionLine = null;
-                string ourLine = null;
-                int i=0;
-                while((solutionLine = solution.ReadLine()) != null && (ourLine = ourReader.ReadLine()) != null)
-                {
-                    i++;
-                    Assert.AreEqual(solutionLine, ourLine, $"Failure at line {i} soln: {solutionLine}");
-                }
-                ourLine = ourReader.ReadLine(); //since AND short circuit
-                if (solutionLine != ourLine)
-                {
-                    Assert.Fail("Number of lines are different");
-                }
+                string filename = (i == 0 && d.FirstFilename != null)
+                    ? d.FirstFilename
+                    : $"file_{i:D3}.mp3";
+                files.Add(new Soulseek.File(1, filename, 1000L, "mp3"));
             }
-
-            
+            return new Soulseek.Directory(d.Name, files);
         }
 
-        private void PrintLine(string s, StreamWriter sw)
+        private static string PrintTreeToString(Common.TreeNode<Soulseek.Directory> tree)
         {
-            Con.WriteLine(s);
-            sw.WriteLine(s);
+            var sb = new StringBuilder();
+            PrintTree(tree, sb);
+            return sb.ToString();
         }
 
-        private void PrintTree(Common.TreeNode<Soulseek.Directory> tree, int depth, StreamWriter sw)
+        private static void PrintTree(Common.TreeNode<Soulseek.Directory> tree, StringBuilder sb)
         {
-            PrintLine(tree.Data.Name, sw);
-            PrintLine(tree.Data.Files.Count.ToString(), sw);
+            sb.AppendLine(tree.Data.Name);
+            sb.AppendLine(tree.Data.Files.Count.ToString());
             if (tree.Data.Files.Count > 0)
             {
-                PrintLine(tree.Data.Files.First().Filename, sw);
+                sb.AppendLine(tree.Data.Files.First().Filename);
             }
             foreach (Common.TreeNode<Soulseek.Directory> child in tree.Children)
             {
-                PrintTree(child, depth + 1, sw);
+                PrintTree(child, sb);
             }
         }
     }
