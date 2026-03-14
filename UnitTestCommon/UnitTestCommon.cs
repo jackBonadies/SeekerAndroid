@@ -1,3 +1,4 @@
+using Common.Browse;
 using MessagePack;
 using Microsoft.VisualStudio.TestPlatform.PlatformAbstractions.Interfaces;
 using NUnit.Framework;
@@ -46,7 +47,7 @@ namespace UnitTestCommon
             var lockedDirectories = testData.LockedDirectories.Select(ToDirectory).ToList();
             var browseResponse = new BrowseResponse(directories, lockedDirectories);
 
-            Common.TreeNode<Soulseek.Directory> tree = Common.Algorithms.CreateTreeCore(browseResponse, false, null, null, username, false);
+            Common.TreeNode<Soulseek.Directory> tree = BrowseUtils.CreateTreeFromFlatList(browseResponse, false, null, null, username, false);
             string result = PrintTreeToString(tree);
 
             await Verifier.Verify(result).UseParameters(username);
@@ -127,7 +128,7 @@ namespace UnitTestCommon
             var browseResponse = MessagePackSerializer.Deserialize<BrowseResponse>(stream, SerializationHelper.BrowseResponseOptions);
             var input = PrintTreeToString(browseResponse);
 
-            Common.TreeNode<Soulseek.Directory> tree = Common.Algorithms.CreateTreeCore(browseResponse, false, null, null, username, false);
+            Common.TreeNode<Soulseek.Directory> tree = BrowseUtils.CreateTreeFromFlatList(browseResponse, false, null, null, username, false);
             string result = PrintTreeToString(tree);
 
             await Verifier.Verify(result).UseParameters(username);
@@ -146,7 +147,7 @@ namespace UnitTestCommon
                 createDirectory("c"),
                 createDirectory("a"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             Assert.AreEqual(dirTree.Children.ElementAt(0).Data.Name, "a");
             Assert.AreEqual(dirTree.Children.ElementAt(1).Data.Name, "B");
             Assert.AreEqual(dirTree.Children.ElementAt(2).Data.Name, "c");
@@ -164,7 +165,7 @@ namespace UnitTestCommon
                 createDirectory("b\\subofb"),
                 createDirectory("a"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             string result = PrintTreeToString(dirTree);
             await Verifier.Verify(result);
         }
@@ -173,7 +174,7 @@ namespace UnitTestCommon
         public void TestSingleDirectory()
         {
             var list = new List<Soulseek.Directory>() { createDirectory("Music") };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             Assert.AreEqual("Music", dirTree.Data.Name);
             Assert.AreEqual(0, dirTree.Children.Count);
             Assert.AreEqual(1, dirTree.Data.Files.Count);
@@ -186,7 +187,7 @@ namespace UnitTestCommon
                 createDirectory("Music"),
                 createDirectory("Music\\Rock"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             Assert.AreEqual("Music", dirTree.Data.Name);
             Assert.AreEqual(1, dirTree.Children.Count);
             Assert.AreEqual("Music\\Rock", dirTree.Children.ElementAt(0).Data.Name);
@@ -200,7 +201,7 @@ namespace UnitTestCommon
                 createDirectory("Music"),
                 createDirectory("Music\\Rock"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             Assert.AreEqual("Music", dirTree.Data.Name);
             Assert.AreEqual(1, dirTree.Children.Count);
             Assert.AreEqual("Music\\Rock", dirTree.Children.ElementAt(0).Data.Name);
@@ -213,7 +214,7 @@ namespace UnitTestCommon
                 createDirectory("Music\\"),
                 createDirectory("Music\\Rock"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             Assert.AreEqual("Music", dirTree.Data.Name);
             Assert.AreEqual(1, dirTree.Children.Count);
         }
@@ -227,7 +228,7 @@ namespace UnitTestCommon
                 createDirectory("Music\\Rock\\Classic"),
                 createDirectory("Music\\Rock\\Classic\\70s"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             Assert.AreEqual("Music", dirTree.Data.Name);
             var rock = dirTree.Children.ElementAt(0);
             Assert.AreEqual("Music\\Rock", rock.Data.Name);
@@ -246,7 +247,7 @@ namespace UnitTestCommon
                 createDirectory("Music\\Rock\\Classic\\70s"),
                 createDirectory("Music\\Jazz"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             Assert.AreEqual("Music", dirTree.Data.Name);
             Assert.AreEqual(2, dirTree.Children.Count);
             // Jazz sorts before Rock (case-insensitive)
@@ -265,7 +266,7 @@ namespace UnitTestCommon
                 createDirectory("Music\\Jazz"),
                 createDirectory("Music\\Rock"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             Assert.AreEqual("Music", dirTree.Data.Name);
             Assert.AreEqual(3, dirTree.Children.Count);
             Assert.AreEqual("Music\\Classical", dirTree.Children.ElementAt(0).Data.Name);
@@ -281,7 +282,7 @@ namespace UnitTestCommon
                 createDirectory("Music"),
                 createDirectory("Music\\Rock"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             // No common parent → synthetic empty root
             Assert.AreEqual("", dirTree.Data.Name);
             Assert.AreEqual(0, dirTree.Data.Files.Count);
@@ -298,7 +299,7 @@ namespace UnitTestCommon
                 createDirectory("shared\\FolderA\\sub"),
                 createDirectory("shared\\FolderB"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             // Common parent "shared" becomes synthetic root
             Assert.AreEqual("shared", dirTree.Data.Name);
             Assert.AreEqual(0, dirTree.Data.Files.Count);
@@ -318,7 +319,7 @@ namespace UnitTestCommon
                 createDirectory("Music"),
                 createDirectory("Music\\Rock"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             // "Music" is NOT a child of "Mu" → synthetic empty root
             Assert.AreEqual("", dirTree.Data.Name);
             Assert.That(dirTree.Children.Any(c => c.Data.Name == "Mu"));
@@ -334,7 +335,7 @@ namespace UnitTestCommon
         {
             var regular = new List<Soulseek.Directory>() { createDirectory("Music") };
             var locked = new List<Soulseek.Directory>() { createDirectory("Music\\Private") };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(regular, locked), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(regular, locked), false, null, null, "test", false);
             Assert.AreEqual("Music", dirTree.Data.Name);
             Assert.AreEqual(1, dirTree.Children.Count);
             Assert.AreEqual("Music\\Private", dirTree.Children.ElementAt(0).Data.Name);
@@ -345,7 +346,7 @@ namespace UnitTestCommon
         {
             var regular = new List<Soulseek.Directory>() { createDirectory("Music") };
             var locked = new List<Soulseek.Directory>() { createDirectory("Music\\Private") };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(regular, locked), false, null, null, "test", true);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(regular, locked), false, null, null, "test", true);
             Assert.AreEqual("Music", dirTree.Data.Name);
             Assert.AreEqual(0, dirTree.Children.Count);
         }
@@ -359,7 +360,7 @@ namespace UnitTestCommon
                 createDirectory("aa"),
                 createDirectory("a\\b"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             // "a" and "aa" are separate roots, "a\b" is child of "a"
             Assert.AreEqual("", dirTree.Data.Name);
             Assert.AreEqual(2, dirTree.Children.Count);
@@ -380,7 +381,7 @@ namespace UnitTestCommon
                 createDirectory("Music\\Rock"),
                 createDirectory("music\\jazz"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             Assert.AreEqual("", dirTree.Data.Name);
             Assert.AreEqual(2, dirTree.Children.Count);
             Assert.AreEqual("Music", dirTree.Children.ElementAt(0).Data.Name);
@@ -396,7 +397,7 @@ namespace UnitTestCommon
                 new Soulseek.Directory("Music"),
                 createDirectory("Music\\Rock"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             Assert.AreEqual("Music", dirTree.Data.Name);
             Assert.AreEqual(0, dirTree.Data.Files.Count);
             Assert.AreEqual(1, dirTree.Children.Count);
@@ -411,7 +412,7 @@ namespace UnitTestCommon
                 createDirectory("Music"),
                 createDirectory("Music\\Rock\\Classic"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             Assert.AreEqual("Music", dirTree.Data.Name);
             // "Music\Rock\Classic" should still be a child of "Music" (IsChildDirString checks prefix, not direct parent)
             Assert.AreEqual(1, dirTree.Children.Count);
@@ -426,7 +427,7 @@ namespace UnitTestCommon
                 createDirectory("music"),
                 createDirectory("Music"),
             };
-            var dirTree = Common.Algorithms.CreateTreeCore(new BrowseResponse(list), false, null, null, "test", false);
+            var dirTree = BrowseUtils.CreateTreeFromFlatList(new BrowseResponse(list), false, null, null, "test", false);
             // "Music" (uppercase M) should sort before "music" (lowercase m)
             Assert.AreEqual("", dirTree.Data.Name);
             Assert.AreEqual(2, dirTree.Children.Count);

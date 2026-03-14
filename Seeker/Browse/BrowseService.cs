@@ -227,7 +227,7 @@ namespace Seeker.Browse
                 var data = MessagePackSerializer.Serialize(b, options: SerializationHelper.BrowseResponseOptions);
                 FileSystemService.Instance.SaveToFile(username + ".mpk", username, data, null, null, true, 0, true, out string _);
                 #endif
-                rootNode = Common.Algorithms.CreateTreeCore(b, filter, wordsToAvoid, wordsToInclude, username, hideLocked);
+                rootNode = BrowseUtils.CreateTreeFromFlatList(b, filter, wordsToAvoid, wordsToInclude, username, hideLocked);
             }
             catch (Exception e)
             {
