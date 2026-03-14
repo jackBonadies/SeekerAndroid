@@ -4,6 +4,7 @@ using Android.Widget;
 using Common;
 using Common.Browse;
 using Google.Android.Material.Snackbar;
+using MessagePack;
 using Seeker.Helpers;
 using Seeker.Search;
 using Seeker.Services;
@@ -222,7 +223,11 @@ namespace Seeker.Browse
             try
             {
                 errorMsgToToast = String.Empty;
-                rootNode = Common.Algorithms.CreateTreeCore(b, filter, wordsToAvoid, wordsToInclude, username, hideLocked);
+                #if DEBUG
+                var data = MessagePackSerializer.Serialize(b, options: SerializationHelper.BrowseResponseOptions);
+                FileSystemService.Instance.SaveToFile(username + ".mpk", username, data, null, null, true, 0, true, out string _);
+                #endif
+                rootNode = BrowseUtils.CreateTreeFromFlatList(b, filter, wordsToAvoid, wordsToInclude, username, hideLocked);
             }
             catch (Exception e)
             {
