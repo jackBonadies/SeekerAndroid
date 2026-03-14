@@ -79,7 +79,6 @@ namespace Common
             TreeNode<Directory> rootNode = null;
 
             String prevDirName = string.Empty;
-            //TreeNode<Directory> rootNode = null;
             TreeNode<Directory> curNode = null;
 
             TreeNode<Directory> prevNodeDebug = null;
@@ -128,56 +127,7 @@ namespace Common
                 return len1 - len2;
             }
             ); //sometimes i dont quite think they are sorted.
-            //sorting alphabetically seems weird, but since it puts shorter strings in front of longer ones, it does actually sort the highest parent 1st, etc.
 
-            //sorting fails as it does not consider \\ higher than other chars, etc.
-            //Music
-            //music 3
-            //Music\test
-            //fixed with custom comparer
-
-
-
-            //normally peoples files look like 
-            //@@datd\complete
-            //@@datd\complete\1990
-            //@@datd\complete\1990\test
-            //but sometimes they do not have a common parent! they are not a tree but many different trees (which soulseek allows)
-            //in that case we need to make a common root, as the directory everyone has (even if its the fake "@@adfadf" directory NOT TRUE)
-            //I think a quick hack would be.. is the first directory name contained in the last directory name
-
-            //User case (This is SoulseekQT Im guessing)
-            //@@bvenl\0
-            //@@bvenl\1
-            //@@bvenl\2
-            //@@bvenl\2\complete
-            //@@bvenl\2\complete\1990
-            //@@bvenl\2\complete\1990\test
-
-
-            //User
-            //@@pulvh\FLAC Library
-            //@@pulvh\Old School
-
-            //User (This is Nicotine multi-root Im guessing)
-            //__INTERNAL_ERROR__P:\\My Videos\\++Music SD++\\ArtistName"
-            //__INTERNAL_ERROR__P:\\My Videos\\++Music SD++\\ArtistName"
-            //__INTERNAL_ERROR__P:\\My Videos\\++Music SD++\\ArtistName"
-            //FLAC"
-            //FLAC\..."...
-            //FLAC\\++Various Artists++\\Artist"
-            //NOTE THERE IS NO FAKE @@lskjdf
-            //sometimes the root is the empty string
-
-            //User - the first is literally just '\\' not an actual directory name... (old PowerPC Mac version??)
-            //\\
-            //\\Volumes
-            //...
-            //"\\Volumes\\Music\\**Artist**"
-            //or 
-            //adfzdg\\  (Note this should be adfzdg)...
-            //adfzdg\\Music
-            //I think this would be a special case where we simply remove the first dir.
             if (dirInfoArray[0].Item1.Name == "\\")
             {
                 dirInfoArray = dirInfoArray.Skip(1).ToArray();
@@ -187,35 +137,22 @@ namespace Common
                 dirInfoArray[0] = new Tuple<Directory, bool>(new Directory(dirInfoArray[0].Item1.Name.Substring(0, dirInfoArray[0].Item1.Name.Length - 1), dirInfoArray[0].Item1.Files), dirInfoArray[0].Item2);
             }
 
-
-
             bool emptyRoot = false;
-            //if(dirArray[dirArray.Length-1].Name.Contains(dirArray[0].Name))
             if (Helpers.IsChildDirString(dirInfoArray[dirInfoArray.Length - 1].Item1.Name, dirInfoArray[0].Item1.Name, true) || dirInfoArray[dirInfoArray.Length - 1].Item1.Name.Equals(dirInfoArray[0].Item1.Name))
             {
                 //normal single tree case..
             }
             else
             {
-                //we need to set the first root..
-                //GetLongestCommonParent(dirArray[dirArray.Length - 1].Name, dirArray[0].Name);
                 string newRootDirName = GetLongestCommonParent(dirInfoArray[dirInfoArray.Length - 1].Item1.Name, dirInfoArray[0].Item1.Name);
                 if (newRootDirName == string.Empty)
                 {
-                    //MainActivity.LogFirebase("Root is the empty string: " + username); //this is fine
                     newRootDirName = "";
                     emptyRoot = true;
                 }
-                //if(newRootDirName.EndsWith("\\"))
-                //{
-                //    newRootDirName = newRootDirName.Substring(0, newRootDirName.Length-1);
-                //    //else our new folder root will be "@@sdfklj\\" rather than "@@sdfklj" causing problems..
-                //}
-                //the rootname can be "@@sdfklj\\! " if the directories are "@@sdfklj\\! mp3", "@@sdfklj\\! flac"
                 if (newRootDirName.LastIndexOf("\\") != -1)
                 {
                     newRootDirName = newRootDirName.Substring(0, newRootDirName.LastIndexOf("\\"));
-                    //else our new folder root will be "@@sdfklj\\" rather than "@@sdfklj" causing problems..
                 }
                 Directory rootDirectory = new Directory(newRootDirName);
 
@@ -237,26 +174,13 @@ namespace Common
                 }
                 else if (Helpers.IsChildDirString(dInfo.Item1.Name, prevDirName, curNode?.Parent == null)) //if the next directory contains the previous in its path then it is a child. //this is not true... it will set music as the child of mu //TODO !!!!!
                 {
-                    //uncomment these lines for the Nicotine way of handling QT trees
-                    //if(curNode.Data.Name == "" && curNode?.Parent == null && dInfo.Item1.Name.Contains('\\')) //QT double directory case. 
-                    //{   //sometimes the dir is just '//' not sure how that happens since even if you put files into root, it is still proper.
-                    //    Directory rootSubDirectory = new Directory(dInfo.Item1.Name.Substring(0, dInfo.Item1.Name.IndexOf('\\')));
-                    //    curNode = AddChildNode(curNode, new Tuple<Directory,bool>(rootSubDirectory, dInfo.Item2), filter, wordsToAvoid, wordsToInclude);
-                    //}
                     curNode = AddChildNode(curNode, dInfo, filter, wordsToAvoid, wordsToInclude);
                     prevDirName = dInfo.Item1.Name;
                 }
                 else
-                { //go up one OR more than one
+                {
                     prevNodeDebug = new TreeNode<Directory>(curNode.Data, dInfo.Item2);
                     curNode = curNode.Parent; //This is not good if the first node is not the root...
-
-
-                    //if(dInfo==null || dInfo.Item1 == null || curNode == null || curNode.Data == null)
-                    //{
-
-                    //}
-
                     while (!Helpers.IsChildDirString(dInfo.Item1.Name, curNode.Data.Name, curNode?.Parent == null))
                     {
                         if (curNode.Parent == null)
@@ -265,12 +189,6 @@ namespace Common
                         }
                         curNode = curNode.Parent; // may have to go up more than one
                     }
-                    //uncomment these lines for the Nicotine way of handling QT trees
-                    //if (curNode.Data.Name == "" && curNode?.Parent == null && dInfo.Item1.Name.Contains('\\')) //QT double directory case.
-                    //{
-                    //    Directory rootSubDirectory = new Directory(dInfo.Item1.Name.Substring(0, dInfo.Item1.Name.IndexOf('\\')));
-                    //    curNode = AddChildNode(curNode, new Tuple<Directory, bool>(rootSubDirectory, dInfo.Item2), filter, wordsToAvoid, wordsToInclude);
-                    //}
                     curNode = AddChildNode(curNode, dInfo, filter, wordsToAvoid, wordsToInclude);
                     prevDirName = dInfo.Item1.Name;
                 }
@@ -281,29 +199,6 @@ namespace Common
                 //unhide any ones with valid Files (by default they are all hidden).
                 IterateTreeAndUnsetFilteredForValid(rootNode);
             }
-
-            //logging code for unit tests / diagnostic..
-            //var root2 = DocumentFile.FromTreeUri(SeekerState.MainActivityRef, Android.Net.Uri.Parse(SeekerState.SaveDataDirectoryUri));
-            //DocumentFile exists2 = root.FindFile(username + "_parsed_answer");
-            //if (exists2 == null || !exists2.Exists())
-            //{
-            //    DocumentFile f = root2.CreateFile(@"custom\binary", username + "_parsed_answer");
-
-            //    System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(f.Uri);
-            //    //Java.IO.File musicFile = new Java.IO.File(filePath);
-            //    //FileOutputStream stream = new FileOutputStream(mFile);
-            //    using (System.IO.MemoryStream userListStream = new System.IO.MemoryStream())
-            //    {
-            //        System.Runtime.Serialization.Formatters.Binary.BinaryFormatter formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
-            //        formatter.Serialize(userListStream, rootNode);
-
-            //        //write to binary..
-
-            //        stream.Write(userListStream.ToArray());
-            //        stream.Close();
-            //    }
-            //}
-            //end logging code for unit tests / diagnostic..
 
             return rootNode;
         }
@@ -420,20 +315,6 @@ namespace Common
                 //return possibleChild.Substring(0, pathSep).Contains(possibleParent);
 
                 return possibleChild.Substring(0, pathSep + 1).StartsWith(possibleParent + "\\") || possibleChild.Substring(0, pathSep) == possibleParent || possibleParent == String.Empty;
-
-
-                //{
-                //    return true;
-                //}
-                //else
-                //{
-                //    //special case. since primary: is a parent of primary:Music
-                //    if(possibleParent.LastIndexOf("\\")==-1 && possibleParent.IndexOf(':')==(possibleParent.Length-1))
-                //    {
-                //        return true;
-                //    }
-                //    return false;
-                //}
             }
         }
 
@@ -496,7 +377,7 @@ namespace Common
         public T Data;
         public bool IsFilteredOut = false;
         public bool IsLocked = false;
-        public TreeNode<T> Parent;
+        public TreeNode<T>? Parent;
         public ICollection<TreeNode<T>> Children;
 
         public TreeNode(T data, bool isLocked)
@@ -521,7 +402,7 @@ namespace Common
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return null;
+            throw new NotImplementedException();
         }
     }
 }
