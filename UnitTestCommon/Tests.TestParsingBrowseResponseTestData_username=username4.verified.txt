@@ -1,0 +1,4625 @@
+﻿
+Files: 0
+Children: 2
+Root A\Artist A
+Files: 0
+Children: 265
+Root A\Artist A\Album A
+Files: 0
+Children: 1
+Root A\Artist A\Album A\Sub A
+Files: 17
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AA
+Files: 0
+Children: 2
+Root A\Artist A\Album AA\Sub AR
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AA\Sub AS
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AB
+Files: 0
+Children: 1
+Root A\Artist A\Album AB\Sub AT
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AC
+Files: 0
+Children: 3
+Root A\Artist A\Album AC\Sub AU
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AC\Sub AV
+Files: 20
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AC\Sub AW
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AD
+Files: 0
+Children: 2
+Root A\Artist A\Album AD\Sub AX
+Files: 0
+Children: 2
+Root A\Artist A\Album AD\Sub AX\Sub B
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AD\Sub AX\Sub C
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AD\Sub AY
+Files: 0
+Children: 2
+Root A\Artist A\Album AD\Sub AY\Sub B
+Files: 5
+Children: 0
+Track 01.m4a
+Root A\Artist A\Album AD\Sub AY\Sub C
+Files: 4
+Children: 0
+Track 01.m4a
+Root A\Artist A\Album AE
+Files: 0
+Children: 2
+Root A\Artist A\Album AE\Sub AZ
+Files: 0
+Children: 2
+Root A\Artist A\Album AE\Sub AZ\Sub J
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AE\Sub AZ\Sub K
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AE\Sub BA
+Files: 0
+Children: 2
+Root A\Artist A\Album AE\Sub BA\Sub J
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AE\Sub BA\Sub L
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AF
+Files: 0
+Children: 2
+Root A\Artist A\Album AF\Sub BB
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AF\Sub BC
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AG
+Files: 0
+Children: 1
+Root A\Artist A\Album AG\Sub BD
+Files: 3
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AH
+Files: 0
+Children: 1
+Root A\Artist A\Album AH\Sub BE
+Files: 1
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AI
+Files: 0
+Children: 2
+Root A\Artist A\Album AI\Sub BF
+Files: 1
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AI\Sub BG
+Files: 0
+Children: 0
+Root A\Artist A\Album AJ
+Files: 0
+Children: 2
+Root A\Artist A\Album AJ\Sub BH
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AJ\Sub BI
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AK
+Files: 0
+Children: 1
+Root A\Artist A\Album AK\Sub BJ
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AL
+Files: 1
+Children: 6
+Track 01.jpg
+Root A\Artist A\Album AL\Sub BK
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AL\Sub BL
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AL\Sub BM
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AL\Sub BN
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AL\Sub BO
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AL\Sub BP
+Files: 3
+Children: 0
+Track 01.cue
+Root A\Artist A\Album AM
+Files: 0
+Children: 1
+Root A\Artist A\Album AM\Sub BQ
+Files: 1
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AN
+Files: 1
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AO
+Files: 0
+Children: 1
+Root A\Artist A\Album AO\Sub BR
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AP
+Files: 0
+Children: 1
+Root A\Artist A\Album AP\Sub BS
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AQ
+Files: 0
+Children: 1
+Root A\Artist A\Album AQ\Sub BT
+Files: 0
+Children: 1
+Root A\Artist A\Album AQ\Sub BT\Sub M
+Files: 2
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album AR
+Files: 0
+Children: 1
+Root A\Artist A\Album AR\Sub BU
+Files: 4
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album AS
+Files: 0
+Children: 1
+Root A\Artist A\Album AS\Sub BV
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AT
+Files: 0
+Children: 2
+Root A\Artist A\Album AT\Sub BW
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AT\Sub BX
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AU
+Files: 0
+Children: 3
+Root A\Artist A\Album AU\Sub BY
+Files: 19
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AU\Sub BZ
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AU\Sub CA
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AV
+Files: 0
+Children: 1
+Root A\Artist A\Album AV\Sub CB
+Files: 1
+Children: 2
+Track 01.jpg
+Root A\Artist A\Album AV\Sub CB\Sub D
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AV\Sub CB\Sub E
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AW
+Files: 0
+Children: 2
+Root A\Artist A\Album AW\Sub CC
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AW\Sub CD
+Files: 3
+Children: 0
+Track 01.log
+Root A\Artist A\Album AX
+Files: 0
+Children: 2
+Root A\Artist A\Album AX\Sub CE
+Files: 17
+Children: 1
+Track 01.flac
+Root A\Artist A\Album AX\Sub CE\Sub N
+Files: 9
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album AX\Sub CF
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AY
+Files: 0
+Children: 1
+Root A\Artist A\Album AY\Sub CG
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AZ
+Files: 2
+Children: 3
+Track 01.log
+Root A\Artist A\Album AZ\Sub CH
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album AZ\Sub CI
+Files: 4
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album AZ\Sub CJ
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album B
+Files: 0
+Children: 2
+Root A\Artist A\Album B\Sub B
+Files: 1
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album B\Sub C
+Files: 76
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BA
+Files: 0
+Children: 4
+Root A\Artist A\Album BA\Sub CK
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BA\Sub CL
+Files: 0
+Children: 2
+Root A\Artist A\Album BA\Sub CL\Sub D
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BA\Sub CL\Sub E
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BA\Sub CM
+Files: 0
+Children: 2
+Root A\Artist A\Album BA\Sub CM\Sub B
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BA\Sub CM\Sub C
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BA\Sub CN
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BB
+Files: 0
+Children: 10
+Root A\Artist A\Album BB\Sub CO
+Files: 3
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BB\Sub CP
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BB\Sub CQ
+Files: 3
+Children: 0
+Track 01.txt
+Root A\Artist A\Album BB\Sub CR
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BB\Sub CS
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BB\Sub CT
+Files: 17
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BB\Sub CU
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BB\Sub CV
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BB\Sub CW
+Files: 22
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BB\Sub CX
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BC
+Files: 0
+Children: 1
+Root A\Artist A\Album BC\Sub CY
+Files: 19
+Children: 0
+Track 01.mp3
+Root A\Artist A\Album BD
+Files: 0
+Children: 1
+Root A\Artist A\Album BD\Sub CZ
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BE
+Files: 0
+Children: 2
+Root A\Artist A\Album BE\Sub DA
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BE\Sub DB
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BF
+Files: 0
+Children: 4
+Root A\Artist A\Album BF\Sub DC
+Files: 0
+Children: 0
+Root A\Artist A\Album BF\Sub DD
+Files: 1
+Children: 3
+Track 01.jpg
+Root A\Artist A\Album BF\Sub DD\Sub J
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BF\Sub DD\Sub K
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BF\Sub DD\Sub O
+Files: 21
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album BF\Sub DE
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BF\Sub DF
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BG
+Files: 0
+Children: 2
+Root A\Artist A\Album BG\Sub DG
+Files: 1
+Children: 2
+Track 01.jpg
+Root A\Artist A\Album BG\Sub DG\Sub P
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BG\Sub DG\Sub Q
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BG\Sub DH
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BH
+Files: 0
+Children: 1
+Root A\Artist A\Album BH\Sub DI
+Files: 0
+Children: 3
+Root A\Artist A\Album BH\Sub DI\Sub R
+Files: 7
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album BH\Sub DI\Sub S
+Files: 25
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BH\Sub DI\Sub T
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BI
+Files: 0
+Children: 1
+Root A\Artist A\Album BI\Sub DJ
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BJ
+Files: 0
+Children: 4
+Root A\Artist A\Album BJ\Sub DK
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BJ\Sub DL
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BJ\Sub DM
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BJ\Sub DN
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BK
+Files: 0
+Children: 4
+Root A\Artist A\Album BK\Sub DO
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BK\Sub DP
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BK\Sub DQ
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BK\Sub DR
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BL
+Files: 0
+Children: 1
+Root A\Artist A\Album BL\Sub DS
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BM
+Files: 0
+Children: 2
+Root A\Artist A\Album BM\Sub DT
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BM\Sub DU
+Files: 2
+Children: 0
+Track 01.log
+Root A\Artist A\Album BN
+Files: 0
+Children: 2
+Root A\Artist A\Album BN\Sub DV
+Files: 24
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BN\Sub DW
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BO
+Files: 0
+Children: 1
+Root A\Artist A\Album BO\Sub DX
+Files: 14
+Children: 1
+Track 01.flac
+Root A\Artist A\Album BO\Sub DX\Sub R
+Files: 4
+Children: 0
+Track 01.png
+Root A\Artist A\Album BP
+Files: 0
+Children: 3
+Root A\Artist A\Album BP\Sub DY
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BP\Sub DZ
+Files: 14
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album BP\Sub EA
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BQ
+Files: 0
+Children: 3
+Root A\Artist A\Album BQ\Sub EB
+Files: 19
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BQ\Sub EC
+Files: 1
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BQ\Sub ED
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BR
+Files: 0
+Children: 2
+Root A\Artist A\Album BR\Sub EE
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BR\Sub EF
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BS
+Files: 0
+Children: 1
+Root A\Artist A\Album BS\Sub EG
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BT
+Files: 0
+Children: 1
+Root A\Artist A\Album BT\Sub EH
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BU
+Files: 0
+Children: 1
+Root A\Artist A\Album BU\Sub EI
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BV
+Files: 0
+Children: 2
+Root A\Artist A\Album BV\Sub EJ
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BV\Sub EK
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BW
+Files: 0
+Children: 4
+Root A\Artist A\Album BW\Sub EL
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BW\Sub EM
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BW\Sub EN
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BW\Sub EO
+Files: 20
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BX
+Files: 0
+Children: 2
+Root A\Artist A\Album BX\Sub EP
+Files: 11
+Children: 1
+Track 01.flac
+Root A\Artist A\Album BX\Sub EP\Sub R
+Files: 4
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album BX\Sub EQ
+Files: 0
+Children: 2
+Root A\Artist A\Album BX\Sub EQ\Sub J
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BX\Sub EQ\Sub K
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album BY
+Files: 0
+Children: 1
+Root A\Artist A\Album BY\Sub ER
+Files: 15
+Children: 0
+Track 01.mp3
+Root A\Artist A\Album BZ
+Files: 0
+Children: 1
+Root A\Artist A\Album BZ\Sub ES
+Files: 1
+Children: 0
+Track 01.flac
+Root A\Artist A\Album C
+Files: 0
+Children: 1
+Root A\Artist A\Album C\Sub D
+Files: 0
+Children: 1
+Root A\Artist A\Album C\Sub D\Sub A
+Files: 0
+Children: 0
+Root A\Artist A\Album CA
+Files: 0
+Children: 1
+Root A\Artist A\Album CA\Sub ET
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CB
+Files: 0
+Children: 1
+Root A\Artist A\Album CB\Sub EU
+Files: 16
+Children: 0
+Track 01.mp3
+Root A\Artist A\Album CC
+Files: 0
+Children: 1
+Root A\Artist A\Album CC\Sub EV
+Files: 26
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CD
+Files: 0
+Children: 1
+Root A\Artist A\Album CD\Sub EW
+Files: 19
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CE
+Files: 0
+Children: 4
+Root A\Artist A\Album CE\Sub EX
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CE\Sub EY
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CE\Sub EZ
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CE\Sub FA
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CF
+Files: 0
+Children: 1
+Root A\Artist A\Album CF\Sub FB
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CG
+Files: 0
+Children: 2
+Root A\Artist A\Album CG\Sub FC
+Files: 17
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CG\Sub FD
+Files: 1
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CH
+Files: 0
+Children: 3
+Root A\Artist A\Album CH\Sub FE
+Files: 28
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CH\Sub FF
+Files: 26
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CH\Sub FG
+Files: 19
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CI
+Files: 0
+Children: 4
+Root A\Artist A\Album CI\Sub FH
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CI\Sub FI
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CI\Sub FJ
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CI\Sub FK
+Files: 12
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album CJ
+Files: 0
+Children: 2
+Root A\Artist A\Album CJ\Sub FL
+Files: 0
+Children: 2
+Root A\Artist A\Album CJ\Sub FL\Sub J
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CJ\Sub FL\Sub K
+Files: 4
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CJ\Sub FM
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CK
+Files: 0
+Children: 1
+Root A\Artist A\Album CK\Sub FN
+Files: 10
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album CL
+Files: 0
+Children: 1
+Root A\Artist A\Album CL\Sub FO
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CM
+Files: 0
+Children: 10
+Root A\Artist A\Album CM\Sub FP
+Files: 0
+Children: 3
+Root A\Artist A\Album CM\Sub FP\Sub U
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CM\Sub FP\Sub V
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CM\Sub FP\Sub W
+Files: 5
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album CM\Sub FQ
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CM\Sub FR
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CM\Sub FS
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CM\Sub FT
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CM\Sub FU
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CM\Sub FV
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CM\Sub FW
+Files: 11
+Children: 1
+Track 01.flac
+Root A\Artist A\Album CM\Sub FW\Sub X
+Files: 4
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album CM\Sub FX
+Files: 17
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CM\Sub FY
+Files: 13
+Children: 1
+Track 01.flac
+Root A\Artist A\Album CM\Sub FY\Sub W
+Files: 5
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album CN
+Files: 0
+Children: 1
+Root A\Artist A\Album CN\Sub FZ
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CO
+Files: 0
+Children: 2
+Root A\Artist A\Album CO\Sub GA
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CO\Sub GB
+Files: 16
+Children: 1
+Track 01.flac
+Root A\Artist A\Album CO\Sub GB\Sub R
+Files: 9
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album CP
+Files: 1
+Children: 2
+Track 01.jpg
+Root A\Artist A\Album CP\Sub GC
+Files: 21
+Children: 1
+Track 01.flac
+Root A\Artist A\Album CP\Sub GC\Sub R
+Files: 3
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album CP\Sub GD
+Files: 12
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album CQ
+Files: 0
+Children: 1
+Root A\Artist A\Album CQ\Sub GE
+Files: 12
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album CR
+Files: 0
+Children: 1
+Root A\Artist A\Album CR\Sub GF
+Files: 17
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album CS
+Files: 0
+Children: 1
+Root A\Artist A\Album CS\Sub GG
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CT
+Files: 0
+Children: 2
+Root A\Artist A\Album CT\Sub GH
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CT\Sub GI
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CU
+Files: 0
+Children: 1
+Root A\Artist A\Album CU\Sub GJ
+Files: 12
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album CV
+Files: 0
+Children: 2
+Root A\Artist A\Album CV\Sub GK
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CV\Sub GL
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CW
+Files: 0
+Children: 2
+Root A\Artist A\Album CW\Sub GM
+Files: 1
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album CW\Sub GN
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CX
+Files: 0
+Children: 4
+Root A\Artist A\Album CX\Sub GO
+Files: 0
+Children: 0
+Root A\Artist A\Album CX\Sub GP
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CX\Sub GQ
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CX\Sub GR
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CY
+Files: 0
+Children: 4
+Root A\Artist A\Album CY\Sub GS
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CY\Sub GT
+Files: 0
+Children: 2
+Root A\Artist A\Album CY\Sub GT\Sub B
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CY\Sub GT\Sub C
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CY\Sub GU
+Files: 30
+Children: 0
+Track 01.m3u
+Root A\Artist A\Album CY\Sub GV
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album CZ
+Files: 0
+Children: 1
+Root A\Artist A\Album CZ\Sub GW
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album D
+Files: 0
+Children: 1
+Root A\Artist A\Album D\Sub E
+Files: 1
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DA
+Files: 0
+Children: 1
+Root A\Artist A\Album DA\Sub GX
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DB
+Files: 0
+Children: 6
+Root A\Artist A\Album DB\Sub GY
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DB\Sub GZ
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DB\Sub HA
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DB\Sub HB
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DB\Sub HC
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DB\Sub HD
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DC
+Files: 0
+Children: 7
+Root A\Artist A\Album DC\Sub HE
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DC\Sub HF
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DC\Sub HG
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DC\Sub HH
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DC\Sub HI
+Files: 18
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DC\Sub HJ
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DC\Sub HK
+Files: 9
+Children: 0
+Track 01.mp3
+Root A\Artist A\Album DD
+Files: 0
+Children: 1
+Root A\Artist A\Album DD\Sub HL
+Files: 14
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album DE
+Files: 0
+Children: 2
+Root A\Artist A\Album DE\Sub HM
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DE\Sub HN
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DF
+Files: 0
+Children: 1
+Root A\Artist A\Album DF\Sub HO
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DG
+Files: 0
+Children: 4
+Root A\Artist A\Album DG\Sub HP
+Files: 1
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album DG\Sub HQ
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DG\Sub HR
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DG\Sub HS
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DH
+Files: 0
+Children: 2
+Root A\Artist A\Album DH\Sub HT
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DH\Sub HU
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DI
+Files: 0
+Children: 1
+Root A\Artist A\Album DI\Sub HV
+Files: 16
+Children: 1
+Track 01.flac
+Root A\Artist A\Album DI\Sub HV\Sub Y
+Files: 1
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album DJ
+Files: 0
+Children: 3
+Root A\Artist A\Album DJ\Sub HW
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DJ\Sub HX
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DJ\Sub HY
+Files: 12
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album DK
+Files: 0
+Children: 1
+Root A\Artist A\Album DK\Sub HZ
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DL
+Files: 0
+Children: 4
+Root A\Artist A\Album DL\Sub IA
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DL\Sub IB
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DL\Sub IC
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DL\Sub ID
+Files: 17
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DM
+Files: 0
+Children: 1
+Root A\Artist A\Album DM\Sub IE
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DN
+Files: 0
+Children: 2
+Root A\Artist A\Album DN\Sub IF
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DN\Sub IG
+Files: 17
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DO
+Files: 0
+Children: 2
+Root A\Artist A\Album DO\Sub IH
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DO\Sub II
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DP
+Files: 0
+Children: 1
+Root A\Artist A\Album DP\Sub IJ
+Files: 1
+Children: 2
+Track 01.jpg
+Root A\Artist A\Album DP\Sub IJ\Sub AA
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DP\Sub IJ\Sub Z
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DQ
+Files: 0
+Children: 1
+Root A\Artist A\Album DQ\Sub IK
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DR
+Files: 0
+Children: 1
+Root A\Artist A\Album DR\Sub IL
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DS
+Files: 0
+Children: 2
+Root A\Artist A\Album DS\Sub IM
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DS\Sub IN
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DT
+Files: 0
+Children: 1
+Root A\Artist A\Album DT\Sub IO
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DU
+Files: 0
+Children: 1
+Root A\Artist A\Album DU\Sub IP
+Files: 0
+Children: 3
+Root A\Artist A\Album DU\Sub IP\Sub J
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DU\Sub IP\Sub K
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DU\Sub IP\Sub L
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DV
+Files: 0
+Children: 2
+Root A\Artist A\Album DV\Sub IQ
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DV\Sub IR
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DW
+Files: 0
+Children: 2
+Root A\Artist A\Album DW\Sub IS
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DW\Sub IT
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DX
+Files: 0
+Children: 3
+Root A\Artist A\Album DX\Sub IU
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DX\Sub IV
+Files: 18
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DX\Sub IW
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DY
+Files: 0
+Children: 1
+Root A\Artist A\Album DY\Sub IX
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album DZ
+Files: 0
+Children: 1
+Root A\Artist A\Album DZ\Sub IY
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album E
+Files: 0
+Children: 3
+Root A\Artist A\Album E\Sub F
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album E\Sub G
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album E\Sub H
+Files: 0
+Children: 2
+Root A\Artist A\Album E\Sub H\Sub B
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album E\Sub H\Sub C
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EA
+Files: 0
+Children: 1
+Root A\Artist A\Album EA\Sub IZ
+Files: 7
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album EB
+Files: 0
+Children: 1
+Root A\Artist A\Album EB\Sub JA
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EC
+Files: 0
+Children: 3
+Root A\Artist A\Album EC\Sub JB
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EC\Sub JC
+Files: 11
+Children: 1
+Track 01.jpg
+Root A\Artist A\Album EC\Sub JC\Sub AB
+Files: 5
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album EC\Sub JD
+Files: 15
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album ED
+Files: 1
+Children: 2
+Track 01.jpg
+Root A\Artist A\Album ED\Sub JE
+Files: 3
+Children: 0
+Track 01.Flac
+Root A\Artist A\Album ED\Sub JF
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EE
+Files: 0
+Children: 4
+Root A\Artist A\Album EE\Sub JG
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EE\Sub JH
+Files: 0
+Children: 2
+Root A\Artist A\Album EE\Sub JH\Sub J
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EE\Sub JH\Sub K
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EE\Sub JI
+Files: 0
+Children: 2
+Root A\Artist A\Album EE\Sub JI\Sub B
+Files: 4
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EE\Sub JI\Sub C
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EE\Sub JJ
+Files: 0
+Children: 2
+Root A\Artist A\Album EE\Sub JJ\Sub B
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EE\Sub JJ\Sub C
+Files: 4
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EF
+Files: 0
+Children: 2
+Root A\Artist A\Album EF\Sub JK
+Files: 17
+Children: 0
+Track 01.jpeg
+Root A\Artist A\Album EF\Sub JL
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EG
+Files: 0
+Children: 3
+Root A\Artist A\Album EG\Sub JM
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EG\Sub JN
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EG\Sub JO
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EH
+Files: 0
+Children: 3
+Root A\Artist A\Album EH\Sub JP
+Files: 0
+Children: 2
+Root A\Artist A\Album EH\Sub JP\Sub B
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EH\Sub JP\Sub C
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EH\Sub JQ
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EH\Sub JR
+Files: 11
+Children: 0
+Track 01.mp3
+Root A\Artist A\Album EI
+Files: 0
+Children: 1
+Root A\Artist A\Album EI\Sub JS
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EJ
+Files: 0
+Children: 2
+Root A\Artist A\Album EJ\Sub JT
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EJ\Sub JU
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EK
+Files: 0
+Children: 2
+Root A\Artist A\Album EK\Sub JV
+Files: 15
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album EK\Sub JW
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EL
+Files: 0
+Children: 3
+Root A\Artist A\Album EL\Sub JX
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EL\Sub JY
+Files: 4
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EL\Sub JZ
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EM
+Files: 0
+Children: 1
+Root A\Artist A\Album EM\Sub KA
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EN
+Files: 0
+Children: 2
+Root A\Artist A\Album EN\Sub KB
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EN\Sub KC
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EO
+Files: 0
+Children: 3
+Root A\Artist A\Album EO\Sub KD
+Files: 0
+Children: 2
+Root A\Artist A\Album EO\Sub KD\Sub J
+Files: 11
+Children: 0
+Track 01.mp3
+Root A\Artist A\Album EO\Sub KD\Sub K
+Files: 11
+Children: 0
+Track 01.mp3
+Root A\Artist A\Album EO\Sub KE
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EO\Sub KF
+Files: 12
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album EP
+Files: 0
+Children: 1
+Root A\Artist A\Album EP\Sub KG
+Files: 1
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album EQ
+Files: 0
+Children: 3
+Root A\Artist A\Album EQ\Sub KH
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EQ\Sub KI
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EQ\Sub KJ
+Files: 6
+Children: 0
+Track 01.mp3
+Root A\Artist A\Album ER
+Files: 0
+Children: 1
+Root A\Artist A\Album ER\Sub KK
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album ES
+Files: 0
+Children: 1
+Root A\Artist A\Album ES\Sub KG
+Files: 22
+Children: 0
+Track 01.flac
+Root A\Artist A\Album ET
+Files: 0
+Children: 6
+Root A\Artist A\Album ET\Sub KL
+Files: 18
+Children: 0
+Track 01.flac
+Root A\Artist A\Album ET\Sub KM
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album ET\Sub KN
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album ET\Sub KO
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album ET\Sub KP
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album ET\Sub KQ
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EU
+Files: 0
+Children: 1
+Root A\Artist A\Album EU\Sub KR
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EV
+Files: 0
+Children: 1
+Root A\Artist A\Album EV\Sub KS
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EW
+Files: 0
+Children: 4
+Root A\Artist A\Album EW\Sub KT
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EW\Sub KU
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EW\Sub KV
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EW\Sub KW
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EX
+Files: 0
+Children: 8
+Root A\Artist A\Album EX\Sub KX
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EX\Sub KY
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EX\Sub KZ
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EX\Sub LA
+Files: 2
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EX\Sub LB
+Files: 1
+Children: 0
+Track 01.png
+Root A\Artist A\Album EX\Sub LC
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EX\Sub LD
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EX\Sub LE
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EY
+Files: 0
+Children: 2
+Root A\Artist A\Album EY\Sub LF
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EY\Sub LG
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EZ
+Files: 0
+Children: 6
+Root A\Artist A\Album EZ\Sub LH
+Files: 4
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EZ\Sub LI
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EZ\Sub LJ
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EZ\Sub LK
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EZ\Sub LL
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album EZ\Sub LM
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album F
+Files: 0
+Children: 2
+Root A\Artist A\Album F\Sub I
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album F\Sub J
+Files: 1
+Children: 2
+Track 01.jpg
+Root A\Artist A\Album F\Sub J\Sub D
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album F\Sub J\Sub E
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FA
+Files: 0
+Children: 4
+Root A\Artist A\Album FA\Sub LN
+Files: 18
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FA\Sub LO
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FA\Sub LP
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FA\Sub LQ
+Files: 21
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FB
+Files: 0
+Children: 1
+Root A\Artist A\Album FB\Sub LR
+Files: 26
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FC
+Files: 0
+Children: 3
+Root A\Artist A\Album FC\Sub LS
+Files: 18
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FC\Sub LT
+Files: 18
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FC\Sub LU
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FD
+Files: 0
+Children: 1
+Root A\Artist A\Album FD\Sub LV
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FE
+Files: 0
+Children: 6
+Root A\Artist A\Album FE\Sub LW
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FE\Sub LX
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FE\Sub LY
+Files: 0
+Children: 2
+Root A\Artist A\Album FE\Sub LY\Sub B
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FE\Sub LY\Sub C
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FE\Sub LZ
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FE\Sub MA
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FE\Sub MB
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FF
+Files: 0
+Children: 1
+Root A\Artist A\Album FF\Sub MC
+Files: 0
+Children: 2
+Root A\Artist A\Album FF\Sub MC\Sub B
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FF\Sub MC\Sub C
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FG
+Files: 0
+Children: 2
+Root A\Artist A\Album FG\Sub MD
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FG\Sub ME
+Files: 15
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album FH
+Files: 0
+Children: 3
+Root A\Artist A\Album FH\Sub MF
+Files: 3
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FH\Sub MG
+Files: 0
+Children: 2
+Root A\Artist A\Album FH\Sub MG\Sub D
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FH\Sub MG\Sub E
+Files: 18
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FH\Sub MH
+Files: 0
+Children: 2
+Root A\Artist A\Album FH\Sub MH\Sub J
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FH\Sub MH\Sub K
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FI
+Files: 0
+Children: 1
+Root A\Artist A\Album FI\Sub MI
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FJ
+Files: 0
+Children: 1
+Root A\Artist A\Album FJ\Sub MJ
+Files: 12
+Children: 0
+Track 01.mp3
+Root A\Artist A\Album FK
+Files: 0
+Children: 1
+Root A\Artist A\Album FK\Sub MK
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FL
+Files: 0
+Children: 1
+Root A\Artist A\Album FL\Sub ML
+Files: 18
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FM
+Files: 0
+Children: 7
+Root A\Artist A\Album FM\Sub MM
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FM\Sub MN
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FM\Sub MO
+Files: 0
+Children: 2
+Root A\Artist A\Album FM\Sub MO\Sub B
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FM\Sub MO\Sub C
+Files: 3
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FM\Sub MP
+Files: 0
+Children: 2
+Root A\Artist A\Album FM\Sub MP\Sub B
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FM\Sub MP\Sub C
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FM\Sub MQ
+Files: 8
+Children: 2
+Track 01.flac
+Root A\Artist A\Album FM\Sub MQ\Sub AC
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FM\Sub MQ\Sub AD
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FM\Sub MR
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FM\Sub MS
+Files: 19
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FN
+Files: 0
+Children: 3
+Root A\Artist A\Album FN\Sub MT
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FN\Sub MU
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FN\Sub MV
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FO
+Files: 0
+Children: 1
+Root A\Artist A\Album FO\Sub MW
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FP
+Files: 0
+Children: 1
+Root A\Artist A\Album FP\Sub MX
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FQ
+Files: 0
+Children: 1
+Root A\Artist A\Album FQ\Sub MY
+Files: 12
+Children: 1
+Track 01.flac
+Root A\Artist A\Album FQ\Sub MY\Sub R
+Files: 2
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album FR
+Files: 0
+Children: 2
+Root A\Artist A\Album FR\Sub MZ
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FR\Sub NA
+Files: 13
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album FS
+Files: 0
+Children: 4
+Root A\Artist A\Album FS\Sub NB
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FS\Sub NC
+Files: 14
+Children: 0
+Track 01.jpeg
+Root A\Artist A\Album FS\Sub ND
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FS\Sub NE
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FT
+Files: 0
+Children: 1
+Root A\Artist A\Album FT\Sub NF
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FU
+Files: 0
+Children: 1
+Root A\Artist A\Album FU\Sub NG
+Files: 12
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album FV
+Files: 0
+Children: 2
+Root A\Artist A\Album FV\Sub NH
+Files: 10
+Children: 1
+Track 01.flac
+Root A\Artist A\Album FV\Sub NH\Sub AE
+Files: 5
+Children: 0
+Track 01.png
+Root A\Artist A\Album FV\Sub NI
+Files: 0
+Children: 2
+Root A\Artist A\Album FV\Sub NI\Sub J
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FV\Sub NI\Sub K
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FW
+Files: 0
+Children: 6
+Root A\Artist A\Album FW\Sub NJ
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FW\Sub NK
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FW\Sub NL
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FW\Sub NM
+Files: 0
+Children: 2
+Root A\Artist A\Album FW\Sub NM\Sub J
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FW\Sub NM\Sub K
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FW\Sub NN
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FW\Sub NO
+Files: 0
+Children: 0
+Root A\Artist A\Album FX
+Files: 0
+Children: 3
+Root A\Artist A\Album FX\Sub NP
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FX\Sub NQ
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FX\Sub NR
+Files: 14
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album FY
+Files: 0
+Children: 4
+Root A\Artist A\Album FY\Sub NS
+Files: 1
+Children: 2
+Track 01.jpg
+Root A\Artist A\Album FY\Sub NS\Sub D
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FY\Sub NS\Sub E
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FY\Sub NT
+Files: 1
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album FY\Sub NU
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FY\Sub NV
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FZ
+Files: 0
+Children: 3
+Root A\Artist A\Album FZ\Sub NW
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FZ\Sub NX
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album FZ\Sub NY
+Files: 10
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album G
+Files: 0
+Children: 2
+Root A\Artist A\Album G\Sub K
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album G\Sub L
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GA
+Files: 0
+Children: 1
+Root A\Artist A\Album GA\Sub NZ
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GB
+Files: 0
+Children: 3
+Root A\Artist A\Album GB\Sub OA
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GB\Sub OB
+Files: 11
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album GB\Sub OC
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GC
+Files: 0
+Children: 2
+Root A\Artist A\Album GC\Sub OD
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GC\Sub OE
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GD
+Files: 0
+Children: 5
+Root A\Artist A\Album GD\Sub OF
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GD\Sub OG
+Files: 16
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album GD\Sub OH
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GD\Sub OI
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GD\Sub OJ
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GE
+Files: 0
+Children: 1
+Root A\Artist A\Album GE\Sub OK
+Files: 1
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GF
+Files: 0
+Children: 4
+Root A\Artist A\Album GF\Sub OL
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GF\Sub OM
+Files: 15
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album GF\Sub ON
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GF\Sub OO
+Files: 0
+Children: 2
+Root A\Artist A\Album GF\Sub OO\Sub B
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GF\Sub OO\Sub C
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GG
+Files: 0
+Children: 2
+Root A\Artist A\Album GG\Sub OP
+Files: 11
+Children: 1
+Track 01.flac
+Root A\Artist A\Album GG\Sub OP\Sub AF
+Files: 30
+Children: 0
+Track 01.png
+Root A\Artist A\Album GG\Sub OQ
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GH
+Files: 0
+Children: 1
+Root A\Artist A\Album GH\Sub OR
+Files: 2
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GI
+Files: 0
+Children: 1
+Root A\Artist A\Album GI\Sub OS
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GJ
+Files: 0
+Children: 4
+Root A\Artist A\Album GJ\Sub OT
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GJ\Sub OU
+Files: 4
+Children: 0
+Track 01.log
+Root A\Artist A\Album GJ\Sub OV
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GJ\Sub OW
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GK
+Files: 0
+Children: 1
+Root A\Artist A\Album GK\Sub OX
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GL
+Files: 0
+Children: 3
+Root A\Artist A\Album GL\Sub OZ
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GL\Sub PA
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GL\Sub PB
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GM
+Files: 0
+Children: 1
+Root A\Artist A\Album GM\Sub OY
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GN
+Files: 0
+Children: 1
+Root A\Artist A\Album GN\Sub PC
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GO
+Files: 0
+Children: 1
+Root A\Artist A\Album GO\Sub PD
+Files: 17
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GP
+Files: 0
+Children: 4
+Root A\Artist A\Album GP\Sub PE
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GP\Sub PF
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GP\Sub PG
+Files: 0
+Children: 0
+Root A\Artist A\Album GP\Sub PH
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GQ
+Files: 0
+Children: 2
+Root A\Artist A\Album GQ\Sub PI
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GQ\Sub PJ
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GR
+Files: 0
+Children: 1
+Root A\Artist A\Album GR\Sub PK
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GS
+Files: 0
+Children: 2
+Root A\Artist A\Album GS\Sub PL
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GS\Sub PM
+Files: 0
+Children: 2
+Root A\Artist A\Album GS\Sub PM\Sub J
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GS\Sub PM\Sub K
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GT
+Files: 0
+Children: 2
+Root A\Artist A\Album GT\Sub PN
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GT\Sub PO
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GU
+Files: 0
+Children: 2
+Root A\Artist A\Album GU\Sub PP
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GU\Sub PQ
+Files: 0
+Children: 2
+Root A\Artist A\Album GU\Sub PQ\Sub J
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GU\Sub PQ\Sub K
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GV
+Files: 0
+Children: 3
+Root A\Artist A\Album GV\Sub PR
+Files: 0
+Children: 1
+Root A\Artist A\Album GV\Sub PR\Sub N
+Files: 31
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album GV\Sub PS
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GV\Sub PT
+Files: 0
+Children: 0
+Root A\Artist A\Album GW
+Files: 0
+Children: 1
+Root A\Artist A\Album GW\Sub PU
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GX
+Files: 0
+Children: 1
+Root A\Artist A\Album GX\Sub PV
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GY
+Files: 0
+Children: 1
+Root A\Artist A\Album GY\Sub PW
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album GZ
+Files: 0
+Children: 1
+Root A\Artist A\Album GZ\Sub PX
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album H
+Files: 0
+Children: 2
+Root A\Artist A\Album H\Sub M
+Files: 0
+Children: 0
+Root A\Artist A\Album H\Sub N
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HA
+Files: 0
+Children: 2
+Root A\Artist A\Album HA\Sub PY
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HA\Sub PZ
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HB
+Files: 0
+Children: 1
+Root A\Artist A\Album HB\Sub QA
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HC
+Files: 0
+Children: 2
+Root A\Artist A\Album HC\Sub QB
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HC\Sub QC
+Files: 0
+Children: 2
+Root A\Artist A\Album HC\Sub QC\Sub B
+Files: 3
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HC\Sub QC\Sub C
+Files: 3
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HD
+Files: 0
+Children: 2
+Root A\Artist A\Album HD\Sub QD
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HD\Sub QE
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HE
+Files: 0
+Children: 1
+Root A\Artist A\Album HE\Sub QF
+Files: 1
+Children: 2
+Track 01.jpg
+Root A\Artist A\Album HE\Sub QF\Sub J
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HE\Sub QF\Sub K
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HF
+Files: 0
+Children: 1
+Root A\Artist A\Album HF\Sub QG
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HG
+Files: 0
+Children: 1
+Root A\Artist A\Album HG\Sub QH
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HH
+Files: 0
+Children: 1
+Root A\Artist A\Album HH\Sub QI
+Files: 0
+Children: 2
+Root A\Artist A\Album HH\Sub QI\Sub J
+Files: 0
+Children: 0
+Root A\Artist A\Album HH\Sub QI\Sub K
+Files: 0
+Children: 0
+Root A\Artist A\Album HI
+Files: 0
+Children: 1
+Root A\Artist A\Album HI\Sub QJ
+Files: 1
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HJ
+Files: 0
+Children: 1
+Root A\Artist A\Album HJ\Sub QK
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HK
+Files: 0
+Children: 2
+Root A\Artist A\Album HK\Sub QL
+Files: 22
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HK\Sub QM
+Files: 17
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HL
+Files: 0
+Children: 1
+Root A\Artist A\Album HL\Sub QN
+Files: 12
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album HM
+Files: 0
+Children: 2
+Root A\Artist A\Album HM\Sub QO
+Files: 0
+Children: 0
+Root A\Artist A\Album HM\Sub QP
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HN
+Files: 0
+Children: 2
+Root A\Artist A\Album HN\Sub QQ
+Files: 0
+Children: 2
+Root A\Artist A\Album HN\Sub QQ\Sub J
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HN\Sub QQ\Sub K
+Files: 4
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HN\Sub QR
+Files: 0
+Children: 3
+Root A\Artist A\Album HN\Sub QR\Sub AG
+Files: 0
+Children: 0
+Root A\Artist A\Album HN\Sub QR\Sub AH
+Files: 0
+Children: 0
+Root A\Artist A\Album HN\Sub QR\Sub W
+Files: 5
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album HO
+Files: 0
+Children: 1
+Root A\Artist A\Album HO\Sub QS
+Files: 12
+Children: 0
+Track 01.mp3
+Root A\Artist A\Album HP
+Files: 0
+Children: 1
+Root A\Artist A\Album HP\Sub QT
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HQ
+Files: 0
+Children: 2
+Root A\Artist A\Album HQ\Sub QU
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HQ\Sub QV
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HR
+Files: 0
+Children: 5
+Root A\Artist A\Album HR\Sub QW
+Files: 18
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HR\Sub QX
+Files: 3
+Children: 0
+Track 01.m3u
+Root A\Artist A\Album HR\Sub QY
+Files: 25
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HR\Sub QZ
+Files: 21
+Children: 1
+Track 01.flac
+Root A\Artist A\Album HR\Sub QZ\Sub AI
+Files: 5
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album HR\Sub R
+Files: 2
+Children: 0
+Track 01.auCDtect
+Root A\Artist A\Album HS
+Files: 0
+Children: 3
+Root A\Artist A\Album HS\Sub RA
+Files: 18
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HS\Sub RB
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HS\Sub RC
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HT
+Files: 0
+Children: 1
+Root A\Artist A\Album HT\Sub RD
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HU
+Files: 0
+Children: 5
+Root A\Artist A\Album HU\Sub RE
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HU\Sub RF
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HU\Sub RG
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HU\Sub RH
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HU\Sub RI
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HV
+Files: 0
+Children: 5
+Root A\Artist A\Album HV\Sub RJ
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HV\Sub RK
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HV\Sub RL
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HV\Sub RM
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HV\Sub RN
+Files: 0
+Children: 2
+Root A\Artist A\Album HV\Sub RN\Sub J
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HV\Sub RN\Sub K
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HW
+Files: 0
+Children: 3
+Root A\Artist A\Album HW\Sub RO
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HW\Sub RP
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HW\Sub RQ
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HX
+Files: 0
+Children: 2
+Root A\Artist A\Album HX\Sub RR
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HX\Sub RS
+Files: 12
+Children: 0
+Track 01.jpeg
+Root A\Artist A\Album HY
+Files: 0
+Children: 1
+Root A\Artist A\Album HY\Sub RT
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album HZ
+Files: 0
+Children: 1
+Root A\Artist A\Album HZ\Sub RU
+Files: 12
+Children: 1
+Track 01.flac
+Root A\Artist A\Album HZ\Sub RU\Sub R
+Files: 7
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album I
+Files: 0
+Children: 2
+Root A\Artist A\Album I\Sub O
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album I\Sub P
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IA
+Files: 0
+Children: 3
+Root A\Artist A\Album IA\Sub RV
+Files: 21
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IA\Sub RW
+Files: 0
+Children: 2
+Root A\Artist A\Album IA\Sub RW\Sub J
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IA\Sub RW\Sub K
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IA\Sub RX
+Files: 0
+Children: 2
+Root A\Artist A\Album IA\Sub RX\Sub B
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IA\Sub RX\Sub C
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IB
+Files: 0
+Children: 2
+Root A\Artist A\Album IB\Sub RY
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IB\Sub RZ
+Files: 14
+Children: 0
+Track 01.mp3
+Root A\Artist A\Album IC
+Files: 0
+Children: 1
+Root A\Artist A\Album IC\Sub SA
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album ID
+Files: 0
+Children: 1
+Root A\Artist A\Album ID\Sub SB
+Files: 0
+Children: 3
+Root A\Artist A\Album ID\Sub SB\Sub J
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album ID\Sub SB\Sub K
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album ID\Sub SB\Sub L
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IE
+Files: 0
+Children: 1
+Root A\Artist A\Album IE\Sub SC
+Files: 14
+Children: 1
+Track 01.flac
+Root A\Artist A\Album IE\Sub SC\Sub R
+Files: 9
+Children: 0
+Track 01.JPG
+Root A\Artist A\Album IF
+Files: 0
+Children: 1
+Root A\Artist A\Album IF\Sub SD
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IG
+Files: 0
+Children: 2
+Root A\Artist A\Album IG\Sub SE
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IG\Sub SF
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IH
+Files: 0
+Children: 1
+Root A\Artist A\Album IH\Sub SG
+Files: 11
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album II
+Files: 0
+Children: 4
+Root A\Artist A\Album II\Sub SH
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album II\Sub SI
+Files: 15
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album II\Sub SJ
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album II\Sub SK
+Files: 19
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IJ
+Files: 0
+Children: 4
+Root A\Artist A\Album IJ\Sub SL
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IJ\Sub SM
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IJ\Sub SN
+Files: 17
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IJ\Sub SO
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IK
+Files: 0
+Children: 3
+Root A\Artist A\Album IK\Sub SP
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IK\Sub SQ
+Files: 0
+Children: 2
+Root A\Artist A\Album IK\Sub SQ\Sub J
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IK\Sub SQ\Sub K
+Files: 2
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IK\Sub SR
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IL
+Files: 0
+Children: 2
+Root A\Artist A\Album IL\Sub SS
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IL\Sub ST
+Files: 1
+Children: 0
+Track 01.txt
+Root A\Artist A\Album IM
+Files: 0
+Children: 3
+Root A\Artist A\Album IM\Sub SU
+Files: 23
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IM\Sub SV
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IM\Sub SW
+Files: 1
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album IN
+Files: 0
+Children: 5
+Root A\Artist A\Album IN\Sub SX
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IN\Sub SY
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IN\Sub SZ
+Files: 0
+Children: 2
+Root A\Artist A\Album IN\Sub SZ\Sub B
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IN\Sub SZ\Sub C
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IN\Sub TA
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IN\Sub TB
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IO
+Files: 0
+Children: 3
+Root A\Artist A\Album IO\Sub TC
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IO\Sub TD
+Files: 12
+Children: 0
+Track 01.ts
+Root A\Artist A\Album IO\Sub TE
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IP
+Files: 0
+Children: 1
+Root A\Artist A\Album IP\Sub TF
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IQ
+Files: 0
+Children: 3
+Root A\Artist A\Album IQ\Sub TG
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IQ\Sub TH
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IQ\Sub TI
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IR
+Files: 0
+Children: 2
+Root A\Artist A\Album IR\Sub TJ
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IR\Sub TK
+Files: 1
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album IS
+Files: 0
+Children: 3
+Root A\Artist A\Album IS\Sub TL
+Files: 15
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album IS\Sub TM
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IS\Sub TN
+Files: 11
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IT
+Files: 0
+Children: 4
+Root A\Artist A\Album IT\Sub TO
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IT\Sub TP
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IT\Sub TQ
+Files: 0
+Children: 2
+Root A\Artist A\Album IT\Sub TQ\Sub J
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IT\Sub TQ\Sub K
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IT\Sub TR
+Files: 2
+Children: 2
+Track 01.jpg
+Root A\Artist A\Album IT\Sub TR\Sub J
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IT\Sub TR\Sub K
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IU
+Files: 0
+Children: 3
+Root A\Artist A\Album IU\Sub TS
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IU\Sub TT
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IU\Sub TU
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IV
+Files: 0
+Children: 1
+Root A\Artist A\Album IV\Sub TV
+Files: 0
+Children: 2
+Root A\Artist A\Album IV\Sub TV\Sub B
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IV\Sub TV\Sub C
+Files: 5
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IW
+Files: 0
+Children: 1
+Root A\Artist A\Album IW\Sub TW
+Files: 0
+Children: 1
+Root A\Artist A\Album IW\Sub TW\Sub J
+Files: 2
+Children: 0
+Track 01.m4a
+Root A\Artist A\Album IX
+Files: 0
+Children: 1
+Root A\Artist A\Album IX\Sub TX
+Files: 8
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album IY
+Files: 0
+Children: 3
+Root A\Artist A\Album IY\Sub TY
+Files: 11
+Children: 0
+Track 01.mp3
+Root A\Artist A\Album IY\Sub TZ
+Files: 9
+Children: 0
+Track 01.mp3
+Root A\Artist A\Album IY\Sub UA
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IZ
+Files: 0
+Children: 2
+Root A\Artist A\Album IZ\Sub UB
+Files: 9
+Children: 0
+Track 01.flac
+Root A\Artist A\Album IZ\Sub UC
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album J
+Files: 0
+Children: 4
+Root A\Artist A\Album J\Sub Q
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album J\Sub R
+Files: 3
+Children: 0
+Track 01.log
+Root A\Artist A\Album J\Sub S
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album J\Sub T
+Files: 0
+Children: 0
+Root A\Artist A\Album JA
+Files: 0
+Children: 1
+Root A\Artist A\Album JA\Sub UD
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album JB
+Files: 0
+Children: 2
+Root A\Artist A\Album JB\Sub UE
+Files: 5
+Children: 0
+Track 01.nfo
+Root A\Artist A\Album JB\Sub UF
+Files: 45
+Children: 0
+Track 01.flac
+Root A\Artist A\Album JC
+Files: 0
+Children: 3
+Root A\Artist A\Album JC\Sub UG
+Files: 15
+Children: 0
+Track 01.flac
+Root A\Artist A\Album JC\Sub UH
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album JC\Sub UI
+Files: 0
+Children: 2
+Root A\Artist A\Album JC\Sub UI\Sub AJ
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album JC\Sub UI\Sub AK
+Files: 6
+Children: 0
+Track 01.flac
+Root A\Artist A\Album JD
+Files: 0
+Children: 1
+Root A\Artist A\Album JD\Sub UJ
+Files: 11
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album JE
+Files: 0
+Children: 3
+Root A\Artist A\Album JE\Sub UK
+Files: 13
+Children: 1
+Track 01.flac
+Root A\Artist A\Album JE\Sub UK\Sub R
+Files: 14
+Children: 0
+Track 01.JPG
+Root A\Artist A\Album JE\Sub UL
+Files: 12
+Children: 1
+Track 01.flac
+Root A\Artist A\Album JE\Sub UL\Sub R
+Files: 8
+Children: 0
+Track 01.JPG
+Root A\Artist A\Album JE\Sub UM
+Files: 12
+Children: 1
+Track 01.flac
+Root A\Artist A\Album JE\Sub UM\Sub R
+Files: 6
+Children: 0
+Track 01.JPG
+Root A\Artist A\Album K
+Files: 0
+Children: 1
+Root A\Artist A\Album K\Sub U
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album L
+Files: 0
+Children: 1
+Root A\Artist A\Album L\Sub V
+Files: 1
+Children: 4
+Track 01.jpg
+Root A\Artist A\Album L\Sub V\Sub F
+Files: 16
+Children: 1
+Track 01.flac
+Root A\Artist A\Album L\Sub V\Sub F\Sub A
+Files: 14
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album L\Sub V\Sub G
+Files: 3
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album L\Sub V\Sub H
+Files: 17
+Children: 1
+Track 01.flac
+Root A\Artist A\Album L\Sub V\Sub H\Sub A
+Files: 13
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album L\Sub V\Sub I
+Files: 18
+Children: 1
+Track 01.flac
+Root A\Artist A\Album L\Sub V\Sub I\Sub A
+Files: 16
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album M
+Files: 0
+Children: 2
+Root A\Artist A\Album M\Sub W
+Files: 1
+Children: 0
+Track 01.jpg
+Root A\Artist A\Album M\Sub X
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album N
+Files: 0
+Children: 1
+Root A\Artist A\Album N\Sub Y
+Files: 25
+Children: 0
+Track 01.flac
+Root A\Artist A\Album O
+Files: 0
+Children: 1
+Root A\Artist A\Album O\Sub Z
+Files: 13
+Children: 0
+Track 01.flac
+Root A\Artist A\Album P
+Files: 0
+Children: 1
+Root A\Artist A\Album P\Sub AA
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album Q
+Files: 0
+Children: 1
+Root A\Artist A\Album Q\Sub AB
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album R
+Files: 0
+Children: 1
+Root A\Artist A\Album R\Sub AC
+Files: 35
+Children: 0
+Track 01.flac
+Root A\Artist A\Album S
+Files: 0
+Children: 1
+Root A\Artist A\Album S\Sub AD
+Files: 19
+Children: 0
+Track 01.flac
+Root A\Artist A\Album T
+Files: 0
+Children: 1
+Root A\Artist A\Album T\Sub AE
+Files: 0
+Children: 2
+Root A\Artist A\Album T\Sub AE\Sub D
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album T\Sub AE\Sub E
+Files: 8
+Children: 0
+Track 01.flac
+Root A\Artist A\Album U
+Files: 0
+Children: 1
+Root A\Artist A\Album U\Sub AF
+Files: 0
+Children: 2
+Root A\Artist A\Album U\Sub AF\Sub B
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album U\Sub AF\Sub C
+Files: 7
+Children: 0
+Track 01.flac
+Root A\Artist A\Album V
+Files: 0
+Children: 2
+Root A\Artist A\Album V\Sub AG
+Files: 0
+Children: 0
+Root A\Artist A\Album V\Sub AH
+Files: 16
+Children: 0
+Track 01.flac
+Root A\Artist A\Album W
+Files: 0
+Children: 2
+Root A\Artist A\Album W\Sub AI
+Files: 0
+Children: 2
+Root A\Artist A\Album W\Sub AI\Sub J
+Files: 8
+Children: 0
+Track 01.m4a
+Root A\Artist A\Album W\Sub AI\Sub K
+Files: 21
+Children: 0
+Track 01.m4a
+Root A\Artist A\Album W\Sub AJ
+Files: 7
+Children: 0
+Track 01.m3u
+Root A\Artist A\Album X
+Files: 0
+Children: 3
+Root A\Artist A\Album X\Sub AK
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album X\Sub AL
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album X\Sub AM
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album Y
+Files: 0
+Children: 1
+Root A\Artist A\Album Y\Sub AN
+Files: 14
+Children: 0
+Track 01.flac
+Root A\Artist A\Album Z
+Files: 0
+Children: 3
+Root A\Artist A\Album Z\Sub AO
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album Z\Sub AP
+Files: 12
+Children: 0
+Track 01.flac
+Root A\Artist A\Album Z\Sub AQ
+Files: 0
+Children: 2
+Root A\Artist A\Album Z\Sub AQ\Sub J
+Files: 10
+Children: 0
+Track 01.flac
+Root A\Artist A\Album Z\Sub AQ\Sub K
+Files: 10
+Children: 0
+Track 01.flac
+Root B\Artist A
+Files: 0
+Children: 172
+Root B\Artist A\Album JF
+Files: 18
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JG
+Files: 0
+Children: 1
+Root B\Artist A\Album JG\Sub UN
+Files: 1
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JH
+Files: 12
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JI
+Files: 9
+Children: 1
+Track 01.flac
+Root B\Artist A\Album JI\Sub UO
+Files: 8
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JJ
+Files: 14
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JK
+Files: 8
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JL
+Files: 25
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JM
+Files: 13
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JN
+Files: 12
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JO
+Files: 35
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JP
+Files: 19
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JQ
+Files: 14
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JR
+Files: 12
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JS
+Files: 20
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JT
+Files: 9
+Children: 0
+Track 01.m4a
+Root B\Artist A\Album JU
+Files: 14
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JV
+Files: 13
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JW
+Files: 3
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JX
+Files: 1
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JY
+Files: 1
+Children: 0
+Track 01.flac
+Root B\Artist A\Album JZ
+Files: 11
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KA
+Files: 14
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KB
+Files: 1
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KC
+Files: 17
+Children: 1
+Track 01.flac
+Root B\Artist A\Album KC\Sub UP
+Files: 2
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album KD
+Files: 7
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album KE
+Files: 13
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KF
+Files: 21
+Children: 0
+Track 01.aiff
+Root B\Artist A\Album KG
+Files: 23
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KH
+Files: 31
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KI
+Files: 32
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KJ
+Files: 11
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KK
+Files: 15
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KL
+Files: 6
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KM
+Files: 0
+Children: 3
+Root B\Artist A\Album KM\Sub UQ
+Files: 13
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KM\Sub UR
+Files: 11
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KM\Sub US
+Files: 4
+Children: 0
+Track 01.bmp
+Root B\Artist A\Album KN
+Files: 3
+Children: 3
+Track 01.docx
+Root B\Artist A\Album KN\Sub UT
+Files: 7
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album KN\Sub UU
+Files: 54
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KN\Sub UV
+Files: 36
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KO
+Files: 0
+Children: 2
+Root B\Artist A\Album KO\Sub UW
+Files: 14
+Children: 1
+Track 01.flac
+Root B\Artist A\Album KO\Sub UW\Sub AL
+Files: 13
+Children: 0
+Track 01.mp3
+Root B\Artist A\Album KO\Sub UX
+Files: 6
+Children: 1
+Track 01.flac
+Root B\Artist A\Album KO\Sub UX\Sub AM
+Files: 6
+Children: 0
+Track 01.mp3
+Root B\Artist A\Album KP
+Files: 1
+Children: 1
+Track 01.jpg
+Root B\Artist A\Album KP\Sub UY
+Files: 14
+Children: 0
+Track 01.m3u
+Root B\Artist A\Album KQ
+Files: 11
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KR
+Files: 22
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KS
+Files: 24
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KT
+Files: 20
+Children: 1
+Track 01.flac
+Root B\Artist A\Album KT\Sub UZ
+Files: 4
+Children: 0
+Track 01.png
+Root B\Artist A\Album KU
+Files: 12
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KV
+Files: 11
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KW
+Files: 14
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KX
+Files: 21
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KY
+Files: 4
+Children: 0
+Track 01.flac
+Root B\Artist A\Album KZ
+Files: 14
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LA
+Files: 15
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LB
+Files: 7
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LC
+Files: 9
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LD
+Files: 14
+Children: 1
+Track 01.flac
+Root B\Artist A\Album LD\Sub UZ
+Files: 4
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album LE
+Files: 16
+Children: 0
+Track 01.m3u
+Root B\Artist A\Album LF
+Files: 3
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LG
+Files: 17
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LH
+Files: 1
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LI
+Files: 28
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LJ
+Files: 13
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LK
+Files: 16
+Children: 1
+Track 01.flac
+Root B\Artist A\Album LK\Sub VA
+Files: 4
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album LL
+Files: 21
+Children: 0
+Track 01.nfo
+Root B\Artist A\Album LM
+Files: 11
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LN
+Files: 21
+Children: 1
+Track 01.flac
+Root B\Artist A\Album LN\Sub UZ
+Files: 9
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album LO
+Files: 1
+Children: 6
+Track 01.jpg
+Root B\Artist A\Album LO\Sub GD
+Files: 12
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album LO\Sub VB
+Files: 0
+Children: 0
+Root B\Artist A\Album LO\Sub VC
+Files: 0
+Children: 0
+Root B\Artist A\Album LO\Sub VD
+Files: 0
+Children: 0
+Root B\Artist A\Album LO\Sub VE
+Files: 4
+Children: 1
+Track 01.jpg
+Root B\Artist A\Album LO\Sub VE\Sub R
+Files: 6
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album LO\Sub VF
+Files: 24
+Children: 1
+Track 01.flac
+Root B\Artist A\Album LO\Sub VF\Sub R
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album LP
+Files: 12
+Children: 0
+Track 01.mp3
+Root B\Artist A\Album LQ
+Files: 17
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album LR
+Files: 13
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LS
+Files: 11
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LT
+Files: 14
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LU
+Files: 30
+Children: 0
+Track 01.m3u
+Root B\Artist A\Album LV
+Files: 16
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LW
+Files: 9
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LX
+Files: 26
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LY
+Files: 15
+Children: 0
+Track 01.flac
+Root B\Artist A\Album LZ
+Files: 18
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MA
+Files: 11
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MB
+Files: 16
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MC
+Files: 33
+Children: 0
+Track 01.cue
+Root B\Artist A\Album MD
+Files: 0
+Children: 5
+Root B\Artist A\Album MD\Sub VG
+Files: 5
+Children: 0
+Track 01.part
+Root B\Artist A\Album MD\Sub VH
+Files: 1
+Children: 0
+Track 01.part
+Root B\Artist A\Album MD\Sub VI
+Files: 4
+Children: 0
+Track 01.part
+Root B\Artist A\Album MD\Sub VJ
+Files: 13
+Children: 2
+Track 01.mp3
+Root B\Artist A\Album MD\Sub VJ\Sub AN
+Files: 2
+Children: 0
+Track 01.m4a
+Root B\Artist A\Album MD\Sub VJ\Sub O
+Files: 4
+Children: 1
+Track 01.pdf
+Root B\Artist A\Album MD\Sub VJ\Sub O\Sub B
+Files: 17
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album MD\Sub VK
+Files: 3
+Children: 0
+Track 01.part
+Root B\Artist A\Album ME
+Files: 15
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MF
+Files: 12
+Children: 1
+Track 01.m4a
+Root B\Artist A\Album MF\Sub VL
+Files: 8
+Children: 0
+Track 01.png
+Root B\Artist A\Album MG
+Files: 11
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MH
+Files: 17
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MI
+Files: 13
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MJ
+Files: 13
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MK
+Files: 17
+Children: 0
+Track 01.flac
+Root B\Artist A\Album ML
+Files: 20
+Children: 1
+Track 01.flac
+Root B\Artist A\Album ML\Sub VM
+Files: 1
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album MM
+Files: 13
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MN
+Files: 16
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MO
+Files: 1
+Children: 6
+Track 01.jpg
+Root B\Artist A\Album MO\Sub VN
+Files: 5
+Children: 0
+Track 01.log
+Root B\Artist A\Album MO\Sub VO
+Files: 5
+Children: 0
+Track 01.Flac
+Root B\Artist A\Album MO\Sub VP
+Files: 32
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MO\Sub VQ
+Files: 5
+Children: 0
+Track 01.log
+Root B\Artist A\Album MO\Sub VR
+Files: 0
+Children: 2
+Root B\Artist A\Album MO\Sub VR\Sub AJ
+Files: 7
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MO\Sub VR\Sub AK
+Files: 6
+Children: 0
+Track 01.log
+Root B\Artist A\Album MO\Sub VS
+Files: 6
+Children: 0
+Track 01.log
+Root B\Artist A\Album MP
+Files: 7
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MQ
+Files: 17
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MR
+Files: 1
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MS
+Files: 20
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MT
+Files: 17
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MU
+Files: 18
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MV
+Files: 16
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MW
+Files: 18
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album MX
+Files: 6
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MY
+Files: 4
+Children: 0
+Track 01.flac
+Root B\Artist A\Album MZ
+Files: 5
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NA
+Files: 12
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NB
+Files: 12
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NC
+Files: 23
+Children: 0
+Track 01.flac
+Root B\Artist A\Album ND
+Files: 1
+Children: 2
+Track 01.jpg
+Root B\Artist A\Album ND\Sub VT
+Files: 14
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album ND\Sub VU
+Files: 24
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NE
+Files: 14
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NF
+Files: 19
+Children: 0
+Track 01.m3u
+Root B\Artist A\Album NG
+Files: 14
+Children: 1
+Track 01.cue
+Root B\Artist A\Album NG\Sub UZ
+Files: 14
+Children: 0
+Track 01.JPG
+Root B\Artist A\Album NH
+Files: 13
+Children: 1
+Track 01.cue
+Root B\Artist A\Album NH\Sub UZ
+Files: 8
+Children: 0
+Track 01.JPG
+Root B\Artist A\Album NI
+Files: 13
+Children: 1
+Track 01.cue
+Root B\Artist A\Album NI\Sub UZ
+Files: 6
+Children: 0
+Track 01.JPG
+Root B\Artist A\Album NJ
+Files: 27
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NK
+Files: 0
+Children: 3
+Root B\Artist A\Album NK\Sub VV
+Files: 0
+Children: 9
+Root B\Artist A\Album NK\Sub VV\Sub AO
+Files: 0
+Children: 3
+Root B\Artist A\Album NK\Sub VV\Sub AO\Sub A
+Files: 1
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VV\Sub AO\Sub C
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VV\Sub AO\Sub D
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VV\Sub AP
+Files: 3
+Children: 1
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VV\Sub AP\Sub A
+Files: 0
+Children: 0
+Root B\Artist A\Album NK\Sub VV\Sub AQ
+Files: 13
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NK\Sub VV\Sub AR
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VV\Sub AS
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VV\Sub AT
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VV\Sub AU
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VV\Sub AV
+Files: 0
+Children: 2
+Root B\Artist A\Album NK\Sub VV\Sub AV\Sub E
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VV\Sub AV\Sub F
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VV\Sub AW
+Files: 2
+Children: 0
+Track 01.m3u
+Root B\Artist A\Album NK\Sub VW
+Files: 0
+Children: 2
+Root B\Artist A\Album NK\Sub VW\Sub AX
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VW\Sub AY
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VX
+Files: 0
+Children: 11
+Root B\Artist A\Album NK\Sub VX\Sub AZ
+Files: 3
+Children: 0
+Track 01.CUE
+Root B\Artist A\Album NK\Sub VX\Sub BA
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VX\Sub BB
+Files: 3
+Children: 0
+Track 01.cue
+Root B\Artist A\Album NK\Sub VX\Sub BC
+Files: 3
+Children: 0
+Track 01.cue
+Root B\Artist A\Album NK\Sub VX\Sub BD
+Files: 3
+Children: 1
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VX\Sub BD\Sub A
+Files: 0
+Children: 0
+Root B\Artist A\Album NK\Sub VX\Sub BE
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VX\Sub BF
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VX\Sub BG
+Files: 2
+Children: 2
+Track 01.cue
+Root B\Artist A\Album NK\Sub VX\Sub BG\Sub G
+Files: 1
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VX\Sub BG\Sub H
+Files: 1
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VX\Sub BH
+Files: 3
+Children: 1
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VX\Sub BH\Sub A
+Files: 0
+Children: 0
+Root B\Artist A\Album NK\Sub VX\Sub BI
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NK\Sub VX\Sub BJ
+Files: 3
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NL
+Files: 14
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NM
+Files: 9
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NN
+Files: 8
+Children: 2
+Track 01.flac
+Root B\Artist A\Album NN\Sub VY
+Files: 13
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NN\Sub VZ
+Files: 14
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NO
+Files: 18
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NP
+Files: 15
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NQ
+Files: 17
+Children: 1
+Track 01.flac
+Root B\Artist A\Album NQ\Sub WA
+Files: 2
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NR
+Files: 14
+Children: 0
+Track 01.m3u
+Root B\Artist A\Album NS
+Files: 6
+Children: 1
+Track 01.txt
+Root B\Artist A\Album NS\Sub WB
+Files: 25
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NT
+Files: 15
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NU
+Files: 13
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album NV
+Files: 1
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NW
+Files: 24
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NX
+Files: 2
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NY
+Files: 17
+Children: 0
+Track 01.flac
+Root B\Artist A\Album NZ
+Files: 10
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OA
+Files: 10
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OB
+Files: 10
+Children: 0
+Track 01.m4a
+Root B\Artist A\Album OC
+Files: 0
+Children: 2
+Root B\Artist A\Album OC\Sub R
+Files: 11
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OC\Sub UO
+Files: 7
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OD
+Files: 3
+Children: 1
+Track 01.cue
+Root B\Artist A\Album OD\Sub WC
+Files: 31
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album OE
+Files: 13
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OF
+Files: 11
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OG
+Files: 12
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OH
+Files: 17
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OI
+Files: 1
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OJ
+Files: 1
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OK
+Files: 1
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OL
+Files: 9
+Children: 0
+Track 01.m4a
+Root B\Artist A\Album OM
+Files: 21
+Children: 0
+Track 01.m4a
+Root B\Artist A\Album ON
+Files: 11
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OO
+Files: 12
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OP
+Files: 8
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OQ
+Files: 12
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OR
+Files: 12
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OS
+Files: 11
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OT
+Files: 22
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OU
+Files: 16
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OV
+Files: 1
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OW
+Files: 12
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OX
+Files: 25
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OY
+Files: 9
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OZ
+Files: 0
+Children: 3
+Root B\Artist A\Album OZ\Sub R
+Files: 15
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OZ\Sub UO
+Files: 9
+Children: 0
+Track 01.flac
+Root B\Artist A\Album OZ\Sub WD
+Files: 5
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album PA
+Files: 14
+Children: 0
+Track 01.flac
+Root B\Artist A\Album PB
+Files: 23
+Children: 1
+Track 01.flac
+Root B\Artist A\Album PB\Sub US
+Files: 5
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album PC
+Files: 10
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album PD
+Files: 11
+Children: 0
+Track 01.flac
+Root B\Artist A\Album PE
+Files: 12
+Children: 0
+Track 01.flac
+Root B\Artist A\Album PF
+Files: 17
+Children: 1
+Track 01.flac
+Root B\Artist A\Album PF\Sub UZ
+Files: 7
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album PG
+Files: 18
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album PH
+Files: 9
+Children: 0
+Track 01.flac
+Root B\Artist A\Album PI
+Files: 16
+Children: 1
+Track 01.flac
+Root B\Artist A\Album PI\Sub UZ
+Files: 9
+Children: 0
+Track 01.JPG
+Root B\Artist A\Album PJ
+Files: 15
+Children: 0
+Track 01.flac
+Root B\Artist A\Album PK
+Files: 15
+Children: 0
+Track 01.flac
+Root B\Artist A\Album PL
+Files: 7
+Children: 0
+Track 01.flac
+Root B\Artist A\Album PM
+Files: 13
+Children: 0
+Track 01.jpg
+Root B\Artist A\Album PN
+Files: 8
+Children: 0
+Track 01.flac
+Root B\Artist A\Album PO
+Files: 15
+Children: 0
+Track 01.flac
+Root B\Artist A\Album PP
+Files: 10
+Children: 0
+Track 01.flac
+Root B\Artist A\Album PQ
+Files: 26
+Children: 0
+Track 01.m4a
+Root B\Artist A\Album PR
+Files: 15
+Children: 0
+Track 01.flac
+Root B\Artist A\Album PS
+Files: 8
+Children: 0
+Track 01.flac
+Root B\Artist A\Album PT
+Files: 17
+Children: 0
+Track 01.flac
+Root B\Artist A\Album PU
+Files: 10
+Children: 0
+Track 01.jpg

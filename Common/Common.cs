@@ -93,40 +93,44 @@ namespace Common
                 dirInfoArray = b.Directories.Select(d => new Tuple<Directory, bool>(d, false)).Concat(b.LockedDirectories.Select(d => new Tuple<Directory, bool>(d, true))).ToArray();
             }
             //TODO I think moving this out of a lambda would make it faster, but need to do unit tests first!
-            //StringComparer alphabetComparer = StringComparer.Create(new System.Globalization.CultureInfo("en-US"), true); //else 'a' is 26 behind 'A'
             Array.Sort(dirInfoArray, (x, y) =>
             {
-                int len1 = x.Item1.Name.Length;
-                int len2 = y.Item1.Name.Length;
-                int len = Math.Min(len1, len2);
+                string nx = x.Item1.Name;
+                string ny = y.Item1.Name;
+                int len = Math.Min(nx.Length, ny.Length);
+
                 for (int i = 0; i < len; i++)
                 {
-                    char cx = x.Item1.Name[i];
-                    char cy = y.Item1.Name[i];
+                    char cx = nx[i], cy = ny[i];
+
                     if (cx == '\\' || cy == '\\')
                     {
-                        if (cx == '\\' && cy != '\\')
+                        if (cx != cy)
                         {
-                            return -1;
+                            return cx == '\\' ? -1 : 1;
                         }
-                        if (cx != '\\' && cy == '\\')
-                        {
-                            return 1;
-                        }
+                        continue;
                     }
+
+                    int comp = char.ToLowerInvariant(cx).CompareTo(char.ToLowerInvariant(cy));
+                    if (comp != 0)
+                    {
+                        // if they are different case invariant (this prevents say B getting placed before lowercase a)
+                        return comp;
+                    } 
                     else
                     {
-                        //int comp = System.String.Compare(x.Name, i, y.Name, i , 1);
-                        int comp = char.ToLowerInvariant(cx).CompareTo(char.ToLowerInvariant(cy));
-                        if (comp != 0)
+                        int comp1 = cx.CompareTo(cy); 
+                        if (comp1 != 0)
                         {
-                            return comp;
+                            // if they are different case sensitive (some users will have Music and music. these are distinct folders)
+                            return comp1;
                         }
                     }
                 }
-                return len1 - len2;
-            }
-            ); //sometimes i dont quite think they are sorted.
+
+                return nx.Length - ny.Length;
+            });
 
             if (dirInfoArray[0].Item1.Name == "\\")
             {
