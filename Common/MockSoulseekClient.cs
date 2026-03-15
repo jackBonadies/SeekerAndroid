@@ -370,7 +370,36 @@ namespace Seeker
                     new[] { new FileAttribute(FileAttributeType.BitRate, 320), new FileAttribute(FileAttributeType.Length, 240) });
 
             BrowseResponse browseResponse;
-            if (username.Contains("large"))
+            if (username == "large2")
+            {
+                var dirs = new List<Soulseek.Directory>
+                {
+                    new("@@mockuser\\Music", new[] { MakeFile("cover.jpg", 200_000) }),
+                    new("@@mockuser\\Music\\ArtistA", new[] {MakeFile("looseArtist1Track.mp3", 200_000)}),
+                    new("@@mockuser\\Music\\ArtistA\\Album1", new[] { MakeFile("01 Track One.mp3"), MakeFile("02 Track Two.mp3"), MakeFile("03 Track Three failed.mp3") }),
+                    new("@@mockuser\\Music\\ArtistA\\Album2", new[] { MakeFile("01 Intro.flac", 30_000_000), MakeFile("02 Main.flac", 45_000_000) }),
+                    new("@@mockuser\\Music\\ArtistA\\Album2\\CD2", new[] { MakeFile("01 Bonus.flac", 28_000_000) }),
+                    new("@@mockuser\\Music\\ArtistB"),
+                    new("@@mockuser\\Music\\ArtistB\\Best Of", new[] { MakeFile("01 Hit.mp3"), MakeFile("02 Single.mp3"), MakeFile("03 Classic.mp3"), MakeFile("04 Deep Cut.mp3") }),
+                    new("@@mockuser\\Music\\ArtistC"),
+                    new("@@mockuser\\Music\\ArtistC\\Live", new[] { MakeFile("01 Opening.mp3"), MakeFile("02 Encore.mp3") }),
+                    new("@@mockuser\\Music\\Various"),
+                    new("@@mockuser\\Music\\Various\\Compilation", new[] { MakeFile("01 Song.mp3"), MakeFile("02 Song.mp3"), MakeFile("03 Song.mp3") }),
+                    new("@@mockuser\\Documents"),
+                    new("@@mockuser\\Documents\\Misc"),
+                    new("@@mockuser\\Documents\\Misc\\Test"),
+                    new("@@mockuser\\Documents\\Misc\\Test\\Test2"),
+                    new("@@mockuser\\Documents\\Misc\\Test\\Test2\\HelloWorld", new[] { MakeFile("readme.txt", 1_000) }),
+                };
+                var lockedDirs = new List<Soulseek.Directory>
+                {
+                    new("@@mockuser\\Music\\ArtistA\\Album3 (Private)", new[] { MakeFile("01 Unreleased.mp3"), MakeFile("02 Demo failed.mp3") }),
+                    new("@@mockuser\\Music\\ArtistD\\Rare", new[] { MakeFile("01 Rarity.flac", 40_000_000) }),
+                };
+                browseResponse = new BrowseResponse(dirs, lockedDirs);
+
+            }
+            else if (username.Contains("large"))
             {
                 var dirs = new List<Soulseek.Directory>
                 {
