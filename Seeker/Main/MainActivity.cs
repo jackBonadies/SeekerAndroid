@@ -1174,7 +1174,7 @@ namespace Seeker
             {
                 if (SearchFragment.dlDialogShown)
                 {
-                    var dlg = SupportFragmentManager.FindFragmentByTag(DownloadDialog.DOWNLOAD_DIAGLOG_FRAGMENT) as DownloadDialog;
+                    var dlg = SupportFragmentManager.FindFragmentByTag(DownloadDialog.DOWNLOAD_DIALOG_FRAGMENT) as DownloadDialog;
                     dlg?.Dialog?.Hide();
                 }
             }
@@ -1182,7 +1182,7 @@ namespace Seeker
             {
                 if (SearchFragment.dlDialogShown)
                 {
-                    var dlg = SupportFragmentManager.FindFragmentByTag(DownloadDialog.DOWNLOAD_DIAGLOG_FRAGMENT) as DownloadDialog;
+                    var dlg = SupportFragmentManager.FindFragmentByTag(DownloadDialog.DOWNLOAD_DIALOG_FRAGMENT) as DownloadDialog;
                     dlg?.Dialog?.Show();
                 }
             }
