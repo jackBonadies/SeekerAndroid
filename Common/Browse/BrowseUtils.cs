@@ -55,51 +55,53 @@ namespace Common.Browse
         /// <summary>
         /// Flattens the tree
         /// </summary>
-        /// <param name="di"></param>
+        /// <param name="curItem"></param>
         /// <returns></returns>
-        public static List<FullFileInfo> GetRecursiveFullFileInfo(DataItem di)
+        public static List<FullFileInfo> GetRecursiveFullFileInfo(DataItem curItem)
         {
             List<FullFileInfo> listOfFiles = new List<FullFileInfo>();
-            AddFiles(listOfFiles, di);
+            AddFiles(listOfFiles, curItem, 1);
             return listOfFiles;
         }
 
-        public static List<FullFileInfo> GetRecursiveFullFileInfo(List<DataItem> di)
+        public static List<FullFileInfo> GetRecursiveFullFileInfo(List<DataItem> curItems)
         {
             List<FullFileInfo> listOfFiles = new List<FullFileInfo>();
-            foreach (var childNode in di)
+            foreach (var childNode in curItems)
             {
-                AddFiles(listOfFiles, childNode);
+                AddFiles(listOfFiles, childNode, 1);
             }
             return listOfFiles;
         }
 
-        private static void AddFiles(List<FullFileInfo> fullFileList, DataItem d)
+        private static void AddFiles(List<FullFileInfo> fullFileList, DataItem curItem, int curLevel)
         {
-            if (d.File != null)
+            if (curItem.File != null)
             {
                 FullFileInfo f = new FullFileInfo();
-                f.FullFileName = d.Node.Data.Name + @"\" + d.File.Filename;
-                f.Size = d.File.Size;
-                f.wasFilenameLatin1Decoded = d.File.IsLatin1Decoded;
-                f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
+                f.FullFileName = curItem.Node.Data.Name + @"\" + curItem.File.Filename;
+                f.Size = curItem.File.Size;
+                f.wasFilenameLatin1Decoded = curItem.File.IsLatin1Decoded;
+                f.wasFolderLatin1Decoded = curItem.Node.Data.DecodedViaLatin1;
+                f.Depth = curLevel;
                 fullFileList.Add(f);
                 return;
             }
             else
             {
-                foreach (Soulseek.File slskFile in d.Directory.Files) //files in dir
+                foreach (Soulseek.File slskFile in curItem.Directory.Files) //files in dir
                 {
                     FullFileInfo f = new FullFileInfo();
-                    f.FullFileName = d.Node.Data.Name + @"\" + slskFile.Filename;
+                    f.FullFileName = curItem.Node.Data.Name + @"\" + slskFile.Filename;
                     f.Size = slskFile.Size;
                     f.wasFilenameLatin1Decoded = slskFile.IsLatin1Decoded;
-                    f.wasFolderLatin1Decoded = d.Node.Data.DecodedViaLatin1;
+                    f.wasFolderLatin1Decoded = curItem.Node.Data.DecodedViaLatin1;
+                    f.Depth = curLevel + 1 ;
                     fullFileList.Add(f);
                 }
-                foreach (var childNode in d.Node.Children) //dirs in dir
+                foreach (var childNode in curItem.Node.Children) //dirs in dir
                 {
-                    AddFiles(fullFileList, new DataItem(childNode.Data, childNode));
+                    AddFiles(fullFileList, new DataItem(childNode.Data, childNode), curLevel + 1);
                 }
                 return;
             }
@@ -281,36 +283,6 @@ namespace Common.Browse
             {
                 GetPathItemsInternal(pathItems, treeNode.Parent, false);
             }
-        }
-        public static void SetDepthTags(DataItem d, List<FullFileInfo> recursiveFileInfo)
-        {
-            int lowestLevel = GetLevel(d.Node.Data.Name);
-            foreach (FullFileInfo fullFileInfo in recursiveFileInfo)
-            {
-                int level = GetLevel(fullFileInfo.FullFileName);
-                int depth = level - lowestLevel + 1;
-#if DEBUG
-                if (depth == 0)
-                {
-                    throw new Exception("depth is 0");
-                }
-#endif
-                fullFileInfo.Depth = depth;
-            }
-
-        }
-
-        private static int GetLevel(string fileName)
-        {
-            int count = 0;
-            foreach (char c in fileName)
-            {
-                if (c == '\\')
-                {
-                    count++;
-                }
-            }
-            return count;
         }
 
         public record struct BrowseStats(double NumFolders, double NumFiles);

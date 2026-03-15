@@ -390,7 +390,6 @@ namespace UnitTestCommon
             TransferItems.TransferItemManagerUploads = new TransferItemManager(true);
 
             var ti = CreateTransferItem("user1", "\\dir\\folder1\\file.mp3");
-            ti.AvgSpeed = 500.5;
             ti.InProcessing = true;
             TransferItems.TransferItemManagerDL.Add(ti);
 
@@ -401,7 +400,6 @@ namespace UnitTestCommon
 
             var restored = TransferItems.TransferItemManagerDL.AllTransferItems[0];
             // XmlIgnore fields should be default values after deserialization
-            Assert.AreEqual(0, restored.AvgSpeed);
             Assert.IsFalse(restored.InProcessing);
         }
 

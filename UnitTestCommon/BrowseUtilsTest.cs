@@ -342,27 +342,6 @@ namespace UnitTestCommon
             Assert.AreEqual(650, summary.SizeBytes); // 100+200+300+50
         }
 
-        // ===== SetDepthTags =====
-
-        [Test]
-        public void SetDepthTags_SetsCorrectDepths()
-        {
-            var root = BuildTestTree();
-            var musicNode = root.Children.First();
-            var items = BrowseUtils.GetDataItemsForNode(musicNode);
-
-            var recursive = BrowseUtils.GetRecursiveFullFileInfo(items);
-
-            // items[0] is the SubFolder directory
-            BrowseUtils.SetDepthTags(items[0], recursive);
-
-            // All files should have Depth >= 1
-            foreach (var f in recursive)
-            {
-                Assert.IsTrue(f.Depth >= 1, $"Depth for {f.FullFileName} was {f.Depth}");
-            }
-        }
-
         // ===== GetPathItems =====
 
         [Test]
