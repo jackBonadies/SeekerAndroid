@@ -290,7 +290,7 @@ namespace Seeker
             treePathRecyclerAdapter = new TreePathRecyclerAdapter(state.PathItems, this);
             treePathRecyclerView.SetAdapter(treePathRecyclerAdapter);
 
-            this.noBrowseView = this.rootView.FindViewById<TextView>(Resource.Id.noBrowseView);
+            this.noBrowseView = this.rootView.FindViewById<View>(Resource.Id.noBrowseView);
             this.separator = this.rootView.FindViewById<View>(Resource.Id.recyclerViewHorizontalPathSep);
             this.separator.Visibility = ViewStates.Gone;
             if (state.HasResponse())
@@ -687,7 +687,6 @@ namespace Seeker
                 });
                 EventHandler<DialogClickEventArgs> eventHandlerRecursiveFolders = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    BrowseUtils.SetDepthTags(sourceList.First(), recursiveFullFileInfo);
                     DownloadUserFilesEntryStage3(true, recursiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
                 });
                 builder.SetPositiveButton(Resource.String.all, eventHandlerRecursiveFolders);

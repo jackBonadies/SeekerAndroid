@@ -86,7 +86,19 @@
         client, Seeker. I do not currently accept donations.
     </string>
 
-    <string name="no_messages">No messages.  Hit \"+\" to get started.</string>
+    <string name="no_messages">No messages</string>
+    <string name="no_messages_subtitle">Messages from users will appear here</string>
+    <string name="no_users_added">No users added</string>
+    <string name="no_users_subtitle">Add or ignore users to see them here</string>
+    <string name="no_browse_results">No browse results</string>
+    <string name="no_browse_subtitle">Enter a username to browse their files</string>
+    <string name="no_downloads">No downloads</string>
+    <string name="no_downloads_subtitle">Downloaded files will appear here</string>
+    <string name="no_uploads">No uploads</string>
+    <string name="no_uploads_subtitle">Uploads will appear when other users download your files</string>
+    <string name="no_uploads_not_sharing_subtitle">You are not currently sharing any files</string>
+    <string name="no_searches">No searches</string>
+    <string name="no_searches_subtitle">Enter a term to search the Soulseek network</string>
     <string name="messages">Messages</string>
     <string name="browse_files">Browse Files</string>
     <string name="chatroomListLoading">
