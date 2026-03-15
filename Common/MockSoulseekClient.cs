@@ -832,8 +832,11 @@ namespace Seeker
         public Task<Task<Transfer>> EnqueueUploadAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
             => throw new NotImplementedException();
 
-        public Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool wasFileLatin1Decoded = false, bool wasFolderLatin1Decoded = false)
-            => throw new NotImplementedException();
+        public async Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool wasFileLatin1Decoded = false, bool wasFolderLatin1Decoded = false)
+        {
+            await Task.Delay(_random.Next(0, 5000));
+            return _random.Next(1, 125);
+        }
 
         public Task<IPEndPoint> GetUserEndPointAsync(string username, CancellationToken? cancellationToken = null)
             => throw new NotImplementedException();
