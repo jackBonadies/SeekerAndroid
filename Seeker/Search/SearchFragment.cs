@@ -1654,7 +1654,7 @@ namespace Seeker
                     dlDiagResp = SearchTabHelper.SearchResponses.ElementAt<SearchResponse>(pos);
                 }
                 DownloadDialog downloadDialog = DownloadDialog.CreateNewInstance(pos, dlDiagResp);
-                downloadDialog.Show(FragmentManager, "tag_download_test");
+                downloadDialog.Show(FragmentManager, DownloadDialog.DOWNLOAD_DIAGLOG_FRAGMENT);
                 // When creating a DialogFragment from within a Fragment, you must use the Fragment's CHILD FragmentManager to ensure that the state is properly restored after configuration changes. ????
             }
             catch (System.Exception e)
