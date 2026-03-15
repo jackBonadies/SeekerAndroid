@@ -1169,6 +1169,23 @@ namespace Seeker
             {
                 BrowseFragment.BrowseActionMode.Finish();
             }
+            // Hide download dialog when leaving search tab (i.e. clicking browse user -> go to browse response), show when returning
+            if (e.Position != 1)
+            {
+                if (SearchFragment.dlDialogShown)
+                {
+                    var dlg = SupportFragmentManager.FindFragmentByTag(DownloadDialog.DOWNLOAD_DIAGLOG_FRAGMENT) as DownloadDialog;
+                    dlg?.Dialog?.Hide();
+                }
+            }
+            else
+            {
+                if (SearchFragment.dlDialogShown)
+                {
+                    var dlg = SupportFragmentManager.FindFragmentByTag(DownloadDialog.DOWNLOAD_DIAGLOG_FRAGMENT) as DownloadDialog;
+                    dlg?.Dialog?.Show();
+                }
+            }
             //in addition each fragment is responsible for expanding their menu...
             switch (e.Position)
             {

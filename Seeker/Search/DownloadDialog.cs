@@ -46,6 +46,7 @@ namespace Seeker
 {
     class DownloadDialog : AndroidX.Fragment.App.DialogFragment, PopupMenu.IOnMenuItemClickListener
     {
+        public const string DOWNLOAD_DIAGLOG_FRAGMENT = "download_dialog_fragment";
         private int searchPosition = -1;
         private SearchResponse searchResponse = null;
         DownloadCustomAdapter customAdapter = null;
