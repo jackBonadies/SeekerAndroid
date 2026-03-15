@@ -1967,7 +1967,7 @@ namespace Seeker
             View v = null;
             if (SeekerState.ActiveActivityRef is MainActivity mar)
             {
-                var f = mar.SupportFragmentManager.FindFragmentByTag(DownloadDialog.DOWNLOAD_DIAGLOG_FRAGMENT);
+                var f = mar.SupportFragmentManager.FindFragmentByTag(DownloadDialog.DOWNLOAD_DIALOG_FRAGMENT);
                 //this is the only one we have..  tho obv a more generic way would be to see if s/t is a dialog fragmnet.  but arent a lot of just simple alert dialogs etc dialog fragment?? maybe explicitly checking is the best way.
                 if (f != null && f.IsVisible)
                 {

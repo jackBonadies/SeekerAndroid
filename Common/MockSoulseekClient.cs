@@ -15,8 +15,138 @@ namespace Seeker
 
     public class MockSoulseekClient : ISoulseekClient
     {
-        // --- Configurable delay ---
+        public MockSoulseekClient()
+        {
+            StartBackgroundTimers();
+        }
+
         public int SimulatedDelayMs { get; set; } = 200;
+
+        public int PrivateMessageIntervalSec { get; set; } = 60;
+        public int ExcludedPhrasesIntervalSec { get; set; } = 60;
+        public int UserStatusIntervalSec { get; set; } = 10;
+
+        private CancellationTokenSource? _backgroundTimersCts;
+
+        private static readonly string[] _mockMessages =
+        {
+            "hello test",
+            "test - how are you doing?",
+            "what is in your collection? anything of note?",
+            "how is everything going?",
+            "test",
+        };
+
+        private static readonly string[] _mockExcludedPhrases =
+        {
+            "testArtistA", "testArtistB"
+        };
+
+        public void StartBackgroundTimers()
+        {
+            StopBackgroundTimers();
+            _backgroundTimersCts = new CancellationTokenSource();
+            var ct = _backgroundTimersCts.Token;
+
+            if (PrivateMessageIntervalSec > 0)
+            {
+                _ = RunPrivateMessageLoop(ct);
+            }
+            if (ExcludedPhrasesIntervalSec > 0)
+            {
+                _ = RunExcludedPhrasesLoop(ct);
+            }
+            if (UserStatusIntervalSec > 0)
+            {
+                _ = RunUserStatusLoop(ct);
+            }
+        }
+
+        public void StopBackgroundTimers()
+        {
+            _backgroundTimersCts?.Cancel();
+            _backgroundTimersCts?.Dispose();
+            _backgroundTimersCts = null;
+        }
+
+        private async Task RunPrivateMessageLoop(CancellationToken ct)
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                try
+                {
+                    await Task.Delay(PrivateMessageIntervalSec * 1000, ct);
+                    var username = _mockUsernames[_random.Next(_mockUsernames.Length)];
+                    var message = _mockMessages[_random.Next(_mockMessages.Length)];
+                    var args = new PrivateMessageReceivedEventArgs(
+                        _random.Next(1, 100000),
+                        DateTime.UtcNow,
+                        username,
+                        message,
+                        false);
+                    RaisePrivateMessageReceived(args);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+        }
+
+        private async Task RunExcludedPhrasesLoop(CancellationToken ct)
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                try
+                {
+                    await Task.Delay(ExcludedPhrasesIntervalSec * 1000, ct);
+                    int count = _random.Next(1, _mockExcludedPhrases.Length + 1);
+                    var phrases = _mockExcludedPhrases
+                        .OrderBy(_ => _random.Next())
+                        .Take(count)
+                        .ToList()
+                        .AsReadOnly();
+                    RaiseExcludedSearchPhrasesReceived(phrases);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+        }
+
+        private async Task RunUserStatusLoop(CancellationToken ct)
+        {
+            var presenceValues = (UserPresence[])Enum.GetValues(typeof(UserPresence));
+            while (!ct.IsCancellationRequested)
+            {
+                try
+                {
+                    await Task.Delay(UserStatusIntervalSec * 1000, ct);
+                    var combined = new List<string>();
+                    foreach (var item in Common.CommonState.UserList)
+                    {
+                        combined.Add(item.Username);
+                    }
+                    foreach (var item in Common.CommonState.IgnoreUserList)
+                    {
+                        combined.Add(item.Username);
+                    }
+                    if (combined.Count == 0)
+                    {
+                        continue;
+                    }
+                    var targetUser = combined[_random.Next(combined.Count)];
+                    var newPresence = presenceValues[_random.Next(presenceValues.Length)];
+                    var status = new UserStatus(targetUser, newPresence, false);
+                    RaiseUserStatusChanged(status);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+        }
 
         // --- Configurable method handlers ---
         public Func<string, string, CancellationToken?, Task>? ConnectAsyncHandler { get; set; }
@@ -832,8 +962,11 @@ namespace Seeker
         public Task<Task<Transfer>> EnqueueUploadAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
             => throw new NotImplementedException();
 
-        public Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool wasFileLatin1Decoded = false, bool wasFolderLatin1Decoded = false)
-            => throw new NotImplementedException();
+        public async Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool wasFileLatin1Decoded = false, bool wasFolderLatin1Decoded = false)
+        {
+            await Task.Delay(_random.Next(0, 5000));
+            return _random.Next(1, 125);
+        }
 
         public Task<IPEndPoint> GetUserEndPointAsync(string username, CancellationToken? cancellationToken = null)
             => throw new NotImplementedException();
@@ -857,7 +990,10 @@ namespace Seeker
             => throw new NotImplementedException();
 
         // --- IDisposable ---
-        public void Dispose() { }
+        public void Dispose()
+        {
+            StopBackgroundTimers();
+        }
     }
 }
 #endif
