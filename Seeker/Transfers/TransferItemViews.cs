@@ -719,7 +719,7 @@ namespace Seeker
                     int queueLen = item.GetQueueLength();
                     if (queueLen != int.MaxValue)
                     {
-                        label += " " + string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.position_), queueLen.ToString());
+                        label += $" #{queueLen.ToString()}";
                     }
                 }
                 StyleStatus(statusDot, statusText, label, TransferChipType.Queued);
