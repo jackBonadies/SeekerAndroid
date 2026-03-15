@@ -301,7 +301,6 @@ namespace Seeker.Services
 
         public void GetDownloadPlaceInQueueBatch(List<TransferItem> transferItems, bool addIfNotAdded)
         {
-
             sessionService.RunWithReconnect(() => GetDownloadPlaceInQueueBatchLogic(transferItems, addIfNotAdded), silent: true);
         }
 

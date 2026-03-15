@@ -66,7 +66,8 @@ namespace Seeker
                         TransferStates.Requested |
                         TransferStates.Aborted;
 
-                    if ((ti.State & activeOrAborted) != 0)
+                    // "None" is equivalent to just being paused
+                    if (ti.State == TransferStates.None || (ti.State & activeOrAborted) != 0)
                     {
                         ti.State = TransferStates.Cancelled;
                         ti.RemainingTime = null;
