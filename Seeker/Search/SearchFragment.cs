@@ -1335,15 +1335,12 @@ namespace Seeker
             if (AreChipsFiltering() || SearchTabHelper.TextFilter.IsFiltered)
             {
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
-
                 recyclerSearchAdapter.NotifyDataSetChanged();
-                bool refSame = System.Object.ReferenceEquals(recyclerSearchAdapter.localDataSet, SearchTabHelper.UI_SearchResponses);
-                bool refSame2 = System.Object.ReferenceEquals(recyclerSearchAdapter.localDataSet, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].UI_SearchResponses);
             }
             else
             {
-                SearchTabHelper.UI_SearchResponses.Clear();// = SearchTabHelper.SearchResponses.ToList();
-                SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);// = SearchTabHelper.SearchResponses.ToList();
+                SearchTabHelper.UI_SearchResponses.Clear();
+                SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
                 recyclerSearchAdapter.NotifyDataSetChanged();
             }
         }
@@ -1530,13 +1527,7 @@ namespace Seeker
                 }
 #endif
                 var diff = DiffUtil.CalculateDiff(new SearchDiffCallback(prevList, newResults), true);
-                // When filtered, localDataSet IS newResults (updated in-place by UpdateFilteredResponses).
-                // When unfiltered, localDataSet is a different object and needs manual update.
-                if (!ReferenceEquals(Instance.recyclerSearchAdapter.localDataSet, newResults))
-                {
-                    Instance.recyclerSearchAdapter.localDataSet.Clear();
-                    Instance.recyclerSearchAdapter.localDataSet.AddRange(newResults);
-                }
+                Instance.recyclerSearchAdapter.localDataSet = newResults;
                 diff.DispatchUpdatesTo(Instance.recyclerSearchAdapter);
                 Instance.recycleLayoutManager.OnRestoreInstanceState(state);
             }
