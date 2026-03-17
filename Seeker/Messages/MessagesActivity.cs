@@ -158,8 +158,7 @@ namespace Seeker
                 case Resource.Id.action_delete_messages:
                     DELETED_USERNAME = MessagesInnerFragment.Username;
                     DELETED_POSITION = int.MaxValue;
-                    MessageController.Messages.Remove(MessagesActivity.DELETED_USERNAME, out DELETED_DATA);
-                    MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+                    (DELETED_DATA, DELETED_READ_COUNT) = MessageController.DeleteMessageFromUserWithUndo(DELETED_USERNAME);
                     this.SwitchToOuter(SupportFragmentManager.FindFragmentByTag("InnerUserFragment"), true);
                     return true;
                 case Resource.Id.action_delete_all_messages:
@@ -403,6 +402,7 @@ namespace Seeker
         //Delete Undo Helpers
         public static string DELETED_USERNAME = string.Empty;
         public static int DELETED_POSITION = -1;
+        public static int DELETED_READ_COUNT = -1;
         public static List<Message> DELETED_DATA = null;
         public static volatile bool FromDeleteMessage = false;
 

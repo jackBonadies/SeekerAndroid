@@ -128,6 +128,15 @@ namespace Seeker.Messages
             }
         }
 
+        public static (List<Message>, int) DeleteMessageFromUserWithUndo(string usernameToDelete)
+        {
+            Messages.Remove(usernameToDelete, out var deleteMessages);
+            LastReadMessageCounts.Remove(usernameToDelete, out int readCount);
+            SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+            SaveLastReadCounts(SeekerState.SharedPreferences);
+            return (deleteMessages, readCount);
+        }
+
         public static (Dictionary<string, List<Message>> deletedMessageDictionary, Dictionary<string, int> deletedMessageCountDictionary) DeleteAllMessagesWithUndo()
         {
             var deletedAllMessages = MessageController.Messages.ToDictionary(entry => entry.Key, entry => entry.Value);

@@ -55,7 +55,9 @@ namespace Seeker.Messages
                     return;
                 }
                 MessageController.Messages[MessagesActivity.DELETED_USERNAME] = MessagesActivity.DELETED_DATA;
+                MessageController.LastReadMessageCounts[MessagesActivity.DELETED_USERNAME] = MessagesActivity.DELETED_READ_COUNT;
                 MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+                MessageController.SaveLastReadCounts(SeekerState.SharedPreferences);
                 if (!fromOptionMenu)
                 {
                     adapter.RestoreAt(MessagesActivity.DELETED_POSITION, MessagesActivity.DELETED_USERNAME);
@@ -82,8 +84,7 @@ namespace Seeker.Messages
             MessagesActivity.DELETED_POSITION = pos;
             MessagesActivity.DELETED_USERNAME = adapter.At(MessagesActivity.DELETED_POSITION);
             adapter.RemoveAt(MessagesActivity.DELETED_POSITION); //removes from adapter data and notifies.
-            MessageController.Messages.Remove(MessagesActivity.DELETED_USERNAME, out MessagesActivity.DELETED_DATA);
-            MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+            (MessagesActivity.DELETED_DATA, MessagesActivity.DELETED_READ_COUNT) = MessageController.DeleteMessageFromUserWithUndo(MessagesActivity.DELETED_USERNAME);
 
             Snackbar sb = Snackbar.Make(containingFragment.View, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
                 MessagesActivity.DELETED_USERNAME), Snackbar.LengthLong)
@@ -91,6 +92,13 @@ namespace Seeker.Messages
                 .SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
             (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
             sb.Show();
+        }
+
+        public override void ClearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder)
+        {
+            base.ClearView(recyclerView, viewHolder);
+            this.colorDrawable.SetBounds(0, 0, 0, 0);
+            this.clipDrawable.SetBounds(0, 0, 0, 0);
         }
 
         public override void OnChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, bool isCurrentlyActive)
