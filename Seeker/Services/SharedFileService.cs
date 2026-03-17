@@ -184,8 +184,8 @@ namespace Seeker.Services
                         Android.Provider.MediaStore.IMediaColumns.DisplayName,
 
                         Android.Provider.MediaStore.IMediaColumns.Data, //disambiguator if applicable
-                                    Android.Provider.MediaStore.IMediaColumns.Duration,
-                                    Android.Provider.MediaStore.IMediaColumns.Bitrate };
+                        Android.Provider.MediaStore.IMediaColumns.Duration,
+                        Android.Provider.MediaStore.IMediaColumns.Bitrate };
                 }
                 else //only has duration
                 {
@@ -194,7 +194,7 @@ namespace Seeker.Services
                         Android.Provider.MediaStore.IMediaColumns.DisplayName,
 
                         Android.Provider.MediaStore.IMediaColumns.Data, //disambiguator if applicable
-                                    Android.Provider.MediaStore.IMediaColumns.Duration };
+                        Android.Provider.MediaStore.IMediaColumns.Duration };
                 }
 
 
@@ -971,8 +971,6 @@ namespace Seeker.Services
 
                 if (cachedParseResults == null)
                 {
-                    System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
-                    s.Start();
                     //optimization - if new directory is a subdir we can skip this part. !!!! but we still have things to do like make all files that start with said presentableDir to be locked / hidden. etc.
 
                     UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
@@ -1001,48 +999,9 @@ namespace Seeker.Services
                     Logger.Debug($"Non Hidden Count for Server: {nonHiddenCountForServer}");
 
                     SeekerState.NumberParsed = int.MaxValue; //our signal that we are finishing up...
-                    s.Stop();
-                    Logger.Debug(string.Format("{0} Files parsed in {1} milliseconds", presentableNameToFullFileInfo.Keys.Count, s.ElapsedMilliseconds));
-                    s.Reset();
-                    s.Start();
 
-                    var fileKeyToPresentableName = new Dictionary<int, string>();
-                    int fileKey = 0;
-                    foreach (string presentableName in presentableNameToFullFileInfo.Keys)
-                    {
-                        fileKeyToPresentableName[fileKey] = presentableName;
-                        fileKey++;
-                    }
-
-                    Dictionary<string, List<int>> searchTermTokenToListOfFileKeys = new Dictionary<string, List<int>>();
-                    var presentableNameToFileKey = fileKeyToPresentableName.ToDictionary(x => x.Value, x => x.Key);
-                    foreach (string presentableName in presentableNameToFullFileInfo.Keys)
-                    {
-                        string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(SimpleHelpers.GetFileNameFromFile(presentableName));
-                        searchableName = SharedFileCache.MatchSpecialCharAgnostic(searchableName);
-                        int code = presentableNameToFileKey[presentableName];
-                        foreach (string token in searchableName.ToLower().Split(null)) //null means whitespace
-                        {
-                            if (token == string.Empty)
-                            {
-                                continue;
-                            }
-                            if (searchTermTokenToListOfFileKeys.ContainsKey(token))
-                            {
-                                searchTermTokenToListOfFileKeys[token].Add(code);
-                            }
-                            else
-                            {
-                                searchTermTokenToListOfFileKeys[token] = new List<int>();
-                                searchTermTokenToListOfFileKeys[token].Add(code);
-                            }
-                        }
-                    }
-                    s.Stop();
-                    Logger.Debug(string.Format("Token index created in {0} milliseconds", s.ElapsedMilliseconds));
-
-                    //s.Stop();
-                    //Logger.Debug("ParseSharedDirectory: " + s.ElapsedMilliseconds);
+                    Dictionary<int, string> fileKeyToPresentableName = GenerateFileKeyToPresentableNameIndex(presentableNameToFullFileInfo);
+                    Dictionary<string, List<int>> searchTermTokenToListOfFileKeys = GenerateSearchTermTokenToFileKeysIndex(presentableNameToFullFileInfo, fileKeyToPresentableName);
 
                     var newCachedResults = new CachedParseResults(
                         presentableNameToFullFileInfo,
@@ -1055,7 +1014,7 @@ namespace Seeker.Services
                         nonHiddenCountForServer);
                     StoreCachedParseResults(SeekerState.ActiveActivityRef, newCachedResults);
 
-                    UploadDirectoryManager.SaveToSharedPreferences(SeekerState.SharedPreferences); 
+                    UploadDirectoryManager.SaveToSharedPreferences(SeekerState.SharedPreferences);
 
                     // TODO we do not save the directoryCount ?? and so subsequent times its just browseResponse.Count?
                     // would it ever be different?
@@ -1148,6 +1107,49 @@ namespace Seeker.Services
             return success;
             //SeekerState.SoulseekClient.SearchResponseDelivered += SoulseekClient_SearchResponseDelivered;
             //SeekerState.SoulseekClient.SearchResponseDeliveryFailed += SoulseekClient_SearchResponseDeliveryFailed;
+        }
+
+        private static Dictionary<string, List<int>> GenerateSearchTermTokenToFileKeysIndex(Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfo, Dictionary<int, string> fileKeyToPresentableName)
+        {
+            Dictionary<string, List<int>> searchTermTokenToListOfFileKeys = new Dictionary<string, List<int>>();
+            var presentableNameToFileKey = fileKeyToPresentableName.ToDictionary(x => x.Value, x => x.Key);
+            foreach (string presentableName in presentableNameToFullFileInfo.Keys)
+            {
+                string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(SimpleHelpers.GetFileNameFromFile(presentableName));
+                searchableName = SharedFileCache.MatchSpecialCharAgnostic(searchableName);
+                int code = presentableNameToFileKey[presentableName];
+                foreach (string token in searchableName.ToLower().Split(null)) //null means whitespace
+                {
+                    if (token == string.Empty)
+                    {
+                        continue;
+                    }
+                    if (searchTermTokenToListOfFileKeys.ContainsKey(token))
+                    {
+                        searchTermTokenToListOfFileKeys[token].Add(code);
+                    }
+                    else
+                    {
+                        searchTermTokenToListOfFileKeys[token] = new List<int>();
+                        searchTermTokenToListOfFileKeys[token].Add(code);
+                    }
+                }
+            }
+
+            return searchTermTokenToListOfFileKeys;
+        }
+
+        private static Dictionary<int, string> GenerateFileKeyToPresentableNameIndex(Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfo)
+        {
+            var fileKeyToPresentableName = new Dictionary<int, string>();
+            int fileKey = 0;
+            foreach (string presentableName in presentableNameToFullFileInfo.Keys)
+            {
+                fileKeyToPresentableName[fileKey] = presentableName;
+                fileKey++;
+            }
+
+            return fileKeyToPresentableName;
         }
 
         public static CachedParseResults GetCachedParseResults(Context c)
