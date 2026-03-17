@@ -274,51 +274,61 @@ namespace Seeker
 
         public void UpdateConnectionStatus(SoulseekClientStates state)
         {
-            int textResId;
-            int dotColorResId;
-            int textColorResId;
-            int chipBgColorResId;
-
-            if (state.HasFlag(SoulseekClientStates.LoggedIn))
+            if (this.Context != null)
             {
-                textResId = Resource.String.status_connected;
-                dotColorResId = Resource.Color.statusConnectedDot;
-                textColorResId = Resource.Color.statusConnectedText;
-                chipBgColorResId = Resource.Color.statusConnectedChipBg;
-            }
-            else if (state.HasFlag(SoulseekClientStates.Connecting) || state.HasFlag(SoulseekClientStates.LoggingIn))
-            {
-                textResId = Resource.String.status_connecting;
-                dotColorResId = Resource.Color.statusConnectingDot;
-                textColorResId = Resource.Color.statusConnectingText;
-                chipBgColorResId = Resource.Color.statusConnectingChipBg;
-            }
-            else
-            {
-                if (state.HasFlag(SoulseekClientStates.Disconnecting))
+                try
                 {
-                    textResId = Resource.String.status_disconnecting;
-                }
-                else
+                    int textResId;
+                    int dotColorResId;
+                    int textColorResId;
+                    int chipBgColorResId;
+
+                    if (state.HasFlag(SoulseekClientStates.LoggedIn))
+                    {
+                        textResId = Resource.String.status_connected;
+                        dotColorResId = Resource.Color.statusConnectedDot;
+                        textColorResId = Resource.Color.statusConnectedText;
+                        chipBgColorResId = Resource.Color.statusConnectedChipBg;
+                    }
+                    else if (state.HasFlag(SoulseekClientStates.Connecting) || state.HasFlag(SoulseekClientStates.LoggingIn))
+                    {
+                        textResId = Resource.String.status_connecting;
+                        dotColorResId = Resource.Color.statusConnectingDot;
+                        textColorResId = Resource.Color.statusConnectingText;
+                        chipBgColorResId = Resource.Color.statusConnectingChipBg;
+                    }
+                    else
+                    {
+                        if (state.HasFlag(SoulseekClientStates.Disconnecting))
+                        {
+                            textResId = Resource.String.status_disconnecting;
+                        }
+                        else
+                        {
+                            textResId = Resource.String.status_disconnected;
+                        }
+                        dotColorResId = Resource.Color.statusDisconnectedDot;
+                        textColorResId = Resource.Color.statusDisconnectedText;
+                        chipBgColorResId = Resource.Color.statusDisconnectedChipBg;
+                    }
+
+                    var resources = this.Context.Resources;
+                    int dotColor = resources.GetColor(dotColorResId, this.Context.Theme);
+                    int textColor = resources.GetColor(textColorResId, this.Context.Theme);
+                    int chipBgColor = resources.GetColor(chipBgColorResId, this.Context.Theme);
+
+                    var dotDrawable = (GradientDrawable)connectionStatusDot.Background;
+                    dotDrawable.SetColor(dotColor);
+                    connectionStatusText.Text = SeekerApplication.GetString(textResId);
+                    connectionStatusText.SetTextColor(new Android.Graphics.Color(textColor));
+                    var chipBgDrawable = (GradientDrawable)connectionStatusChip.Background;
+                    chipBgDrawable.SetColor(chipBgColor);
+                } catch (Exception e)
                 {
-                    textResId = Resource.String.status_disconnected;
+                    Logger.FirebaseError("Update connection status ", e);
                 }
-                dotColorResId = Resource.Color.statusDisconnectedDot;
-                textColorResId = Resource.Color.statusDisconnectedText;
-                chipBgColorResId = Resource.Color.statusDisconnectedChipBg;
+
             }
-
-            var resources = this.Context.Resources;
-            int dotColor = resources.GetColor(dotColorResId, this.Context.Theme);
-            int textColor = resources.GetColor(textColorResId, this.Context.Theme);
-            int chipBgColor = resources.GetColor(chipBgColorResId, this.Context.Theme);
-
-            var dotDrawable = (GradientDrawable)connectionStatusDot.Background;
-            dotDrawable.SetColor(dotColor);
-            connectionStatusText.Text = SeekerApplication.GetString(textResId);
-            connectionStatusText.SetTextColor(new Android.Graphics.Color(textColor));
-            var chipBgDrawable = (GradientDrawable)connectionStatusChip.Background;
-            chipBgDrawable.SetColor(chipBgColor);
         }
 
         private void UpdateUnreadBadge()
