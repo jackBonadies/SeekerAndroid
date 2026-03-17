@@ -156,9 +156,18 @@ namespace Seeker
                     OnBackPressedDispatcher.OnBackPressed();
                     return true;
                 case Resource.Id.action_delete_messages:
-                    DELETED_USERNAME = MessagesInnerFragment.Username;
-                    DELETED_POSITION = int.MaxValue;
-                    (DELETED_DATA, DELETED_READ_COUNT) = MessageController.DeleteMessageFromUserWithUndo(DELETED_USERNAME);
+                    var usernameToDelete = MessagesInnerFragment.Username;
+                    var (deletedMessages, deletedReadCount) = MessageController.DeleteMessageFromUserWithUndo(MessagesInnerFragment.Username);
+                    Snackbar sb1 = Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content),
+                            string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
+                            usernameToDelete),
+                            Snackbar.LengthLong)
+                        .SetAction(Resource.String.undo, (View v) => ItemTouchHelperMessageOverviewCallback.UndoSingleUserMessagesDeleteAction(null, (usernameToDelete, deletedMessages, deletedReadCount), -1, true))
+                        .SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
+
+                    (sb1.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView)
+                    .SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
+                    sb1.Show();
                     this.SwitchToOuter(SupportFragmentManager.FindFragmentByTag("InnerUserFragment"), true);
                     return true;
                 case Resource.Id.action_delete_all_messages:
@@ -399,13 +408,6 @@ namespace Seeker
         }
 
 
-        //Delete Undo Helpers
-        public static string DELETED_USERNAME = string.Empty;
-        public static int DELETED_POSITION = -1;
-        public static int DELETED_READ_COUNT = -1;
-        public static List<Message> DELETED_DATA = null;
-        public static volatile bool FromDeleteMessage = false;
-
         /// <summary>
         /// This method will switch you from inner to outer.  If you came to inner from a notification, outer will be added.
         /// note: whenever we go back we recreate the fragment so we dont need to mess around with the adapter (in the case of delete), it will be recreated.
@@ -420,7 +422,6 @@ namespace Seeker
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
             var outerExists = SupportFragmentManager.FindFragmentByTag("OuterUserFragment");
-            FromDeleteMessage = forDeleteMessage;
             if (outerExists != null)
             {
                 SupportFragmentManager.PopBackStack();

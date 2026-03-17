@@ -42,33 +42,23 @@ namespace Seeker.Messages
             return false;
         }
 
-        public static Action<View> GetSnackBarAction(MessagesOverviewRecyclerAdapter adapter, bool fromOptionMenu = false)
+        public static void UndoSingleUserMessagesDeleteAction(MessagesOverviewRecyclerAdapter adapter, (string username, List<Message> messages, int readCount) deletedData, int position = -1, bool fromOptionMenu = false)
         {
-            Action<View> undoSnackBarAction = new Action<View>((View v) =>
+            if (string.IsNullOrEmpty(deletedData.username) || (!fromOptionMenu && position == -1))
             {
-                if (MessagesActivity.DELETED_USERNAME == string.Empty || MessagesActivity.DELETED_DATA == null || MessagesActivity.DELETED_POSITION == -1)
-                {
-                    //error
-                    bool isNull = MessagesActivity.DELETED_DATA == null;
-                    Logger.Firebase("failure on undo uname:" + MessagesActivity.DELETED_USERNAME + " " + isNull + " " + MessagesActivity.DELETED_POSITION);
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_undo), ToastLength.Short);
-                    return;
-                }
-                MessageController.Messages[MessagesActivity.DELETED_USERNAME] = MessagesActivity.DELETED_DATA;
-                MessageController.LastReadMessageCounts[MessagesActivity.DELETED_USERNAME] = MessagesActivity.DELETED_READ_COUNT;
-                MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
-                MessageController.SaveLastReadCounts(SeekerState.SharedPreferences);
-                if (!fromOptionMenu)
-                {
-                    adapter.RestoreAt(MessagesActivity.DELETED_POSITION, MessagesActivity.DELETED_USERNAME);
-                }
-                else
-                {
-                    (SeekerState.ActiveActivityRef as MessagesActivity).GetOverviewFragment().RefreshAdapter();
-                }
-                MessagesActivity.DELETED_USERNAME = string.Empty; MessagesActivity.DELETED_DATA = null; MessagesActivity.DELETED_POSITION = -1;
-            });
-            return undoSnackBarAction;
+                //error
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_undo), ToastLength.Short);
+                return;
+            }
+            MessageController.UndoDeleteMessagesFromUser(deletedData);
+            if (fromOptionMenu)
+            {
+                (SeekerState.ActiveActivityRef as MessagesActivity).GetOverviewFragment().RefreshAdapter();
+            }
+            else
+            {
+                adapter.RestoreAt(position, deletedData.username);
+            }
         }
 
         public override void OnSwiped(RecyclerView.ViewHolder p0, int p1)
@@ -81,14 +71,13 @@ namespace Seeker.Messages
             }
             //delete and save messages
             //show snackbar
-            MessagesActivity.DELETED_POSITION = pos;
-            MessagesActivity.DELETED_USERNAME = adapter.At(MessagesActivity.DELETED_POSITION);
-            adapter.RemoveAt(MessagesActivity.DELETED_POSITION); //removes from adapter data and notifies.
-            (MessagesActivity.DELETED_DATA, MessagesActivity.DELETED_READ_COUNT) = MessageController.DeleteMessageFromUserWithUndo(MessagesActivity.DELETED_USERNAME);
+            var usernameToDelete = adapter.At(pos);
+            adapter.RemoveAt(pos); //removes from adapter data and notifies.
+            var (deletedMessages, readCount) = MessageController.DeleteMessageFromUserWithUndo(usernameToDelete);
 
             Snackbar sb = Snackbar.Make(containingFragment.View, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
-                MessagesActivity.DELETED_USERNAME), Snackbar.LengthLong)
-                .SetAction(Resource.String.undo, GetSnackBarAction(this.adapter, false))
+                usernameToDelete), Snackbar.LengthLong)
+                .SetAction(Resource.String.undo, (View view) => UndoSingleUserMessagesDeleteAction(this.adapter, (usernameToDelete, deletedMessages, readCount), pos, false))
                 .SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
             (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
             sb.Show();

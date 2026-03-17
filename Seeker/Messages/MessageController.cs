@@ -849,5 +849,13 @@ namespace Seeker.Messages
             Logger.Debug("useranme to mesasge " + usernameToMessage);
             SeekerState.SoulseekClient.SendPrivateMessageAsync(usernameToMessage, msg.MessageText).ContinueWith(continueWithAction);
         }
+
+        public static void UndoDeleteMessagesFromUser((string username, List<Message> messages, int readCount) deletedData)
+        {
+            Messages[deletedData.username] = deletedData.messages;
+            LastReadMessageCounts[deletedData.username] = deletedData.readCount;
+            SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+            SaveLastReadCounts(SeekerState.SharedPreferences);
+        }
     }
 }

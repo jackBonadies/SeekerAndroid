@@ -64,20 +64,6 @@ namespace Seeker.Messages
         {
             base.OnResume();
             SeekerState.ActiveActivityRef.InvalidateOptionsMenu();
-            if (MessagesActivity.FromDeleteMessage)
-            {
-                MessagesActivity.FromDeleteMessage = false;
-                Snackbar sb = Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content),
-                        string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
-                        MessagesActivity.DELETED_USERNAME),
-                        Snackbar.LengthLong)
-                    .SetAction(Resource.String.undo, ItemTouchHelperMessageOverviewCallback.GetSnackBarAction(recyclerAdapter, true))
-                    .SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-
-                (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView)
-                    .SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
-                sb.Show();
-            }
             MessagesBroadcastReceiver.MarkAsReadFromNotification += UpdateMarkAsReadFromNotif;
             SeekerApplication.UserStatusChangedUIEvent += OnUserStatusChanged;
         }
