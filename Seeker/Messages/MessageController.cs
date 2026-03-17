@@ -631,13 +631,13 @@ namespace Seeker.Messages
             {
                 RootMessages = SerializationHelper.RestoreMessagesFromString(messages);
                 MessagesUsername = PreferencesState.Username;
+                Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
                 if (!string.IsNullOrEmpty(PreferencesState.Username) && RootMessages.ContainsKey(PreferencesState.Username))
                 {
                     Messages = RootMessages[PreferencesState.Username];
                 } 
-                else
+                else if(!string.IsNullOrEmpty(PreferencesState.Username))
                 {
-                    Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
                     RootMessages[MessagesUsername] = Messages;
                 }
             }
