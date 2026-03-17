@@ -622,14 +622,23 @@ namespace Seeker.Messages
             {
                 RootMessages = new System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>>();
                 Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+                if (!string.IsNullOrEmpty(PreferencesState.Username))
+                {
+                    RootMessages[PreferencesState.Username] = Messages;
+                }
             }
             else
             {
                 RootMessages = SerializationHelper.RestoreMessagesFromString(messages);
+                MessagesUsername = PreferencesState.Username;
                 if (!string.IsNullOrEmpty(PreferencesState.Username) && RootMessages.ContainsKey(PreferencesState.Username))
                 {
                     Messages = RootMessages[PreferencesState.Username];
-                    MessagesUsername = PreferencesState.Username;
+                } 
+                else
+                {
+                    Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+                    RootMessages[MessagesUsername] = Messages;
                 }
             }
         }
