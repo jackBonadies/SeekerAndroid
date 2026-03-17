@@ -17,9 +17,17 @@ namespace Seeker.Services
 {
     public static class SharedFileService
     {
-        public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> GetFullFileInfoFromSharedDirectory(UploadDirectoryEntry newlyAddedDirectoryIfApplicable,
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, ref int directoryCount, out BrowseResponse br,
-            out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out List<Soulseek.Directory> allHiddenDirs)
+        public class FullFileInfosResult
+        {
+            public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> PresentableNameToFullFileInfo { get; set; }
+            public int DirectoryCount { get; set; }
+            public BrowseResponse BrowseResponse { get; set; }
+            public List<Tuple<string, string>> DirMappingFriendlyNameToUri { get; set; }
+            public List<Soulseek.Directory> HiddenDirectories { get; set; }
+        }
+
+        public static FullFileInfosResult GetFullFileInfoFromSharedDirectory(
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
             //so the presentablename should be FolderSelected/path to rest
@@ -28,8 +36,9 @@ namespace Seeker.Services
             Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfos = new Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>();
             List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
             List<Soulseek.Directory> allLockedDirs = new List<Soulseek.Directory>();
-            allHiddenDirs = new List<Soulseek.Directory>();
-            dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
+            var allHiddenDirs = new List<Soulseek.Directory>();
+            var dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
+            int directoryCount = 0;
 
             //UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
             //if (UploadDirectoryManager.AreAllFailed()) //the newly added one is always good.
@@ -59,9 +68,14 @@ namespace Seeker.Services
                     ref directoryCount);
             }
 
-
-            br = new BrowseResponse(allDirs, allLockedDirs);
-            return presentableNameToFullFileInfos;
+            return new FullFileInfosResult
+            {
+                PresentableNameToFullFileInfo = presentableNameToFullFileInfos,
+                DirectoryCount = directoryCount,
+                BrowseResponse = new BrowseResponse(allDirs, allLockedDirs),
+                DirMappingFriendlyNameToUri = dirMappingFriendlyNameToUri,
+                HiddenDirectories = allHiddenDirs,
+            };
         }
 
         public static void GetAllFolderInfo(UploadDirectoryEntry uploadDirEntry, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out string presentableNameToUse)
@@ -232,29 +246,25 @@ namespace Seeker.Services
             }
         }
 
-
-
-        public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> GetFullFileInfoFromSharedDirectoryLegacy(
-            UploadDirectoryEntry newlyAddedDirectoryIfApplicable, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
-            ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out List<Soulseek.Directory> allHiddenDirs)
+        public static FullFileInfosResult GetFullFileInfoFromSharedDirectoryLegacy(
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
             //so the presentablename should be FolderSelected/path to rest
-            //there due to the way android separates the sdcard root (or primary:) and other OS.  wherewas other OS use path separators, Android uses primary:FolderName vs say C:\Foldername.  If primary: is part of the presentable name then I will change 
+            //there due to the way android separates the sdcard root (or primary:) and other OS.  wherewas other OS use path separators, Android uses primary:FolderName vs say C:\Foldername.  If primary: is part of the presentable name then I will change
             //it to primary:\Foldername similar to C:\Foldername.  I think this makes most sense of the things I have tried.
             Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs = new Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>();
             List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
             List<Soulseek.Directory> allLockedDirs = new List<Soulseek.Directory>();
-            allHiddenDirs = new List<Soulseek.Directory>();
-
+            var allHiddenDirs = new List<Soulseek.Directory>();
+            var dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
+            int directoryCount = 0;
 
             //UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
             //if(UploadDirectoryManager.AreAllFailed())
             //{
             //    throw new DirectoryAccessFailure("All Failed");
             //}
-
-            dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
 
 
             //string lastPathSegment = dir.Uri.Path.Replace('/', '\\');
@@ -282,8 +292,14 @@ namespace Seeker.Services
                     ref directoryCount);
             }
 
-            br = new BrowseResponse(allDirs, allLockedDirs);
-            return pairs;
+            return new FullFileInfosResult
+            {
+                PresentableNameToFullFileInfo = pairs,
+                DirectoryCount = directoryCount,
+                BrowseResponse = new BrowseResponse(allDirs, allLockedDirs),
+                DirMappingFriendlyNameToUri = dirMappingFriendlyNameToUri,
+                HiddenDirectories = allHiddenDirs,
+            };
         }
 
         /// <summary>
@@ -957,13 +973,6 @@ namespace Seeker.Services
                 {
                     System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
                     s.Start();
-                    Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfo = null;
-                    BrowseResponse browseResponse = null;
-                    List<Tuple<string, string>> presentableDirectoryNameToDirectoryUriMappings = null;
-                    List<Soulseek.Directory> hiddenDirectories = null;
-                    int directoryCount = 0;
-
-
                     //optimization - if new directory is a subdir we can skip this part. !!!! but we still have things to do like make all files that start with said presentableDir to be locked / hidden. etc.
 
                     UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
@@ -971,14 +980,22 @@ namespace Seeker.Services
                     {
                         throw new DirectoryAccessFailure("All Failed");
                     }
+
+                    FullFileInfosResult result;
                     if (SeekerState.PreOpenDocumentTree() || UploadDirectoryManager.AreAnyFromLegacy())
                     {
-                        presentableNameToFullFileInfo = GetFullFileInfoFromSharedDirectoryLegacy(null, SeekerState.SharedFileCache?.PresentableNameToFullFileInfo, ref directoryCount, out browseResponse, out presentableDirectoryNameToDirectoryUriMappings, out hiddenDirectories);
+                        result = GetFullFileInfoFromSharedDirectoryLegacy(SeekerState.SharedFileCache?.PresentableNameToFullFileInfo);
                     }
                     else
                     {
-                        presentableNameToFullFileInfo = GetFullFileInfoFromSharedDirectory(null, SeekerState.SharedFileCache?.PresentableNameToFullFileInfo, ref directoryCount, out browseResponse, out presentableDirectoryNameToDirectoryUriMappings, out hiddenDirectories);
+                        result = GetFullFileInfoFromSharedDirectory(SeekerState.SharedFileCache?.PresentableNameToFullFileInfo);
                     }
+
+                    var presentableNameToFullFileInfo = result.PresentableNameToFullFileInfo;
+                    var browseResponse = result.BrowseResponse;
+                    var presentableDirectoryNameToDirectoryUriMappings = result.DirMappingFriendlyNameToUri;
+                    var hiddenDirectories = result.HiddenDirectories;
+                    int directoryCount = result.DirectoryCount;
 
                     int nonHiddenCountForServer = presentableNameToFullFileInfo.Count(pair1 => !pair1.Value.Item5);
                     Logger.Debug($"Non Hidden Count for Server: {nonHiddenCountForServer}");
