@@ -44,7 +44,7 @@ namespace Seeker.Messages
             }
             else
             {
-                internalList = GetOverviewList();//MessageController.Messages.Keys.ToList();
+                internalList = GetSortedMessagesList();//MessageController.Messages.Keys.ToList();
             }
             recyclerAdapter = new MessagesOverviewRecyclerAdapter(internalList); //this depends tightly on MessageController... since these are just strings..
             recyclerViewOverview.SetAdapter(recyclerAdapter);
@@ -131,7 +131,7 @@ namespace Seeker.Messages
             }
         }
 
-        public static List<string> GetOverviewList()
+        public static List<string> GetSortedMessagesList()
         {
             var listToSort = MessageController.Messages.ToList();
             listToSort.Sort(new MessageOverviewComparer());
@@ -157,27 +157,34 @@ namespace Seeker.Messages
 
         public void RefreshAdapter()
         {
-            internalList = GetOverviewList();
-            if (internalList.Count != 0)
+            var newList = GetSortedMessagesList();
+            if (newList.Count != 0)
             {
                 noMessagesView.Visibility = ViewStates.Gone;
             }
-            recyclerAdapter = new MessagesOverviewRecyclerAdapter(internalList); //this depends tightly on MessageController... since these are just strings..
-            recyclerViewOverview.SetAdapter(recyclerAdapter);
-            recyclerAdapter.NotifyDataSetChanged();
+            var diff = DiffUtil.CalculateDiff(new MessageOverviewDiffCallback(internalList, newList), true);
+            internalList = newList;
+            recyclerAdapter.localDataSet = newList;
+            diff.DispatchUpdatesTo(recyclerAdapter);
         }
 
         public override void OnAttach(Context activity)
         {
             if (created) //attach can happen before we created our view...
             {
-                internalList = GetOverviewList();
-                if (internalList.Count != 0)
+                var newList = GetSortedMessagesList();
+                if (newList.Count != 0)
                 {
                     noMessagesView.Visibility = ViewStates.Gone;
                 }
-                recyclerAdapter = new MessagesOverviewRecyclerAdapter(internalList); //this depends tightly on MessageController... since these are just strings..
-                recyclerViewOverview.SetAdapter(recyclerAdapter);
+                if (recyclerAdapter == null)
+                {
+                    recyclerAdapter = new MessagesOverviewRecyclerAdapter(internalList);
+                }
+                var diff = DiffUtil.CalculateDiff(new MessageOverviewDiffCallback(internalList, newList), true);
+                internalList = newList;
+                recyclerAdapter.localDataSet = newList;
+                diff.DispatchUpdatesTo(recyclerAdapter);
                 MessageController.MessageReceived -= OnMessageReceived;
                 MessageController.MessageReceived += OnMessageReceived;
             }

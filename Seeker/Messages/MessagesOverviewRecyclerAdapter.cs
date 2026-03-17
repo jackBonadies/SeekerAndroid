@@ -71,9 +71,15 @@ namespace Seeker.Messages
 
         public override void OnSwiped(RecyclerView.ViewHolder p0, int p1)
         {
+            int pos = p0.AbsoluteAdapterPosition;
+            if (pos == RecyclerView.NoPosition || pos >= adapter.ItemCount)
+            {
+                Logger.Firebase("MESSAGE OVERVIEW: " + pos);
+                return;
+            }
             //delete and save messages
             //show snackbar
-            MessagesActivity.DELETED_POSITION = p0.AbsoluteAdapterPosition;
+            MessagesActivity.DELETED_POSITION = pos;
             MessagesActivity.DELETED_USERNAME = adapter.At(MessagesActivity.DELETED_POSITION);
             adapter.RemoveAt(MessagesActivity.DELETED_POSITION); //removes from adapter data and notifies.
             MessageController.Messages.Remove(MessagesActivity.DELETED_USERNAME, out MessagesActivity.DELETED_DATA);
@@ -122,9 +128,35 @@ namespace Seeker.Messages
     }
 
 
+    public class MessageOverviewDiffCallback : DiffUtil.Callback
+    {
+        private List<string> oldList;
+        private List<string> newList;
+
+        public MessageOverviewDiffCallback(List<string> _oldList, List<string> _newList)
+        {
+            oldList = _oldList;
+            newList = _newList;
+        }
+
+        public override int NewListSize => newList.Count;
+
+        public override int OldListSize => oldList.Count;
+
+        public override bool AreContentsTheSame(int oldItemPosition, int newItemPosition)
+        {
+            return false; // always rebind — unread count / last message may have changed
+        }
+
+        public override bool AreItemsTheSame(int oldItemPosition, int newItemPosition)
+        {
+            return oldList[oldItemPosition] == newList[newItemPosition];
+        }
+    }
+
     public class MessagesOverviewRecyclerAdapter : RecyclerView.Adapter
     {
-        private List<string> localDataSet;
+        public List<string> localDataSet;
         public override int ItemCount => localDataSet.Count;
         private int position = -1;
 
