@@ -1184,14 +1184,7 @@ namespace Seeker.Services
 
         public static bool IsSharingSetUpSuccessfully()
         {
-            if (SeekerState.SharedFileCache == null || !SeekerState.SharedFileCache.SuccessfullyInitialized)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return SeekerState.SharedFileCache != null && SeekerState.SharedFileCache.SuccessfullyInitialized;
         }
     }
 

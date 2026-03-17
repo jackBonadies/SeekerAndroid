@@ -1078,14 +1078,7 @@ namespace Seeker
         /// <returns></returns>
         public static bool OnUIthread()
         {
-            if (OperatingSystem.IsAndroidVersionAtLeast(23))
-            {
-                return Looper.MainLooper.IsCurrentThread;
-            }
-            else
-            {
-                return Looper.MainLooper.Thread == Java.Lang.Thread.CurrentThread();
-            }
+            return Looper.MainLooper.IsCurrentThread;
         }
 
 
