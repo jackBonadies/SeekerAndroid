@@ -21,7 +21,7 @@ namespace Common.Share
             Dictionary<string,List<int>> tokenIndex, Dictionary<int,string> helperIndex, List<Soulseek.Directory> hiddenDirectories,
             int _nonHiddenFileCountForServer)
         {
-            FullInfo = fullInfo; //this is the full info, i.e. keys and and their corresponding URI and length
+            PresentableNameToFullFileInfo = fullInfo; //this is the full info, i.e. keys and and their corresponding URI and length
             DirectoryCount = direcotryCount;
             BrowseResponse = browseResponse;
             FriendlyDirNameToUriMapping = friendlyDirNameToUriMapping;
@@ -55,10 +55,10 @@ namespace Common.Share
         public Tuple<long, string, Tuple<int, int, int, int>, bool, bool> GetFullInfoFromSearchableName(string keyFilename, out string errorMessage)
         {
             //Tuple<string, string, long> ourFileInfo = FullInfo.Where((Tuple<string, string, long> fullInfoTuple) => { return fullInfoTuple.Item1 == keyFilename; }).FirstOrDefault();
-            Tuple<long, string, Tuple<int, int, int, int>, bool, bool> ourFileInfo = FullInfo[keyFilename];
+            Tuple<long, string, Tuple<int, int, int, int>, bool, bool> ourFileInfo = PresentableNameToFullFileInfo[keyFilename];
             if(ourFileInfo==null)
             {
-                errorMessage = "ourFileInfo 1 is null keyFilename is: " + keyFilename + "FullInfo.Count" + FullInfo.Count;
+                errorMessage = "ourFileInfo 1 is null keyFilename is: " + keyFilename + "FullInfo.Count" + PresentableNameToFullFileInfo.Count;
                 return null;
             }
             //if(ourFileInfo.Item1==-1)
@@ -136,7 +136,7 @@ namespace Common.Share
             List<Soulseek.File> response = new List<Soulseek.File>();
             foreach (var fName in presentableNames)
             {
-                var fullInfoFile = FullInfo[fName];
+                var fullInfoFile = PresentableNameToFullFileInfo[fName];
                 
                 // should we skip it
                 if(fullInfoFile.Item5)
@@ -212,19 +212,19 @@ namespace Common.Share
             }
         }
 
-        public Dictionary<string,Tuple<long,string, Tuple<int, int, int, int>, bool, bool>> FullInfo {get; }
+        public Dictionary<string,Tuple<long,string, Tuple<int, int, int, int>, bool, bool>> PresentableNameToFullFileInfo {get; }
         public int DirectoryCount = -1;
         public int FileCount
         {
             get
             {
-                if(FullInfo == null)
+                if(PresentableNameToFullFileInfo == null)
                 {
                     return 0;
                 }
                 else
                 {
-                    return FullInfo.Keys.Count;
+                    return PresentableNameToFullFileInfo.Keys.Count;
                 }
             }
         }

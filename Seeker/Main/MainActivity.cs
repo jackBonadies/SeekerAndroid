@@ -1357,14 +1357,14 @@ namespace Seeker
         private void TestEnqueueSharedFolder()
         {
             var cache = SeekerState.SharedFileCache;
-            if (cache?.FullInfo == null || cache.FullInfo.Count == 0)
+            if (cache?.PresentableNameToFullFileInfo == null || cache.PresentableNameToFullFileInfo.Count == 0)
             {
                 Logger.Debug("TestEnqueue: no shared files");
                 return;
             }
 
             // group files by directory (everything before the last backslash)
-            var filesByDir = cache.FullInfo.Keys
+            var filesByDir = cache.PresentableNameToFullFileInfo.Keys
                 .GroupBy(f => f.Substring(0, f.LastIndexOf('\\')))
                 .ToList();
 

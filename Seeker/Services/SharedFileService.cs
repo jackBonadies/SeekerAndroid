@@ -17,15 +17,15 @@ namespace Seeker.Services
 {
     public static class SharedFileService
     {
-        public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> ParseSharedDirectoryFastDocContract(UploadDirectoryEntry newlyAddedDirectoryIfApplicable,
+        public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> GetFullFileInfoFromSharedDirectory(UploadDirectoryEntry newlyAddedDirectoryIfApplicable,
             Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, ref int directoryCount, out BrowseResponse br,
-            out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index, out List<Soulseek.Directory> allHiddenDirs)
+            out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> fileKeyToPresentableName, out List<Soulseek.Directory> allHiddenDirs)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
             //so the presentablename should be FolderSelected/path to rest
             //there due to the way android separates the sdcard root (or primary:) and other OS.  wherewas other OS use path separators, Android uses primary:FolderName vs say C:\Foldername.  If primary: is part of the presentable name then I will change 
             //it to primary:\Foldername similar to C:\Foldername.  I think this makes most sense of the things I have tried.
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs = new Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>();
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfos = new Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>();
             List<Soulseek.Directory> allDirs = new List<Soulseek.Directory>();
             List<Soulseek.Directory> allLockedDirs = new List<Soulseek.Directory>();
             allHiddenDirs = new List<Soulseek.Directory>();
@@ -43,7 +43,7 @@ namespace Seeker.Services
             PopulateAllMediaStoreInfo(allMediaStoreInfo, volNames);
 
 
-            index = new Dictionary<int, string>();
+            fileKeyToPresentableName = new Dictionary<int, string>();
             int indexNum = 0;
             var tmpUploadDirs = UploadDirectoryManager.UploadDirectories.ToList(); //avoid race conditions and enumeration modified exceptions.
             foreach (var uploadDirEntry in tmpUploadDirs)
@@ -56,14 +56,14 @@ namespace Seeker.Services
                 DocumentFile dir = uploadDirEntry.UploadDirectory;
                 GetAllFolderInfo(uploadDirEntry, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out _);
 
-                traverseDirectoryEntriesInternal(SeekerState.ActiveActivityRef.ContentResolver, dir.Uri, DocumentsContract.GetTreeDocumentId(dir.Uri), dir.Uri,
-                    pairs, true, volName, allDirs, allLockedDirs, allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, index, dir, allMediaStoreInfo, previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null,
+                traverseDirectoriesGatherFullFileInfos(SeekerState.ActiveActivityRef.ContentResolver, dir.Uri, DocumentsContract.GetTreeDocumentId(dir.Uri), dir.Uri,
+                    presentableNameToFullFileInfos, true, volName, allDirs, allLockedDirs, allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, fileKeyToPresentableName, dir, allMediaStoreInfo, previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null,
                     ref directoryCount, ref indexNum);
             }
 
 
             br = new BrowseResponse(allDirs, allLockedDirs);
-            return pairs;
+            return presentableNameToFullFileInfos;
         }
 
         public static void GetAllFolderInfo(UploadDirectoryEntry uploadDirEntry, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out string presentableNameToUse)
@@ -236,9 +236,9 @@ namespace Seeker.Services
 
 
 
-        public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> ParseSharedDirectoryLegacy(
+        public static Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> GetFullFileInfoFromSharedDirectoryLegacy(
             UploadDirectoryEntry newlyAddedDirectoryIfApplicable, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
-            ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> index, out List<Soulseek.Directory> allHiddenDirs)
+            ref int directoryCount, out BrowseResponse br, out List<Tuple<string, string>> dirMappingFriendlyNameToUri, out Dictionary<int, string> fileKeyToPresentableName, out List<Soulseek.Directory> allHiddenDirs)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
             //so the presentablename should be FolderSelected/path to rest
@@ -257,7 +257,7 @@ namespace Seeker.Services
             //}
 
             dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
-            index = new Dictionary<int, string>();
+            fileKeyToPresentableName = new Dictionary<int, string>();
             int indexNum = 0;
 
 
@@ -281,96 +281,13 @@ namespace Seeker.Services
                 GetAllFolderInfo(uploadDirEntry, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out _);
 
                 traverseDirectoryEntriesLegacy(dir, pairs, true, allDirs, allLockedDirs,
-                    allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, index,
+                    allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, fileKeyToPresentableName,
                     previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null,
                     ref directoryCount, ref indexNum);
             }
 
             br = new BrowseResponse(allDirs, allLockedDirs);
             return pairs;
-        }
-        public static Soulseek.Directory SlskDirFromUri(ContentResolver contentResolver, Android.Net.Uri rootUri, Android.Net.Uri dirUri, string dirToStrip, bool diagFromDirectoryResolver, string volumePath)
-        {
-
-
-            string directoryPath = dirUri.LastPathSegment; //on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
-            directoryPath = directoryPath.Replace("/", @"\");
-            //try
-            //{
-            //    directoryPath = directoryPath.Substring(directoryPath.ToLower().IndexOf(dirToStrip.ToLower()));
-            //    directoryPath = directoryPath.Replace("/", @"\"); //probably strip out the root shared dir...
-            //}
-            //catch(Exception e)
-            //{
-            //    //Non-fatal Exception: java.lang.Throwable: directoryPath: False\tree\msd:824\document\msd:825MusicStartIndex cannot be less than zero.
-            //    //its possible for dirToStrip to be null
-            //    //True\tree\0000-0000:Musica iTunes\document\0000-0000:Musica iTunesObject reference not set to an instance of an object 
-            //    //Non-fatal Exception: java.lang.Throwable: directoryPath: True\tree\3061-6232:Musica\document\3061-6232:MusicaObject reference not set to an instance of an object  at AndriodApp1.MainActivity.SlskDirFromDocumentFile (AndroidX.DocumentFile.Provider.DocumentFile dirFile, System.String dirToStrip) [0x00024] in <778faaf2e13641b38ae2700aacc789af>:0 
-            //    Logger.Firebase("directoryPath: " + (dirToStrip==null).ToString() + directoryPath + " from directory resolver: "+ diagFromDirectoryResolver+" toStrip: " + dirToStrip + e.Message + e.StackTrace);
-            //}
-            //friendlyDirNameToUriMapping.Add(new Tuple<string, string>(directoryPath, dirFile.Uri.ToString()));
-            //strip out the shared root dir
-            //directoryPath.Substring(directoryPath.IndexOf(dir.Name))
-            Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, DocumentsContract.GetDocumentId(dirUri));
-            Android.Database.ICursor c = contentResolver.Query(listChildrenUri, new String[] { Document.ColumnDocumentId, Document.ColumnDisplayName, Document.ColumnMimeType, Document.ColumnSize }, null, null, null);
-            List<Soulseek.File> files = new List<Soulseek.File>();
-            try
-            {
-                while (c.MoveToNext())
-                {
-                    string docId = c.GetString(0);
-                    string name = c.GetString(1);
-                    string mime = c.GetString(2);
-                    long size = c.GetLong(3);
-                    var childUri = DocumentsContract.BuildDocumentUri(rootUri.Authority, docId);
-                    //Logger.Debug("docId: " + docId + ", name: " + name + ", mime: " + mime);
-                    if (isDirectory(mime))
-                    {
-                    }
-                    else
-                    {
-
-                        string fname = SimpleHelpers.GetFileNameFromFile(childUri.Path.Replace("/", @"\"));
-                        string folderName = Common.Helpers.GetFolderNameFromFile(childUri.Path.Replace("/", @"\"));
-                        string searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
-                                                                               //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
-                                                                               //bc we get a path that is:
-                                                                               //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
-                                                                               //not quite a full URI but it does add quite a bit..
-
-                        //if (searchableName.Length > 7 && searchableName.Substring(0, 8).ToLower() == "primary:")
-                        //{
-                        //    searchableName = searchableName.Substring(8);
-                        //}
-                        var slskFile = new Soulseek.File(1, searchableName.Replace("/", @"\"), size, System.IO.Path.GetExtension(childUri.Path));
-                        files.Add(slskFile);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.Debug("Parse error with " + dirUri.Path + e.Message + e.StackTrace);
-                Logger.Firebase("Parse error with " + dirUri.Path + e.Message + e.StackTrace);
-            }
-            finally
-            {
-                closeQuietly(c);
-            }
-            SimpleHelpers.SortSlskDirFiles(files); //otherwise our browse response files will be way out of order
-
-            if (volumePath != null)
-            {
-                if (directoryPath.Substring(0, volumePath.Length) == volumePath)
-                {
-                    //if (directoryPath.Length != volumePath.Length)
-                    //{
-                    directoryPath = directoryPath.Substring(volumePath.Length);
-                    //}
-                }
-            }
-
-            var slskDir = new Soulseek.Directory(directoryPath, files);
-            return slskDir;
         }
 
         /// <summary>
@@ -472,132 +389,6 @@ namespace Seeker.Services
                 Logger.Debug("ClearParsedCacheResults " + e.Message + e.StackTrace);
                 Logger.Firebase("ClearParsedCacheResults " + e.Message + e.StackTrace);
             }
-        }
-
-        public static CachedParseResults GetLegacyCachedParseResult()
-        {
-#if !BinaryFormatterAvailable
-            return null;
-#else
-            bool convertFrom2to3 = false;
-
-            string s_stringUriPairs = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_stringUriPairs_v3, string.Empty);
-            if (s_stringUriPairs == string.Empty)
-            {
-                s_stringUriPairs = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_stringUriPairs_v2, string.Empty);
-                convertFrom2to3 = true;
-            }
-
-            string s_BrowseResponse = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_browseResponse_v2, string.Empty);
-            string s_FriendlyDirNameMapping = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_friendlyDirNameToUriMapping_v2, string.Empty);
-            string s_intHelperIndex = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_intHelperIndex_v2, string.Empty);
-            int nonHiddenFileCount = SeekerState.SharedPreferences.GetInt(KeyConsts.M_CACHE_nonHiddenFileCount_v3, -1);
-            string s_tokenIndex = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_tokenIndex_v2, string.Empty);
-            string s_BrowseResponse_hiddenPortion = SeekerState.SharedPreferences.GetString(KeyConsts.M_CACHE_browseResponse_hidden_portion, string.Empty); //this one can be empty.
-
-            if (s_intHelperIndex == string.Empty || s_tokenIndex == string.Empty || s_stringUriPairs == string.Empty || s_BrowseResponse == string.Empty || s_FriendlyDirNameMapping == string.Empty)
-            {
-                return null;
-            }
-            else
-            {
-                //deserialize..
-                try
-                {
-                    System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-                    sw.Start();
-                    byte[] b_stringUriPairs = Convert.FromBase64String(s_stringUriPairs);
-                    byte[] b_BrowseResponse = Convert.FromBase64String(s_BrowseResponse);
-                    byte[] b_FriendlyDirNameMapping = Convert.FromBase64String(s_FriendlyDirNameMapping);
-                    byte[] b_intHelperIndex = Convert.FromBase64String(s_intHelperIndex);
-                    byte[] b_tokenIndex = Convert.FromBase64String(s_tokenIndex);
-
-                    using (System.IO.MemoryStream m_stringUriPairs = new System.IO.MemoryStream(b_stringUriPairs))
-                    using (System.IO.MemoryStream m_BrowseResponse = new System.IO.MemoryStream(b_BrowseResponse))
-                    using (System.IO.MemoryStream m_FriendlyDirNameMapping = new System.IO.MemoryStream(b_FriendlyDirNameMapping))
-                    using (System.IO.MemoryStream m_intHelperIndex = new System.IO.MemoryStream(b_intHelperIndex))
-
-                    using (System.IO.MemoryStream m_tokenIndex = new System.IO.MemoryStream(b_tokenIndex))
-                    {
-                        BinaryFormatter binaryFormatter = SerializationMigrationHelper.GetLegacyBinaryFormatter();
-                        CachedParseResults cachedParseResults = new CachedParseResults();
-                        if (convertFrom2to3)
-                        {
-                            Logger.Debug("convert from v2 to v3");
-                            var oldKeys = binaryFormatter.Deserialize(m_stringUriPairs) as Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>>>;
-                            var newKeys = new Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>();
-                            if (oldKeys != null)
-                            {
-                                foreach (var oldkeyvaluepair in oldKeys)
-                                {
-                                    newKeys.Add(oldkeyvaluepair.Key, new Tuple<long, string, Tuple<int, int, int, int>, bool, bool>(oldkeyvaluepair.Value.Item1, oldkeyvaluepair.Value.Item2, oldkeyvaluepair.Value.Item3, false, false));
-                                }
-                            }
-                            lock (SeekerState.SharedPrefLock)
-                            {
-                                var editor = SeekerState.SharedPreferences.Edit();
-                                editor.PutString(KeyConsts.M_CACHE_stringUriPairs_v2, string.Empty);
-                                using (System.IO.MemoryStream bstringUrimemoryStreamv3 = new System.IO.MemoryStream())
-                                {
-                                    BinaryFormatter formatter = SerializationMigrationHelper.GetLegacyBinaryFormatter();
-                                    formatter.Serialize(bstringUrimemoryStreamv3, newKeys);
-                                    string stringUrimemoryStreamv3 = Convert.ToBase64String(bstringUrimemoryStreamv3.ToArray());
-                                    editor.PutString(KeyConsts.M_CACHE_stringUriPairs_v3, stringUrimemoryStreamv3);
-                                    editor.Commit();
-                                }
-                            }
-                            cachedParseResults.keys = newKeys;
-                        }
-                        else
-                        {
-                            Logger.Debug("v3");
-                            cachedParseResults.keys = binaryFormatter.Deserialize(m_stringUriPairs) as Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>;
-                        }
-
-
-                        cachedParseResults.browseResponse = binaryFormatter.Deserialize(m_BrowseResponse) as BrowseResponse;
-
-
-                        if (!string.IsNullOrEmpty(s_BrowseResponse_hiddenPortion))
-                        {
-                            byte[] b_BrowseResponse_hiddenPortion = Convert.FromBase64String(s_BrowseResponse_hiddenPortion);
-                            using (System.IO.MemoryStream m_BrowseResponse_hiddenPortion = new System.IO.MemoryStream(b_BrowseResponse_hiddenPortion))
-                            {
-                                cachedParseResults.browseResponseHiddenPortion = binaryFormatter.Deserialize(m_BrowseResponse_hiddenPortion) as List<Soulseek.Directory>;
-                            }
-                        }
-                        else
-                        {
-                            cachedParseResults.browseResponseHiddenPortion = null;
-                        }
-
-
-                        cachedParseResults.friendlyDirNameToUriMapping = binaryFormatter.Deserialize(m_FriendlyDirNameMapping) as List<Tuple<string, string>>;
-                        cachedParseResults.directoryCount = cachedParseResults.browseResponse.DirectoryCount;
-                        cachedParseResults.helperIndex = binaryFormatter.Deserialize(m_intHelperIndex) as Dictionary<int, string>;
-                        cachedParseResults.tokenIndex = binaryFormatter.Deserialize(m_tokenIndex) as Dictionary<string, List<int>>;
-                        cachedParseResults.nonHiddenFileCount = nonHiddenFileCount;
-
-                        if (cachedParseResults.keys == null || cachedParseResults.browseResponse == null || cachedParseResults.friendlyDirNameToUriMapping == null || cachedParseResults.helperIndex == null || cachedParseResults.tokenIndex == null)
-                        {
-                            return null;
-                        }
-
-                        sw.Stop();
-                        Logger.Debug("time to deserialize all sharing helpers: " + sw.ElapsedMilliseconds);
-
-                        return cachedParseResults;
-                    }
-
-                }
-                catch (Exception e)
-                {
-                    Logger.Debug("error deserializing" + e.Message + e.StackTrace);
-                    Logger.Firebase("error deserializing" + e.Message + e.StackTrace);
-                    return null;
-                }
-            }
-#endif
         }
 
         //Pretty much all clients send "attributes" or limited metadata.
@@ -891,16 +682,13 @@ namespace Seeker.Services
             }
         }
 
-        public static void traverseDirectoryEntriesInternal(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri,
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs, bool isRootCase, string volName, List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs,
+        public static void traverseDirectoriesGatherFullFileInfos(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri,
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfos, bool isRootCase, string volName, List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs,
             List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, Dictionary<int, string> index, DocumentFile rootDirCase,
             Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
             bool msdMsfOrOverrideCase, string msdMsfOrOverrideBuildParentName, ref int totalDirectoryCount, ref int indexNum)
         {
             //this should be the folder before the selected to strip away..
-
-
-
             Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, parentDoc);
             //Log.d(TAG, "node uri: ", childrenUri);
             Android.Database.ICursor c = contentResolver.Query(listChildrenUri, new String[] { Document.ColumnDocumentId, Document.ColumnDisplayName, Document.ColumnMimeType, Document.ColumnSize }, null, null, null);
@@ -935,7 +723,7 @@ namespace Seeker.Services
                     if (isDirectory(mime))
                     {
                         totalDirectoryCount++;
-                        traverseDirectoryEntriesInternal(contentResolver, rootUri, docId, childUri, pairs, false, volName, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
+                        traverseDirectoriesGatherFullFileInfos(contentResolver, rootUri, docId, childUri, presentableNameToFullFileInfos, false, volName, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
                             dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, null, allMediaInfoDict, previousFileInfoToUse,
                             msdMsfOrOverrideCase, msdMsfOrOverrideCase ? msdMsfOrOverrideBuildParentName + '\\' + name : null, ref totalDirectoryCount, ref indexNum);
                     }
@@ -960,7 +748,7 @@ namespace Seeker.Services
                             //Logger.Debug("fname: " + name + " attr: " + attributes.Item1 + "  " + attributes.Item2 + "  " + attributes.Item3 + "  " + attributes.Item4 + "  ");
                         }
 
-                        pairs.Add(presentableName, new Tuple<long, string, Tuple<int, int, int, int>, bool, bool>(size, childUri.ToString(), attributes, FileFilterHelper.IsLockedFile(presentableName), FileFilterHelper.IsHiddenFile(presentableName)));
+                        presentableNameToFullFileInfos.Add(presentableName, new Tuple<long, string, Tuple<int, int, int, int>, bool, bool>(size, childUri.ToString(), attributes, FileFilterHelper.IsLockedFile(presentableName), FileFilterHelper.IsHiddenFile(presentableName)));
                         index.Add(indexNum, presentableName); //throws on same key (the file in question ends with unicode EOT char (\u04)).
                         indexNum++;
                         if (indexNum % 50 == 0)
@@ -1047,7 +835,7 @@ namespace Seeker.Services
             List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri,
             string folderToStripForPresentableNames, Dictionary<int, string> index, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
             bool overrideCase, string msdMsfOrOverrideBuildParentName,
-            ref int totalDirectoryCount, ref int indexNum)
+            ref int totalDirectoryCount, ref int fileKeyToPresentableName)
         {
             //this should be the folder before the selected to strip away..
             List<Soulseek.File> files = new List<Soulseek.File>();
@@ -1058,7 +846,7 @@ namespace Seeker.Services
                     totalDirectoryCount++;
                     traverseDirectoryEntriesLegacy(childDocFile, pairs, false, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
                         dirMappingFriendlyNameToUri, folderToStripForPresentableNames, index, previousFileInfoToUse, overrideCase,
-                        overrideCase ? msdMsfOrOverrideBuildParentName + '\\' + childDocFile.Name : null, ref totalDirectoryCount, ref indexNum);
+                        overrideCase ? msdMsfOrOverrideBuildParentName + '\\' + childDocFile.Name : null, ref totalDirectoryCount, ref fileKeyToPresentableName);
                 }
                 else
                 {
@@ -1082,12 +870,12 @@ namespace Seeker.Services
                     }
 
                     pairs.Add(presentableName, new Tuple<long, string, Tuple<int, int, int, int>, bool, bool>(childDocFile.Length(), childDocFile.Uri.ToString(), attributes, FileFilterHelper.IsLockedFile(presentableName), FileFilterHelper.IsHiddenFile(presentableName))); //todo attributes was null here???? before
-                    index.Add(indexNum, presentableName);
-                    indexNum++;
-                    if (indexNum % 50 == 0)
+                    index.Add(fileKeyToPresentableName, presentableName);
+                    fileKeyToPresentableName++;
+                    if (fileKeyToPresentableName % 50 == 0)
                     {
                         //update public status variable every so often
-                        SeekerState.NumberParsed = indexNum;
+                        SeekerState.NumberParsed = fileKeyToPresentableName;
                     }
                     string fname = SimpleHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
                                                                                                           //for the brose response should only be the filename!!! 
@@ -1170,14 +958,6 @@ namespace Seeker.Services
                 CachedParseResults cachedParseResults = null;
                 if (checkCache)
                 {
-                    // migrate if applicable
-                    cachedParseResults = GetLegacyCachedParseResult();
-                    if(cachedParseResults != null)
-                    {
-                        StoreCachedParseResults(SeekerState.ActiveActivityRef, cachedParseResults);
-                        ClearLegacyParsedCacheResults();
-                    }
-
                     cachedParseResults = GetCachedParseResults(SeekerState.ActiveActivityRef);
                 }
 
@@ -1185,11 +965,11 @@ namespace Seeker.Services
                 {
                     System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
                     s.Start();
-                    Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> keys = null;
+                    Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfo = null;
                     BrowseResponse browseResponse = null;
-                    List<Tuple<string, string>> dirMappingFriendlyNameToUri = null;
+                    List<Tuple<string, string>> presentableDirectoryNameToDirectoryUriMappings = null;
                     List<Soulseek.Directory> hiddenDirectories = null;
-                    Dictionary<int, string> helperIndex = null;
+                    Dictionary<int, string> fileKeyToPresentableName = null;
                     int directoryCount = 0;
 
 
@@ -1202,66 +982,60 @@ namespace Seeker.Services
                     }
                     if (SeekerState.PreOpenDocumentTree() || UploadDirectoryManager.AreAnyFromLegacy())
                     {
-                        keys = ParseSharedDirectoryLegacy(null, SeekerState.SharedFileCache?.FullInfo, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out helperIndex, out hiddenDirectories);
+                        presentableNameToFullFileInfo = GetFullFileInfoFromSharedDirectoryLegacy(null, SeekerState.SharedFileCache?.PresentableNameToFullFileInfo, ref directoryCount, out browseResponse, out presentableDirectoryNameToDirectoryUriMappings, out fileKeyToPresentableName, out hiddenDirectories);
                     }
                     else
                     {
-                        keys = ParseSharedDirectoryFastDocContract(null, SeekerState.SharedFileCache?.FullInfo, ref directoryCount, out browseResponse, out dirMappingFriendlyNameToUri, out helperIndex, out hiddenDirectories);
+                        presentableNameToFullFileInfo = GetFullFileInfoFromSharedDirectory(null, SeekerState.SharedFileCache?.PresentableNameToFullFileInfo, ref directoryCount, out browseResponse, out presentableDirectoryNameToDirectoryUriMappings, out fileKeyToPresentableName, out hiddenDirectories);
                     }
 
-                    int nonHiddenCountForServer = keys.Count(pair1 => !pair1.Value.Item5);
+                    int nonHiddenCountForServer = presentableNameToFullFileInfo.Count(pair1 => !pair1.Value.Item5);
                     Logger.Debug($"Non Hidden Count for Server: {nonHiddenCountForServer}");
 
                     SeekerState.NumberParsed = int.MaxValue; //our signal that we are finishing up...
                     s.Stop();
-                    Logger.Debug(string.Format("{0} Files parsed in {1} milliseconds", keys.Keys.Count, s.ElapsedMilliseconds));
+                    Logger.Debug(string.Format("{0} Files parsed in {1} milliseconds", presentableNameToFullFileInfo.Keys.Count, s.ElapsedMilliseconds));
                     s.Reset();
                     s.Start();
 
-                    Dictionary<string, List<int>> tokenIndex = new Dictionary<string, List<int>>();
-                    var reversed = helperIndex.ToDictionary(x => x.Value, x => x.Key);
-                    foreach (string presentableName in keys.Keys)
+                    Dictionary<string, List<int>> searchTermTokenToListOfFileKeys = new Dictionary<string, List<int>>();
+                    var presentableNameToFileKey = fileKeyToPresentableName.ToDictionary(x => x.Value, x => x.Key);
+                    foreach (string presentableName in presentableNameToFullFileInfo.Keys)
                     {
                         string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(SimpleHelpers.GetFileNameFromFile(presentableName));
                         searchableName = SharedFileCache.MatchSpecialCharAgnostic(searchableName);
-                        int code = reversed[presentableName];
+                        int code = presentableNameToFileKey[presentableName];
                         foreach (string token in searchableName.ToLower().Split(null)) //null means whitespace
                         {
                             if (token == string.Empty)
                             {
                                 continue;
                             }
-                            if (tokenIndex.ContainsKey(token))
+                            if (searchTermTokenToListOfFileKeys.ContainsKey(token))
                             {
-                                tokenIndex[token].Add(code);
+                                searchTermTokenToListOfFileKeys[token].Add(code);
                             }
                             else
                             {
-                                tokenIndex[token] = new List<int>();
-                                tokenIndex[token].Add(code);
+                                searchTermTokenToListOfFileKeys[token] = new List<int>();
+                                searchTermTokenToListOfFileKeys[token].Add(code);
                             }
                         }
                     }
                     s.Stop();
-
-                    //foreach(string token in tokenIndex.Keys)
-                    //{
-                    //    Logger.Debug(token);
-                    //}
-
                     Logger.Debug(string.Format("Token index created in {0} milliseconds", s.ElapsedMilliseconds));
 
                     //s.Stop();
                     //Logger.Debug("ParseSharedDirectory: " + s.ElapsedMilliseconds);
 
                     var newCachedResults = new CachedParseResults(
-                        keys,
+                        presentableNameToFullFileInfo,
                         browseResponse.DirectoryCount, // todo?
                         browseResponse,
                         hiddenDirectories,
-                        dirMappingFriendlyNameToUri,
-                        tokenIndex,
-                        helperIndex,
+                        presentableDirectoryNameToDirectoryUriMappings,
+                        searchTermTokenToListOfFileKeys,
+                        fileKeyToPresentableName,
                         nonHiddenCountForServer);
                     StoreCachedParseResults(SeekerState.ActiveActivityRef, newCachedResults);
 
@@ -1311,7 +1085,7 @@ namespace Seeker.Services
                     // TODO we do not save the directoryCount ?? and so subsequent times its just browseResponse.Count?
                     // would it ever be different?
 
-                    SharedFileCache sharedFileCache = new SharedFileCache(keys, directoryCount, browseResponse, dirMappingFriendlyNameToUri, tokenIndex, helperIndex, hiddenDirectories, nonHiddenCountForServer);//.Select(_=>_.Item1).ToList());
+                    SharedFileCache sharedFileCache = new SharedFileCache(presentableNameToFullFileInfo, directoryCount, browseResponse, presentableDirectoryNameToDirectoryUriMappings, searchTermTokenToListOfFileKeys, fileKeyToPresentableName, hiddenDirectories, nonHiddenCountForServer);//.Select(_=>_.Item1).ToList());
                     SharedFileCache_Refreshed(null, (sharedFileCache.DirectoryCount, nonHiddenCountForServer != -1 ? nonHiddenCountForServer : sharedFileCache.FileCount));
                     SeekerState.SharedFileCache = sharedFileCache;
 
@@ -1360,10 +1134,10 @@ namespace Seeker.Services
                     }
                     else
                     {
-                        SharedFileCache sharedFileCache = new SharedFileCache(cachedParseResults.keys, // todo new constructor
-                            cachedParseResults.directoryCount, cachedParseResults.browseResponse, cachedParseResults.friendlyDirNameToUriMapping,
-                            cachedParseResults.tokenIndex, cachedParseResults.helperIndex, cachedParseResults.browseResponseHiddenPortion,
-                            cachedParseResults.nonHiddenFileCount);
+                        SharedFileCache sharedFileCache = new SharedFileCache(cachedParseResults.PresentableNameToFullFileInfo,
+                            cachedParseResults.DirectoryCount, cachedParseResults.BrowseResponse, cachedParseResults.PresentableDirectoryNameToDirectoryUriMappings,
+                            cachedParseResults.SearchTermTokenToListOfFileKeys, cachedParseResults.FileKeyToPresentableName, cachedParseResults.BrowseResponseHiddenPortion,
+                            cachedParseResults.NonHiddenFileCount);
 
                         SharedFileCache_Refreshed(null, (sharedFileCache.DirectoryCount, sharedFileCache.GetNonHiddenFileCountForServer() != -1 ? sharedFileCache.GetNonHiddenFileCountForServer() : sharedFileCache.FileCount));
                         SeekerState.SharedFileCache = sharedFileCache;

@@ -7,36 +7,32 @@ namespace Seeker
     public class CachedParseResults
     {
         public CachedParseResults(
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> keys,
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfo,
             int directoryCount,
             BrowseResponse browseResponse,
             List<Directory> browseResponseHiddenPortion,
-            List<Tuple<string, string>> friendlyDirNameToUriMapping,
-            Dictionary<string, List<int>> tokenIndex,
-            Dictionary<int, string> helperIndex,
+            List<Tuple<string, string>> presentableDirectoryNameToDirectoryUriMappings,
+            Dictionary<string, List<int>> searchTermTokenToListOfFileKeys,
+            Dictionary<int, string> fileKeyToPresentableName,
             int nonHiddenFileCount)
         {
-            this.keys = keys;
-            this.directoryCount = directoryCount;
-            this.browseResponse = browseResponse;
-            this.browseResponseHiddenPortion = browseResponseHiddenPortion;
-            this.friendlyDirNameToUriMapping = friendlyDirNameToUriMapping;
-            this.tokenIndex = tokenIndex;
-            this.helperIndex = helperIndex;
-            this.nonHiddenFileCount = nonHiddenFileCount;
+            this.PresentableNameToFullFileInfo = presentableNameToFullFileInfo;
+            this.DirectoryCount = directoryCount;
+            this.BrowseResponse = browseResponse;
+            this.BrowseResponseHiddenPortion = browseResponseHiddenPortion;
+            this.PresentableDirectoryNameToDirectoryUriMappings = presentableDirectoryNameToDirectoryUriMappings;
+            this.SearchTermTokenToListOfFileKeys = searchTermTokenToListOfFileKeys;
+            this.FileKeyToPresentableName = fileKeyToPresentableName;
+            this.NonHiddenFileCount = nonHiddenFileCount;
         }
 
-        public CachedParseResults()
-        {
-        }
-
-        public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> keys = null;
-        public int directoryCount = -1;
-        public BrowseResponse browseResponse = null;
-        public List<Soulseek.Directory> browseResponseHiddenPortion = null;
-        public List<Tuple<string, string>> friendlyDirNameToUriMapping = null;
-        public Dictionary<string, List<int>> tokenIndex = null;
-        public Dictionary<int, string> helperIndex = null;
-        public int nonHiddenFileCount = -1;
+        public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> PresentableNameToFullFileInfo { get; private set; }
+        public int DirectoryCount { get; private set; } = -1;
+        public BrowseResponse BrowseResponse { get; private set; }
+        public List<Soulseek.Directory> BrowseResponseHiddenPortion { get; private set; }
+        public List<Tuple<string, string>> PresentableDirectoryNameToDirectoryUriMappings { get; private set; }
+        public Dictionary<string, List<int>> SearchTermTokenToListOfFileKeys { get; private set; }
+        public Dictionary<int, string> FileKeyToPresentableName { get; private set; }
+        public int NonHiddenFileCount { get; private set; } = -1;
     }
 }
