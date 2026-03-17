@@ -29,7 +29,7 @@ namespace Seeker
         {
             if (string.IsNullOrEmpty(Info.DisplayNameOverride))
             {
-                SharedFileService.GetAllFolderInfo(this, out _, out _, out _, out _, out string presentableName);
+                SharedFileService.GetAllFolderInfo(this, out _, out string presentableName);
                 return presentableName;
             }
             else
@@ -48,7 +48,7 @@ namespace Seeker
             }
             else
             {
-                SharedFileService.GetAllFolderInfo(ourTopMostParent, out bool overrideCase, out _, out _, out string rootOverrideName, out string parentPresentableName);
+                SharedFileService.GetAllFolderInfo(ourTopMostParent, out _, out string parentPresentableName);
                 return parentPresentableName + ourLastPathSegment.Substring(parentLastPathSegment.Length);
             }
         }

@@ -61,10 +61,10 @@ namespace Seeker.Services
                 }
 
                 DocumentFile uploadDirectory = uploadDirEntry.UploadDirectory;
-                GetAllFolderInfo(uploadDirEntry, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out _);
+                GetAllFolderInfo(uploadDirEntry, out string rootFolderDisplayName, out _);
 
                 traverseDirectoriesGatherFullFileInfos(SeekerState.ActiveActivityRef.ContentResolver, uploadDirectory.Uri, DocumentsContract.GetTreeDocumentId(uploadDirectory.Uri), uploadDirectory.Uri,
-                    presentableNameToFullFileInfos, true, volName, allDirs, allLockedDirs, allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, uploadDirectory, allMediaStoreInfo, previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null,
+                    presentableNameToFullFileInfos, allDirs, allLockedDirs, allHiddenDirs, dirMappingFriendlyNameToUri, allMediaStoreInfo, previousFileInfoToUse, rootFolderDisplayName,
                     ref directoryCount);
             }
 
@@ -78,15 +78,15 @@ namespace Seeker.Services
             };
         }
 
-        public static void GetAllFolderInfo(UploadDirectoryEntry uploadDirEntry, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out string presentableNameToUse)
+        public static void GetAllFolderInfo(UploadDirectoryEntry uploadDirEntry, out string rootFolderDisplayName, out string presentableNameToUse)
         {
             DocumentFile dir = uploadDirEntry.UploadDirectory;
-            Android.Net.Uri uri = dir.Uri;//Android.Net.Uri.Parse(uploadDirEntry.Info.UploadDataDirectoryUri);
+            Android.Net.Uri uri = dir.Uri;
             Logger.InfoFirebase("case " + uri.ToString() + " - - - - " + uri.LastPathSegment);
             string lastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(dir, out bool msdCase);
-            toStrip = string.Empty;
+            string toStrip = string.Empty;
             //can be reproduced with pixel emulator API 28 (android 9). the last path segment for the downloads dir is "downloads" but the last path segment for its child is "raw:/storage/emulated/0/Download/Soulseek Complete" (note it is still a content scheme, raw: is the volume)
-            volName = null;
+            string volName = null;
             if (!msdCase)
             {
                 volName = FileFilterHelper.GetVolumeName(lastPathSegment, true, out _);
@@ -112,33 +112,15 @@ namespace Seeker.Services
                 }
             }
 
-
             rootFolderDisplayName = uploadDirEntry.Info.DisplayNameOverride;
-            overrideCase = false;
 
             if (msdCase)
             {
-                overrideCase = true;
                 if (string.IsNullOrEmpty(rootFolderDisplayName))
                 {
                     rootFolderDisplayName = "downloads";
                 }
-                volName = null; //i.e. nothing to strip out!
-                toStrip = string.Empty;
             }
-
-            if (!string.IsNullOrEmpty(rootFolderDisplayName))
-            {
-                overrideCase = true;
-                volName = null; //i.e. nothing to strip out!
-                toStrip = string.Empty;
-            }
-
-            // Forcing Override Case
-            // Basically there are two ways we construct the tree. One by appending each new name to the base as we go
-            // (the 'Override' Case) the other by taking current.Uri minus root.Uri to get the difference.  
-            // The latter does not work because sometimes current.Uri will be say "home:" and root will be say "primary:".
-            overrideCase = true;
 
             if (!string.IsNullOrEmpty(rootFolderDisplayName))
             {
@@ -266,11 +248,11 @@ namespace Seeker.Services
                 }
 
                 DocumentFile dir = uploadDirEntry.UploadDirectory;
-                GetAllFolderInfo(uploadDirEntry, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out _);
+                GetAllFolderInfo(uploadDirEntry, out string rootFolderDisplayName, out _);
 
-                traverseDirectoryEntriesLegacy(dir, pairs, true, allDirs, allLockedDirs,
-                    allHiddenDirs, dirMappingFriendlyNameToUri, toStrip,
-                    previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null,
+                traverseDirectoryEntriesLegacy(dir, pairs, allDirs, allLockedDirs,
+                    allHiddenDirs, dirMappingFriendlyNameToUri,
+                    previousFileInfoToUse, rootFolderDisplayName,
                     ref directoryCount);
             }
 
@@ -677,10 +659,10 @@ namespace Seeker.Services
         }
 
         public static void traverseDirectoriesGatherFullFileInfos(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri,
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfos, bool isRootCase, string volName, List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs,
-            List<Tuple<string, string>> dirMappingFriendlyNameToUri, string folderToStripForPresentableNames, DocumentFile rootDirCase,
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfos, List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs,
+            List<Tuple<string, string>> dirMappingFriendlyNameToUri,
             Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
-            bool msdMsfOrOverrideCase, string msdMsfOrOverrideBuildParentName, ref int totalDirectoryCount)
+            string parentDisplayName, ref int totalDirectoryCount)
         {
             //this should be the folder before the selected to strip away..
             Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, parentDoc);
@@ -717,24 +699,13 @@ namespace Seeker.Services
                     if (isDirectory(mime))
                     {
                         totalDirectoryCount++;
-                        traverseDirectoriesGatherFullFileInfos(contentResolver, rootUri, docId, childUri, presentableNameToFullFileInfos, false, volName, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
-                            dirMappingFriendlyNameToUri, folderToStripForPresentableNames, null, allMediaInfoDict, previousFileInfoToUse,
-                            msdMsfOrOverrideCase, msdMsfOrOverrideCase ? msdMsfOrOverrideBuildParentName + '\\' + name : null, ref totalDirectoryCount);
+                        traverseDirectoriesGatherFullFileInfos(contentResolver, rootUri, docId, childUri, presentableNameToFullFileInfos, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
+                            dirMappingFriendlyNameToUri, allMediaInfoDict, previousFileInfoToUse,
+                            parentDisplayName + '\\' + name, ref totalDirectoryCount);
                     }
                     else
                     {
-                        string presentableName = null;
-                        if (msdMsfOrOverrideCase)
-                        {
-                            presentableName = msdMsfOrOverrideBuildParentName + '\\' + name;
-                        }
-                        else
-                        {
-                            presentableName = FileFilterHelper.GetPresentableName(childUri, folderToStripForPresentableNames, volName);
-                        }
-
-
-                        string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + @"\" + SimpleHelpers.GetFileNameFromFile(presentableName);
+                        string presentableName = parentDisplayName + '\\' + name;
 
                         Tuple<int, int, int, int> attributes = GetAudioAttributes(contentResolver, name, size, presentableName, childUri, allMediaInfoDict, previousFileInfoToUse);
                         if (attributes != null)
@@ -767,39 +738,7 @@ namespace Seeker.Services
                     }
                 }
                 SimpleHelpers.SortSlskDirFiles(files);
-                string lastPathSegment = null;
-                if (msdMsfOrOverrideCase)
-                {
-                    lastPathSegment = msdMsfOrOverrideBuildParentName;
-                }
-                else if (isRootCase)
-                {
-                    lastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(rootDirCase, out _);
-                }
-                else
-                {
-                    lastPathSegment = parentUri.LastPathSegment;
-                }
-                string directoryPath = lastPathSegment.Replace("/", @"\");
-
-                if (!msdMsfOrOverrideCase)
-                {
-                    if (folderToStripForPresentableNames == null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
-                    {
-                        if (volName != null && volName.Length != directoryPath.Length) //i.e. if it has something after it.. primary: should be primary: not primary:\ but primary:Alarms should be primary:\Alarms
-                        {
-                            if (volName.Length > directoryPath.Length)
-                            {
-                                Logger.Firebase("volName > directoryPath" + volName + " -- " + directoryPath + " -- " + isRootCase);
-                            }
-                            directoryPath = directoryPath.Substring(0, volName.Length) + '\\' + directoryPath.Substring(volName.Length);
-                        }
-                    }
-                    else
-                    {
-                        directoryPath = directoryPath.Substring(folderToStripForPresentableNames.Length);
-                    }
-                }
+                string directoryPath = parentDisplayName;
 
                 var slskDir = new Soulseek.Directory(directoryPath, files);
                 if (FileFilterHelper.IsHiddenFolder(directoryPath))
@@ -823,10 +762,10 @@ namespace Seeker.Services
             }
         }
 
-        public static void traverseDirectoryEntriesLegacy(DocumentFile parentDocFile, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs, bool isRootCase,
+        public static void traverseDirectoryEntriesLegacy(DocumentFile parentDocFile, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs,
             List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri,
-            string folderToStripForPresentableNames, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
-            bool overrideCase, string msdMsfOrOverrideBuildParentName,
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
+            string parentDisplayName,
             ref int totalDirectoryCount)
         {
             //this should be the folder before the selected to strip away..
@@ -836,24 +775,13 @@ namespace Seeker.Services
                 if (childDocFile.IsDirectory)
                 {
                     totalDirectoryCount++;
-                    traverseDirectoryEntriesLegacy(childDocFile, pairs, false, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
-                        dirMappingFriendlyNameToUri, folderToStripForPresentableNames, previousFileInfoToUse, overrideCase,
-                        overrideCase ? msdMsfOrOverrideBuildParentName + '\\' + childDocFile.Name : null, ref totalDirectoryCount);
+                    traverseDirectoryEntriesLegacy(childDocFile, pairs, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
+                        dirMappingFriendlyNameToUri, previousFileInfoToUse,
+                        parentDisplayName + '\\' + childDocFile.Name, ref totalDirectoryCount);
                 }
                 else
                 {
-                    //for subAPI21 last path segment is:
-                    //".android_secure" so just the filename whereas Path is more similar to last part segment:
-                    //"/storage/sdcard/.android_secure"
-                    string presentableName = childDocFile.Uri.Path.Replace('/', '\\');
-                    if (overrideCase)
-                    {
-                        presentableName = msdMsfOrOverrideBuildParentName + '\\' + childDocFile.Name;
-                    }
-                    else if (folderToStripForPresentableNames != null) //this means that the primary: is in the path so at least convert it from primary: to primary:\
-                    {
-                        presentableName = presentableName.Substring(folderToStripForPresentableNames.Length);
-                    }
+                    string presentableName = parentDisplayName + '\\' + childDocFile.Name;
 
                     Tuple<int, int, int, int> attributes = GetAudioAttributes(SeekerState.ActiveActivityRef.ContentResolver, childDocFile.Name, childDocFile.Length(), presentableName, childDocFile.Uri, null, previousFileInfoToUse);
                     if (attributes != null)
@@ -884,16 +812,7 @@ namespace Seeker.Services
             }
 
             SimpleHelpers.SortSlskDirFiles(files);
-            string directoryPath = parentDocFile.Uri.Path.Replace("/", @"\");
-
-            if (overrideCase)
-            {
-                directoryPath = msdMsfOrOverrideBuildParentName;
-            }
-            else if (folderToStripForPresentableNames != null)
-            {
-                directoryPath = directoryPath.Substring(folderToStripForPresentableNames.Length);
-            }
+            string directoryPath = parentDisplayName;
 
             var slskDir = new Soulseek.Directory(directoryPath, files);
             if (FileFilterHelper.IsHiddenFolder(directoryPath))

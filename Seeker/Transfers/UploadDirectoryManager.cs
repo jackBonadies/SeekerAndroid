@@ -157,11 +157,11 @@ namespace Seeker
                 }
                 else
                 {
-                    SharedFileService.GetAllFolderInfo(dirEntry, out _, out _, out _, out _, out string presentableName);
+                    SharedFileService.GetAllFolderInfo(dirEntry, out _, out string presentableName);
                     currentRootNames.Add(presentableName);
                 }
             }
-            SharedFileService.GetAllFolderInfo(newDirEntry, out _, out _, out _, out _, out string presentableNameNew);
+            SharedFileService.GetAllFolderInfo(newDirEntry, out _, out string presentableNameNew);
             if (currentRootNames.Contains(presentableNameNew))
             {
                 isUnique = false;
