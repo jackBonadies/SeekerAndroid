@@ -46,12 +46,12 @@ namespace Seeker.Messages
             {
                 return;
             }
-            SeekerState.SoulseekClient.PrivateMessageReceived += Client_PrivateMessageReceived;
             lock (MessageListLockObject)
             {
                 //SerializationHelper.MigratedMessages(SeekerState.SharedPreferences, KeyConsts.M_Messages_Legacy, KeyConsts.M_Messages);
                 RestoreMessagesFromSharedPrefs(SeekerState.SharedPreferences);
             }
+            SeekerState.SoulseekClient.PrivateMessageReceived += Client_PrivateMessageReceived;
             RestoreLastReadCountsFromSharedPrefs(SeekerState.SharedPreferences);
             bool isFirstTimeInit = !SeekerState.SharedPreferences.Contains(KeyConsts.M_LastReadMessageCounts);
             if (isFirstTimeInit && RootMessages != null)
