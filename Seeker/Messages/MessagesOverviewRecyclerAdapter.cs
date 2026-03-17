@@ -223,6 +223,9 @@ namespace Seeker.Messages
         private TextView viewDateTimeAgo;
         private TextView unreadBadge;
         private ImageView viewStatusIndicator;
+        private Color cellTextColor;
+        private Color subduedColor;
+        private Color verySubduedColor;
 
         public MessageOverviewView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
@@ -248,6 +251,9 @@ namespace Seeker.Messages
             viewDateTimeAgo = FindViewById<TextView>(Resource.Id.dateTimeAgo);
             unreadBadge = FindViewById<TextView>(Resource.Id.unreadBadge);
             viewStatusIndicator = FindViewById<ImageView>(Resource.Id.statusIndicator);
+            cellTextColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColor);
+            subduedColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued);
+            verySubduedColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorVerySubdued);
         }
 
         private void SetStatusIndicator(string username)
@@ -310,9 +316,6 @@ namespace Seeker.Messages
 
             SetStatusIndicator(username);
 
-            var cellTextColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColor);
-            var subduedColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued);
-
             int unreadCount = MessageController.GetUnreadCount(username);
             if (unreadCount > 0)
             {
@@ -331,11 +334,11 @@ namespace Seeker.Messages
             {
                 unreadBadge.Visibility = ViewStates.Gone;
 
-                // read: username normal white, message subdued
+                // read: username normal, message more subdued for contrast
                 viewUsername.SetTypeface(null, TypefaceStyle.Normal);
                 viewUsername.SetTextColor(cellTextColor);
                 viewMessage.SetTypeface(null, TypefaceStyle.Normal);
-                viewMessage.SetTextColor(subduedColor);
+                viewMessage.SetTextColor(verySubduedColor);
                 viewDateTimeAgo.SetTypeface(null, TypefaceStyle.Normal);
                 viewDateTimeAgo.SetTextColor(subduedColor);
             }

@@ -55,6 +55,7 @@
         <item name="secondaryColor">#cccccc</item>
         <item name="cellTextColor">#2c3e50</item>
         <item name="cellTextColorSubdued">#cc2c3e50</item>
+        <item name="cellTextColorVerySubdued">#802c3e50</item>
         <item name="slightestContrastColor">#e0e0e0</item>
         <item name="slightContrastColor">#c7c7c7</item>
         <item name="mainTextColor">#4f58c4</item>
@@ -231,6 +232,7 @@
         <item name="secondaryColor">#ff424242</item>
         <item name="cellTextColor">#ffffffff</item>
         <item name="cellTextColorSubdued">#ccffffff</item>
+        <item name="cellTextColorVerySubdued">#80ffffff</item>
         <item name="slightestContrastColor">#4E4E4E</item>
         <item name="slightContrastColor">#6d6d6d</item>
 
@@ -284,6 +286,7 @@
         <item name="secondaryColor">#ff202020</item>
         <item name="cellTextColor">#ffE4E4E4</item>
         <item name="cellTextColorSubdued">#ccE4E4E4</item>
+        <item name="cellTextColorVerySubdued">#80E4E4E4</item>
 
         <item name="the_rounded_corner_background_drawable">
             @drawable/rounded_corner_background_dark_amoled

@@ -8,6 +8,7 @@
     <attr name="secondaryColor" format="color" />
     <attr name="cellTextColor" format="color" />
     <attr name="cellTextColorSubdued" format="color" />
+    <attr name="cellTextColorVerySubdued" format="color" />
     <attr name="slightestContrastColor" format="color" />
     <attr name="slightContrastColor" format="color" />
     <attr name="dialog_background" format="color" />
