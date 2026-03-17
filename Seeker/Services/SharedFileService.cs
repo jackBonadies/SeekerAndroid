@@ -543,20 +543,12 @@ namespace Seeker.Services
 
                 if ((PreferencesState.PerformDeepMetadataSearch && (bitrate == -1 || duration == -1) && size != 0))
                 {
+                    Android.Media.MediaMetadataRetriever mediaMetadataRetriever = new Android.Media.MediaMetadataRetriever();
                     try
                     {
-                        Android.Media.MediaMetadataRetriever mediaMetadataRetriever = new Android.Media.MediaMetadataRetriever();
                         mediaMetadataRetriever.SetDataSource(SeekerState.ActiveActivityRef, childUri); //TODO: error file descriptor must not be null.
                         string? bitRateStr = mediaMetadataRetriever.ExtractMetadata(Android.Media.MetadataKey.Bitrate);
                         string? durationStr = mediaMetadataRetriever.ExtractMetadata(Android.Media.MetadataKey.Duration);
-                        if (HasMediaStoreDurationColumn())
-                        {
-                            mediaMetadataRetriever.Close(); //added in api 29
-                        }
-                        else
-                        {
-                            mediaMetadataRetriever.Release();
-                        }
 
                         if (bitRateStr != null)
                         {
@@ -585,6 +577,17 @@ namespace Seeker.Services
                         if (sampleRate == -1 || duration == -1 || bitDepth == -1)
                         {
                             Logger.Firebase("MediaMetadataRetriever: " + e.Message + e.StackTrace + " isnull" + (SeekerState.ActiveActivityRef == null) + childUri?.ToString());
+                        }
+                    }
+                    finally
+                    {
+                        if (HasMediaStoreDurationColumn())
+                        {
+                            mediaMetadataRetriever.Close(); //added in api 29
+                        }
+                        else
+                        {
+                            mediaMetadataRetriever.Release();
                         }
                     }
                 }
