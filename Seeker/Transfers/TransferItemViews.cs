@@ -677,16 +677,7 @@ namespace Seeker
             var theme = pb.Context.Theme;
             int color = resources.GetColor(colorResId, theme);
 
-#pragma warning disable 0618
-            if (OperatingSystem.IsAndroidVersionAtLeast(21))
-            {
-                pb.ProgressTintList = ColorStateList.ValueOf(new Color(color));
-            }
-            else
-            {
-                pb.ProgressDrawable.SetColorFilter(new Color(color), PorterDuff.Mode.Multiply);
-            }
-#pragma warning restore 0618
+            pb.ProgressTintList = ColorStateList.ValueOf(new Color(color));
         }
 
         public static void SetAdditionalStatusText(

@@ -881,7 +881,7 @@ namespace Seeker.Services
                     }
 
                     FullFileInfosResult result;
-                    if (SeekerState.PreOpenDocumentTree() || UploadDirectoryManager.AreAnyFromLegacy())
+                    if (UploadDirectoryManager.AreAnyFromLegacy())
                     {
                         result = GetFullFileInfoFromSharedDirectoryLegacy(SeekerState.SharedFileCache?.PresentableNameToFullFileInfo);
                     }

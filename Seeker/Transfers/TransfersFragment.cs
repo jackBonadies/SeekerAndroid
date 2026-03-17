@@ -415,15 +415,7 @@ namespace Seeker
             StaticHacks.TransfersFrag = this;
             HasOptionsMenu = true;
             Logger.Debug("TransfersFragment OnCreateView");
-            if (!OperatingSystem.IsAndroidVersionAtLeast(21))
-            {
-                AndroidX.AppCompat.App.AppCompatDelegate.CompatVectorFromResourcesEnabled = true;
-                this.rootView = inflater.Inflate(Resource.Layout.transfers, container, false);
-            }
-            else
-            {
-                this.rootView = inflater.Inflate(Resource.Layout.transfers, container, false);
-            }
+            this.rootView = inflater.Inflate(Resource.Layout.transfers, container, false);
             recyclerViewTransferItems = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerView1);
             this.noTransfers = rootView.FindViewById<View>(Resource.Id.noTransfersView);
             this.noTransfersIcon = rootView.FindViewById<ImageView>(Resource.Id.noTransfersIcon);

@@ -206,19 +206,9 @@ namespace Seeker
                 if (resultCode == Result.Ok)
                 {
                     AndroidX.DocumentFile.Provider.DocumentFile chosenFile = null;
-                    if (SeekerState.PreOpenDocumentTree())
-                    {
-                        chosenFile = AndroidX.DocumentFile.Provider.DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
-                    }
-                    else
-                    {
-                        chosenFile = AndroidX.DocumentFile.Provider.DocumentFile.FromSingleUri(this, data.Data);
-                    }
+                    chosenFile = AndroidX.DocumentFile.Provider.DocumentFile.FromSingleUri(this, data.Data);
 
-                    //for samsung galaxy api 19 chosenFile.Exists() returns false, whether DF.FromFile or DF.FromSingleUri
-                    //even tho it returns false it still works completely fine..
-
-                    if (chosenFile == null || (!SeekerState.PreOpenDocumentTree() && !chosenFile.Exists())) //i.e. its not an error if <21 and does not exist.
+                    if (chosenFile == null || !chosenFile.Exists())
                     {
                         Logger.Firebase("selected image does not exist !!!!");
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_image_doesnt_exist), ToastLength.Long);

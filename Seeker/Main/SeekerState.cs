@@ -153,10 +153,6 @@ namespace Seeker
             return !OperatingSystem.IsAndroidVersionAtLeast(29);
         }
 
-        public static bool PreOpenDocumentTree()
-        {
-            return !OperatingSystem.IsAndroidVersionAtLeast(21);
-        }
 
         public static bool PreMoveDocument()
         {
@@ -210,14 +206,7 @@ namespace Seeker
 
         public static DocumentFile OpenRootFile(Context context, Android.Net.Uri chosenUri)
         {
-            if (SeekerState.PreOpenDocumentTree())
-            {
-                return DocumentFile.FromFile(new Java.IO.File(chosenUri.Path));
-            }
-            else
-            {
-                return DocumentFile.FromTreeUri(context, chosenUri);
-            }
+            return DocumentFile.FromTreeUri(context, chosenUri);
         }
     }
 

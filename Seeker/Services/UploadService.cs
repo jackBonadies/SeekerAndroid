@@ -117,7 +117,7 @@ namespace Seeker.Services
                 }
             }
 
-            if (SeekerState.PreOpenDocumentTree() || !UploadDirectoryManager.IsFromTree(filename)) //IsFromTree method!
+            if (!UploadDirectoryManager.IsFromTree(filename)) //IsFromTree method!
             {
                 ourFile = DocumentFile.FromFile(new Java.IO.File(ourUri.Path));
             }

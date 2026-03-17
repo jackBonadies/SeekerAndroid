@@ -291,32 +291,16 @@ namespace Seeker
             {
 
 #pragma warning disable 0618
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
-                }
-                else
-                {
-                    e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                }
+                e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
+                e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
 #pragma warning restore 0618
                 this.customAdapter.SelectedPositions.Add(e.Position);
             }
             else
             {
 #pragma warning disable 0618
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    e.View.Background = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
-                }
-                else
-                {
-                    e.View.Background = new Android.Graphics.Drawables.ColorDrawable(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellback));
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = new Android.Graphics.Drawables.ColorDrawable(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellback));
-                }
+                e.View.Background = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
+                e.View.FindViewById(Resource.Id.mainDlLayout).Background = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
 #pragma warning restore 0618
                 this.customAdapter.SelectedPositions.Remove(e.Position);
             }
@@ -325,36 +309,32 @@ namespace Seeker
 
         private void SetDownloadSelectedButtonState()
         {
-            //backgroundtintlist is api 21+ so lower than this, there is no disabled state change which is fine.
-            if (OperatingSystem.IsAndroidVersionAtLeast(21))
+            if (this.customAdapter == null || this.customAdapter.SelectedPositions.Count == 0)
             {
-                if (this.customAdapter == null || this.customAdapter.SelectedPositions.Count == 0)
-                {
-                    //get backed in disabled color.
-                    Color mainColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainPurple);
-                    Color backgroundColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellback);
-                    int disableColor = AndroidX.Core.Graphics.ColorUtils.BlendARGB(mainColor.ToArgb(), backgroundColor.ToArgb(), 0.5f);
+                //get backed in disabled color.
+                Color mainColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainPurple);
+                Color backgroundColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellback);
+                int disableColor = AndroidX.Core.Graphics.ColorUtils.BlendARGB(mainColor.ToArgb(), backgroundColor.ToArgb(), 0.5f);
 
-                    int red = Color.GetRedComponent(disableColor);
-                    int green = Color.GetGreenComponent(disableColor);
-                    int blue = Color.GetBlueComponent(disableColor);
+                int red = Color.GetRedComponent(disableColor);
+                int green = Color.GetGreenComponent(disableColor);
+                int blue = Color.GetBlueComponent(disableColor);
 
-                    int disableTextColor = AndroidX.Core.Graphics.ColorUtils.BlendARGB(Color.White.ToArgb(), backgroundColor.ToArgb(), 0.5f);
+                int disableTextColor = AndroidX.Core.Graphics.ColorUtils.BlendARGB(Color.White.ToArgb(), backgroundColor.ToArgb(), 0.5f);
 
-                    int redtc = Color.GetRedComponent(disableTextColor);
-                    int greentc = Color.GetGreenComponent(disableTextColor);
-                    int bluetc = Color.GetBlueComponent(disableTextColor);
+                int redtc = Color.GetRedComponent(disableTextColor);
+                int greentc = Color.GetGreenComponent(disableTextColor);
+                int bluetc = Color.GetBlueComponent(disableTextColor);
 
-                    downloadSelectedButton.SetTextColor(ColorStateList.ValueOf(Color.Argb(255, redtc, greentc, bluetc)));
-                    downloadSelectedButton.BackgroundTintList = ColorStateList.ValueOf(Color.Argb(255, red, green, blue));
-                    downloadSelectedButton.Clickable = false;
-                }
-                else
-                {
-                    downloadSelectedButton.SetTextColor(ColorStateList.ValueOf(Color.White));
-                    downloadSelectedButton.BackgroundTintList = null;
-                    downloadSelectedButton.Clickable = true;
-                }
+                downloadSelectedButton.SetTextColor(ColorStateList.ValueOf(Color.Argb(255, redtc, greentc, bluetc)));
+                downloadSelectedButton.BackgroundTintList = ColorStateList.ValueOf(Color.Argb(255, red, green, blue));
+                downloadSelectedButton.Clickable = false;
+            }
+            else
+            {
+                downloadSelectedButton.SetTextColor(ColorStateList.ValueOf(Color.White));
+                downloadSelectedButton.BackgroundTintList = null;
+                downloadSelectedButton.Clickable = true;
             }
         }
 
@@ -664,35 +644,17 @@ namespace Seeker
             if (SelectedPositions.Contains(position))
             {
 #pragma warning disable 0618
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    var cellbackSelected = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
-                    itemView.Background = cellbackSelected;
-                    itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = cellbackSelected;
-                }
-                else
-                {
-                    var cellbackSelected = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected);
-                    itemView.Background = cellbackSelected;
-                    itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = cellbackSelected;
-                }
+                var cellbackSelected = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
+                itemView.Background = cellbackSelected;
+                itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = cellbackSelected;
 #pragma warning restore 0618
             }
             else //views get reused, hence we need to reset the color so that when we scroll the resused views arent still highlighted.
             {
 #pragma warning disable 0618
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    var cellbackNormal = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
-                    itemView.Background = cellbackNormal;
-                    itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = cellbackNormal;
-                }
-                else
-                {
-                    var cellbackNormal = new Android.Graphics.Drawables.ColorDrawable(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellback));
-                    itemView.Background = cellbackNormal;
-                    itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = cellbackNormal;
-                }
+                var cellbackNormal = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
+                itemView.Background = cellbackNormal;
+                itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = cellbackNormal;
             }
 #pragma warning restore 0618
             return itemView;

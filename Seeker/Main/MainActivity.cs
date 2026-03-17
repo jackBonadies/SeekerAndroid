@@ -650,14 +650,7 @@ namespace Seeker
                     // basically it clears all activities in the current task.
                     intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
                     this.StartActivity(intent3);
-                    if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                    {
-                        this.FinishAndRemoveTask();
-                    }
-                    else
-                    {
-                        this.FinishAffinity();
-                    }
+                    this.FinishAndRemoveTask();
                     return true;
                 case Resource.Id.about_action:
                     var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);

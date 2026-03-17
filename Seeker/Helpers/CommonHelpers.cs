@@ -381,9 +381,7 @@ namespace Seeker
                           .SetContentIntent(pendingIntent)
                           .SetOnlyAlertOnce(setOnlyAlertOnce) //maybe
                           .SetTicker(titleText);
-                //for < 21 it is possible (must use png icon instead of xml) but the icon does look great
-                //  and it doesnt clear from recents..
-                if (shutdownAction && OperatingSystem.IsAndroidVersionAtLeast(21))
+                if (shutdownAction)
                 {
                     Intent intent3 = new Intent(context, typeof(CloseActivity));
                     intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);

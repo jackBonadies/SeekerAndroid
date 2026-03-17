@@ -16,7 +16,7 @@ namespace Seeker
 
             private bool alreadyOpen;
             private const int defaultKeyboardHeightDP = 100;
-            private int EstimatedKeyboardDP = defaultKeyboardHeightDP + (OperatingSystem.IsAndroidVersionAtLeast(21) ? 48 : 0); //api 21
+            private int EstimatedKeyboardDP = defaultKeyboardHeightDP + 48;
             private View parentView;
             private Android.Graphics.Rect rect = new Android.Graphics.Rect();
             public ListenerKeyboard(View _parentView)

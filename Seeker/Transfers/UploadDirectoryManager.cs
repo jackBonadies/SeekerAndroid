@@ -251,7 +251,7 @@ namespace Seeker
                 try
                 {
                     entry.Info.ErrorState = UploadDirectoryError.NoError;
-                    if (SeekerState.PreOpenDocumentTree() || !entry.Info.UploadDataDirectoryUriIsFromTree)
+                    if (!entry.Info.UploadDataDirectoryUriIsFromTree)
                     {
                         entry.UploadDirectory = DocumentFile.FromFile(new Java.IO.File(uploadDirUri.Path));
                     }

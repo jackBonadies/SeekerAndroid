@@ -42,14 +42,7 @@ namespace Seeker
             StartService(intent);
 
             //remove this final "closing" activity from task list.
-            if (OperatingSystem.IsAndroidVersionAtLeast(21))
-            {
-                this.FinishAndRemoveTask();
-            }
-            else
-            {
-                this.FinishAffinity();
-            }
+            this.FinishAndRemoveTask();
 
             //actually unload all classes, statics, etc from JVM.
             //the process will still be a "cached background process" that is fine.

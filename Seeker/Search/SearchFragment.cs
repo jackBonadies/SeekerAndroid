@@ -176,16 +176,7 @@ namespace Seeker
             }
 
             Android.Graphics.Drawables.Drawable drawable = null;
-            if (OperatingSystem.IsAndroidVersionAtLeast(21))
-            {
-                drawable = c.Resources.GetDrawable(idOfDrawable, c.Theme);
-            }
-            else
-            {
-                AndroidX.AppCompat.App.AppCompatDelegate.CompatVectorFromResourcesEnabled = true;
-                //the above is needed else it fails **Java.Lang.RuntimeException:** 'File res/drawable/numeric_1_box_multiple_outline.xml from drawable resource ID #0x7f0700d3'
-                drawable = c.Resources.GetDrawable(idOfDrawable);
-            }
+            drawable = c.Resources.GetDrawable(idOfDrawable, c.Theme);
             imgView.SetImageDrawable(drawable);
 
         }

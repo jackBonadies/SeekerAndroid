@@ -321,7 +321,7 @@ namespace Seeker
             bool canWrite = false;
             try
             {
-                if (SeekerState.PreOpenDocumentTree() || !directoryUriFromTree)
+                if (!directoryUriFromTree)
                 {
                     canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite();
                 }
@@ -392,7 +392,7 @@ namespace Seeker
                     var incompleteRes = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
                     if (CheckDirectoryForWritePermission(context, incompleteRes, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "incomplete"))
                     {
-                        SeekerState.RootIncompleteDocumentFile = (SeekerState.PreOpenDocumentTree() || !PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
+                        SeekerState.RootIncompleteDocumentFile = (!PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
                             ? DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path))
                             : DocumentFile.FromTreeUri(context, incompleteRes);
                     }
@@ -1656,14 +1656,7 @@ namespace Seeker
             var typedValue = new TypedValue();
             c.Theme.ResolveAttribute(attr, typedValue, true);
             int drawableRes = (typedValue.ResourceId != 0) ? typedValue.ResourceId : typedValue.Data;
-            if (OperatingSystem.IsAndroidVersionAtLeast(21))
-            {
-                return c.Resources.GetDrawable(drawableRes, SeekerState.ActiveActivityRef.Theme);
-            }
-            else
-            {
-                return c.Resources.GetDrawable(drawableRes);
-            }
+            return c.Resources.GetDrawable(drawableRes, SeekerState.ActiveActivityRef.Theme);
         }
 
         /// <summary>
