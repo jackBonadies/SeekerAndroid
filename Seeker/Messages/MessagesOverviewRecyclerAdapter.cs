@@ -97,30 +97,23 @@ namespace Seeker.Messages
         {
             base.OnChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
             View itemView = viewHolder.ItemView;
-            Logger.Debug("dX" + dX);
-            if (dX > 0)
-            {
-                this.colorDrawable.SetBounds(itemView.Left, itemView.Top, itemView.Left + (int)dX, itemView.Bottom);
-            }
-            else if (dX < 0)
+            if (dX < 0)
             {
                 this.colorDrawable.SetBounds(itemView.Right + (int)dX, itemView.Top, itemView.Right, itemView.Bottom);
-                double margin = (itemView.Bottom - itemView.Top) * .15; //BOTTOM IS GREATER THAN TOP
+                double margin = (itemView.Bottom - itemView.Top) * .15;
                 int clipBounds = (int)((itemView.Bottom - itemView.Top) - 2 * margin);
                 int level = Math.Min((int)(Math.Abs((dX + margin) / (clipBounds)) * 10000), 10000);
-                Logger.Debug("level" + level);
                 if (level < 0)
                 {
                     level = 0;
                 }
                 clipDrawable.SetLevel(level);
-                //int dXicon = -300;
                 clipDrawable.SetBounds((int)(itemView.Right - clipBounds - margin), (int)(itemView.Top + margin), (int)(itemView.Right - margin), (int)(itemView.Bottom - margin));
             }
             else
             {
                 this.colorDrawable.SetBounds(0, 0, 0, 0);
-                //this.iconDrawable.SetBounds(0,0,0,0);
+                this.clipDrawable.SetBounds(0, 0, 0, 0);
             }
             this.colorDrawable.Draw(c);
             clipDrawable.Draw(c);

@@ -168,12 +168,7 @@ namespace Seeker
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.deleted_all_no_messages), ToastLength.Long);
                         return true;
                     }
-                    var deletedAllMessages = MessageController.Messages.ToDictionary(entry => entry.Key, entry => entry.Value);
-                    var deletedAllLastReadMessageCounts = MessageController.LastReadMessageCounts.ToDictionary(entry => entry.Key, entry => entry.Value);
-                    MessageController.Messages.Clear();
-                    MessageController.LastReadMessageCounts.Clear();
-                    MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
-                    MessageController.SaveLastReadCounts(SeekerState.SharedPreferences);
+                    var (deletedAllMessages, deletedAllLastReadMessageCounts) = MessageController.DeleteAllMessagesWithUndo();
                     this.GetOverviewFragment().RefreshAdapter();
                     Snackbar sb = Snackbar.Make(this.GetOverviewFragment().View, SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong).SetAction("Undo", (View v) => GetUndoDeleteAllSnackBarAction(deletedAllMessages, deletedAllLastReadMessageCounts)).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
                     (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));

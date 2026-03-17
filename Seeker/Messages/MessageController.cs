@@ -128,6 +128,18 @@ namespace Seeker.Messages
             }
         }
 
+        public static (Dictionary<string, List<Message>> deletedMessageDictionary, Dictionary<string, int> deletedMessageCountDictionary) DeleteAllMessagesWithUndo()
+        {
+            var deletedAllMessages = MessageController.Messages.ToDictionary(entry => entry.Key, entry => entry.Value);
+            var deletedAllLastReadMessageCounts = MessageController.LastReadMessageCounts.ToDictionary(entry => entry.Key, entry => entry.Value);
+            Messages.Clear();
+            LastReadMessageCounts.Clear();
+            SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+            SaveLastReadCounts(SeekerState.SharedPreferences);
+            return (deletedAllMessages, deletedAllLastReadMessageCounts);
+        }
+
+
         private static void Client_PrivateMessageReceived(object sender, Soulseek.PrivateMessageReceivedEventArgs e)
         {
             try
