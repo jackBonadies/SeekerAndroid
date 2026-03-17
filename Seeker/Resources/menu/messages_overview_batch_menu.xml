@@ -1,0 +1,30 @@
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+    <item
+        android:id="@+id/action_delete_selected_batch"
+        android:title="@string/DeleteSelected"
+        android:icon="@drawable/trash_can_outline"
+        app:showAsAction="always"
+        android:iconifiedByDefault="true"
+    />
+
+    <item
+        android:id="@+id/select_all"
+        android:title="@string/SelectAll"
+        android:icon="@drawable/select_all"
+        app:iconTint="?attr/colorOnSurface"
+        app:showAsAction="never"
+        android:iconifiedByDefault="false"
+    />
+
+    <item
+        android:id="@+id/invert_selection"
+        android:title="@string/InvertSelection"
+        android:icon="@drawable/select_inverse"
+        app:iconTint="?attr/colorOnSurface"
+        app:showAsAction="never"
+        android:iconifiedByDefault="false"
+    />
+</menu>

@@ -1262,6 +1262,8 @@ The standard way of requesting folder access does not always persist permissions
     <string name="HideSpeed">Hide Speed</string>
 
     <string name="Num_Selected">{0} Selected</string>
+    <string name="DeleteSelected">Delete Selected</string>
+    <string name="deleted_selected_message_histories">Deleted {0} conversation(s)</string>
 
     <string name="ExportClientData">Export Client Data</string>
     <string name="export_more_info">

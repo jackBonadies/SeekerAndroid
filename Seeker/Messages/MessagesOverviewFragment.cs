@@ -13,7 +13,7 @@ using System.Text;
 
 namespace Seeker.Messages
 {
-    public class MessagesOverviewFragment : AndroidX.Fragment.App.Fragment
+    public partial class MessagesOverviewFragment : AndroidX.Fragment.App.Fragment
     {
         private RecyclerView recyclerViewOverview;
         private LinearLayoutManager recycleLayoutManager;
@@ -143,10 +143,15 @@ namespace Seeker.Messages
 
         public void RefreshAdapter()
         {
+            MessagesOverviewActionMode?.Finish();
             var newList = GetSortedMessagesList();
             if (newList.Count != 0)
             {
                 noMessagesView.Visibility = ViewStates.Gone;
+            }
+            else
+            {
+                noMessagesView.Visibility = ViewStates.Visible;
             }
             var diff = DiffUtil.CalculateDiff(new MessageOverviewDiffCallback(internalList, newList), true);
             internalList = newList;
@@ -158,6 +163,7 @@ namespace Seeker.Messages
         {
             if (created) //attach can happen before we created our view...
             {
+                MessagesOverviewActionMode?.Finish();
                 var newList = GetSortedMessagesList();
                 if (newList.Count != 0)
                 {

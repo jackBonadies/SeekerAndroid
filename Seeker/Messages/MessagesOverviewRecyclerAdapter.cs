@@ -21,9 +21,6 @@ namespace Seeker.Messages
 {
     public class ItemTouchHelperMessageOverviewCallback : ItemTouchHelper.SimpleCallback
     {
-        //public static string DELETED_USERNAME = string.Empty;
-        //public static int DELETED_POSITION = -1;
-        //public static List<Message> DELETED_DATA = null;
         private MessagesOverviewRecyclerAdapter adapter = null;
         private AndroidX.Fragment.App.Fragment containingFragment = null;
         public ItemTouchHelperMessageOverviewCallback(MessagesOverviewRecyclerAdapter _adapter, AndroidX.Fragment.App.Fragment outerFrag) : base(0, ItemTouchHelper.Left) //no dragging. left swiping.
@@ -36,6 +33,15 @@ namespace Seeker.Messages
         private Android.Graphics.Drawables.ColorDrawable colorDrawable = new Android.Graphics.Drawables.ColorDrawable(Color.ParseColor("#ed4a51"));
         private Android.Graphics.Drawables.Drawable iconDrawable = null;
         private Android.Graphics.Drawables.ClipDrawable clipDrawable = null;
+
+        public override int GetMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder)
+        {
+            if (adapter.IsInBatchSelectMode)
+            {
+                return MakeMovementFlags(0, 0);
+            }
+            return base.GetMovementFlags(recyclerView, viewHolder);
+        }
 
         public override bool OnMove(RecyclerView p0, RecyclerView.ViewHolder p1, RecyclerView.ViewHolder p2)
         {
@@ -147,13 +153,25 @@ namespace Seeker.Messages
     public class MessagesOverviewRecyclerAdapter : RecyclerView.Adapter
     {
         public List<string> localDataSet;
+        public List<int> SelectedPositions = new List<int>();
+        public bool IsInBatchSelectMode = false;
         public override int ItemCount => localDataSet.Count;
         private int position = -1;
 
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
         {
-            (holder as MessageOverviewHolder).messageOverviewView.setItem(localDataSet[position]);
-            //(holder as TransferViewHolder).getTransferItemView().LongClick += TransferAdapterRecyclerVersion_LongClick; //I dont think we should be adding this here.  you get 3 after a short time...
+            var view = (holder as MessageOverviewHolder).messageOverviewView;
+
+            if (SelectedPositions.Contains(position))
+            {
+                view.SetSelectedBackground(true);
+            }
+            else
+            {
+                view.SetSelectedBackground(false);
+            }
+
+            view.setItem(localDataSet[position], IsInBatchSelectMode, SelectedPositions.Contains(position));
         }
 
         public void setPosition(int position)
@@ -170,6 +188,11 @@ namespace Seeker.Messages
         private void MessageOverviewClick(object sender, EventArgs e)
         {
             setPosition((sender as MessageOverviewView).ViewHolder.BindingAdapterPosition);
+            if (IsInBatchSelectMode)
+            {
+                (MessagesActivity.MessagesActivityRef as MessagesActivity).GetOverviewFragment()?.ToggleBatchSelect(position);
+                return;
+            }
             MessagesActivity.MessagesActivityRef.ChangeToInnerFragment(localDataSet[position]);
         }
 
@@ -177,10 +200,17 @@ namespace Seeker.Messages
         {
             MessageOverviewView view = MessageOverviewView.inflate(parent);
             view.setupChildren();
-            // .inflate(R.layout.text_row_item, viewGroup, false);
             (view as View).Click += MessageOverviewClick;
-            return new MessageOverviewHolder(view as View);
-
+            MessageOverviewHolder holder = new MessageOverviewHolder(view as View);
+            (view as View).LongClick += (sender, e) =>
+            {
+                int pos = holder.BindingAdapterPosition;
+                if (pos != RecyclerView.NoPosition)
+                {
+                    (MessagesActivity.MessagesActivityRef as MessagesActivity).GetOverviewFragment()?.OnItemLongClick(pos);
+                }
+            };
+            return holder;
         }
 
         public string At(int pos)
@@ -245,6 +275,7 @@ namespace Seeker.Messages
         private TextView viewDateTimeAgo;
         private TextView unreadBadge;
         private ImageView viewStatusIndicator;
+        private ImageView selectionCheckbox;
         private Color cellTextColor;
         private Color subduedColor;
         private Color verySubduedColor;
@@ -273,9 +304,22 @@ namespace Seeker.Messages
             viewDateTimeAgo = FindViewById<TextView>(Resource.Id.dateTimeAgo);
             unreadBadge = FindViewById<TextView>(Resource.Id.unreadBadge);
             viewStatusIndicator = FindViewById<ImageView>(Resource.Id.statusIndicator);
+            selectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
             cellTextColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColor);
             subduedColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued);
             verySubduedColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorVerySubdued);
+        }
+
+        public void SetSelectedBackground(bool isSelected)
+        {
+            if (isSelected)
+            {
+                this.Background = Resources.GetDrawable(Resource.Color.batchSelectHighlight, null);
+            }
+            else
+            {
+                this.Background = null;
+            }
         }
 
         private void SetStatusIndicator(string username)
@@ -329,7 +373,7 @@ namespace Seeker.Messages
             viewStatusIndicator.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, colorRes)));
         }
 
-        public void setItem(string username)
+        public void setItem(string username, bool isInBatchMode, bool isSelected)
         {
             viewUsername.Text = username;
             Message m = MessageController.Messages[username].Last();
@@ -337,6 +381,23 @@ namespace Seeker.Messages
             viewDateTimeAgo.Text = SimpleHelpers.GetDateTimeSinceAbbrev(m.LocalDateTime);
 
             SetStatusIndicator(username);
+
+            if (isInBatchMode)
+            {
+                selectionCheckbox.Visibility = ViewStates.Visible;
+                if (isSelected)
+                {
+                    selectionCheckbox.SetImageResource(Resource.Drawable.check_circle);
+                }
+                else
+                {
+                    selectionCheckbox.SetImageResource(Resource.Drawable.check_circle_outline);
+                }
+            }
+            else
+            {
+                selectionCheckbox.Visibility = ViewStates.Gone;
+            }
 
             int unreadCount = MessageController.GetUnreadCount(username);
             if (unreadCount > 0)
