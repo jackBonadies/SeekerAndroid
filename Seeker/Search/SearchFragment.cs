@@ -29,6 +29,7 @@ namespace Seeker
     public partial class SearchFragment : Fragment
     {
         public View rootView = null;
+        private View noSearchesView = null;
         private Context context;
         public static SearchResultStyleEnum SearchResultStyle = SearchResultStyleEnum.Medium;
         public static IMenu ActionBarMenu = null;
@@ -338,6 +339,7 @@ namespace Seeker
                     {
                         SetTransitionDrawableState();
                     }
+                    UpdateNoSearchesView();
                 });
                 if (SeekerState.MainActivityRef == null)
                 {
@@ -546,6 +548,16 @@ namespace Seeker
             }
         }
 
+        public void UpdateNoSearchesView()
+        {
+            if (noSearchesView == null)
+            {
+                return;
+            }
+            bool neverSearched = string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm);
+            noSearchesView.Visibility = neverSearched ? ViewStates.Visible : ViewStates.Gone;
+        }
+
         public void SearchResultStyleChanged()
         {
             RecyclerView rv = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches); //TODO //TODO //TODO
@@ -660,6 +672,9 @@ namespace Seeker
                 recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
             }
+
+            noSearchesView = rootView.FindViewById<View>(Resource.Id.noSearchesView);
+            UpdateNoSearchesView();
 
             SeekerState.ClearSearchHistoryEventsFromTarget(this);
             SeekerState.ClearSearchHistory += SeekerState_ClearSearchHistory;
@@ -1466,6 +1481,8 @@ namespace Seeker
 
                 SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
+
+                SearchFragment.Instance.UpdateNoSearchesView();
             }
         }
 
@@ -1532,6 +1549,7 @@ namespace Seeker
                 Instance.recycleLayoutManager.OnRestoreInstanceState(state);
             }
             SetOldList(cacheKey, newResults.ToList());
+            Instance.UpdateNoSearchesView();
         }
 
         /// <summary>

@@ -19,13 +19,13 @@ namespace Seeker.Messages
         private LinearLayoutManager recycleLayoutManager;
         public MessagesOverviewRecyclerAdapter recyclerAdapter;
         private List<string> internalList = null;
-        private TextView noMessagesView = null;
+        private View noMessagesView = null;
         private bool created = false;
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             MessageController.MessageReceived += OnMessageReceived;
             View rootView = inflater.Inflate(Resource.Layout.messages_overview, container, false);
-            noMessagesView = rootView.FindViewById<TextView>(Resource.Id.noMessagesView);
+            noMessagesView = rootView.FindViewById<View>(Resource.Id.noMessagesView);
             if (MessageController.Messages == null || MessageController.Messages.Keys.Count == 0)
             {
                 noMessagesView.Visibility = ViewStates.Visible;
