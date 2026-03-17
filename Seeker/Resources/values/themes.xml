@@ -286,7 +286,7 @@
         <item name="secondaryColor">#ff202020</item>
         <item name="cellTextColor">#ffE4E4E4</item>
         <item name="cellTextColorSubdued">#ccE4E4E4</item>
-        <item name="cellTextColorVerySubdued">#80E4E4E4</item>
+        <item name="cellTextColorVerySubdued">#a0E4E4E4</item>
 
         <item name="the_rounded_corner_background_drawable">
             @drawable/rounded_corner_background_dark_amoled

@@ -421,7 +421,7 @@ namespace Seeker.Messages
                 viewUsername.SetTypeface(null, TypefaceStyle.Normal);
                 viewUsername.SetTextColor(cellTextColor);
                 viewMessage.SetTypeface(null, TypefaceStyle.Normal);
-                viewMessage.SetTextColor(verySubduedColor);
+                viewMessage.SetTextColor(subduedColor);
                 viewDateTimeAgo.SetTypeface(null, TypefaceStyle.Normal);
                 viewDateTimeAgo.SetTextColor(subduedColor);
             }

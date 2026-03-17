@@ -299,7 +299,7 @@ namespace Seeker
 
         public static Color GetColorFromInteger(int color)
         {
-            return Color.Rgb(Color.GetRedComponent(color), Color.GetGreenComponent(color), Color.GetBlueComponent(color));
+            return Color.Argb(Color.GetAlphaComponent(color), Color.GetRedComponent(color), Color.GetGreenComponent(color), Color.GetBlueComponent(color));
         }
 
         public static void SetTextColor(TextView tv, Context c)
