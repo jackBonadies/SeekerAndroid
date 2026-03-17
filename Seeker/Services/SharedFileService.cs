@@ -340,12 +340,9 @@ namespace Seeker.Services
 
             if (volumePath != null)
             {
-                if (directoryPath.Substring(0, volumePath.Length) == volumePath)
+                if (directoryPath.StartsWith(volumePath))
                 {
-                    //if(directoryPath.Length != volumePath.Length)
-                    //{
                     directoryPath = directoryPath.Substring(volumePath.Length);
-                    //}
                 }
             }
 
