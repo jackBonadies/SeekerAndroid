@@ -52,19 +52,19 @@ namespace Seeker.Services
             PopulateAllMediaStoreInfo(allMediaStoreInfo, volNames);
 
 
-            var tmpUploadDirs = UploadDirectoryManager.UploadDirectories.ToList(); //avoid race conditions and enumeration modified exceptions.
-            foreach (var uploadDirEntry in tmpUploadDirs)
+            var uploadDirectories = UploadDirectoryManager.UploadDirectories.ToList(); //avoid race conditions and enumeration modified exceptions.
+            foreach (var uploadDirEntry in uploadDirectories)
             {
                 if (uploadDirEntry.IsSubdir || uploadDirEntry.Info.HasError())
                 {
                     continue;
                 }
 
-                DocumentFile dir = uploadDirEntry.UploadDirectory;
+                DocumentFile uploadDirectory = uploadDirEntry.UploadDirectory;
                 GetAllFolderInfo(uploadDirEntry, out bool overrideCase, out string volName, out string toStrip, out string rootFolderDisplayName, out _);
 
-                traverseDirectoriesGatherFullFileInfos(SeekerState.ActiveActivityRef.ContentResolver, dir.Uri, DocumentsContract.GetTreeDocumentId(dir.Uri), dir.Uri,
-                    presentableNameToFullFileInfos, true, volName, allDirs, allLockedDirs, allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, dir, allMediaStoreInfo, previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null,
+                traverseDirectoriesGatherFullFileInfos(SeekerState.ActiveActivityRef.ContentResolver, uploadDirectory.Uri, DocumentsContract.GetTreeDocumentId(uploadDirectory.Uri), uploadDirectory.Uri,
+                    presentableNameToFullFileInfos, true, volName, allDirs, allLockedDirs, allHiddenDirs, dirMappingFriendlyNameToUri, toStrip, uploadDirectory, allMediaStoreInfo, previousFileInfoToUse, overrideCase, overrideCase ? rootFolderDisplayName : null,
                     ref directoryCount);
             }
 
@@ -83,31 +83,13 @@ namespace Seeker.Services
             DocumentFile dir = uploadDirEntry.UploadDirectory;
             Android.Net.Uri uri = dir.Uri;//Android.Net.Uri.Parse(uploadDirEntry.Info.UploadDataDirectoryUri);
             Logger.InfoFirebase("case " + uri.ToString() + " - - - - " + uri.LastPathSegment);
-            //string lastPathSegment = null;
-            //bool msdCase = false;
-            //if (uploadDirectoryInfo.UploadDirectory != null)
-            //{
             string lastPathSegment = CommonHelpers.GetLastPathSegmentWithSpecialCaseProtection(dir, out bool msdCase);
-            //}
-            //else
-            //{
-
-            //    lastPathSegment = uri.LastPathSegment.Replace('/', '\\');
-            //}
             toStrip = string.Empty;
             //can be reproduced with pixel emulator API 28 (android 9). the last path segment for the downloads dir is "downloads" but the last path segment for its child is "raw:/storage/emulated/0/Download/Soulseek Complete" (note it is still a content scheme, raw: is the volume)
             volName = null;
-            if (msdCase)
-            {
-                //in this case we assume the volume is primary..
-            }
-            else
+            if (!msdCase)
             {
                 volName = FileFilterHelper.GetVolumeName(lastPathSegment, true, out _);
-                //if(volName==null)
-                //{
-                //    Logger.Firebase("volName is null: " + dir.Uri.ToString());
-                //}
                 if (lastPathSegment.Contains('\\'))
                 {
                     int stripIndex = lastPathSegment.LastIndexOf('\\');
