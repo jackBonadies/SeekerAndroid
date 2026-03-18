@@ -91,6 +91,8 @@
             android:id="@+id/speedTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:drawableStart="@drawable/download_search_drawable"
+            android:drawablePadding="0dp"
             android:paddingStart="8dp"
             android:textColor="@color/subTextColor"
             android:textSize="12sp"

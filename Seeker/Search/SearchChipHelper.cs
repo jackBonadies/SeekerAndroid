@@ -286,9 +286,29 @@ namespace Seeker.Search
 
             var resources = chip.Context.Resources;
             var theme = chip.Context.Theme;
-            ApplyChipStyle(chip,
-                resources.GetColor(Resource.Color.searchChipOtherText, theme),
+            int textColor = resources.GetColor(Resource.Color.searchChipOtherText, theme);
+            ApplyChipStyle(chip, textColor,
                 resources.GetColor(Resource.Color.searchChipOtherBg, theme));
+
+            var drawables = chip.GetCompoundDrawablesRelative();
+            if (drawables[0] != null)
+            {
+                var tinted = drawables[0].Mutate();
+                tinted.SetTint(textColor);
+                chip.SetCompoundDrawablesRelativeWithIntrinsicBounds(tinted, null, null, null);
+            }
+        }
+
+        public static void StyleSpeed(TextView view, string speedText)
+        {
+            view.Text = speedText;
+            var drawables = view.GetCompoundDrawablesRelative();
+            if (drawables[0] != null)
+            {
+                var tinted = drawables[0].Mutate();
+                tinted.SetTint(view.CurrentTextColor);
+                view.SetCompoundDrawablesRelativeWithIntrinsicBounds(tinted, null, null, null);
+            }
         }
 
         public static void StyleFileCount(TextView view, int fileCount)

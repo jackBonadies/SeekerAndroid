@@ -487,7 +487,8 @@ namespace Seeker
             var artist = _mockArtists[_random.Next(_mockArtists.Length)];
             var album = _mockAlbums[_random.Next(_mockAlbums.Length)];
             var ext = _extensions[_random.Next(_extensions.Length)];
-            var uploadSpeed = _random.Next(50_000, 10_000_000);
+            int minUploadSpeed = (int)(100_000 * Math.Pow(10, _random.Next(2)));
+            var uploadSpeed = _random.Next(minUploadSpeed, minUploadSpeed * 10);
             var queueLength = _random.Next(0, 50);
             var hasFreeSlot = _random.Next(2) == 0;
             var isLocked = _random.Next(5) == 0; // ~20% chance locked
@@ -501,8 +502,13 @@ namespace Seeker
                 long size = _random.Next(2_000_000, 60_000_000);
                 int length = _random.Next(120, 480);
                 string filename = $"@@{username}\\Music\\{artist}\\{term} - AlbumName {album}\\{trackNum:D2} Track {trackNum}.{ext}";
-                files.Add(new Soulseek.File(1, filename, size, ext,
-                    new[] { new FileAttribute(FileAttributeType.BitRate, bitRate), new FileAttribute(FileAttributeType.Length, length) }));
+                var fileAttributes = new[] { new FileAttribute(FileAttributeType.BitRate, bitRate), new FileAttribute(FileAttributeType.Length, length) };
+                if (ext == "flac" && _random.Next(2) == 0)
+                {
+                    fileAttributes = fileAttributes.Concat(new[] { new FileAttribute(FileAttributeType.SampleRate, 44100), new FileAttribute(FileAttributeType.BitDepth, 16) }).ToArray();
+
+                }
+                files.Add(new Soulseek.File(1, filename, size, ext, fileAttributes));
             }
 
             if (isLocked)

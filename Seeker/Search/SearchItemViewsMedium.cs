@@ -60,7 +60,7 @@ namespace Seeker
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
+            SearchChipHelper.StyleSpeed(viewSpeed, (item.UploadSpeed / 1024).ToString() + " kb/s");
             int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
             SearchChipHelper.StyleFileCount(viewFileCount, fcount);
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
@@ -119,7 +119,7 @@ namespace Seeker
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
+            SearchChipHelper.StyleSpeed(viewSpeed, (item.UploadSpeed / 1024).ToString() + " kb/s");
             int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
             SearchChipHelper.StyleFileCount(viewFileCount, fcount);
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
@@ -178,7 +178,7 @@ namespace Seeker
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
+            SearchChipHelper.StyleSpeed(viewSpeed, (item.UploadSpeed / 1024).ToString() + " kb/s");
             int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
             SearchChipHelper.StyleFileCount(viewFileCount, fcount);
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
@@ -237,7 +237,7 @@ namespace Seeker
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            string speedText = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
+            string speedText = (item.UploadSpeed / 1024).ToString() + " kb/s";
             SearchChipHelper.StyleSpeedChip(viewSpeed, speedText);
             int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
             SearchChipHelper.StyleFileCount(viewFileCount, fcount);
@@ -297,7 +297,7 @@ namespace Seeker
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
+            SearchChipHelper.StyleSpeed(viewSpeed, (item.UploadSpeed / 1024).ToString() + " kb/s");
             int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
             SearchChipHelper.StyleFileCount(viewFileCount, fcount);
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
