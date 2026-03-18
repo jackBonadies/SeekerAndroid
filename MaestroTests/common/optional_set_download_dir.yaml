@@ -1,0 +1,11 @@
+appId: com.companyname.andriodapp1
+---
+- tapOn:
+    text: "OK"
+    optional: true
+- tapOn:
+    id: button1
+    optional: true
+- tapOn:
+    id: button1
+    optional: true

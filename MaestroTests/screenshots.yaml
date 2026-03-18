@@ -1,0 +1,30 @@
+appId: com.companyname.andriodapp1
+---
+- runFlow: ./common/optional_set_download_dir.yaml
+- tapOn:
+    id: navigation_bar_item_icon_container
+    index: 0
+- runFlow: ./common/optional_login.yaml
+- tapOn:
+    id: settings_action
+- scrollUntilVisible:
+    element:
+      id: smartFilterEnable
+    direction: DOWN
+- tapOn:
+    id: smartFilterEnable
+- back
+- tapOn:
+    id: navigation_bar_item_icon_container
+    index: 1
+- tapOn:
+    id: searchHere
+- inputText: beethoven overture
+- tapOn:
+    id: action_search
+- tapOn:
+    id: navigation_bar_item_icon_container
+    index: 2
+- tapOn:
+    id: navigation_bar_item_icon_container
+    index: 3
