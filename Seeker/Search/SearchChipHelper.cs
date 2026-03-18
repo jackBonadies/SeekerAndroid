@@ -133,41 +133,35 @@ namespace Seeker.Search
         }
 
         /// <summary>
-        /// Shows "FORMAT BITRATE" as two adjacent chips. e.g. [FLAC] [320kbps]
-        /// formatChip gets colored by type, bitrateChip gets same color.
+        /// Shows format and bitrate as a single combined chip. e.g. [WAV · 192kbps]
+        /// bitrateChip is always hidden (kept for layout compat).
         /// </summary>
         public static void StyleFormatAndBitrateChips(TextView formatChip, TextView bitrateChip, string fullFormatStr)
         {
+            bitrateChip.Visibility = ViewStates.Gone;
             if (string.IsNullOrEmpty(fullFormatStr))
             {
                 formatChip.Visibility = ViewStates.Gone;
-                bitrateChip.Visibility = ViewStates.Gone;
                 return;
             }
             string formatName = ExtractFormatName(fullFormatStr);
             string bitRate = ExtractBitRate(fullFormatStr);
 
+            string chipText = formatName.ToUpperInvariant();
+            if (!string.IsNullOrEmpty(bitRate))
+            {
+                chipText += " \u00b7 " + bitRate;
+            }
+
             formatChip.Visibility = ViewStates.Visible;
-            formatChip.Text = formatName.ToUpperInvariant();
+            formatChip.Text = chipText;
 
             var (textColorResId, bgColorResId) = GetFormatChipColorResIds(formatName);
             var resources = formatChip.Context.Resources;
             var theme = formatChip.Context.Theme;
-            int textColor = resources.GetColor(textColorResId, theme);
-            int bgColor = resources.GetColor(bgColorResId, theme);
-
-            ApplyChipStyle(formatChip, textColor, bgColor);
-
-            if (!string.IsNullOrEmpty(bitRate))
-            {
-                bitrateChip.Visibility = ViewStates.Visible;
-                bitrateChip.Text = bitRate;
-                ApplyChipStyle(bitrateChip, textColor, bgColor);
-            }
-            else
-            {
-                bitrateChip.Visibility = ViewStates.Gone;
-            }
+            ApplyChipStyle(formatChip,
+                resources.GetColor(textColorResId, theme),
+                resources.GetColor(bgColorResId, theme));
         }
 
         public static void StyleQueueChip(TextView chip, bool hasFreeSlot, int queueLength)
