@@ -19,7 +19,7 @@
         android:paddingTop="8dp"
         android:textColor="?attr/cellTextColor"
         android:textSize="14sp"
-        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
         android:singleLine="true"
     />
     <LinearLayout

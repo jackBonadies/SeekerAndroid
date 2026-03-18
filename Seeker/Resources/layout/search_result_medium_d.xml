@@ -38,42 +38,27 @@
                 android:ellipsize="end"
                 android:textColor="?attr/cellTextColor"
                 android:textSize="15sp"
-                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
                 android:singleLine="true"
             />
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="1dp"
-            >
-                <TextView
-                    android:id="@+id/userNameTextView"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:textColor="@color/subTextColor"
-                    android:textSize="12sp"
-                    android:singleLine="true"
-                />
-                <TextView
-                    android:id="@+id/speedTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/subTextColor"
-                    android:textSize="12sp"
-                    android:singleLine="true"
-                />
-            </LinearLayout>
             <LinearLayout
                 android:orientation="horizontal"
                 android:id="@+id/subLayout"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                android:paddingTop="4dp"
+                android:paddingTop="2dp"
             >
+                <TextView
+                    android:id="@+id/userNameTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:paddingEnd="6dp"
+                    android:textColor="@color/subTextColor"
+                    android:textSize="12sp"
+                    android:singleLine="true"
+                />
                 <TextView
                     android:id="@+id/fileTypeTextView"
                     android:layout_width="wrap_content"
@@ -101,6 +86,15 @@
                     android:textStyle="bold"
                     android:singleLine="true"
                     android:visibility="gone"
+                />
+                <TextView
+                    android:id="@+id/speedTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
+                    android:textColor="@color/subTextColor"
+                    android:textSize="12sp"
+                    android:singleLine="true"
                 />
                 <TextView
                     android:id="@+id/queueTextView"

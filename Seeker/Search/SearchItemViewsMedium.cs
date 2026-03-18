@@ -58,7 +58,14 @@ namespace Seeker
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleSlotAndQueue(viewSlotQueue, item.HasFreeUploadSlot, item.QueueLength);
+            if (item.HasFreeUploadSlot)
+            {
+                viewSlotQueue.Visibility = ViewStates.Gone;
+            }
+            else
+            {
+                SearchChipHelper.StyleSlotAndQueue(viewSlotQueue, item.HasFreeUploadSlot, item.QueueLength);
+            }
         }
     }
 
@@ -110,7 +117,7 @@ namespace Seeker
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            if (item.HasFreeUploadSlot && item.QueueLength <= 0)
+            if (item.HasFreeUploadSlot)
             {
                 viewSlotQueue.Visibility = ViewStates.Gone;
             }
@@ -332,7 +339,7 @@ namespace Seeker
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            if (item.HasFreeUploadSlot && item.QueueLength <= 0)
+            if (item.HasFreeUploadSlot)
             {
                 viewSlotQueue.Visibility = ViewStates.Gone;
             }
