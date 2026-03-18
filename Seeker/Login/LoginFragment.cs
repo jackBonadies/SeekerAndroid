@@ -50,7 +50,7 @@ namespace Seeker
         private TextInputLayout usernameInputLayout;
 
         // Logged-in views (child 2)
-        private Button mustSelectDirButton;
+        private View mustSelectDirButton;
         private TextView welcomeTextView;
         private View connectionStatusDot;
         private TextView connectionStatusText;
@@ -172,7 +172,7 @@ namespace Seeker
 
         private void SetUpLoggedInViews()
         {
-            mustSelectDirButton = rootView.FindViewById<Button>(Resource.Id.mustSelectDirectory);
+            mustSelectDirButton = rootView.FindViewById<View>(Resource.Id.mustSelectDirectory);
             welcomeTextView = rootView.FindViewById<TextView>(Resource.Id.userNameView);
             connectionStatusDot = rootView.FindViewById<View>(Resource.Id.connectionStatusDot);
             connectionStatusText = rootView.FindViewById<TextView>(Resource.Id.connectionStatusText);

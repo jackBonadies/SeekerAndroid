@@ -471,7 +471,7 @@ namespace Seeker
             foreach (var term in query.Terms)
             {
                 if (term.StartsWith("n:", StringComparison.OrdinalIgnoreCase) && int.TryParse(term.Substring(2), out int n))
-                    count = Math.Max(1, n);
+                    count = Math.Max(0, n);
                 else if (term.StartsWith("t:", StringComparison.OrdinalIgnoreCase) && int.TryParse(term.Substring(2), out int t))
                     totalTimeMs = Math.Max(0, t);
                 else  
