@@ -62,4 +62,26 @@
     <color name="statusDisconnectedChipBg">#26E57373</color>
 
     <color name="unreadBadgeText">#303030</color>
+
+    <color name="searchChipFlacText">#64B5F6</color>
+    <color name="searchChipFlacBg">#2664B5F6</color>
+    <color name="searchChipMp3Text">#81C784</color>
+    <color name="searchChipMp3Bg">#2681C784</color>
+    <color name="searchChipM4aText">#CE93D8</color>
+    <color name="searchChipM4aBg">#26CE93D8</color>
+    <color name="searchChipWavText">#FFB74D</color>
+    <color name="searchChipWavBg">#26FFB74D</color>
+    <color name="searchChipAacText">#4DD0E1</color>
+    <color name="searchChipAacBg">#264DD0E1</color>
+    <color name="searchChipWmaText">#F48FB1</color>
+    <color name="searchChipWmaBg">#26F48FB1</color>
+    <color name="searchChipAiffText">#FFD54F</color>
+    <color name="searchChipAiffBg">#26FFD54F</color>
+    <color name="searchChipOtherText">#90A4AE</color>
+    <color name="searchChipOtherBg">#2690A4AE</color>
+
+    <color name="searchChipQueueText">#FFD54F</color>
+    <color name="searchChipQueueBg">#26FFA726</color>
+    <color name="searchChipNoSlotText">#E57373</color>
+    <color name="searchChipNoSlotBg">#26F44336</color>
 </resources>

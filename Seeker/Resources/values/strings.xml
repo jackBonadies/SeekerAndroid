@@ -241,6 +241,12 @@ Directory Count: {5}"
     <string name="search_result_style_collapsed">Expandable: Collapsed</string>
     <string name="search_result_style_medium">Medium</string>
     <string name="search_result_style_minimal">Minimal</string>
+    <string name="search_result_style_chip_row">Medium: Chip Row</string>
+    <string name="search_result_style_two_line">Medium: Two Line</string>
+    <string name="search_result_style_card">Medium: Card</string>
+    <string name="search_result_style_status_bar">Medium: Status Bar</string>
+    <string name="search_result_style_chip_grid">Medium: Chip Grid</string>
+    <string name="search_result_style_badge_line">Medium: Badge Line</string>
 
     <string name="new_search_tab">New Search</string>
     <string name="search_tabs_header">SEARCH TABS</string>
