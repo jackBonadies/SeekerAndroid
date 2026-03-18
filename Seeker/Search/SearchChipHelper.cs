@@ -170,9 +170,9 @@ namespace Seeker.Search
             }
         }
 
-        public static void StyleQueueChip(TextView chip, int queueLength)
+        public static void StyleQueueChip(TextView chip, bool hasFreeSlot, int queueLength)
         {
-            if (queueLength <= 0)
+            if (hasFreeSlot)
             {
                 chip.Visibility = ViewStates.Gone;
                 return;

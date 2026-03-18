@@ -19,7 +19,6 @@ namespace Seeker
         private TextView viewFileType;
         private TextView viewBitrate;
         private TextView viewQueue;
-        private TextView viewNoSlot;
         private TextView viewFileCount;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
@@ -51,7 +50,6 @@ namespace Seeker
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
             viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
-            viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
             viewFileCount = FindViewById<TextView>(Resource.Id.fileCountTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
@@ -64,8 +62,8 @@ namespace Seeker
             int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
             SearchChipHelper.StyleFileCount(viewFileCount, fcount);
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
-            SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
+            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot, item.QueueLength);
+
         }
     }
 
@@ -78,7 +76,6 @@ namespace Seeker
         private TextView viewFileType;
         private TextView viewBitrate;
         private TextView viewQueue;
-        private TextView viewNoSlot;
         private TextView viewFileCount;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
@@ -110,7 +107,6 @@ namespace Seeker
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
             viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
-            viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
             viewFileCount = FindViewById<TextView>(Resource.Id.fileCountTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
@@ -123,8 +119,8 @@ namespace Seeker
             int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
             SearchChipHelper.StyleFileCount(viewFileCount, fcount);
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
-            SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
+            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot, item.QueueLength);
+
         }
     }
 
@@ -137,7 +133,6 @@ namespace Seeker
         private TextView viewFileType;
         private TextView viewBitrate;
         private TextView viewQueue;
-        private TextView viewNoSlot;
         private TextView viewFileCount;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
@@ -169,7 +164,6 @@ namespace Seeker
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
             viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
-            viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
             viewFileCount = FindViewById<TextView>(Resource.Id.fileCountTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
@@ -182,8 +176,8 @@ namespace Seeker
             int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
             SearchChipHelper.StyleFileCount(viewFileCount, fcount);
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
-            SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
+            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot, item.QueueLength);
+
         }
     }
 
@@ -196,7 +190,6 @@ namespace Seeker
         private TextView viewFileType;
         private TextView viewBitrate;
         private TextView viewQueue;
-        private TextView viewNoSlot;
         private TextView viewFileCount;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
@@ -228,7 +221,6 @@ namespace Seeker
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
             viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
-            viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
             viewFileCount = FindViewById<TextView>(Resource.Id.fileCountTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
@@ -242,8 +234,8 @@ namespace Seeker
             int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
             SearchChipHelper.StyleFileCount(viewFileCount, fcount);
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
-            SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
+            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot, item.QueueLength);
+
         }
     }
 
@@ -256,7 +248,6 @@ namespace Seeker
         private TextView viewFileType;
         private TextView viewBitrate;
         private TextView viewQueue;
-        private TextView viewNoSlot;
         private TextView viewFileCount;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
@@ -288,7 +279,6 @@ namespace Seeker
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
             viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
-            viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
             viewFileCount = FindViewById<TextView>(Resource.Id.fileCountTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
@@ -301,8 +291,8 @@ namespace Seeker
             int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
             SearchChipHelper.StyleFileCount(viewFileCount, fcount);
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
-            SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
+            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot, item.QueueLength);
+
         }
     }
 }
