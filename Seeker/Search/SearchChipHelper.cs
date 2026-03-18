@@ -290,5 +290,17 @@ namespace Seeker.Search
                 resources.GetColor(Resource.Color.searchChipOtherText, theme),
                 resources.GetColor(Resource.Color.searchChipOtherBg, theme));
         }
+
+        public static void StyleFileCount(TextView view, int fileCount)
+        {
+            view.Text = fileCount.ToString();
+            var drawables = view.GetCompoundDrawablesRelative();
+            if (drawables[0] != null)
+            {
+                var tinted = drawables[0].Mutate();
+                tinted.SetTint(view.CurrentTextColor);
+                view.SetCompoundDrawablesRelativeWithIntrinsicBounds(tinted, null, null, null);
+            }
+        }
     }
 }

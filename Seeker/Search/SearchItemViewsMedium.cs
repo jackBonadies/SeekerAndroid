@@ -20,6 +20,7 @@ namespace Seeker
         private TextView viewBitrate;
         private TextView viewQueue;
         private TextView viewNoSlot;
+        private TextView viewFileCount;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
         public SearchItemViewMediumA(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -51,6 +52,7 @@ namespace Seeker
             viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
             viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
+            viewFileCount = FindViewById<TextView>(Resource.Id.fileCountTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
@@ -59,6 +61,8 @@ namespace Seeker
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
+            int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
+            SearchChipHelper.StyleFileCount(viewFileCount, fcount);
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
             SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
             SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
@@ -75,6 +79,7 @@ namespace Seeker
         private TextView viewBitrate;
         private TextView viewQueue;
         private TextView viewNoSlot;
+        private TextView viewFileCount;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
         public SearchItemViewMediumB(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -106,6 +111,7 @@ namespace Seeker
             viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
             viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
+            viewFileCount = FindViewById<TextView>(Resource.Id.fileCountTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
@@ -114,6 +120,8 @@ namespace Seeker
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
+            int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
+            SearchChipHelper.StyleFileCount(viewFileCount, fcount);
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
             SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
             SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
@@ -130,6 +138,7 @@ namespace Seeker
         private TextView viewBitrate;
         private TextView viewQueue;
         private TextView viewNoSlot;
+        private TextView viewFileCount;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
         public SearchItemViewMediumD(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -161,6 +170,7 @@ namespace Seeker
             viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
             viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
+            viewFileCount = FindViewById<TextView>(Resource.Id.fileCountTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
@@ -169,6 +179,8 @@ namespace Seeker
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
+            int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
+            SearchChipHelper.StyleFileCount(viewFileCount, fcount);
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
             SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
             SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
@@ -185,6 +197,7 @@ namespace Seeker
         private TextView viewBitrate;
         private TextView viewQueue;
         private TextView viewNoSlot;
+        private TextView viewFileCount;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
         public SearchItemViewMediumE(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -216,6 +229,7 @@ namespace Seeker
             viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
             viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
+            viewFileCount = FindViewById<TextView>(Resource.Id.fileCountTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
@@ -225,6 +239,8 @@ namespace Seeker
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             string speedText = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
             SearchChipHelper.StyleSpeedChip(viewSpeed, speedText);
+            int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
+            SearchChipHelper.StyleFileCount(viewFileCount, fcount);
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
             SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
             SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
@@ -241,6 +257,7 @@ namespace Seeker
         private TextView viewBitrate;
         private TextView viewQueue;
         private TextView viewNoSlot;
+        private TextView viewFileCount;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
         public SearchItemViewMediumF(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -272,6 +289,7 @@ namespace Seeker
             viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
             viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
+            viewFileCount = FindViewById<TextView>(Resource.Id.fileCountTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
@@ -280,6 +298,8 @@ namespace Seeker
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
+            int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
+            SearchChipHelper.StyleFileCount(viewFileCount, fcount);
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
             SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
             SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
