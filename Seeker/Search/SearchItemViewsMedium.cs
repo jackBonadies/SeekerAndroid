@@ -10,15 +10,15 @@ using Common;
 
 namespace Seeker
 {
-    // Style A: Chip Row - two lines like Medium but with colored format chip
+    // Style A: Chip Row - two lines, flat with bottom cell border
     public class SearchItemViewMediumA : RelativeLayout, ISearchItemViewBase
     {
         private TextView viewUsername;
         private TextView viewFoldername;
         private TextView viewSpeed;
         private TextView viewFileType;
-        private TextView viewQueue;
-        private TextView viewNoSlot;
+        private TextView viewBitrate;
+        private TextView viewSlotQueue;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
         public SearchItemViewMediumA(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -47,8 +47,8 @@ namespace Seeker
             viewFoldername = FindViewById<TextView>(Resource.Id.folderNameTextView);
             viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
-            viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
-            viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
+            viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
+            viewSlotQueue = FindViewById<TextView>(Resource.Id.slotQueueTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
@@ -56,22 +56,21 @@ namespace Seeker
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SimpleHelpers.STRINGS_KBS;
-            SearchChipHelper.StyleFormatChip(viewFileType, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleQueueText(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
-            SearchChipHelper.StyleNoSlotText(viewNoSlot, item.HasFreeUploadSlot);
+            viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
+            SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
+            SearchChipHelper.StyleSlotAndQueue(viewSlotQueue, item.HasFreeUploadSlot, item.QueueLength);
         }
     }
 
-    // Style B: Two Line - three lines, username own line, metadata on bottom
+    // Style B: Two Line (flat with separator, matches screenshot 2)
     public class SearchItemViewMediumB : RelativeLayout, ISearchItemViewBase
     {
         private TextView viewUsername;
         private TextView viewFoldername;
         private TextView viewSpeed;
         private TextView viewFileType;
-        private TextView viewQueue;
-        private TextView viewNoSlot;
+        private TextView viewBitrate;
+        private TextView viewSlotQueue;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
         public SearchItemViewMediumB(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -100,8 +99,8 @@ namespace Seeker
             viewFoldername = FindViewById<TextView>(Resource.Id.folderNameTextView);
             viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
-            viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
-            viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
+            viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
+            viewSlotQueue = FindViewById<TextView>(Resource.Id.slotQueueTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
@@ -109,22 +108,28 @@ namespace Seeker
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SimpleHelpers.STRINGS_KBS;
-            SearchChipHelper.StyleFormatChip(viewFileType, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleQueueText(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
-            SearchChipHelper.StyleNoSlotText(viewNoSlot, item.HasFreeUploadSlot);
+            viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
+            SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
+            if (item.HasFreeUploadSlot && item.QueueLength <= 0)
+            {
+                viewSlotQueue.Visibility = ViewStates.Gone;
+            }
+            else
+            {
+                SearchChipHelper.StyleSlotAndQueue(viewSlotQueue, item.HasFreeUploadSlot, item.QueueLength);
+            }
         }
     }
 
-    // Style C: Card - format chip in header beside album name, divider, footer
+    // Style C: Card (elevated card with left accent bar, matches screenshot 1)
     public class SearchItemViewMediumC : RelativeLayout, ISearchItemViewBase
     {
         private TextView viewUsername;
         private TextView viewFoldername;
         private TextView viewSpeed;
         private TextView viewFileType;
-        private TextView viewQueue;
-        private TextView viewNoSlot;
+        private TextView viewBitrate;
+        private TextView viewSlotQueue;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
         public SearchItemViewMediumC(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -153,8 +158,8 @@ namespace Seeker
             viewFoldername = FindViewById<TextView>(Resource.Id.folderNameTextView);
             viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
-            viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
-            viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
+            viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
+            viewSlotQueue = FindViewById<TextView>(Resource.Id.slotQueueTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
@@ -162,20 +167,20 @@ namespace Seeker
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SimpleHelpers.STRINGS_KBS;
-            SearchChipHelper.StyleFormatChip(viewFileType, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleQueueText(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
-            SearchChipHelper.StyleNoSlotText(viewNoSlot, item.HasFreeUploadSlot);
+            viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
+            SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
+            SearchChipHelper.StyleSlotAndQueue(viewSlotQueue, item.HasFreeUploadSlot, item.QueueLength);
         }
     }
 
-    // Style D: Status Bar - three lines, bottom row is all chips
+    // Style D: Status Bar (card with all chips on bottom row)
     public class SearchItemViewMediumD : RelativeLayout, ISearchItemViewBase
     {
         private TextView viewUsername;
         private TextView viewFoldername;
         private TextView viewSpeed;
         private TextView viewFileType;
+        private TextView viewBitrate;
         private TextView viewQueue;
         private TextView viewNoSlot;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
@@ -206,6 +211,7 @@ namespace Seeker
             viewFoldername = FindViewById<TextView>(Resource.Id.folderNameTextView);
             viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
+            viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
             viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
@@ -215,20 +221,21 @@ namespace Seeker
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SimpleHelpers.STRINGS_KBS;
-            SearchChipHelper.StyleFormatChip(viewFileType, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
+            viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
+            SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
             SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
             SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
         }
     }
 
-    // Style E: Chip Grid - three lines, ALL metadata as uniform chips
+    // Style E: Chip Grid - three lines, ALL metadata as chips, flat with separator
     public class SearchItemViewMediumE : RelativeLayout, ISearchItemViewBase
     {
         private TextView viewUsername;
         private TextView viewFoldername;
         private TextView viewSpeed;
         private TextView viewFileType;
+        private TextView viewBitrate;
         private TextView viewQueue;
         private TextView viewNoSlot;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
@@ -259,6 +266,7 @@ namespace Seeker
             viewFoldername = FindViewById<TextView>(Resource.Id.folderNameTextView);
             viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
+            viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
             viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
             viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
@@ -268,23 +276,23 @@ namespace Seeker
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            string speedText = (item.UploadSpeed / 1024).ToString() + SimpleHelpers.STRINGS_KBS;
+            string speedText = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
             SearchChipHelper.StyleSpeedChip(viewSpeed, speedText);
-            SearchChipHelper.StyleFormatChip(viewFileType, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
+            SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
             SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
             SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
         }
     }
 
-    // Style F: Badge Line - two lines only, most compact
+    // Style F: Badge Line - two lines only, most compact, flat with separator
     public class SearchItemViewMediumF : RelativeLayout, ISearchItemViewBase
     {
         private TextView viewUsername;
         private TextView viewFoldername;
         private TextView viewSpeed;
         private TextView viewFileType;
-        private TextView viewQueue;
-        private TextView viewNoSlot;
+        private TextView viewBitrate;
+        private TextView viewSlotQueue;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
         public SearchItemViewMediumF(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -313,8 +321,8 @@ namespace Seeker
             viewFoldername = FindViewById<TextView>(Resource.Id.folderNameTextView);
             viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
-            viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
-            viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
+            viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
+            viewSlotQueue = FindViewById<TextView>(Resource.Id.slotQueueTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
@@ -322,10 +330,16 @@ namespace Seeker
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + SimpleHelpers.STRINGS_KBS;
-            SearchChipHelper.StyleFormatChipShort(viewFileType, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleQueueText(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
-            SearchChipHelper.StyleNoSlotText(viewNoSlot, item.HasFreeUploadSlot);
+            viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
+            SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
+            if (item.HasFreeUploadSlot && item.QueueLength <= 0)
+            {
+                viewSlotQueue.Visibility = ViewStates.Gone;
+            }
+            else
+            {
+                SearchChipHelper.StyleSlotAndQueue(viewSlotQueue, item.HasFreeUploadSlot, item.QueueLength);
+            }
         }
     }
 }

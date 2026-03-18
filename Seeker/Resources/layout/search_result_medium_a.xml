@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- Style A: Chip Row - two lines, format as colored chip pill -->
+<!-- Style A: Chip Row - two lines, flat with separator -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
@@ -15,8 +15,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ellipsize="end"
-        android:paddingStart="5dp"
-        android:paddingTop="3dp"
+        android:paddingStart="8dp"
+        android:paddingTop="6dp"
         android:textColor="?attr/cellTextColor"
         android:textSize="14sp"
         android:textStyle="bold"
@@ -28,14 +28,15 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:paddingBottom="4dp"
+        android:paddingBottom="6dp"
+        android:paddingTop="2dp"
     >
         <TextView
             android:id="@+id/userNameTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:paddingStart="5dp"
+            android:paddingStart="8dp"
             android:paddingEnd="6dp"
             android:textColor="@color/subTextColor"
             android:textSize="12sp"
@@ -46,13 +47,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/search_format_chip_bg"
-            android:paddingStart="6dp"
-            android:paddingEnd="6dp"
-            android:paddingTop="2dp"
-            android:paddingBottom="2dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:paddingTop="1dp"
+            android:paddingBottom="1dp"
             android:textSize="10sp"
             android:textStyle="bold"
             android:singleLine="true"
+        />
+        <TextView
+            android:id="@+id/bitrateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/search_format_chip_bg"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:paddingTop="1dp"
+            android:paddingBottom="1dp"
+            android:layout_marginStart="3dp"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:visibility="gone"
         />
         <TextView
             android:id="@+id/speedTextView"
@@ -64,22 +80,11 @@
             android:singleLine="true"
         />
         <TextView
-            android:id="@+id/queueTextView"
+            android:id="@+id/slotQueueTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
-            android:textColor="@color/queueColor"
             android:textSize="12sp"
-            android:singleLine="true"
-            android:visibility="gone"
-        />
-        <TextView
-            android:id="@+id/noSlotTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="6dp"
-            android:textSize="10sp"
-            android:textStyle="bold"
             android:singleLine="true"
             android:visibility="gone"
         />
