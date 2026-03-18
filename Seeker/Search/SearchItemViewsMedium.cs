@@ -18,7 +18,8 @@ namespace Seeker
         private TextView viewSpeed;
         private TextView viewFileType;
         private TextView viewBitrate;
-        private TextView viewSlotQueue;
+        private TextView viewQueue;
+        private TextView viewNoSlot;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
         public SearchItemViewMediumA(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -48,7 +49,8 @@ namespace Seeker
             viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
             viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
-            viewSlotQueue = FindViewById<TextView>(Resource.Id.slotQueueTextView);
+            viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
+            viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
@@ -58,14 +60,8 @@ namespace Seeker
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            if (item.HasFreeUploadSlot)
-            {
-                viewSlotQueue.Visibility = ViewStates.Gone;
-            }
-            else
-            {
-                SearchChipHelper.StyleSlotAndQueue(viewSlotQueue, item.HasFreeUploadSlot, item.QueueLength);
-            }
+            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
+            SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
         }
     }
 
@@ -77,7 +73,8 @@ namespace Seeker
         private TextView viewSpeed;
         private TextView viewFileType;
         private TextView viewBitrate;
-        private TextView viewSlotQueue;
+        private TextView viewQueue;
+        private TextView viewNoSlot;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
         public SearchItemViewMediumB(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -107,7 +104,8 @@ namespace Seeker
             viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
             viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
-            viewSlotQueue = FindViewById<TextView>(Resource.Id.slotQueueTextView);
+            viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
+            viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
@@ -117,14 +115,8 @@ namespace Seeker
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            if (item.HasFreeUploadSlot)
-            {
-                viewSlotQueue.Visibility = ViewStates.Gone;
-            }
-            else
-            {
-                SearchChipHelper.StyleSlotAndQueue(viewSlotQueue, item.HasFreeUploadSlot, item.QueueLength);
-            }
+            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
+            SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
         }
     }
 
@@ -247,7 +239,8 @@ namespace Seeker
         private TextView viewSpeed;
         private TextView viewFileType;
         private TextView viewBitrate;
-        private TextView viewSlotQueue;
+        private TextView viewQueue;
+        private TextView viewNoSlot;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
         public SearchItemViewMediumF(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
@@ -277,7 +270,8 @@ namespace Seeker
             viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
             viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
             viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
-            viewSlotQueue = FindViewById<TextView>(Resource.Id.slotQueueTextView);
+            viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
+            viewNoSlot = FindViewById<TextView>(Resource.Id.noSlotTextView);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
@@ -287,14 +281,8 @@ namespace Seeker
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
             viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
             SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            if (item.HasFreeUploadSlot)
-            {
-                viewSlotQueue.Visibility = ViewStates.Gone;
-            }
-            else
-            {
-                SearchChipHelper.StyleSlotAndQueue(viewSlotQueue, item.HasFreeUploadSlot, item.QueueLength);
-            }
+            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot ? 0 : item.QueueLength);
+            SearchChipHelper.StyleNoSlotChip(viewNoSlot, item.HasFreeUploadSlot);
         }
     }
 }
