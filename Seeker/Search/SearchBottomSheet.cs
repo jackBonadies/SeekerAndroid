@@ -39,9 +39,6 @@ namespace Seeker
                     case SearchResultStyleEnum.MediumTwoLine:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonTwoLine);
                         break;
-                    case SearchResultStyleEnum.MediumCard:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonCard);
-                        break;
                     case SearchResultStyleEnum.MediumStatusBar:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonStatusBar);
                         break;
@@ -79,9 +76,6 @@ namespace Seeker
                         break;
                     case Resource.Id.radioButtonTwoLine:
                         SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumTwoLine;
-                        break;
-                    case Resource.Id.radioButtonCard:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumCard;
                         break;
                     case Resource.Id.radioButtonStatusBar:
                         SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumStatusBar;

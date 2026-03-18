@@ -42,6 +42,7 @@
         android:paddingTop="3dp"
         android:paddingBottom="10dp"
         android:paddingStart="12dp"
+        android:paddingEnd="12dp"
     >
         <TextView
             android:id="@+id/fileTypeTextView"
@@ -71,6 +72,11 @@
             android:singleLine="true"
             android:visibility="gone"
         />
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+        />
         <TextView
             android:id="@+id/speedTextView"
             android:layout_width="wrap_content"
@@ -80,7 +86,6 @@
             android:paddingEnd="5dp"
             android:paddingTop="1dp"
             android:paddingBottom="1dp"
-            android:layout_marginStart="4dp"
             android:textSize="10sp"
             android:textStyle="bold"
             android:textColor="@color/subTextColor"

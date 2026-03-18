@@ -67,9 +67,6 @@ namespace Seeker
                     case SearchResultStyleEnum.MediumTwoLine:
                         view = SearchItemViewMediumB.inflate(parent);
                         break;
-                    case SearchResultStyleEnum.MediumCard:
-                        view = SearchItemViewMediumC.inflate(parent);
-                        break;
                     case SearchResultStyleEnum.MediumStatusBar:
                         view = SearchItemViewMediumD.inflate(parent);
                         break;

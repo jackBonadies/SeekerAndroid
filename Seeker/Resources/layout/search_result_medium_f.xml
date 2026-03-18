@@ -30,6 +30,7 @@
         android:gravity="center_vertical"
         android:paddingBottom="8dp"
         android:paddingTop="2dp"
+        android:paddingEnd="12dp"
     >
         <TextView
             android:id="@+id/userNameTextView"
@@ -69,6 +70,11 @@
             android:textStyle="bold"
             android:singleLine="true"
             android:visibility="gone"
+        />
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
         />
         <TextView
             android:id="@+id/speedTextView"

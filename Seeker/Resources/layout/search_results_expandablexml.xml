@@ -109,18 +109,6 @@
                 android:layout_marginTop="4dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/search_result_style_card"
-                android:id="@+id/radioButtonCard"
-                android:checked="false"
-                android:textSize="18sp"
-                android:buttonTint="?attr/slskAccent"
-                android:textColor="?attr/mainTextColor"
-            />
-
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:layout_marginTop="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="@string/search_result_style_status_bar"
                 android:id="@+id/radioButtonStatusBar"
                 android:checked="false"

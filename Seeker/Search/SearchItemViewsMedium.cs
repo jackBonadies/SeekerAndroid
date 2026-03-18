@@ -128,58 +128,6 @@ namespace Seeker
         }
     }
 
-    // Style C: Card (elevated card with left accent bar, matches screenshot 1)
-    public class SearchItemViewMediumC : RelativeLayout, ISearchItemViewBase
-    {
-        private TextView viewUsername;
-        private TextView viewFoldername;
-        private TextView viewSpeed;
-        private TextView viewFileType;
-        private TextView viewBitrate;
-        private TextView viewSlotQueue;
-        public SearchFragment.SearchViewHolder ViewHolder { get; set; }
-
-        public SearchItemViewMediumC(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.search_result_medium_c, this, true);
-            setupChildren();
-        }
-
-        public SearchItemViewMediumC(Context context, IAttributeSet attrs) : base(context, attrs)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.search_result_medium_c, this, true);
-            setupChildren();
-        }
-
-        public static SearchItemViewMediumC inflate(ViewGroup parent)
-        {
-            SearchItemViewMediumC itemView = (SearchItemViewMediumC)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.searchitemviewmediumc_dummy, parent, false);
-            return itemView;
-        }
-
-        private bool hideLocked = false;
-
-        public void setupChildren()
-        {
-            viewUsername = FindViewById<TextView>(Resource.Id.userNameTextView);
-            viewFoldername = FindViewById<TextView>(Resource.Id.folderNameTextView);
-            viewSpeed = FindViewById<TextView>(Resource.Id.speedTextView);
-            viewFileType = FindViewById<TextView>(Resource.Id.fileTypeTextView);
-            viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
-            viewSlotQueue = FindViewById<TextView>(Resource.Id.slotQueueTextView);
-            hideLocked = PreferencesState.HideLockedResultsInSearch;
-        }
-
-        public void setItem(SearchResponse item, int noop)
-        {
-            viewUsername.Text = item.Username;
-            viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            viewSpeed.Text = "\u2193 " + (item.UploadSpeed / 1024).ToString() + "kb/s";
-            SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleSlotAndQueue(viewSlotQueue, item.HasFreeUploadSlot, item.QueueLength);
-        }
-    }
-
     // Style D: Status Bar (card with all chips on bottom row)
     public class SearchItemViewMediumD : RelativeLayout, ISearchItemViewBase
     {

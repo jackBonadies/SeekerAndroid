@@ -87,6 +87,11 @@
                     android:singleLine="true"
                     android:visibility="gone"
                 />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                />
                 <TextView
                     android:id="@+id/speedTextView"
                     android:layout_width="wrap_content"
