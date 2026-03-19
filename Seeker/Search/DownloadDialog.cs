@@ -216,8 +216,8 @@ namespace Seeker
             }
 
             folderNameHeader.Text = SimpleHelpers.GetFolderNameForSearchResult(searchResponse);
-            userHeader.Text = SeekerApplication.GetString(Resource.String.user_) + " " + searchResponse.Username;
-            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + SimpleHelpers.GetSubHeaderText(searchResponse);
+            userHeader.Text = searchResponse.Username;
+            subHeader.Text = SimpleHelpers.GetSubHeaderText(searchResponse);
             headerLayout.Click += UserHeader_Click;
             Logger.Debug("Is searchResponse.Files null: " + (searchResponse.Files == null).ToString());
 
