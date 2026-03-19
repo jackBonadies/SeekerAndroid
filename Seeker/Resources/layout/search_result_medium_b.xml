@@ -9,19 +9,42 @@
     android:foreground="?android:attr/selectableItemBackground"
     android:descendantFocusability="beforeDescendants"
 >
-    <TextView
-        android:id="@+id/folderNameTextView"
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ellipsize="end"
+        android:gravity="center_vertical"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
         android:paddingTop="10dp"
-        android:textColor="?attr/cellTextColor"
-        android:textSize="15sp"
-        android:fontFamily="sans-serif-medium"
-        android:singleLine="true"
-    />
+    >
+        <TextView
+            android:id="@+id/folderNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:textColor="?attr/cellTextColor"
+            android:textSize="15sp"
+            android:fontFamily="sans-serif-medium"
+            android:singleLine="true"
+        />
+        <TextView
+            android:id="@+id/queueTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/search_format_chip_bg"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:paddingTop="1dp"
+            android:paddingBottom="1dp"
+            android:layout_marginStart="3dp"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:visibility="gone"
+        />
+    </LinearLayout>
     <LinearLayout
         android:orientation="horizontal"
         android:id="@+id/subLayout"
@@ -97,21 +120,6 @@
             android:textColor="@color/subTextColor"
             android:textSize="12sp"
             android:singleLine="true"
-        />
-        <TextView
-            android:id="@+id/queueTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/search_format_chip_bg"
-            android:paddingStart="5dp"
-            android:paddingEnd="5dp"
-            android:paddingTop="1dp"
-            android:paddingBottom="1dp"
-            android:layout_marginStart="4dp"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            android:singleLine="true"
-            android:visibility="gone"
         />
     </LinearLayout>
     <View
