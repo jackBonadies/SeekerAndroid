@@ -101,6 +101,7 @@
         android:background="@color/slightTint"
         android:layout_marginStart="12dp"
         android:layout_marginEnd="12dp"
+        android:layout_marginBottom="8dp"
     />
     <Button
         android:foreground="@drawable/button"
@@ -110,9 +111,51 @@
         android:text="@string/download_folder"
         style="@style/SeekerButtonStyle"
         android:textSize="14sp"
+        app:icon="@drawable/download_20dp"
+        app:iconTint="#ffffff"
+        app:iconPadding="8dp"
+        app:iconGravity="textStart"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="12dp"
-        android:layout_marginTop="4dp"
     />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="12dp"
+    >
+        <Button
+            android:foreground="@drawable/button"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonBrowse"
+            android:text="@string/browse_files"
+            style="@style/SeekerButtonStyle"
+            android:textSize="13sp"
+            app:icon="@drawable/folder_20dp"
+            app:iconTint="#ffffff"
+            app:iconPadding="6dp"
+            app:iconGravity="textStart"
+            android:layout_marginEnd="6dp"
+        />
+        <Button
+            android:foreground="@drawable/button"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonClose"
+            android:text="@string/close_download_diag"
+            style="@style/SeekerButtonStyle"
+            android:textSize="13sp"
+            app:icon="@drawable/close_20dp"
+            app:iconTint="#ffffff"
+            app:iconPadding="6dp"
+            app:iconGravity="textStart"
+            android:layout_marginStart="6dp"
+        />
+    </LinearLayout>
 </LinearLayout>

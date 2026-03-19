@@ -191,6 +191,12 @@ namespace Seeker
             downloadButton = view.FindViewById<Button>(Resource.Id.buttonDownload);
             downloadButton.Click += Download_Click;
 
+            Button browseButton = view.FindViewById<Button>(Resource.Id.buttonBrowse);
+            browseButton.Click += Browse_Click;
+
+            Button closeButton = view.FindViewById<Button>(Resource.Id.buttonClose);
+            closeButton.Click += Close_Click;
+
             TextView folderNameHeader = view.FindViewById<TextView>(Resource.Id.folderNameHeader);
             TextView userHeader = view.FindViewById<TextView>(Resource.Id.userHeader);
             TextView subHeader = view.FindViewById<TextView>(Resource.Id.userHeaderSub);
@@ -307,6 +313,21 @@ namespace Seeker
         {
             bool hasSelection = this.customAdapter != null && this.customAdapter.SelectedPositions.Count > 0;
             DownloadWithContinuation(GetFilesToDownload(hasSelection), this.searchResponse.Username);
+        }
+
+        private void Browse_Click(object sender, EventArgs e)
+        {
+            Action<View> browseAction = new Action<View>((v) =>
+            {
+                this.Dismiss();
+                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+            });
+            Browse.BrowseService.RequestFilesApi(searchResponse.Username, this.View, browseAction, null);
+        }
+
+        private void Close_Click(object sender, EventArgs e)
+        {
+            Dismiss();
         }
 
         private void DownloadWithContinuation(FullFileInfo[] filesToDownload, string username)
@@ -546,16 +567,6 @@ namespace Seeker
                     return true;
                 case Resource.Id.getUserInfo:
                     RequestedUserInfoHelper.RequestUserInfoApi(searchResponse.Username);
-                    return true;
-                case Resource.Id.requestDirectories:
-                    {
-                        Action<View> reqDirAction = new Action<View>((v) =>
-                        {
-                            this.Dismiss();
-                            ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
-                        });
-                        Browse.BrowseService.RequestFilesApi(searchResponse.Username, this.View, reqDirAction, null);
-                    }
                     return true;
                 case Resource.Id.download_folder_as_queued:
                     {

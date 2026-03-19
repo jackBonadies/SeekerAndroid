@@ -451,10 +451,40 @@ namespace Seeker
             return browseResponse;
         }
 
-        public Task<IReadOnlyCollection<Soulseek.Directory>> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null, bool isLegacy = false)
+        public async Task<IReadOnlyCollection<Soulseek.Directory>> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null, bool isLegacy = false)
         {
-            if (GetDirectoryContentsAsyncHandler != null) return GetDirectoryContentsAsyncHandler(username, directoryName, token, cancellationToken, isLegacy);
-            return Task.FromResult<IReadOnlyCollection<Soulseek.Directory>>(Array.Empty<Soulseek.Directory>());
+            if (GetDirectoryContentsAsyncHandler != null)
+            {
+                return await GetDirectoryContentsAsyncHandler(username, directoryName, token, cancellationToken, isLegacy);
+            }
+
+            await Task.Delay(_random.Next(800, 3000), cancellationToken ?? CancellationToken.None);
+
+            var directories = new List<Soulseek.Directory>();
+            int dirCount = _random.Next(100) < 80 ? 1 : 2;
+
+            for (int d = 0; d < dirCount; d++)
+            {
+                string dirName = d == 0 ? directoryName : directoryName + "\\2CD" + (d + 1);
+                int fileCount = _random.Next(1, 36);
+                var ext = _extensions[_random.Next(_extensions.Length)];
+                int bitRate = ext == "flac" ? 1411 : new[] { 128, 192, 256, 320 }[_random.Next(4)];
+                var files = new List<Soulseek.File>();
+
+                for (int i = 0; i < fileCount; i++)
+                {
+                    int trackNum = i + 1;
+                    long size = _random.Next(2_000_000, 60_000_000);
+                    int length = _random.Next(120, 480);
+                    string filename = $"{trackNum:D2} Track {trackNum}.{ext}";
+                    var fileAttributes = new[] { new FileAttribute(FileAttributeType.BitRate, bitRate), new FileAttribute(FileAttributeType.Length, length) };
+                    files.Add(new Soulseek.File(1, filename, size, ext, fileAttributes));
+                }
+
+                directories.Add(new Soulseek.Directory(dirName, files));
+            }
+
+            return directories.AsReadOnly();
         }
 
         private static readonly Random _random = new Random();
@@ -493,7 +523,7 @@ namespace Seeker
             var hasFreeSlot = _random.Next(2) == 0;
             var isLocked = _random.Next(5) == 0; // ~20% chance locked
 
-            int trackCount = _random.Next(1, 6);
+            int trackCount = _random.Next(1, 30);
             var files = new List<Soulseek.File>();
             int bitRate = ext == "flac" ? 1411 : new[] { 128, 192, 256, 320 }[_random.Next(4)];
             for (int i = 0; i < trackCount; i++)
