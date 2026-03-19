@@ -1,19 +1,30 @@
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?attr/dialog_background"
 >
-    android:layout_gravity="center"
+    <!-- Drag handle -->
+    <View
+        android:layout_width="32dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"
+        android:background="@drawable/bottom_sheet_drag_handle"
+    />
+    <!-- Header section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="4dp"
+        android:padding="8dp"
+        android:paddingStart="12dp"
         android:id="@+id/header1"
         android:clickable="true"
-        android:background="@drawable/rounded_top_purple"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
     >
         <LinearLayout
             android:layout_width="0dp"
@@ -24,22 +35,29 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="19sp"
-                android:paddingStart="5dp"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:text=""
+                android:textColor="?attr/mainTextColor"
+                android:id="@+id/folderNameHeader"
+                android:ellipsize="middle"
+                android:singleLine="true"
+            />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
                 android:text="User: dummy"
-                android:background="?attr/mainPurple"
-                android:textColor="#ffffff"
+                android:textColor="?attr/mainTextColor"
                 android:id="@+id/userHeader"
             />
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
-                android:paddingStart="5dp"
                 android:paddingBottom="2dp"
                 android:text="Total: 12 files x 60 MB x 12m16s"
-                android:background="?attr/mainPurple"
-                android:textColor="#ffffff"
+                android:textColor="?attr/mainTextColorHinted"
                 android:id="@+id/userHeaderSub"
             />
         </LinearLayout>
@@ -47,105 +65,40 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="6dp"
-            android:tint="#ffffff"
+            android:tint="?attr/mainTextColor"
             app:srcCompat="@drawable/dots_horizontal_circle_outline"
             android:layout_gravity="center_vertical"
         />
     </LinearLayout>
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:layout_below="@id/header1"
         android:id="@+id/swipeToRefreshLayout"
         android:minWidth="25px"
         android:minHeight="25px"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
     >
         <ListView
-            android:layout_below="@id/header1"
             android:minWidth="25px"
             android:minHeight="25px"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingBottom="120dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="8dp"
             android:clipToPadding="false"
             android:id="@+id/listView1"
         />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-    <LinearLayout
+    <Button
+        android:foreground="@drawable/button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:layout_gravity="center"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical"
-    >
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="horizontal"
-        >
-            <Button
-                android:foreground="@drawable/button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/buttonDownload"
-                android:text="@string/download_folder"
-                style="@style/SeekerButtonStyle"
-                android:textSize="13sp"
-                android:layout_weight="0.4"
-                android:layout_marginStart="20dp"
-                android:layout_gravity="fill_vertical"
-                android:layout_marginEnd="10dp"
-            />
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:foreground="@drawable/button"
-                android:id="@+id/buttonDownloadSelected"
-                android:text="@string/download_selected"
-                android:textSize="13sp"
-                style="@style/SeekerButtonStyle"
-                android:layout_weight="0.4"
-                android:layout_gravity="fill_vertical"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="20dp"
-            />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_gravity="center"
-            android:orientation="horizontal"
-        >
-            <Button
-                android:layout_height="wrap_content"
-                android:id="@+id/buttonRequestDirectories"
-                android:foreground="@drawable/button"
-                android:text="@string/request_directories"
-                android:textSize="13sp"
-                style="@style/SeekerButtonStyle"
-                android:layout_weight="0.4"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="10dp"
-                android:layout_gravity="fill_vertical"
-                android:layout_width="match_parent"
-            />
-            <Button
-                android:layout_height="wrap_content"
-                android:id="@+id/buttonCancel"
-                android:text="@string/close_download_diag"
-                android:foreground="@drawable/button"
-                android:layout_gravity="fill_vertical"
-                android:textSize="13sp"
-                style="@style/SeekerButtonStyle"
-                android:layout_weight="0.4"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="20dp"
-                android:layout_width="match_parent"
-            />
-        </LinearLayout>
-    </LinearLayout>
-</RelativeLayout>
+        android:id="@+id/buttonDownload"
+        android:text="@string/download_folder"
+        style="@style/SeekerButtonStyle"
+        android:textSize="14sp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginTop="4dp"
+    />
+</LinearLayout>

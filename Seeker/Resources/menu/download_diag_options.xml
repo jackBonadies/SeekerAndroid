@@ -12,6 +12,10 @@
     <item android:id="@+id/moreInfo" android:title="@string/quick_info" />
     <item android:id="@+id/getUserInfo" android:title="@string/get_user_info" />
     <item
+        android:id="@+id/requestDirectories"
+        android:title="@string/request_directories"
+    />
+    <item
         android:id="@+id/download_folder_as_queued"
         android:title="@string/QueueFolderAsPaused"
     />

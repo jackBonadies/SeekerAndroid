@@ -27,6 +27,7 @@ using Android.Views;
 using Android.Widget;
 using Common;
 using Common.Browse;
+using Google.Android.Material.BottomSheet;
 using Google.Android.Material.Snackbar;
 using Seeker.Extensions.SearchResponseExtensions;
 using Seeker.Helpers;
@@ -44,7 +45,7 @@ using log = Android.Util.Log;
 
 namespace Seeker
 {
-    class DownloadDialog : AndroidX.Fragment.App.DialogFragment, PopupMenu.IOnMenuItemClickListener
+    class DownloadDialog : BottomSheetDialogFragment, PopupMenu.IOnMenuItemClickListener
     {
         public const string DOWNLOAD_DIALOG_FRAGMENT = "download_dialog_fragment";
         private int searchPosition = -1;
@@ -100,16 +101,6 @@ namespace Seeker
                 }
             }
             SearchResponseTemp = searchResponse = new SearchResponse(searchResponse.Username, searchResponse.Token, searchResponse.HasFreeUploadSlot, searchResponse.UploadSpeed, searchResponse.QueueLength, fullFilenameCollection);
-        }
-
-        public override void OnResume()
-        {
-            base.OnResume();
-            Logger.Debug("OnResume Start");
-
-            Dialog?.SetSizeProportional(.9, .9);
-
-            Logger.Debug("OnResume End");
         }
 
         public override void OnAttach(Context context)
@@ -174,28 +165,33 @@ namespace Seeker
             }
         }
 
-        private Button downloadSelectedButton = null;
+        private Button downloadButton = null;
         private AndroidX.SwipeRefreshLayout.Widget.SwipeRefreshLayout swipeRefreshLayout = null;
-        /// <summary>
-        /// Called after on create view
-        /// </summary>
-        /// <param name="view"></param>
-        /// <param name="savedInstanceState"></param>
+
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
             base.OnViewCreated(view, savedInstanceState);
-            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable_dl_dialog_specific));
 
-            this.SetStyle((int)DialogFragmentStyle.NoTitle, 0);
-            Button dl = view.FindViewById<Button>(Resource.Id.buttonDownload);
-            dl.Click += DownloadAll_Click;
-            Button cancel = view.FindViewById<Button>(Resource.Id.buttonCancel);
-            cancel.Click += Cancel_Click;
-            downloadSelectedButton = view.FindViewById<Button>(Resource.Id.buttonDownloadSelected);
-            downloadSelectedButton.Click += DownloadSelected_Click;
-            Button reqFiles = view.FindViewById<Button>(Resource.Id.buttonRequestDirectories);
-            reqFiles.Click += ReqFiles_Click;
-            //selectedPositions.Clear();
+            // Configure bottom sheet behavior
+            var dialog = (BottomSheetDialog)Dialog;
+            var bottomSheet = dialog.FindViewById<View>(Resource.Id.design_bottom_sheet);
+            if (bottomSheet != null)
+            {
+                var behavior = BottomSheetBehavior.From(bottomSheet);
+                behavior.State = BottomSheetBehavior.StateExpanded;
+                behavior.PeekHeight = (int)(Resources.DisplayMetrics.HeightPixels * 0.85);
+                behavior.SkipCollapsed = true;
+
+                // Make the bottom sheet take up most of the screen
+                var layoutParams = bottomSheet.LayoutParameters;
+                layoutParams.Height = (int)(Resources.DisplayMetrics.HeightPixels * 0.85);
+                bottomSheet.LayoutParameters = layoutParams;
+            }
+
+            downloadButton = view.FindViewById<Button>(Resource.Id.buttonDownload);
+            downloadButton.Click += Download_Click;
+
+            TextView folderNameHeader = view.FindViewById<TextView>(Resource.Id.folderNameHeader);
             TextView userHeader = view.FindViewById<TextView>(Resource.Id.userHeader);
             TextView subHeader = view.FindViewById<TextView>(Resource.Id.userHeaderSub);
 
@@ -209,9 +205,11 @@ namespace Seeker
             if (searchResponse == null)
             {
                 Logger.Firebase("DownloadDialog search response is null");
-                this.Dismiss(); //this is honestly pretty good behavior...
+                this.Dismiss();
                 return;
             }
+
+            folderNameHeader.Text = SimpleHelpers.GetFolderNameForSearchResult(searchResponse);
             userHeader.Text = SeekerApplication.GetString(Resource.String.user_) + " " + searchResponse.Username;
             subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + SimpleHelpers.GetSubHeaderText(searchResponse);
             headerLayout.Click += UserHeader_Click;
@@ -221,7 +219,7 @@ namespace Seeker
             listView.ItemClick += ListView_ItemClick;
             listView.ChoiceMode = ChoiceMode.Multiple;
             UpdateListView();
-            SetDownloadSelectedButtonState();
+            UpdateDownloadButtonText();
         }
 
         private void UpdateListView()
@@ -272,18 +270,6 @@ namespace Seeker
             }
         }
 
-        private void ReqFiles_Click(object sender, EventArgs e)
-        {
-            Action<View> action = new Action<View>((v) =>
-            {
-                this.Dismiss();
-                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
-            });
-            Browse.BrowseService.RequestFilesApi(searchResponse.Username, this.View, action, null);
-        }
-
-
-
         private void ListView_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
         {
             bool alreadySelected = this.customAdapter.SelectedPositions.Contains<int>(e.Position);
@@ -304,59 +290,25 @@ namespace Seeker
 #pragma warning restore 0618
                 this.customAdapter.SelectedPositions.Remove(e.Position);
             }
-            SetDownloadSelectedButtonState();
+            UpdateDownloadButtonText();
         }
 
-        private void SetDownloadSelectedButtonState()
+        private void UpdateDownloadButtonText()
         {
-            if (this.customAdapter == null || this.customAdapter.SelectedPositions.Count == 0)
+            if (this.customAdapter != null && this.customAdapter.SelectedPositions.Count > 0)
             {
-                //get backed in disabled color.
-                Color mainColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainPurple);
-                Color backgroundColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellback);
-                int disableColor = AndroidX.Core.Graphics.ColorUtils.BlendARGB(mainColor.ToArgb(), backgroundColor.ToArgb(), 0.5f);
-
-                int red = Color.GetRedComponent(disableColor);
-                int green = Color.GetGreenComponent(disableColor);
-                int blue = Color.GetBlueComponent(disableColor);
-
-                int disableTextColor = AndroidX.Core.Graphics.ColorUtils.BlendARGB(Color.White.ToArgb(), backgroundColor.ToArgb(), 0.5f);
-
-                int redtc = Color.GetRedComponent(disableTextColor);
-                int greentc = Color.GetGreenComponent(disableTextColor);
-                int bluetc = Color.GetBlueComponent(disableTextColor);
-
-                downloadSelectedButton.SetTextColor(ColorStateList.ValueOf(Color.Argb(255, redtc, greentc, bluetc)));
-                downloadSelectedButton.BackgroundTintList = ColorStateList.ValueOf(Color.Argb(255, red, green, blue));
-                downloadSelectedButton.Clickable = false;
+                downloadButton.Text = SeekerApplication.GetString(Resource.String.download_selected) + " (" + this.customAdapter.SelectedPositions.Count + ")";
             }
             else
             {
-                downloadSelectedButton.SetTextColor(ColorStateList.ValueOf(Color.White));
-                downloadSelectedButton.BackgroundTintList = null;
-                downloadSelectedButton.Clickable = true;
+                downloadButton.Text = SeekerApplication.GetString(Resource.String.download_folder);
             }
         }
 
-        private void Cancel_Click(object sender, EventArgs e)
+        private void Download_Click(object sender, EventArgs e)
         {
-            Dismiss();
-        }
-
-        private void DownloadAll_Click(object sender, EventArgs e)
-        {
-            DownloadWithContinuation(GetFilesToDownload(false), this.searchResponse.Username);
-        }
-
-        private void DownloadSelected_Click(object sender, EventArgs e)
-        {
-            if (this.customAdapter.SelectedPositions.Count == 0)
-            {
-                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.nothing_selected_extra), ToastLength.Short);
-                return;
-            }
-
-            DownloadWithContinuation(GetFilesToDownload(true), this.searchResponse.Username);
+            bool hasSelection = this.customAdapter != null && this.customAdapter.SelectedPositions.Count > 0;
+            DownloadWithContinuation(GetFilesToDownload(hasSelection), this.searchResponse.Username);
         }
 
         private void DownloadWithContinuation(FullFileInfo[] filesToDownload, string username)
@@ -596,6 +548,16 @@ namespace Seeker
                     return true;
                 case Resource.Id.getUserInfo:
                     RequestedUserInfoHelper.RequestUserInfoApi(searchResponse.Username);
+                    return true;
+                case Resource.Id.requestDirectories:
+                    {
+                        Action<View> reqDirAction = new Action<View>((v) =>
+                        {
+                            this.Dismiss();
+                            ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                        });
+                        Browse.BrowseService.RequestFilesApi(searchResponse.Username, this.View, reqDirAction, null);
+                    }
                     return true;
                 case Resource.Id.download_folder_as_queued:
                     {
