@@ -30,7 +30,7 @@
             android:singleLine="true"
         />
         <TextView
-            android:id="@+id/queueTextView"
+            android:id="@+id/fileTypeTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/search_format_chip_bg"
@@ -39,7 +39,21 @@
             android:paddingTop="1dp"
             android:paddingBottom="1dp"
             android:layout_marginStart="3dp"
-            android:textSize="13sp"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+        />
+        <TextView
+            android:id="@+id/bitrateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/search_format_chip_bg"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:paddingTop="1dp"
+            android:paddingBottom="1dp"
+            android:layout_marginStart="3dp"
+            android:textSize="10sp"
             android:textStyle="bold"
             android:singleLine="true"
             android:visibility="gone"
@@ -73,43 +87,9 @@
             android:layout_height="wrap_content"
             android:drawableStart="@drawable/file_stacks_drawable"
             android:drawablePadding="2dp"
-            android:paddingEnd="6dp"
             android:textColor="@color/subTextColor"
             android:textSize="12sp"
             android:singleLine="true"
-        />
-        <TextView
-            android:id="@+id/fileTypeTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/search_format_chip_bg"
-            android:paddingStart="5dp"
-            android:paddingEnd="5dp"
-            android:paddingTop="1dp"
-            android:paddingBottom="1dp"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            android:singleLine="true"
-        />
-        <TextView
-            android:id="@+id/bitrateTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/search_format_chip_bg"
-            android:paddingStart="5dp"
-            android:paddingEnd="5dp"
-            android:paddingTop="1dp"
-            android:paddingBottom="1dp"
-            android:layout_marginStart="3dp"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            android:singleLine="true"
-            android:visibility="gone"
-        />
-        <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1"
         />
         <TextView
             android:id="@+id/speedTextView"
@@ -118,6 +98,7 @@
             android:background="@drawable/search_format_chip_bg"
             android:drawableStart="@drawable/download_search_drawable"
             android:drawablePadding="0dp"
+            android:layout_marginStart="8dp"
             android:paddingStart="5dp"
             android:paddingEnd="5dp"
             android:paddingTop="1dp"
@@ -126,6 +107,21 @@
             android:textStyle="bold"
             android:textColor="@color/subTextColor"
             android:singleLine="true"
+        />
+        <TextView
+            android:id="@+id/queueTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/search_format_chip_bg"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:paddingTop="1dp"
+            android:paddingBottom="1dp"
+            android:layout_marginStart="4dp"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:visibility="gone"
         />
     </LinearLayout>
     <View
