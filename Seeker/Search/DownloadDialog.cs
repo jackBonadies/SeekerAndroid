@@ -284,10 +284,8 @@ namespace Seeker
             }
             else
             {
-#pragma warning disable 0618
-                e.View.Background = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
-                e.View.FindViewById(Resource.Id.mainDlLayout).Background = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
-#pragma warning restore 0618
+                e.View.Background = null;
+                e.View.FindViewById(Resource.Id.mainDlLayout).Background = null;
                 this.customAdapter.SelectedPositions.Remove(e.Position);
             }
             UpdateDownloadButtonText();
@@ -614,9 +612,8 @@ namespace Seeker
             else //views get reused, hence we need to reset the color so that when we scroll the resused views arent still highlighted.
             {
 #pragma warning disable 0618
-                var cellbackNormal = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
-                itemView.Background = cellbackNormal;
-                itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = cellbackNormal;
+                itemView.Background = null;
+                itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = null;
             }
 #pragma warning restore 0618
             return itemView;

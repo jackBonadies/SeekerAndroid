@@ -70,6 +70,13 @@
             android:layout_gravity="center_vertical"
         />
     </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/slightTint"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+    />
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeToRefreshLayout"
         android:minWidth="25px"
@@ -88,6 +95,13 @@
             android:id="@+id/listView1"
         />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/slightTint"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+    />
     <Button
         android:foreground="@drawable/button"
         android:layout_width="match_parent"

@@ -5,9 +5,6 @@
     android:id="@+id/mainDlLayout"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:paddingBottom="4dp"
-    android:paddingTop="2dp"
-    android:background="@drawable/cell_shape_end_dldiag"
     android:foreground="?android:attr/selectableItemBackground"
 >
     <TextView
@@ -16,7 +13,9 @@
         android:layout_height="wrap_content"
         android:textSize="15sp"
         android:textColor="?attr/cellTextColor"
-        android:paddingStart="5dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="6dp"
         android:ellipsize="end"
         android:text="1.5"
         android:singleLine="false"
@@ -29,8 +28,17 @@
         android:textSize="10sp"
         android:textColor="?attr/cellTextColorSubdued"
         android:ellipsize="end"
-        android:paddingStart="5dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="6dp"
         android:text="15mb - 10:14 - 245kbps"
         android:singleLine="true"
+    />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/slightTint"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
     />
 </LinearLayout>
