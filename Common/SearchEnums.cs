@@ -16,10 +16,9 @@ namespace Seeker
         CollapsedAll = 2,
         ExpandedAll = 3,
         MediumChipRow = 4,
-        MediumTwoLine = 5,
-        MediumStatusBar = 7,
-        MediumChipGrid = 8,
         MediumBadgeLine = 9,
+        MediumChipRow2 = 10,
+        MediumBadgeLine2 = 11,
     }
 
     public enum TabType

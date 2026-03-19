@@ -64,17 +64,14 @@ namespace Seeker
                     case SearchResultStyleEnum.MediumChipRow:
                         view = SearchItemViewMediumA.inflate(parent);
                         break;
-                    case SearchResultStyleEnum.MediumTwoLine:
-                        view = SearchItemViewMediumB.inflate(parent);
-                        break;
-                    case SearchResultStyleEnum.MediumStatusBar:
-                        view = SearchItemViewMediumD.inflate(parent);
-                        break;
-                    case SearchResultStyleEnum.MediumChipGrid:
-                        view = SearchItemViewMediumE.inflate(parent);
-                        break;
                     case SearchResultStyleEnum.MediumBadgeLine:
                         view = SearchItemViewMediumF.inflate(parent);
+                        break;
+                    case SearchResultStyleEnum.MediumChipRow2:
+                        view = SearchItemViewMediumA2.inflate(parent);
+                        break;
+                    case SearchResultStyleEnum.MediumBadgeLine2:
+                        view = SearchItemViewMediumF2.inflate(parent);
                         break;
                 }
                 view.setupChildren();

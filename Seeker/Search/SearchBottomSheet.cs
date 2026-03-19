@@ -36,17 +36,14 @@ namespace Seeker
                     case SearchResultStyleEnum.MediumChipRow:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonChipRow);
                         break;
-                    case SearchResultStyleEnum.MediumTwoLine:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonTwoLine);
-                        break;
-                    case SearchResultStyleEnum.MediumStatusBar:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonStatusBar);
-                        break;
-                    case SearchResultStyleEnum.MediumChipGrid:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonChipGrid);
-                        break;
                     case SearchResultStyleEnum.MediumBadgeLine:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonBadgeLine);
+                        break;
+                    case SearchResultStyleEnum.MediumChipRow2:
+                        resultStyleRadioGroup.Check(Resource.Id.radioButtonChipRow2);
+                        break;
+                    case SearchResultStyleEnum.MediumBadgeLine2:
+                        resultStyleRadioGroup.Check(Resource.Id.radioButtonBadgeLine2);
                         break;
                 }
                 resultStyleRadioGroup.CheckedChange += ResultStyleRadioGroup_CheckedChange;
@@ -74,17 +71,14 @@ namespace Seeker
                     case Resource.Id.radioButtonChipRow:
                         SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumChipRow;
                         break;
-                    case Resource.Id.radioButtonTwoLine:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumTwoLine;
-                        break;
-                    case Resource.Id.radioButtonStatusBar:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumStatusBar;
-                        break;
-                    case Resource.Id.radioButtonChipGrid:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumChipGrid;
-                        break;
                     case Resource.Id.radioButtonBadgeLine:
                         SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumBadgeLine;
+                        break;
+                    case Resource.Id.radioButtonChipRow2:
+                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumChipRow2;
+                        break;
+                    case Resource.Id.radioButtonBadgeLine2:
+                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumBadgeLine2;
                         break;
                 }
                 if (prev != SearchFragment.SearchResultStyle)

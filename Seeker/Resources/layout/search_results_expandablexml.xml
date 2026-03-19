@@ -97,44 +97,32 @@
                 android:layout_marginTop="4dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/search_result_style_two_line"
-                android:id="@+id/radioButtonTwoLine"
-                android:checked="false"
-                android:textSize="18sp"
-                android:buttonTint="?attr/slskAccent"
-                android:textColor="?attr/mainTextColor"
-            />
-
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:layout_marginTop="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/search_result_style_status_bar"
-                android:id="@+id/radioButtonStatusBar"
-                android:checked="false"
-                android:textSize="18sp"
-                android:buttonTint="?attr/slskAccent"
-                android:textColor="?attr/mainTextColor"
-            />
-
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:layout_marginTop="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/search_result_style_chip_grid"
-                android:id="@+id/radioButtonChipGrid"
-                android:checked="false"
-                android:textSize="18sp"
-                android:buttonTint="?attr/slskAccent"
-                android:textColor="?attr/mainTextColor"
-            />
-
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:layout_marginTop="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:text="@string/search_result_style_badge_line"
                 android:id="@+id/radioButtonBadgeLine"
+                android:checked="false"
+                android:textSize="18sp"
+                android:buttonTint="?attr/slskAccent"
+                android:textColor="?attr/mainTextColor"
+            />
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:layout_marginTop="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/search_result_style_chip_row_2"
+                android:id="@+id/radioButtonChipRow2"
+                android:checked="false"
+                android:textSize="18sp"
+                android:buttonTint="?attr/slskAccent"
+                android:textColor="?attr/mainTextColor"
+            />
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:layout_marginTop="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/search_result_style_badge_line_2"
+                android:id="@+id/radioButtonBadgeLine2"
                 android:checked="false"
                 android:textSize="18sp"
                 android:buttonTint="?attr/slskAccent"
