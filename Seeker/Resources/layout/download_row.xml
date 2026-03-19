@@ -1,39 +1,62 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:id="@+id/mainDlLayout"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:foreground="?android:attr/selectableItemBackground"
 >
-    <TextView
-        android:id="@+id/textView1"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="15sp"
-        android:textColor="?attr/cellTextColor"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:paddingTop="6dp"
-        android:ellipsize="end"
-        android:text="1.5"
-        android:singleLine="false"
-    />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+    >
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+        >
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="15sp"
+                android:textColor="?attr/cellTextColor"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="6dp"
+                android:ellipsize="end"
+                android:text="1.5"
+                android:singleLine="false"
+            />
 
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="10sp"
-        android:textColor="?attr/cellTextColorSubdued"
-        android:ellipsize="end"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:paddingBottom="6dp"
-        android:text="15mb - 10:14 - 245kbps"
-        android:singleLine="true"
-    />
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textColor="?attr/cellTextColorSubdued"
+                android:ellipsize="end"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="6dp"
+                android:text="15mb - 10:14 - 245kbps"
+                android:singleLine="true"
+            />
+        </LinearLayout>
+        <ImageView
+            android:id="@+id/selectionCheck"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="12dp"
+            app:srcCompat="@drawable/check_circle"
+            android:visibility="gone"
+        />
+    </LinearLayout>
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

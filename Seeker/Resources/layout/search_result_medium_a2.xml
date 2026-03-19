@@ -39,7 +39,7 @@
             android:paddingEnd="5dp"
             android:paddingTop="1dp"
             android:paddingBottom="1dp"
-            android:layout_marginStart="3dp"
+            android:layout_marginStart="2dp"
             android:textSize="10sp"
             android:textStyle="bold"
             android:singleLine="true"

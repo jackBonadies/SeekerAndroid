@@ -281,17 +281,18 @@ namespace Seeker
             bool alreadySelected = this.customAdapter.SelectedPositions.Contains<int>(e.Position);
             if (!alreadySelected)
             {
-
 #pragma warning disable 0618
-                e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
-                e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
+                e.View.Background = Resources.GetDrawable(Resource.Color.batchSelectHighlight, this.Activity.Theme);
+                e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.batchSelectHighlight, this.Activity.Theme);
 #pragma warning restore 0618
+                e.View.FindViewById(Resource.Id.selectionCheck).Visibility = ViewStates.Visible;
                 this.customAdapter.SelectedPositions.Add(e.Position);
             }
             else
             {
                 e.View.Background = null;
                 e.View.FindViewById(Resource.Id.mainDlLayout).Background = null;
+                e.View.FindViewById(Resource.Id.selectionCheck).Visibility = ViewStates.Gone;
                 this.customAdapter.SelectedPositions.Remove(e.Position);
             }
             UpdateDownloadButtonText();
@@ -615,18 +616,18 @@ namespace Seeker
             if (SelectedPositions.Contains(position))
             {
 #pragma warning disable 0618
-                var cellbackSelected = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
-                itemView.Background = cellbackSelected;
-                itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = cellbackSelected;
+                var highlight = Owner.Resources.GetDrawable(Resource.Color.batchSelectHighlight, SeekerState.ActiveActivityRef.Theme);
+                itemView.Background = highlight;
+                itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = highlight;
 #pragma warning restore 0618
+                itemView.FindViewById<View>(Resource.Id.selectionCheck).Visibility = ViewStates.Visible;
             }
             else //views get reused, hence we need to reset the color so that when we scroll the resused views arent still highlighted.
             {
-#pragma warning disable 0618
                 itemView.Background = null;
                 itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = null;
+                itemView.FindViewById<View>(Resource.Id.selectionCheck).Visibility = ViewStates.Gone;
             }
-#pragma warning restore 0618
             return itemView;
             //return base.GetView(position, convertView, parent);
         }
