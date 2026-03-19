@@ -59,7 +59,7 @@
             android:id="@+id/userNameTextView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_weight="4"
             android:ellipsize="end"
             android:paddingStart="8dp"
             android:paddingEnd="6dp"
@@ -71,7 +71,7 @@
             android:orientation="horizontal"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="3"
+            android:layout_weight="7"
             android:gravity="center_vertical"
             android:paddingEnd="8dp"
         >
