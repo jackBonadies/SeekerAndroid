@@ -94,7 +94,7 @@ namespace Seeker
         private View shimmerSpeed, shimmerFiles, shimmerDirs;
         private ObjectAnimator shimmerAnimSpeed, shimmerAnimFiles, shimmerAnimDirs;
 
-        private TextView noPicture = null;
+        private View noPicture = null;
         private ImageView picture = null;
         private TextView userBio = null;
 
@@ -196,7 +196,7 @@ namespace Seeker
             {
                 Logger.Firebase("UserToView==null");
             }
-            myToolbar.Title = this.GetString(Resource.String.user_) + " " + UserToView;
+            myToolbar.Title = UserToView;
             this.SetSupportActionBar(myToolbar);
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
@@ -232,7 +232,7 @@ namespace Seeker
             SetupShimmerPlaceholder(shimmerFiles);
             SetupShimmerPlaceholder(shimmerDirs);
 
-            noPicture = FindViewById<TextView>(Resource.Id.user_info_no_picture);
+            noPicture = FindViewById(Resource.Id.user_info_no_picture);
             picture = FindViewById<ImageView>(Resource.Id.user_info_picture);
             userBio = FindViewById<TextView>(Resource.Id.textViewBio);
 

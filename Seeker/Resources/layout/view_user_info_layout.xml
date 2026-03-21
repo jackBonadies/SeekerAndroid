@@ -90,7 +90,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="13sp"
-                            android:textColor="?attr/cellTextColorSubdued"
+                            android:textColor="?attr/cellTextColorMoreSubdued"
                             android:text="@string/stat_upload_slots"
                             android:layout_marginTop="2dp"
                         />
@@ -124,7 +124,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="13sp"
-                            android:textColor="?attr/cellTextColorSubdued"
+                            android:textColor="?attr/cellTextColorMoreSubdued"
                             android:text="@string/stat_queued"
                             android:layout_marginTop="2dp"
                         />
@@ -179,7 +179,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="13sp"
-                            android:textColor="?attr/cellTextColorSubdued"
+                            android:textColor="?attr/cellTextColorMoreSubdued"
                             android:text="@string/stat_speed"
                             android:layout_marginTop="2dp"
                         />
@@ -224,7 +224,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="13sp"
-                            android:textColor="?attr/cellTextColorSubdued"
+                            android:textColor="?attr/cellTextColorMoreSubdued"
                             android:text="@string/stat_files"
                             android:layout_marginTop="2dp"
                         />
@@ -256,8 +256,8 @@
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:textSize="15sp"
-                        android:textColor="?attr/cellTextColorSubdued"
-                        android:text="@string/stat_dirs"
+                        android:textColor="?attr/cellTextColorMoreSubdued"
+                        android:text="@string/stat_directories"
                     />
                     <FrameLayout
                         android:layout_width="wrap_content"
@@ -305,7 +305,7 @@
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
                         android:textSize="15sp"
-                        android:textColor="?attr/cellTextColorSubdued"
+                        android:textColor="?attr/cellTextColorMoreSubdued"
                         android:text="@string/stat_free_upload"
                     />
                     <TextView
@@ -318,55 +318,89 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- BIO header -->
             <TextView
-                android:layout_marginTop="4dp"
-                android:layout_marginStart="2dp"
-                android:layout_width="match_parent"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="14dp"
+                android:layout_marginBottom="6dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="22sp"
-                android:textColor="?attr/normalTextColor"
+                android:textSize="13sp"
+                android:textAllCaps="true"
+                android:letterSpacing="0.1"
+                android:textStyle="bold"
+                android:textColor="?attr/cellTextColorSubdued"
                 android:text="@string/user_info_bio"
             />
-            <TextView
-                android:layout_marginTop="4dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:textSize="16sp"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/user_has_no_bio"
-                android:textColor="?attr/normalTextColor"
-                android:gravity="top|start"
-                android:layout_weight="1"
-                android:id="@+id/textViewBio"
-                android:padding="6dp"
-                android:background="?the_rounded_corner_background_drawable"
-                android:layout_marginBottom="12dp"
-            />
 
-            <TextView
-                android:layout_marginStart="2dp"
+            <com.google.android.material.card.MaterialCardView
+                style="@style/StatCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="22sp"
-                android:textColor="?attr/normalTextColor"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="12dp"
+            >
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:text="@string/user_has_no_bio"
+                    android:textColor="?attr/normalTextColor"
+                    android:gravity="top|start"
+                    android:id="@+id/textViewBio"
+                    android:padding="14dp"
+                />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- PICTURE header -->
+            <TextView
+                android:layout_marginTop="0dp"
+                android:layout_marginStart="14dp"
+                android:layout_marginBottom="6dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textAllCaps="true"
+                android:letterSpacing="0.1"
+                android:textStyle="bold"
+                android:textColor="?attr/cellTextColorSubdued"
                 android:text="@string/user_info_picture"
             />
 
-            <TextView
+            <com.google.android.material.card.MaterialCardView
+                style="@style/StatCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                android:text="@string/user_has_no_pic"
-                android:id="@+id/user_info_no_picture"
-                android:padding="6dp"
-                android:textColor="?attr/normalTextColor"
-                android:background="?the_rounded_corner_background_drawable"
-                android:layout_marginTop="4dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginBottom="6dp"
-            />
+                android:id="@+id/user_info_no_picture"
+            >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:paddingTop="24dp"
+                    android:paddingBottom="24dp"
+                >
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/imagesmode_36dp"
+                        android:tint="?attr/cellTextColorMoreSubdued"
+                    />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:textColor="?attr/cellTextColorMoreSubdued"
+                        android:text="@string/user_has_no_pic"
+                        android:layout_marginTop="8dp"
+                    />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <ImageView
                 android:id="@+id/user_info_picture"
