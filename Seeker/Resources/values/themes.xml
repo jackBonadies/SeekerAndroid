@@ -27,6 +27,7 @@
         <!--<item name="dialogBackground">#52000000</item>-->
         <item name="cellbackColor">#00000000</item>
         <item name="cellback">#ffffff</item>
+        <item name="user_info_chip_background">#ffffff</item>
         <item name="CustomSelector">@drawable/CustomSelector_ffffff</item>
         <item name="cellbackColorDownloadDialog">#00000000</item>
         <item name="expandIconColor">#959BDC</item>
@@ -217,6 +218,7 @@
         <!--<item name="dialogBackground">#52000000</item>-->
         <item name="cellbackColor">#ff303030</item>
         <item name="cellback">#ff303030</item>
+        <item name="user_info_chip_background">#ff404040</item>
         <item name="CustomSelector">@drawable/CustomSelector_ff303030</item>
 
         <item name="cellbackColorDownloadDialog">#ff424242</item>
@@ -276,6 +278,7 @@
 
         <item name="cellbackColor">#ff000000</item>
         <item name="cellback">#ff000000</item>
+        <item name="user_info_chip_background">#ff141414</item>
         <item name="CustomSelector">@drawable/CustomSelector_ff000000</item>
 
         <item name="cellbackColorDownloadDialog">#ff202020</item>

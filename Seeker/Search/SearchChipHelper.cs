@@ -58,15 +58,24 @@ namespace Seeker.Search
         {
             switch (formatName)
             {
+                // orange
                 case "flac":
+                case "epub":
                     return (Resource.Color.searchChipFlacText, Resource.Color.searchChipFlacBg);
+                // blue
                 case "mp3":
+                case "pdf":
                     return (Resource.Color.searchChipMp3Text, Resource.Color.searchChipMp3Bg);
+                // pink
                 case "m4a":
+                case "azw3":
                     return (Resource.Color.searchChipM4aText, Resource.Color.searchChipM4aBg);
+                // green
                 case "wav":
                     return (Resource.Color.searchChipWavText, Resource.Color.searchChipWavBg);
+                // teal
                 case "aac":
+                case "mobi":
                     return (Resource.Color.searchChipAacText, Resource.Color.searchChipAacBg);
                 case "wma":
                     return (Resource.Color.searchChipWmaText, Resource.Color.searchChipWmaBg);

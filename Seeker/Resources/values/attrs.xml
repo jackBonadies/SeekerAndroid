@@ -27,6 +27,7 @@
     <attr name="expandIconColor" format="color" />
     <attr name="mainPurpleForNavBar" format="color" />
     <attr name="pseudo_window_background_color" format="color" />
+    <attr name="user_info_chip_background" format="color" />
 
     <attr name="android_default_notification_blue_color" format="color" />
     <attr

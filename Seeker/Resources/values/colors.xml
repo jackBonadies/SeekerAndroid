@@ -72,14 +72,14 @@
 
     <color name="unreadBadgeText">#FFFFFF</color>
 
-    <color name="searchChipFlacText">#1565C0</color>
-    <color name="searchChipFlacBg">#1A1565C0</color>
-    <color name="searchChipMp3Text">#2E7D32</color>
-    <color name="searchChipMp3Bg">#1A2E7D32</color>
+    <color name="searchChipFlacText">#E65100</color>
+    <color name="searchChipFlacBg">#1AE65100</color>
+    <color name="searchChipMp3Text">#1565C0</color>
+    <color name="searchChipMp3Bg">#1A1565C0</color>
+    <color name="searchChipWavText">#2E7D32</color>
+    <color name="searchChipWavBg">#1A2E7D32</color>
     <color name="searchChipM4aText">#6A1B9A</color>
     <color name="searchChipM4aBg">#1A6A1B9A</color>
-    <color name="searchChipWavText">#E65100</color>
-    <color name="searchChipWavBg">#1AE65100</color>
     <color name="searchChipAacText">#00838F</color>
     <color name="searchChipAacBg">#1A00838F</color>
     <color name="searchChipWmaText">#AD1457</color>

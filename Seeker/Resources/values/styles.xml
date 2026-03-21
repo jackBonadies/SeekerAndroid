@@ -154,7 +154,7 @@
 
     <style name="StatCard" parent="Widget.Material3.CardView.Outlined">
         <item name="cardCornerRadius">12dp</item>
-        <item name="cardBackgroundColor">?attr/cellback</item>
+        <item name="cardBackgroundColor">?attr/user_info_chip_background</item>
     </style>
 
     <style name="SettingsCard" parent="Widget.Material3.CardView.Outlined">
