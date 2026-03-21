@@ -85,8 +85,7 @@
             android:minWidth="25px"
             android:minHeight="25px"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
+            android:layout_height="match_parent"
         >
             <ListView
                 android:minWidth="25px"
@@ -98,6 +97,14 @@
                 android:id="@+id/listView1"
             />
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </LinearLayout>
+    <!-- Button footer - always visible at bottom -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="?attr/dialog_background"
+    >
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"

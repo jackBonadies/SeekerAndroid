@@ -21,6 +21,7 @@ using Android.App;
 using Android.Content;
 using Android.Content.Res;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Util;
 using Android.Views;
@@ -117,6 +118,44 @@ namespace Seeker
             }
         }
 
+        private class SheetStateCallback : BottomSheetBehavior.BottomSheetCallback
+        {
+            private readonly View contentView;
+            private readonly float density;
+            private readonly int peekHeight;
+
+            public SheetStateCallback(View contentView, float density, int peekHeight)
+            {
+                this.contentView = contentView;
+                this.density = density;
+                this.peekHeight = peekHeight;
+            }
+
+            public override void OnStateChanged(View bottomSheetView, int newState)
+            {
+                var bg = contentView.Background?.Mutate() as GradientDrawable;
+                if (bg != null)
+                {
+                    float radius = newState == BottomSheetBehavior.StateExpanded ? 0f : 28f * density;
+                    bg.SetCornerRadii(new float[] { radius, radius, radius, radius, 0, 0, 0, 0 });
+                    contentView.Background = bg;
+                }
+            }
+
+            public override void OnSlide(View bottomSheetView, float slideOffset)
+            {
+                if (slideOffset >= 0f && bottomSheetView.Height > 0)
+                {
+                    int hiddenPortion = (int)((1f - slideOffset) * (bottomSheetView.Height - peekHeight));
+                    contentView.SetPadding(
+                        contentView.PaddingLeft,
+                        contentView.PaddingTop,
+                        contentView.PaddingRight,
+                        Math.Max(hiddenPortion, 0));
+                }
+            }
+        }
+
         private Button downloadButton = null;
         private AndroidX.SwipeRefreshLayout.Widget.SwipeRefreshLayout swipeRefreshLayout = null;
 
@@ -124,20 +163,25 @@ namespace Seeker
         {
             base.OnViewCreated(view, savedInstanceState);
 
-            // Configure bottom sheet behavior
             var dialog = (BottomSheetDialog)Dialog;
             var bottomSheet = dialog.FindViewById<View>(Resource.Id.design_bottom_sheet);
             if (bottomSheet != null)
             {
                 var behavior = BottomSheetBehavior.From(bottomSheet);
-                behavior.State = BottomSheetBehavior.StateExpanded;
-                behavior.PeekHeight = (int)(Resources.DisplayMetrics.HeightPixels * 0.85);
-                behavior.SkipCollapsed = true;
+                behavior.State = BottomSheetBehavior.StateCollapsed;
+                int peekHeightPx = (int)(Resources.DisplayMetrics.HeightPixels * 0.85);
+                behavior.PeekHeight = peekHeightPx;
+                behavior.SkipCollapsed = false;
 
-                // Make the bottom sheet take up most of the screen
                 var layoutParams = bottomSheet.LayoutParameters;
-                layoutParams.Height = (int)(Resources.DisplayMetrics.HeightPixels * 0.85);
+                layoutParams.Height = ViewGroup.LayoutParams.MatchParent;
                 bottomSheet.LayoutParameters = layoutParams;
+
+                behavior.AddBottomSheetCallback(new SheetStateCallback(view, Resources.DisplayMetrics.Density, peekHeightPx));
+
+                // Set initial bottom padding so footer is visible at peek height
+                int initialPadding = Resources.DisplayMetrics.HeightPixels - peekHeightPx;
+                view.SetPadding(view.PaddingLeft, view.PaddingTop, view.PaddingRight, initialPadding);
             }
 
             downloadButton = view.FindViewById<Button>(Resource.Id.buttonDownload);
