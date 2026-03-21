@@ -54,6 +54,18 @@ namespace Seeker.Search
             return "";
         }
 
+        private static readonly (int textColorResId, int bgColorResId)[] ChipColors = new[]
+        {
+            (Resource.Color.searchChipFlacText, Resource.Color.searchChipFlacBg), 
+            (Resource.Color.searchChipMp3Text, Resource.Color.searchChipMp3Bg),    
+            (Resource.Color.searchChipM4aText, Resource.Color.searchChipM4aBg),     
+            (Resource.Color.searchChipWavText, Resource.Color.searchChipWavBg),      
+            (Resource.Color.searchChipAacText, Resource.Color.searchChipAacBg),       
+            (Resource.Color.searchChipWmaText, Resource.Color.searchChipWmaBg),     
+            (Resource.Color.searchChipAiffText, Resource.Color.searchChipAiffBg),    
+            (Resource.Color.searchChipOtherText, Resource.Color.searchChipOtherBg),   
+        };
+
         public static (int textColorResId, int bgColorResId) GetFormatChipColorResIds(string formatName)
         {
             switch (formatName)
@@ -82,7 +94,8 @@ namespace Seeker.Search
                 case "aiff":
                     return (Resource.Color.searchChipAiffText, Resource.Color.searchChipAiffBg);
                 default:
-                    return (Resource.Color.searchChipOtherText, Resource.Color.searchChipOtherBg);
+                    int hash = formatName.GetHashCode() & 0x7FFFFFFF;
+                    return ChipColors[hash % ChipColors.Length];
             }
         }
 
