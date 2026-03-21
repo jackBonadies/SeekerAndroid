@@ -1,6 +1,7 @@
 using Android.Content;
 using Common;
 using Common.Messages;
+using System;
 using System.Collections.Generic;
 
 namespace Seeker
@@ -84,10 +85,19 @@ namespace Seeker
             PreferencesState.HideLockedResultsInSearch = prefs.GetBoolean(KeyConsts.M_HideLockedSearch, true);
             PreferencesState.FilterSticky = prefs.GetBoolean(KeyConsts.M_FilterSticky, false);
             PreferencesState.FilterStickyString = prefs.GetString(KeyConsts.M_FilterStickyString, string.Empty);
-            PreferencesState.SearchResultStyle = prefs.GetInt(KeyConsts.M_SearchResultStyle, 1);
+            PreferencesState.SearchResultStyle = ConvertSafe(prefs.GetInt(KeyConsts.M_SearchResultStyle, 1));
             PreferencesState.DefaultSearchResultSortAlgorithm = (SearchResultSorting)(prefs.GetInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, 0));
 
             PreferencesState.SearchHistory = GetSearchHistory(prefs);
+        }
+
+        private static SearchResultStyleEnum ConvertSafe(int value)
+        {
+            if (Enum.IsDefined(typeof(SearchResultStyleEnum), value))
+            {
+                return (SearchResultStyleEnum)value;
+            }
+            return SearchResultStyleEnum.MediumModernBitrateBottom;
         }
 
         private static List<string> GetSearchHistory(ISharedPreferences prefs)
@@ -707,7 +717,7 @@ namespace Seeker
                 editor.PutBoolean(KeyConsts.M_FilterSticky, PreferencesState.FilterSticky);
                 editor.PutString(KeyConsts.M_FilterStickyString, PreferencesState.FilterStickyString);
                 editor.PutBoolean(KeyConsts.M_MemoryBackedDownload, PreferencesState.MemoryBackedDownload);
-                editor.PutInt(KeyConsts.M_SearchResultStyle, PreferencesState.SearchResultStyle);
+                editor.PutInt(KeyConsts.M_SearchResultStyle, (int)PreferencesState.SearchResultStyle);
                 editor.PutBoolean(KeyConsts.M_DisableToastNotifications, PreferencesState.DisableDownloadToastNotification);
                 editor.PutInt(KeyConsts.M_UploadSpeed, PreferencesState.UploadSpeed);
                 editor.PutBoolean(KeyConsts.M_SharingOn, PreferencesState.SharingOn);

@@ -31,7 +31,7 @@ namespace Seeker
         public View rootView = null;
         private View noSearchesView = null;
         private Context context;
-        public static SearchResultStyleEnum SearchResultStyle = SearchResultStyleEnum.Medium;
+        public static SearchResultStyleEnum SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateBottom;
         public static IMenu ActionBarMenu = null;
         public static int LastSearchResponseCount = -1;
 
@@ -72,17 +72,18 @@ namespace Seeker
             }
         }
 
-        public static void SetSearchResultStyle(int style)
+        public static void SetSearchResultStyle(SearchResultStyleEnum style)
         {
             //in case its out of range bc we add / rm enums in the future...
             foreach (int i in System.Enum.GetValues(typeof(SearchResultStyleEnum)))
             {
-                if (i == style)
+                if (i == (int)style)
                 {
                     SearchResultStyle = (SearchResultStyleEnum)(i);
-                    break;
+                    return;
                 }
             }
+            SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateBottom;
         }
 
         public override void SetMenuVisibility(bool menuVisible)

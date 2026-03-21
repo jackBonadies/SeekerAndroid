@@ -10,7 +10,6 @@ using Common;
 
 namespace Seeker
 {
-    // Style A: Chip Row - two lines, flat with bottom cell border
     public class SearchItemViewMediumA : RelativeLayout, ISearchItemViewBase
     {
         private TextView viewUsername;
@@ -67,8 +66,7 @@ namespace Seeker
         }
     }
 
-    // Style F: Badge Line - two lines only, most compact, flat with separator
-    public class SearchItemViewMediumF : RelativeLayout, ISearchItemViewBase
+    public class SearchItemViewMediumBadgeBitrateBottom : RelativeLayout, ISearchItemViewBase
     {
         private TextView viewUsername;
         private TextView viewFoldername;
@@ -79,21 +77,21 @@ namespace Seeker
         private TextView viewFileCount;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
-        public SearchItemViewMediumF(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public SearchItemViewMediumBadgeBitrateBottom(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.search_result_medium_f, this, true);
             setupChildren();
         }
 
-        public SearchItemViewMediumF(Context context, IAttributeSet attrs) : base(context, attrs)
+        public SearchItemViewMediumBadgeBitrateBottom(Context context, IAttributeSet attrs) : base(context, attrs)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.search_result_medium_f, this, true);
             setupChildren();
         }
 
-        public static SearchItemViewMediumF inflate(ViewGroup parent)
+        public static SearchItemViewMediumBadgeBitrateBottom inflate(ViewGroup parent)
         {
-            SearchItemViewMediumF itemView = (SearchItemViewMediumF)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.searchitemviewmediumf_dummy, parent, false);
+            SearchItemViewMediumBadgeBitrateBottom itemView = (SearchItemViewMediumBadgeBitrateBottom)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.searchitemviewmediumf_dummy, parent, false);
             return itemView;
         }
 
@@ -124,7 +122,6 @@ namespace Seeker
         }
     }
 
-    // Style A2: Chip Row 2 - bitrate on folder line, right-aligned info
     public class SearchItemViewMediumA2 : RelativeLayout, ISearchItemViewBase
     {
         private TextView viewUsername;
@@ -180,8 +177,7 @@ namespace Seeker
         }
     }
 
-    // Style F2: Badge Line 2 - bitrate on folder line, right-aligned info
-    public class SearchItemViewMediumF2 : RelativeLayout, ISearchItemViewBase
+    public class SearchItemViewMediumBadgeBitrateTop : RelativeLayout, ISearchItemViewBase
     {
         private TextView viewUsername;
         private TextView viewFoldername;
@@ -192,21 +188,21 @@ namespace Seeker
         private TextView viewFileCount;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
-        public SearchItemViewMediumF2(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public SearchItemViewMediumBadgeBitrateTop(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.search_result_medium_f2, this, true);
             setupChildren();
         }
 
-        public SearchItemViewMediumF2(Context context, IAttributeSet attrs) : base(context, attrs)
+        public SearchItemViewMediumBadgeBitrateTop(Context context, IAttributeSet attrs) : base(context, attrs)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.search_result_medium_f2, this, true);
             setupChildren();
         }
 
-        public static SearchItemViewMediumF2 inflate(ViewGroup parent)
+        public static SearchItemViewMediumBadgeBitrateTop inflate(ViewGroup parent)
         {
-            SearchItemViewMediumF2 itemView = (SearchItemViewMediumF2)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.searchitemviewmediumf2_dummy, parent, false);
+            SearchItemViewMediumBadgeBitrateTop itemView = (SearchItemViewMediumBadgeBitrateTop)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.searchitemviewmediumf2_dummy, parent, false);
             return itemView;
         }
 

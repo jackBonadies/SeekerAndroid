@@ -55,23 +55,17 @@ namespace Seeker
                         (view as View).FindViewById<ImageView>(Resource.Id.expandableClick).Click += CustomAdapter_Click;
                         (view as View).FindViewById<LinearLayout>(Resource.Id.relativeLayout1).Click += CustomAdapter_Click1;
                         break;
-                    case SearchResultStyleEnum.Medium:
+                    case SearchResultStyleEnum.MediumLegacy:
                         view = SearchItemViewMedium.inflate(parent);
                         break;
-                    case SearchResultStyleEnum.Minimal:
+                    case SearchResultStyleEnum.MinimalLegacy:
                         view = SearchItemViewMinimal.inflate(parent);
                         break;
-                    case SearchResultStyleEnum.MediumChipRow:
-                        view = SearchItemViewMediumA.inflate(parent);
+                    case SearchResultStyleEnum.MediumModernBitrateBottom:
+                        view = SearchItemViewMediumBadgeBitrateBottom.inflate(parent);
                         break;
-                    case SearchResultStyleEnum.MediumBadgeLine:
-                        view = SearchItemViewMediumF.inflate(parent);
-                        break;
-                    case SearchResultStyleEnum.MediumChipRow2:
-                        view = SearchItemViewMediumA2.inflate(parent);
-                        break;
-                    case SearchResultStyleEnum.MediumBadgeLine2:
-                        view = SearchItemViewMediumF2.inflate(parent);
+                    case SearchResultStyleEnum.MediumModernBitrateTop:
+                        view = SearchItemViewMediumBadgeBitrateTop.inflate(parent);
                         break;
                 }
                 view.setupChildren();

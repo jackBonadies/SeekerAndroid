@@ -59,7 +59,7 @@ namespace Common
         public static bool FilterSticky = false;
         public static string FilterStickyString = string.Empty;
         public static List<string> SearchHistory = new List<string>();
-        public static int SearchResultStyle = 1; // Medium
+        public static SearchResultStyleEnum SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateBottom;
 
         // UI / Theme
         public static int DayNightMode = -1; // AppCompatDelegate.ModeNightFollowSystem

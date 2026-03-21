@@ -27,23 +27,17 @@ namespace Seeker
                     case SearchResultStyleEnum.CollapsedAll:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonCollapsed);
                         break;
-                    case SearchResultStyleEnum.Medium:
+                    case SearchResultStyleEnum.MediumLegacy:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonMedium);
                         break;
-                    case SearchResultStyleEnum.Minimal:
+                    case SearchResultStyleEnum.MinimalLegacy:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonMinimal);
                         break;
-                    case SearchResultStyleEnum.MediumChipRow:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonChipRow);
+                    case SearchResultStyleEnum.MediumModernBitrateBottom:
+                        resultStyleRadioGroup.Check(Resource.Id.radioButtonModernBitrateBottom);
                         break;
-                    case SearchResultStyleEnum.MediumBadgeLine:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonBadgeLine);
-                        break;
-                    case SearchResultStyleEnum.MediumChipRow2:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonChipRow2);
-                        break;
-                    case SearchResultStyleEnum.MediumBadgeLine2:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonBadgeLine2);
+                    case SearchResultStyleEnum.MediumModernBitrateTop:
+                        resultStyleRadioGroup.Check(Resource.Id.radioButtonModernBitrateTop);
                         break;
                 }
                 resultStyleRadioGroup.CheckedChange += ResultStyleRadioGroup_CheckedChange;
@@ -63,22 +57,16 @@ namespace Seeker
                         SearchFragment.SearchResultStyle = SearchResultStyleEnum.CollapsedAll;
                         break;
                     case Resource.Id.radioButtonMedium:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.Medium;
+                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumLegacy;
                         break;
                     case Resource.Id.radioButtonMinimal:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.Minimal;
+                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MinimalLegacy;
                         break;
-                    case Resource.Id.radioButtonChipRow:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumChipRow;
+                    case Resource.Id.radioButtonModernBitrateBottom:
+                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateBottom;
                         break;
-                    case Resource.Id.radioButtonBadgeLine:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumBadgeLine;
-                        break;
-                    case Resource.Id.radioButtonChipRow2:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumChipRow2;
-                        break;
-                    case Resource.Id.radioButtonBadgeLine2:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumBadgeLine2;
+                    case Resource.Id.radioButtonModernBitrateTop:
+                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateTop;
                         break;
                 }
                 if (prev != SearchFragment.SearchResultStyle)
