@@ -12,7 +12,7 @@
 	</style>
 
 	<style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
-		<item name="background">?attr/colorPrimary</item>
+		<item name="background">?attr/mainPurple</item>
 		<item name="titleTextStyle">@style/MyActionModeTitle</item>
 	</style>
 
@@ -52,9 +52,10 @@
         <item name="slskAccent">#437eab</item>
 
         <item name="windowActionModeOverlay">true</item>
-        <item name="android:actionModeBackground">?attr/colorPrimary</item>
-        <item name="actionModeBackground">?attr/colorPrimary</item>
+        <item name="android:actionModeBackground">?attr/mainPurple</item>
+        <item name="actionModeBackground">?attr/mainPurple</item>
     </style>
+
 
     <style
         name="MaterialThemeForChip"
