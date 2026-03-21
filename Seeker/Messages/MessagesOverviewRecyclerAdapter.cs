@@ -103,7 +103,7 @@ namespace Seeker.Messages
             if (dX < 0)
             {
                 this.colorDrawable.SetBounds(itemView.Right + (int)dX, itemView.Top, itemView.Right, itemView.Bottom);
-                double margin = (itemView.Bottom - itemView.Top) * .15;
+                double margin = (itemView.Bottom - itemView.Top) * .25;
                 int clipBounds = (int)((itemView.Bottom - itemView.Top) - 2 * margin);
                 int level = Math.Min((int)(Math.Abs((dX + margin) / (clipBounds)) * 10000), 10000);
                 if (level < 0)
