@@ -306,7 +306,7 @@ namespace Seeker
             Button chbox = this.FindViewById<Button>(Resource.Id.addUploadDirectory);
 
             var progBar = this.FindViewById<ProgressBar>(Resource.Id.progressBarSharedStatus);
-            progBar.IndeterminateDrawable.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), Android.Graphics.PorterDuff.Mode.SrcIn);
+            progBar.IndeterminateDrawable.SetColorFilter(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), Android.Graphics.PorterDuff.Mode.SrcIn);
             progBar.Click += ImageView_Click;
             Intent intent = Intent; //intent that started this activity
             //this.SaveDataDirectoryUri = intent.GetStringExtra("SaveDataDirectoryUri");

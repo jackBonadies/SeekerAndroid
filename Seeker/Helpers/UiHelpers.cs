@@ -10,11 +10,48 @@ using Seeker.Managers;
 using Seeker.Messages;
 using System;
 using System.Threading.Tasks;
+using Android.Graphics;
+using Android.Util;
+using Android.Content.Res;
+using AndroidX.Core.Content;
 
 namespace Seeker
 {
     public static class UiHelpers
     {
+        public static Color GetColorFromAttribute(Context c, int attr, Resources.Theme overrideTheme = null)
+        {
+            var typedValue = new TypedValue();
+            if (overrideTheme != null)
+            {
+                overrideTheme.ResolveAttribute(attr, typedValue, true);
+            }
+            else
+            {
+                c.Theme.ResolveAttribute(attr, typedValue, true);
+            }
+
+            if (typedValue.ResourceId == 0)
+            {
+                return GetColorFromInteger(typedValue.Data);
+            }
+            else
+            {
+                return GetColorFromInteger(ContextCompat.GetColor(c, typedValue.ResourceId));
+            }
+        }
+
+        public static Color GetColorFromInteger(int color)
+        {
+            return Color.Argb(Color.GetAlphaComponent(color), Color.GetRedComponent(color), Color.GetGreenComponent(color), Color.GetBlueComponent(color));
+        }
+
+        public static void SetTextColor(TextView tv, Context c)
+        {
+            tv.SetTextColor(GetColorFromAttribute(c, Resource.Attribute.cellTextColor));
+        }
+
+
         public static void ConfigureSpecialLinks(TextView textView, string msgText, SimpleHelpers.SpecialMessageType specialMessageType)
         {
             Android.Text.SpannableString messageText = new Android.Text.SpannableString(msgText);

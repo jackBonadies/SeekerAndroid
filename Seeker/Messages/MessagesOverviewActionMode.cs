@@ -29,7 +29,7 @@ namespace Seeker.Messages
                 var activity = SeekerState.ActiveActivityRef;
                 if (activity != null)
                 {
-                    var color = SearchItemViewExpandable.GetColorFromAttribute(activity, Resource.Attribute.colorPrimary);
+                    var color = UiHelpers.GetColorFromAttribute(activity, Resource.Attribute.colorPrimary);
                     activity.Window?.SetStatusBarColor(color);
                 }
                 return true;

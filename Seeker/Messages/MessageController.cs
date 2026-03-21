@@ -257,7 +257,7 @@ namespace Seeker.Messages
         {
             var newTheme = contextToUse.Resources.NewTheme();
             newTheme.ApplyStyle(ThemeHelper.GetThemeInChosenDayNightMode(useNightColors, contextToUse), true);
-            return SearchItemViewExpandable.GetColorFromAttribute(contextToUse, Resource.Attribute.android_default_notification_blue_color, newTheme);
+            return UiHelpers.GetColorFromAttribute(contextToUse, Resource.Attribute.android_default_notification_blue_color, newTheme);
         }
 
         private static Color GetOtherTextColor(bool useNightColors, Context contextToUse)
@@ -279,7 +279,7 @@ namespace Seeker.Messages
                 //todo
                 var newTheme = contextToUse.Resources.NewTheme();
                 newTheme.ApplyStyle(ThemeHelper.GetThemeInChosenDayNightMode(useNightColors, contextToUse), true);
-                return SearchItemViewExpandable.GetColorFromAttribute(contextToUse, Resource.Attribute.android_default_notification_complementary_color, newTheme);
+                return UiHelpers.GetColorFromAttribute(contextToUse, Resource.Attribute.android_default_notification_complementary_color, newTheme);
             }
         }
 
@@ -342,7 +342,7 @@ namespace Seeker.Messages
 
 
             ssb.Append(spannableString);
-            //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
+            //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
             string msgToShow = "\n" + messageNotifExtended.MessageText;
             var spannableString2 = new Android.Text.SpannableString(msgToShow);
             //spannableString2.SetSpan(textColorSubdued, 0, msgToShow.Length, SpanTypes.InclusiveInclusive);
@@ -416,7 +416,7 @@ namespace Seeker.Messages
                 {
                     spannableString2 = new Android.Text.SpannableString(msg.MessageText);
                 }
-                //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
+                //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
                 //spannableString2.SetSpan(textColorSubdued, 0, msg.MessageText.Length, SpanTypes.InclusiveInclusive);
                 ssb.Append(spannableString2);
 

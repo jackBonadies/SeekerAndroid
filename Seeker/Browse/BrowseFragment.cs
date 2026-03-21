@@ -1099,14 +1099,14 @@ namespace Seeker
                 titleView.Text = folderName;
                 titleView.SetPadding(dp24, dp20, dp24, 0);
                 titleView.SetTextSize(Android.Util.ComplexUnitType.Sp, 20);
-                titleView.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor));
+                titleView.SetTextColor(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor));
                 titleView.SetMaxLines(2);
                 titleView.Ellipsize = Android.Text.TextUtils.TruncateAt.End;
                 builder.SetCustomTitle(titleView);
             }
 
-            var labelColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued);
-            var valueColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor);
+            var labelColor = UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued);
+            var valueColor = UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor);
 
             string lengthValue = (folderSummary.LengthSeconds == 0) ? "-" : SimpleHelpers.GetHumanReadableTime(folderSummary.LengthSeconds, true);
 
@@ -1156,7 +1156,7 @@ namespace Seeker
 
             var diag = builder.SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
-            diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
+            diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
         }
 
         private static void ClearFilterUIString(bool force = false)

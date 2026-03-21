@@ -217,7 +217,7 @@ namespace Seeker
             foreach (Soulseek.File f in item.GetFiles(PreferencesState.HideLockedResultsInSearch))
             {
                 TextView tv = new TextView(SeekerState.MainActivityRef);
-                SetTextColor(tv, SeekerState.MainActivityRef);
+                UiHelpers.SetTextColor(tv, SeekerState.MainActivityRef);
                 tv.Text = SimpleHelpers.GetFileNameFromFile(f.Filename);
                 viewToHideShow.AddView(tv);
             }
@@ -275,37 +275,6 @@ namespace Seeker
             viewToHideShow.Visibility = ViewStates.Gone;
         }
 
-        public static Color GetColorFromAttribute(Context c, int attr, Resources.Theme overrideTheme = null)
-        {
-            var typedValue = new TypedValue();
-            if (overrideTheme != null)
-            {
-                overrideTheme.ResolveAttribute(attr, typedValue, true);
-            }
-            else
-            {
-                c.Theme.ResolveAttribute(attr, typedValue, true);
-            }
-
-            if (typedValue.ResourceId == 0)
-            {
-                return GetColorFromInteger(typedValue.Data);
-            }
-            else
-            {
-                return GetColorFromInteger(ContextCompat.GetColor(c, typedValue.ResourceId));
-            }
-        }
-
-        public static Color GetColorFromInteger(int color)
-        {
-            return Color.Argb(Color.GetAlphaComponent(color), Color.GetRedComponent(color), Color.GetGreenComponent(color), Color.GetBlueComponent(color));
-        }
-
-        public static void SetTextColor(TextView tv, Context c)
-        {
-            tv.SetTextColor(GetColorFromAttribute(c, Resource.Attribute.cellTextColor));
-        }
     }
 
 }

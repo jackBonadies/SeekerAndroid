@@ -303,9 +303,9 @@ namespace Seeker.Messages
             unreadBadge = FindViewById<TextView>(Resource.Id.unreadBadge);
             viewStatusIndicator = FindViewById<ImageView>(Resource.Id.statusIndicator);
             selectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
-            cellTextColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColor);
-            subduedColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued);
-            verySubduedColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorVerySubdued);
+            cellTextColor = UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColor);
+            subduedColor = UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued);
+            verySubduedColor = UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorVerySubdued);
         }
 
         public void SetSelectedBackground(bool isSelected)

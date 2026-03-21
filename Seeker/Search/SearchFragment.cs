@@ -451,7 +451,7 @@ namespace Seeker
                 if (purple)
                 {
                     //https://developer.android.com/reference/android/graphics/PorterDuff.Mode
-                    cancel.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), PorterDuff.Mode.SrcAtop);
+                    cancel.SetColorFilter(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), PorterDuff.Mode.SrcAtop);
                 }
                 actv.SetCompoundDrawables(null, null, cancel, null);
             }

@@ -237,7 +237,7 @@ namespace Seeker.Messages
             {
                 case SentStatus.Pending:
                 case SentStatus.Success:
-                    return SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainPurple);
+                    return UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainPurple);
                 case SentStatus.Failed:
                     resourceIntColor = Resource.Color.hardErrorRed;
                     return GetColorFromInteger(ContextCompat.GetColor(SeekerState.ActiveActivityRef, resourceIntColor));

@@ -198,8 +198,8 @@ namespace Seeker
             TextView subHeader = view.FindViewById<TextView>(Resource.Id.userHeaderSub);
 
             swipeRefreshLayout = view.FindViewById<AndroidX.SwipeRefreshLayout.Widget.SwipeRefreshLayout>(Resource.Id.swipeToRefreshLayout);
-            swipeRefreshLayout.SetProgressBackgroundColorSchemeColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.swipeToRefreshBackground).ToArgb());
-            swipeRefreshLayout.SetColorSchemeColors(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.swipeToRefreshProgress).ToArgb());
+            swipeRefreshLayout.SetProgressBackgroundColorSchemeColor(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.swipeToRefreshBackground).ToArgb());
+            swipeRefreshLayout.SetColorSchemeColors(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.swipeToRefreshProgress).ToArgb());
             swipeRefreshLayout.SetOnRefreshListener(new OnRefreshListenerGetFolder(this));
 
             ViewGroup headerLayout = view.FindViewById<ViewGroup>(Resource.Id.header1);
@@ -552,7 +552,7 @@ namespace Seeker
                     //}
                     //else
                     //{
-                    diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
+                    diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
                     //}
                     return true;
                 case Resource.Id.getUserInfo:

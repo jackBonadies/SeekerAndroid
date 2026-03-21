@@ -314,7 +314,7 @@ namespace Seeker
         private void SetupShimmerPlaceholder(View view)
         {
             var drawable = new GradientDrawable();
-            Color color = SearchItemViewExpandable.GetColorFromAttribute(this, Resource.Attribute.slightestContrastColor);
+            Color color = UiHelpers.GetColorFromAttribute(this, Resource.Attribute.slightestContrastColor);
             drawable.SetColor(color);
             drawable.SetCornerRadius(TypedValue.ApplyDimension(ComplexUnitType.Dip, 6, Resources.DisplayMetrics));
             view.Background = drawable;

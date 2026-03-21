@@ -595,7 +595,7 @@ namespace Seeker
             {
                 speedView.Visibility = ViewStates.Visible;
                 speedView.Text = SimpleHelpers.GetTransferSpeedString(avgSpeed);
-                //speedView.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(speedView.Context, Resource.Attribute.transferSpeedSubdued));
+                //speedView.SetTextColor(UiHelpers.GetColorFromAttribute(speedView.Context, Resource.Attribute.transferSpeedSubdued));
                 int color = resources.GetColor(Resource.Color.transferSpeedSubdued, theme);
                 speedView.SetTextColor(new Color(color));
                 speedView.SetTypeface(speedView.Typeface, TypefaceStyle.Normal);

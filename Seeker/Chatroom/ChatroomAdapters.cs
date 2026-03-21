@@ -649,8 +649,8 @@ namespace Seeker
 
                 viewRoomName.SetTypeface(null, TypefaceStyle.Bold);
                 viewUsersInRoom.SetTypeface(null, TypefaceStyle.Bold);
-                viewRoomName.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
-                viewUsersInRoom.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
+                viewRoomName.SetTextColor(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
+                viewUsersInRoom.SetTextColor(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColorNonTinted));
             }
             else
             {
