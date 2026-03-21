@@ -244,7 +244,6 @@ namespace Seeker
         private TextView viewQueue;
         private TextView viewFileCount;
         private LinearLayout viewToHideShow;
-        private View headerFilesSeparator;
         private ImageView imageViewExpandable;
 
         public SearchFragment.SearchAdapterRecyclerVersion AdapterRef;
@@ -281,7 +280,6 @@ namespace Seeker
             viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
             viewFileCount = FindViewById<TextView>(Resource.Id.fileCountTextView);
             viewToHideShow = FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
-            headerFilesSeparator = FindViewById<View>(Resource.Id.headerFilesSeparator);
             imageViewExpandable = FindViewById<ImageView>(Resource.Id.expandableClick);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
 
@@ -306,7 +304,6 @@ namespace Seeker
                 SearchFragment.ExpandAllResults && !opposite)
             {
                 viewToHideShow.Visibility = ViewStates.Visible;
-                //headerFilesSeparator.Visibility = ViewStates.Visible;
                 PopulateFilesListView(viewToHideShow, item);
                 imageViewExpandable.Rotation = 0;
                 imageViewExpandable.SetImageResource(Resource.Drawable.ic_expand_less_white_32_dp);
@@ -314,7 +311,6 @@ namespace Seeker
             else
             {
                 viewToHideShow.Visibility = ViewStates.Gone;
-                headerFilesSeparator.Visibility = ViewStates.Gone;
                 imageViewExpandable.Rotation = 0;
                 imageViewExpandable.SetImageResource(Resource.Drawable.ic_expand_more_black_32dp);
             }
@@ -348,13 +344,11 @@ namespace Seeker
         public void Expand()
         {
             viewToHideShow.Visibility = ViewStates.Visible;
-            //headerFilesSeparator.Visibility = ViewStates.Visible;
         }
 
         public void Collapse()
         {
             viewToHideShow.Visibility = ViewStates.Gone;
-            headerFilesSeparator.Visibility = ViewStates.Gone;
         }
     }
 }

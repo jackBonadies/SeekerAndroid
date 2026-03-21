@@ -118,7 +118,6 @@ namespace Seeker
                 int position = ((itemRoot as IViewParent).Parent as RecyclerView).GetChildAdapterPosition(itemRoot);
                 var v = itemRoot.FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
                 var img = itemRoot.FindViewById<ImageView>(Resource.Id.expandableClick);
-                var sep = itemRoot.FindViewById<View>(Resource.Id.headerFilesSeparator);
                 if (v.Visibility == ViewStates.Gone)
                 {
                     img.Animate().RotationBy((float)(180.0)).SetDuration(100).Start();
@@ -139,7 +138,6 @@ namespace Seeker
                 {
                     img.Animate().RotationBy((float)(-180.0)).SetDuration(350).Start();
                     v.Visibility = ViewStates.Gone;
-                    sep.Visibility = ViewStates.Gone;
                     if (!SearchFragment.ExpandAllResults)
                     {
                         oppositePositions.Remove(position);
