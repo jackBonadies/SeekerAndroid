@@ -56,29 +56,7 @@ namespace Seeker
             switch (item.ItemId)
             {
                 case Resource.Id.browseUsersFiles:
-
-                    //!!!!! TESTING ONLY !!!!!!
-
-                    //System.Threading.Tasks.Task t = new System.Threading.Tasks.Task(() => {System.Threading.Thread.Sleep(5000); });
-                    //t.Start();
-                    //t.ContinueWith((System.Threading.Tasks.Task t) => {
-                    //    SeekerState.ActiveActivityRef.RunOnUiThread(() => {
-                    //    Google.Android.Material.Snackbar.Snackbar sb = Google.Android.Material.Snackbar.Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), "Test anywhere snackbar", Google.Android.Material.Snackbar.Snackbar.LengthLong).SetAction("Go", (View v)=>{
-
-                    //        RequestedUserInfoHelper.LaunchUserInfoView(PreferencesState.Username);
-
-
-
-                    //    });
-                    //sb.Show(); });
-                    //});
-
-                    //^^^^^ TESTING ONLY ^^^^^^^
-
-
-
-                    //do browse thing...
-                    BrowseService.RequestFilesApi(UserToView, null, null, null); //im pretty sure this is a bug... no action! unless a default one is used later on..
+                    BrowseService.RequestFilesApi(UserToView, null, null, null); //TODO2026 im pretty sure this is a bug... no action! unless a default one is used later on..
                     return true;
                 case Resource.Id.searchUserFiles:
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
@@ -191,14 +169,12 @@ namespace Seeker
                         string user = savedInstanceState.GetString("userData.Username");
                         userData = new Soulseek.UserData(user, pres, aspeed, downloadCount, fcount, dc, cc, slotsFree);
                     }
-
                 }
             }
         }
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-
             base.OnCreate(savedInstanceState);
 
             SeekerState.ActiveActivityRef = this;
@@ -236,7 +212,6 @@ namespace Seeker
                 RestoreStateFromBundleIfNecessary(savedInstanceState);
             }
 
-
             userStats = FindViewById<TextView>(Resource.Id.user_info_stats);
             noPicture = FindViewById<TextView>(Resource.Id.user_info_no_picture);
             picture = FindViewById<ImageView>(Resource.Id.user_info_picture);
@@ -244,10 +219,6 @@ namespace Seeker
 
             this.RegisterForContextMenu(picture);
             picture.LongClick += Picture_LongClick;
-
-
-
-
         }
 
         protected override void OnResume()
@@ -490,31 +461,8 @@ namespace Seeker
         {
             if (outStream != null)
             {
-                //try
-                //{
                 outStream.Write(pic, 0, pic.Length);
                 outStream.Close();
-                //}
-                //catch (e: Exception) 
-                //{
-                //    e.printStackTrace()
-                //}
-            }
-        }
-
-        private void SaveImageToStream(Bitmap bmp, System.IO.Stream outStream)
-        {
-            if (outStream != null)
-            {
-                //try
-                //{
-                bmp.Compress(Bitmap.CompressFormat.Png, 100, outStream);
-                outStream.Close();
-                //}
-                //catch (e: Exception) 
-                //{
-                //    e.printStackTrace()
-                //}
             }
         }
     }

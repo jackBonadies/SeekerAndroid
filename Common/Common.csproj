@@ -22,4 +22,8 @@
     <ProjectReference Include="..\Seeker\Soulseek.NET-master\src\Soulseek_Source.csproj" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <EmbeddedResource Include="DebugAssets\githublogo.png" />
+  </ItemGroup>
+
 </Project>

@@ -957,7 +957,22 @@ namespace Seeker
         public Task<UserInfo> GetUserInfoAsync(string username, CancellationToken? cancellationToken = null)
         {
             if (GetUserInfoAsyncHandler != null) return GetUserInfoAsyncHandler(username, cancellationToken);
-            return Task.FromResult<UserInfo>(null!);
+            bool includePic = (_random.Next(0,2) == 0 || username.Contains("pic") && !username.Contains("nopic"));
+            byte[]? pictureBytes = null;
+            if (includePic)
+            {
+                var stream = typeof(MockSoulseekClient).Assembly.GetManifestResourceStream("Common.DebugAssets.githublogo.png");
+                if (stream != null)
+                {
+                    using (var ms = new System.IO.MemoryStream())
+                    {
+                        stream.CopyTo(ms);
+                        pictureBytes = ms.ToArray();
+                    }
+                    stream.Dispose();
+                }
+            }
+            return Task.FromResult(new UserInfo("Mock user description for " + username, _random.Next(0, 100), _random.Next(0, 1), includePic, pictureBytes));
         }
 
         public async Task SendUploadSpeedAsync(int speed, CancellationToken? cancellationToken = null)
