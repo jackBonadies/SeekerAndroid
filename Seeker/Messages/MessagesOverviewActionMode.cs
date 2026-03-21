@@ -1,6 +1,11 @@
+using Android.Content;
 using Android.Views;
 using Android.Widget;
 using Google.Android.Material.Snackbar;
+using Seeker.Browse;
+using Seeker.Helpers;
+using Seeker.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -32,13 +37,137 @@ namespace Seeker.Messages
 
             public bool OnPrepareActionMode(ActionMode mode, IMenu menu)
             {
-                return false;
+                int selectedCount = Adapter.SelectedPositions.Count;
+                bool singleSelected = selectedCount == 1;
+                bool anySelected = selectedCount > 0;
+
+                // Single-select only items
+                menu.FindItem(Resource.Id.action_browse_files)?.SetVisible(singleSelected);
+                menu.FindItem(Resource.Id.action_search_files)?.SetVisible(singleSelected);
+                menu.FindItem(Resource.Id.action_get_user_info)?.SetVisible(singleSelected);
+                menu.FindItem(Resource.Id.action_delete_messages)?.SetVisible(singleSelected);
+
+                // Single + multi items
+                menu.FindItem(Resource.Id.action_add_to_user_list)?.SetVisible(anySelected);
+                menu.FindItem(Resource.Id.action_ignore)?.SetVisible(anySelected);
+
+                if (singleSelected)
+                {
+                    string username = Adapter.localDataSet[Adapter.SelectedPositions[0]];
+                    UiHelpers.SetMenuTitles(menu, username);
+                    UiHelpers.SetIgnoreAddExclusive(menu, username);
+                }
+                else if (anySelected)
+                {
+                    menu.FindItem(Resource.Id.action_add_to_user_list)?.SetTitle(Resource.String.add_to_user_list);
+                    menu.FindItem(Resource.Id.action_ignore)?.SetTitle(Resource.String.ignore_user);
+                }
+
+                return true;
+            }
+
+            private List<string> GetSelectedUsernames()
+            {
+                return Adapter.SelectedPositions
+                    .Where(i => i < Adapter.localDataSet.Count)
+                    .Select(i => Adapter.localDataSet[i])
+                    .ToList();
             }
 
             public bool OnActionItemClicked(ActionMode mode, IMenuItem item)
             {
                 switch (item.ItemId)
                 {
+                    case Resource.Id.action_browse_files:
+                    {
+                        string username = GetSelectedUsernames().FirstOrDefault();
+                        if (username != null)
+                        {
+                            Action<View> action = new Action<View>((v) =>
+                            {
+                                Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
+                                intent.PutExtra(MainActivity.GoToBrowseExtra, true);
+                                SeekerState.ActiveActivityRef.StartActivity(intent);
+                            });
+                            View snackView = SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId);
+                            BrowseService.RequestFilesApi(username, snackView, action, null);
+                        }
+                        MessagesOverviewActionMode?.Finish();
+                        return true;
+                    }
+                    case Resource.Id.action_search_files:
+                    {
+                        string username = GetSelectedUsernames().FirstOrDefault();
+                        if (username != null)
+                        {
+                            SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
+                            SearchTabHelper.SearchTargetChosenUser = username;
+                            Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
+                            intent.PutExtra(MainActivity.GoToSearchExtra, true);
+                            SeekerState.ActiveActivityRef.StartActivity(intent);
+                        }
+                        MessagesOverviewActionMode?.Finish();
+                        return true;
+                    }
+                    case Resource.Id.action_get_user_info:
+                    {
+                        string username = GetSelectedUsernames().FirstOrDefault();
+                        if (username != null)
+                        {
+                            RequestedUserInfoHelper.RequestUserInfoApi(username);
+                        }
+                        MessagesOverviewActionMode?.Finish();
+                        return true;
+                    }
+                    case Resource.Id.action_delete_messages:
+                        Frag.DeleteBatchSelected();
+                        return true;
+                    case Resource.Id.action_add_to_user_list:
+                    {
+                        var selectedUsernames = GetSelectedUsernames();
+                        if (selectedUsernames.Count == 1)
+                        {
+                            UiHelpers.HandleCommonContextMenuActions(
+                                item.TitleFormatted.ToString(), selectedUsernames[0],
+                                SeekerState.ActiveActivityRef,
+                                SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId));
+                        }
+                        else
+                        {
+                            foreach (string username in selectedUsernames)
+                            {
+                                if (!UserListService.Instance.ContainsUser(username))
+                                {
+                                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, username, new Action(() => { }));
+                                }
+                            }
+                        }
+                        MessagesOverviewActionMode?.Finish();
+                        return true;
+                    }
+                    case Resource.Id.action_ignore:
+                    {
+                        var selectedUsernames = GetSelectedUsernames();
+                        if (selectedUsernames.Count == 1)
+                        {
+                            UiHelpers.HandleCommonContextMenuActions(
+                                item.TitleFormatted.ToString(), selectedUsernames[0],
+                                SeekerState.ActiveActivityRef,
+                                SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId));
+                        }
+                        else
+                        {
+                            foreach (string username in selectedUsernames)
+                            {
+                                if (!SeekerApplication.IsUserInIgnoreList(username))
+                                {
+                                    SeekerApplication.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, username);
+                                }
+                            }
+                        }
+                        MessagesOverviewActionMode?.Finish();
+                        return true;
+                    }
                     case Resource.Id.action_delete_selected_batch:
                         Frag.DeleteBatchSelected();
                         return true;
