@@ -32,7 +32,7 @@ using System.Linq;
 using Common;
 namespace Seeker
 {
-    [Activity(Label = "EditUserInfoActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask, Exported = false)]
+    [Activity(Label = "EditUserInfoActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, Exported = false)]
     public class EditUserInfoActivity : ThemeableActivity
     {
         public const string USER_INFO_PIC_DIR = "user_info_picture";

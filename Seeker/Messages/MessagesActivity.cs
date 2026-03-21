@@ -50,7 +50,7 @@ using ActivityFlags = Android.Content.ActivityFlags;
 namespace Seeker
 {
 
-    [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask, Exported = false)]
+    [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, Exported = false)]
     public class MessagesActivity : SlskLinkMenuActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
         public static MessagesActivity MessagesActivityRef = null;
