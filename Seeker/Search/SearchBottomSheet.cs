@@ -21,11 +21,8 @@ namespace Seeker
 
                 switch (SearchFragment.SearchResultStyle)
                 {
-                    case SearchResultStyleEnum.ExpandedAll:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonExpanded);
-                        break;
-                    case SearchResultStyleEnum.CollapsedAll:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonCollapsed);
+                    case SearchResultStyleEnum.ExpandableLegacy:
+                        resultStyleRadioGroup.Check(Resource.Id.radioButtonExpandable);
                         break;
                     case SearchResultStyleEnum.MediumLegacy:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonMedium);
@@ -50,11 +47,8 @@ namespace Seeker
                 var prev = SearchFragment.SearchResultStyle;
                 switch (e.CheckedId)
                 {
-                    case Resource.Id.radioButtonExpanded:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.ExpandedAll;
-                        break;
-                    case Resource.Id.radioButtonCollapsed:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.CollapsedAll;
+                    case Resource.Id.radioButtonExpandable:
+                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.ExpandableLegacy;
                         break;
                     case Resource.Id.radioButtonMedium:
                         SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumLegacy;

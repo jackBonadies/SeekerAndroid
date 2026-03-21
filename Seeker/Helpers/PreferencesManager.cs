@@ -86,6 +86,7 @@ namespace Seeker
             PreferencesState.FilterSticky = prefs.GetBoolean(KeyConsts.M_FilterSticky, false);
             PreferencesState.FilterStickyString = prefs.GetString(KeyConsts.M_FilterStickyString, string.Empty);
             PreferencesState.SearchResultStyle = ConvertSafe(prefs.GetInt(KeyConsts.M_SearchResultStyle, 1));
+            PreferencesState.ExpandAllResults = prefs.GetBoolean(KeyConsts.M_ExpandAllResults, false);
             PreferencesState.DefaultSearchResultSortAlgorithm = (SearchResultSorting)(prefs.GetInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, 0));
 
             PreferencesState.SearchHistory = GetSearchHistory(prefs);
@@ -93,6 +94,11 @@ namespace Seeker
 
         private static SearchResultStyleEnum ConvertSafe(int value)
         {
+            if (value == 3) // old ExpandedAll, migrate to ExpandableLegacy with expand on
+            {
+                PreferencesState.ExpandAllResults = true;
+                return SearchResultStyleEnum.ExpandableLegacy;
+            }
             if (Enum.IsDefined(typeof(SearchResultStyleEnum), value))
             {
                 return (SearchResultStyleEnum)value;
@@ -718,6 +724,7 @@ namespace Seeker
                 editor.PutString(KeyConsts.M_FilterStickyString, PreferencesState.FilterStickyString);
                 editor.PutBoolean(KeyConsts.M_MemoryBackedDownload, PreferencesState.MemoryBackedDownload);
                 editor.PutInt(KeyConsts.M_SearchResultStyle, (int)PreferencesState.SearchResultStyle);
+                editor.PutBoolean(KeyConsts.M_ExpandAllResults, PreferencesState.ExpandAllResults);
                 editor.PutBoolean(KeyConsts.M_DisableToastNotifications, PreferencesState.DisableDownloadToastNotification);
                 editor.PutInt(KeyConsts.M_UploadSpeed, PreferencesState.UploadSpeed);
                 editor.PutBoolean(KeyConsts.M_SharingOn, PreferencesState.SharingOn);
@@ -735,7 +742,7 @@ namespace Seeker
         /// <summary>
         /// Saves the sticky filter state and search result style from SearchFragment.OnPause.
         /// </summary>
-        public static void SaveSearchFragmentFilterState(bool filterSticky, string filterStickyString, int searchResultStyle)
+        public static void SaveSearchFragmentFilterState(bool filterSticky, string filterStickyString, int searchResultStyle, bool expandAllResults)
         {
             lock (SharedPrefLock)
             {
@@ -746,6 +753,7 @@ namespace Seeker
                     editor.PutString(KeyConsts.M_FilterStickyString, filterStickyString);
                 }
                 editor.PutInt(KeyConsts.M_SearchResultStyle, searchResultStyle);
+                editor.PutBoolean(KeyConsts.M_ExpandAllResults, expandAllResults);
                 editor.Apply();
             }
         }

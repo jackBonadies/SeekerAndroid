@@ -61,23 +61,11 @@
             <com.google.android.material.radiobutton.MaterialRadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/search_result_style_expanded"
-                android:id="@+id/radioButtonExpanded"
+                android:text="@string/search_result_style_expandable_legacy"
+                android:id="@+id/radioButtonExpandable"
                 android:checked="false"
                 android:layout_marginTop="6dp"
                 android:textSize="18sp"
-                android:buttonTint="?attr/slskAccent"
-                android:textColor="?attr/mainTextColor"
-            />
-
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/search_result_style_collapsed"
-                android:id="@+id/radioButtonCollapsed"
-                android:checked="false"
-                android:textSize="18sp"
-                android:layout_marginTop="4dp"
                 android:buttonTint="?attr/slskAccent"
                 android:textColor="?attr/mainTextColor"
             />

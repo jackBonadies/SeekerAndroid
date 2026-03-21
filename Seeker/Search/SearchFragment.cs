@@ -32,6 +32,7 @@ namespace Seeker
         private View noSearchesView = null;
         private Context context;
         public static SearchResultStyleEnum SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateBottom;
+        public static bool ExpandAllResults { get => PreferencesState.ExpandAllResults; set => PreferencesState.ExpandAllResults = value; }
         public static IMenu ActionBarMenu = null;
         public static int LastSearchResponseCount = -1;
 
@@ -86,6 +87,7 @@ namespace Seeker
             SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateBottom;
         }
 
+
         public override void SetMenuVisibility(bool menuVisible)
         {
             //this is necessary if programmatically moving to a tab from another activity..
@@ -121,6 +123,23 @@ namespace Seeker
                 GetTransitionDrawable().StartTransition(0);
             }
             base.OnCreateOptionsMenu(menu, inflater);
+        }
+
+        public override void OnPrepareOptionsMenu(IMenu menu)
+        {
+            var toggleItem = menu.FindItem(Resource.Id.action_toggle_expand_all);
+            if (toggleItem != null)
+            {
+                bool isExpandable = SearchResultStyle == SearchResultStyleEnum.ExpandableLegacy;
+                toggleItem.SetVisible(isExpandable);
+                if (isExpandable)
+                {
+                    toggleItem.SetTitle(ExpandAllResults
+                        ? Resource.String.collapse_all
+                        : Resource.String.expand_all);
+                }
+            }
+            base.OnPrepareOptionsMenu(menu);
         }
 
         public static void SetCustomViewTabNumberInner(ImageView imgView, Context c)
@@ -392,6 +411,11 @@ namespace Seeker
                 case Resource.Id.action_change_result_style:
                     ShowChangeResultStyleBottomDialog();
                     return true;
+                case Resource.Id.action_toggle_expand_all:
+                    ExpandAllResults = !ExpandAllResults;
+                    this.Activity?.InvalidateOptionsMenu();
+                    SearchResultStyleChanged();
+                    return true;
                 case Resource.Id.action_add_to_wishlist:
                     AddSearchToWishlist();
                     return true;
@@ -552,6 +576,7 @@ namespace Seeker
 
         public void SearchResultStyleChanged()
         {
+            this.Activity?.InvalidateOptionsMenu();
             RecyclerView rv = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches); //TODO //TODO //TODO
 
             if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
@@ -1367,7 +1392,7 @@ namespace Seeker
         {
             Logger.Debug("SearchFragmentOnPause");
             base.OnPause();
-            PreferencesManager.SaveSearchFragmentFilterState(PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)SearchResultStyle);
+            PreferencesManager.SaveSearchFragmentFilterState(PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)SearchResultStyle, ExpandAllResults);
         }
 
         private static void Actv_KeyPressHELPER(object sender, View.KeyEventArgs e)

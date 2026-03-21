@@ -13,8 +13,7 @@ namespace Seeker
     {
         MinimalLegacy = 0,
         MediumLegacy = 11,
-        CollapsedAll = 2,
-        ExpandedAll = 3,
+        ExpandableLegacy = 2,
         MediumModernBitrateBottom = 1, // the new default
         MediumModernBitrateTop = 5,
     }

@@ -48,8 +48,7 @@ namespace Seeker
                 ISearchItemViewBase view = null;
                 switch (this.searchResultStyle)
                 {
-                    case SearchResultStyleEnum.ExpandedAll:
-                    case SearchResultStyleEnum.CollapsedAll:
+                    case SearchResultStyleEnum.ExpandableLegacy:
                         view = SearchItemViewExpandable.inflate(parent);
                         (view as SearchItemViewExpandable).AdapterRef = this;
                         (view as View).FindViewById<ImageView>(Resource.Id.expandableClick).Click += CustomAdapter_Click;
@@ -114,7 +113,7 @@ namespace Seeker
                     img.Animate().RotationBy((float)(180.0)).SetDuration(350).Start();
                     v.Visibility = ViewStates.Visible;
                     SearchItemViewExpandable.PopulateFilesListView(v as LinearLayout, this.localDataSet[position]);
-                    if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll)
+                    if (!SearchFragment.ExpandAllResults)
                     {
                         oppositePositions.Add(position);
                         oppositePositions.Sort();
@@ -128,7 +127,7 @@ namespace Seeker
                 {
                     img.Animate().RotationBy((float)(-180.0)).SetDuration(350).Start();
                     v.Visibility = ViewStates.Gone;
-                    if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll)
+                    if (!SearchFragment.ExpandAllResults)
                     {
                         oppositePositions.Remove(position);
                     }

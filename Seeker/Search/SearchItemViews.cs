@@ -239,8 +239,8 @@ namespace Seeker
             }
             viewFileType.Text = item.GetDominantFileTypeAndBitRate(hideLocked, out _);
 
-            if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll && opposite ||
-                SearchFragment.SearchResultStyle == SearchResultStyleEnum.ExpandedAll && !opposite)
+            if (!SearchFragment.ExpandAllResults && opposite ||
+                SearchFragment.ExpandAllResults && !opposite)
             {
                 viewToHideShow.Visibility = ViewStates.Visible;
                 PopulateFilesListView(viewToHideShow, item);

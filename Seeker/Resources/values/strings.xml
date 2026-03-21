@@ -245,8 +245,9 @@ Directory Count: {5}"
 
     <!--Search Result Styles-->
     <string name="search_result_style">Result Style:</string>
-    <string name="search_result_style_expanded">Expandable: Expanded</string>
-    <string name="search_result_style_collapsed">Expandable: Collapsed</string>
+    <string name="search_result_style_expandable_legacy">Expandable: Legacy</string>
+    <string name="expand_all">Expand All</string>
+    <string name="collapse_all">Collapse All</string>
     <string name="search_result_style_standard_legacy">Default: Legacy</string>
     <string name="search_result_style_dense_legacy">Dense: Legacy</string>
     <string name="search_result_style_standard_bitrate_bottom_row">Default: Filetype Bottom</string>
