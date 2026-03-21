@@ -51,11 +51,16 @@
 
         <item name="slskAccent">#437eab</item>
 
+        <item name="snackbarButtonStyle">@style/Seeker.Snackbar.Action</item>
+
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionModeBackground">?attr/mainPurple</item>
         <item name="actionModeBackground">?attr/mainPurple</item>
     </style>
 
+    <style name="Seeker.Snackbar.Action" parent="Widget.Material3.Button.TextButton.Snackbar">
+        <item name="android:textColor">?attr/snackbarActionColor</item>
+    </style>
 
     <style
         name="MaterialThemeForChip"

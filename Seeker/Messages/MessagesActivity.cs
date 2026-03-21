@@ -162,11 +162,8 @@ namespace Seeker
                             string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
                             usernameToDelete),
                             Snackbar.LengthLong)
-                        .SetAction(Resource.String.undo, (View v) => ItemTouchHelperMessageOverviewCallback.UndoSingleUserMessagesDeleteAction(null, (usernameToDelete, deletedMessages, deletedReadCount), -1, true))
-                        .SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
+                        .SetAction(Resource.String.undo, (View v) => ItemTouchHelperMessageOverviewCallback.UndoSingleUserMessagesDeleteAction(null, (usernameToDelete, deletedMessages, deletedReadCount), -1, true)) ;
 
-                    (sb1.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView)
-                    .SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
                     sb1.Show();
                     this.SwitchToOuter(SupportFragmentManager.FindFragmentByTag("InnerUserFragment"), true);
                     return true;
@@ -178,8 +175,7 @@ namespace Seeker
                     }
                     var (deletedAllMessages, deletedAllLastReadMessageCounts) = MessageController.DeleteAllMessagesWithUndo();
                     this.GetOverviewFragment().RefreshAdapter();
-                    Snackbar sb = Snackbar.Make(this.GetOverviewFragment().View, SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong).SetAction("Undo", (View v) => GetUndoDeleteAllSnackBarAction(deletedAllMessages, deletedAllLastReadMessageCounts)).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                    (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
+                    Snackbar sb = Snackbar.Make(this.GetOverviewFragment().View, SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong).SetAction("Undo", (View v) => GetUndoDeleteAllSnackBarAction(deletedAllMessages, deletedAllLastReadMessageCounts));
                     sb.Show();
                     return true;
 

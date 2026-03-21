@@ -56,4 +56,5 @@
 
     <attr name="show_progress_size" format="boolean" />
     <attr name="colorSurfaceLogin" format="color" />
+    <attr name="snackbarActionColor" format="color" />
 </resources>

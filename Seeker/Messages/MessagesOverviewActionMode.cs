@@ -283,9 +283,7 @@ namespace Seeker.Messages
                         MessageController.UndoDeleteMessagesFromUser(data);
                     }
                     RefreshAdapter();
-                })
-                .SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-            (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
+                });
             sb.Show();
         }
 

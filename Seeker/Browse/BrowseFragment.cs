@@ -192,7 +192,7 @@ namespace Seeker
                     DownloadUserFilesEntry(true, true);
                     return true;
                 case Resource.Id.action_browse_user:
-                    ShowEditTextBrowseUserDialog();
+                    ShowBrowseUserDialog();
                     return true;
                 case Resource.Id.action_up_directory:
                     GoUpDirectory();
@@ -1221,7 +1221,7 @@ namespace Seeker
 
         private static AndroidX.AppCompat.App.AlertDialog browseUserDialog = null;
 
-        public void ShowEditTextBrowseUserDialog()
+        public void ShowBrowseUserDialog()
         {
             FragmentActivity c = this.Activity != null ? this.Activity : SeekerState.MainActivityRef;
             Logger.InfoFirebase("ShowEditTextBrowseUserDialog" + c.IsDestroyed + c.IsFinishing);

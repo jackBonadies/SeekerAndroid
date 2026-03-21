@@ -83,9 +83,7 @@ namespace Seeker.Messages
 
             Snackbar sb = Snackbar.Make(containingFragment.View, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
                 usernameToDelete), Snackbar.LengthLong)
-                .SetAction(Resource.String.undo, (View view) => UndoSingleUserMessagesDeleteAction(this.adapter, (usernameToDelete, deletedMessages, readCount), pos, false))
-                .SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-            (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
+                .SetAction(Resource.String.undo, (View view) => UndoSingleUserMessagesDeleteAction(this.adapter, (usernameToDelete, deletedMessages, readCount), pos, false)) ;
             sb.Show();
         }
 

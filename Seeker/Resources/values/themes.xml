@@ -33,6 +33,9 @@
         <item name="expandIconColor">#959BDC</item>
         <item name="cellStroke">#994f58c4</item>
 
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#8AB4F8</item>
+
         <item name="rounded_input_edit">
             @drawable/rounded_text_input_background_light
         </item>
@@ -105,6 +108,9 @@
         <item name="cellStroke">#9086b2cb</item>
         <item name="colorAccent">#86b2cb</item>
         <item name="checkBoxColor">#4496ee</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#86b2cb</item>
         <!--<item name="colorAccent">#054568</item>-->
     </style>
 
@@ -124,6 +130,9 @@
 
         <item name="colorAccent">#d57676</item>
         <item name="checkBoxColor">#FC4C02</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#d57676</item>
     </style>
 
     <style name="DefaultDark_Blue" parent="DefaultDark">
@@ -140,6 +149,9 @@
 
         <item name="expandIconColor">#86b2cb</item>
         <item name="mainTextColorHinted">#86b2cb</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#10496b</item>
     </style>
 
     <style name="DefaultDark_Grey" parent="DefaultDark">
@@ -164,6 +176,9 @@
             @drawable/rounded_corner_dialog_background_dark_303030
         </item>
 
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#202124</item>
+
         <item name="cellbackColorDownloadDialog">#ff303030</item>
     </style>
 
@@ -184,6 +199,9 @@
         <item name="mainTextColorHinted">#dddddd</item>
         <item name="slskAccent">#2A4C6D</item>
         <item name="normalTextColor">#FFFFFF</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#333333</item>
     </style>
 
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
@@ -194,6 +212,10 @@
         <item name="colorOnSurface">?attr/normalTextColor</item>
 		<item name="colorOnBackground">?attr/normalTextColor</item>
         <item name="mainTextColor">#bcc1f7</item>
+        <item name="checkBoxColor">#FC4C02</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary light variant for it-->
+        <item name="snackbarActionColor">#4f58c4</item>
 
         <!--this was added bc some samsung devices have the nav bar as a bright white for seeker, but not for other apps.
 			I assume this is because other apps were setting it, and we werent. so remedy this here.-->
@@ -266,6 +288,9 @@
         <item name="expandIconColor">#ffffffff</item>
         <item name="normalTextColor">#bcc1f7</item>
         <item name="normalTextColorNonTinted">#FFFFFF</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#bcc1f7</item>
 
         <!--Setting the window background color causes real bad UI issues on API19 emulator
 		    So therefore the pseudo window background color attribute is needed.
