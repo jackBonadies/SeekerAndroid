@@ -68,6 +68,10 @@
         <item name="mainTextColorHinted">#959BDC</item>
         <item name="searchTabButtonColor">?attr/mainPurple</item>
 
+        <item name="expandableModernChevronBg">#00F5F5F5</item>
+        <item name="expandableModernFilesBg">#ffffff</item>
+        <item name="expandableModernSeparatorColor">#18000000</item>
+
         <item name="the_rounded_corner_background_drawable">
             @drawable/rounded_corner_background_light
         </item>
@@ -275,11 +279,17 @@
             ?attr/the_rounded_corner_dialog_background_drawable
         </item>
 
+        <item name="expandableModernChevronBg">#00424242</item>
+        <item name="expandableModernFilesBg">#3A3A3A</item>
+        <item name="expandableModernSeparatorColor">#18FFFFFF</item>
+
         <item name="mainTextColorHinted">#bcc1f7</item>
         <item name="searchTabButtonColor">?attr/mainTextColorHinted</item>
     </style>
 
     <style name="Amoled" parent="DefaultDark">
+        <item name="expandableModernChevronBg">#001A1A1A</item>
+        <item name="expandableModernFilesBg">#1A1A1A</item>
         <item name="colorSurface">#000000</item>
         <item name="colorSurfaceLogin">#1A1A1A</item>
         <item name="floating_action_bar_to_bottom_icon">#d8d8d8</item>

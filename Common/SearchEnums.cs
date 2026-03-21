@@ -15,6 +15,7 @@ namespace Seeker
         MediumLegacy = 11,
         ExpandableLegacy = 2,
         MediumModernBitrateBottom = 1, // the new default
+        ExpandableModern = 4,
         MediumModernBitrateTop = 5,
     }
 

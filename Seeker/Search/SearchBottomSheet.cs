@@ -24,6 +24,9 @@ namespace Seeker
                     case SearchResultStyleEnum.ExpandableLegacy:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonExpandable);
                         break;
+                    case SearchResultStyleEnum.ExpandableModern:
+                        resultStyleRadioGroup.Check(Resource.Id.radioButtonExpandableModern);
+                        break;
                     case SearchResultStyleEnum.MediumLegacy:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonMedium);
                         break;
@@ -49,6 +52,9 @@ namespace Seeker
                 {
                     case Resource.Id.radioButtonExpandable:
                         SearchFragment.SearchResultStyle = SearchResultStyleEnum.ExpandableLegacy;
+                        break;
+                    case Resource.Id.radioButtonExpandableModern:
+                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.ExpandableModern;
                         break;
                     case Resource.Id.radioButtonMedium:
                         SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumLegacy;
