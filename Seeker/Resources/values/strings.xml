@@ -139,6 +139,13 @@ Upload Speed: {3}
 File Count: {4}
 Directory Count: {5}"
     </string>
+    <string name="statistics_header">Statistics</string>
+    <string name="stat_upload_slots">Upload slots</string>
+    <string name="stat_queued">Queued</string>
+    <string name="stat_speed">Speed</string>
+    <string name="stat_files">Files</string>
+    <string name="stat_dirs">Dirs</string>
+    <string name="stat_free_upload">Free upload</string>
     <string name="add_user">Add User</string>
     <string name="empty_browse_directory">
         This tab is used to browse a user\'s directory tree.\n\nTo get started
