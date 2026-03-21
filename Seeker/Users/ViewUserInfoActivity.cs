@@ -269,12 +269,12 @@ namespace Seeker
 
             if (userInfo.HasFreeUploadSlot)
             {
-                statFreeUploadValue.Text = "Yes";
+                statFreeUploadValue.Text = SeekerApplication.GetString(Resource.String.yes);
                 statFreeUploadValue.SetTextColor(Color.ParseColor("#4CAF50"));
             }
             else
             {
-                statFreeUploadValue.Text = "No";
+                statFreeUploadValue.Text = SeekerApplication.GetString(Resource.String.No);
                 statFreeUploadValue.SetTextColor(Color.ParseColor("#F44336"));
             }
 
@@ -295,7 +295,7 @@ namespace Seeker
                 shimmerFiles.Visibility = ViewStates.Gone;
                 shimmerDirs.Visibility = ViewStates.Gone;
 
-                statSpeedValue.Text = (userData.AverageSpeed / 1000).ToString("N0") + " kB/s";
+                statSpeedValue.Text = (userData.AverageSpeed / 1000).ToString("N0") + " KB/s";
                 statFilesValue.Text = userData.FileCount.ToString("N0");
                 statDirsValue.Text = userData.DirectoryCount.ToString("N0");
 
@@ -422,7 +422,6 @@ namespace Seeker
                     Logger.Firebase("FAILURE TO DECODE USERS PICTURE " + uname);
                     return;
                 }
-                int h = loadedBitmap.Height;
                 originalImageMimetype = mimeType;
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(dimensions.Item1, dimensions.Item2);
                 layoutParams.Gravity = GravityFlags.CenterHorizontal;

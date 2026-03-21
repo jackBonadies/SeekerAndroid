@@ -948,15 +948,22 @@ namespace Seeker
             return Task.FromResult(0);
         }
 
-        public Task<UserStatistics> GetUserStatisticsAsync(string username, CancellationToken? cancellationToken = null)
+        public async Task<UserStatistics> GetUserStatisticsAsync(string username, CancellationToken? cancellationToken = null)
         {
-            if (GetUserStatisticsAsyncHandler != null) return GetUserStatisticsAsyncHandler(username, cancellationToken);
-            return Task.FromResult<UserStatistics>(null!);
+            if (GetUserStatisticsAsyncHandler != null) return await GetUserStatisticsAsyncHandler(username, cancellationToken);
+            // this will either be very slow or very fast to test it coming in before or after UserInfo
+            bool fast = _random.Next(0,2) == 0;
+            int wait = fast ? 100 : 10_000;
+            await Task.Delay(wait);
+            var userStats = new UserStatistics(username, _random.Next(100_000, 10_000_000), _random.Next(0, 100), _random.Next(0, 100_000), _random.Next(0, 10_000));
+            this.UserStatisticsChanged?.Invoke(this, userStats);
+            return await Task.FromResult<UserStatistics>(userStats);
         }
 
-        public Task<UserInfo> GetUserInfoAsync(string username, CancellationToken? cancellationToken = null)
+        public async Task<UserInfo> GetUserInfoAsync(string username, CancellationToken? cancellationToken = null)
         {
-            if (GetUserInfoAsyncHandler != null) return GetUserInfoAsyncHandler(username, cancellationToken);
+            if (GetUserInfoAsyncHandler != null) return await GetUserInfoAsyncHandler(username, cancellationToken);
+            await Task.Delay(100);
             bool includePic = (_random.Next(0,2) == 0 || username.Contains("pic") && !username.Contains("nopic"));
             byte[]? pictureBytes = null;
             if (includePic)
@@ -972,7 +979,8 @@ namespace Seeker
                     stream.Dispose();
                 }
             }
-            return Task.FromResult(new UserInfo("Mock user description for " + username, _random.Next(0, 100), _random.Next(0, 1), includePic, pictureBytes));
+            var res = await Task.FromResult(new UserInfo("Mock user description for " + username, _random.Next(0, 100), _random.Next(0, 1), includePic, pictureBytes));
+            return res;
         }
 
         public async Task SendUploadSpeedAsync(int speed, CancellationToken? cancellationToken = null)

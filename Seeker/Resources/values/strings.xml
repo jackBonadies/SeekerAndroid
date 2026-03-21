@@ -145,6 +145,7 @@ Directory Count: {5}"
     <string name="stat_speed">Speed</string>
     <string name="stat_files">Files</string>
     <string name="stat_dirs">Dirs</string>
+    <string name="stat_directories">Directories</string>
     <string name="stat_free_upload">Free upload</string>
     <string name="add_user">Add User</string>
     <string name="empty_browse_directory">

@@ -54,7 +54,7 @@
                 android:text="@string/statistics_header"
             />
 
-            <!-- Row 1: Upload Slots + Queued -->
+            <!-- Row 1: Upload Slots + Speed -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -112,27 +112,38 @@
                         android:paddingTop="14dp"
                         android:paddingBottom="14dp"
                     >
-                        <TextView
-                            android:id="@+id/stat_queued_value"
+                        <FrameLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/normalTextColor"
-                        />
+                        >
+                            <TextView
+                                android:id="@+id/stat_speed_value"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                android:textColor="?attr/normalTextColor"
+                                android:visibility="gone"
+                            />
+                            <View
+                                android:id="@+id/stat_speed_shimmer"
+                                android:layout_width="60dp"
+                                android:layout_height="24dp"
+                            />
+                        </FrameLayout>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="13sp"
                             android:textColor="?attr/cellTextColorMoreSubdued"
-                            android:text="@string/stat_queued"
+                            android:text="@string/stat_speed"
                             android:layout_marginTop="2dp"
                         />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-            <!-- Row 2: Speed + Files -->
+            <!-- Row 2: Dirs + Files -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -161,7 +172,7 @@
                             android:layout_height="wrap_content"
                         >
                             <TextView
-                                android:id="@+id/stat_speed_value"
+                                android:id="@+id/stat_dirs_value"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textSize="24sp"
@@ -170,7 +181,7 @@
                                 android:visibility="gone"
                             />
                             <View
-                                android:id="@+id/stat_speed_shimmer"
+                                android:id="@+id/stat_dirs_shimmer"
                                 android:layout_width="60dp"
                                 android:layout_height="24dp"
                             />
@@ -180,7 +191,7 @@
                             android:layout_height="wrap_content"
                             android:textSize="13sp"
                             android:textColor="?attr/cellTextColorMoreSubdued"
-                            android:text="@string/stat_speed"
+                            android:text="@string/stat_directories"
                             android:layout_marginTop="2dp"
                         />
                     </LinearLayout>
@@ -232,7 +243,7 @@
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-            <!-- Row 3: Dirs bar -->
+            <!-- Row 3: Queued bar -->
             <com.google.android.material.card.MaterialCardView
                 style="@style/StatCard"
                 android:layout_width="match_parent"
@@ -257,27 +268,16 @@
                         android:layout_height="wrap_content"
                         android:textSize="15sp"
                         android:textColor="?attr/cellTextColorMoreSubdued"
-                        android:text="@string/stat_directories"
+                        android:text="@string/stat_queued"
                     />
-                    <FrameLayout
+                    <TextView
+                        android:id="@+id/stat_queued_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                    >
-                        <TextView
-                            android:id="@+id/stat_dirs_value"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/normalTextColor"
-                            android:visibility="gone"
-                        />
-                        <View
-                            android:id="@+id/stat_dirs_shimmer"
-                            android:layout_width="40dp"
-                            android:layout_height="18dp"
-                        />
-                    </FrameLayout>
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="?attr/normalTextColor"
+                    />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

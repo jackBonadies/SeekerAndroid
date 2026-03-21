@@ -27,6 +27,7 @@ using Android.Views;
 using Android.Widget;
 using Common;
 using Common.Browse;
+using Common.Search;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.Snackbar;
 using Seeker.Extensions.SearchResponseExtensions;
@@ -48,73 +49,26 @@ namespace Seeker
     class DownloadDialog : BottomSheetDialogFragment, PopupMenu.IOnMenuItemClickListener
     {
         public const string DOWNLOAD_DIALOG_FRAGMENT = "download_dialog_fragment";
-        private int searchPosition = -1;
-        private SearchResponse searchResponse = null;
-        DownloadCustomAdapter customAdapter = null;
-        static SearchResponse SearchResponseTemp = null; //These are for when the DownloadDialog gets recreated by the system.
-        static int SearchPositionTemp = -1; //The system NEEDS a default fragment constructor to call. So we re-
-        //private bool diagFirstTime = true;                                                 //use these arguments.
-        private Activity activity = null;
-        //private List<int> selectedPositions = new List<int>();
+
+        // this is view state
+        private static SearchResponse SearchResponse = null;
+
+        private DownloadCustomAdapter customAdapter = null;
         public DownloadDialog(int pos, SearchResponse resp)
         {
             Logger.Debug("DownloadDialog create");
-            searchResponse = resp;
-            searchPosition = pos;
-            SearchResponseTemp = resp;
-            SearchPositionTemp = pos;
+            SearchResponse = resp;
         }
 
         public DownloadDialog()
         {
             Logger.Debug("DownloadDialog create (default constructor)"); //this gets called on recreate i.e. phone tilt, etc.
-            searchResponse = SearchResponseTemp;
-            searchPosition = SearchPositionTemp;
-        }
-
-        // TODO2026 move
-        private void UpdateSearchResponseWithFullDirectory(Soulseek.Directory d)
-        {
-            //normally files are like this "@@ynkmv\\Albums\\albumname (2012)\\02 - songname.mp3"
-            //but when we get a dir response the files are just the end file names i.e. "02 - songname.mp3" so they cannot be downloaded like that...
-            //can be fixed with d.Name + "\\" + f.Filename
-            //they also do not come with any attributes.. , just the filenames (and sizes) you need if you want to download them...
-            bool hideLocked = PreferencesState.HideLockedResultsInSearch;
-            List<File> fullFilenameCollection = new List<File>();
-            foreach (File f in d.Files)
-            {
-                string fName = d.Name + "\\" + f.Filename;
-                bool extraAttr = false;
-                //if it existed in the old folder then we can get some extra attributes
-                foreach (File fullFileInfo in searchResponse.GetFiles(hideLocked))
-                {
-                    if (fName == fullFileInfo.Filename)
-                    {
-                        fullFilenameCollection.Add(new File(f.Code, fName, f.Size, f.Extension, fullFileInfo.Attributes, f.IsLatin1Decoded, d.DecodedViaLatin1));
-                        extraAttr = true;
-                        break;
-                    }
-                }
-                if (!extraAttr)
-                {
-                    fullFilenameCollection.Add(new File(f.Code, fName, f.Size, f.Extension, f.Attributes, f.IsLatin1Decoded, d.DecodedViaLatin1));
-                }
-            }
-            SearchResponseTemp = searchResponse = new SearchResponse(searchResponse.Username, searchResponse.Token, searchResponse.HasFreeUploadSlot, searchResponse.UploadSpeed, searchResponse.QueueLength, fullFilenameCollection);
         }
 
         public override void OnAttach(Context context)
         {
             Logger.Debug("DownloadDialog OnAttach");
             base.OnAttach(context);
-            if (context is Activity)
-            {
-                this.activity = context as Activity;
-            }
-            else
-            {
-                throw new Exception("Custom");
-            }
         }
 
         public override void OnDetach()
@@ -122,14 +76,12 @@ namespace Seeker
             Logger.Debug("DownloadDialog OnDetach");
             SearchFragment.dlDialogShown = false;
             base.OnDetach();
-            this.activity = null;
         }
 
         public override void OnDestroy()
         {
             SearchFragment.dlDialogShown = false;
             base.OnDestroy();
-            this.activity = null;
         }
 
         public override void OnDismiss(IDialogInterface dialog)
@@ -208,18 +160,18 @@ namespace Seeker
 
             ViewGroup headerLayout = view.FindViewById<ViewGroup>(Resource.Id.header1);
 
-            if (searchResponse == null)
+            if (SearchResponse == null)
             {
                 Logger.Firebase("DownloadDialog search response is null");
                 this.Dismiss();
                 return;
             }
 
-            folderNameHeader.Text = SimpleHelpers.GetFolderNameForSearchResult(searchResponse);
-            userHeader.Text = searchResponse.Username;
-            subHeader.Text = SimpleHelpers.GetSubHeaderText(searchResponse);
+            folderNameHeader.Text = SimpleHelpers.GetFolderNameForSearchResult(SearchResponse);
+            userHeader.Text = SearchResponse.Username;
+            subHeader.Text = SimpleHelpers.GetSubHeaderText(SearchResponse);
             headerLayout.Click += UserHeader_Click;
-            Logger.Debug("Is searchResponse.Files null: " + (searchResponse.Files == null).ToString());
+            Logger.Debug("Is searchResponse.Files null: " + (SearchResponse.Files == null).ToString());
 
             ListView listView = view.FindViewById<ListView>(Resource.Id.listView1);
             listView.ItemClick += ListView_ItemClick;
@@ -232,10 +184,10 @@ namespace Seeker
         {
             ListView listView = this.View.FindViewById<ListView>(Resource.Id.listView1);
             List<FileLockedUnlockedWrapper> adapterList = new List<FileLockedUnlockedWrapper>();
-            adapterList.AddRange(searchResponse.Files.ToList().Select(x => new FileLockedUnlockedWrapper(x, false)));
+            adapterList.AddRange(SearchResponse.Files.ToList().Select(x => new FileLockedUnlockedWrapper(x, false)));
             if (!PreferencesState.HideLockedResultsInSearch)
             {
-                adapterList.AddRange(searchResponse.LockedFiles.ToList().Select(x => new FileLockedUnlockedWrapper(x, true)));
+                adapterList.AddRange(SearchResponse.LockedFiles.ToList().Select(x => new FileLockedUnlockedWrapper(x, true)));
             }
             this.customAdapter = new DownloadCustomAdapter(SeekerState.MainActivityRef, adapterList);
             this.customAdapter.Owner = this;
@@ -245,7 +197,7 @@ namespace Seeker
         private void UpdateSubHeader()
         {
             TextView subHeader = this.View.FindViewById<TextView>(Resource.Id.userHeaderSub);
-            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + SimpleHelpers.GetSubHeaderText(searchResponse);
+            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + SimpleHelpers.GetSubHeaderText(SearchResponse);
         }
 
         private void UserHeader_Click(object sender, EventArgs e)
@@ -313,7 +265,7 @@ namespace Seeker
         private void Download_Click(object sender, EventArgs e)
         {
             bool hasSelection = this.customAdapter != null && this.customAdapter.SelectedPositions.Count > 0;
-            DownloadWithContinuation(GetFilesToDownload(hasSelection), this.searchResponse.Username);
+            DownloadWithContinuation(GetFilesToDownload(hasSelection), SearchResponse.Username);
         }
 
         private void Browse_Click(object sender, EventArgs e)
@@ -323,7 +275,7 @@ namespace Seeker
                 this.Dismiss();
                 ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
             });
-            Browse.BrowseService.RequestFilesApi(searchResponse.Username, this.View, browseAction, null);
+            Browse.BrowseService.RequestFilesApi(SearchResponse.Username, this.View, browseAction, null);
         }
 
         private void Close_Click(object sender, EventArgs e)
@@ -380,14 +332,14 @@ namespace Seeker
                 List<File> selectedFiles = new List<File>();
                 foreach (int position in this.customAdapter.SelectedPositions)
                 {
-                    var file = searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, position);
+                    var file = SearchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, position);
                     selectedFiles.Add(file);
                 }
                 return BrowseUtils.GetFullFileInfos(selectedFiles.ToArray());
             }
             else
             {
-                return BrowseUtils.GetFullFileInfos(searchResponse.GetFiles(PreferencesState.HideLockedResultsInSearch));
+                return BrowseUtils.GetFullFileInfos(SearchResponse.GetFiles(PreferencesState.HideLockedResultsInSearch));
             }
         }
 
@@ -435,7 +387,6 @@ namespace Seeker
             }
         }
 
-
         public void DirectoryReceivedContAction(Task<IReadOnlyCollection<Directory>> dirTask)
         {
 
@@ -481,15 +432,9 @@ namespace Seeker
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.folder_request_already_have), ToastLength.Short);
                         return;
                     }
-                    this.UpdateSearchResponseWithFullDirectory(directory);
+                    SearchResponse = SearchUtil.CreateSearchResponseFromDirectory(SearchResponse, directory, PreferencesState.HideLockedResultsInSearch);
                     this.UpdateListView();
                     this.UpdateSubHeader();
-
-                    //this.customAdapter = new DownloadCustomAdapter(Context, dirTask.Result.Files.ToList());
-                    //this.customAdapter.Owner = this;
-                    //listView.Adapter = (customAdapter);
-                    ////listView.ItemClick += ListView_ItemClick; //already hooked up!
-                    //listView.ChoiceMode = ChoiceMode.Multiple;
                 }
             });
         }
@@ -498,7 +443,7 @@ namespace Seeker
         {
             try
             {
-                var file = searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0);
+                var file = SearchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0);
                 string dirname = SimpleHelpers.GetDirectoryRequestFolderName(file.Filename);
                 if (dirname == string.Empty)
                 {
@@ -506,19 +451,19 @@ namespace Seeker
                     stopRefreshing();
                     return;
                 }
-                if (!PreferencesState.HideLockedResultsInSearch && searchResponse.FileCount == 0 && searchResponse.LockedFileCount > 0)
+                if (!PreferencesState.HideLockedResultsInSearch && SearchResponse.FileCount == 0 && SearchResponse.LockedFileCount > 0)
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short);
                     stopRefreshing();
                     return;
                 }
-                Logger.InfoFirebase("requesting " + dirname + " from " + searchResponse.Username);
-                Browse.BrowseService.GetFolderContentsAPI(searchResponse.Username, dirname, file.IsDirectoryLatin1Decoded, DirectoryReceivedContAction);
+                Logger.InfoFirebase("requesting " + dirname + " from " + SearchResponse.Username);
+                Browse.BrowseService.GetFolderContentsAPI(SearchResponse.Username, dirname, file.IsDirectoryLatin1Decoded, DirectoryReceivedContAction);
             }
             catch (Exception ex)
             {
                 UiHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Get Folder Contents Issue");
-                Logger.FirebaseError($"{PreferencesState.HideLockedResultsInSearch} {searchResponse.FileCount} {searchResponse.LockedFileCount}", ex);
+                Logger.FirebaseError($"{PreferencesState.HideLockedResultsInSearch} {SearchResponse.FileCount} {SearchResponse.LockedFileCount}", ex);
             }
         }
 
@@ -530,18 +475,18 @@ namespace Seeker
                     GetFolderContents();
                     return true;
                 case Resource.Id.browseAtLocation:
-                    string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0).Filename);
+                    string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(SearchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0).Filename);
                     Action<View> action = new Action<View>((v) =>
                     {
                         this.Dismiss();
                         ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
-                    if (!PreferencesState.HideLockedResultsInSearch && PreferencesState.HideLockedResultsInBrowse && searchResponse.IsLockedOnly())
+                    if (!PreferencesState.HideLockedResultsInSearch && PreferencesState.HideLockedResultsInBrowse && SearchResponse.IsLockedOnly())
                     {
                         //this is if the user has show locked in search results but hide in browse results, then we cannot go to the folder if it is locked.
                         startingDir = null;
                     }
-                    Browse.BrowseService.RequestFilesApi(searchResponse.Username, this.View, action, startingDir);
+                    Browse.BrowseService.RequestFilesApi(SearchResponse.Username, this.View, action, startingDir);
                     return true;
                 case Resource.Id.moreInfo:
                     //TransferItem[] tempArry = new TransferItem[transferItems.Count]();
@@ -549,11 +494,11 @@ namespace Seeker
                     //TODOASAP - hasfreeupload slots is now a boolean, fix the string.
                     var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
                     var diag = builder.SetMessage(this.Context.GetString(Resource.String.queue_length_) +
-                        searchResponse.QueueLength +
+                        SearchResponse.QueueLength +
                         System.Environment.NewLine +
                         System.Environment.NewLine +
                         this.Context.GetString(Resource.String.upload_slots_) +
-                        searchResponse.HasFreeUploadSlot).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+                        SearchResponse.HasFreeUploadSlot).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     diag.Show();
                     //System.Threading.Thread.Sleep(100); Is this required?
                     //diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(new Android.Graphics.Color(9804764)); makes the whole button invisible...
@@ -567,12 +512,12 @@ namespace Seeker
                     //}
                     return true;
                 case Resource.Id.getUserInfo:
-                    RequestedUserInfoHelper.RequestUserInfoApi(searchResponse.Username);
+                    RequestedUserInfoHelper.RequestUserInfoApi(SearchResponse.Username);
                     return true;
                 case Resource.Id.download_folder_as_queued:
                     {
                         var filesToDownload = GetFilesToDownload(false);
-                        DownloadFiles(filesToDownload, this.searchResponse.Username, true);
+                        DownloadFiles(filesToDownload, SearchResponse.Username, true);
                         Dismiss();
                     }
                     return true;
@@ -584,7 +529,7 @@ namespace Seeker
                             return true;
                         }
                         var filesToDownload = GetFilesToDownload(true);
-                        DownloadFiles(filesToDownload, this.searchResponse.Username, true);
+                        DownloadFiles(filesToDownload, SearchResponse.Username, true);
                         Dismiss();
                     }
                     return true;
