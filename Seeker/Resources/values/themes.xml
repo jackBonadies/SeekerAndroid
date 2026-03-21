@@ -127,7 +127,7 @@
     </style>
 
     <style name="DefaultDark_Blue" parent="DefaultDark">
-        <item name="colorPrimary">#126291</item>
+        <item name="colorPrimary">#86b2cb</item>
         <item name="mainPurple">#126291</item>
         <item name="mainPurpleStatusBar">#10496b</item>        <item name="colorAccent">#86b2cb</item>
         <item name="whitePurpleForNavBar">#4c8aae</item>
@@ -143,7 +143,7 @@
     </style>
 
     <style name="DefaultDark_Grey" parent="DefaultDark">
-        <item name="colorPrimary">#202124</item>
+        <item name="colorPrimary">#86b2cb</item>
         <item name="mainPurple">#202124</item>
         <item name="mainPurpleStatusBar">#000000</item>
         <item name="mainPurpleForNavBar">#202124</item>
@@ -168,7 +168,7 @@
     </style>
 
     <style name="Amoled_Grey" parent="Amoled">
-        <item name="colorPrimary">#333333</item>
+        <item name="colorPrimary">#2A4C6D</item>
         <item name="mainPurple">#333333</item>
         <item name="mainPurpleStatusBar">#0c0c0c</item>
 
@@ -188,6 +188,7 @@
 
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
         <item name="colorOnPrimary">#ffffff</item>
+        <item name="colorPrimary">#8AB4F8</item>
         <item name="colorSurface">#303030</item>
         <item name="colorSurfaceLogin">#404040</item>
         <item name="colorOnSurface">?attr/normalTextColor</item>
