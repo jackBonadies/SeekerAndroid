@@ -5,73 +5,82 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bottom_sheet_header_bg"
-    android:backgroundTint="?attr/mainPurple"
+    android:backgroundTint="?attr/dialog_background"
 >
-    <!-- Drag handle -->
-    <View
-        android:layout_width="32dp"
-        android:layout_height="4dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="0dp"
-        android:background="@drawable/bottom_sheet_drag_handle"
-    />
-    <!-- Header section -->
+    <!-- Purple header wrapper -->
     <LinearLayout
+		android:id="@+id/mainContentHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="2dp"
-        android:paddingBottom="4dp"
-        android:paddingEnd="8dp"
-        android:paddingStart="12dp"
-        android:id="@+id/header1"
-        android:clickable="true"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:background="@drawable/bottom_sheet_header_bg"
+        android:backgroundTint="?attr/mainPurple"
     >
+        <View
+            android:layout_width="32dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="0dp"
+            android:background="@drawable/bottom_sheet_drag_handle"
+        />
+        <!-- Header section -->
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_weight="1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:paddingTop="2dp"
+            android:paddingBottom="4dp"
+            android:paddingEnd="8dp"
+            android:paddingStart="12dp"
+            android:id="@+id/header1"
+            android:clickable="true"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
         >
-            <TextView
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:text=""
-                android:textColor="#ffffff"
-                android:id="@+id/folderNameHeader"
-                android:ellipsize="middle"
-                android:singleLine="true"
-            />
-            <TextView
-                android:layout_width="match_parent"
+                android:orientation="vertical"
+            >
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:text=""
+                    android:textColor="#ffffff"
+                    android:id="@+id/folderNameHeader"
+                    android:ellipsize="middle"
+                    android:singleLine="true"
+                />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:text="User: dummy"
+                    android:textColor="#ffffff"
+                    android:id="@+id/userHeader"
+                />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:paddingBottom="2dp"
+                    android:text="Total: 12 files x 60 MB x 12m16s"
+                    android:textColor="#ccffffff"
+                    android:id="@+id/userHeaderSub"
+                />
+            </LinearLayout>
+            <ImageView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:text="User: dummy"
-                android:textColor="#ffffff"
-                android:id="@+id/userHeader"
-            />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="12sp"
-                android:paddingBottom="2dp"
-                android:text="Total: 12 files x 60 MB x 12m16s"
-                android:textColor="#ccffffff"
-                android:id="@+id/userHeaderSub"
+                android:layout_marginEnd="6dp"
+                android:tint="#ffffff"
+                app:srcCompat="@drawable/ic_more_vert_white_vector_32dp"
+                android:layout_gravity="center_vertical"
             />
         </LinearLayout>
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="6dp"
-            android:tint="#ffffff"
-            app:srcCompat="@drawable/ic_more_vert_white_vector_32dp"
-            android:layout_gravity="center_vertical"
-        />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"

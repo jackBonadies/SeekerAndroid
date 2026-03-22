@@ -133,13 +133,13 @@ namespace Seeker
 
             public override void OnStateChanged(View bottomSheetView, int newState)
             {
-                var bg = contentView.Background?.Mutate() as GradientDrawable;
-                if (bg != null)
-                {
-                    float radius = newState == BottomSheetBehavior.StateExpanded ? 0f : 28f * density;
-                    bg.SetCornerRadii(new float[] { radius, radius, radius, radius, 0, 0, 0, 0 });
-                    contentView.Background = bg;
-                }
+                //var bg = contentView.Background?.Mutate() as GradientDrawable;
+                //if (bg != null)
+                //{
+                //    float radius = newState == BottomSheetBehavior.StateExpanded ? 0f : 28f * density;
+                //    bg.SetCornerRadii(new float[] { radius, radius, radius, radius, 0, 0, 0, 0 });
+                //    contentView.Background = bg;
+                //}
             }
 
             public override void OnSlide(View bottomSheetView, float slideOffset)
