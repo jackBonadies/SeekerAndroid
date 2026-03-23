@@ -22,6 +22,7 @@ namespace Seeker
 
         public int SimulatedDelayMs { get; set; } = 200;
 
+        public int BrowseUploadIntervalSec { get; set; } = 180;
         public int PrivateMessageIntervalSec { get; set; } = 60;
         public int ExcludedPhrasesIntervalSec { get; set; } = 60;
         public int UserStatusIntervalSec { get; set; } = 10;
@@ -60,6 +61,10 @@ namespace Seeker
             {
                 _ = RunUserStatusLoop(ct);
             }
+            if (BrowseUploadIntervalSec > 0)
+            {
+                _ = RunBrowseUploadLoop(ct);
+            }
         }
 
         public void StopBackgroundTimers()
@@ -90,6 +95,27 @@ namespace Seeker
                 {
                     break;
                 }
+            }
+        }
+
+        private async Task RunBrowseUploadLoop(CancellationToken ct)
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                await Task.Delay(10_000, ct);
+                var username = _mockUsernames[_random.Next(_mockUsernames.Length)];
+                var response = Options?.BrowseResponseResolver(username, IPEndPoint)?.Result;
+                if (response != null)
+                {
+                    var nonEmptyDirectories = response.Directories.Where(dir => dir.FileCount != 0);
+                    var index = _random.Next(0, nonEmptyDirectories.Count());
+                    var directoryToDownload = nonEmptyDirectories.ElementAt(index);
+                    foreach (var file in directoryToDownload.Files)
+                    {
+                        Options?.EnqueueDownload(username, IPEndPoint, directoryToDownload.Name + @"\" + file.Filename);
+                    }
+                }
+                await Task.Delay(BrowseUploadIntervalSec * 1000, ct);
             }
         }
 
@@ -558,9 +584,12 @@ namespace Seeker
             string fullPath = $"@@{username}\\Music\\{folder}\\{filename}";
             var attrs = new List<FileAttribute>
             {
-                new FileAttribute(FileAttributeType.BitRate, bitRate),
                 new FileAttribute(FileAttributeType.Length, lengthSeconds),
             };
+            if (bitRate != 0)
+            {
+                attrs.Add(new FileAttribute(FileAttributeType.BitRate, bitRate));
+            }
             if (isVbr)
             {
                 attrs.Add(new FileAttribute(FileAttributeType.VariableBitRate, 1));
@@ -594,7 +623,7 @@ namespace Seeker
 
             responses.Add(new SearchResponse("vinyl_rips", token, true, 8_132_000, 0, new[]
             {
-                Other("vinyl_rips", "Beethoven, Ludwig van", "Beethoven Complete Works (1770-1827).tar.gz", "gz", 4_200_000_000),
+                Other("vinyl_rips", "Beethoven, Ludwig van", "Beethoven Complete Works (1770-1827).tar.gz", "tar.gz", 4_200_000_000),
                 Other("vinyl_rips", "Beethoven, Ludwig van", "README.txt", "txt", 2048),
             }));
 
@@ -1342,10 +1371,11 @@ namespace Seeker
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
-                    if (_random.Next(100) == 0)
-                    {
-                        throw new Exception("Simulated Exception");
-                    }
+                    // sporadic failure
+                    //if (_random.Next(100) == 0)
+                    //{
+                    //    throw new Exception("Simulated Exception");
+                    //}
                     UpdateProgress(startOffset + chunkSize * i);
                 }
 
@@ -1423,7 +1453,12 @@ namespace Seeker
         public Task<bool> ReconfigureOptionsAsync(SoulseekClientOptionsPatch patch, CancellationToken? cancellationToken = null)
         {
             if (ReconfigureOptionsAsyncHandler != null) return ReconfigureOptionsAsyncHandler(patch, cancellationToken);
-            return Task.FromResult(false);
+            Options = (Options ?? new SoulseekClientOptions()).With(
+                searchResponseResolver: patch.SearchResponseResolver,
+                browseResponseResolver: patch.BrowseResponseResolver,
+                enqueueDownload: patch.EnqueueDownload,
+                directoryContentsResolver: patch.DirectoryContentsResolver);
+            return Task.FromResult(true);
         }
 
         public Task<RoomList> GetRoomListAsync(CancellationToken? cancellationToken = null)

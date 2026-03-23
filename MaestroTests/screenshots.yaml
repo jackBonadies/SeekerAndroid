@@ -2,29 +2,57 @@ appId: com.companyname.andriodapp1
 ---
 - runFlow: ./common/optional_set_download_dir.yaml
 - tapOn:
-    id: navigation_bar_item_icon_container
-    index: 0
+    id: navigation_home
 - runFlow: ./common/optional_login.yaml
 - tapOn:
-    id: settings_action
-- scrollUntilVisible:
-    element:
-      id: smartFilterEnable
-    direction: DOWN
+    id: navigation_home
+- takeScreenshot:
+    path: 01_home
 - tapOn:
-    id: smartFilterEnable
-- back
-- tapOn:
-    id: navigation_bar_item_icon_container
-    index: 1
+    id: navigation_search
 - tapOn:
     id: searchHere
 - inputText: beethoven overture
 - tapOn:
     id: action_search
 - tapOn:
-    id: navigation_bar_item_icon_container
-    index: 2
+    id: bsbutton
 - tapOn:
-    id: navigation_bar_item_icon_container
-    index: 3
+    id: toggleSmartFilters
+- tapOn:
+    id: bsbutton
+- takeScreenshot:
+    path: 02_search
+- tapOn: Furtwangler Conducts Beethoven
+- takeScreenshot:
+    path: 03_download_dialog
+- tapOn:
+    id: buttonDownload
+- tapOn: Karajan - Beethoven Symphony No. 9 and Overture 'Coriolan'
+- tapOn:
+    id: buttonDownload
+- tapOn: Beethoven Overtures - Herbert von Karajan (1965)
+- tapOn:
+    id: buttonDownload
+- tapOn:
+    id: navigation_transfers
+- takeScreenshot:
+    path: 04_downloads
+- tapOn:
+    id: navigation_browse
+- tapOn:
+    id: action_browse_user
+- tapOn:
+    id: chosenUserEditText
+- inputText: beethoven_fan
+- tapOn:
+    id: button1
+- tapOn: Beethoven Complete Works
+- takeScreenshot:
+    path: 06_browse
+- tapOn:
+    id: navigation_transfers
+- tapOn:
+    id: action_toggle_download_upload
+- takeScreenshot:
+    path: 05_uploads
