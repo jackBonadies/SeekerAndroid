@@ -78,6 +78,11 @@ namespace Seeker
         public ProgressBar progressBar { get; set; }
         public Transfers.SegmentedProgressBar segmentedProgressBar;
 
+        private Drawable cachedDownloadArrow;
+        private Drawable cachedUploadArrow;
+        private int cachedDlColor;
+        private int cachedDrawablePadding;
+
         public TextView GetAdditionalStatusInfoView()
         {
             return viewStatusAdditionalInfo;
@@ -165,6 +170,18 @@ namespace Seeker
             {
                 viewFoldername.Typeface = Typeface.Create(viewFoldername.Typeface, 600, false);
             }
+
+            var resources = Context.Resources;
+            var theme = Context.Theme;
+            cachedDlColor = resources.GetColor(Resource.Color.transferChipDownloadingText, theme);
+            int iconSize = (int)(10 * resources.DisplayMetrics.Density);
+            cachedDownloadArrow = resources.GetDrawable(Resource.Drawable.arrow_down, theme);
+            cachedDownloadArrow.SetBounds(0, 0, iconSize, iconSize);
+            cachedDownloadArrow.SetTint(cachedDlColor);
+            cachedUploadArrow = resources.GetDrawable(Resource.Drawable.arrow_up, theme);
+            cachedUploadArrow.SetBounds(0, 0, iconSize, iconSize);
+            cachedUploadArrow.SetTint(cachedDlColor);
+            cachedDrawablePadding = (int)(2 * resources.DisplayMetrics.Density);
         }
 
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
@@ -180,7 +197,8 @@ namespace Seeker
             var state = folderItem.GetState(out bool isFailed, out _);
 
             TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSizeSeparator, viewSize, viewSpeed, item, state, this.showSize, this.showSpeed, isFolder: true);
-            TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state);
+            var arrow = folderItem.IsUpload() ? cachedUploadArrow : cachedDownloadArrow;
+            TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state, arrow, cachedDlColor, cachedDrawablePadding);
             TransferViewHelper.UpdateSegmentedProgressBar(segmentedProgressBar, folderItem);
 
             viewUsername.Text = folderItem.Username;
@@ -252,7 +270,7 @@ namespace Seeker
         }
 
 
-        public static void SetAdditionalFolderInfoState(TextView filesLongStatus, TextView currentFile, FolderItem fi, TransferStates folderState)
+        public static void SetAdditionalFolderInfoState(TextView filesLongStatus, TextView currentFile, FolderItem fi, TransferStates folderState, Drawable cachedArrow, int dlColor, int drawablePadding)
         {
             SetFolderStatusSpannable(filesLongStatus, fi);
 
@@ -277,17 +295,9 @@ namespace Seeker
                 currentFile.Visibility = ViewStates.Visible;
                 currentFile.Text = currentFilename;
 
-                var resources = currentFile.Context.Resources;
-                var theme = currentFile.Context.Theme;
-                int dlColor = resources.GetColor(Resource.Color.transferChipDownloadingText, theme);
                 currentFile.SetTextColor(new Color(dlColor));
-
-                var arrow = resources.GetDrawable(Resource.Drawable.arrow_down, theme);
-                int iconSize = (int)(10 * resources.DisplayMetrics.Density);
-                arrow.SetBounds(0, 0, iconSize, iconSize);
-                arrow.SetTint(dlColor);
-                currentFile.SetCompoundDrawables(arrow, null, null, null);
-                currentFile.CompoundDrawablePadding = (int)(2 * resources.DisplayMetrics.Density);
+                currentFile.SetCompoundDrawables(cachedArrow, null, null, null);
+                currentFile.CompoundDrawablePadding = drawablePadding;
             }
             else
             {
