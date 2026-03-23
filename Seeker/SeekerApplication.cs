@@ -248,6 +248,7 @@ namespace Seeker
             //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:PreferencesState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
             #if DEBUG
             SeekerState.SoulseekClient = new MockSoulseekClient();
+            SharingService.TurnOnSharing();
             //128,
             //new SoulseekClientOptions(
             //    minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info,
