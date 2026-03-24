@@ -1,0 +1,15 @@
+appId: com.companyname.andriodapp1
+---
+- back
+- runFlow:
+    when:
+      notVisible:
+        id: "navigation_home"
+    commands:
+      - back
+- runFlow:
+    when:
+      notVisible:
+        id: "navigation_home"
+    commands:
+      - back

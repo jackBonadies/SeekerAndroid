@@ -1,0 +1,32 @@
+appId: com.companyname.andriodapp1
+env:
+  IS_NIGHT: 'true'
+  THEME_INDEX: '0'
+---
+- tapOn:
+    id: navigation_home
+- tapOn:
+    id: menuSettings
+- scrollUntilVisible:
+    element:
+      id: 'nightVarientSpinner'
+    direction: DOWN
+- runFlow:
+    when:
+      true: ${IS_NIGHT == 'true'}
+    commands:
+      - tapOn:
+          id: nightVarientSpinner
+      - tapOn:
+          id: text1
+          index: 2
+- runFlow:
+    when:
+      true: ${IS_NIGHT == 'false'}
+    commands:
+      - tapOn:
+          id: dayVarientSpinner
+      - tapOn:
+          id: text1
+          index: 1
+- runFlow: ./back_to_main.yaml
