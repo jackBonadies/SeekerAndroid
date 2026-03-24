@@ -921,7 +921,7 @@ namespace Seeker.Services
                     // would it ever be different?
 
                     SharedFileCache sharedFileCache = new SharedFileCache(presentableNameToFullFileInfo, directoryCount, browseResponse, presentableDirectoryNameToDirectoryUriMappings, searchTermTokenToListOfFileKeys, fileKeyToPresentableName, hiddenDirectories, nonHiddenCountForServer);//.Select(_=>_.Item1).ToList());
-                    SharedFileCache_Refreshed(null, (sharedFileCache.DirectoryCount, nonHiddenCountForServer != -1 ? nonHiddenCountForServer : sharedFileCache.FileCount));
+                    SharedFileCache_Refreshed(null, (sharedFileCache.DirectoryCount, nonHiddenCountForServer));
                     SeekerState.SharedFileCache = sharedFileCache;
                 }
                 else
