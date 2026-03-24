@@ -27,7 +27,10 @@ namespace Seeker
         private static TransfersViewState ViewState => TransfersViewState.Instance;
 
         private View rootView = null;
-        private TextView noTransfers = null;
+        private View noTransfers = null;
+        private ImageView noTransfersIcon = null;
+        private TextView noTransfersHeader = null;
+        private TextView noTransfersSubtitle = null;
         private Button setupUpSharing = null;
         private RecyclerView.LayoutManager recycleLayoutManager;
         private RecyclerView recyclerViewTransferItems;
@@ -370,19 +373,21 @@ namespace Seeker
                 else
                 {
                     noTransfers.Visibility = ViewStates.Visible;
+                    noTransfersIcon.SetImageResource(Resource.Drawable.upload_48dp);
+                    noTransfersHeader.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads);
                     if (SharedFileService.MeetsSharingConditions())
                     {
-                        noTransfers.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet);
+                        noTransfersSubtitle.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_subtitle);
                         setupUpSharing.Visibility = ViewStates.Gone;
                     }
-                    else if(PreferencesState.SharingOn && UploadDirectoryManager.UploadDirectories.Count != 0 && UploadDirectoryManager.AreAllFailed())
+                    else if (PreferencesState.SharingOn && UploadDirectoryManager.UploadDirectories.Count != 0 && UploadDirectoryManager.AreAllFailed())
                     {
-                        noTransfers.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet_failed_to_set_up_shared_files);
+                        noTransfersSubtitle.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_not_sharing_subtitle);
                         setupUpSharing.Visibility = ViewStates.Visible;
                     }
                     else
                     {
-                        noTransfers.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_yet_not_sharing);
+                        noTransfersSubtitle.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_uploads_not_sharing_subtitle);
                         setupUpSharing.Visibility = ViewStates.Visible;
                     }
                 }
@@ -397,7 +402,9 @@ namespace Seeker
                 else
                 {
                     noTransfers.Visibility = ViewStates.Visible;
-                    noTransfers.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_transfers_yet);
+                    noTransfersIcon.SetImageResource(Resource.Drawable.download_48);
+                    noTransfersHeader.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_downloads);
+                    noTransfersSubtitle.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.no_downloads_subtitle);
                 }
             }
         }
@@ -408,17 +415,12 @@ namespace Seeker
             StaticHacks.TransfersFrag = this;
             HasOptionsMenu = true;
             Logger.Debug("TransfersFragment OnCreateView");
-            if (!OperatingSystem.IsAndroidVersionAtLeast(21))
-            {
-                AndroidX.AppCompat.App.AppCompatDelegate.CompatVectorFromResourcesEnabled = true;
-                this.rootView = inflater.Inflate(Resource.Layout.transfers, container, false);
-            }
-            else
-            {
-                this.rootView = inflater.Inflate(Resource.Layout.transfers, container, false);
-            }
+            this.rootView = inflater.Inflate(Resource.Layout.transfers, container, false);
             recyclerViewTransferItems = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerView1);
-            this.noTransfers = rootView.FindViewById<TextView>(Resource.Id.noTransfersView);
+            this.noTransfers = rootView.FindViewById<View>(Resource.Id.noTransfersView);
+            this.noTransfersIcon = rootView.FindViewById<ImageView>(Resource.Id.noTransfersIcon);
+            this.noTransfersHeader = rootView.FindViewById<TextView>(Resource.Id.noTransfersHeader);
+            this.noTransfersSubtitle = rootView.FindViewById<TextView>(Resource.Id.noTransfersSubtitle);
             this.setupUpSharing = rootView.FindViewById<Button>(Resource.Id.setUpSharing);
             this.setupUpSharing.Click += SetupUpSharing_Click;
 

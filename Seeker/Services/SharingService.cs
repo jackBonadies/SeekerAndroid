@@ -149,7 +149,7 @@ namespace Seeker.Services
                 //could not find...
             }
             DocumentFile fullDir = null;
-            if (SeekerState.PreOpenDocumentTree() || !UploadDirectoryManager.IsFromTree(fullDirUri.Item2)) //todo
+            if (!UploadDirectoryManager.IsFromTree(fullDirUri.Item2)) //todo
             {
                 fullDir = DocumentFile.FromFile(new Java.IO.File(Android.Net.Uri.Parse(fullDirUri.Item2).Path));
             }

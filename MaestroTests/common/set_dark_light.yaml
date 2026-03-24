@@ -1,0 +1,29 @@
+appId: com.companyname.andriodapp1
+env:
+  TO_NIGHT: 'false'
+---
+- tapOn:
+    id: navigation_home
+- tapOn:
+    id: menuSettings
+- scrollUntilVisible:
+    element:
+      id: 'nightModeSpinner'
+    direction: DOWN
+- tapOn:
+    id: nightModeSpinner
+- runFlow:
+    when:
+      true: ${TO_NIGHT == 'true'}
+    commands:
+      - tapOn:
+          id: text1
+          index: 2
+- runFlow:
+    when:
+      true: ${TO_NIGHT == 'false'}
+    commands:
+      - tapOn:
+          id: text1
+          index: 1
+- back

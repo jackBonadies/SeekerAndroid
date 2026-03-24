@@ -156,6 +156,7 @@ namespace Seeker
         private LinearLayoutManager recycleLayoutManager;
         public RecyclerUserListAdapter recyclerAdapter;
         private RecyclerView recyclerViewUserList;
+        private View noUsersView;
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -179,6 +180,7 @@ namespace Seeker
             //this.SupportActionBar.SetBackgroundDrawable turn off overflow....
 
             recyclerViewUserList = this.FindViewById<RecyclerView>(Resource.Id.userList);
+            noUsersView = this.FindViewById<View>(Resource.Id.noUsersView);
             recycleLayoutManager = new LinearLayoutManager(this);
             recyclerViewUserList.SetLayoutManager(recycleLayoutManager);
 
@@ -189,12 +191,15 @@ namespace Seeker
         {
             if (CommonState.UserList != null)
             {
-                lock (CommonState.UserList) //shouldnt we also lock IgnoreList?
+                lock (CommonState.UserList)
                 {
                     recyclerAdapter = new RecyclerUserListAdapter(this, ParseUserListForPresentation());
                     recyclerViewUserList.SetAdapter(recyclerAdapter);
                 }
             }
+
+            bool hasUsers = recyclerAdapter != null && recyclerAdapter.ItemCount > 0;
+            noUsersView.Visibility = hasUsers ? ViewStates.Gone : ViewStates.Visible;
         }
 
 

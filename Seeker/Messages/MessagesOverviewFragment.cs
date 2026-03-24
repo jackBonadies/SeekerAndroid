@@ -13,19 +13,19 @@ using System.Text;
 
 namespace Seeker.Messages
 {
-    public class MessagesOverviewFragment : AndroidX.Fragment.App.Fragment
+    public partial class MessagesOverviewFragment : AndroidX.Fragment.App.Fragment
     {
         private RecyclerView recyclerViewOverview;
         private LinearLayoutManager recycleLayoutManager;
         public MessagesOverviewRecyclerAdapter recyclerAdapter;
         private List<string> internalList = null;
-        private TextView noMessagesView = null;
+        private View noMessagesView = null;
         private bool created = false;
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             MessageController.MessageReceived += OnMessageReceived;
             View rootView = inflater.Inflate(Resource.Layout.messages_overview, container, false);
-            noMessagesView = rootView.FindViewById<TextView>(Resource.Id.noMessagesView);
+            noMessagesView = rootView.FindViewById<View>(Resource.Id.noMessagesView);
             if (MessageController.Messages == null || MessageController.Messages.Keys.Count == 0)
             {
                 noMessagesView.Visibility = ViewStates.Visible;
@@ -44,7 +44,7 @@ namespace Seeker.Messages
             }
             else
             {
-                internalList = GetOverviewList();//MessageController.Messages.Keys.ToList();
+                internalList = GetSortedMessagesList();//MessageController.Messages.Keys.ToList();
             }
             recyclerAdapter = new MessagesOverviewRecyclerAdapter(internalList); //this depends tightly on MessageController... since these are just strings..
             recyclerViewOverview.SetAdapter(recyclerAdapter);
@@ -64,32 +64,33 @@ namespace Seeker.Messages
         {
             base.OnResume();
             SeekerState.ActiveActivityRef.InvalidateOptionsMenu();
-            if (MessagesActivity.FromDeleteMessage)
-            {
-                MessagesActivity.FromDeleteMessage = false;
-                Snackbar sb = Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content),
-                        string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
-                        MessagesActivity.DELETED_USERNAME),
-                        Snackbar.LengthLong)
-                    .SetAction(Resource.String.undo, ItemTouchHelperMessageOverviewCallback.GetSnackBarAction(recyclerAdapter, true))
-                    .SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-
-                (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView)
-                    .SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
-                sb.Show();
-            }
             MessagesBroadcastReceiver.MarkAsReadFromNotification += UpdateMarkAsReadFromNotif;
+            SeekerApplication.UserStatusChangedUIEvent += OnUserStatusChanged;
         }
 
         public override void OnPause()
         {
             base.OnPause();
             MessagesBroadcastReceiver.MarkAsReadFromNotification -= UpdateMarkAsReadFromNotif;
+            SeekerApplication.UserStatusChangedUIEvent -= OnUserStatusChanged;
         }
 
         private void UpdateMarkAsReadFromNotif(object o, string uname)
         {
             recyclerAdapter.NotifyNameChanged(uname);
+        }
+
+        private void OnUserStatusChanged(object sender, string username)
+        {
+            if (MainActivity.OnUIthread())
+            {
+                recyclerAdapter.NotifyNameChanged(username);
+            }
+            else
+            {
+                SeekerState.ActiveActivityRef.RunOnUiThread(() =>
+                    recyclerAdapter.NotifyNameChanged(username));
+            }
         }
 
         public class MessageOverviewComparer : IComparer<KeyValuePair<string, List<Message>>>
@@ -116,7 +117,7 @@ namespace Seeker.Messages
             }
         }
 
-        public static List<string> GetOverviewList()
+        public static List<string> GetSortedMessagesList()
         {
             var listToSort = MessageController.Messages.ToList();
             listToSort.Sort(new MessageOverviewComparer());
@@ -142,27 +143,40 @@ namespace Seeker.Messages
 
         public void RefreshAdapter()
         {
-            internalList = GetOverviewList();
-            if (internalList.Count != 0)
+            MessagesOverviewActionMode?.Finish();
+            var newList = GetSortedMessagesList();
+            if (newList.Count != 0)
             {
                 noMessagesView.Visibility = ViewStates.Gone;
             }
-            recyclerAdapter = new MessagesOverviewRecyclerAdapter(internalList); //this depends tightly on MessageController... since these are just strings..
-            recyclerViewOverview.SetAdapter(recyclerAdapter);
-            recyclerAdapter.NotifyDataSetChanged();
+            else
+            {
+                noMessagesView.Visibility = ViewStates.Visible;
+            }
+            var diff = DiffUtil.CalculateDiff(new MessageOverviewDiffCallback(internalList, newList), true);
+            internalList = newList;
+            recyclerAdapter.localDataSet = newList;
+            diff.DispatchUpdatesTo(recyclerAdapter);
         }
 
         public override void OnAttach(Context activity)
         {
             if (created) //attach can happen before we created our view...
             {
-                internalList = GetOverviewList();
-                if (internalList.Count != 0)
+                MessagesOverviewActionMode?.Finish();
+                var newList = GetSortedMessagesList();
+                if (newList.Count != 0)
                 {
                     noMessagesView.Visibility = ViewStates.Gone;
                 }
-                recyclerAdapter = new MessagesOverviewRecyclerAdapter(internalList); //this depends tightly on MessageController... since these are just strings..
-                recyclerViewOverview.SetAdapter(recyclerAdapter);
+                if (recyclerAdapter == null)
+                {
+                    recyclerAdapter = new MessagesOverviewRecyclerAdapter(internalList);
+                }
+                var diff = DiffUtil.CalculateDiff(new MessageOverviewDiffCallback(internalList, newList), true);
+                internalList = newList;
+                recyclerAdapter.localDataSet = newList;
+                diff.DispatchUpdatesTo(recyclerAdapter);
                 MessageController.MessageReceived -= OnMessageReceived;
                 MessageController.MessageReceived += OnMessageReceived;
             }

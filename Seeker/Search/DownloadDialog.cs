@@ -21,12 +21,15 @@ using Android.App;
 using Android.Content;
 using Android.Content.Res;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Common;
 using Common.Browse;
+using Common.Search;
+using Google.Android.Material.BottomSheet;
 using Google.Android.Material.Snackbar;
 using Seeker.Extensions.SearchResponseExtensions;
 using Seeker.Helpers;
@@ -44,86 +47,29 @@ using log = Android.Util.Log;
 
 namespace Seeker
 {
-    class DownloadDialog : AndroidX.Fragment.App.DialogFragment, PopupMenu.IOnMenuItemClickListener
+    class DownloadDialog : BottomSheetDialogFragment, PopupMenu.IOnMenuItemClickListener
     {
         public const string DOWNLOAD_DIALOG_FRAGMENT = "download_dialog_fragment";
-        private int searchPosition = -1;
-        private SearchResponse searchResponse = null;
-        DownloadCustomAdapter customAdapter = null;
-        static SearchResponse SearchResponseTemp = null; //These are for when the DownloadDialog gets recreated by the system.
-        static int SearchPositionTemp = -1; //The system NEEDS a default fragment constructor to call. So we re-
-        //private bool diagFirstTime = true;                                                 //use these arguments.
-        private Activity activity = null;
-        //private List<int> selectedPositions = new List<int>();
+
+        // this is view state
+        private static SearchResponse SearchResponse = null;
+
+        private DownloadCustomAdapter customAdapter = null;
         public DownloadDialog(int pos, SearchResponse resp)
         {
             Logger.Debug("DownloadDialog create");
-            searchResponse = resp;
-            searchPosition = pos;
-            SearchResponseTemp = resp;
-            SearchPositionTemp = pos;
+            SearchResponse = resp;
         }
 
         public DownloadDialog()
         {
             Logger.Debug("DownloadDialog create (default constructor)"); //this gets called on recreate i.e. phone tilt, etc.
-            searchResponse = SearchResponseTemp;
-            searchPosition = SearchPositionTemp;
-        }
-
-        // TODO2026 move
-        private void UpdateSearchResponseWithFullDirectory(Soulseek.Directory d)
-        {
-            //normally files are like this "@@ynkmv\\Albums\\albumname (2012)\\02 - songname.mp3"
-            //but when we get a dir response the files are just the end file names i.e. "02 - songname.mp3" so they cannot be downloaded like that...
-            //can be fixed with d.Name + "\\" + f.Filename
-            //they also do not come with any attributes.. , just the filenames (and sizes) you need if you want to download them...
-            bool hideLocked = PreferencesState.HideLockedResultsInSearch;
-            List<File> fullFilenameCollection = new List<File>();
-            foreach (File f in d.Files)
-            {
-                string fName = d.Name + "\\" + f.Filename;
-                bool extraAttr = false;
-                //if it existed in the old folder then we can get some extra attributes
-                foreach (File fullFileInfo in searchResponse.GetFiles(hideLocked))
-                {
-                    if (fName == fullFileInfo.Filename)
-                    {
-                        fullFilenameCollection.Add(new File(f.Code, fName, f.Size, f.Extension, fullFileInfo.Attributes, f.IsLatin1Decoded, d.DecodedViaLatin1));
-                        extraAttr = true;
-                        break;
-                    }
-                }
-                if (!extraAttr)
-                {
-                    fullFilenameCollection.Add(new File(f.Code, fName, f.Size, f.Extension, f.Attributes, f.IsLatin1Decoded, d.DecodedViaLatin1));
-                }
-            }
-            SearchResponseTemp = searchResponse = new SearchResponse(searchResponse.Username, searchResponse.Token, searchResponse.HasFreeUploadSlot, searchResponse.UploadSpeed, searchResponse.QueueLength, fullFilenameCollection);
-        }
-
-        public override void OnResume()
-        {
-            base.OnResume();
-            Logger.Debug("OnResume Start");
-
-            Dialog?.SetSizeProportional(.9, .9);
-
-            Logger.Debug("OnResume End");
         }
 
         public override void OnAttach(Context context)
         {
             Logger.Debug("DownloadDialog OnAttach");
             base.OnAttach(context);
-            if (context is Activity)
-            {
-                this.activity = context as Activity;
-            }
-            else
-            {
-                throw new Exception("Custom");
-            }
         }
 
         public override void OnDetach()
@@ -131,14 +77,12 @@ namespace Seeker
             Logger.Debug("DownloadDialog OnDetach");
             SearchFragment.dlDialogShown = false;
             base.OnDetach();
-            this.activity = null;
         }
 
         public override void OnDestroy()
         {
             SearchFragment.dlDialogShown = false;
             base.OnDestroy();
-            this.activity = null;
         }
 
         public override void OnDismiss(IDialogInterface dialog)
@@ -174,64 +118,120 @@ namespace Seeker
             }
         }
 
-        private Button downloadSelectedButton = null;
+        private class SheetStateCallback : BottomSheetBehavior.BottomSheetCallback
+        {
+            private readonly View contentView;
+            private readonly float density;
+            private readonly int peekHeight;
+
+            public SheetStateCallback(View contentView, float density, int peekHeight)
+            {
+                this.contentView = contentView;
+                this.density = density;
+                this.peekHeight = peekHeight;
+            }
+
+            public override void OnStateChanged(View bottomSheetView, int newState)
+            {
+                //var bg = contentView.Background?.Mutate() as GradientDrawable;
+                //if (bg != null)
+                //{
+                //    float radius = newState == BottomSheetBehavior.StateExpanded ? 0f : 28f * density;
+                //    bg.SetCornerRadii(new float[] { radius, radius, radius, radius, 0, 0, 0, 0 });
+                //    contentView.Background = bg;
+                //}
+            }
+
+            public override void OnSlide(View bottomSheetView, float slideOffset)
+            {
+                if (slideOffset >= 0f && bottomSheetView.Height > 0)
+                {
+                    int hiddenPortion = (int)((1f - slideOffset) * (bottomSheetView.Height - peekHeight));
+                    contentView.SetPadding(
+                        contentView.PaddingLeft,
+                        contentView.PaddingTop,
+                        contentView.PaddingRight,
+                        Math.Max(hiddenPortion, 0));
+                }
+            }
+        }
+
+        private Button downloadButton = null;
         private AndroidX.SwipeRefreshLayout.Widget.SwipeRefreshLayout swipeRefreshLayout = null;
-        /// <summary>
-        /// Called after on create view
-        /// </summary>
-        /// <param name="view"></param>
-        /// <param name="savedInstanceState"></param>
+
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
             base.OnViewCreated(view, savedInstanceState);
-            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable_dl_dialog_specific));
 
-            this.SetStyle((int)DialogFragmentStyle.NoTitle, 0);
-            Button dl = view.FindViewById<Button>(Resource.Id.buttonDownload);
-            dl.Click += DownloadAll_Click;
-            Button cancel = view.FindViewById<Button>(Resource.Id.buttonCancel);
-            cancel.Click += Cancel_Click;
-            downloadSelectedButton = view.FindViewById<Button>(Resource.Id.buttonDownloadSelected);
-            downloadSelectedButton.Click += DownloadSelected_Click;
-            Button reqFiles = view.FindViewById<Button>(Resource.Id.buttonRequestDirectories);
-            reqFiles.Click += ReqFiles_Click;
-            //selectedPositions.Clear();
+            var dialog = (BottomSheetDialog)Dialog;
+            var bottomSheet = dialog.FindViewById<View>(Resource.Id.design_bottom_sheet);
+            if (bottomSheet != null)
+            {
+                var behavior = BottomSheetBehavior.From(bottomSheet);
+                behavior.State = BottomSheetBehavior.StateCollapsed;
+                int peekHeightPx = (int)(Resources.DisplayMetrics.HeightPixels * 0.85);
+                behavior.PeekHeight = peekHeightPx;
+                behavior.SkipCollapsed = false;
+
+                var layoutParams = bottomSheet.LayoutParameters;
+                layoutParams.Height = ViewGroup.LayoutParams.MatchParent;
+                bottomSheet.LayoutParameters = layoutParams;
+
+                behavior.AddBottomSheetCallback(new SheetStateCallback(view, Resources.DisplayMetrics.Density, peekHeightPx));
+
+                // Set initial bottom padding so footer is visible at peek height
+                int initialPadding = Resources.DisplayMetrics.HeightPixels - peekHeightPx;
+                view.SetPadding(view.PaddingLeft, view.PaddingTop, view.PaddingRight, initialPadding);
+            }
+
+            downloadButton = view.FindViewById<Button>(Resource.Id.buttonDownload);
+            downloadButton.Click += Download_Click;
+
+            Button browseButton = view.FindViewById<Button>(Resource.Id.buttonBrowse);
+            browseButton.Click += Browse_Click;
+
+            Button closeButton = view.FindViewById<Button>(Resource.Id.buttonClose);
+            closeButton.Click += Close_Click;
+
+            TextView folderNameHeader = view.FindViewById<TextView>(Resource.Id.folderNameHeader);
             TextView userHeader = view.FindViewById<TextView>(Resource.Id.userHeader);
             TextView subHeader = view.FindViewById<TextView>(Resource.Id.userHeaderSub);
 
             swipeRefreshLayout = view.FindViewById<AndroidX.SwipeRefreshLayout.Widget.SwipeRefreshLayout>(Resource.Id.swipeToRefreshLayout);
-            swipeRefreshLayout.SetProgressBackgroundColorSchemeColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.swipeToRefreshBackground).ToArgb());
-            swipeRefreshLayout.SetColorSchemeColors(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.swipeToRefreshProgress).ToArgb());
+            swipeRefreshLayout.SetProgressBackgroundColorSchemeColor(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.swipeToRefreshBackground).ToArgb());
+            swipeRefreshLayout.SetColorSchemeColors(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.swipeToRefreshProgress).ToArgb());
             swipeRefreshLayout.SetOnRefreshListener(new OnRefreshListenerGetFolder(this));
 
             ViewGroup headerLayout = view.FindViewById<ViewGroup>(Resource.Id.header1);
 
-            if (searchResponse == null)
+            if (SearchResponse == null)
             {
                 Logger.Firebase("DownloadDialog search response is null");
-                this.Dismiss(); //this is honestly pretty good behavior...
+                this.Dismiss();
                 return;
             }
-            userHeader.Text = SeekerApplication.GetString(Resource.String.user_) + " " + searchResponse.Username;
-            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + SimpleHelpers.GetSubHeaderText(searchResponse);
+
+            folderNameHeader.Text = SimpleHelpers.GetFolderNameForSearchResult(SearchResponse);
+            userHeader.Text = SearchResponse.Username;
+            subHeader.Text = SimpleHelpers.GetSubHeaderText(SearchResponse);
             headerLayout.Click += UserHeader_Click;
-            Logger.Debug("Is searchResponse.Files null: " + (searchResponse.Files == null).ToString());
+            Logger.Debug("Is searchResponse.Files null: " + (SearchResponse.Files == null).ToString());
 
             ListView listView = view.FindViewById<ListView>(Resource.Id.listView1);
             listView.ItemClick += ListView_ItemClick;
             listView.ChoiceMode = ChoiceMode.Multiple;
             UpdateListView();
-            SetDownloadSelectedButtonState();
+            UpdateDownloadButtonText();
         }
 
         private void UpdateListView()
         {
             ListView listView = this.View.FindViewById<ListView>(Resource.Id.listView1);
             List<FileLockedUnlockedWrapper> adapterList = new List<FileLockedUnlockedWrapper>();
-            adapterList.AddRange(searchResponse.Files.ToList().Select(x => new FileLockedUnlockedWrapper(x, false)));
+            adapterList.AddRange(SearchResponse.Files.ToList().Select(x => new FileLockedUnlockedWrapper(x, false)));
             if (!PreferencesState.HideLockedResultsInSearch)
             {
-                adapterList.AddRange(searchResponse.LockedFiles.ToList().Select(x => new FileLockedUnlockedWrapper(x, true)));
+                adapterList.AddRange(SearchResponse.LockedFiles.ToList().Select(x => new FileLockedUnlockedWrapper(x, true)));
             }
             this.customAdapter = new DownloadCustomAdapter(SeekerState.MainActivityRef, adapterList);
             this.customAdapter.Owner = this;
@@ -241,7 +241,7 @@ namespace Seeker
         private void UpdateSubHeader()
         {
             TextView subHeader = this.View.FindViewById<TextView>(Resource.Id.userHeaderSub);
-            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + SimpleHelpers.GetSubHeaderText(searchResponse);
+            subHeader.Text = SeekerApplication.GetString(Resource.String.Total_) + " " + SimpleHelpers.GetSubHeaderText(SearchResponse);
         }
 
         private void UserHeader_Click(object sender, EventArgs e)
@@ -272,111 +272,59 @@ namespace Seeker
             }
         }
 
-        private void ReqFiles_Click(object sender, EventArgs e)
-        {
-            Action<View> action = new Action<View>((v) =>
-            {
-                this.Dismiss();
-                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
-            });
-            Browse.BrowseService.RequestFilesApi(searchResponse.Username, this.View, action, null);
-        }
-
-
-
         private void ListView_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
         {
             bool alreadySelected = this.customAdapter.SelectedPositions.Contains<int>(e.Position);
             if (!alreadySelected)
             {
-
 #pragma warning disable 0618
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected, this.Activity.Theme);
-                }
-                else
-                {
-                    e.View.Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.cellbackSelected);
-                }
+                e.View.Background = Resources.GetDrawable(Resource.Color.batchSelectHighlight, this.Activity.Theme);
+                e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.batchSelectHighlight, this.Activity.Theme);
 #pragma warning restore 0618
+                e.View.FindViewById(Resource.Id.selectionCheck).Visibility = ViewStates.Visible;
                 this.customAdapter.SelectedPositions.Add(e.Position);
             }
             else
             {
-#pragma warning disable 0618
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    e.View.Background = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
-                }
-                else
-                {
-                    e.View.Background = new Android.Graphics.Drawables.ColorDrawable(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellback));
-                    e.View.FindViewById(Resource.Id.mainDlLayout).Background = new Android.Graphics.Drawables.ColorDrawable(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellback));
-                }
-#pragma warning restore 0618
+                e.View.Background = null;
+                e.View.FindViewById(Resource.Id.mainDlLayout).Background = null;
+                e.View.FindViewById(Resource.Id.selectionCheck).Visibility = ViewStates.Gone;
                 this.customAdapter.SelectedPositions.Remove(e.Position);
             }
-            SetDownloadSelectedButtonState();
+            UpdateDownloadButtonText();
         }
 
-        private void SetDownloadSelectedButtonState()
+        private void UpdateDownloadButtonText()
         {
-            //backgroundtintlist is api 21+ so lower than this, there is no disabled state change which is fine.
-            if (OperatingSystem.IsAndroidVersionAtLeast(21))
+            if (this.customAdapter != null && this.customAdapter.SelectedPositions.Count > 0)
             {
-                if (this.customAdapter == null || this.customAdapter.SelectedPositions.Count == 0)
-                {
-                    //get backed in disabled color.
-                    Color mainColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainPurple);
-                    Color backgroundColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellback);
-                    int disableColor = AndroidX.Core.Graphics.ColorUtils.BlendARGB(mainColor.ToArgb(), backgroundColor.ToArgb(), 0.5f);
-
-                    int red = Color.GetRedComponent(disableColor);
-                    int green = Color.GetGreenComponent(disableColor);
-                    int blue = Color.GetBlueComponent(disableColor);
-
-                    int disableTextColor = AndroidX.Core.Graphics.ColorUtils.BlendARGB(Color.White.ToArgb(), backgroundColor.ToArgb(), 0.5f);
-
-                    int redtc = Color.GetRedComponent(disableTextColor);
-                    int greentc = Color.GetGreenComponent(disableTextColor);
-                    int bluetc = Color.GetBlueComponent(disableTextColor);
-
-                    downloadSelectedButton.SetTextColor(ColorStateList.ValueOf(Color.Argb(255, redtc, greentc, bluetc)));
-                    downloadSelectedButton.BackgroundTintList = ColorStateList.ValueOf(Color.Argb(255, red, green, blue));
-                    downloadSelectedButton.Clickable = false;
-                }
-                else
-                {
-                    downloadSelectedButton.SetTextColor(ColorStateList.ValueOf(Color.White));
-                    downloadSelectedButton.BackgroundTintList = null;
-                    downloadSelectedButton.Clickable = true;
-                }
+                downloadButton.Text = SeekerApplication.GetString(Resource.String.download_selected) + " (" + this.customAdapter.SelectedPositions.Count + ")";
+            }
+            else
+            {
+                downloadButton.Text = SeekerApplication.GetString(Resource.String.download_folder);
             }
         }
 
-        private void Cancel_Click(object sender, EventArgs e)
+        private void Download_Click(object sender, EventArgs e)
+        {
+            bool hasSelection = this.customAdapter != null && this.customAdapter.SelectedPositions.Count > 0;
+            DownloadWithContinuation(GetFilesToDownload(hasSelection), SearchResponse.Username);
+        }
+
+        private void Browse_Click(object sender, EventArgs e)
+        {
+            Action<View> browseAction = new Action<View>((v) =>
+            {
+                this.Dismiss();
+                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+            });
+            Browse.BrowseService.RequestFilesApi(SearchResponse.Username, this.View, browseAction, null);
+        }
+
+        private void Close_Click(object sender, EventArgs e)
         {
             Dismiss();
-        }
-
-        private void DownloadAll_Click(object sender, EventArgs e)
-        {
-            DownloadWithContinuation(GetFilesToDownload(false), this.searchResponse.Username);
-        }
-
-        private void DownloadSelected_Click(object sender, EventArgs e)
-        {
-            if (this.customAdapter.SelectedPositions.Count == 0)
-            {
-                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.nothing_selected_extra), ToastLength.Short);
-                return;
-            }
-
-            DownloadWithContinuation(GetFilesToDownload(true), this.searchResponse.Username);
         }
 
         private void DownloadWithContinuation(FullFileInfo[] filesToDownload, string username)
@@ -428,14 +376,14 @@ namespace Seeker
                 List<File> selectedFiles = new List<File>();
                 foreach (int position in this.customAdapter.SelectedPositions)
                 {
-                    var file = searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, position);
+                    var file = SearchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, position);
                     selectedFiles.Add(file);
                 }
                 return BrowseUtils.GetFullFileInfos(selectedFiles.ToArray());
             }
             else
             {
-                return BrowseUtils.GetFullFileInfos(searchResponse.GetFiles(PreferencesState.HideLockedResultsInSearch));
+                return BrowseUtils.GetFullFileInfos(SearchResponse.GetFiles(PreferencesState.HideLockedResultsInSearch));
             }
         }
 
@@ -483,7 +431,6 @@ namespace Seeker
             }
         }
 
-
         public void DirectoryReceivedContAction(Task<IReadOnlyCollection<Directory>> dirTask)
         {
 
@@ -529,15 +476,9 @@ namespace Seeker
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.folder_request_already_have), ToastLength.Short);
                         return;
                     }
-                    this.UpdateSearchResponseWithFullDirectory(directory);
+                    SearchResponse = SearchUtil.CreateSearchResponseFromDirectory(SearchResponse, directory, PreferencesState.HideLockedResultsInSearch);
                     this.UpdateListView();
                     this.UpdateSubHeader();
-
-                    //this.customAdapter = new DownloadCustomAdapter(Context, dirTask.Result.Files.ToList());
-                    //this.customAdapter.Owner = this;
-                    //listView.Adapter = (customAdapter);
-                    ////listView.ItemClick += ListView_ItemClick; //already hooked up!
-                    //listView.ChoiceMode = ChoiceMode.Multiple;
                 }
             });
         }
@@ -546,7 +487,7 @@ namespace Seeker
         {
             try
             {
-                var file = searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0);
+                var file = SearchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0);
                 string dirname = SimpleHelpers.GetDirectoryRequestFolderName(file.Filename);
                 if (dirname == string.Empty)
                 {
@@ -554,19 +495,19 @@ namespace Seeker
                     stopRefreshing();
                     return;
                 }
-                if (!PreferencesState.HideLockedResultsInSearch && searchResponse.FileCount == 0 && searchResponse.LockedFileCount > 0)
+                if (!PreferencesState.HideLockedResultsInSearch && SearchResponse.FileCount == 0 && SearchResponse.LockedFileCount > 0)
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.GetFolderDoesntWorkForLockedShares), ToastLength.Short);
                     stopRefreshing();
                     return;
                 }
-                Logger.InfoFirebase("requesting " + dirname + " from " + searchResponse.Username);
-                Browse.BrowseService.GetFolderContentsAPI(searchResponse.Username, dirname, file.IsDirectoryLatin1Decoded, DirectoryReceivedContAction);
+                Logger.InfoFirebase("requesting " + dirname + " from " + SearchResponse.Username);
+                Browse.BrowseService.GetFolderContentsAPI(SearchResponse.Username, dirname, file.IsDirectoryLatin1Decoded, DirectoryReceivedContAction);
             }
             catch (Exception ex)
             {
                 UiHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Get Folder Contents Issue");
-                Logger.FirebaseError($"{PreferencesState.HideLockedResultsInSearch} {searchResponse.FileCount} {searchResponse.LockedFileCount}", ex);
+                Logger.FirebaseError($"{PreferencesState.HideLockedResultsInSearch} {SearchResponse.FileCount} {SearchResponse.LockedFileCount}", ex);
             }
         }
 
@@ -578,18 +519,18 @@ namespace Seeker
                     GetFolderContents();
                     return true;
                 case Resource.Id.browseAtLocation:
-                    string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(searchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0).Filename);
+                    string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(SearchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0).Filename);
                     Action<View> action = new Action<View>((v) =>
                     {
                         this.Dismiss();
                         ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
-                    if (!PreferencesState.HideLockedResultsInSearch && PreferencesState.HideLockedResultsInBrowse && searchResponse.IsLockedOnly())
+                    if (!PreferencesState.HideLockedResultsInSearch && PreferencesState.HideLockedResultsInBrowse && SearchResponse.IsLockedOnly())
                     {
                         //this is if the user has show locked in search results but hide in browse results, then we cannot go to the folder if it is locked.
                         startingDir = null;
                     }
-                    Browse.BrowseService.RequestFilesApi(searchResponse.Username, this.View, action, startingDir);
+                    Browse.BrowseService.RequestFilesApi(SearchResponse.Username, this.View, action, startingDir);
                     return true;
                 case Resource.Id.moreInfo:
                     //TransferItem[] tempArry = new TransferItem[transferItems.Count]();
@@ -597,11 +538,11 @@ namespace Seeker
                     //TODOASAP - hasfreeupload slots is now a boolean, fix the string.
                     var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
                     var diag = builder.SetMessage(this.Context.GetString(Resource.String.queue_length_) +
-                        searchResponse.QueueLength +
+                        SearchResponse.QueueLength +
                         System.Environment.NewLine +
                         System.Environment.NewLine +
                         this.Context.GetString(Resource.String.upload_slots_) +
-                        searchResponse.HasFreeUploadSlot).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+                        SearchResponse.HasFreeUploadSlot).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     diag.Show();
                     //System.Threading.Thread.Sleep(100); Is this required?
                     //diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(new Android.Graphics.Color(9804764)); makes the whole button invisible...
@@ -611,16 +552,16 @@ namespace Seeker
                     //}
                     //else
                     //{
-                    diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
+                    diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
                     //}
                     return true;
                 case Resource.Id.getUserInfo:
-                    RequestedUserInfoHelper.RequestUserInfoApi(searchResponse.Username);
+                    RequestedUserInfoHelper.RequestUserInfoApi(SearchResponse.Username);
                     return true;
                 case Resource.Id.download_folder_as_queued:
                     {
                         var filesToDownload = GetFilesToDownload(false);
-                        DownloadFiles(filesToDownload, this.searchResponse.Username, true);
+                        DownloadFiles(filesToDownload, SearchResponse.Username, true);
                         Dismiss();
                     }
                     return true;
@@ -632,7 +573,7 @@ namespace Seeker
                             return true;
                         }
                         var filesToDownload = GetFilesToDownload(true);
-                        DownloadFiles(filesToDownload, this.searchResponse.Username, true);
+                        DownloadFiles(filesToDownload, SearchResponse.Username, true);
                         Dismiss();
                     }
                     return true;
@@ -664,37 +605,18 @@ namespace Seeker
             if (SelectedPositions.Contains(position))
             {
 #pragma warning disable 0618
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    var cellbackSelected = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected, SeekerState.ActiveActivityRef.Theme);
-                    itemView.Background = cellbackSelected;
-                    itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = cellbackSelected;
-                }
-                else
-                {
-                    var cellbackSelected = Owner.Resources.GetDrawable(Resource.Color.cellbackSelected);
-                    itemView.Background = cellbackSelected;
-                    itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = cellbackSelected;
-                }
+                var highlight = Owner.Resources.GetDrawable(Resource.Color.batchSelectHighlight, SeekerState.ActiveActivityRef.Theme);
+                itemView.Background = highlight;
+                itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = highlight;
 #pragma warning restore 0618
+                itemView.FindViewById<View>(Resource.Id.selectionCheck).Visibility = ViewStates.Visible;
             }
             else //views get reused, hence we need to reset the color so that when we scroll the resused views arent still highlighted.
             {
-#pragma warning disable 0618
-                if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                {
-                    var cellbackNormal = AndroidX.Core.Content.ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.cell_shape_end_dldiag);
-                    itemView.Background = cellbackNormal;
-                    itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = cellbackNormal;
-                }
-                else
-                {
-                    var cellbackNormal = new Android.Graphics.Drawables.ColorDrawable(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellback));
-                    itemView.Background = cellbackNormal;
-                    itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = cellbackNormal;
-                }
+                itemView.Background = null;
+                itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = null;
+                itemView.FindViewById<View>(Resource.Id.selectionCheck).Visibility = ViewStates.Gone;
             }
-#pragma warning restore 0618
             return itemView;
             //return base.GetView(position, convertView, parent);
         }

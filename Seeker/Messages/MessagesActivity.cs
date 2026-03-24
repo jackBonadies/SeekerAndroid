@@ -50,7 +50,7 @@ using ActivityFlags = Android.Content.ActivityFlags;
 namespace Seeker
 {
 
-    [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask, Exported = false)]
+    [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, Exported = false)]
     public class MessagesActivity : SlskLinkMenuActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
         public static MessagesActivity MessagesActivityRef = null;
@@ -156,10 +156,15 @@ namespace Seeker
                     OnBackPressedDispatcher.OnBackPressed();
                     return true;
                 case Resource.Id.action_delete_messages:
-                    DELETED_USERNAME = MessagesInnerFragment.Username;
-                    DELETED_POSITION = int.MaxValue;
-                    MessageController.Messages.Remove(MessagesActivity.DELETED_USERNAME, out DELETED_DATA);
-                    MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+                    var usernameToDelete = MessagesInnerFragment.Username;
+                    var (deletedMessages, deletedReadCount) = MessageController.DeleteMessageFromUserWithUndo(MessagesInnerFragment.Username);
+                    Snackbar sb1 = Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content),
+                            string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
+                            usernameToDelete),
+                            Snackbar.LengthLong)
+                        .SetAction(Resource.String.undo, (View v) => ItemTouchHelperMessageOverviewCallback.UndoSingleUserMessagesDeleteAction(null, (usernameToDelete, deletedMessages, deletedReadCount), -1, true)) ;
+
+                    sb1.Show();
                     this.SwitchToOuter(SupportFragmentManager.FindFragmentByTag("InnerUserFragment"), true);
                     return true;
                 case Resource.Id.action_delete_all_messages:
@@ -168,12 +173,9 @@ namespace Seeker
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.deleted_all_no_messages), ToastLength.Long);
                         return true;
                     }
-                    DELETED_DICTIONARY = MessageController.Messages.ToDictionary(entry => entry.Key, entry => entry.Value);
-                    MessageController.Messages.Clear();
-                    MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+                    var (deletedAllMessages, deletedAllLastReadMessageCounts) = MessageController.DeleteAllMessagesWithUndo();
                     this.GetOverviewFragment().RefreshAdapter();
-                    Snackbar sb = Snackbar.Make(this.GetOverviewFragment().View, SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong).SetAction("Undo", GetUndoDeleteAllSnackBarAction()).SetActionTextColor(Resource.Color.lightPurpleNotTransparent);
-                    (sb.View.FindViewById<TextView>(Resource.Id.snackbar_action) as TextView).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));//AndroidX.Core.Content.ContextCompat.GetColor(this.Context,Resource.Color.lightPurpleNotTransparent));
+                    Snackbar sb = Snackbar.Make(this.GetOverviewFragment().View, SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong).SetAction("Undo", (View v) => GetUndoDeleteAllSnackBarAction(deletedAllMessages, deletedAllLastReadMessageCounts));
                     sb.Show();
                     return true;
 
@@ -184,29 +186,30 @@ namespace Seeker
         //note: when the undo snackbar is up and you click into an inner then the snackbar is still there, I tested it and clicking undo works properly in this case :)
 
 
-        public Action<View> GetUndoDeleteAllSnackBarAction()
+        public void GetUndoDeleteAllSnackBarAction(Dictionary<string, List<Message>> deletedMessageDictionary, Dictionary<string, int> deletedMessageCountDictionary)
         {
-            Action<View> undoSnackBarAction = new Action<View>((View v) =>
+            if (deletedMessageDictionary == null)
             {
-                if (MessagesActivity.DELETED_DICTIONARY == null)
-                {
-                    //error
-                    bool isNull = MessagesActivity.DELETED_DICTIONARY == null;
-                    Logger.Firebase("failure on undo delete all. dict was null");
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_undo), ToastLength.Short);
-                    return;
-                }
+                //error
+                bool isNull = deletedMessageDictionary == null;
+                Logger.Firebase("failure on undo delete all. dict was null");
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_undo), ToastLength.Short);
+                return;
+            }
 
-                foreach (var entry in MessagesActivity.DELETED_DICTIONARY)
-                {
-                    MessageController.Messages[entry.Key] = entry.Value;
-                }
+            foreach (var entry in deletedMessageDictionary)
+            {
+                MessageController.Messages[entry.Key] = entry.Value;
+            }
 
-                MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
-                (SeekerState.ActiveActivityRef as MessagesActivity).GetOverviewFragment().RefreshAdapter();
-                MessagesActivity.DELETED_DICTIONARY = null;
-            });
-            return undoSnackBarAction;
+            foreach (var entry in deletedMessageCountDictionary)
+            {
+                MessageController.LastReadMessageCounts[entry.Key] = entry.Value;
+            }
+
+            MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+            MessageController.SaveLastReadCounts(SeekerState.SharedPreferences);
+            (SeekerState.ActiveActivityRef as MessagesActivity).GetOverviewFragment().RefreshAdapter();
         }
 
         public MessagesOverviewFragment GetOverviewFragment()
@@ -401,14 +404,6 @@ namespace Seeker
         }
 
 
-        //Delete Undo Helpers
-        public static string DELETED_USERNAME = string.Empty;
-        public static int DELETED_POSITION = -1;
-        public static List<Message> DELETED_DATA = null;
-        public static volatile bool FromDeleteMessage = false;
-        //for delete all
-        public static Dictionary<string, List<Message>> DELETED_DICTIONARY = null;
-
         /// <summary>
         /// This method will switch you from inner to outer.  If you came to inner from a notification, outer will be added.
         /// note: whenever we go back we recreate the fragment so we dont need to mess around with the adapter (in the case of delete), it will be recreated.
@@ -423,7 +418,6 @@ namespace Seeker
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
             var outerExists = SupportFragmentManager.FindFragmentByTag("OuterUserFragment");
-            FromDeleteMessage = forDeleteMessage;
             if (outerExists != null)
             {
                 SupportFragmentManager.PopBackStack();

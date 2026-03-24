@@ -27,10 +27,14 @@
         <!--<item name="dialogBackground">#52000000</item>-->
         <item name="cellbackColor">#00000000</item>
         <item name="cellback">#ffffff</item>
+        <item name="user_info_chip_background">#ffffff</item>
         <item name="CustomSelector">@drawable/CustomSelector_ffffff</item>
         <item name="cellbackColorDownloadDialog">#00000000</item>
         <item name="expandIconColor">#959BDC</item>
         <item name="cellStroke">#994f58c4</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#8AB4F8</item>
 
         <item name="rounded_input_edit">
             @drawable/rounded_text_input_background_light
@@ -55,12 +59,18 @@
         <item name="secondaryColor">#cccccc</item>
         <item name="cellTextColor">#2c3e50</item>
         <item name="cellTextColorSubdued">#cc2c3e50</item>
+        <item name="cellTextColorMoreSubdued">#a02c3e50</item>
+        <item name="cellTextColorVerySubdued">#802c3e50</item>
         <item name="slightestContrastColor">#e0e0e0</item>
         <item name="slightContrastColor">#c7c7c7</item>
         <item name="mainTextColor">#4f58c4</item>
 
         <item name="mainTextColorHinted">#959BDC</item>
         <item name="searchTabButtonColor">?attr/mainPurple</item>
+
+        <item name="expandableModernChevronBg">#00F5F5F5</item>
+        <item name="expandableModernFilesBg">#ffffff</item>
+        <item name="expandableModernSeparatorColor">#18000000</item>
 
         <item name="the_rounded_corner_background_drawable">
             @drawable/rounded_corner_background_light
@@ -77,7 +87,7 @@
 	</style>
 
 	<style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
-		<item name="background">?attr/colorPrimary</item>
+		<item name="background">?attr/mainPurple</item>
 		<item name="titleTextStyle">@style/MyActionModeTitle</item>
 	</style>
 
@@ -102,6 +112,9 @@
         <item name="cellStroke">#9086b2cb</item>
         <item name="colorAccent">#86b2cb</item>
         <item name="checkBoxColor">#4496ee</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#86b2cb</item>
         <!--<item name="colorAccent">#054568</item>-->
     </style>
 
@@ -121,10 +134,13 @@
 
         <item name="colorAccent">#d57676</item>
         <item name="checkBoxColor">#FC4C02</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#d57676</item>
     </style>
 
     <style name="DefaultDark_Blue" parent="DefaultDark">
-        <item name="colorPrimary">#126291</item>
+        <item name="colorPrimary">#86b2cb</item>
         <item name="mainPurple">#126291</item>
         <item name="mainPurpleStatusBar">#10496b</item>        <item name="colorAccent">#86b2cb</item>
         <item name="whitePurpleForNavBar">#4c8aae</item>
@@ -137,10 +153,13 @@
 
         <item name="expandIconColor">#86b2cb</item>
         <item name="mainTextColorHinted">#86b2cb</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#10496b</item>
     </style>
 
     <style name="DefaultDark_Grey" parent="DefaultDark">
-        <item name="colorPrimary">#202124</item>
+        <item name="colorPrimary">#86b2cb</item>
         <item name="mainPurple">#202124</item>
         <item name="mainPurpleStatusBar">#000000</item>
         <item name="mainPurpleForNavBar">#202124</item>
@@ -161,11 +180,14 @@
             @drawable/rounded_corner_dialog_background_dark_303030
         </item>
 
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#202124</item>
+
         <item name="cellbackColorDownloadDialog">#ff303030</item>
     </style>
 
     <style name="Amoled_Grey" parent="Amoled">
-        <item name="colorPrimary">#333333</item>
+        <item name="colorPrimary">#2A4C6D</item>
         <item name="mainPurple">#333333</item>
         <item name="mainPurpleStatusBar">#0c0c0c</item>
 
@@ -181,15 +203,23 @@
         <item name="mainTextColorHinted">#dddddd</item>
         <item name="slskAccent">#2A4C6D</item>
         <item name="normalTextColor">#FFFFFF</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#333333</item>
     </style>
 
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
         <item name="colorOnPrimary">#ffffff</item>
+        <item name="colorPrimary">#8AB4F8</item>
         <item name="colorSurface">#303030</item>
         <item name="colorSurfaceLogin">#404040</item>
         <item name="colorOnSurface">?attr/normalTextColor</item>
 		<item name="colorOnBackground">?attr/normalTextColor</item>
         <item name="mainTextColor">#bcc1f7</item>
+        <item name="checkBoxColor">#FC4C02</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary light variant for it-->
+        <item name="snackbarActionColor">#4f58c4</item>
 
         <!--this was added bc some samsung devices have the nav bar as a bright white for seeker, but not for other apps.
 			I assume this is because other apps were setting it, and we werent. so remedy this here.-->
@@ -215,6 +245,7 @@
         <!--<item name="dialogBackground">#52000000</item>-->
         <item name="cellbackColor">#ff303030</item>
         <item name="cellback">#ff303030</item>
+        <item name="user_info_chip_background">#ff404040</item>
         <item name="CustomSelector">@drawable/CustomSelector_ff303030</item>
 
         <item name="cellbackColorDownloadDialog">#ff424242</item>
@@ -231,6 +262,8 @@
         <item name="secondaryColor">#ff424242</item>
         <item name="cellTextColor">#ffffffff</item>
         <item name="cellTextColorSubdued">#ccffffff</item>
+        <item name="cellTextColorMoreSubdued">#a0ffffff</item>
+        <item name="cellTextColorVerySubdued">#80ffffff</item>
         <item name="slightestContrastColor">#4E4E4E</item>
         <item name="slightContrastColor">#6d6d6d</item>
 
@@ -246,11 +279,17 @@
             ?attr/the_rounded_corner_dialog_background_drawable
         </item>
 
+        <item name="expandableModernChevronBg">#00424242</item>
+        <item name="expandableModernFilesBg">#3A3A3A</item>
+        <item name="expandableModernSeparatorColor">#18FFFFFF</item>
+
         <item name="mainTextColorHinted">#bcc1f7</item>
         <item name="searchTabButtonColor">?attr/mainTextColorHinted</item>
     </style>
 
     <style name="Amoled" parent="DefaultDark">
+        <item name="expandableModernChevronBg">#001A1A1A</item>
+        <item name="expandableModernFilesBg">#1A1A1A</item>
         <item name="colorSurface">#000000</item>
         <item name="colorSurfaceLogin">#1A1A1A</item>
         <item name="floating_action_bar_to_bottom_icon">#d8d8d8</item>
@@ -259,6 +298,9 @@
         <item name="expandIconColor">#ffffffff</item>
         <item name="normalTextColor">#bcc1f7</item>
         <item name="normalTextColorNonTinted">#FFFFFF</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#bcc1f7</item>
 
         <!--Setting the window background color causes real bad UI issues on API19 emulator
 		    So therefore the pseudo window background color attribute is needed.
@@ -272,6 +314,7 @@
 
         <item name="cellbackColor">#ff000000</item>
         <item name="cellback">#ff000000</item>
+        <item name="user_info_chip_background">#ff141414</item>
         <item name="CustomSelector">@drawable/CustomSelector_ff000000</item>
 
         <item name="cellbackColorDownloadDialog">#ff202020</item>
@@ -284,6 +327,8 @@
         <item name="secondaryColor">#ff202020</item>
         <item name="cellTextColor">#ffE4E4E4</item>
         <item name="cellTextColorSubdued">#ccE4E4E4</item>
+        <item name="cellTextColorMoreSubdued">#aaE4E4E4</item>
+        <item name="cellTextColorVerySubdued">#a0E4E4E4</item>
 
         <item name="the_rounded_corner_background_drawable">
             @drawable/rounded_corner_background_dark_amoled

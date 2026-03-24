@@ -29,8 +29,9 @@ namespace Seeker
     public partial class SearchFragment : Fragment
     {
         public View rootView = null;
+        private View noSearchesView = null;
         private Context context;
-        public static SearchResultStyleEnum SearchResultStyle = SearchResultStyleEnum.Medium;
+        public static bool ExpandAllResults { get => PreferencesState.ExpandAllResults; set => PreferencesState.ExpandAllResults = value; }
         public static IMenu ActionBarMenu = null;
         public static int LastSearchResponseCount = -1;
 
@@ -71,18 +72,7 @@ namespace Seeker
             }
         }
 
-        public static void SetSearchResultStyle(int style)
-        {
-            //in case its out of range bc we add / rm enums in the future...
-            foreach (int i in System.Enum.GetValues(typeof(SearchResultStyleEnum)))
-            {
-                if (i == style)
-                {
-                    SearchResultStyle = (SearchResultStyleEnum)(i);
-                    break;
-                }
-            }
-        }
+
 
         public override void SetMenuVisibility(bool menuVisible)
         {
@@ -119,6 +109,24 @@ namespace Seeker
                 GetTransitionDrawable().StartTransition(0);
             }
             base.OnCreateOptionsMenu(menu, inflater);
+        }
+
+        public override void OnPrepareOptionsMenu(IMenu menu)
+        {
+            var toggleItem = menu.FindItem(Resource.Id.action_toggle_expand_all);
+            if (toggleItem != null)
+            {
+                bool isExpandable = PreferencesState.SearchResultStyle == SearchResultStyleEnum.ExpandableLegacy ||
+                    PreferencesState.SearchResultStyle == SearchResultStyleEnum.ExpandableModern;
+                toggleItem.SetVisible(isExpandable);
+                if (isExpandable)
+                {
+                    toggleItem.SetTitle(ExpandAllResults
+                        ? Resource.String.collapse_all
+                        : Resource.String.expand_all);
+                }
+            }
+            base.OnPrepareOptionsMenu(menu);
         }
 
         public static void SetCustomViewTabNumberInner(ImageView imgView, Context c)
@@ -175,16 +183,7 @@ namespace Seeker
             }
 
             Android.Graphics.Drawables.Drawable drawable = null;
-            if (OperatingSystem.IsAndroidVersionAtLeast(21))
-            {
-                drawable = c.Resources.GetDrawable(idOfDrawable, c.Theme);
-            }
-            else
-            {
-                AndroidX.AppCompat.App.AppCompatDelegate.CompatVectorFromResourcesEnabled = true;
-                //the above is needed else it fails **Java.Lang.RuntimeException:** 'File res/drawable/numeric_1_box_multiple_outline.xml from drawable resource ID #0x7f0700d3'
-                drawable = c.Resources.GetDrawable(idOfDrawable);
-            }
+            drawable = c.Resources.GetDrawable(idOfDrawable, c.Theme);
             imgView.SetImageDrawable(drawable);
 
         }
@@ -338,6 +337,7 @@ namespace Seeker
                     {
                         SetTransitionDrawableState();
                     }
+                    UpdateNoSearchesView();
                 });
                 if (SeekerState.MainActivityRef == null)
                 {
@@ -397,6 +397,11 @@ namespace Seeker
                     }
                 case Resource.Id.action_change_result_style:
                     ShowChangeResultStyleBottomDialog();
+                    return true;
+                case Resource.Id.action_toggle_expand_all:
+                    ExpandAllResults = !ExpandAllResults;
+                    this.Activity?.InvalidateOptionsMenu();
+                    SearchResultStyleChanged();
                     return true;
                 case Resource.Id.action_add_to_wishlist:
                     AddSearchToWishlist();
@@ -458,7 +463,7 @@ namespace Seeker
                 if (purple)
                 {
                     //https://developer.android.com/reference/android/graphics/PorterDuff.Mode
-                    cancel.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), PorterDuff.Mode.SrcAtop);
+                    cancel.SetColorFilter(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), PorterDuff.Mode.SrcAtop);
                 }
                 actv.SetCompoundDrawables(null, null, cancel, null);
             }
@@ -546,8 +551,19 @@ namespace Seeker
             }
         }
 
+        public void UpdateNoSearchesView()
+        {
+            if (noSearchesView == null)
+            {
+                return;
+            }
+            bool neverSearched = string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm);
+            noSearchesView.Visibility = neverSearched ? ViewStates.Visible : ViewStates.Gone;
+        }
+
         public void SearchResultStyleChanged()
         {
+            this.Activity?.InvalidateOptionsMenu();
             RecyclerView rv = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches); //TODO //TODO //TODO
 
             if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
@@ -660,6 +676,9 @@ namespace Seeker
                 recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
             }
+
+            noSearchesView = rootView.FindViewById<View>(Resource.Id.noSearchesView);
+            UpdateNoSearchesView();
 
             SeekerState.ClearSearchHistoryEventsFromTarget(this);
             SeekerState.ClearSearchHistory += SeekerState_ClearSearchHistory;
@@ -1360,7 +1379,7 @@ namespace Seeker
         {
             Logger.Debug("SearchFragmentOnPause");
             base.OnPause();
-            PreferencesManager.SaveSearchFragmentFilterState(PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)SearchResultStyle);
+            PreferencesManager.SaveSearchFragmentFilterState(PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)PreferencesState.SearchResultStyle, ExpandAllResults);
         }
 
         private static void Actv_KeyPressHELPER(object sender, View.KeyEventArgs e)
@@ -1466,6 +1485,8 @@ namespace Seeker
 
                 SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
+
+                SearchFragment.Instance.UpdateNoSearchesView();
             }
         }
 
@@ -1532,6 +1553,7 @@ namespace Seeker
                 Instance.recycleLayoutManager.OnRestoreInstanceState(state);
             }
             SetOldList(cacheKey, newResults.ToList());
+            Instance.UpdateNoSearchesView();
         }
 
         /// <summary>

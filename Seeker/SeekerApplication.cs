@@ -248,6 +248,7 @@ namespace Seeker
             //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:PreferencesState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
             #if DEBUG
             SeekerState.SoulseekClient = new MockSoulseekClient();
+            SharingService.TurnOnSharing();
             //128,
             //new SoulseekClientOptions(
             //    minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info,
@@ -321,7 +322,7 @@ namespace Seeker
             bool canWrite = false;
             try
             {
-                if (SeekerState.PreOpenDocumentTree() || !directoryUriFromTree)
+                if (!directoryUriFromTree)
                 {
                     canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite();
                 }
@@ -392,7 +393,7 @@ namespace Seeker
                     var incompleteRes = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
                     if (CheckDirectoryForWritePermission(context, incompleteRes, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "incomplete"))
                     {
-                        SeekerState.RootIncompleteDocumentFile = (SeekerState.PreOpenDocumentTree() || !PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
+                        SeekerState.RootIncompleteDocumentFile = (!PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
                             ? DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path))
                             : DocumentFile.FromTreeUri(context, incompleteRes);
                     }
@@ -1656,14 +1657,7 @@ namespace Seeker
             var typedValue = new TypedValue();
             c.Theme.ResolveAttribute(attr, typedValue, true);
             int drawableRes = (typedValue.ResourceId != 0) ? typedValue.ResourceId : typedValue.Data;
-            if (OperatingSystem.IsAndroidVersionAtLeast(21))
-            {
-                return c.Resources.GetDrawable(drawableRes, SeekerState.ActiveActivityRef.Theme);
-            }
-            else
-            {
-                return c.Resources.GetDrawable(drawableRes);
-            }
+            return c.Resources.GetDrawable(drawableRes, SeekerState.ActiveActivityRef.Theme);
         }
 
         /// <summary>
@@ -2046,8 +2040,6 @@ namespace Seeker
                 // Restore all pure-data preferences via PreferencesManager
                 PreferencesManager.RestoreAll(sharedPreferences);
                 PreferencesManager.RestoreListeningState(sharedPreferences);
-
-                SearchFragment.SetSearchResultStyle(Common.PreferencesState.SearchResultStyle);
 
                 // Side-effect restores that depend on Android APIs
                 UploadDirectoryManager.RestoreFromSavedState(sharedPreferences);

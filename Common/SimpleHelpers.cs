@@ -246,7 +246,6 @@ namespace Seeker
                 totalBytes = searchResponse.Files.Sum(f => f.Size) + searchResponse.LockedFiles.Sum(f => f.Size);
             }
 
-            //if total bytes greater than 1GB
             string sizeString = GetHumanReadableSize(totalBytes);
 
             var filesWithLength = searchResponse.Files.Where(f => f.Length.HasValue);
@@ -257,8 +256,7 @@ namespace Seeker
             string timeString = string.Empty;
             if (filesWithLength.Count() > 0)
             {
-                //translate length into human readable
-                timeString = GetHumanReadableTime(filesWithLength.Sum(f => f.Length.Value));
+                timeString = GetHumanReadableTime(filesWithLength.Sum(f => f.Length.Value), true);
             }
             if (string.IsNullOrEmpty(timeString))
             {
@@ -276,7 +274,7 @@ namespace Seeker
         {
 
             string sizeString = string.Format("{0:0.##} MB", f.Size / (1024.0 * 1024.0));
-            string lengthString = f.Length.HasValue ? GetHumanReadableTime(f.Length.Value) : string.Empty;
+            string lengthString = f.Length.HasValue ? GetHumanReadableTime(f.Length.Value, true) : string.Empty;
             string attrString = GetHumanReadableAttributesForSingleItem(f);
             if (string.IsNullOrEmpty(attrString) && string.IsNullOrEmpty(lengthString))
             {

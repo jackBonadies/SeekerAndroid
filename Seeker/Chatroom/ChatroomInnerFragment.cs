@@ -528,10 +528,7 @@ namespace Seeker.Chatroom
             recyclerViewInner.SetAdapter(recyclerAdapter);
             recyclerViewInner.SetLayoutManager(recycleLayoutManager);
 
-            if (OperatingSystem.IsAndroidVersionAtLeast(23))
-            {
-                recyclerViewInner.ScrollChange += RecyclerViewInner_ScrollChange;
-            }
+            recyclerViewInner.ScrollChange += RecyclerViewInner_ScrollChange;
 
             this.RegisterForContextMenu(recyclerViewInner);
             if (messagesInternal.Count != 0)

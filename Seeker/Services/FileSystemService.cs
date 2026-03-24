@@ -781,7 +781,7 @@ namespace Seeker.Services
             to.Flush();
             to.Close();
 
-            if (SeekerState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() || toDelete.Scheme == "file")
+            if (SettingsActivity.UseTempDirectory() || toDelete.Scheme == "file")
             {
                 try
                 {
@@ -799,14 +799,14 @@ namespace Seeker.Services
             {
                 DocumentFile df = DocumentFile.FromSingleUri(SeekerState.ActiveActivityRef, toDelete); //this returns a file that doesnt exist with file ://
 
-                if (!df.Delete()) //on API 19 this seems to always fail..
+                if (!df.Delete())
                 {
                     Logger.Firebase("df.Delete() failed to delete");
                 }
             }
 
             DocumentFile parent = null;
-            if (SeekerState.PreOpenDocumentTree() || SettingsActivity.UseTempDirectory() || parentToDelete.Scheme == "file")
+            if (SettingsActivity.UseTempDirectory() || parentToDelete.Scheme == "file")
             {
                 parent = DocumentFile.FromFile(new Java.IO.File(parentToDelete.Path));
             }

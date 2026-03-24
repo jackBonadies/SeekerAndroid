@@ -90,21 +90,13 @@ namespace Seeker
 
         public static PendingIntentFlags AppendMutabilityIfApplicable(PendingIntentFlags existingFlags, bool immutable)
         {
-            if (OperatingSystem.IsAndroidVersionAtLeast(23))
+            if (immutable)
             {
-                if (immutable)
-                {
-                    return existingFlags | PendingIntentFlags.Immutable;
-                }
-                else
-                {
-                    return existingFlags | PendingIntentFlags.Mutable;
-                }
+                return existingFlags | PendingIntentFlags.Immutable;
             }
             else
             {
-                //immutable flag was only introduced in 23 so if less than that we always need to OR with mutable (or we can just leave it alone). (remember mutable is the default)
-                return existingFlags;
+                return existingFlags | PendingIntentFlags.Mutable;
             }
         }
 
@@ -381,9 +373,7 @@ namespace Seeker
                           .SetContentIntent(pendingIntent)
                           .SetOnlyAlertOnce(setOnlyAlertOnce) //maybe
                           .SetTicker(titleText);
-                //for < 21 it is possible (must use png icon instead of xml) but the icon does look great
-                //  and it doesnt clear from recents..
-                if (shutdownAction && OperatingSystem.IsAndroidVersionAtLeast(21))
+                if (shutdownAction)
                 {
                     Intent intent3 = new Intent(context, typeof(CloseActivity));
                     intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);

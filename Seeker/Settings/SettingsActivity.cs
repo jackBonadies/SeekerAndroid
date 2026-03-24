@@ -111,7 +111,6 @@ namespace Seeker
             //when you open up the directory selection with OpenDocumentTree the SettingsActivity is paused
             this.UpdateDirectoryViews();
 
-            //however with the api<21 it is not paused and so an event is needed.
             SeekerState.DirectoryUpdatedEvent += DirectoryUpdated;
             SeekerState.SharingStatusChangedEvent += SharingStatusUpdated;
 
@@ -307,7 +306,7 @@ namespace Seeker
             Button chbox = this.FindViewById<Button>(Resource.Id.addUploadDirectory);
 
             var progBar = this.FindViewById<ProgressBar>(Resource.Id.progressBarSharedStatus);
-            progBar.IndeterminateDrawable.SetColorFilter(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), Android.Graphics.PorterDuff.Mode.SrcIn);
+            progBar.IndeterminateDrawable.SetColorFilter(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), Android.Graphics.PorterDuff.Mode.SrcIn);
             progBar.Click += ImageView_Click;
             Intent intent = Intent; //intent that started this activity
             //this.SaveDataDirectoryUri = intent.GetStringExtra("SaveDataDirectoryUri");
@@ -1064,19 +1063,12 @@ namespace Seeker
             //for rescan=true, we use the previous parse to get metadata if there is a match...
             //so that we do not have to read the file again to get things like bitrate, samples, etc.
             //if the presentable name is in the last parse, and the size matches, then use those attributes we previously had to read the file to get..
-            if (SeekerState.PreOpenDocumentTree())
-            {
-                Rescan(null, -1, true, true);
-            }
-            else
-            {
-                Rescan(null, -1, false, true);
-            }
+            Rescan(null, -1, false, true);
         }
 
         private static string GetFriendlyDownloadDirectoryName()
         {
-            if (SeekerState.RootDocumentFile == null) //even in API<21 we do set this RootDocumentFile
+            if (SeekerState.RootDocumentFile == null)            
             {
                 if (SeekerState.UseLegacyStorage())
                 {
@@ -1118,7 +1110,7 @@ namespace Seeker
                     return SeekerApplication.GetString(Resource.String.AppLocalStorage);
                 }
                 //if not override then its whatever the download directory is...
-                if (SeekerState.RootDocumentFile == null) //even in API<21 we do set this RootDocumentFile
+                if (SeekerState.RootDocumentFile == null)                
                 {
                     if (SeekerState.UseLegacyStorage())
                     {
@@ -2640,19 +2632,19 @@ namespace Seeker
                         DocumentFile f = DocumentFile.FromFile(new Java.IO.File(t.Result)); //from tree uri not added til 21 also.  from single uri returns a f.Exists=false file.
                         if (f == null)
                         {
-                            Logger.Firebase("api<21 f is null");
+                            Logger.Firebase("legacy f is null");
                             SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_reading_dir), ToastLength.Long);
                             return;
                         }
                         else if (!f.Exists())
                         {
-                            Logger.Firebase("api<21 f does not exist");
+                            Logger.Firebase("legacy f does not exist");
                             SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_reading_dir), ToastLength.Long);
                             return;
                         }
                         else if (!f.IsDirectory)
                         {
-                            Logger.Firebase("api<21 NOT A DIRECTORY");
+                            Logger.Firebase("legacy NOT A DIRECTORY");
                             SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_not_a_dir), ToastLength.Long);
                             return;
                         }

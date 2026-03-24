@@ -166,7 +166,6 @@ namespace Seeker.Chatroom
             List<Soulseek.UserData> chatroomUserData = new List<Soulseek.UserData>();
 
             var userlist = ChatroomController.JoinedRoomData[roomName].Users.ToList();
-
             var opList = ChatroomController.JoinedRoomData[roomName].Operators?.ToList();
             var owner = ChatroomController.JoinedRoomData[roomName].Owner;
             //int timeJoined = 0;

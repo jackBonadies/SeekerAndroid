@@ -176,7 +176,7 @@ namespace Seeker
     This fix solves the issue without the unintented changes of making MainActivity a SingleTask activity.
 
     **/
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask, Exported = true)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, Exported = true)]
     [IntentFilter(new[] { Intent.ActionSend },
     Categories = new[] { Intent.CategoryDefault }, DataMimeType = "text/plain", Label = "Search Here")]
     public class SearchDialogDummyActivity : ThemeableActivity

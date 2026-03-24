@@ -11,10 +11,12 @@ namespace Seeker
 
     public enum SearchResultStyleEnum
     {
-        Minimal = 0,
-        Medium = 1,
-        CollapsedAll = 2,
-        ExpandedAll = 3,
+        MinimalLegacy = 0,
+        MediumLegacy = 11,
+        ExpandableLegacy = 2,
+        MediumModernBitrateBottom = 1, // the new default
+        ExpandableModern = 4,
+        MediumModernBitrateTop = 5,
     }
 
     public enum TabType

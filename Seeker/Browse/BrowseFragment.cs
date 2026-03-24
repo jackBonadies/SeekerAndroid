@@ -192,7 +192,7 @@ namespace Seeker
                     DownloadUserFilesEntry(true, true);
                     return true;
                 case Resource.Id.action_browse_user:
-                    ShowEditTextBrowseUserDialog();
+                    ShowBrowseUserDialog();
                     return true;
                 case Resource.Id.action_up_directory:
                     GoUpDirectory();
@@ -290,7 +290,7 @@ namespace Seeker
             treePathRecyclerAdapter = new TreePathRecyclerAdapter(state.PathItems, this);
             treePathRecyclerView.SetAdapter(treePathRecyclerAdapter);
 
-            this.noBrowseView = this.rootView.FindViewById<TextView>(Resource.Id.noBrowseView);
+            this.noBrowseView = this.rootView.FindViewById<View>(Resource.Id.noBrowseView);
             this.separator = this.rootView.FindViewById<View>(Resource.Id.recyclerViewHorizontalPathSep);
             this.separator.Visibility = ViewStates.Gone;
             if (state.HasResponse())
@@ -687,7 +687,6 @@ namespace Seeker
                 });
                 EventHandler<DialogClickEventArgs> eventHandlerRecursiveFolders = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    BrowseUtils.SetDepthTags(sourceList.First(), recursiveFullFileInfo);
                     DownloadUserFilesEntryStage3(true, recursiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
                 });
                 builder.SetPositiveButton(Resource.String.all, eventHandlerRecursiveFolders);
@@ -1100,14 +1099,14 @@ namespace Seeker
                 titleView.Text = folderName;
                 titleView.SetPadding(dp24, dp20, dp24, 0);
                 titleView.SetTextSize(Android.Util.ComplexUnitType.Sp, 20);
-                titleView.SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor));
+                titleView.SetTextColor(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor));
                 titleView.SetMaxLines(2);
                 titleView.Ellipsize = Android.Text.TextUtils.TruncateAt.End;
                 builder.SetCustomTitle(titleView);
             }
 
-            var labelColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued);
-            var valueColor = SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor);
+            var labelColor = UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued);
+            var valueColor = UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor);
 
             string lengthValue = (folderSummary.LengthSeconds == 0) ? "-" : SimpleHelpers.GetHumanReadableTime(folderSummary.LengthSeconds, true);
 
@@ -1157,7 +1156,7 @@ namespace Seeker
 
             var diag = builder.SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             diag.Show();
-            diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
+            diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
         }
 
         private static void ClearFilterUIString(bool force = false)
@@ -1222,7 +1221,7 @@ namespace Seeker
 
         private static AndroidX.AppCompat.App.AlertDialog browseUserDialog = null;
 
-        public void ShowEditTextBrowseUserDialog()
+        public void ShowBrowseUserDialog()
         {
             FragmentActivity c = this.Activity != null ? this.Activity : SeekerState.MainActivityRef;
             Logger.InfoFirebase("ShowEditTextBrowseUserDialog" + c.IsDestroyed + c.IsFinishing);

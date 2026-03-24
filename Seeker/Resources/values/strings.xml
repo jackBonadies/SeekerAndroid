@@ -86,7 +86,19 @@
         client, Seeker. I do not currently accept donations.
     </string>
 
-    <string name="no_messages">No messages.  Hit \"+\" to get started.</string>
+    <string name="no_messages">No messages</string>
+    <string name="no_messages_subtitle">Messages from users will appear here</string>
+    <string name="no_users_added">No users added</string>
+    <string name="no_users_subtitle">Add or ignore users to see them here</string>
+    <string name="no_browse_results">No browse results</string>
+    <string name="no_browse_subtitle">Enter a username to browse their files</string>
+    <string name="no_downloads">No downloads</string>
+    <string name="no_downloads_subtitle">Downloaded files will appear here</string>
+    <string name="no_uploads">No uploads</string>
+    <string name="no_uploads_subtitle">Uploads will appear when other users download your files</string>
+    <string name="no_uploads_not_sharing_subtitle">You are not currently sharing any files</string>
+    <string name="no_searches">No searches</string>
+    <string name="no_searches_subtitle">Enter a term to search the Soulseek network</string>
     <string name="messages">Messages</string>
     <string name="browse_files">Browse Files</string>
     <string name="chatroomListLoading">
@@ -127,6 +139,14 @@ Upload Speed: {3}
 File Count: {4}
 Directory Count: {5}"
     </string>
+    <string name="statistics_header">Statistics</string>
+    <string name="stat_upload_slots">Upload slots</string>
+    <string name="stat_queued">Queued</string>
+    <string name="stat_speed">Speed</string>
+    <string name="stat_files">Files</string>
+    <string name="stat_dirs">Dirs</string>
+    <string name="stat_directories">Directories</string>
+    <string name="stat_free_upload">Free upload</string>
     <string name="add_user">Add User</string>
     <string name="empty_browse_directory">
         This tab is used to browse a user\'s directory tree.\n\nTo get started
@@ -225,10 +245,14 @@ Directory Count: {5}"
 
     <!--Search Result Styles-->
     <string name="search_result_style">Result Style:</string>
-    <string name="search_result_style_expanded">Expandable: Expanded</string>
-    <string name="search_result_style_collapsed">Expandable: Collapsed</string>
-    <string name="search_result_style_medium">Medium</string>
-    <string name="search_result_style_minimal">Minimal</string>
+    <string name="search_result_style_expandable_modern">Expandable: Modern</string>
+    <string name="search_result_style_expandable_legacy">Expandable: Simple Text</string>
+    <string name="expand_all">Expand All</string>
+    <string name="collapse_all">Collapse All</string>
+    <string name="search_result_style_standard_legacy">Default: Simple Text</string>
+    <string name="search_result_style_dense_legacy">Dense: Simple Text</string>
+    <string name="search_result_style_standard_bitrate_bottom_row">Default: Filetype Bottom</string>
+    <string name="search_result_style_standard_bitrate_top_row">Default: Filetype Top</string>
 
     <string name="new_search_tab">New Search</string>
     <string name="search_tabs_header">SEARCH TABS</string>
@@ -1250,6 +1274,8 @@ The standard way of requesting folder access does not always persist permissions
     <string name="HideSpeed">Hide Speed</string>
 
     <string name="Num_Selected">{0} Selected</string>
+    <string name="DeleteSelected">Delete Selected</string>
+    <string name="deleted_selected_message_histories">Deleted {0} conversation(s)</string>
 
     <string name="ExportClientData">Export Client Data</string>
     <string name="export_more_info">

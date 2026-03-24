@@ -1,0 +1,7 @@
+appId: com.companyname.andriodapp1
+---
+- launchApp
+- runFlow: ./common/optional_set_download_dir.yaml
+- runFlow: ./common/optional_login.yaml
+- tapOn:
+    id: menuLogout

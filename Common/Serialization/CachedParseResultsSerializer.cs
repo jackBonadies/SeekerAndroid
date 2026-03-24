@@ -16,23 +16,23 @@ namespace Seeker.Serialization
                 return null;
             }
 
-            var helperIndex = DeserializeFromProvider<Dictionary<int, string>>(provider, KeyConsts.M_HelperIndex_Filename);
-            var tokenIndex = DeserializeFromProvider<Dictionary<string, List<int>>>(provider, KeyConsts.M_TokenIndex_Filename);
-            var keys = DeserializeFromProvider<Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>>(provider, KeyConsts.M_Keys_Filename);
+            var fileKeyToPresentableName = DeserializeFromProvider<Dictionary<int, string>>(provider, KeyConsts.M_HelperIndex_Filename);
+            var searchTermTokenToListOfFileKeys = DeserializeFromProvider<Dictionary<string, List<int>>>(provider, KeyConsts.M_TokenIndex_Filename);
+            var presentableNameToFullFileInfo = DeserializeFromProvider<Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>>(provider, KeyConsts.M_Keys_Filename);
             var browseResponse = DeserializeFromProvider<BrowseResponse>(provider, KeyConsts.M_BrowseResponse_Filename, SerializationHelper.BrowseResponseOptions);
             var browseResponseHidden = DeserializeFromProvider<List<Soulseek.Directory>>(provider, KeyConsts.M_BrowseResponse_Hidden_Filename, SerializationHelper.BrowseResponseOptions);
-            var friendlyDirToUri = DeserializeFromProvider<List<Tuple<string, string>>>(provider, KeyConsts.M_FriendlyDirNameToUri_Filename);
+            var presentableDirectoryNameToDirectoryUriMappings = DeserializeFromProvider<List<Tuple<string, string>>>(provider, KeyConsts.M_FriendlyDirNameToUri_Filename);
 
             int nonHiddenFileCount = provider.GetCachedFileCount();
 
             return new CachedParseResults(
-                keys,
+                presentableNameToFullFileInfo,
                 browseResponse.DirectoryCount,
                 browseResponse,
                 browseResponseHidden,
-                friendlyDirToUri,
-                tokenIndex,
-                helperIndex,
+                presentableDirectoryNameToDirectoryUriMappings,
+                searchTermTokenToListOfFileKeys,
+                fileKeyToPresentableName,
                 nonHiddenFileCount);
         }
 
@@ -40,25 +40,25 @@ namespace Seeker.Serialization
         {
             provider.EnsureCacheExists();
 
-            byte[] data = MessagePackSerializer.Serialize(cached.helperIndex);
+            byte[] data = MessagePackSerializer.Serialize(cached.FileKeyToPresentableName);
             provider.Write(KeyConsts.M_HelperIndex_Filename, data);
 
-            data = MessagePackSerializer.Serialize(cached.tokenIndex);
+            data = MessagePackSerializer.Serialize(cached.SearchTermTokenToListOfFileKeys);
             provider.Write(KeyConsts.M_TokenIndex_Filename, data);
 
-            data = MessagePackSerializer.Serialize(cached.keys);
+            data = MessagePackSerializer.Serialize(cached.PresentableNameToFullFileInfo);
             provider.Write(KeyConsts.M_Keys_Filename, data);
 
-            data = MessagePackSerializer.Serialize(cached.browseResponse, options: SerializationHelper.BrowseResponseOptions);
+            data = MessagePackSerializer.Serialize(cached.BrowseResponse, options: SerializationHelper.BrowseResponseOptions);
             provider.Write(KeyConsts.M_BrowseResponse_Filename, data);
 
-            data = MessagePackSerializer.Serialize(cached.browseResponseHiddenPortion, options: SerializationHelper.BrowseResponseOptions);
+            data = MessagePackSerializer.Serialize(cached.BrowseResponseHiddenPortion, options: SerializationHelper.BrowseResponseOptions);
             provider.Write(KeyConsts.M_BrowseResponse_Hidden_Filename, data);
 
-            data = MessagePackSerializer.Serialize(cached.friendlyDirNameToUriMapping);
+            data = MessagePackSerializer.Serialize(cached.PresentableDirectoryNameToDirectoryUriMappings);
             provider.Write(KeyConsts.M_FriendlyDirNameToUri_Filename, data);
 
-            provider.SaveCachedFileCount(cached.nonHiddenFileCount);
+            provider.SaveCachedFileCount(cached.NonHiddenFileCount);
         }
 
         private static T DeserializeFromProvider<T>(ICacheDataProvider provider, string filename, MessagePackSerializerOptions? options = null) where T : class

@@ -1,0 +1,3 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:top="2dp" android:drawable="@drawable/file_stacks_vector" />
+</layer-list>

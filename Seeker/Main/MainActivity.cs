@@ -68,7 +68,7 @@ using ActivityFlags = Android.Content.ActivityFlags;
 //\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 namespace Seeker
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTask, MainLauncher = true, Exported = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, MainLauncher = true, Exported = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
     public partial class MainActivity :
         ThemeableActivity, 
         ActivityCompat.IOnRequestPermissionsResultCallback, 
@@ -650,14 +650,7 @@ namespace Seeker
                     // basically it clears all activities in the current task.
                     intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
                     this.StartActivity(intent3);
-                    if (OperatingSystem.IsAndroidVersionAtLeast(21))
-                    {
-                        this.FinishAndRemoveTask();
-                    }
-                    else
-                    {
-                        this.FinishAffinity();
-                    }
+                    this.FinishAndRemoveTask();
                     return true;
                 case Resource.Id.about_action:
                     var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
@@ -1085,14 +1078,7 @@ namespace Seeker
         /// <returns></returns>
         public static bool OnUIthread()
         {
-            if (OperatingSystem.IsAndroidVersionAtLeast(23))
-            {
-                return Looper.MainLooper.IsCurrentThread;
-            }
-            else
-            {
-                return Looper.MainLooper.Thread == Java.Lang.Thread.CurrentThread();
-            }
+            return Looper.MainLooper.IsCurrentThread;
         }
 
 
@@ -1127,7 +1113,7 @@ namespace Seeker
             outState.PutBoolean(KeyConsts.M_HideLockedSearch, PreferencesState.HideLockedResultsInSearch);
             outState.PutBoolean(KeyConsts.M_HideLockedBrowse, PreferencesState.HideLockedResultsInBrowse);
             outState.PutBoolean(KeyConsts.M_DisableToastNotifications, PreferencesState.DisableDownloadToastNotification);
-            outState.PutInt(KeyConsts.M_SearchResultStyle, (int)(SearchFragment.SearchResultStyle));
+            outState.PutInt(KeyConsts.M_SearchResultStyle, (int)(PreferencesState.SearchResultStyle));
             outState.PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.TextFilter.FilterString);
             outState.PutInt(KeyConsts.M_UploadSpeed, PreferencesState.UploadSpeed);
             //outState.PutString(KeyConsts.M_UploadDirectoryUri, SeekerState.UploadDataDirectoryUri);
@@ -1357,14 +1343,14 @@ namespace Seeker
         private void TestEnqueueSharedFolder()
         {
             var cache = SeekerState.SharedFileCache;
-            if (cache?.FullInfo == null || cache.FullInfo.Count == 0)
+            if (cache?.PresentableNameToFullFileInfo == null || cache.PresentableNameToFullFileInfo.Count == 0)
             {
                 Logger.Debug("TestEnqueue: no shared files");
                 return;
             }
 
             // group files by directory (everything before the last backslash)
-            var filesByDir = cache.FullInfo.Keys
+            var filesByDir = cache.PresentableNameToFullFileInfo.Keys
                 .GroupBy(f => f.Substring(0, f.LastIndexOf('\\')))
                 .ToList();
 

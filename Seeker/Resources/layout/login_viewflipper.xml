@@ -237,20 +237,6 @@
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
-        <Button
-            android:layout_centerHorizontal="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/choose_a_download_folder"
-            android:foreground="@drawable/button"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="260dp"
-            android:layout_marginBottom="40dp"
-            style="@style/SeekerButtonStyle"
-            android:id="@+id/mustSelectDirectory"
-            android:visibility="gone"
-        />
 
         <ScrollView
             android:layout_width="match_parent"
@@ -277,6 +263,56 @@
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp"
                 />
+
+                <!-- Select Download Directory row -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/mustSelectDirectory"
+                    style="@style/Widget.Material3.CardView.Elevated"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="12dp"
+                    app:cardBackgroundColor="?attr/colorSurfaceLogin"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="4dp"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:visibility="gone"
+                >
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingTop="14dp"
+                        android:paddingBottom="14dp"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:gravity="center_vertical"
+                    >
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/download_material"
+                            app:tint="#F44336"
+                        />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/choose_a_download_folder"
+                            android:textSize="16sp"
+                            android:textColor="#F44336"
+                            android:layout_marginStart="16dp"
+                        />
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/chevron_right"
+                            app:tint="@color/subTextColor"
+                        />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
                 <!-- Set Up Sharing row -->
                 <com.google.android.material.card.MaterialCardView

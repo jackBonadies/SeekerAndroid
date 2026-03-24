@@ -1,6 +1,7 @@
 using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
+using Common;
 using Seeker.Search;
 using Soulseek;
 using System;
@@ -48,18 +49,29 @@ namespace Seeker
                 ISearchItemViewBase view = null;
                 switch (this.searchResultStyle)
                 {
-                    case SearchResultStyleEnum.ExpandedAll:
-                    case SearchResultStyleEnum.CollapsedAll:
+                    case SearchResultStyleEnum.ExpandableLegacy:
                         view = SearchItemViewExpandable.inflate(parent);
                         (view as SearchItemViewExpandable).AdapterRef = this;
                         (view as View).FindViewById<ImageView>(Resource.Id.expandableClick).Click += CustomAdapter_Click;
                         (view as View).FindViewById<LinearLayout>(Resource.Id.relativeLayout1).Click += CustomAdapter_Click1;
                         break;
-                    case SearchResultStyleEnum.Medium:
+                    case SearchResultStyleEnum.ExpandableModern:
+                        view = SearchItemViewExpandableModern.inflate(parent);
+                        (view as SearchItemViewExpandableModern).AdapterRef = this;
+                        (view as View).FindViewById(Resource.Id.expandClickArea).Click += CustomAdapter_ClickModern;
+                        (view as View).FindViewById<LinearLayout>(Resource.Id.relativeLayout1).Click += CustomAdapter_Click1Modern;
+                        break;
+                    case SearchResultStyleEnum.MediumLegacy:
                         view = SearchItemViewMedium.inflate(parent);
                         break;
-                    case SearchResultStyleEnum.Minimal:
+                    case SearchResultStyleEnum.MinimalLegacy:
                         view = SearchItemViewMinimal.inflate(parent);
+                        break;
+                    case SearchResultStyleEnum.MediumModernBitrateBottom:
+                        view = SearchItemViewMediumBadgeBitrateBottom.inflate(parent);
+                        break;
+                    case SearchResultStyleEnum.MediumModernBitrateTop:
+                        view = SearchItemViewMediumBadgeBitrateTop.inflate(parent);
                         break;
                 }
                 view.setupChildren();
@@ -81,7 +93,7 @@ namespace Seeker
             {
                 oldList = null; // no longer valid...
                 localDataSet = ti;
-                searchResultStyle = SearchFragment.SearchResultStyle;
+                searchResultStyle = PreferencesState.SearchResultStyle;
                 oppositePositions = new List<int>();
             }
 
@@ -92,6 +104,52 @@ namespace Seeker
                 SearchFragment.Instance.showEditDialog(position);
             }
 
+            private void CustomAdapter_Click1Modern(object sender, EventArgs e)
+            {
+                // sender = relativeLayout1, parent = header horizontal, parent.parent = root vertical, parent.parent.parent = item root
+                var itemRoot = (sender as View).Parent.Parent.Parent as View;
+                int position = ((itemRoot as IViewParent).Parent as RecyclerView).GetChildAdapterPosition(itemRoot);
+                SearchFragment.Instance.showEditDialog(position);
+            }
+
+            private void CustomAdapter_ClickModern(object sender, EventArgs e)
+            {
+                // sender = expandClickArea, parent = header horizontal, parent.parent = root vertical, parent.parent.parent = item root
+                var itemRoot = (sender as View).Parent.Parent.Parent as View;
+                int position = ((itemRoot as IViewParent).Parent as RecyclerView).GetChildAdapterPosition(itemRoot);
+                var v = itemRoot.FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
+                var img = itemRoot.FindViewById<ImageView>(Resource.Id.expandableClick);
+                if (v.Visibility == ViewStates.Gone)
+                {
+                    img.Animate().RotationBy((float)(180.0)).SetDuration(100).Start();
+                    v.Visibility = ViewStates.Visible;
+                    //sep.Visibility = ViewStates.Visible;
+                    (itemRoot as SearchItemViewExpandableModern).PopulateFilesListView(v as LinearLayout, this.localDataSet[position]);
+                    if (!SearchFragment.ExpandAllResults)
+                    {
+                        oppositePositions.Add(position);
+                        oppositePositions.Sort();
+                    }
+                    else
+                    {
+                        oppositePositions.Remove(position);
+                    }
+                }
+                else
+                {
+                    img.Animate().RotationBy((float)(-180.0)).SetDuration(350).Start();
+                    v.Visibility = ViewStates.Gone;
+                    if (!SearchFragment.ExpandAllResults)
+                    {
+                        oppositePositions.Remove(position);
+                    }
+                    else
+                    {
+                        oppositePositions.Add(position);
+                        oppositePositions.Sort();
+                    }
+                }
+            }
 
             private void CustomAdapter_Click(object sender, EventArgs e)
             {
@@ -108,7 +166,7 @@ namespace Seeker
                     img.Animate().RotationBy((float)(180.0)).SetDuration(350).Start();
                     v.Visibility = ViewStates.Visible;
                     SearchItemViewExpandable.PopulateFilesListView(v as LinearLayout, this.localDataSet[position]);
-                    if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll)
+                    if (!SearchFragment.ExpandAllResults)
                     {
                         oppositePositions.Add(position);
                         oppositePositions.Sort();
@@ -122,7 +180,7 @@ namespace Seeker
                 {
                     img.Animate().RotationBy((float)(-180.0)).SetDuration(350).Start();
                     v.Visibility = ViewStates.Gone;
-                    if (SearchFragment.SearchResultStyle == SearchResultStyleEnum.CollapsedAll)
+                    if (!SearchFragment.ExpandAllResults)
                     {
                         oppositePositions.Remove(position);
                     }

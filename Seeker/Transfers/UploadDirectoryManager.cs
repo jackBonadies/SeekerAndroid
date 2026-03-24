@@ -157,11 +157,11 @@ namespace Seeker
                 }
                 else
                 {
-                    SharedFileService.GetAllFolderInfo(dirEntry, out _, out _, out _, out _, out string presentableName);
+                    SharedFileService.GetAllFolderInfo(dirEntry, out _, out string presentableName);
                     currentRootNames.Add(presentableName);
                 }
             }
-            SharedFileService.GetAllFolderInfo(newDirEntry, out _, out _, out _, out _, out string presentableNameNew);
+            SharedFileService.GetAllFolderInfo(newDirEntry, out _, out string presentableNameNew);
             if (currentRootNames.Contains(presentableNameNew))
             {
                 isUnique = false;
@@ -251,7 +251,7 @@ namespace Seeker
                 try
                 {
                     entry.Info.ErrorState = UploadDirectoryError.NoError;
-                    if (SeekerState.PreOpenDocumentTree() || !entry.Info.UploadDataDirectoryUriIsFromTree)
+                    if (!entry.Info.UploadDataDirectoryUriIsFromTree)
                     {
                         entry.UploadDirectory = DocumentFile.FromFile(new Java.IO.File(uploadDirUri.Path));
                     }

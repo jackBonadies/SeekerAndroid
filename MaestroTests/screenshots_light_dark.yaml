@@ -1,0 +1,12 @@
+appId: com.companyname.andriodapp1
+---
+- runFlow:
+    file: ./screenshots_core.yaml
+    env:
+      IS_NIGHT: "false"
+      PREFIX: "0"
+- runFlow:
+    file: ./screenshots_core.yaml
+    env:
+      IS_NIGHT: "true"
+      PREFIX: "1"

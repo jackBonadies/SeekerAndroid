@@ -12,7 +12,7 @@
 	</style>
 
 	<style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
-		<item name="background">?attr/colorPrimary</item>
+		<item name="background">?attr/mainPurple</item>
 		<item name="titleTextStyle">@style/MyActionModeTitle</item>
 	</style>
 
@@ -51,9 +51,15 @@
 
         <item name="slskAccent">#437eab</item>
 
+        <item name="snackbarButtonStyle">@style/Seeker.Snackbar.Action</item>
+
         <item name="windowActionModeOverlay">true</item>
-        <item name="android:actionModeBackground">?attr/colorPrimary</item>
-        <item name="actionModeBackground">?attr/colorPrimary</item>
+        <item name="android:actionModeBackground">?attr/mainPurple</item>
+        <item name="actionModeBackground">?attr/mainPurple</item>
+    </style>
+
+    <style name="Seeker.Snackbar.Action" parent="Widget.Material3.Button.TextButton.Snackbar">
+        <item name="android:textColor">?attr/snackbarActionColor</item>
     </style>
 
     <style
@@ -150,6 +156,11 @@
         <item name="android:layout_marginEnd">16dp</item>
         <item name="android:layout_marginTop">16dp</item>
         <item name="android:layout_marginBottom">4dp</item>
+    </style>
+
+    <style name="StatCard" parent="Widget.Material3.CardView.Outlined">
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardBackgroundColor">?attr/user_info_chip_background</item>
     </style>
 
     <style name="SettingsCard" parent="Widget.Material3.CardView.Outlined">

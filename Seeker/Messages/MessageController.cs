@@ -46,12 +46,12 @@ namespace Seeker.Messages
             {
                 return;
             }
-            SeekerState.SoulseekClient.PrivateMessageReceived += Client_PrivateMessageReceived;
             lock (MessageListLockObject)
             {
                 //SerializationHelper.MigratedMessages(SeekerState.SharedPreferences, KeyConsts.M_Messages_Legacy, KeyConsts.M_Messages);
                 RestoreMessagesFromSharedPrefs(SeekerState.SharedPreferences);
             }
+            SeekerState.SoulseekClient.PrivateMessageReceived += Client_PrivateMessageReceived;
             RestoreLastReadCountsFromSharedPrefs(SeekerState.SharedPreferences);
             bool isFirstTimeInit = !SeekerState.SharedPreferences.Contains(KeyConsts.M_LastReadMessageCounts);
             if (isFirstTimeInit && RootMessages != null)
@@ -127,6 +127,27 @@ namespace Seeker.Messages
                 }
             }
         }
+
+        public static (List<Message>, int) DeleteMessageFromUserWithUndo(string usernameToDelete)
+        {
+            Messages.Remove(usernameToDelete, out var deleteMessages);
+            LastReadMessageCounts.Remove(usernameToDelete, out int readCount);
+            SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+            SaveLastReadCounts(SeekerState.SharedPreferences);
+            return (deleteMessages, readCount);
+        }
+
+        public static (Dictionary<string, List<Message>> deletedMessageDictionary, Dictionary<string, int> deletedMessageCountDictionary) DeleteAllMessagesWithUndo()
+        {
+            var deletedAllMessages = MessageController.Messages.ToDictionary(entry => entry.Key, entry => entry.Value);
+            var deletedAllLastReadMessageCounts = MessageController.LastReadMessageCounts.ToDictionary(entry => entry.Key, entry => entry.Value);
+            Messages.Clear();
+            LastReadMessageCounts.Clear();
+            SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+            SaveLastReadCounts(SeekerState.SharedPreferences);
+            return (deletedAllMessages, deletedAllLastReadMessageCounts);
+        }
+
 
         private static void Client_PrivateMessageReceived(object sender, Soulseek.PrivateMessageReceivedEventArgs e)
         {
@@ -236,7 +257,7 @@ namespace Seeker.Messages
         {
             var newTheme = contextToUse.Resources.NewTheme();
             newTheme.ApplyStyle(ThemeHelper.GetThemeInChosenDayNightMode(useNightColors, contextToUse), true);
-            return SearchItemViewExpandable.GetColorFromAttribute(contextToUse, Resource.Attribute.android_default_notification_blue_color, newTheme);
+            return UiHelpers.GetColorFromAttribute(contextToUse, Resource.Attribute.android_default_notification_blue_color, newTheme);
         }
 
         private static Color GetOtherTextColor(bool useNightColors, Context contextToUse)
@@ -258,7 +279,7 @@ namespace Seeker.Messages
                 //todo
                 var newTheme = contextToUse.Resources.NewTheme();
                 newTheme.ApplyStyle(ThemeHelper.GetThemeInChosenDayNightMode(useNightColors, contextToUse), true);
-                return SearchItemViewExpandable.GetColorFromAttribute(contextToUse, Resource.Attribute.android_default_notification_complementary_color, newTheme);
+                return UiHelpers.GetColorFromAttribute(contextToUse, Resource.Attribute.android_default_notification_complementary_color, newTheme);
             }
         }
 
@@ -321,7 +342,7 @@ namespace Seeker.Messages
 
 
             ssb.Append(spannableString);
-            //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
+            //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
             string msgToShow = "\n" + messageNotifExtended.MessageText;
             var spannableString2 = new Android.Text.SpannableString(msgToShow);
             //spannableString2.SetSpan(textColorSubdued, 0, msgToShow.Length, SpanTypes.InclusiveInclusive);
@@ -395,7 +416,7 @@ namespace Seeker.Messages
                 {
                     spannableString2 = new Android.Text.SpannableString(msg.MessageText);
                 }
-                //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//SearchItemViewExpandable.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
+                //var textColorSubdued = new Android.Text.Style.ForegroundColorSpan(Color.White);//UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued));
                 //spannableString2.SetSpan(textColorSubdued, 0, msg.MessageText.Length, SpanTypes.InclusiveInclusive);
                 ssb.Append(spannableString2);
 
@@ -601,14 +622,23 @@ namespace Seeker.Messages
             {
                 RootMessages = new System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>>();
                 Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
+                if (!string.IsNullOrEmpty(PreferencesState.Username))
+                {
+                    RootMessages[PreferencesState.Username] = Messages;
+                }
             }
             else
             {
                 RootMessages = SerializationHelper.RestoreMessagesFromString(messages);
+                MessagesUsername = PreferencesState.Username;
+                Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
                 if (!string.IsNullOrEmpty(PreferencesState.Username) && RootMessages.ContainsKey(PreferencesState.Username))
                 {
                     Messages = RootMessages[PreferencesState.Username];
-                    MessagesUsername = PreferencesState.Username;
+                } 
+                else if(!string.IsNullOrEmpty(PreferencesState.Username))
+                {
+                    RootMessages[MessagesUsername] = Messages;
                 }
             }
         }
@@ -827,6 +857,14 @@ namespace Seeker.Messages
             });
             Logger.Debug("useranme to mesasge " + usernameToMessage);
             SeekerState.SoulseekClient.SendPrivateMessageAsync(usernameToMessage, msg.MessageText).ContinueWith(continueWithAction);
+        }
+
+        public static void UndoDeleteMessagesFromUser((string username, List<Message> messages, int readCount) deletedData)
+        {
+            Messages[deletedData.username] = deletedData.messages;
+            LastReadMessageCounts[deletedData.username] = deletedData.readCount;
+            SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+            SaveLastReadCounts(SeekerState.SharedPreferences);
         }
     }
 }

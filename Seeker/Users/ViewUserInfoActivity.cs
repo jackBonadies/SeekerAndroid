@@ -20,10 +20,13 @@
 using Seeker.Browse;
 using Seeker.Helpers;
 using Seeker.Messages;
+using Android.Animation;
 using Android.App;
 using Android.Content;
 using Android.Graphics;
+using Android.Graphics.Drawables;
 using Android.OS;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
 using System;
@@ -56,29 +59,7 @@ namespace Seeker
             switch (item.ItemId)
             {
                 case Resource.Id.browseUsersFiles:
-
-                    //!!!!! TESTING ONLY !!!!!!
-
-                    //System.Threading.Tasks.Task t = new System.Threading.Tasks.Task(() => {System.Threading.Thread.Sleep(5000); });
-                    //t.Start();
-                    //t.ContinueWith((System.Threading.Tasks.Task t) => {
-                    //    SeekerState.ActiveActivityRef.RunOnUiThread(() => {
-                    //    Google.Android.Material.Snackbar.Snackbar sb = Google.Android.Material.Snackbar.Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content), "Test anywhere snackbar", Google.Android.Material.Snackbar.Snackbar.LengthLong).SetAction("Go", (View v)=>{
-
-                    //        RequestedUserInfoHelper.LaunchUserInfoView(PreferencesState.Username);
-
-
-
-                    //    });
-                    //sb.Show(); });
-                    //});
-
-                    //^^^^^ TESTING ONLY ^^^^^^^
-
-
-
-                    //do browse thing...
-                    BrowseService.RequestFilesApi(UserToView, null, null, null); //im pretty sure this is a bug... no action! unless a default one is used later on..
+                    BrowseService.RequestFilesApi(UserToView, null, null, null); //TODO2026 im pretty sure this is a bug... no action! unless a default one is used later on..
                     return true;
                 case Resource.Id.searchUserFiles:
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
@@ -109,8 +90,11 @@ namespace Seeker
         private Soulseek.UserInfo userInfo = null;
         private Soulseek.UserData userData = null;
 
-        private TextView userStats = null;
-        private TextView noPicture = null;
+        private TextView statUploadSlotsValue, statQueuedValue, statSpeedValue, statFilesValue, statDirsValue, statFreeUploadValue;
+        private View shimmerSpeed, shimmerFiles, shimmerDirs;
+        private ObjectAnimator shimmerAnimSpeed, shimmerAnimFiles, shimmerAnimDirs;
+
+        private View noPicture = null;
         private ImageView picture = null;
         private TextView userBio = null;
 
@@ -191,14 +175,12 @@ namespace Seeker
                         string user = savedInstanceState.GetString("userData.Username");
                         userData = new Soulseek.UserData(user, pres, aspeed, downloadCount, fcount, dc, cc, slotsFree);
                     }
-
                 }
             }
         }
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-
             base.OnCreate(savedInstanceState);
 
             SeekerState.ActiveActivityRef = this;
@@ -214,7 +196,7 @@ namespace Seeker
             {
                 Logger.Firebase("UserToView==null");
             }
-            myToolbar.Title = this.GetString(Resource.String.user_) + " " + UserToView;
+            myToolbar.Title = UserToView;
             this.SetSupportActionBar(myToolbar);
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
@@ -236,18 +218,26 @@ namespace Seeker
                 RestoreStateFromBundleIfNecessary(savedInstanceState);
             }
 
+            statUploadSlotsValue = FindViewById<TextView>(Resource.Id.stat_upload_slots_value);
+            statQueuedValue = FindViewById<TextView>(Resource.Id.stat_queued_value);
+            statSpeedValue = FindViewById<TextView>(Resource.Id.stat_speed_value);
+            statFilesValue = FindViewById<TextView>(Resource.Id.stat_files_value);
+            statDirsValue = FindViewById<TextView>(Resource.Id.stat_dirs_value);
+            statFreeUploadValue = FindViewById<TextView>(Resource.Id.stat_free_upload_value);
+            shimmerSpeed = FindViewById<View>(Resource.Id.stat_speed_shimmer);
+            shimmerFiles = FindViewById<View>(Resource.Id.stat_files_shimmer);
+            shimmerDirs = FindViewById<View>(Resource.Id.stat_dirs_shimmer);
 
-            userStats = FindViewById<TextView>(Resource.Id.user_info_stats);
-            noPicture = FindViewById<TextView>(Resource.Id.user_info_no_picture);
+            SetupShimmerPlaceholder(shimmerSpeed);
+            SetupShimmerPlaceholder(shimmerFiles);
+            SetupShimmerPlaceholder(shimmerDirs);
+
+            noPicture = FindViewById(Resource.Id.user_info_no_picture);
             picture = FindViewById<ImageView>(Resource.Id.user_info_picture);
             userBio = FindViewById<TextView>(Resource.Id.textViewBio);
 
             this.RegisterForContextMenu(picture);
             picture.LongClick += Picture_LongClick;
-
-
-
-
         }
 
         protected override void OnResume()
@@ -262,26 +252,112 @@ namespace Seeker
         private void UserDataReceivedUIHandler(object sender, Soulseek.UserData _userData)
         {
             userData = _userData;
-            SetUserStatsStatus();
+            RunOnUiThread(() => { SetUserStatsStatus(); });
         }
 
         protected override void OnPause()
         {
             RequestedUserInfoHelper.UserDataReceivedUI -= UserDataReceivedUIHandler;
+            StopShimmerAnimations();
             base.OnPause();
         }
 
         private void SetUserStatsStatus()
         {
-            bool userInfoNull = userInfo == null;
-            bool userDataNull = userData == null;
-            string speedString = "...";
-            if (!userDataNull)
+            statUploadSlotsValue.Text = userInfo.UploadSlots.ToString();
+            statQueuedValue.Text = userInfo.QueueLength.ToString();
+
+            if (userInfo.HasFreeUploadSlot)
             {
-                int speedKbs = userData.AverageSpeed / 1000; //someone got a nullref here.... this can happen if the server is slower to respond than the user...
-                speedString = speedKbs.ToString("N0") + " kbs";
+                statFreeUploadValue.Text = SeekerApplication.GetString(Resource.String.yes);
+                statFreeUploadValue.SetTextColor(Color.ParseColor("#4CAF50"));
             }
-            userStats.Text = string.Format(Resources.GetString(Resource.String.user_status_string), userInfo.UploadSlots, userInfo.HasFreeUploadSlot, userInfo.QueueLength, speedString, userDataNull ? "..." : userData.FileCount.ToString("N0"), userDataNull ? "..." : userData.DirectoryCount.ToString("N0"));
+            else
+            {
+                statFreeUploadValue.Text = SeekerApplication.GetString(Resource.String.No);
+                statFreeUploadValue.SetTextColor(Color.ParseColor("#F44336"));
+            }
+
+            if (userData == null)
+            {
+                shimmerSpeed.Visibility = ViewStates.Visible;
+                shimmerFiles.Visibility = ViewStates.Visible;
+                shimmerDirs.Visibility = ViewStates.Visible;
+                statSpeedValue.Visibility = ViewStates.Gone;
+                statFilesValue.Visibility = ViewStates.Gone;
+                statDirsValue.Visibility = ViewStates.Gone;
+                StartShimmerAnimations();
+            }
+            else
+            {
+                StopShimmerAnimations();
+                shimmerSpeed.Visibility = ViewStates.Gone;
+                shimmerFiles.Visibility = ViewStates.Gone;
+                shimmerDirs.Visibility = ViewStates.Gone;
+
+                statSpeedValue.Text = (userData.AverageSpeed / 1000).ToString("N0") + " KB/s";
+                statFilesValue.Text = userData.FileCount.ToString("N0");
+                statDirsValue.Text = userData.DirectoryCount.ToString("N0");
+
+                statSpeedValue.Alpha = 0f;
+                statFilesValue.Alpha = 0f;
+                statDirsValue.Alpha = 0f;
+                statSpeedValue.Visibility = ViewStates.Visible;
+                statFilesValue.Visibility = ViewStates.Visible;
+                statDirsValue.Visibility = ViewStates.Visible;
+                statSpeedValue.Animate().Alpha(1f).SetDuration(300).Start();
+                statFilesValue.Animate().Alpha(1f).SetDuration(300).Start();
+                statDirsValue.Animate().Alpha(1f).SetDuration(300).Start();
+            }
+        }
+
+        private void SetupShimmerPlaceholder(View view)
+        {
+            var drawable = new GradientDrawable();
+            Color color = UiHelpers.GetColorFromAttribute(this, Resource.Attribute.slightestContrastColor);
+            drawable.SetColor(color);
+            drawable.SetCornerRadius(TypedValue.ApplyDimension(ComplexUnitType.Dip, 6, Resources.DisplayMetrics));
+            view.Background = drawable;
+        }
+
+        private ObjectAnimator CreateShimmerAnimator(View target)
+        {
+            var animator = ObjectAnimator.OfFloat(target, "alpha", 1f, 0.3f);
+            animator.SetDuration(800);
+            animator.RepeatCount = ValueAnimator.Infinite;
+            animator.RepeatMode = ValueAnimatorRepeatMode.Reverse;
+            animator.SetInterpolator(new Android.Views.Animations.AccelerateDecelerateInterpolator());
+            return animator;
+        }
+
+        private void StartShimmerAnimations()
+        {
+            StopShimmerAnimations();
+            shimmerAnimSpeed = CreateShimmerAnimator(shimmerSpeed);
+            shimmerAnimFiles = CreateShimmerAnimator(shimmerFiles);
+            shimmerAnimDirs = CreateShimmerAnimator(shimmerDirs);
+            shimmerAnimSpeed.Start();
+            shimmerAnimFiles.Start();
+            shimmerAnimDirs.Start();
+        }
+
+        private void StopShimmerAnimations()
+        {
+            if (shimmerAnimSpeed != null)
+            {
+                shimmerAnimSpeed.Cancel();
+                shimmerAnimSpeed = null;
+            }
+            if (shimmerAnimFiles != null)
+            {
+                shimmerAnimFiles.Cancel();
+                shimmerAnimFiles = null;
+            }
+            if (shimmerAnimDirs != null)
+            {
+                shimmerAnimDirs.Cancel();
+                shimmerAnimDirs = null;
+            }
         }
 
         private void SetBioStatus()
@@ -346,7 +422,6 @@ namespace Seeker
                     Logger.Firebase("FAILURE TO DECODE USERS PICTURE " + uname);
                     return;
                 }
-                int h = loadedBitmap.Height;
                 originalImageMimetype = mimeType;
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(dimensions.Item1, dimensions.Item2);
                 layoutParams.Gravity = GravityFlags.CenterHorizontal;
@@ -490,31 +565,8 @@ namespace Seeker
         {
             if (outStream != null)
             {
-                //try
-                //{
                 outStream.Write(pic, 0, pic.Length);
                 outStream.Close();
-                //}
-                //catch (e: Exception) 
-                //{
-                //    e.printStackTrace()
-                //}
-            }
-        }
-
-        private void SaveImageToStream(Bitmap bmp, System.IO.Stream outStream)
-        {
-            if (outStream != null)
-            {
-                //try
-                //{
-                bmp.Compress(Bitmap.CompressFormat.Png, 100, outStream);
-                outStream.Close();
-                //}
-                //catch (e: Exception) 
-                //{
-                //    e.printStackTrace()
-                //}
             }
         }
     }

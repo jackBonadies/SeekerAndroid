@@ -117,7 +117,7 @@ namespace UnitTestCommon
         {
             long bytes = 5 * 1024 * 1024; // 5 MB
             string result = SimpleHelpers.GetHumanReadableSize(bytes);
-            Assert.That(result, Is.EqualTo("5 mb"));
+            Assert.That(result, Is.EqualTo("5 MB"));
         }
 
         [Test]
@@ -125,7 +125,7 @@ namespace UnitTestCommon
         {
             long bytes = 2L * 1024 * 1024 * 1024; // 2 GB
             string result = SimpleHelpers.GetHumanReadableSize(bytes);
-            Assert.That(result, Is.EqualTo("2 gb"));
+            Assert.That(result, Is.EqualTo("2 GB"));
         }
 
         [Test]
@@ -133,7 +133,7 @@ namespace UnitTestCommon
         {
             long bytes = 1024L * 1024 * 1024 + 1;
             string result = SimpleHelpers.GetHumanReadableSize(bytes);
-            Assert.That(result, Does.Contain("gb"));
+            Assert.That(result, Does.Contain("GB"));
         }
 
         [Test]
@@ -142,14 +142,14 @@ namespace UnitTestCommon
             // exactly 1 GB is NOT > 1 GB, so should return mb
             long bytes = 1024L * 1024 * 1024;
             string result = SimpleHelpers.GetHumanReadableSize(bytes);
-            Assert.That(result, Does.Contain("mb"));
+            Assert.That(result, Does.Contain("MB"));
         }
 
         [Test]
         public void GetHumanReadableSize_ZeroBytes()
         {
             string result = SimpleHelpers.GetHumanReadableSize(0);
-            Assert.That(result, Is.EqualTo("0 mb"));
+            Assert.That(result, Is.EqualTo("0 MB"));
         }
 
         // --- GetTransferSpeedString ---
@@ -158,14 +158,14 @@ namespace UnitTestCommon
         public void GetTransferSpeedString_AboveMb()
         {
             string result = SimpleHelpers.GetTransferSpeedString(2 * 1048576.0);
-            Assert.That(result, Is.EqualTo("2.0mbs"));
+            Assert.That(result, Is.EqualTo("2.0 MB/s"));
         }
 
         [Test]
         public void GetTransferSpeedString_BelowMb()
         {
             string result = SimpleHelpers.GetTransferSpeedString(512 * 1024.0);
-            Assert.That(result, Is.EqualTo("512.0kbs"));
+            Assert.That(result, Is.EqualTo("512.0 KB/s"));
         }
 
         [Test]
@@ -173,7 +173,7 @@ namespace UnitTestCommon
         {
             // exactly 1MB is NOT > 1MB
             string result = SimpleHelpers.GetTransferSpeedString(1048576.0);
-            Assert.That(result, Does.Contain("kbs"));
+            Assert.That(result, Does.Contain("KB/s"));
         }
 
         // --- IsFileUri ---
@@ -424,7 +424,7 @@ namespace UnitTestCommon
         {
             var file = new File(1, "test.mp3", 5 * 1024 * 1024, "mp3", new List<FileAttribute>());
             string result = SimpleHelpers.GetSizeLengthAttrString(file);
-            Assert.That(result, Does.Contain("mb"));
+            Assert.That(result, Does.Contain("MB"));
             Assert.That(result, Does.Not.Contain("•"));
         }
 

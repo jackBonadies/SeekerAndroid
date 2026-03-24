@@ -8,6 +8,8 @@
     <attr name="secondaryColor" format="color" />
     <attr name="cellTextColor" format="color" />
     <attr name="cellTextColorSubdued" format="color" />
+    <attr name="cellTextColorMoreSubdued" format="color" />
+    <attr name="cellTextColorVerySubdued" format="color" />
     <attr name="slightestContrastColor" format="color" />
     <attr name="slightContrastColor" format="color" />
     <attr name="dialog_background" format="color" />
@@ -25,6 +27,7 @@
     <attr name="expandIconColor" format="color" />
     <attr name="mainPurpleForNavBar" format="color" />
     <attr name="pseudo_window_background_color" format="color" />
+    <attr name="user_info_chip_background" format="color" />
 
     <attr name="android_default_notification_blue_color" format="color" />
     <attr
@@ -53,4 +56,9 @@
 
     <attr name="show_progress_size" format="boolean" />
     <attr name="colorSurfaceLogin" format="color" />
+    <attr name="snackbarActionColor" format="color" />
+
+    <attr name="expandableModernChevronBg" format="color" />
+    <attr name="expandableModernFilesBg" format="color" />
+    <attr name="expandableModernSeparatorColor" format="color" />
 </resources>

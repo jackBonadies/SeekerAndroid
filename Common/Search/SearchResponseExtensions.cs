@@ -1,5 +1,5 @@
-using Common.Share;
 using Soulseek;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,6 +9,8 @@ namespace Seeker.Extensions
     {
         public static class SearchResponseExtensions
         {
+            static readonly HashSet<string> KnownCompoundExtensions = new() { ".tar.gz", ".tar.bz2", ".tar.xz" };
+
             public static IEnumerable<Soulseek.File> GetFiles(this SearchResponse searchResponse, bool hideLocked)
             {
                 return hideLocked ? searchResponse.Files : searchResponse.Files.Concat(searchResponse.LockedFiles);
@@ -17,6 +19,21 @@ namespace Seeker.Extensions
             public static bool IsLockedOnly(this SearchResponse searchResponse)
             {
                 return searchResponse.FileCount == 0 && searchResponse.LockedFileCount != 0;
+            }
+
+            // System.IO.Path.GetExtension returns only the last string after the dot.  so .tar.gz will be .gz.
+            // we cant return the first string after the dot (because both folder and filename can contain dots)
+            //   so here we just check an allowlist of a few valid extensions
+            private static string GetFullFileExtension(string filename)
+            {
+                foreach (var ext in KnownCompoundExtensions)
+                {
+                    if (filename.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return ext;
+                    }
+                }
+                return System.IO.Path.GetExtension(filename);
             }
             
             public static string GetDominantFileTypeAndBitRate(this SearchResponse searchResponse, bool hideLocked, out double calcBitRate)
@@ -28,7 +45,7 @@ namespace Seeker.Extensions
                 }
                 //basically this works in two ways.  if the first file has a type of .mp3, .flac, .wav, .aiff, .wma, .aac then thats likely the type.
                 //if not then we do a more expensive parsing, where we get the most common
-                string ext = System.IO.Path.GetExtension(searchResponse.FileCount > 0 ? searchResponse.Files.First().Filename : searchResponse.LockedFiles.First().Filename);  //do not use Soulseek.File.Extension that will be "" most of the time...
+                string ext = GetFullFileExtension(searchResponse.FileCount > 0 ? searchResponse.Files.First().Filename : searchResponse.LockedFiles.First().Filename);  //do not use Soulseek.File.Extension that will be "" most of the time...
                 string dominantTypeToReturn = "";
                 if (SimpleHelpers.KNOWN_TYPES.Contains(ext))
                 {
@@ -41,7 +58,7 @@ namespace Seeker.Extensions
                     var toIterate1 = hideLocked ? searchResponse.Files : searchResponse.Files.Concat(searchResponse.LockedFiles);
                     foreach (Soulseek.File f in toIterate1)
                     {
-                        ext = System.IO.Path.GetExtension(f.Filename);
+                        ext = GetFullFileExtension(f.Filename);
                         if (countTypes.ContainsKey(ext))
                         {
                             countTypes[ext] = countTypes[ext] + 1;
@@ -80,12 +97,12 @@ namespace Seeker.Extensions
                 var toIterate = hideLocked ? searchResponse.Files : searchResponse.Files.Concat(searchResponse.LockedFiles);
                 foreach (Soulseek.File f in toIterate)
                 {
-                    if (representative == null && dominantTypeToReturn == System.IO.Path.GetExtension(f.Filename))
+                    if (representative == null && dominantTypeToReturn == GetFullFileExtension(f.Filename))
                     {
                         representative = f;
                         continue;
                     }
-                    if (dominantTypeToReturn == System.IO.Path.GetExtension(f.Filename))
+                    if (dominantTypeToReturn == GetFullFileExtension(f.Filename))
                     {
                         representative2 = f;
                         break;
@@ -99,11 +116,7 @@ namespace Seeker.Extensions
                     return searchResponse.cachedDominantFileType;
                 }
 
-
-
                 //vbr flags never work so just get two representative files and see if bitrate is same...
-
-
                 bool isVbr = (representative.IsVariableBitRate == null) ? false : representative.IsVariableBitRate.Value;
 
                 if (representative2 != null)

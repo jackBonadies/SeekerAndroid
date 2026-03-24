@@ -1,0 +1,13 @@
+appId: com.companyname.andriodapp1
+---
+- tapOn:
+    id: etUsername
+    optional: true
+- inputText: testUser
+- tapOn:
+    id: etPassword
+    optional: true
+- inputText: testPass
+- tapOn:
+    id: buttonLogin
+    optional: true
