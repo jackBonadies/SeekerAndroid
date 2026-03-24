@@ -177,10 +177,6 @@ Numero Cartelle: {5}\"
     <string name="enter_user_to_message">Inserisci utente a cui inviare un messaggio</string>
 
     <string name="search_result_style">Visualizzazione risultati:</string>
-    <string name="search_result_style_expanded">Espandibile: Espanso</string>
-    <string name="search_result_style_collapsed">Espandibile: Chiuso</string>
-    <string name="search_result_style_medium">Medio</string>
-    <string name="search_result_style_minimal">Minimale</string>
 
     <string name="new_search_tab">Nuova Ricerca</string>
     <string name="filter_search_results_here">Filtra i risultati</string>

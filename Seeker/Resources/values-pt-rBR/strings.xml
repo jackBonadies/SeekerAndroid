@@ -177,10 +177,6 @@ Contador de diretórios: {5}
     <string name="enter_user_to_message">Digite o usuário para enviar mensagem</string>
 
     <string name="search_result_style">Estilo do resultado:</string>
-    <string name="search_result_style_expanded">Expansível: Expandido</string>
-    <string name="search_result_style_collapsed">Expansível: Recolhido</string>
-    <string name="search_result_style_medium">Médio</string>
-    <string name="search_result_style_minimal">Mínimo</string>
 
     <string name="new_search_tab">Nova pesquisa</string>
     <string name="filter_search_results_here">Filtrar resultados por</string>

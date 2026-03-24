@@ -177,10 +177,6 @@ Recompte de directoris: {5}\"
     <string name="enter_user_to_message">Introduïu l\'usuari al missatge</string>
 
     <string name="search_result_style">Estil de resultats:</string>
-    <string name="search_result_style_expanded">Ampliable: ampliat</string>
-    <string name="search_result_style_collapsed">Ampliable: col·lapsat</string>
-    <string name="search_result_style_medium">Mitjà</string>
-    <string name="search_result_style_minimal">Mínim</string>
 
     <string name="new_search_tab">Nova cerca</string>
     <string name="filter_search_results_here">Filtreu els resultats aquí</string>

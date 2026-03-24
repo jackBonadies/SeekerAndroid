@@ -178,10 +178,6 @@
     <string name="enter_user_to_message">Введите имя пользователя, чтобы написать</string>
 
     <string name="search_result_style">Вид результата:</string>
-    <string name="search_result_style_expanded">Развернутый: раскрытый</string>
-    <string name="search_result_style_collapsed">Развернутый: скрытый</string>
-    <string name="search_result_style_medium">Обычный</string>
-    <string name="search_result_style_minimal">Сеткой</string>
 
     <string name="new_search_tab">Новая вкладка</string>
     <string name="filter_search_results_here">Введите фильтр...</string>

@@ -179,10 +179,6 @@ Ordneranzahl: {5}\"
     <string name="enter_user_to_message">Gebe Benutzername für die Nachricht ein</string>
 
     <string name="search_result_style">Result Style:</string>
-    <string name="search_result_style_expanded">Expandable: Expanded</string>
-    <string name="search_result_style_collapsed">Expandable: Collapsed</string>
-    <string name="search_result_style_medium">Medium</string>
-    <string name="search_result_style_minimal">Minimal</string>
 
     <string name="new_search_tab">Neue Suche</string>
     <string name="filter_search_results_here">Ergebnisse hier filtern</string>

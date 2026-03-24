@@ -177,10 +177,6 @@ Mappeantall: {5}\"
     <string name="enter_user_to_message">Enter User to Message</string>
 
     <string name="search_result_style">Result Style:</string>
-    <string name="search_result_style_expanded">Expandable: Expanded</string>
-    <string name="search_result_style_collapsed">Expandable: Collapsed</string>
-    <string name="search_result_style_medium">Medium</string>
-    <string name="search_result_style_minimal">Minimal</string>
 
     <string name="new_search_tab">New Search</string>
     <string name="filter_search_results_here">Filter Results Here</string>

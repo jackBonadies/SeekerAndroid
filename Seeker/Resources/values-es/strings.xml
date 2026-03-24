@@ -177,10 +177,6 @@ Directorio: {5}
     <string name="enter_user_to_message">Introducir usuario a mensajear</string>
 
     <string name="search_result_style">Estilo de resultado:</string>
-    <string name="search_result_style_expanded">Expandible: Ampliado</string>
-    <string name="search_result_style_collapsed">Expandible: Colapsado</string>
-    <string name="search_result_style_medium">Mediano</string>
-    <string name="search_result_style_minimal">Minimalista</string>
 
     <string name="new_search_tab">Nueva Búsqueda</string>
     <string name="filter_search_results_here">Filtrar resultados aquí</string>

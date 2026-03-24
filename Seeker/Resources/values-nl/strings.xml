@@ -177,10 +177,6 @@ Aantal mappen: {5}
     <string name="enter_user_to_message">Voer een gebruiker in voor het bericht</string>
 
     <string name="search_result_style">Zoekresultaten vormgeving:</string>
-    <string name="search_result_style_expanded">Uitklapbaar: uitgebreid</string>
-    <string name="search_result_style_collapsed">Uitklapbaar: Ingeklapt</string>
-    <string name="search_result_style_medium">Gemiddeld</string>
-    <string name="search_result_style_minimal">Minimaal</string>
 
     <string name="new_search_tab">Nieuwe Zoekopdracht</string>
     <string name="filter_search_results_here">Hier Resultaten Filteren</string>

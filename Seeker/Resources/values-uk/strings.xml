@@ -177,10 +177,6 @@
     <string name="enter_user_to_message">Ввести ім\'я користувача, щоб написати</string>
 
     <string name="search_result_style">Вигляд результату:</string>
-    <string name="search_result_style_expanded">Розширений: Розгорнутий</string>
-    <string name="search_result_style_collapsed">Розширений: Згорнутий</string>
-    <string name="search_result_style_medium">Звичайний</string>
-    <string name="search_result_style_minimal">Мінімалістичний</string>
 
     <string name="new_search_tab">Нова вкладка</string>
     <string name="filter_search_results_here">Фільтрувати результати тут</string>
