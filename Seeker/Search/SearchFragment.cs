@@ -31,7 +31,6 @@ namespace Seeker
         public View rootView = null;
         private View noSearchesView = null;
         private Context context;
-        public static SearchResultStyleEnum SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateBottom;
         public static bool ExpandAllResults { get => PreferencesState.ExpandAllResults; set => PreferencesState.ExpandAllResults = value; }
         public static IMenu ActionBarMenu = null;
         public static int LastSearchResponseCount = -1;
@@ -73,19 +72,6 @@ namespace Seeker
             }
         }
 
-        public static void SetSearchResultStyle(SearchResultStyleEnum style)
-        {
-            //in case its out of range bc we add / rm enums in the future...
-            foreach (int i in System.Enum.GetValues(typeof(SearchResultStyleEnum)))
-            {
-                if (i == (int)style)
-                {
-                    SearchResultStyle = (SearchResultStyleEnum)(i);
-                    return;
-                }
-            }
-            SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateBottom;
-        }
 
 
         public override void SetMenuVisibility(bool menuVisible)
@@ -130,8 +116,8 @@ namespace Seeker
             var toggleItem = menu.FindItem(Resource.Id.action_toggle_expand_all);
             if (toggleItem != null)
             {
-                bool isExpandable = SearchResultStyle == SearchResultStyleEnum.ExpandableLegacy ||
-                    SearchResultStyle == SearchResultStyleEnum.ExpandableModern;
+                bool isExpandable = PreferencesState.SearchResultStyle == SearchResultStyleEnum.ExpandableLegacy ||
+                    PreferencesState.SearchResultStyle == SearchResultStyleEnum.ExpandableModern;
                 toggleItem.SetVisible(isExpandable);
                 if (isExpandable)
                 {
@@ -1393,7 +1379,7 @@ namespace Seeker
         {
             Logger.Debug("SearchFragmentOnPause");
             base.OnPause();
-            PreferencesManager.SaveSearchFragmentFilterState(PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)SearchResultStyle, ExpandAllResults);
+            PreferencesManager.SaveSearchFragmentFilterState(PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)PreferencesState.SearchResultStyle, ExpandAllResults);
         }
 
         private static void Actv_KeyPressHELPER(object sender, View.KeyEventArgs e)

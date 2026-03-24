@@ -2041,8 +2041,6 @@ namespace Seeker
                 PreferencesManager.RestoreAll(sharedPreferences);
                 PreferencesManager.RestoreListeningState(sharedPreferences);
 
-                SearchFragment.SetSearchResultStyle(Common.PreferencesState.SearchResultStyle);
-
                 // Side-effect restores that depend on Android APIs
                 UploadDirectoryManager.RestoreFromSavedState(sharedPreferences);
 

@@ -2,6 +2,7 @@ using Android.OS;
 using Android.Views;
 using Android.Widget;
 using Google.Android.Material.BottomSheet;
+using Common;
 using Seeker.Search;
 
 namespace Seeker
@@ -19,7 +20,7 @@ namespace Seeker
 
 
 
-                switch (SearchFragment.SearchResultStyle)
+                switch (PreferencesState.SearchResultStyle)
                 {
                     case SearchResultStyleEnum.ExpandableLegacy:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonExpandable);
@@ -47,29 +48,29 @@ namespace Seeker
             private void ResultStyleRadioGroup_CheckedChange(object sender, RadioGroup.CheckedChangeEventArgs e)
             {
                 //RadioButton checkedRadioButton = (RadioButton)(sender as View).FindViewById(e.CheckedId);
-                var prev = SearchFragment.SearchResultStyle;
+                var prev = PreferencesState.SearchResultStyle;
                 switch (e.CheckedId)
                 {
                     case Resource.Id.radioButtonExpandable:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.ExpandableLegacy;
+                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.ExpandableLegacy;
                         break;
                     case Resource.Id.radioButtonExpandableModern:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.ExpandableModern;
+                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.ExpandableModern;
                         break;
                     case Resource.Id.radioButtonMedium:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumLegacy;
+                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.MediumLegacy;
                         break;
                     case Resource.Id.radioButtonMinimal:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MinimalLegacy;
+                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.MinimalLegacy;
                         break;
                     case Resource.Id.radioButtonModernBitrateBottom:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateBottom;
+                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateBottom;
                         break;
                     case Resource.Id.radioButtonModernBitrateTop:
-                        SearchFragment.SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateTop;
+                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateTop;
                         break;
                 }
-                if (prev != SearchFragment.SearchResultStyle)
+                if (prev != PreferencesState.SearchResultStyle)
                 {
                     SearchFragment.Instance.SearchResultStyleChanged();
                 }

@@ -1,6 +1,7 @@
 using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
+using Common;
 using Seeker.Search;
 using Soulseek;
 using System;
@@ -92,7 +93,7 @@ namespace Seeker
             {
                 oldList = null; // no longer valid...
                 localDataSet = ti;
-                searchResultStyle = SearchFragment.SearchResultStyle;
+                searchResultStyle = PreferencesState.SearchResultStyle;
                 oppositePositions = new List<int>();
             }
 
