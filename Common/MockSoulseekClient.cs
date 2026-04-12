@@ -522,6 +522,8 @@ namespace Seeker
         private static readonly string[] _mockArtists = { "bach", "beethoven", "mozart" };
         private static readonly string[] _mockAlbums = { "Greatest Hits", "Live Sessions", "Remastered Edition", "Deluxe", "The Collection", "Anthology", "Unplugged", "B-Sides" };
         private static readonly string[] _extensions = { "mp3", "flac", "ogg", "wav", "m4a" };
+        private static readonly string[] _lossy = { "mp3", "ogg", "m4a" };
+        private static readonly string[] _lossless = { "flac", "wav" };
 
         private static (int count, int totalTimeMs, string search) ParseMockSearchParams(SearchQuery query)
         {
@@ -566,7 +568,20 @@ namespace Seeker
                 if (ext == "flac" && _random.Next(2) == 0)
                 {
                     fileAttributes = fileAttributes.Concat(new[] { new FileAttribute(FileAttributeType.SampleRate, 44100), new FileAttribute(FileAttributeType.BitDepth, 16) }).ToArray();
-
+                }
+                else if (_lossy.Contains(ext))
+                {
+                    switch(_random.Next(3))
+                    {
+                        case 0:
+                            fileAttributes = fileAttributes.Concat(new[] { new FileAttribute(FileAttributeType.VariableBitRate, 0) }).ToArray();
+                            break;
+                        case 1:
+                            fileAttributes = fileAttributes.Concat(new[] { new FileAttribute(FileAttributeType.VariableBitRate, 1) }).ToArray();
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 files.Add(new Soulseek.File(1, filename, size, ext, fileAttributes));
             }
