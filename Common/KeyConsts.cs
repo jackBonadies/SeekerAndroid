@@ -137,6 +137,9 @@ namespace Common
 
         public const string M_PostNotificationRequestAlreadyShown = "Momento_M_PostNotificationRequestAlreadyShown";
 
+        public const string M_FilterFormat = "Momento_FilterFormat";
+        public const string M_FilterMinBitrateKbs = "Momento_FilterMinBitrateKbs";
+
         public const string M_SmartFilter_KeywordsEnabled = "Momento_SmartFilterKeywordsEnabled";
         public const string M_SmartFilter_CountsEnabled = "Momento_SmartFilterCountsEnabled";
         public const string M_SmartFilter_TypesEnabled = "Momento_SmartFilterTypesEnabled";

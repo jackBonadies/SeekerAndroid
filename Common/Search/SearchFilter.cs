@@ -14,6 +14,18 @@ namespace Seeker
         public int MinBitRateKBS = 0;
         public bool IsVBR = false;
         public bool IsCBR = false;
+        public FormatFilterType FormatFilter = FormatFilterType.Any;
+
+        public static readonly HashSet<string> LosslessExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "flac", "wav", "aiff", "alac", "ape", "wv", "dsf", "dff"
+        };
+
+        public static readonly HashSet<string> LossyExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "mp3", "aac", "ogg", "opus", "wma", "m4a"
+        };
+
         public void Clear()
         {
             ContainsSpecialFlags = false;
@@ -22,6 +34,7 @@ namespace Seeker
             MinBitRateKBS = 0;
             IsVBR = false;
             IsCBR = false;
+            FormatFilter = FormatFilterType.Any;
         }
     }
 
@@ -339,6 +352,19 @@ namespace Seeker
 
         public static bool MatchesSpecialFlags(SearchResponse s, FilterSpecialFlags flags, bool hideLocked)
         {
+            if (flags.FormatFilter != FormatFilterType.Any)
+            {
+                string dominantType = s.GetDominantFileTypeAndBitRate(hideLocked, out _);
+                string ext = dominantType.Contains(' ') ? dominantType.Substring(0, dominantType.IndexOf(' ')) : dominantType;
+                if (flags.FormatFilter == FormatFilterType.Lossless && !FilterSpecialFlags.LosslessExtensions.Contains(ext))
+                {
+                    return false;
+                }
+                if (flags.FormatFilter == FormatFilterType.Lossy && !FilterSpecialFlags.LossyExtensions.Contains(ext))
+                {
+                    return false;
+                }
+            }
             if (flags.MinFoldersInFile != 0)
             {
                 if (flags.MinFoldersInFile > (hideLocked ? s.Files.Count : (s.Files.Count + s.LockedFiles.Count)))

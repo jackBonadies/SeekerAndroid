@@ -138,6 +138,10 @@ namespace Common
         // User list
         public static SortOrder UserListSortOrder = SortOrder.DateAddedAsc;
 
+        // Filter controls
+        public static FormatFilterType FilterFormat = FormatFilterType.Any;
+        public static int FilterMinBitrateKbs = 0;
+
         // Smart filters
         public static bool ShowSmartFilters = true;
         public static SmartFilterState SmartFilterOptions;

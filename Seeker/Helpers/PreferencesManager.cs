@@ -90,6 +90,9 @@ namespace Seeker
             PreferencesState.DefaultSearchResultSortAlgorithm = (SearchResultSorting)(prefs.GetInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, 0));
 
             PreferencesState.SearchHistory = GetSearchHistory(prefs);
+
+            PreferencesState.FilterFormat = (FormatFilterType)prefs.GetInt(KeyConsts.M_FilterFormat, 0);
+            PreferencesState.FilterMinBitrateKbs = prefs.GetInt(KeyConsts.M_FilterMinBitrateKbs, 0);
         }
 
         private static SearchResultStyleEnum ConvertSafe(int value)
@@ -341,6 +344,17 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_ShowSmartFilters, PreferencesState.ShowSmartFilters);
+                editor.Apply();
+            }
+        }
+
+        public static void SaveFilterControlsState()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutInt(KeyConsts.M_FilterFormat, (int)PreferencesState.FilterFormat);
+                editor.PutInt(KeyConsts.M_FilterMinBitrateKbs, PreferencesState.FilterMinBitrateKbs);
                 editor.Apply();
             }
         }

@@ -260,6 +260,11 @@ Directory Count: {5}"
     <string name="wishlist_empty_header">WISHLIST (EMPTY)</string>
     <string name="filter_search_results_here">Filter Results Here</string>
     <string name="persist_it">Sticky</string>
+    <string name="filter_format_label">Format</string>
+    <string name="filter_any">Any</string>
+    <string name="filter_format_lossless">Lossless</string>
+    <string name="filter_format_lossy">Lossy</string>
+    <string name="filter_min_bitrate_label">Min Bitrate</string>
     <string name="type_chatroom_ticker_message">Type Ticker Message</string>
 
     <string name="section_downloads">Downloads</string>

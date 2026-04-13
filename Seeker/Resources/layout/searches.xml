@@ -77,79 +77,233 @@
 
         </LinearLayout>
     </RelativeLayout>
-    <RelativeLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
         app:layout_behavior="@string/bottom_sheet_behavior"
         android:id="@+id/bottomSheet"
-        android:paddingTop="@dimen/abc_action_bar_content_inset_material"
         android:background="?attr/secondaryColor"
     >
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:id="@+id/filterLineOne"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="6dp"
-            android:hint="@string/filter_search_results_here"
-        >
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/filterText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:focusable="true"
-                android:imeOptions="actionDone"
-            />
-        </com.google.android.material.textfield.TextInputLayout>
         <LinearLayout
             android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="12dp"
-            android:layout_below="@id/filterLineOne"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/abc_action_bar_content_inset_material"
         >
-            <Button
-                android:layout_marginTop="0dp"
-                style="@style/SeekerButtonStyle"
-                android:foreground="@drawable/button"
-                android:text="Show Smart Filters"
-                android:id="@+id/toggleSmartFilters"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:minWidth="0dp"
-                android:textSize="12sp"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-            />
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-            />
-            <com.google.android.material.checkbox.MaterialCheckBox
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:id="@+id/filterLineOne"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="6dp"
+                android:hint="@string/filter_search_results_here"
+            >
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/filterText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:focusable="true"
+                    android:imeOptions="actionDone"
+                />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:textSize="16sp"
-                android:id="@+id/stickyFilterCheckbox"
-                android:textColor="?attr/mainTextColor"
-                android:text="@string/persist_it"
+                android:text="@string/filter_format_label"
+                android:textAllCaps="true"
+                android:textSize="11sp"
+                android:letterSpacing="0.08"
+                android:textColor="?attr/cellTextColorSubdued"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="4dp"
             />
-            <FrameLayout
-                android:layout_marginTop="0dp"
-                android:layout_width="32dp"
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/formatToggleGroup"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginTop="4dp"
+                app:singleSelection="true"
+                app:selectionRequired="true"
+                app:checkedButton="@id/formatAny"
+            >
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/formatAny"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/filter_any"
+                    android:textSize="12sp"
+                    android:minWidth="0dp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"
+                    android:insetLeft="0dp"
+                    android:insetRight="0dp"
+
+                />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/formatLossless"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/filter_format_lossless"
+                    android:textSize="12sp"
+                    android:minWidth="0dp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"
+                    android:insetLeft="0dp"
+                    android:insetRight="0dp"
+
+                />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/formatLossy"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/filter_format_lossy"
+                    android:textSize="12sp"
+                    android:minWidth="0dp"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"
+                    android:insetLeft="0dp"
+                    android:insetRight="0dp"
+
+                />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_min_bitrate_label"
+                android:textAllCaps="true"
+                android:textSize="11sp"
+                android:letterSpacing="0.08"
+                android:textColor="?attr/cellTextColorSubdued"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="8dp"
             />
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/bitrateToggleGroup"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="4dp"
+                app:singleSelection="true"
+                app:selectionRequired="true"
+                app:checkedButton="@id/bitrateAny"
+            >
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/bitrateAny"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/filter_any"
+                    android:textSize="10sp"
+                    android:minWidth="0dp"
+
+                />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/bitrate320"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="320"
+                    android:textSize="10sp"
+                    android:minWidth="0dp"
+
+                />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/bitrate256"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="256"
+                    android:textSize="10sp"
+                    android:minWidth="0dp"
+
+                />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/bitrate192"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="192"
+                    android:textSize="10sp"
+                    android:minWidth="0dp"
+
+                />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/bitrate128"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="128"
+                    android:textSize="10sp"
+                    android:minWidth="0dp"
+
+                />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="12dp"
+                android:layout_height="wrap_content"
+            >
+                <Button
+                    android:layout_marginTop="0dp"
+                    style="@style/SeekerButtonStyle"
+                    android:foreground="@drawable/button"
+                    android:text="Show Smart Filters"
+                    android:id="@+id/toggleSmartFilters"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:minWidth="0dp"
+                    android:textSize="12sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                />
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                />
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:textSize="16sp"
+                    android:id="@+id/stickyFilterCheckbox"
+                    android:textColor="?attr/mainTextColor"
+                    android:text="@string/persist_it"
+                />
+                <FrameLayout
+                    android:layout_marginTop="0dp"
+                    android:layout_width="32dp"
+                    android:layout_height="wrap_content"
+                />
+            </LinearLayout>
         </LinearLayout>
-    </RelativeLayout>
+    </androidx.core.widget.NestedScrollView>
     <!--    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

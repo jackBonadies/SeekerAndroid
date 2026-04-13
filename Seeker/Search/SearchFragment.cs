@@ -12,6 +12,7 @@ using Android.Widget;
 using AndroidX.Core.Content;
 using AndroidX.Fragment.App;
 using AndroidX.RecyclerView.Widget;
+using Google.Android.Material.Button;
 using Google.Android.Material.BottomNavigation;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.FloatingActionButton;
@@ -69,7 +70,21 @@ namespace Seeker
                     UpdateDrawableState(filterText, true);
                 }
                 PreferencesState.FilterStickyString = string.Empty;
+
+                PreferencesState.FilterFormat = FormatFilterType.Any;
+                PreferencesState.FilterMinBitrateKbs = 0;
+                PreferencesManager.SaveFilterControlsState();
+                ResetFilterControlsUI();
             }
+        }
+
+        private void ResetFilterControlsUI()
+        {
+            var formatToggle = rootView?.FindViewById<MaterialButtonToggleGroup>(Resource.Id.formatToggleGroup);
+            formatToggle?.Check(Resource.Id.formatAny);
+
+            var bitrateToggle = rootView?.FindViewById<MaterialButtonToggleGroup>(Resource.Id.bitrateToggleGroup);
+            bitrateToggle?.Check(Resource.Id.bitrateAny);
         }
 
 
@@ -299,7 +314,7 @@ namespace Seeker
                     }//timing issue where menu options invalidate etc. may not be done yet...
                     SetFilterState();
 
-                    if (SearchTabHelper.SearchTabCollection[fromTab].TextFilter.IsFiltered || AreChipsFiltering())
+                    if (SearchTabHelper.SearchTabCollection[fromTab].TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
                     {
                         if (SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount != SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count)
                         {
@@ -566,7 +581,7 @@ namespace Seeker
             this.Activity?.InvalidateOptionsMenu();
             RecyclerView rv = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches); //TODO //TODO //TODO
 
-            if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
+            if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
             {
                 SearchAdapterRecyclerVersion customAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 rv.SetAdapter(customAdapter);
@@ -633,8 +648,8 @@ namespace Seeker
             recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
             recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
 
-            RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
-            BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
+            View bottomSheetView = rootView.FindViewById<View>(Resource.Id.bottomSheet);
+            BottomSheetBehavior bsb = BottomSheetBehavior.From(bottomSheetView);
             bsb.Hideable = true;
             bsb.PeekHeight = 320;
             bsb.State = BottomSheetBehavior.StateHidden;
@@ -665,7 +680,7 @@ namespace Seeker
             recycleLayoutManager = new LinearLayoutManager(Activity);
             recyclerViewTransferItems.SetItemAnimator(null); //todo
             recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
-            if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
+            if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
             {
                 recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
                 recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
@@ -702,7 +717,141 @@ namespace Seeker
             showHideSmartFilters.Text = PreferencesState.ShowSmartFilters ? this.GetString(Resource.String.HideSmartFilters) : this.GetString(Resource.String.ShowSmartFilters);
             showHideSmartFilters.Click += ShowHideSmartFilters_Click;
 
+            SetupFilterControls();
+
             return rootView;
+        }
+
+        private void SetupFilterControls()
+        {
+            var tint = GetSegmentedButtonTint();
+
+            var formatToggle = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.formatToggleGroup);
+            ApplyToggleGroupTint(formatToggle, tint);
+            formatToggle.Check(GetFormatButtonId(PreferencesState.FilterFormat));
+            formatToggle.ButtonChecked += FormatToggle_ButtonChecked;
+
+            var bitrateToggle = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.bitrateToggleGroup);
+            ApplyToggleGroupTint(bitrateToggle, tint);
+            for (int i = 0; i < bitrateToggle.ChildCount; i++)
+            {
+                var btn = (MaterialButton)bitrateToggle.GetChildAt(i);
+                btn.SetPadding(0, btn.PaddingTop, 0, btn.PaddingBottom);
+            }
+            bitrateToggle.Check(GetBitrateButtonId(PreferencesState.FilterMinBitrateKbs));
+            bitrateToggle.ButtonChecked += BitrateToggle_ButtonChecked;
+        }
+
+        private Android.Content.Res.ColorStateList GetSegmentedButtonTint()
+        {
+            var typedValue = new Android.Util.TypedValue();
+            this.Context.Theme.ResolveAttribute(Resource.Attribute.mainPurple, typedValue, true);
+            int accentColor = typedValue.Data;
+
+            var states = new int[][]
+            {
+                new int[] { Android.Resource.Attribute.StateChecked },
+                new int[] { -Android.Resource.Attribute.StateChecked }
+            };
+            var colors = new int[] { accentColor, Android.Graphics.Color.Transparent };
+            return new Android.Content.Res.ColorStateList(states, colors);
+        }
+
+        private static void ApplyToggleGroupTint(MaterialButtonToggleGroup group, Android.Content.Res.ColorStateList bgTint)
+        {
+            for (int i = 0; i < group.ChildCount; i++)
+            {
+                var btn = (MaterialButton)group.GetChildAt(i);
+                btn.BackgroundTintList = bgTint;
+                btn.SetTextColor(Android.Graphics.Color.White);
+            }
+        }
+
+        private void FormatToggle_ButtonChecked(object sender, MaterialButtonToggleGroup.ButtonCheckedEventArgs e)
+        {
+            if (!e.P2)
+            {
+                return;
+            }
+            switch (e.P1)
+            {
+                case Resource.Id.formatLossless:
+                    PreferencesState.FilterFormat = FormatFilterType.Lossless;
+                    break;
+                case Resource.Id.formatLossy:
+                    PreferencesState.FilterFormat = FormatFilterType.Lossy;
+                    break;
+                default:
+                    PreferencesState.FilterFormat = FormatFilterType.Any;
+                    break;
+            }
+            PreferencesManager.SaveFilterControlsState();
+            ApplyFilterControls();
+        }
+
+        private void BitrateToggle_ButtonChecked(object sender, MaterialButtonToggleGroup.ButtonCheckedEventArgs e)
+        {
+            if (!e.P2)
+            {
+                return;
+            }
+            switch (e.P1)
+            {
+                case Resource.Id.bitrate320:
+                    PreferencesState.FilterMinBitrateKbs = 320;
+                    break;
+                case Resource.Id.bitrate256:
+                    PreferencesState.FilterMinBitrateKbs = 256;
+                    break;
+                case Resource.Id.bitrate192:
+                    PreferencesState.FilterMinBitrateKbs = 192;
+                    break;
+                case Resource.Id.bitrate128:
+                    PreferencesState.FilterMinBitrateKbs = 128;
+                    break;
+                default:
+                    PreferencesState.FilterMinBitrateKbs = 0;
+                    break;
+            }
+            PreferencesManager.SaveFilterControlsState();
+            ApplyFilterControls();
+        }
+
+        private void ApplyFilterControls()
+        {
+            if (AreFilterControlsActive() || AreChipsFiltering() || SearchTabHelper.TextFilter.IsFiltered)
+            {
+                UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
+                recyclerSearchAdapter.NotifyDataSetChanged();
+            }
+            else
+            {
+                SearchTabHelper.UI_SearchResponses.Clear();
+                SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
+                recyclerSearchAdapter.NotifyDataSetChanged();
+            }
+        }
+
+        private static int GetFormatButtonId(FormatFilterType format)
+        {
+            switch (format)
+            {
+                case FormatFilterType.Lossless: return Resource.Id.formatLossless;
+                case FormatFilterType.Lossy: return Resource.Id.formatLossy;
+                default: return Resource.Id.formatAny;
+            }
+        }
+
+        private static int GetBitrateButtonId(int bitrateKbs)
+        {
+            switch (bitrateKbs)
+            {
+                case 320: return Resource.Id.bitrate320;
+                case 256: return Resource.Id.bitrate256;
+                case 192: return Resource.Id.bitrate192;
+                case 128: return Resource.Id.bitrate128;
+                default: return Resource.Id.bitrateAny;
+            }
         }
 
         private void ShowHideSmartFilters_Click(object sender, EventArgs e)
@@ -769,6 +918,12 @@ namespace Seeker
             }
         }
 
+        private static bool AreFilterControlsActive()
+        {
+            return PreferencesState.FilterFormat != FormatFilterType.Any
+                || PreferencesState.FilterMinBitrateKbs > 0;
+        }
+
         private void FilterText_FocusChange(object sender, View.FocusChangeEventArgs e)
         {
             try
@@ -783,8 +938,8 @@ namespace Seeker
 
         private void B_Click(object sender, EventArgs e)
         {
-            RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
-            BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
+            View bottomSheetView = rootView.FindViewById<View>(Resource.Id.bottomSheet);
+            BottomSheetBehavior bsb = BottomSheetBehavior.From(bottomSheetView);
             if (bsb.State != BottomSheetBehavior.StateExpanded && bsb.State != BottomSheetBehavior.StateCollapsed)
             {
                 bsb.State = BottomSheetBehavior.StateExpanded;
@@ -1108,7 +1263,7 @@ namespace Seeker
                     //now that they are sorted, replace them.
                     SearchTabHelper.SearchResponses = SearchTabHelper.SortHelper.Keys.ToList();
 
-                    if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
+                    if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
                     {
                         UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
                         recyclerSearchAdapter.NotifyDataSetChanged();
@@ -1282,16 +1437,43 @@ namespace Seeker
             Logger.Debug("Whether to Filter: " + searchTab.TextFilter.IsFiltered);
             Logger.Debug("FilterString: " + searchTab.TextFilter.FilterString);
             bool hideLocked = PreferencesState.HideLockedResultsInSearch;
+            var mergedFlags = MergeFilterFlags(searchTab.TextFilter.FilterSpecialFlags);
             searchTab.UI_SearchResponses.Clear();
             searchTab.UI_SearchResponses.AddRange(searchTab.SearchResponses.FindAll(
-                s => SearchFilter.MatchesAllCriteria(s, searchTab.ChipsFilter, searchTab.TextFilter.FilterSpecialFlags, searchTab.TextFilter.WordsToAvoid, searchTab.TextFilter.WordsToInclude, hideLocked)));
+                s => SearchFilter.MatchesAllCriteria(s, searchTab.ChipsFilter, mergedFlags, searchTab.TextFilter.WordsToAvoid, searchTab.TextFilter.WordsToInclude, hideLocked)));
+        }
+
+        private static FilterSpecialFlags MergeFilterFlags(FilterSpecialFlags textFlags)
+        {
+            var merged = new FilterSpecialFlags();
+            if (textFlags != null)
+            {
+                merged.MinBitRateKBS = textFlags.MinBitRateKBS;
+                merged.MinFileSizeMB = textFlags.MinFileSizeMB;
+                merged.MinFoldersInFile = textFlags.MinFoldersInFile;
+                merged.IsVBR = textFlags.IsVBR;
+                merged.IsCBR = textFlags.IsCBR;
+                merged.FormatFilter = textFlags.FormatFilter;
+                merged.ContainsSpecialFlags = textFlags.ContainsSpecialFlags;
+            }
+            if (PreferencesState.FilterFormat != FormatFilterType.Any)
+            {
+                merged.FormatFilter = PreferencesState.FilterFormat;
+                merged.ContainsSpecialFlags = true;
+            }
+            if (PreferencesState.FilterMinBitrateKbs > 0)
+            {
+                merged.MinBitRateKBS = System.Math.Max(merged.MinBitRateKBS, PreferencesState.FilterMinBitrateKbs);
+                merged.ContainsSpecialFlags = true;
+            }
+            return merged;
         }
 
         private void FilterText_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
             Logger.Debug("Text Changed: " + e.Text);
             string oldFilterString = SearchTabHelper.TextFilter.IsFiltered ? SearchTabHelper.TextFilter.FilterString : string.Empty;
-            if ((e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null) || AreChipsFiltering())
+            if ((e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null) || AreChipsFiltering() || AreFilterControlsActive())
             {
 
 #if DEBUG
@@ -1351,7 +1533,7 @@ namespace Seeker
         /// <param name="e"></param>
         public void RefreshOnChipChanged()
         {
-            if (AreChipsFiltering() || SearchTabHelper.TextFilter.IsFiltered)
+            if (AreChipsFiltering() || SearchTabHelper.TextFilter.IsFiltered || AreFilterControlsActive())
             {
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
                 recyclerSearchAdapter.NotifyDataSetChanged();
@@ -1623,7 +1805,7 @@ namespace Seeker
                         return;
                     }
 
-                    if (tab.TextFilter.IsFiltered || AreChipsFiltering())
+                    if (tab.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
                     {
                         SearchFragment.Instance.UpdateFilteredResponses(tab);
                         ApplySearchResults(tab.UI_SearchResponses, tab.TextFilter.FilterString);
@@ -1667,7 +1849,7 @@ namespace Seeker
                 }
                 dlDialogShown = true;
                 SearchResponse dlDiagResp = null;
-                if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
+                if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
                 {
                     dlDiagResp = SearchTabHelper.UI_SearchResponses.ElementAt<SearchResponse>(pos);
                 }
@@ -1682,7 +1864,7 @@ namespace Seeker
             catch (System.Exception e)
             {
                 System.String msg = string.Empty;
-                if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
+                if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
                 {
                     msg = "Filtered.Count " + SearchTabHelper.UI_SearchResponses.Count.ToString() + " position selected = " + pos.ToString();
                 }
@@ -1919,8 +2101,8 @@ namespace Seeker
                             SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
                             {
 
-                                RelativeLayout rel = SearchFragment.Instance.rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
-                                BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
+                                View bottomSheetView = SearchFragment.Instance.rootView.FindViewById<View>(Resource.Id.bottomSheet);
+                                BottomSheetBehavior bsb = BottomSheetBehavior.From(bottomSheetView);
                                 if (bsb.State == BottomSheetBehavior.StateHidden)
                                 {
 

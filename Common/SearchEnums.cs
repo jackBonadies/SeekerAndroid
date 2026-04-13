@@ -40,6 +40,13 @@ namespace Seeker
         Keyword = 2
     }
 
+    public enum FormatFilterType
+    {
+        Any = 0,
+        Lossless = 1,
+        Lossy = 2
+    }
+
     public class ConfigureChipItems
     {
         public bool Enabled;
