@@ -179,7 +179,7 @@ Mappeantall: {5}\"
     <string name="search_result_style">Result Style:</string>
 
     <string name="new_search_tab">New Search</string>
-    <string name="filter_search_results_here">Filter Results Here</string>
+    <string name="filter_search_results_here">Filter Results</string>
     <string name="persist_it">Sticky</string>
     <string name="type_chatroom_ticker_message">Type Ticker Message</string>
 

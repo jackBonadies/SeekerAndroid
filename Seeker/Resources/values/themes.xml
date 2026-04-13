@@ -53,6 +53,7 @@
         <item name="floating_action_bar_to_bottom_background">#FAFAFA</item>
 
         <item name="dialog_background">#ffffffff</item>
+        <item name="searchBottomSheetBackground">#F2F5FA</item>
 
         <item name="pseudo_window_background_color">#00000000</item>
 
@@ -258,6 +259,7 @@
         </item>
 
         <item name="dialog_background">#ff424242</item>
+        <item name="searchBottomSheetBackground">#ff424242</item>
 
         <item name="secondaryColor">#ff424242</item>
         <item name="cellTextColor">#ffffffff</item>
@@ -323,6 +325,7 @@
         <item name="slightContrastColor">#4E4E4E</item>
 
         <item name="dialog_background">#ff202020</item>
+        <item name="searchBottomSheetBackground">#ff202020</item>
 
         <item name="secondaryColor">#ff202020</item>
         <item name="cellTextColor">#ffE4E4E4</item>

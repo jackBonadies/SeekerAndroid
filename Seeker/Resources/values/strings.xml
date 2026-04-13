@@ -155,7 +155,7 @@ Directory Count: {5}"
     <string name="clear">Clear</string>
     <string name="get_user_info">Get User Info</string>
     <string name="quick_info">Quick Info</string>
-    <string name="filer_files">Filter Files Here</string>
+    <string name="filter">Filter</string>
     <string name="enter_user_to_browse">Enter User to Browse</string>
     <!--
   These are search targets
@@ -258,7 +258,7 @@ Directory Count: {5}"
     <string name="search_tabs_header">SEARCH TABS</string>
     <string name="wishlist_header">WISHLIST</string>
     <string name="wishlist_empty_header">WISHLIST (EMPTY)</string>
-    <string name="filter_search_results_here">Filter Results Here</string>
+    <string name="filter_search_results_here">Filter Results</string>
     <string name="persist_it">Sticky</string>
     <string name="filter_format_label">Format</string>
     <string name="filter_any">Any</string>

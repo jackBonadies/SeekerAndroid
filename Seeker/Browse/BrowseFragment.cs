@@ -315,7 +315,7 @@ namespace Seeker
             filterText.Touch += FilterText_Touch;
             SearchFragment.UpdateDrawableState(filterText, true);
 
-            RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
+            View rel = rootView.FindViewById<View>(Resource.Id.bottomSheet);
             BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.From(rel);
             bottomSheetBehavior.Hideable = true;
             bottomSheetBehavior.PeekHeight = BOTTOM_SHEET_PEEK_HEIGHT;
@@ -361,7 +361,7 @@ namespace Seeker
 
         private void FloatingActionButtonClick(object sender, EventArgs e)
         {
-            RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
+            View rel = rootView.FindViewById<View>(Resource.Id.bottomSheet);
             BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
             if (bsb.State != BottomSheetBehavior.StateExpanded && bsb.State != BottomSheetBehavior.StateCollapsed)
             {

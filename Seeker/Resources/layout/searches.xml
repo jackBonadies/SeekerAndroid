@@ -82,14 +82,22 @@
         android:layout_height="wrap_content"
         app:layout_behavior="@string/bottom_sheet_behavior"
         android:id="@+id/bottomSheet"
-        android:background="?attr/secondaryColor"
+        android:background="@drawable/bottom_sheet_header_bg"
+        android:backgroundTint="?attr/searchBottomSheetBackground"
     >
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="@dimen/abc_action_bar_content_inset_material"
         >
+            <View
+                android:layout_width="32dp"
+                android:layout_height="4dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/search_bottom_sheet_drag_handle"
+            />
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:id="@+id/filterLineOne"
@@ -100,6 +108,7 @@
                 android:layout_marginTop="2dp"
                 android:layout_marginBottom="6dp"
                 android:hint="@string/filter_search_results_here"
+                app:boxBackgroundColor="?attr/dialog_background"
             >
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/filterText"
@@ -293,7 +302,7 @@
                     android:layout_gravity="end"
                     android:textSize="16sp"
                     android:id="@+id/stickyFilterCheckbox"
-                    android:textColor="?attr/mainTextColor"
+                    android:textColor="?android:attr/textColorPrimary"
                     android:text="@string/persist_it"
                 />
                 <FrameLayout

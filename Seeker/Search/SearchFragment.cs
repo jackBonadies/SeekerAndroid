@@ -724,15 +724,16 @@ namespace Seeker
 
         private void SetupFilterControls()
         {
-            var tint = GetSegmentedButtonTint();
+            var bgTint = GetSegmentedButtonBgTint();
+            var textTint = GetSegmentedButtonTextTint();
 
             var formatToggle = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.formatToggleGroup);
-            ApplyToggleGroupTint(formatToggle, tint);
+            ApplyToggleGroupTint(formatToggle, bgTint, textTint);
             formatToggle.Check(GetFormatButtonId(PreferencesState.FilterFormat));
             formatToggle.ButtonChecked += FormatToggle_ButtonChecked;
 
             var bitrateToggle = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.bitrateToggleGroup);
-            ApplyToggleGroupTint(bitrateToggle, tint);
+            ApplyToggleGroupTint(bitrateToggle, bgTint, textTint);
             for (int i = 0; i < bitrateToggle.ChildCount; i++)
             {
                 var btn = (MaterialButton)bitrateToggle.GetChildAt(i);
@@ -742,28 +743,46 @@ namespace Seeker
             bitrateToggle.ButtonChecked += BitrateToggle_ButtonChecked;
         }
 
-        private Android.Content.Res.ColorStateList GetSegmentedButtonTint()
+        private Android.Content.Res.ColorStateList GetSegmentedButtonBgTint()
         {
             var typedValue = new Android.Util.TypedValue();
             this.Context.Theme.ResolveAttribute(Resource.Attribute.mainPurple, typedValue, true);
             int accentColor = typedValue.Data;
+
+            this.Context.Theme.ResolveAttribute(Resource.Attribute.dialog_background, typedValue, true);
+            int uncheckedColor = typedValue.Data;
 
             var states = new int[][]
             {
                 new int[] { Android.Resource.Attribute.StateChecked },
                 new int[] { -Android.Resource.Attribute.StateChecked }
             };
-            var colors = new int[] { accentColor, Android.Graphics.Color.Transparent };
+            var colors = new int[] { accentColor, uncheckedColor };
             return new Android.Content.Res.ColorStateList(states, colors);
         }
 
-        private static void ApplyToggleGroupTint(MaterialButtonToggleGroup group, Android.Content.Res.ColorStateList bgTint)
+        private Android.Content.Res.ColorStateList GetSegmentedButtonTextTint()
+        {
+            var typedValue = new Android.Util.TypedValue();
+            this.Context.Theme.ResolveAttribute(Resource.Attribute.normalTextColor, typedValue, true);
+            int uncheckedColor = typedValue.Data;
+
+            var states = new int[][]
+            {
+                new int[] { Android.Resource.Attribute.StateChecked },
+                new int[] { -Android.Resource.Attribute.StateChecked }
+            };
+            var colors = new int[] { Android.Graphics.Color.White, uncheckedColor };
+            return new Android.Content.Res.ColorStateList(states, colors);
+        }
+
+        private static void ApplyToggleGroupTint(MaterialButtonToggleGroup group, Android.Content.Res.ColorStateList bgTint, Android.Content.Res.ColorStateList textTint)
         {
             for (int i = 0; i < group.ChildCount; i++)
             {
                 var btn = (MaterialButton)group.GetChildAt(i);
                 btn.BackgroundTintList = bgTint;
-                btn.SetTextColor(Android.Graphics.Color.White);
+                btn.SetTextColor(textTint);
             }
         }
 

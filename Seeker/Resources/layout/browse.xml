@@ -76,36 +76,50 @@
 
         </LinearLayout>
     </RelativeLayout>
-    <RelativeLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dp"
         app:layout_behavior="@string/bottom_sheet_behavior"
         android:id="@+id/bottomSheet"
-        android:paddingTop="@dimen/abc_action_bar_content_inset_material"
-        android:background="?attr/secondaryColor"
+        android:background="@drawable/bottom_sheet_header_bg"
+        android:backgroundTint="?attr/searchBottomSheetBackground"
     >
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:id="@+id/filterLineOne"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="6dp"
-            android:hint="@string/filer_files"
+            android:orientation="vertical"
         >
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/filterText"
+            <View
+                android:layout_width="32dp"
+                android:layout_height="4dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/search_bottom_sheet_drag_handle"
+            />
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:id="@+id/filterLineOne"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:focusable="true"
-                android:imeOptions="actionDone"
-            />
-        </com.google.android.material.textfield.TextInputLayout>
-    </RelativeLayout>
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="12dp"
+                android:hint="@string/filter"
+                app:boxBackgroundColor="?attr/dialog_background"
+            >
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/filterText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:focusable="true"
+                    android:imeOptions="actionDone"
+                />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
     <!--    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
