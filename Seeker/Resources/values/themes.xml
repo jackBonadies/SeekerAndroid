@@ -143,7 +143,9 @@
     <style name="DefaultDark_Blue" parent="DefaultDark">
         <item name="colorPrimary">#86b2cb</item>
         <item name="mainPurple">#126291</item>
-        <item name="mainPurpleStatusBar">#10496b</item>        <item name="colorAccent">#86b2cb</item>
+        <item name="mainPurpleStatusBar">#10496b</item>        
+		<item name="colorAccent">#86b2cb</item>
+        <item name="checkBoxColor">#126291</item>
         <item name="whitePurpleForNavBar">#4c8aae</item>
         <item name="mainTextColor">#86b2cb</item>
 
@@ -167,6 +169,7 @@
         <!--a grey accent looks very bad-->
         <item name="colorAccent">#86b2cb</item>
         <item name="whitePurpleForNavBar">#556070</item>
+        <item name="checkBoxColor">#86b2cb</item>
 
         <item name="mainTextColor">#dddddd</item>
 
@@ -194,6 +197,7 @@
 
         <item name="mainPurpleForNavBar">#333333</item>
         <item name="colorAccent">#86b2cb</item>
+        <item name="checkBoxColor">#86b2cb</item>
         <item name="whitePurpleForNavBar">#556070</item>
         <item name="expandIconColor">#424242</item>
         <item name="mainTextColor">#dddddd</item>
@@ -217,7 +221,7 @@
         <item name="colorOnSurface">?attr/normalTextColor</item>
 		<item name="colorOnBackground">?attr/normalTextColor</item>
         <item name="mainTextColor">#bcc1f7</item>
-        <item name="checkBoxColor">#FC4C02</item>
+        <item name="checkBoxColor">#4f58c4</item>
 
 		<!-- this will be shown on opposite color background so use the colorPrimary light variant for it-->
         <item name="snackbarActionColor">#4f58c4</item>

@@ -2,6 +2,7 @@ using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
 using Common;
+using Seeker.Helpers;
 using Seeker.Search;
 using Soulseek;
 using System;
@@ -13,6 +14,8 @@ namespace Seeker
     {
         public class SearchAdapterRecyclerVersion : RecyclerView.Adapter
         {
+            private const int HeaderOffset = 1;
+
             public List<int> oppositePositions = new List<int>();
 
 
@@ -100,7 +103,7 @@ namespace Seeker
             private void CustomAdapter_Click1(object sender, EventArgs e)
             {
                 //Logger.InfoFirebase("CustomAdapter_Click1");
-                int position = ((sender as View).Parent.Parent.Parent as RecyclerView).GetChildAdapterPosition((sender as View).Parent.Parent as View);
+                int position = ((sender as View).Parent.Parent.Parent as RecyclerView).GetChildAdapterPosition((sender as View).Parent.Parent as View) - HeaderOffset;
                 SearchFragment.Instance.showEditDialog(position);
             }
 
@@ -108,7 +111,7 @@ namespace Seeker
             {
                 // sender = relativeLayout1, parent = header horizontal, parent.parent = root vertical, parent.parent.parent = item root
                 var itemRoot = (sender as View).Parent.Parent.Parent as View;
-                int position = ((itemRoot as IViewParent).Parent as RecyclerView).GetChildAdapterPosition(itemRoot);
+                int position = ((itemRoot as IViewParent).Parent as RecyclerView).GetChildAdapterPosition(itemRoot) - HeaderOffset;
                 SearchFragment.Instance.showEditDialog(position);
             }
 
@@ -116,7 +119,7 @@ namespace Seeker
             {
                 // sender = expandClickArea, parent = header horizontal, parent.parent = root vertical, parent.parent.parent = item root
                 var itemRoot = (sender as View).Parent.Parent.Parent as View;
-                int position = ((itemRoot as IViewParent).Parent as RecyclerView).GetChildAdapterPosition(itemRoot);
+                int position = ((itemRoot as IViewParent).Parent as RecyclerView).GetChildAdapterPosition(itemRoot) - HeaderOffset;
                 var v = itemRoot.FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
                 var img = itemRoot.FindViewById<ImageView>(Resource.Id.expandableClick);
                 if (v.Visibility == ViewStates.Gone)
@@ -156,7 +159,7 @@ namespace Seeker
                 //throw new NotImplementedException();
 
 
-                int position = ((sender as View).Parent.Parent.Parent as RecyclerView).GetChildAdapterPosition((sender as View).Parent.Parent as View);
+                int position = ((sender as View).Parent.Parent.Parent as RecyclerView).GetChildAdapterPosition((sender as View).Parent.Parent as View) - HeaderOffset;
 
                 //int position = ((sender as View).Parent.Parent.Parent as ListView).GetPositionForView((sender as View).Parent.Parent as View);
                 var v = ((sender as View).Parent.Parent as View).FindViewById<View>(Resource.Id.detailsExpandable);
@@ -210,6 +213,71 @@ namespace Seeker
             public ISearchItemViewBase getSearchItemView()
             {
                 return searchItemView;
+            }
+        }
+
+        public class SearchResultsHeaderAdapter : RecyclerView.Adapter
+        {
+            public override int ItemCount => 1;
+
+            public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
+            {
+                var view = LayoutInflater.From(parent.Context).Inflate(Resource.Layout.search_results_header, parent, false);
+                return new SearchResultsHeaderViewHolder(view);
+            }
+
+            public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
+            {
+                var tv = ((SearchResultsHeaderViewHolder)holder).Text;
+
+                if (string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm))
+                {
+                    holder.ItemView.Visibility = ViewStates.Gone;
+                    return;
+                }
+
+                int total = SearchTabHelper.SearchResponses?.Count ?? 0;
+                int shown = SearchTabHelper.UI_SearchResponses?.Count ?? total;
+                bool filterActive = SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive();
+
+                holder.ItemView.Visibility = ViewStates.Visible;
+                var ctx = tv.Context;
+                if (shown == 0)
+                {
+                    tv.Text = ctx.GetString(Resource.String.search_results_count_none);
+                }
+                else if (filterActive && shown != total)
+                {
+                    string shownStr = shown.ToString();
+                    string full = string.Format(ctx.GetString(Resource.String.search_results_count_filtered), shownStr, total);
+                    tv.TextFormatted = BuildSemiboldCount(full, shownStr);
+                }
+                else
+                {
+                    string totalStr = total.ToString();
+                    string full = string.Format(ctx.GetString(Resource.String.search_results_count), totalStr);
+                    tv.TextFormatted = BuildSemiboldCount(full, totalStr);
+                }
+            }
+
+            private static Android.Text.SpannableString BuildSemiboldCount(string full, string countToken)
+            {
+                var ss = new Android.Text.SpannableString(full);
+                int idx = full.IndexOf(countToken);
+                if (idx >= 0)
+                {
+                    ss.SetSpan(new Android.Text.Style.TypefaceSpan("sans-serif-medium"), idx, idx + countToken.Length, Android.Text.SpanTypes.ExclusiveExclusive);
+                }
+                return ss;
+            }
+        }
+
+        public class SearchResultsHeaderViewHolder : RecyclerView.ViewHolder
+        {
+            public TextView Text;
+            public SearchResultsHeaderViewHolder(View view) : base(view)
+            {
+                Text = view.FindViewById<TextView>(Resource.Id.searchResultsHeaderText);
             }
         }
 

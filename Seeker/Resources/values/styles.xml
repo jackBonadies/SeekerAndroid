@@ -48,6 +48,7 @@
         <item name="mainPurpleForNavBar">?attr/mainPurple</item>
 
         <item name="checkBoxColor">@color/colorAccent</item>
+        <item name="checkboxStyle">@style/checkBoxStyle</item>
 
         <item name="slskAccent">#437eab</item>
 
@@ -72,9 +73,12 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="checkBoxStyle" parent="AppTheme.NoActionBar">
-        <item name="colorAccent">?attr/checkBoxColor</item>
-        <!--<item name="android:textColorSecondary">UNCHECKEDCOLOR</item>-->
+    <style name="checkBoxStyle" parent="Widget.Material3.CompoundButton.CheckBox">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Seeker.CheckBox</item>
+    </style>
+
+    <style name="ThemeOverlay.Seeker.CheckBox" parent="">
+        <item name="colorPrimary">?attr/checkBoxColor</item>
     </style>
 
     <style

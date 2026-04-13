@@ -36,6 +36,7 @@
         <item name="whitePurpleForNavBar">#858ddd</item>
 
         <item name="checkBoxColor">@color/colorAccent</item>
+        <item name="checkboxStyle">@style/checkBoxStyle</item>
 
         <item name="mainPurpleForNavBar">?attr/mainPurple</item>
 
@@ -68,9 +69,12 @@
         <item name="elevation">0dp</item>
     </style>
 
-    <style name="checkBoxStyle" parent="AppTheme.NoActionBar">
-        <item name="colorAccent">?attr/checkBoxColor</item>
-        <!--<item name="android:textColorSecondary">UNCHECKEDCOLOR</item>-->
+    <style name="checkBoxStyle" parent="Widget.Material3.CompoundButton.CheckBox">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Seeker.CheckBox</item>
+    </style>
+
+    <style name="ThemeOverlay.Seeker.CheckBox" parent="">
+        <item name="colorPrimary">?attr/checkBoxColor</item>
     </style>
 
     <style name="navTextInactive">

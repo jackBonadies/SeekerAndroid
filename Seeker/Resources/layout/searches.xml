@@ -32,8 +32,17 @@
             android:id="@+id/recyclerViewChips"
         />
 
-        <androidx.recyclerview.widget.RecyclerView
+        <View
+            android:id="@+id/chipsSeparator"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
             android:layout_below="@id/recyclerViewChips"
+            android:layout_marginHorizontal="10dp"
+            android:background="@color/slightTint"
+        />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_below="@id/chipsSeparator"
             android:minWidth="25px"
             android:scrollbars="vertical"
             android:paddingBottom="80dp"
