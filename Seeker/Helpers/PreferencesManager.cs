@@ -44,7 +44,7 @@ namespace Seeker
             PreferencesState.LegacyLanguageMigrated = prefs.GetBoolean(KeyConsts.M_LegacyLanguageMigrated, false);
             PreferencesState.NightModeVariant = (NightThemeType)(prefs.GetInt(KeyConsts.M_NightVariant, (int)NightThemeType.ClassicPurple));
             PreferencesState.DayModeVariant = (DayThemeType)(prefs.GetInt(KeyConsts.M_DayVariant, (int)DayThemeType.ClassicPurple));
-            PreferencesState.ShowSmartFilters = prefs.GetBoolean(KeyConsts.M_ShowSmartFilters, false);
+            PreferencesState.ShowSmartFilters = prefs.GetBoolean(KeyConsts.M_ShowSmartFilters, true);
             RestoreSmartFilterState(prefs);
         }
 
@@ -77,7 +77,7 @@ namespace Seeker
 
         public static void RestoreSearchSettings(ISharedPreferences prefs)
         {
-            PreferencesState.NumberSearchResults = prefs.GetInt(KeyConsts.M_NumberSearchResults, 250);
+            PreferencesState.NumberSearchResults = prefs.GetInt(KeyConsts.M_NumberSearchResults, 500);
             PreferencesState.RememberSearchHistory = prefs.GetBoolean(KeyConsts.M_RememberSearchHistory, true);
             PreferencesState.ShowRecentUsers = prefs.GetBoolean(KeyConsts.M_RememberUserHistory, true);
             PreferencesState.FreeUploadSlotsOnly = prefs.GetBoolean(KeyConsts.M_OnlyFreeUploadSlots, true);
