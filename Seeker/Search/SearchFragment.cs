@@ -141,6 +141,11 @@ namespace Seeker
                         : Resource.String.expand_all);
                 }
             }
+            var groupedItem = menu.FindItem(Resource.Id.action_toggle_grouped_chips);
+            if (groupedItem != null)
+            {
+                groupedItem.SetChecked(PreferencesState.SmartFilterStyle == SmartFilterStyle.Grouped);
+            }
             base.OnPrepareOptionsMenu(menu);
         }
 
@@ -325,7 +330,7 @@ namespace Seeker
 
                         recyclerViewTransferItems.SetAdapter(CreateSearchConcatAdapter(SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses));
 
-                        SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
+                        SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
                         SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
 
                     }
@@ -334,7 +339,7 @@ namespace Seeker
                         SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.ToList();
                         recyclerViewTransferItems.SetAdapter(CreateSearchConcatAdapter(SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses));
 
-                        SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
+                        SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
                         SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
                     }
                     SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
@@ -415,6 +420,15 @@ namespace Seeker
                     ExpandAllResults = !ExpandAllResults;
                     this.Activity?.InvalidateOptionsMenu();
                     SearchResultStyleChanged();
+                    return true;
+                case Resource.Id.action_toggle_grouped_chips:
+                    PreferencesState.SmartFilterStyle =
+                        PreferencesState.SmartFilterStyle == SmartFilterStyle.Grouped
+                            ? SmartFilterStyle.Flat
+                            : SmartFilterStyle.Grouped;
+                    PreferencesManager.SaveSmartFilterStyle();
+                    SwapChipAdapter();
+                    this.Activity?.InvalidateOptionsMenu();
                     return true;
                 case Resource.Id.action_add_to_wishlist:
                     AddSearchToWishlist();
@@ -624,7 +638,30 @@ namespace Seeker
 
         public static volatile SearchFragment Instance = null;
         public RecyclerView recyclerViewChips;
-        public ChipsItemRecyclerAdapter recyclerChipsAdapter;
+        public RecyclerView.Adapter recyclerChipsAdapter;
+
+        private static RecyclerView.Adapter CreateChipsAdapter(List<ChipDataItem> items)
+        {
+            if (PreferencesState.SmartFilterStyle == SmartFilterStyle.Grouped)
+            {
+                return new GroupedChipsItemRecyclerAdapter(items);
+            }
+            return new ChipsItemRecyclerAdapter(items);
+        }
+
+        /// <summary>
+        /// Rebuilds the chip row adapter for the current tab using the current SmartFilterStyle
+        /// preference and attaches it to recyclerViewChips. Call whenever the preference toggles.
+        /// </summary>
+        public void SwapChipAdapter()
+        {
+            if (recyclerViewChips == null)
+            {
+                return;
+            }
+            recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
+            recyclerViewChips.SetAdapter(recyclerChipsAdapter);
+        }
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             Instance = this;
@@ -641,7 +678,7 @@ namespace Seeker
             var manager = new LinearLayoutManager(this.Context, LinearLayoutManager.Horizontal, false);
             recyclerViewChips.SetItemAnimator(null);
             recyclerViewChips.SetLayoutManager(manager);
-            recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
+            recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
             recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
 
             View bottomSheetView = rootView.FindViewById<View>(Resource.Id.bottomSheet);
@@ -885,7 +922,7 @@ namespace Seeker
                     SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
                     SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
                     {
-                        SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
+                        SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                         SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
                     }));
                 }
@@ -895,7 +932,7 @@ namespace Seeker
                 SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = null;
                 SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipsFilter = null; //in case there was previously a filter
                 SearchFragment.Instance.RefreshOnChipChanged();
-                SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(null);
+                SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(null);
                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
             }
         }
@@ -920,7 +957,7 @@ namespace Seeker
         /// Are chips filtering out results..
         /// </summary>
         /// <returns></returns>
-        private static bool AreChipsFiltering()
+        internal static bool AreChipsFiltering()
         {
             if (!PreferencesState.ShowSmartFilters || (SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems?.Count ?? 0) == 0)
             {
@@ -932,7 +969,7 @@ namespace Seeker
             }
         }
 
-        private static bool AreFilterControlsActive()
+        internal static bool AreFilterControlsActive()
         {
             return PreferencesState.FilterFormat != FormatFilterType.Any
                 || PreferencesState.FilterMinBitrateKbs > 0;
@@ -1458,7 +1495,7 @@ namespace Seeker
                 s => SearchFilter.MatchesAllCriteria(s, searchTab.ChipsFilter, mergedFlags, searchTab.TextFilter.WordsToAvoid, searchTab.TextFilter.WordsToInclude, hideLocked)));
         }
 
-        private static FilterSpecialFlags MergeFilterFlags(FilterSpecialFlags textFlags)
+        internal static FilterSpecialFlags MergeFilterFlags(FilterSpecialFlags textFlags)
         {
             var merged = new FilterSpecialFlags();
             if (textFlags != null)
@@ -1681,7 +1718,7 @@ namespace Seeker
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses?.ToList();
                 SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.CreateSearchConcatAdapter(SearchTabHelper.UI_SearchResponses));
 
-                SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
+                SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
 
                 SearchFragment.Instance.UpdateNoSearchesView();
@@ -2110,7 +2147,7 @@ namespace Seeker
                             SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
                             SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                             {
-                                SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
+                                SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
                                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
                             }));
                         }

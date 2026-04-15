@@ -37,6 +37,12 @@
         android:visible="false"
     />
     <item
+        android:id="@+id/action_toggle_grouped_chips"
+        android:title="@string/grouped_chips_toggle"
+        app:showAsAction="never"
+        android:checkable="true"
+    />
+    <item
         android:id="@+id/action_sort_results_by"
         android:title="@string/sort_results_by"
         app:showAsAction="never"

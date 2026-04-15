@@ -40,6 +40,12 @@ namespace Seeker
         Keyword = 2
     }
 
+    public enum SmartFilterStyle
+    {
+        Flat = 0,
+        Grouped = 1
+    }
+
     public enum FormatFilterType
     {
         Any = 0,

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="14dp"
+    android:paddingEnd="6dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:layout_marginStart="6dp"
+    android:layout_marginEnd="6dp"
+    android:layout_marginTop="6dp"
+    android:layout_marginBottom="6dp"
+    android:minHeight="36dp"
+    android:elevation="0dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="@drawable/grouped_chip_background">
+    <TextView
+        android:id="@+id/groupedChipText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="?attr/normalTextColor"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:maxWidth="180dp" />
+    <ImageView
+        android:id="@+id/groupedChipArrow"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_marginStart="2dp"
+        android:src="@drawable/ic_arrow_drop_down"
+        android:contentDescription="@null" />
+</LinearLayout>

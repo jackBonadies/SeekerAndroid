@@ -102,6 +102,14 @@
     <string name="search_results_count_none">No results found</string>
     <string name="search_results_count">{0} Results</string>
     <string name="search_results_count_filtered">Showing {0} of {1} Results</string>
+    <string name="category_file_type">File Type</string>
+    <string name="category_keyword">Keyword</string>
+    <string name="category_num_files">Num Files</string>
+    <string name="grouped_chip_n_selected">{0} selected</string>
+    <string name="grouped_chips_toggle">Grouped filter chips</string>
+    <string name="filter_sheet_close_desc">Close</string>
+    <string name="filter_sheet_count_filtered">{0} / {1}</string>
+    <string name="filter_sheet_count">{0}</string>
     <string name="messages">Messages</string>
     <string name="browse_files">Browse Files</string>
     <string name="chatroomListLoading">

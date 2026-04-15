@@ -74,6 +74,7 @@ namespace Common
         public const string M_ServiceOnStartup = "Momento_ServiceOnStartup";
         public const string M_NoSubfolderForSingle = "Momento_NoSubfolderForSingle";
         public const string M_ShowSmartFilters = "Momento_ShowSmartFilters";
+        public const string M_SmartFilterStyle = "Momento_SmartFilterStyle";
         public const string M_chatroomsToNotify_Legacy = "Momento_chatroomsToNotify";
         public const string M_chatroomsToNotify = "Momento_chatroomsToNotify_v2";
         public const string M_SearchTabsState_LEGACY = "Momento_SearchTabsState";

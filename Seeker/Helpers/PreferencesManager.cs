@@ -45,6 +45,7 @@ namespace Seeker
             PreferencesState.NightModeVariant = (NightThemeType)(prefs.GetInt(KeyConsts.M_NightVariant, (int)NightThemeType.ClassicPurple));
             PreferencesState.DayModeVariant = (DayThemeType)(prefs.GetInt(KeyConsts.M_DayVariant, (int)DayThemeType.ClassicPurple));
             PreferencesState.ShowSmartFilters = prefs.GetBoolean(KeyConsts.M_ShowSmartFilters, true);
+            PreferencesState.SmartFilterStyle = (Seeker.SmartFilterStyle)prefs.GetInt(KeyConsts.M_SmartFilterStyle, (int)Seeker.SmartFilterStyle.Flat);
             RestoreSmartFilterState(prefs);
         }
 
@@ -344,6 +345,16 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_ShowSmartFilters, PreferencesState.ShowSmartFilters);
+                editor.Apply();
+            }
+        }
+
+        public static void SaveSmartFilterStyle()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutInt(KeyConsts.M_SmartFilterStyle, (int)PreferencesState.SmartFilterStyle);
                 editor.Apply();
             }
         }

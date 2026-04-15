@@ -144,6 +144,7 @@ namespace Common
 
         // Smart filters
         public static bool ShowSmartFilters = true;
+        public static Seeker.SmartFilterStyle SmartFilterStyle = Seeker.SmartFilterStyle.Flat;
         public static SmartFilterState SmartFilterOptions;
 
         // Listener
