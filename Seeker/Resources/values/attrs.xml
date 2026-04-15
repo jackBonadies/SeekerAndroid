@@ -20,7 +20,9 @@
     <attr name="mainPurpleStatusBar" format="color" />
     <attr name="whitePurpleForNavBar" format="color" />
     <attr name="slskAccent" format="color" />
-    <attr name="mainTextColorHinted" format="color" />
+	<attr name="searchTabHeader" format="color" />
+	<attr name="mainTextColorHinted" format="color" />
+    <attr name="mainTextColorHintedFlair" format="color" />
     <attr name="searchTabButtonColor" format="color" />
     <attr name="cellStroke" format="color" />
     <attr name="checkBoxColor" format="color" />
