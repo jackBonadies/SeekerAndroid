@@ -314,11 +314,6 @@
                     android:textColor="?android:attr/textColorPrimary"
                     android:text="@string/persist_it"
                 />
-                <FrameLayout
-                    android:layout_marginTop="0dp"
-                    android:layout_width="32dp"
-                    android:layout_height="wrap_content"
-                />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
