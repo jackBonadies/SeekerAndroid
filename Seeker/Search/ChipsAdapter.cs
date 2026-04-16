@@ -48,12 +48,12 @@ namespace Seeker
             {
                 if (localDataSet[pos].ChipType == ChipType.FileType)
                 {
-                    if (localDataSet[pos].DisplayText.Contains(" - all"))
+                    if (localDataSet[pos].IsAllCase)
                     {
-                        string baseType = localDataSet[pos].DisplayText.Replace(" - all", "");
+                        string baseType = localDataSet[pos].BaseDisplayText;
                         for (int i = 0; i < localDataSet.Count; i++)
                         {
-                            if (localDataSet[i].DisplayText.Contains(baseType) && localDataSet[i].DisplayText != localDataSet[pos].DisplayText)
+                            if (!localDataSet[i].IsAllCase && localDataSet[i].BaseDisplayText.Contains(baseType) && localDataSet[i].BaseDisplayText != localDataSet[pos].BaseDisplayText)
                             {
                                 localDataSet[i].IsEnabled = !e.IsChecked;
                                 this.NotifyItemChanged(i); //needed to turn off animations for this. else doesn't look too good.
@@ -157,7 +157,7 @@ namespace Seeker
 
         public void setItem(ChipDataItem item)
         {
-            Chip.Text = item.DisplayText;
+            Chip.Text = item.GetFullDisplayText();
             Chip.Checked = item.IsChecked;
 
             Chip.Enabled = item.IsEnabled;

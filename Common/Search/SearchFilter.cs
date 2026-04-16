@@ -40,26 +40,52 @@ namespace Seeker
 
     public class ChipDataItem
     {
-        public readonly string DisplayText;
+        public string GetFullDisplayText()
+        {
+            if (IsAllCase)
+            {
+                // TODO global const suffix
+                return BaseDisplayText + ChipsHelper.ALL_SUFFIX;
+            } 
+            else
+            {
+                return BaseDisplayText;
+            }
+        }
+
+        public readonly string BaseDisplayText;
         public readonly List<string> Children; //this is for "other". this is what the chip actually represents..
         public readonly ChipType ChipType;
         public bool LastInGroup; //last in group AND there is more after it
+        public bool IsAllCase = false;
         public bool IsChecked = false;
         public bool IsEnabled = true; //(-all case)
+
         public ChipDataItem(ChipType chipType, bool lastInGroup, string displayText)
         {
             this.ChipType = chipType;
             this.LastInGroup = lastInGroup;
-            this.DisplayText = displayText;
+            this.BaseDisplayText = displayText;
             this.Children = null;
         }
+
         public ChipDataItem(ChipType chipType, bool lastInGroup, string displayText, List<string> children)
         {
             this.ChipType = chipType;
             this.LastInGroup = lastInGroup;
-            this.DisplayText = displayText;
+            this.BaseDisplayText = displayText;
             this.Children = children;
         }
+
+        public ChipDataItem(ChipType chipType, bool lastInGroup, string displayText, bool isAllCase)
+        {
+            this.ChipType = chipType;
+            this.LastInGroup = lastInGroup;
+            this.BaseDisplayText = displayText;
+            this.IsAllCase = isAllCase;
+            this.Children = null;
+        }
+
         public bool HasTag()
         {
             return this.Children != null;
@@ -105,20 +131,20 @@ namespace Seeker
             {
                 if (chip.ChipType == ChipType.FileCount)
                 {
-                    if (chip.DisplayText.EndsWith(" file"))
+                    if (chip.BaseDisplayText.EndsWith(" file"))
                     {
                         chipFilter.NumFiles.Add(1);
                     }
-                    else if (chip.DisplayText.Contains(" to "))
+                    else if (chip.BaseDisplayText.Contains(" to "))
                     {
-                        int endmin = chip.DisplayText.IndexOf(" to ");
-                        int min = int.Parse(chip.DisplayText.Substring(0, endmin));
-                        int max = int.Parse(chip.DisplayText.Substring(endmin + 4, chip.DisplayText.IndexOf(" files") - (endmin + 4)));
+                        int endmin = chip.BaseDisplayText.IndexOf(" to ");
+                        int min = int.Parse(chip.BaseDisplayText.Substring(0, endmin));
+                        int max = int.Parse(chip.BaseDisplayText.Substring(endmin + 4, chip.BaseDisplayText.IndexOf(" files") - (endmin + 4)));
                         chipFilter.FileRanges.Add(new Tuple<int, int>(min, max));
                     }
-                    else if (chip.DisplayText.EndsWith(" files"))
+                    else if (chip.BaseDisplayText.EndsWith(" files"))
                     {
-                        chipFilter.NumFiles.Add(int.Parse(chip.DisplayText.Replace(" files", "")));
+                        chipFilter.NumFiles.Add(int.Parse(chip.BaseDisplayText.Replace(" files", "")));
                     }
                 }
                 else if (chip.ChipType == ChipType.FileType)
@@ -129,9 +155,9 @@ namespace Seeker
                         {
                             //its okay if this contains "mp3 (other)" say because if it does then by definition it will also contain
                             //mp3 - all bc we dont split groups.
-                            if (subChipString.EndsWith(" - all"))
+                            if (subChipString.EndsWith(ChipsHelper.ALL_SUFFIX))
                             {
-                                chipFilter.AllVariantsFileType.Add(subChipString.Replace(" - all", ""));
+                                chipFilter.AllVariantsFileType.Add(subChipString.Replace(ChipsHelper.ALL_SUFFIX, ""));
                             }
                             else
                             {
@@ -139,20 +165,20 @@ namespace Seeker
                             }
                         }
                     }
-                    else if (chip.DisplayText.EndsWith(" - all"))
+                    else if (chip.IsAllCase)
                     {
-                        chipFilter.AllVariantsFileType.Add(chip.DisplayText.Replace(" - all", ""));
+                        chipFilter.AllVariantsFileType.Add(chip.BaseDisplayText);
                     }
                     else
                     {
-                        chipFilter.SpecificFileType.Add(chip.DisplayText);
+                        chipFilter.SpecificFileType.Add(chip.BaseDisplayText);
                     }
                 }
                 else if (chip.ChipType == ChipType.Keyword)
                 {
                     if (chip.Children == null)
                     {
-                        chipFilter.Keywords.Add(chip.DisplayText);
+                        chipFilter.Keywords.Add(chip.BaseDisplayText);
                     }
                     else
                     {

@@ -66,9 +66,9 @@ namespace Seeker
             }
             if (checkedItems.Count == 1)
             {
-                return checkedItems[0].DisplayText;
+                return checkedItems[0].GetFullDisplayText();
             }
-            return checkedItems[0].DisplayText + " +" + (checkedItems.Count - 1);
+            return checkedItems[0].GetFullDisplayText() + " +" + (checkedItems.Count - 1);
         }
 
         public static string CategoryDisplayName(Android.Content.Context ctx, ChipType category)

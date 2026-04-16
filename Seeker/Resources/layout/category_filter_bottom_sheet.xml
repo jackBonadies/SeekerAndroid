@@ -16,19 +16,20 @@
         android:paddingBottom="8dp">
         <TextView
             android:id="@+id/categoryFilterSheetTitle"
+            android:textStyle="bold"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:textSize="18sp"
-            android:textStyle="bold"
             android:textColor="?attr/normalTextColor" />
         <ImageButton
             android:id="@+id/categoryFilterSheetClose"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:padding="6dp"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            android:tint="#616161"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="2dp"
+			android:layout_marginEnd="10dp"
+            android:src="@drawable/ic_close_small"
+            android:tint="?attr/normalTextColor"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/filter_sheet_close_desc" />
     </LinearLayout>
