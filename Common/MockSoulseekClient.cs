@@ -1088,6 +1088,29 @@ namespace Seeker
             return new BrowseResponse(dirs);
         }
 
+        private static SearchResponse MakeResponseFileTypeBitRate(int resolvedToken, string search, string cachedType, double cachedBitRate = 128.0)
+        {
+            var resp = GenerateMockSearchResponse(resolvedToken, search);
+            resp.cachedDominantFileType = cachedType;
+            resp.cachedCalcBitRate = cachedBitRate;
+            return resp;
+        }
+
+        private static List<SearchResponse> MakeChipResponses(int resolvedToken, string search, params (string type, int count)[] buckets)
+        {
+            var list = new List<SearchResponse>();
+            foreach (var (t, c) in buckets)
+            {
+                for (int i = 0; i < c; i++)
+                {
+                    list.Add(MakeResponseFileTypeBitRate(resolvedToken, search, t));
+                }
+            }
+            return list;
+        }
+
+
+
         public async Task<(Soulseek.Search Search, IReadOnlyCollection<SearchResponse> Responses)> SearchAsync(SearchQuery query, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null)
         {
             if (SearchAsyncHandler != null) return await SearchAsyncHandler(query, scope, token, options, cancellationToken);
@@ -1105,11 +1128,53 @@ namespace Seeker
 
             string joinedTerms = string.Join(" ", query.Terms).ToLowerInvariant();
             bool isBeethovenOverture = joinedTerms.Contains("beethoven") && joinedTerms.Contains("overture");
+            bool isChipTestOther = joinedTerms.Contains("chiptest") && joinedTerms.Contains("other");
+            bool isCurated = isBeethovenOverture || isChipTestOther;
 
             var allResponses = new List<SearchResponse>();
-            if (isBeethovenOverture)
+            if (isCurated)
             {
-                var curatedResponses = GenerateBeethovenOvertureResponses(resolvedToken);
+                List<SearchResponse> curatedResponses = new();
+                if (isBeethovenOverture)
+                {
+                    curatedResponses = GenerateBeethovenOvertureResponses(resolvedToken);
+                } 
+                else if (isChipTestOther)
+                {
+                    curatedResponses = MakeChipResponses(resolvedToken, search,
+                        ("mp3", 10),
+                        ("mp3 (vbr)", 10),
+                        ("mp3 (320kbs)", 10),
+                        ("mp3 (256kbs)", 10),
+                        ("mp3 (196kbs)", 1),
+                        ("mp3 (128kbs)", 1),
+                        ("mp3 (120kbs)", 1),
+                        ("mp3 (96kbs)", 1),
+                        ("flac", 10),
+                        ("flac (vbr)", 10),
+                        ("flac (16, 44.1 kHz)", 20),
+                        ("flac (24, 44.1 kHz)", 10),
+                        ("flac (16, 48 kHz)", 10),
+                        ("flac (test)", 1),
+                        ("flac (test2)", 1),
+                        ("m4a", 10),
+                        ("aac", 10),
+                        ("alac", 10),
+                        ("test3", 1),
+                        ("test4", 1),
+                        ("test5", 1),
+                        ("test6", 1),
+                        ("test7", 1),
+                        ("test8", 1),
+                        ("test9", 1),
+                        ("test10", 1),
+                        ("tar.gz", 10),
+                        ("epub", 7),
+                        ("txt", 7),
+                        ("", 1),
+                        ("flac (test3)", 1)
+                    );
+                }
                 int delayPerCurated = curatedResponses.Count > 0 ? totalTimeMs / curatedResponses.Count : 0;
                 for (int i = 0; i < curatedResponses.Count; i++)
                 {

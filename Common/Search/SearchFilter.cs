@@ -54,12 +54,12 @@ namespace Seeker
         }
 
         public readonly string BaseDisplayText;
-        public readonly List<string> Children; //this is for "other". this is what the chip actually represents..
+        public readonly List<string>? Children; //this is for "other". this is what the chip actually represents..
         public readonly ChipType ChipType;
         public bool LastInGroup; //last in group AND there is more after it
         public bool IsAllCase = false;
         public bool IsChecked = false;
-        public bool IsEnabled = true; //(-all case)
+        public bool IsEnabled = true; // to support variants when " - all" is checked
 
         public ChipDataItem(ChipType chipType, bool lastInGroup, string displayText)
         {
@@ -149,7 +149,7 @@ namespace Seeker
                 }
                 else if (chip.ChipType == ChipType.FileType)
                 {
-                    if (chip.HasTag())
+                    if (chip.Children != null)
                     {
                         foreach (var subChipString in chip.Children)
                         {

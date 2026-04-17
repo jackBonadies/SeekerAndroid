@@ -319,7 +319,7 @@ namespace Seeker
 
         private static bool IsChildOf(ChipDataItem chip, string baseName)
         {
-            return chip.BaseDisplayText.StartsWith(baseName) && chip.GetFullDisplayText() != baseName + ChipsHelper.ALL_SUFFIX;
+            return chip.BaseDisplayText.StartsWith(baseName) && !chip.IsAllCase;
         }
 
         private static string StripBasePrefix(string displayText, string baseName)

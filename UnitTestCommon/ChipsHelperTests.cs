@@ -57,6 +57,29 @@ namespace UnitTestCommon
             return list;
         }
 
+        private static SearchResponse MakeResponseWithFiles(int fileCount)
+        {
+            var files = new File[fileCount];
+            for (int i = 0; i < fileCount; i++)
+            {
+                files[i] = new File(1, $@"\\u\a{i}.mp3", 1000, "mp3");
+            }
+            return new SearchResponse("testuser", 1, true, 5000, 0, files);
+        }
+
+        private static List<SearchResponse> MakeResponsesWithFileCounts(params (int fileCount, int times)[] buckets)
+        {
+            var list = new List<SearchResponse>();
+            foreach (var (fc, times) in buckets)
+            {
+                for (int i = 0; i < times; i++)
+                {
+                    list.Add(MakeResponseWithFiles(fc));
+                }
+            }
+            return list;
+        }
+
         private static PreferencesState.SmartFilterState FileTypesOnly()
         {
             return new PreferencesState.SmartFilterState
@@ -68,9 +91,24 @@ namespace UnitTestCommon
             };
         }
 
-        private static List<ChipDataItem> Run(List<SearchResponse> responses)
+        private static PreferencesState.SmartFilterState FileCountsOnly()
+        {
+            return new PreferencesState.SmartFilterState
+            {
+                FileTypesEnabled = false,
+                NumFilesEnabled = true,
+                KeywordsEnabled = false,
+            };
+        }
+
+        private static List<ChipDataItem> RunFileTypes(List<SearchResponse> responses )
         {
             return ChipsHelper.GetChipDataItemsFromSearchResults(responses, "search", FileTypesOnly());
+        }
+
+        private static List<ChipDataItem> RunFileCounts(List<SearchResponse> responses )
+        {
+            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, "search", FileCountsOnly());
         }
 
         private static List<string> Texts(List<ChipDataItem> chips)
@@ -90,7 +128,7 @@ namespace UnitTestCommon
                 ("flac (192, 24kHz)", 1),
                 ("flacxx", 4));
 
-            var result = Run(responses);
+            var result = RunFileTypes(responses);
             var texts = Texts(result);
 
             // plain "flac" is removed when "flac - all" is introduced
@@ -130,7 +168,7 @@ namespace UnitTestCommon
                     responses.Reverse();
                 }
 
-                var result = Run(responses);
+                var result = RunFileTypes(responses);
                 var texts = Texts(result);
 
 
@@ -162,7 +200,7 @@ namespace UnitTestCommon
             }
             var responses = MakeResponses(buckets);
 
-            var result = Run(responses);
+            var result = RunFileTypes(responses);
 
             // 30 > 14 triggers grouping; with no bases, only the trailing tail-chop fires.
             Assert.AreEqual(14, result.Count);
@@ -201,7 +239,7 @@ namespace UnitTestCommon
             
             var responses = MakeResponses(buckets.Concat(mp3Buckets).ToArray());
 
-            var result = Run(responses);
+            var result = RunFileTypes(responses);
             var texts = Texts(result);
 
             Assert.AreEqual(14, result.Count);
@@ -250,7 +288,7 @@ namespace UnitTestCommon
                 ("flac", 2),
                 ("ogg", 1));
 
-            var result = Run(responses);
+            var result = RunFileTypes(responses);
             var texts = Texts(result);
 
             Assert.AreEqual(3, result.Count);
@@ -266,7 +304,7 @@ namespace UnitTestCommon
         [Test]
         public void FileType_EmptyResponses_ReturnsEmptyList()
         {
-            var result = Run(new List<SearchResponse>());
+            var result = RunFileTypes(new List<SearchResponse>());
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
         }
@@ -274,7 +312,7 @@ namespace UnitTestCommon
         [Test]
         public void FileType_SingleResponseSingleType_SingleChip()
         {
-            var result = Run(MakeResponses(("mp3", 1)));
+            var result = RunFileTypes(MakeResponses(("mp3", 1)));
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual("mp3", result[0].BaseDisplayText);
             Assert.IsFalse(result[0].HasTag());
@@ -293,7 +331,7 @@ namespace UnitTestCommon
             buckets.Add(("topper", 2));
             var responses = MakeResponses(buckets.ToArray());
 
-            var result = Run(responses);
+            var result = RunFileTypes(responses);
 
             Assert.AreEqual(15, result.Count);
             Assert.IsFalse(result.Any(c => c.BaseDisplayText == "other"));
@@ -324,7 +362,7 @@ namespace UnitTestCommon
             var responses = MakeResponses(buckets.ToArray());
 
             List<ChipDataItem> result = null;
-            Assert.DoesNotThrow(() => result = Run(responses));
+            Assert.DoesNotThrow(() => result = RunFileTypes(responses));
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Count > 0);
             Assert.IsTrue(result.Any(c => c.GetFullDisplayText() == "mp3 - all"),
@@ -343,7 +381,7 @@ namespace UnitTestCommon
                 ("mp3", 5));
 
             List<ChipDataItem> result = null;
-            Assert.DoesNotThrow(() => result = Run(responses));
+            Assert.DoesNotThrow(() => result = RunFileTypes(responses));
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Count > 0);
             Assert.IsTrue(Texts(result).Contains("mp3"));
@@ -362,7 +400,7 @@ namespace UnitTestCommon
                 ("flac", 2));
 
             List<ChipDataItem> result = null;
-            Assert.DoesNotThrow(() => result = Run(responses));
+            Assert.DoesNotThrow(() => result = RunFileTypes(responses));
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Count > 0);
         }
@@ -385,6 +423,27 @@ namespace UnitTestCommon
                     FileTypesOnly()));
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Count > 0);
+        }
+        
+        // File Count Tests
+        [Test]
+        public void FileCount_LowVarianceDontOvershoot()
+        {
+            // naturally these should be in 4 equal groups of ~200 each. 1 - 199, 10 - 200, 11 - 200, 119-120 - 101
+            var responses = MakeResponsesWithFileCounts(
+                (1, 199),
+                (10, 200),
+                (11, 200),
+                (119, 100),
+                (120, 101)
+                );
+
+
+            var result = RunFileCounts(responses);
+            var texts = Texts(result);
+
+            // TODO finish test
+
         }
     }
 }
