@@ -425,25 +425,133 @@ namespace UnitTestCommon
             Assert.IsTrue(result.Count > 0);
         }
         
-        // File Count Tests
-        [Test]
-        public void FileCount_LowVarianceDontOvershoot()
+        // --- File Count Tests ---------------------------------------------------
+
+        private static string Serialize(List<string> chips)
         {
-            // naturally these should be in 4 equal groups of ~200 each. 1 - 199, 10 - 200, 11 - 200, 119-120 - 101
+            return "[\n" + string.Join(",\n", chips.Select(c => "  " + c)) + "\n]";
+        }
+
+        [Test]
+        public void FileCount_FewDistinctValues_AllWhales()
+        {
+            var responses = MakeResponsesWithFileCounts((1, 110), (3, 200), (10, 80));
+            Assert.AreEqual(@"[
+  1 file,
+  3 files,
+  10 files
+]", Serialize(Texts(RunFileCounts(responses))));
+        }
+
+        [Test]
+        public void FileCount_WhaleWithMinnows_UserExample()
+        {
             var responses = MakeResponsesWithFileCounts(
-                (1, 199),
-                (10, 200),
-                (11, 200),
-                (119, 100),
-                (120, 101)
-                );
+                (1, 1000), (2, 4), (3, 5), (6, 7), (9, 100));
+            Assert.AreEqual(@"[
+  1 file,
+  2 to 9 files
+]", Serialize(Texts(RunFileCounts(responses))));
+        }
 
+        [Test]
+        public void FileCount_TwoWhales_MinnowsBetween()
+        {
+            var responses = MakeResponsesWithFileCounts(
+                (1, 300), (2, 5), (3, 8), (7, 2), (10, 250), (11, 3), (20, 200));
+            Assert.AreEqual(@"[
+  1 file,
+  2 to 7 files,
+  10 files,
+  11 files,
+  20 files
+]", Serialize(Texts(RunFileCounts(responses))));
+        }
 
-            var result = RunFileCounts(responses);
-            var texts = Texts(result);
+        [Test]
+        public void FileCount_SingleDominantWhale_AllOthersMinnows()
+        {
+            var responses = MakeResponsesWithFileCounts(
+                (1, 900), (2, 3), (5, 2), (8, 1), (10, 4));
+            Assert.AreEqual(@"[
+  1 file,
+  2 to 10 files
+]", Serialize(Texts(RunFileCounts(responses))));
+        }
 
-            // TODO finish test
+        [Test]
+        public void FileCount_MinnowPool_HardSplitAt18Percent()
+        {
+            var responses = MakeResponsesWithFileCounts(
+                (1, 50), (2, 50), (3, 50), (4, 50), (5, 1),
+                (10, 50), (11, 50), (12, 50), (13, 50),
+                (20, 50), (21, 50));
+            Assert.AreEqual(@"[
+  1 to 2 files,
+  3 to 5 files,
+  10 to 11 files,
+  12 to 13 files,
+  20 to 21 files
+]", Serialize(Texts(RunFileCounts(responses))));
+        }
 
+        [Test]
+        public void FileCount_SoftZone_SplitsAtNaturalGap()
+        {
+            var responses = MakeResponsesWithFileCounts(
+                (10, 40), (11, 40), (12, 40), (20, 40), (21, 40), (22, 40));
+            Assert.AreEqual(@"[
+  10 files,
+  11 files,
+  12 files,
+  20 files,
+  21 files,
+  22 files
+]", Serialize(Texts(RunFileCounts(responses))));
+        }
+
+        [Test]
+        public void FileCount_SoftZone_SplitsAtNaturalGap2()
+        {
+            var responses = MakeResponsesWithFileCounts(
+                (1, 1), (2, 1), (4, 1), (5, 100), (6, 1), (7, 1));
+            Assert.AreEqual(@"[
+  1 to 4 files,
+  5 files,
+  6 to 7 files
+]", Serialize(Texts(RunFileCounts(responses))));
+        }
+
+        [Test]
+        public void FileCount_AllUniform_PoolSplitsReasonably()
+        {
+            var buckets = new (int, int)[100];
+            for (int i = 0; i < 100; i++)
+            {
+                buckets[i] = (i + 1, 1);
+            }
+            var responses = MakeResponsesWithFileCounts(buckets);
+            Assert.AreEqual(@"[
+  1 to 24 files,
+  25 to 48 files,
+  49 to 72 files,
+  73 to 96 files,
+  97 to 100 files
+]", Serialize(Texts(RunFileCounts(responses))));
+        }
+
+        [Test]
+        public void FileCount_EndToEnd_ViaSearchResponses()
+        {
+            var responses = MakeResponsesWithFileCounts(
+                (1, 199), (10, 200), (11, 200), (119, 100), (120, 101));
+            Assert.AreEqual(@"[
+  1 file,
+  10 files,
+  11 files,
+  119 files,
+  120 files
+]", Serialize(Texts(RunFileCounts(responses))));
         }
     }
 }

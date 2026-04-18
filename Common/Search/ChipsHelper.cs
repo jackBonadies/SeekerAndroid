@@ -10,7 +10,7 @@ namespace Seeker
     public static class ChipsHelper
     {
         public const string ALL_SUFFIX = " - all";
-        private const int TOTAL_FILENUM_BUCKETS = 4;
+        private const int MAX_FILENUM_BUCKETS = 5;
 
         /// <summary>
         /// If hide hidden is true then for counts only consider unlocked. else consider everything.
@@ -270,94 +270,383 @@ namespace Seeker
             }
         }
 
-        private static List<string> generateFileCountChips(Dictionary<int, int> fileCountCounts, int totalSearchResultCount)
+        internal struct FileCountGroup
         {
-            //second pass
-            //create file count buckets
-            List<string> chipDescriptions = new List<string>();
-            if (fileCountCounts.Count > TOTAL_FILENUM_BUCKETS)
-            {
-                // we have too many buckets, we need to group them
-                // each group consists of >= 1/4 of the results
-                int groupSize = totalSearchResultCount / TOTAL_FILENUM_BUCKETS;
-                var sortedList = fileCountCounts.ToList();
-                //key is the folder count, value is the number of times that folder count appeared.
-                sortedList.Sort((x, y) => x.Key.CompareTo(y.Key)); //low to high
-                int start = int.MinValue;
-                int partialTotal = 0;
-                int numGroups = 0;
+            public int MinValue;
+            public int MaxValue;
+            public int TotalFrequency;
+            public List<(int Value, int Frequency)> Entries;
 
-                for (int j = 0; j < sortedList.Count; j++)
-                {
-                    if (numGroups == TOTAL_FILENUM_BUCKETS - 1)
-                    {
-                        //put the rest in the last bucket
-                        if (j == sortedList.Count - 1)
-                        {
-                            //we are on the last one
-                            chipDescriptions.Add($"{sortedList[j].Key} files");
-                        }
-                        else
-                        {
-                            chipDescriptions.Add($"{sortedList[j].Key} to {sortedList[sortedList.Count - 1].Key} files");
-                        }
-                        break;
-                    }
-                    if (((sortedList[j].Value + partialTotal) >= groupSize) || (sortedList.Count - 1 == j)) //or if its the last one..
-                    {
-                        //thats all for this group
-                        if (start == int.MinValue)
-                        {
-                            //that means we start and end here
-                            numGroups++;
-                            if (sortedList[j].Key == 1)
-                            {
-                                chipDescriptions.Add($"{sortedList[j].Key} file");
-                            }
-                            else
-                            {
-                                chipDescriptions.Add($"{sortedList[j].Key} files");
-                            }
-                        }
-                        else
-                        {
-                            //that means we start and end here
-                            numGroups++;
-                            chipDescriptions.Add($"{start} to {sortedList[j].Key} files");
-                        }
-                        partialTotal = 0;
-                        start = int.MinValue;
-                    }
-                    else
-                    {
-                        if (start == int.MinValue)
-                        {
-                            start = sortedList[j].Key;
-                        }
-                        partialTotal += sortedList[j].Value;
-                    }
-                }
-            }
-            else
+            public FileCountGroup(int value, int frequency)
             {
-                // no need to group, we only have at most 4 distinct buckets
-                var sortedList = fileCountCounts.ToList();
-                sortedList.Sort((x, y) => x.Key.CompareTo(y.Key));
-                foreach (var pair in sortedList)
-                {
-                    if (pair.Key == 1)
-                    {
-                        chipDescriptions.Add($"{pair.Key} file");
-                    }
-                    else
-                    {
-                        chipDescriptions.Add($"{pair.Key} files");
-                    }
-                }
+                MinValue = value;
+                MaxValue = value;
+                TotalFrequency = frequency;
+                Entries = new List<(int, int)> { (value, frequency) };
             }
-
-            return chipDescriptions;
         }
+
+        internal static FileCountGroup MergeGroups(FileCountGroup a, FileCountGroup b)
+        {
+            var merged = new FileCountGroup();
+            merged.MinValue = Math.Min(a.MinValue, b.MinValue);
+            merged.MaxValue = Math.Max(a.MaxValue, b.MaxValue);
+            merged.TotalFrequency = a.TotalFrequency + b.TotalFrequency;
+            merged.Entries = new List<(int, int)>(a.Entries);
+            merged.Entries.AddRange(b.Entries);
+            return merged;
+        }
+
+        internal static string FormatChipDescription(int minVal, int maxVal)
+        {
+            if (minVal == maxVal)
+            {
+                if (minVal == 1)
+                {
+                    return "1 file";
+                }
+                return $"{minVal} files";
+            }
+            return $"{minVal} to {maxVal} files";
+        }
+
+        internal static List<FileCountGroup> SeparateWhalesAndPoolMinnows(List<KeyValuePair<int, int>> sorted, int totalCount)
+        {
+            double whaleThreshold = totalCount * 0.25; // outright whales
+            double hardSplit = totalCount * 0.25; // if we get over 25%, then split ahead
+            double softSplit = totalCount * 0.18; // if we get over 18%, then consider splitting ahead based on variance
+
+            var groups = new List<FileCountGroup>();
+            FileCountGroup? currentPool = null;
+
+            for (int i = 0; i < sorted.Count; i++)
+            {
+                var kvp = sorted[i];
+
+                if (kvp.Value >= whaleThreshold)
+                {
+                    if (currentPool != null)
+                    {
+                        groups.Add(currentPool.Value);
+                        currentPool = null;
+                    }
+                    groups.Add(new FileCountGroup(kvp.Key, kvp.Value));
+                }
+                else
+                {
+                    if (currentPool == null)
+                    {
+                        currentPool = new FileCountGroup(kvp.Key, kvp.Value);
+                    }
+                    else
+                    {
+                        var pool = currentPool.Value;
+                        int newFreq = pool.TotalFrequency + kvp.Value;
+
+                        bool shouldSplit = false;
+
+                        if (newFreq >= hardSplit)
+                        {
+                            shouldSplit = true;
+                        }
+                        else if (pool.TotalFrequency >= softSplit && pool.Entries.Count >= 2)
+                        {
+                            // in the soft zone: split at natural gaps
+                            double avgGap = (double)(pool.MaxValue - pool.MinValue) / (pool.Entries.Count - 1);
+                            int gapToNext = kvp.Key - pool.MaxValue;
+                            if (gapToNext > avgGap)
+                            {
+                                shouldSplit = true;
+                            }
+                        }
+
+                        if (shouldSplit)
+                        {
+                            groups.Add(pool);
+                            currentPool = new FileCountGroup(kvp.Key, kvp.Value);
+                        }
+                        else
+                        {
+                            currentPool = MergeGroups(pool, new FileCountGroup(kvp.Key, kvp.Value));
+                        }
+                    }
+                }
+            }
+
+            if (currentPool != null)
+            {
+                groups.Add(currentPool.Value);
+            }
+
+            return groups;
+        }
+
+        ///// <summary>
+        ///// Jenks Natural Breaks via DP. Partitions groups into k contiguous classes
+        ///// minimizing total weighted within-class sum of squared deviations.
+        ///// </summary>
+        //internal static List<FileCountGroup> ApplyJenksBreaks(List<FileCountGroup> groups, int k)
+        //{
+        //    int n = groups.Count;
+        //    if (n <= k)
+        //    {
+        //        return groups;
+        //    }
+
+        //    // flatten all entries for cost computation
+        //    var allEntries = new List<(int Value, int Frequency)>();
+        //    var groupStartIdx = new int[n + 1];
+        //    for (int i = 0; i < n; i++)
+        //    {
+        //        groupStartIdx[i] = allEntries.Count;
+        //        allEntries.AddRange(groups[i].Entries);
+        //    }
+        //    groupStartIdx[n] = allEntries.Count;
+
+        //    int totalEntries = allEntries.Count;
+
+        //    // prefix sums for O(1) cost queries
+        //    // cost(a,b) = sum(w*v^2) - (sum(w*v))^2 / sum(w)
+        //    double[] prefW = new double[totalEntries + 1];
+        //    double[] prefWV = new double[totalEntries + 1];
+        //    double[] prefWV2 = new double[totalEntries + 1];
+        //    for (int i = 0; i < totalEntries; i++)
+        //    {
+        //        prefW[i + 1] = prefW[i] + allEntries[i].Frequency;
+        //        prefWV[i + 1] = prefWV[i] + (double)allEntries[i].Frequency * allEntries[i].Value;
+        //        prefWV2[i + 1] = prefWV2[i] + (double)allEntries[i].Frequency * allEntries[i].Value * allEntries[i].Value;
+        //    }
+
+        //    // WSSD for entries in range [a, b] (indices into allEntries, inclusive)
+        //    double CostRange(int a, int b)
+        //    {
+        //        double w = prefW[b + 1] - prefW[a];
+        //        if (w == 0)
+        //        {
+        //            return 0;
+        //        }
+        //        double wv = prefWV[b + 1] - prefWV[a];
+        //        double wv2 = prefWV2[b + 1] - prefWV2[a];
+        //        return wv2 - (wv * wv) / w;
+        //    }
+
+        //    // WSSD for combining groups[i..j]
+        //    double CostOfGroups(int i, int j)
+        //    {
+        //        return CostRange(groupStartIdx[i], groupStartIdx[j + 1] - 1);
+        //    }
+
+        //    // dp[c, j] = min cost of partitioning groups[0..j] into c classes
+        //    double[,] dp = new double[k + 1, n];
+        //    int[,] split = new int[k + 1, n];
+
+        //    // base case: 1 class
+        //    for (int j = 0; j < n; j++)
+        //    {
+        //        dp[1, j] = CostOfGroups(0, j);
+        //    }
+
+        //    // fill DP for c = 2..k
+        //    for (int c = 2; c <= k; c++)
+        //    {
+        //        for (int j = c - 1; j < n; j++)
+        //        {
+        //            dp[c, j] = double.MaxValue;
+        //            for (int i = c - 2; i < j; i++)
+        //            {
+        //                double cost = dp[c - 1, i] + CostOfGroups(i + 1, j);
+        //                if (cost < dp[c, j])
+        //                {
+        //                    dp[c, j] = cost;
+        //                    split[c, j] = i;
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    // backtrack to recover partition
+        //    var result = new List<FileCountGroup>();
+        //    int cls = k;
+        //    int end = n - 1;
+        //    while (cls > 1)
+        //    {
+        //        int start = split[cls, end] + 1;
+        //        // merge groups[start..end] into one
+        //        var combined = groups[start];
+        //        for (int i = start + 1; i <= end; i++)
+        //        {
+        //            combined = MergeGroups(combined, groups[i]);
+        //        }
+        //        result.Add(combined);
+        //        end = split[cls, end];
+        //        cls--;
+        //    }
+        //    // first class: groups[0..end]
+        //    var first = groups[0];
+        //    for (int i = 1; i <= end; i++)
+        //    {
+        //        first = MergeGroups(first, groups[i]);
+        //    }
+        //    result.Add(first);
+        //    result.Reverse();
+
+        //    return result;
+        //}
+
+        //internal static List<string> generateFileCountChips(Dictionary<int, int> fileCountCounts, int totalSearchResultCount)
+        //{
+        //    var sorted = fileCountCounts.ToList();
+        //    sorted.Sort((x, y) => x.Key.CompareTo(y.Key));
+
+        //    var groups = SeparateWhalesAndPoolMinnows(sorted, totalSearchResultCount);
+
+        //    //// if too many groups, apply Jenks Natural Breaks to reduce
+        //    //if (groups.Count > MAX_FILENUM_BUCKETS)
+        //    //{
+        //    //    groups = ApplyJenksBreaks(groups, MAX_FILENUM_BUCKETS);
+        //    //}
+
+        //    List<string> chipDescriptions = new List<string>();
+        //    foreach (var group in groups)
+        //    {
+        //        chipDescriptions.Add(FormatChipDescription(group.MinValue, group.MaxValue));
+        //    }
+
+        //    return chipDescriptions;
+        //}
+        ///// <summary>
+        ///// Jenks Natural Breaks via DP. Partitions groups into k contiguous classes
+        ///// minimizing total weighted within-class sum of squared deviations.
+        ///// </summary>
+        //internal static List<FileCountGroup> ApplyJenksBreaks(List<FileCountGroup> groups, int k)
+        //{
+        //    int n = groups.Count;
+        //    if (n <= k)
+        //    {
+        //        return groups;
+        //    }
+
+        //    // flatten all entries for cost computation
+        //    var allEntries = new List<(int Value, int Frequency)>();
+        //    var groupStartIdx = new int[n + 1];
+        //    for (int i = 0; i < n; i++)
+        //    {
+        //        groupStartIdx[i] = allEntries.Count;
+        //        allEntries.AddRange(groups[i].Entries);
+        //    }
+        //    groupStartIdx[n] = allEntries.Count;
+
+        //    int totalEntries = allEntries.Count;
+
+        //    // prefix sums for O(1) cost queries
+        //    // cost(a,b) = sum(w*v^2) - (sum(w*v))^2 / sum(w)
+        //    double[] prefW = new double[totalEntries + 1];
+        //    double[] prefWV = new double[totalEntries + 1];
+        //    double[] prefWV2 = new double[totalEntries + 1];
+        //    for (int i = 0; i < totalEntries; i++)
+        //    {
+        //        prefW[i + 1] = prefW[i] + allEntries[i].Frequency;
+        //        prefWV[i + 1] = prefWV[i] + (double)allEntries[i].Frequency * allEntries[i].Value;
+        //        prefWV2[i + 1] = prefWV2[i] + (double)allEntries[i].Frequency * allEntries[i].Value * allEntries[i].Value;
+        //    }
+
+        //    // WSSD for entries in range [a, b] (indices into allEntries, inclusive)
+        //    double CostRange(int a, int b)
+        //    {
+        //        double w = prefW[b + 1] - prefW[a];
+        //        if (w == 0)
+        //        {
+        //            return 0;
+        //        }
+        //        double wv = prefWV[b + 1] - prefWV[a];
+        //        double wv2 = prefWV2[b + 1] - prefWV2[a];
+        //        return wv2 - (wv * wv) / w;
+        //    }
+
+        //    // WSSD for combining groups[i..j]
+        //    double CostOfGroups(int i, int j)
+        //    {
+        //        return CostRange(groupStartIdx[i], groupStartIdx[j + 1] - 1);
+        //    }
+
+        //    // dp[c, j] = min cost of partitioning groups[0..j] into c classes
+        //    double[,] dp = new double[k + 1, n];
+        //    int[,] split = new int[k + 1, n];
+
+        //    // base case: 1 class
+        //    for (int j = 0; j < n; j++)
+        //    {
+        //        dp[1, j] = CostOfGroups(0, j);
+        //    }
+
+        //    // fill DP for c = 2..k
+        //    for (int c = 2; c <= k; c++)
+        //    {
+        //        for (int j = c - 1; j < n; j++)
+        //        {
+        //            dp[c, j] = double.MaxValue;
+        //            for (int i = c - 2; i < j; i++)
+        //            {
+        //                double cost = dp[c - 1, i] + CostOfGroups(i + 1, j);
+        //                if (cost < dp[c, j])
+        //                {
+        //                    dp[c, j] = cost;
+        //                    split[c, j] = i;
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    // backtrack to recover partition
+        //    var result = new List<FileCountGroup>();
+        //    int cls = k;
+        //    int end = n - 1;
+        //    while (cls > 1)
+        //    {
+        //        int start = split[cls, end] + 1;
+        //        // merge groups[start..end] into one
+        //        var combined = groups[start];
+        //        for (int i = start + 1; i <= end; i++)
+        //        {
+        //            combined = MergeGroups(combined, groups[i]);
+        //        }
+        //        result.Add(combined);
+        //        end = split[cls, end];
+        //        cls--;
+        //    }
+        //    // first class: groups[0..end]
+        //    var first = groups[0];
+        //    for (int i = 1; i <= end; i++)
+        //    {
+        //        first = MergeGroups(first, groups[i]);
+        //    }
+        //    result.Add(first);
+        //    result.Reverse();
+
+        //    return result;
+        //}
+
+        //internal static List<string> generateFileCountChips(Dictionary<int, int> fileCountCounts, int totalSearchResultCount)
+        //{
+        //    var sorted = fileCountCounts.ToList();
+        //    sorted.Sort((x, y) => x.Key.CompareTo(y.Key));
+
+        //    var groups = SeparateWhalesAndPoolMinnows(sorted, totalSearchResultCount);
+
+        //    //// if too many groups, apply Jenks Natural Breaks to reduce
+        //    //if (groups.Count > MAX_FILENUM_BUCKETS)
+        //    //{
+        //    //    groups = ApplyJenksBreaks(groups, MAX_FILENUM_BUCKETS);
+        //    //}
+
+        //    List<string> chipDescriptions = new List<string>();
+        //    foreach (var group in groups)
+        //    {
+        //        chipDescriptions.Add(FormatChipDescription(group.MinValue, group.MaxValue));
+        //    }
+
+        //    return chipDescriptions;
+        //}
 
         public static List<Tuple<string, HashSet<string>>> GetKeywords(List<Soulseek.SearchResponse> responses, string searchTerm)
         {
