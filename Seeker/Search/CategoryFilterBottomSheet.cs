@@ -164,27 +164,26 @@ namespace Seeker
             var promoted = new List<ChipDataItem>();
             for (int i = categoryItems.Count - 1; i >= 0; i--)
             {
-                var c = categoryItems[i];
-                if (c.ChipType != ChipType.FileType)
+                if (!(categoryItems[i] is FileTypeChipDataItem ft))
                 {
                     continue;
                 }
-                if (!c.HasTag())
+                if (!ft.IsOtherCase)
                 {
                     continue;
                 }
-                if (c.BaseDisplayText.Contains("(") || c.IsAllCase)
+                if (ft.BaseFileType.Contains("(") || ft.IsAllCase)
                 {
                     continue;
                 }
 
                 categoryItems.RemoveAt(i);
-                allItems.Remove(c);
+                allItems.Remove(ft);
 
                 int insertAt = i;
-                foreach (var childName in c.Children)
+                foreach (var childName in ft.Children)
                 {
-                    var newChip = new ChipDataItem(ChipType.FileType, false, childName);
+                    var newChip = new FileTypeChipDataItem(childName);
                     categoryItems.Insert(insertAt, newChip);
                     allItems.Add(newChip);
                     promoted.Add(newChip);
@@ -203,7 +202,7 @@ namespace Seeker
                 {
                     Kind = RowKind.Leaf,
                     Chip = chip,
-                    DisplayNormal = chip.BaseDisplayText,
+                    DisplayNormal = chip.GetFullDisplayText(),
                 });
             }
             return rows;
@@ -217,13 +216,11 @@ namespace Seeker
             bool emittedSyntheticOtherParent = false;
             while (i < chips.Count)
             {
-                var chip = chips[i];
+                var ft = (FileTypeChipDataItem)chips[i];
                 bool isNewTopLevelGroup = false;
 
-                if (orphanChildren.Contains(chip))
+                if (orphanChildren.Contains(ft))
                 {
-                    // Emit one synthetic "Other" parent the first time we hit a promoted chip,
-                    // then stream all promoted chips as its indented children.
                     if (!emittedSyntheticOtherParent)
                     {
                         int aggregate = 0;
@@ -231,8 +228,6 @@ namespace Seeker
                         {
                             if (orphanChildren.Contains(promoted) && counts.TryGetValue(promoted, out var pc))
                             {
-                                // FileType responses are exclusive (each response has one dominant
-                                // type), so summing per-child counts is exact.
                                 aggregate += pc;
                             }
                         }
@@ -252,35 +247,35 @@ namespace Seeker
                     rows.Add(new SheetRow
                     {
                         Kind = RowKind.Child,
-                        Chip = chip,
+                        Chip = ft,
                         ParentChip = null,
-                        DisplayLight = chip.BaseDisplayText,
+                        DisplayLight = ft.BaseFileType,
                         IndentAsChild = true,
                         IsOrphanChild = true,
                     });
                     i++;
                 }
-                else if (chip.IsAllCase)
+                else if (ft.IsAllCase)
                 {
-                    string baseName = chip.BaseDisplayText;
+                    string baseName = ft.BaseFileType;
                     rows.Add(new SheetRow
                     {
                         Kind = RowKind.Parent,
-                        Chip = chip,
+                        Chip = ft,
                         DisplayBold = PrettyBase(baseName),
                         ShowTopSeparator = seenTopLevel,
                     });
                     isNewTopLevelGroup = true;
                     i++;
-                    while (i < chips.Count && !orphanChildren.Contains(chips[i]) && IsChildOf(chips[i], baseName))
+                    while (i < chips.Count && !orphanChildren.Contains(chips[i]) && IsChildOf((FileTypeChipDataItem)chips[i], baseName))
                     {
-                        var child = chips[i];
+                        var child = (FileTypeChipDataItem)chips[i];
                         rows.Add(new SheetRow
                         {
                             Kind = RowKind.Child,
                             Chip = child,
-                            ParentChip = chip,
-                            DisplayLight = StripBasePrefix(child.BaseDisplayText, baseName),
+                            ParentChip = ft,
+                            DisplayLight = StripBasePrefix(child.BaseFileType, baseName),
                             IndentAsChild = true,
                         });
                         i++;
@@ -291,18 +286,18 @@ namespace Seeker
                     var row = new SheetRow
                     {
                         Kind = RowKind.Leaf,
-                        Chip = chip,
+                        Chip = ft,
                         ShowTopSeparator = seenTopLevel,
                     };
-                    int paren = chip.BaseDisplayText.IndexOf(" (", System.StringComparison.Ordinal);
-                    if (paren > 0 && chip.BaseDisplayText.EndsWith(")"))
+                    int paren = ft.BaseFileType.IndexOf(" (", System.StringComparison.Ordinal);
+                    if (paren > 0 && ft.BaseFileType.EndsWith(")"))
                     {
-                        row.DisplayBold = PrettyBase(chip.BaseDisplayText.Substring(0, paren));
-                        row.DisplayLight = " " + chip.BaseDisplayText.Substring(paren + 1);
+                        row.DisplayBold = PrettyBase(ft.BaseFileType.Substring(0, paren));
+                        row.DisplayLight = " " + ft.BaseFileType.Substring(paren + 1);
                     }
                     else
                     {
-                        row.DisplayBold = chip.BaseDisplayText;
+                        row.DisplayBold = ft.BaseFileType;
                     }
                     rows.Add(row);
                     isNewTopLevelGroup = true;
@@ -317,9 +312,9 @@ namespace Seeker
             return rows;
         }
 
-        private static bool IsChildOf(ChipDataItem chip, string baseName)
+        private static bool IsChildOf(FileTypeChipDataItem chip, string baseName)
         {
-            return chip.BaseDisplayText.StartsWith(baseName) && !chip.IsAllCase;
+            return chip.BaseFileType.StartsWith(baseName) && !chip.IsAllCase;
         }
 
         private static string StripBasePrefix(string displayText, string baseName)

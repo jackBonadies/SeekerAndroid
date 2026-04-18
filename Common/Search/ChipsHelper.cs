@@ -33,8 +33,7 @@ namespace Seeker
 
                 if (smartFilterOptions.NumFilesEnabled)
                 {
-                    List<string> chipDescriptions = generateFileCountChips(fileCountCounts, totalSearchResultCount);
-                    finalData[ChipType.FileCount] = chipDescriptions.Select(str => new ChipDataItem(ChipType.FileCount, false, str));
+                    finalData[ChipType.FileCount] = generateFileCountChips(fileCountCounts, totalSearchResultCount);
                 }
 
                 if (smartFilterOptions.FileTypesEnabled)
@@ -44,7 +43,7 @@ namespace Seeker
                     List<string> sortedGroupedFileTypes = sortAndGroupFileTypes(fullFileTypeCounts);
 
                     var chipsListFileTypes = sortedGroupedFileTypes.Select(
-                        str => str.EndsWith(ALL_SUFFIX) ? new ChipDataItem(ChipType.FileType, false, str.Substring(0, str.Length - ALL_SUFFIX.Length), true) : new ChipDataItem(ChipType.FileType, false, str)).ToList();
+                        (Func<string, ChipDataItem>)(str => str.EndsWith(ALL_SUFFIX) ? new FileTypeChipDataItem(str.Substring(0, str.Length - ALL_SUFFIX.Length), true) : new FileTypeChipDataItem(str))).ToList();
 
                     condenseFileTypeChips(fullFileTypeCounts, chipsListFileTypes);
                     finalData[ChipType.FileType] = chipsListFileTypes;
@@ -53,17 +52,17 @@ namespace Seeker
 
             if (smartFilterOptions.KeywordsEnabled)
             {
-                List<ChipDataItem> chipKeywords = new List<ChipDataItem>();
+                var chipKeywords = new List<KeywordChipDataItem>();
                 var keywords = GetKeywords(responses, searchTerm);
                 foreach (var keyword in keywords)
                 {
                     if (keyword.Item2 != null)
                     {
-                        chipKeywords.Add(new ChipDataItem(ChipType.Keyword, false, keyword.Item1, keyword.Item2.ToList()));
+                        chipKeywords.Add(new KeywordChipDataItem(keyword.Item1, keyword.Item2));
                     }
                     else
                     {
-                        chipKeywords.Add(new ChipDataItem(ChipType.Keyword, false, keyword.Item1));
+                        chipKeywords.Add(new KeywordChipDataItem(keyword.Item1));
                     }
                 }
                 finalData[ChipType.Keyword] = chipKeywords;
@@ -155,20 +154,20 @@ namespace Seeker
             }
         }
 
-        private static List<string> generateFileCountChips(Dictionary<int, int> fileCountCounts, int totalSearchResultCount)
+        private static List<FileCountChipDataItem> generateFileCountChips(Dictionary<int, int> fileCountCounts, int totalSearchResultCount)
         {
             var sorted = fileCountCounts.ToList();
             sorted.Sort((x, y) => x.Key.CompareTo(y.Key));
 
             var groups = SeparateWhalesAndPoolMinnows(sorted, totalSearchResultCount);
 
-            List<string> chipDescriptions = new List<string>();
+            var chips = new List<FileCountChipDataItem>();
             foreach (var group in groups)
             {
-                chipDescriptions.Add(FormatChipDescription(group.MinValue, group.MaxValue));
+                chips.Add(new FileCountChipDataItem(group.MinValue, group.MaxValue));
             }
 
-            return chipDescriptions;
+            return chips;
         }
 
 
@@ -206,14 +205,14 @@ namespace Seeker
             {
                 //a lot of times we have wayyy too many mp3 varients.
                 //if more than 5 variants or if 2+ variants are less than 7.5% then group them up.
-                var variantsToGroupUp = new List<(ChipDataItem baseChip, int variantsPastCutoff, int totalCount)>();
-                ChipDataItem? currentBaseChip = null;
+                var variantsToGroupUp = new List<(FileTypeChipDataItem baseChip, int variantsPastCutoff, int totalCount)>();
+                FileTypeChipDataItem? currentBaseChip = null;
                 int currentMax = -1;
                 int counter = 0;
                 int variantsPastCutoff = 0;
-                foreach (ChipDataItem chipItem in chipsListFileTypes)
+                foreach (FileTypeChipDataItem chipItem in chipsListFileTypes)
                 {
-                    if (currentBaseChip != null && (chipItem.BaseDisplayText.Contains(currentBaseChip.BaseDisplayText + " ") || chipItem.BaseDisplayText == currentBaseChip.BaseDisplayText))
+                    if (currentBaseChip != null && (chipItem.BaseFileType.Contains(currentBaseChip.BaseFileType + " ") || chipItem.BaseFileType == currentBaseChip.BaseFileType))
                     {
                         counter++;
                         if (counter > 5 || (double)(fullFileTypeCounts[chipItem.GetFullDisplayText()]) / currentMax < .075)
@@ -248,7 +247,7 @@ namespace Seeker
                     var rangeToCondense = chipsListFileTypes.GetRange(start, tup.variantsPastCutoff);
                     //put range to condense in the tag...
                     chipsListFileTypes.RemoveRange(start, tup.variantsPastCutoff);
-                    chipsListFileTypes.Insert(start, new ChipDataItem(ChipType.FileType, false, tup.baseChip.BaseDisplayText + " (other)", rangeToCondense.Select(it=>it.GetFullDisplayText()).ToList()));
+                    chipsListFileTypes.Insert(start, new FileTypeChipDataItem(tup.baseChip.BaseFileType + " (other)", rangeToCondense.Select(it=>it.GetFullDisplayText()).ToList()));
                 }
 
                 //if still more then 14 chop off those at the end...
@@ -258,14 +257,14 @@ namespace Seeker
                 {
                     while (pointToSplit < chipsListFileTypes.Count())
                     {
-                        string fType = chipsListFileTypes[pointToSplit].BaseDisplayText;
+                        string fType = ((FileTypeChipDataItem)chipsListFileTypes[pointToSplit]).BaseFileType;
                         string ftypebase = fType;
                         if (fType.Contains(" ("))
                         {
                             ftypebase = fType.Substring(0, fType.IndexOf(" ("));
 
                         }
-                        if (!(chipsListFileTypes[pointToSplit - 1].BaseDisplayText.Contains(ftypebase)))
+                        if (!(((FileTypeChipDataItem)chipsListFileTypes[pointToSplit - 1]).BaseFileType.Contains(ftypebase)))
                         {
                             //then it is not part of a group, we are done and can split here...
                             break;
@@ -281,7 +280,7 @@ namespace Seeker
                         var endToCondense = chipsListFileTypes.GetRange(pointToSplit, chipsListFileTypes.Count() - pointToSplit);
                         //put range to condense in the tag...
                         chipsListFileTypes.RemoveRange(pointToSplit, cnt);
-                        chipsListFileTypes.Insert(pointToSplit, new ChipDataItem(ChipType.FileType, false, "other", endToCondense.Select(it => it.GetFullDisplayText()).ToList()));
+                        chipsListFileTypes.Insert(pointToSplit, new FileTypeChipDataItem("other", endToCondense.Select(it => it.GetFullDisplayText()).ToList()));
                     }
                 }
             }
@@ -312,19 +311,6 @@ namespace Seeker
             merged.Entries = new List<(int, int)>(a.Entries);
             merged.Entries.AddRange(b.Entries);
             return merged;
-        }
-
-        internal static string FormatChipDescription(int minVal, int maxVal)
-        {
-            if (minVal == maxVal)
-            {
-                if (minVal == 1)
-                {
-                    return "1 file";
-                }
-                return $"{minVal} files";
-            }
-            return $"{minVal} to {maxVal} files";
         }
 
         internal static List<FileCountGroup> SeparateWhalesAndPoolMinnows(List<KeyValuePair<int, int>> sorted, int totalCount)

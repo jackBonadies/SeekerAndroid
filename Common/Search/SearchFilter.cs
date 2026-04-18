@@ -38,57 +38,97 @@ namespace Seeker
         }
     }
 
-    public class ChipDataItem
+    public abstract class ChipDataItem
     {
-        public string GetFullDisplayText()
-        {
-            if (IsAllCase)
-            {
-                // TODO global const suffix
-                return BaseDisplayText + ChipsHelper.ALL_SUFFIX;
-            } 
-            else
-            {
-                return BaseDisplayText;
-            }
-        }
-
-        public readonly string BaseDisplayText;
-        public readonly List<string>? Children; //this is for "other". this is what the chip actually represents..
-        public readonly ChipType ChipType;
-        public bool LastInGroup; //last in group AND there is more after it
-        public bool IsAllCase = false;
+        public abstract string GetFullDisplayText();
+        public abstract ChipType ChipType { get; }
+        public bool LastInGroup;
         public bool IsChecked = false;
-        public bool IsEnabled = true; // to support variants when " - all" is checked
+        public bool IsEnabled = true;
+    }
 
-        public ChipDataItem(ChipType chipType, bool lastInGroup, string displayText)
+    public class FileTypeChipDataItem : ChipDataItem
+    {
+        public override ChipType ChipType => ChipType.FileType;
+        public readonly string BaseFileType;
+        public readonly List<string>? Children;
+        public bool IsAllCase = false;
+
+        public bool IsOtherCase => Children != null;
+
+        public FileTypeChipDataItem(string baseFileType)
         {
-            this.ChipType = chipType;
-            this.LastInGroup = lastInGroup;
-            this.BaseDisplayText = displayText;
-            this.Children = null;
+            this.BaseFileType = baseFileType;
         }
 
-        public ChipDataItem(ChipType chipType, bool lastInGroup, string displayText, List<string> children)
+        public FileTypeChipDataItem(string baseFileType, bool isAllCase)
         {
-            this.ChipType = chipType;
-            this.LastInGroup = lastInGroup;
-            this.BaseDisplayText = displayText;
+            this.BaseFileType = baseFileType;
+            this.IsAllCase = isAllCase;
+        }
+
+        public FileTypeChipDataItem(string baseFileType, List<string> children)
+        {
+            this.BaseFileType = baseFileType;
             this.Children = children;
         }
 
-        public ChipDataItem(ChipType chipType, bool lastInGroup, string displayText, bool isAllCase)
+        public override string GetFullDisplayText()
         {
-            this.ChipType = chipType;
-            this.LastInGroup = lastInGroup;
-            this.BaseDisplayText = displayText;
-            this.IsAllCase = isAllCase;
-            this.Children = null;
+            if (IsAllCase)
+            {
+                return BaseFileType + ChipsHelper.ALL_SUFFIX;
+            }
+            return BaseFileType;
+        }
+    }
+
+    public class FileCountChipDataItem : ChipDataItem
+    {
+        public override ChipType ChipType => ChipType.FileCount;
+        public readonly int FileCountStart;
+        public readonly int FileCountEnd;
+
+        public FileCountChipDataItem(int fileCountStart, int fileCountEnd)
+        {
+            this.FileCountStart = fileCountStart;
+            this.FileCountEnd = fileCountEnd;
         }
 
-        public bool HasTag()
+        public override string GetFullDisplayText()
         {
-            return this.Children != null;
+            if (FileCountStart == FileCountEnd)
+            {
+                if (FileCountStart == 1)
+                {
+                    return "1 file";
+                }
+                return $"{FileCountStart} files";
+            }
+            return $"{FileCountStart} to {FileCountEnd} files";
+        }
+    }
+
+    public class KeywordChipDataItem : ChipDataItem
+    {
+        public override ChipType ChipType => ChipType.Keyword;
+        public readonly string Keyword;
+        public readonly HashSet<string>? InvariantVariants;
+
+        public KeywordChipDataItem(string keyword)
+        {
+            this.Keyword = keyword;
+        }
+
+        public KeywordChipDataItem(string keyword, HashSet<string> invariantVariants)
+        {
+            this.Keyword = keyword;
+            this.InvariantVariants = invariantVariants;
+        }
+
+        public override string GetFullDisplayText()
+        {
+            return Keyword;
         }
     }
 
@@ -103,7 +143,7 @@ namespace Seeker
             NumFiles = new List<int>();
             FileRanges = new List<Tuple<int, int>>();
             Keywords = new List<string>();
-            KeywordInvariant = new List<List<string>>();
+            KeywordInvariant = new List<HashSet<string>>();
 
         }
         public List<string> AllVariantsFileType;
@@ -113,7 +153,7 @@ namespace Seeker
 
         //these are the keywords.  keywords invariant will contain say "Paul and Jake", "Paul & Jake". they are OR'd inner.  both collections outer are AND'd.
         public List<string> Keywords;
-        public List<List<string>> KeywordInvariant;
+        public List<HashSet<string>> KeywordInvariant;
 
         public bool IsEmpty()
         {
@@ -129,61 +169,54 @@ namespace Seeker
             var checkedChips = chipDataItems.Where(i => i.IsChecked).ToList();
             foreach (var chip in checkedChips)
             {
-                if (chip.ChipType == ChipType.FileCount)
+                switch (chip)
                 {
-                    if (chip.BaseDisplayText.EndsWith(" file"))
-                    {
-                        chipFilter.NumFiles.Add(1);
-                    }
-                    else if (chip.BaseDisplayText.Contains(" to "))
-                    {
-                        int endmin = chip.BaseDisplayText.IndexOf(" to ");
-                        int min = int.Parse(chip.BaseDisplayText.Substring(0, endmin));
-                        int max = int.Parse(chip.BaseDisplayText.Substring(endmin + 4, chip.BaseDisplayText.IndexOf(" files") - (endmin + 4)));
-                        chipFilter.FileRanges.Add(new Tuple<int, int>(min, max));
-                    }
-                    else if (chip.BaseDisplayText.EndsWith(" files"))
-                    {
-                        chipFilter.NumFiles.Add(int.Parse(chip.BaseDisplayText.Replace(" files", "")));
-                    }
-                }
-                else if (chip.ChipType == ChipType.FileType)
-                {
-                    if (chip.Children != null)
-                    {
-                        foreach (var subChipString in chip.Children)
+                    case FileCountChipDataItem fc:
+                        if (fc.FileCountStart == fc.FileCountEnd)
                         {
-                            //its okay if this contains "mp3 (other)" say because if it does then by definition it will also contain
-                            //mp3 - all bc we dont split groups.
-                            if (subChipString.EndsWith(ChipsHelper.ALL_SUFFIX))
+                            chipFilter.NumFiles.Add(fc.FileCountStart);
+                        }
+                        else
+                        {
+                            chipFilter.FileRanges.Add(new Tuple<int, int>(fc.FileCountStart, fc.FileCountEnd));
+                        }
+                        break;
+
+                    case FileTypeChipDataItem ft:
+                        if (ft.Children != null)
+                        {
+                            foreach (var subChipString in ft.Children)
                             {
-                                chipFilter.AllVariantsFileType.Add(subChipString.Replace(ChipsHelper.ALL_SUFFIX, ""));
-                            }
-                            else
-                            {
-                                chipFilter.SpecificFileType.Add(subChipString);
+                                if (subChipString.EndsWith(ChipsHelper.ALL_SUFFIX))
+                                {
+                                    chipFilter.AllVariantsFileType.Add(subChipString.Replace(ChipsHelper.ALL_SUFFIX, ""));
+                                }
+                                else
+                                {
+                                    chipFilter.SpecificFileType.Add(subChipString);
+                                }
                             }
                         }
-                    }
-                    else if (chip.IsAllCase)
-                    {
-                        chipFilter.AllVariantsFileType.Add(chip.BaseDisplayText);
-                    }
-                    else
-                    {
-                        chipFilter.SpecificFileType.Add(chip.BaseDisplayText);
-                    }
-                }
-                else if (chip.ChipType == ChipType.Keyword)
-                {
-                    if (chip.Children == null)
-                    {
-                        chipFilter.Keywords.Add(chip.BaseDisplayText);
-                    }
-                    else
-                    {
-                        chipFilter.KeywordInvariant.Add(chip.Children);
-                    }
+                        else if (ft.IsAllCase)
+                        {
+                            chipFilter.AllVariantsFileType.Add(ft.BaseFileType);
+                        }
+                        else
+                        {
+                            chipFilter.SpecificFileType.Add(ft.BaseFileType);
+                        }
+                        break;
+
+                    case KeywordChipDataItem kw:
+                        if (kw.InvariantVariants == null)
+                        {
+                            chipFilter.Keywords.Add(kw.Keyword);
+                        }
+                        else
+                        {
+                            chipFilter.KeywordInvariant.Add(kw.InvariantVariants);
+                        }
+                        break;
                 }
             }
             return chipFilter;
@@ -318,7 +351,7 @@ namespace Seeker
                         return false;
                     }
                 }
-                foreach (List<string> keywordsInvar in chipFilter.KeywordInvariant)
+                foreach (HashSet<string> keywordsInvar in chipFilter.KeywordInvariant)
                 {
                     //do any match?
                     bool anyMatch = false;

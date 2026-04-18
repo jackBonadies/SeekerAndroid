@@ -145,7 +145,7 @@ namespace UnitTestCommon
             Assert.AreEqual("flacxx", texts[4]);
             Assert.AreEqual(5, result.Count);
 
-            Assert.IsTrue(result.All(c => c.ChipType == ChipType.FileType));
+            Assert.IsTrue(result.All(c => c is FileTypeChipDataItem));
         }
 
         [Test]
@@ -186,7 +186,7 @@ namespace UnitTestCommon
                 Assert.AreEqual("ogg", texts[8]);
                 Assert.AreEqual("wav", texts[9]);
 
-                Assert.IsFalse(result.Any(c => c.HasTag()), "no (other) bucket expected at this size");
+                Assert.IsFalse(result.Any(c => ((FileTypeChipDataItem)c).IsOtherCase), "no (other) bucket expected at this size");
             }
         }
 
@@ -205,14 +205,14 @@ namespace UnitTestCommon
             // 30 > 14 triggers grouping; with no bases, only the trailing tail-chop fires.
             Assert.AreEqual(14, result.Count);
 
-            var last = result[13];
-            Assert.AreEqual("other", last.BaseDisplayText);
-            Assert.IsTrue(last.HasTag());
+            var last = (FileTypeChipDataItem)result[13];
+            Assert.AreEqual("other", last.BaseFileType);
+            Assert.IsTrue(last.IsOtherCase);
             Assert.AreEqual(17, last.Children.Count); // 30 - 13
 
             // Union of the 13 top-level chip labels + the "other" children equals the 30 inputs.
             var allInputs = Enumerable.Range(0, 30).Select(i => $"t{i:D2}").ToHashSet();
-            var observed = new HashSet<string>(result.Take(13).Select(c => c.BaseDisplayText));
+            var observed = new HashSet<string>(result.Take(13).Select(c => ((FileTypeChipDataItem)c).BaseFileType));
             observed.UnionWith(last.Children);
             Assert.IsTrue(allInputs.SetEquals(observed));
         }
@@ -247,25 +247,26 @@ namespace UnitTestCommon
             // mp3 group occupies first 5 slots: "- all", 3 top variants, "(other)" with 4 rare variants
             Assert.AreEqual("mp3 - all", texts[0]);
             Assert.AreEqual("mp3 (other)", texts[4]);
-            Assert.IsTrue(result[4].HasTag());
-            Assert.AreEqual(4, result[4].Children.Count);
+            var mp3Other = (FileTypeChipDataItem)result[4];
+            Assert.IsTrue(mp3Other.IsOtherCase);
+            Assert.AreEqual(4, mp3Other.Children.Count);
 
             // trailing "other" bucket with the overflow t## types
-            var last = result[13];
-            Assert.AreEqual("other", last.BaseDisplayText);
-            Assert.IsTrue(last.HasTag());
+            var last = (FileTypeChipDataItem)result[13];
+            Assert.AreEqual("other", last.BaseFileType);
+            Assert.IsTrue(last.IsOtherCase);
             Assert.AreEqual(22, last.Children.Count);
 
             // All 30 t## inputs accounted for across visible chips + both "other" buckets
             var allTInputs = Enumerable.Range(0, 30).Select(i => $"t{i:D2}").ToHashSet();
             var observedT = new HashSet<string>();
-            foreach (var chip in result)
+            foreach (var chip in result.Cast<FileTypeChipDataItem>())
             {
-                if (chip.BaseDisplayText.StartsWith("t"))
+                if (chip.BaseFileType.StartsWith("t"))
                 {
-                    observedT.Add(chip.BaseDisplayText);
+                    observedT.Add(chip.BaseFileType);
                 }
-                if (chip.HasTag())
+                if (chip.IsOtherCase)
                 {
                     foreach (var child in chip.Children)
                     {
@@ -314,8 +315,8 @@ namespace UnitTestCommon
         {
             var result = RunFileTypes(MakeResponses(("mp3", 1)));
             Assert.AreEqual(1, result.Count);
-            Assert.AreEqual("mp3", result[0].BaseDisplayText);
-            Assert.IsFalse(result[0].HasTag());
+            Assert.AreEqual("mp3", ((FileTypeChipDataItem)result[0]).BaseFileType);
+            Assert.IsFalse(((FileTypeChipDataItem)result[0]).IsOtherCase);
         }
 
         [Test]
@@ -334,8 +335,8 @@ namespace UnitTestCommon
             var result = RunFileTypes(responses);
 
             Assert.AreEqual(15, result.Count);
-            Assert.IsFalse(result.Any(c => c.BaseDisplayText == "other"));
-            Assert.AreEqual("topper", result[0].BaseDisplayText); // highest count sorts first
+            Assert.IsFalse(result.Any(c => ((FileTypeChipDataItem)c).BaseFileType == "other"));
+            Assert.AreEqual("topper", ((FileTypeChipDataItem)result[0]).BaseFileType); // highest count sorts first
         }
 
         [Test]

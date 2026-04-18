@@ -33,9 +33,9 @@ namespace Seeker
         /// multiple for a type should be OR'd together. none means all.
         /// </summary>
         /// <returns></returns>
-        public List<ChipDataItem> GetCheckedItemsForType(ChipType type)
+        public List<T> GetCheckedItemsForType<T>() where T : ChipDataItem
         {
-            return localDataSet.Where(item => item.ChipType == type && item.IsChecked && item.IsEnabled).ToList();
+            return localDataSet.OfType<T>().Where(item => item.IsChecked && item.IsEnabled).ToList();
         }
 
         private void Chip_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
@@ -46,18 +46,15 @@ namespace Seeker
             localDataSet[pos].IsChecked = e.IsChecked;
             if (prevValue != e.IsChecked)
             {
-                if (localDataSet[pos].ChipType == ChipType.FileType)
+                if (localDataSet[pos] is FileTypeChipDataItem ftChip && ftChip.IsAllCase)
                 {
-                    if (localDataSet[pos].IsAllCase)
+                    string baseType = ftChip.BaseFileType;
+                    for (int i = 0; i < localDataSet.Count; i++)
                     {
-                        string baseType = localDataSet[pos].BaseDisplayText;
-                        for (int i = 0; i < localDataSet.Count; i++)
+                        if (localDataSet[i] is FileTypeChipDataItem sibling && !sibling.IsAllCase && sibling.BaseFileType.Contains(baseType) && sibling.BaseFileType != ftChip.BaseFileType)
                         {
-                            if (!localDataSet[i].IsAllCase && localDataSet[i].BaseDisplayText.Contains(baseType) && localDataSet[i].BaseDisplayText != localDataSet[pos].BaseDisplayText)
-                            {
-                                localDataSet[i].IsEnabled = !e.IsChecked;
-                                this.NotifyItemChanged(i); //needed to turn off animations for this. else doesn't look too good.
-                            }
+                            sibling.IsEnabled = !e.IsChecked;
+                            this.NotifyItemChanged(i);
                         }
                     }
                 }
