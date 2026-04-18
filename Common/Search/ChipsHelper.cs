@@ -53,7 +53,7 @@ namespace Seeker
             if (smartFilterOptions.KeywordsEnabled)
             {
                 var chipKeywords = new List<KeywordChipDataItem>();
-                var keywords = GetKeywords(responses, searchTerm);
+                var keywords = getKeywords(responses, searchTerm);
                 foreach (var keyword in keywords)
                 {
                     if (keyword.Item2 != null)
@@ -385,7 +385,7 @@ namespace Seeker
         }
 
 
-        public static List<Tuple<string, HashSet<string>>> GetKeywords(List<Soulseek.SearchResponse> responses, string searchTerm)
+        public static List<Tuple<string, HashSet<string>>> getKeywords(List<Soulseek.SearchResponse> responses, string searchTerm)
         {
             try
             {
@@ -395,27 +395,27 @@ namespace Seeker
                 int totalCount = responses.Count();
                 for (int i = 0; i < totalCount; i++)
                 {
-                    string fline = Common.Helpers.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
+                    string folderName = Common.Helpers.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
 
                     //fline = fline.Replace(" - ", " ");
                     //fline = fline.Replace(", ", " ");
-                    if (fline.StartsWith(" - "))
+                    if (folderName.StartsWith(" - "))
                     {
-                        fline = fline.Substring(3);
+                        folderName = folderName.Substring(3);
                     }
-                    fline = fline.Trim();
+                    folderName = folderName.Trim();
 
                     //fline = fline.ToLower(); //this should be moved so its only for the keys..
 
                     //test if something is in parenthesis and treat it specially bc its likely attributes???
 
-                    foreach (string term in fline.Split(new string[] { "- ", " -", "{", "}", "[", "]", "(", ")", " _ " }, StringSplitOptions.RemoveEmptyEntries))
+                    foreach (string term in folderName.Split(new string[] { "- ", " -", "{", "}", "[", "]", "(", ")", " _ " }, StringSplitOptions.RemoveEmptyEntries))
                     {
                         bool inParen = false;
                         bool startsWithYear = false;
                         int dateLen = 0;
                         string trimmedTerm = term.Trim();
-                        //Trippie_Redd-Trip_At_Knight-WEB-2021-ESG this is its own thing.. so just continue after processing...
+                        //Artist_Name-Album_Name-WEB-2021-ESG this is its own thing.. so just continue after processing...
                         if (KeywordHelper.IsNoSpacesFormat(trimmedTerm))
                         {
                             foreach (string t in trimmedTerm.Replace('_', ' ').Split(new string[] { "-" }, StringSplitOptions.RemoveEmptyEntries))
@@ -425,7 +425,7 @@ namespace Seeker
                             continue;
                         }
 
-                        if (KeywordHelper.IsInParenthesis(trimmedTerm, fline))
+                        if (KeywordHelper.IsInParenthesis(trimmedTerm, folderName))
                         {
                             //normally if in parenthesis those are attributes so split them by ','
                             inParen = true;

@@ -105,7 +105,7 @@ namespace Seeker
                 }
                 return $"{FileCountStart} files";
             }
-            return $"{FileCountStart} to {FileCountEnd} files";
+            return $"{FileCountStart}-{FileCountEnd} files";
         }
     }
 
