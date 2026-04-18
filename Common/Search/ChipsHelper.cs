@@ -155,6 +155,23 @@ namespace Seeker
             }
         }
 
+        private static List<string> generateFileCountChips(Dictionary<int, int> fileCountCounts, int totalSearchResultCount)
+        {
+            var sorted = fileCountCounts.ToList();
+            sorted.Sort((x, y) => x.Key.CompareTo(y.Key));
+
+            var groups = SeparateWhalesAndPoolMinnows(sorted, totalSearchResultCount);
+
+            List<string> chipDescriptions = new List<string>();
+            foreach (var group in groups)
+            {
+                chipDescriptions.Add(FormatChipDescription(group.MinValue, group.MaxValue));
+            }
+
+            return chipDescriptions;
+        }
+
+
         private static List<string> sortAndGroupFileTypes(Dictionary<string, int> fullFileTypeCounts)
         {
             // now sort and group variants so they are together
