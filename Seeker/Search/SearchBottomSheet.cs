@@ -1,8 +1,9 @@
 using Android.OS;
 using Android.Views;
-using Android.Widget;
-using Google.Android.Material.BottomSheet;
 using Common;
+using Google.Android.Material.BottomSheet;
+using Google.Android.Material.Button;
+using Google.Android.Material.CheckBox;
 using Seeker.Search;
 
 namespace Seeker
@@ -11,70 +12,72 @@ namespace Seeker
     {
         private class BottomSheetDialogFragmentMenu : BottomSheetDialogFragment
         {
+            private MaterialButtonToggleGroup styleToggleGroup;
+            private MaterialButtonToggleGroup bitrateToggleGroup;
+            private MaterialCheckBox expandableCheckBox;
+
             public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
             {
-
-                //return base.OnCreateView(inflater, container, savedInstanceState);
                 View rootView = inflater.Inflate(Resource.Layout.search_results_expandablexml, container);
-                RadioGroup resultStyleRadioGroup = rootView.FindViewById<RadioGroup>(Resource.Id.radioGroup);
 
+                styleToggleGroup = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.styleToggleGroup);
+                bitrateToggleGroup = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.bitrateToggleGroup);
+                expandableCheckBox = rootView.FindViewById<MaterialCheckBox>(Resource.Id.checkExpandable);
 
+                var current = PreferencesState.SearchResultStyle;
+                styleToggleGroup.Check(current.HasFlag(SearchResultStyleEnum.Modern)
+                    ? Resource.Id.btnStyleModern
+                    : Resource.Id.btnStyleSimple);
+                bitrateToggleGroup.Check(current.HasFlag(SearchResultStyleEnum.BitrateTop)
+                    ? Resource.Id.btnBitrateTop
+                    : Resource.Id.btnBitrateBottom);
+                expandableCheckBox.Checked = current.HasFlag(SearchResultStyleEnum.Expandable);
 
-                // TODO step N: rebuild this UI as 3 toggles (Modern/Simple, Top/Bottom, Expandable)
-                // now that the enum is orthogonal. For now the existing radio buttons map only to
-                // the 5 originally-supported combinations.
-                switch (PreferencesState.SearchResultStyle)
-                {
-                    case SearchResultStyleEnum.SimpleBottomExpandable:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonExpandable);
-                        break;
-                    case SearchResultStyleEnum.ModernBottomExpandable:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonExpandableModern);
-                        break;
-                    case SearchResultStyleEnum.SimpleBottom:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonMedium);
-                        break;
-                    case SearchResultStyleEnum.ModernBottom:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonModernBitrateBottom);
-                        break;
-                    case SearchResultStyleEnum.ModernTop:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonModernBitrateTop);
-                        break;
-                }
-                resultStyleRadioGroup.CheckedChange += ResultStyleRadioGroup_CheckedChange;
+                styleToggleGroup.AddOnButtonCheckedListener(new ToggleListener(OnStyleChanged));
+                bitrateToggleGroup.AddOnButtonCheckedListener(new ToggleListener(OnStyleChanged));
+                expandableCheckBox.CheckedChange += (s, e) => OnStyleChanged();
+
                 return rootView;
             }
 
-            private void ResultStyleRadioGroup_CheckedChange(object sender, RadioGroup.CheckedChangeEventArgs e)
+            private void OnStyleChanged()
             {
-                //RadioButton checkedRadioButton = (RadioButton)(sender as View).FindViewById(e.CheckedId);
                 var prev = PreferencesState.SearchResultStyle;
-                switch (e.CheckedId)
+                var next = SearchResultStyleEnum.Simple;
+                if (styleToggleGroup.CheckedButtonId == Resource.Id.btnStyleModern)
                 {
-                    case Resource.Id.radioButtonExpandable:
-                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.SimpleBottomExpandable;
-                        break;
-                    case Resource.Id.radioButtonExpandableModern:
-                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.ModernBottomExpandable;
-                        break;
-                    case Resource.Id.radioButtonMedium:
-                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.SimpleBottom;
-                        break;
-                    case Resource.Id.radioButtonModernBitrateBottom:
-                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.ModernBottom;
-                        break;
-                    case Resource.Id.radioButtonModernBitrateTop:
-                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.ModernTop;
-                        break;
+                    next |= SearchResultStyleEnum.Modern;
                 }
-                if (prev != PreferencesState.SearchResultStyle)
+                if (bitrateToggleGroup.CheckedButtonId == Resource.Id.btnBitrateTop)
                 {
+                    next |= SearchResultStyleEnum.BitrateTop;
+                }
+                if (expandableCheckBox.Checked)
+                {
+                    next |= SearchResultStyleEnum.Expandable;
+                }
+                if (next != prev)
+                {
+                    PreferencesState.SearchResultStyle = next;
                     SearchFragment.Instance.SearchResultStyleChanged();
                 }
-                this.Dismiss();
             }
 
-            //public override int Theme => Resource.Style.MyCustomTheme; //for rounded corners...
+            // singleSelection + selectionRequired means we get one "checked=false" on the
+            // outgoing button before the "checked=true" on the incoming one. Recompute on
+            // the checked-true edge so we don't react to a transient empty state.
+            private class ToggleListener : Java.Lang.Object, MaterialButtonToggleGroup.IOnButtonCheckedListener
+            {
+                private readonly System.Action onChanged;
+                public ToggleListener(System.Action onChanged) { this.onChanged = onChanged; }
+                public void OnButtonChecked(MaterialButtonToggleGroup group, int checkedId, bool isChecked)
+                {
+                    if (isChecked)
+                    {
+                        onChanged();
+                    }
+                }
+            }
         }
     }
 }

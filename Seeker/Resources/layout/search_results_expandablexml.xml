@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/searchResultSelection"
     android:orientation="vertical"
     android:paddingTop="25dp"
@@ -24,85 +25,108 @@
         android:layout_height="wrap_content"
     />
 
-    <ScrollView
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="2dp"
+        android:text="@string/search_result_style_style_label"
+        android:textColor="?attr/mainTextColor"
+        android:textSize="14sp"
+    />
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/styleToggleGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        app:singleSelection="true"
+        app:selectionRequired="true"
     >
-        <RadioGroup
-            android:layout_width="fill_parent"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStyleSimple"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:id="@+id/radioGroup"
-        >
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:layout_marginTop="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/search_result_style_standard_bitrate_bottom_row"
-                android:id="@+id/radioButtonModernBitrateBottom"
-                android:checked="false"
-                android:textSize="18sp"
-                android:buttonTint="?attr/slskAccent"
-                android:textColor="?attr/mainTextColor"
-            />
+            android:text="@string/search_result_style_simple"
+            android:textSize="14sp"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+        />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStyleModern"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/search_result_style_modern"
+            android:textSize="14sp"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+        />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:layout_marginTop="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/search_result_style_standard_bitrate_top_row"
-                android:id="@+id/radioButtonModernBitrateTop"
-                android:checked="false"
-                android:textSize="18sp"
-                android:buttonTint="?attr/slskAccent"
-                android:textColor="?attr/mainTextColor"
-            />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="2dp"
+        android:text="@string/search_result_style_filetype_position_label"
+        android:textColor="?attr/mainTextColor"
+        android:textSize="14sp"
+    />
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/bitrateToggleGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+    >
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnBitrateBottom"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/search_result_style_filetype_bottom"
+            android:textSize="14sp"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+        />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnBitrateTop"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/search_result_style_filetype_top"
+            android:textSize="14sp"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+        />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/search_result_style_expandable_modern"
-                android:id="@+id/radioButtonExpandableModern"
-                android:checked="false"
-                android:layout_marginTop="6dp"
-                android:textSize="18sp"
-                android:buttonTint="?attr/slskAccent"
-                android:textColor="?attr/mainTextColor"
-            />
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/search_result_style_expandable_legacy"
-                android:id="@+id/radioButtonExpandable"
-                android:checked="false"
-                android:layout_marginTop="6dp"
-                android:textSize="18sp"
-                android:buttonTint="?attr/slskAccent"
-                android:textColor="?attr/mainTextColor"
-            />
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:layout_marginTop="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/radioButtonMedium"
-                android:checked="false"
-                android:text="@string/search_result_style_standard_legacy"
-                android:textSize="18sp"
-                android:buttonTint="?attr/slskAccent"
-                android:textColor="?attr/mainTextColor"
-            />
-
-            <com.google.android.material.radiobutton.MaterialRadioButton
-                android:layout_marginTop="4dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/search_result_style_dense_legacy"
-                android:id="@+id/radioButtonMinimal"
-                android:checked="false"
-                android:textSize="18sp"
-                android:buttonTint="?attr/slskAccent"
-                android:textColor="?attr/mainTextColor"
-            />
-        </RadioGroup>
-    </ScrollView>
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/checkExpandable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/search_result_style_expandable"
+        android:textSize="16sp"
+        android:textColor="?attr/mainTextColor"
+        app:buttonTint="?attr/slskAccent"
+    />
 </LinearLayout>

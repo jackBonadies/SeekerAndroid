@@ -263,14 +263,15 @@ Directory Count: {5}"
 
     <!--Search Result Styles-->
     <string name="search_result_style">Result Style:</string>
-    <string name="search_result_style_expandable_modern">Expandable: Modern</string>
-    <string name="search_result_style_expandable_legacy">Expandable: Simple Text</string>
+    <string name="search_result_style_style_label">Style:</string>
+    <string name="search_result_style_simple">Simple</string>
+    <string name="search_result_style_modern">Modern</string>
+    <string name="search_result_style_filetype_position_label">File Type Position:</string>
+    <string name="search_result_style_filetype_bottom">Bottom</string>
+    <string name="search_result_style_filetype_top">Top</string>
+    <string name="search_result_style_expandable">Expandable</string>
     <string name="expand_all">Expand All</string>
     <string name="collapse_all">Collapse All</string>
-    <string name="search_result_style_standard_legacy">Default: Simple Text</string>
-    <string name="search_result_style_dense_legacy">Dense: Simple Text</string>
-    <string name="search_result_style_standard_bitrate_bottom_row">Default: Filetype Bottom</string>
-    <string name="search_result_style_standard_bitrate_top_row">Default: Filetype Top</string>
 
     <string name="new_search_tab">New Search</string>
     <string name="search_tabs_header">SEARCH TABS</string>
