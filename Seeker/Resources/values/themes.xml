@@ -146,85 +146,6 @@
         <item name="snackbarActionColor">#d57676</item>
     </style>
 
-    <style name="DefaultDark_Blue" parent="DefaultDark">
-        <item name="colorPrimary">#86b2cb</item>
-        <item name="mainPurple">#126291</item>
-        <item name="mainPurpleStatusBar">#10496b</item>        
-		<item name="colorAccent">#86b2cb</item>
-        <item name="checkBoxColor">#126291</item>
-        <item name="whitePurpleForNavBar">#4c8aae</item>
-        <item name="mainTextColor">#86b2cb</item>
-
-        <item name="slskAccent">#679DC6</item>
-        <item name="cellStroke">#86b2cb</item>
-
-        <item name="seeker_notification_other_person_color">#8ACFC6</item>
-
-        <item name="expandIconColor">#86b2cb</item>
-        <item name="searchTabHeader">#dddddd</item>
-        <item name="mainTextColorHinted">#dddddd</item>
-        <item name="mainTextColorHintedFlair">#86b2cb</item>
-
-		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
-        <item name="snackbarActionColor">#10496b</item>
-    </style>
-
-    <style name="DefaultDark_Grey" parent="DefaultDark">
-        <item name="colorPrimary">#86b2cb</item>
-        <item name="mainPurple">#202124</item>
-        <item name="mainPurpleStatusBar">#000000</item>
-        <item name="mainPurpleForNavBar">#202124</item>
-        <!--a grey accent looks very bad-->
-        <item name="colorAccent">#86b2cb</item>
-        <item name="whitePurpleForNavBar">#556070</item>
-        <item name="checkBoxColor">#86b2cb</item>
-
-        <item name="mainTextColor">#dddddd</item>
-
-        <item name="cellStroke">#424242</item>
-
-        <item name="expandIconColor">#a0abb1</item>
-        <item name="searchTabHeader">#dddddd</item>
-        <item name="mainTextColorHinted">#dddddd</item>
-        <item name="mainTextColorHintedFlair">#dddddd</item>
-        <item name="slskAccent">#2A4C6D</item>
-        <item
-            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
-        >
-            @drawable/rounded_corner_dialog_background_dark_303030
-        </item>
-
-		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
-        <item name="snackbarActionColor">#202124</item>
-
-        <item name="cellbackColorDownloadDialog">#ff303030</item>
-    </style>
-
-    <style name="Amoled_Grey" parent="Amoled">
-        <item name="colorPrimary">#2A4C6D</item>
-        <item name="mainPurple">#333333</item>
-        <item name="mainPurpleStatusBar">#0c0c0c</item>
-
-        <item name="mainPurpleForNavBar">#333333</item>
-        <item name="colorAccent">#86b2cb</item>
-        <item name="checkBoxColor">#86b2cb</item>
-        <item name="whitePurpleForNavBar">#556070</item>
-        <item name="expandIconColor">#424242</item>
-        <item name="mainTextColor">#dddddd</item>
-
-        <item name="cellStroke">#424242</item>
-
-        <item name="expandIconColor">#9086b2cb</item>
-        <item name="searchTabHeader">#dddddd</item>
-        <item name="mainTextColorHinted">#dddddd</item>
-        <item name="mainTextColorHintedFlair">#dddddd</item>
-        <item name="slskAccent">#2A4C6D</item>
-        <item name="normalTextColor">#FFFFFF</item>
-
-		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
-        <item name="snackbarActionColor">#333333</item>
-    </style>
-
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
         <item name="colorOnPrimary">#ffffff</item>
         <item name="colorPrimary">#8AB4F8</item>
@@ -307,6 +228,60 @@
         <item name="searchTabButtonColor">?attr/mainTextColorHinted</item>
     </style>
 
+    <style name="DefaultDark_Blue" parent="DefaultDark">
+        <item name="colorPrimary">#86b2cb</item>
+        <item name="mainPurple">#126291</item>
+        <item name="mainPurpleStatusBar">#10496b</item>        
+		<item name="colorAccent">#86b2cb</item>
+        <item name="checkBoxColor">#126291</item>
+        <item name="whitePurpleForNavBar">#4c8aae</item>
+        <item name="mainTextColor">#86b2cb</item>
+
+        <item name="slskAccent">#679DC6</item>
+        <item name="cellStroke">#86b2cb</item>
+
+        <item name="seeker_notification_other_person_color">#8ACFC6</item>
+
+        <item name="expandIconColor">#86b2cb</item>
+        <item name="searchTabHeader">#dddddd</item>
+        <item name="mainTextColorHinted">#dddddd</item>
+        <item name="mainTextColorHintedFlair">#86b2cb</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#10496b</item>
+    </style>
+
+    <style name="DefaultDark_Grey" parent="DefaultDark">
+        <item name="colorPrimary">#86b2cb</item>
+        <item name="mainPurple">#202124</item>
+        <item name="mainPurpleStatusBar">#000000</item>
+        <item name="mainPurpleForNavBar">#202124</item>
+        <!--a grey accent looks very bad-->
+        <item name="colorAccent">#86b2cb</item>
+        <item name="whitePurpleForNavBar">#556070</item>
+        <item name="checkBoxColor">#86b2cb</item>
+
+        <item name="mainTextColor">#dddddd</item>
+
+        <item name="cellStroke">#424242</item>
+
+        <item name="expandIconColor">#a0abb1</item>
+        <item name="searchTabHeader">#dddddd</item>
+        <item name="mainTextColorHinted">#dddddd</item>
+        <item name="mainTextColorHintedFlair">#dddddd</item>
+        <item name="slskAccent">#2A4C6D</item>
+        <item
+            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
+        >
+            @drawable/rounded_corner_dialog_background_dark_303030
+        </item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#202124</item>
+
+        <item name="cellbackColorDownloadDialog">#ff303030</item>
+    </style>
+
     <style name="Amoled" parent="DefaultDark">
         <item name="expandableModernChevronBg">#001A1A1A</item>
         <item name="expandableModernFilesBg">#1A1A1A</item>
@@ -364,4 +339,30 @@
         </item>
         <!--<item name="dialogBackground">#52000000</item>-->
     </style>
+
+    <style name="Amoled_Grey" parent="Amoled">
+        <item name="colorPrimary">#2A4C6D</item>
+        <item name="mainPurple">#333333</item>
+        <item name="mainPurpleStatusBar">#0c0c0c</item>
+
+        <item name="mainPurpleForNavBar">#333333</item>
+        <item name="colorAccent">#86b2cb</item>
+        <item name="checkBoxColor">#86b2cb</item>
+        <item name="whitePurpleForNavBar">#556070</item>
+        <item name="expandIconColor">#424242</item>
+        <item name="mainTextColor">#dddddd</item>
+
+        <item name="cellStroke">#424242</item>
+
+        <item name="expandIconColor">#9086b2cb</item>
+        <item name="searchTabHeader">#dddddd</item>
+        <item name="mainTextColorHinted">#dddddd</item>
+        <item name="mainTextColorHintedFlair">#dddddd</item>
+        <item name="slskAccent">#2A4C6D</item>
+        <item name="normalTextColor">#FFFFFF</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#333333</item>
+    </style>
+
 </resources>
