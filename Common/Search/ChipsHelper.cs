@@ -731,33 +731,19 @@ namespace Seeker
 
             public List<(string displayKeyword, HashSet<string>?)> GetTopCandidates(string searchTerm, int topN)
             {
-                //weigh the years, and throw out the just file types.
+                // drop keys that shouldn't be candidates at all; weighting is applied at sort time.
                 string searchTermInvariant = GetInvariantKey(searchTerm);
                 foreach (string key in stats.Keys.ToList())
                 {
-                    if (IsSingleFileAttributeType(key)) //todo use collection...
+                    if (IsSingleFileAttributeType(key) //todo use collection...
+                        || searchTermInvariant.Contains(key) // consequence of: if someone selects "20" we filter for "20" not " 20 "
+                        || IgnoredTerms.Contains(key))
                     {
                         stats.Remove(key);
-                    }
-                    else if (searchTermInvariant.Contains(key)) // this is questionable but its a consequence of if someone selects "20" we filter for "20" not " 20 "
-                    {
-                        stats.Remove(key);
-                    }
-                    else if (IgnoredTerms.Contains(key))
-                    {
-                        stats.Remove(key);
-                    }
-                    else if (IsYear(key))
-                    {
-                        stats[key].InvariantCount /= 4;
-                    }
-                    else if (IsCommonAttribute(key))
-                    {
-                        stats[key].InvariantCount = (int)(stats[key].InvariantCount * .6);
                     }
                 }
                 var sorted = stats.ToList();
-                sorted.Sort((x, y) => y.Value.InvariantCount.CompareTo(x.Value.InvariantCount));
+                sorted.Sort((x, y) => Score(y).CompareTo(Score(x)));
                 List<(string displayKeyword, HashSet<string>? invariantsCollection)> keyTerms = new();
                 if (topN > sorted.Count)
                 {
@@ -787,6 +773,20 @@ namespace Seeker
                     }
                 }
                 return keyTerms;
+
+                static double Score(KeyValuePair<string, KeywordStats> kvp)
+                {
+                    double s = kvp.Value.InvariantCount;
+                    if (IsYear(kvp.Key))
+                    {
+                        s *= 0.25;
+                    }
+                    else if (IsCommonAttribute(kvp.Key))
+                    {
+                        s *= 0.6;
+                    }
+                    return s;
+                }
             }
         }
     }
