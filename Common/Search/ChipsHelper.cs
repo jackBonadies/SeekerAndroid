@@ -2,6 +2,7 @@
 using Seeker.Extensions.SearchResponseExtensions;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 
@@ -518,6 +519,10 @@ namespace Seeker
 
             foreach (string term in folderName.Split(new string[] { "- ", " -", "{", "}", "[", "]", "(", ")", " _ " }, StringSplitOptions.RemoveEmptyEntries))
             {
+                if (IgnoredTerms.Contains(term))
+                {
+                    continue;
+                }
                 bool inParen = false;
                 bool startsWithYear = false;
                 int dateLen = 0;
@@ -584,6 +589,10 @@ namespace Seeker
                 }
             }
         }
+
+        private static readonly ImmutableHashSet<string> IgnoredTerms = ImmutableHashSet.Create<string>(
+            "@eaDir" // NAS storage devices, no meaning
+            );
 
         public class KeywordHelper
         {
@@ -849,13 +858,16 @@ namespace Seeker
                     {
                         invariantKeyCounts.Remove(key);
                     }
+                    else if (IgnoredTerms.Contains(key))
+                    {
+                        invariantKeyCounts.Remove(key);
+                    }
                     else if (IsYear(key))
                     {
                         invariantKeyCounts[key] /= 4;
                     }
                     else if (IsCommonAttribute(key))
                     {
-
                         invariantKeyCounts[key] = (int)(invariantKeyCounts[key] * .6);
                     }
                     else

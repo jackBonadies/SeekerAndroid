@@ -1,9 +1,13 @@
 using Common;
+using Microsoft.VisualStudio.TestPlatform.Utilities.Helpers;
 using NUnit.Framework;
 using Seeker;
+using Seeker.Debug;
 using Soulseek;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace UnitTestCommon
 {
@@ -101,6 +105,26 @@ namespace UnitTestCommon
             };
         }
 
+        private static PreferencesState.SmartFilterState KeywordsOnly()
+        {
+            return new PreferencesState.SmartFilterState
+            {
+                FileTypesEnabled = false,
+                NumFilesEnabled = false,
+                KeywordsEnabled = true,
+            };
+        }
+
+        private static PreferencesState.SmartFilterState All()
+        {
+            return new PreferencesState.SmartFilterState
+            {
+                FileTypesEnabled = true,
+                NumFilesEnabled = true,
+                KeywordsEnabled = true,
+            };
+        }
+
         private static List<ChipDataItem> RunFileTypes(List<SearchResponse> responses )
         {
             return ChipsHelper.GetChipDataItemsFromSearchResults(responses, "search", FileTypesOnly());
@@ -109,6 +133,16 @@ namespace UnitTestCommon
         private static List<ChipDataItem> RunFileCounts(List<SearchResponse> responses )
         {
             return ChipsHelper.GetChipDataItemsFromSearchResults(responses, "search", FileCountsOnly());
+        }
+
+        private static List<ChipDataItem> RunKeywords(List<SearchResponse> responses, string search)
+        {
+            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, search, KeywordsOnly());
+        }
+
+        private static List<ChipDataItem> RunAll(List<SearchResponse> responses, string search)
+        {
+            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, search, All());
         }
 
         private static List<string> Texts(List<ChipDataItem> chips)
@@ -553,6 +587,54 @@ namespace UnitTestCommon
   119 files,
   120 files
 ]", Serialize(Texts(RunFileCounts(responses))));
+        }
+
+
+        private static IEnumerable<TestCaseData> SearchResponseFiles()
+        {
+            string dir = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "SearchResponse");
+            foreach (var file in System.IO.Directory.GetFiles(dir))
+            {
+                yield return new TestCaseData(file).SetName("Keywords_RealData_" + System.IO.Path.GetFileNameWithoutExtension(file));
+            }
+        }
+
+        // --- keyword test ---
+        [Test, TestCaseSource(nameof(SearchResponseFiles))]
+        public void Keywords_RealData(string fileName)
+        {
+            var searchResponseFolder = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "SearchResponse");
+            var answerDirectory = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "SearchResponseKeywordAnswers");
+            CaptureTestHelper.Configure(searchResponseFolder);
+            string fullFilename = System.IO.Path.Combine(searchResponseFolder, fileName);
+            var capture = CaptureTestHelper.TryLoad(fullFilename);
+            List<SearchResponse> responses = new List<SearchResponse>();
+            for (int i = 0; i < capture.Responses.Count; i++)
+            {
+                var result = Common.SearchResponseUtil.SplitMultiDirResponse(PreferencesState.HideLockedResultsInSearch, capture.Responses.ElementAt(i));
+                if (result.Item1)
+                {
+                    foreach (var r in result.Item2)
+                    {
+                        responses.Add(r);
+                    }
+                }
+                else
+                {
+                    responses.Add(capture.Responses[i]);
+                }
+            }
+            var keywordChips = RunKeywords(responses, capture.Query);
+            var allChips = RunAll(responses, capture.Query);
+            var keywords = string.Join(';',keywordChips.Select(it => (it as KeywordChipDataItem).Keyword));
+
+            var encryptedAnswer = System.IO.File.ReadAllBytes(System.IO.Path.Combine(answerDirectory, System.IO.Path.GetFileNameWithoutExtension(fileName) + ".answer"));
+            var answer = Encoding.UTF8.GetString(new EncryptedFileHelper().Decrypt(encryptedAnswer));//Encoding.UTF8.GetBytes(keywords));
+            //var enryptedAnswer = new EncryptedFileHelper().Encrypt(Encoding.UTF8.GetBytes(keywords));
+            //System.IO.File.WriteAllBytes(System.IO.Path.Combine(answerDirectory, System.IO.Path.GetFileNameWithoutExtension(fileName) + ".answer"), enryptedAnswer);
+            Assert.AreEqual(answer, keywords);
+            Console.WriteLine(capture.Query);
+            Console.WriteLine(keywords);
         }
     }
 }
