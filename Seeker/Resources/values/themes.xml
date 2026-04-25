@@ -30,7 +30,7 @@
         <item name="user_info_chip_background">#ffffff</item>
         <item name="CustomSelector">@drawable/CustomSelector_ffffff</item>
         <item name="cellbackColorDownloadDialog">#00000000</item>
-        <item name="expandIconColor">#959BDC</item>
+        <item name="expandIconColor">#888CB5</item>
         <item name="cellStroke">#994f58c4</item>
 
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
@@ -109,7 +109,8 @@
 
         <item name="whitePurpleForNavBar">#4c8aae</item>
 
-        <item name="searchTabHeader">#303030</item>
+        <item name="expandIconColor">#7BA1D1</item>
+		<item name="searchTabHeader">#303030</item>
         <item name="mainTextColorHinted">#4D4D4D</item>
         <item name="mainTextColorHintedFlair">#86b2cb</item>
         <item name="mainTextColor">#126291</item>
