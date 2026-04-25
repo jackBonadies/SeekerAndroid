@@ -12,6 +12,7 @@ namespace Seeker
     {
         public const string ALL_SUFFIX = " - all";
         private const int MAX_FILENUM_BUCKETS = 5;
+        private const int MAX_KEYWORD_CHIPS = 11;
 
         /// <summary>
         /// If hide hidden is true then for counts only consider unlocked. else consider everything.
@@ -414,92 +415,13 @@ namespace Seeker
                     AddKeywordsFromFolderName(keywordHelper.VoteIfExists, parentFolderName, true);
                 }
 
-                return keywordHelper.GetTopCandidates(searchTerm, 11);
+                return keywordHelper.GetTopCandidates(searchTerm, MAX_KEYWORD_CHIPS);
             }
             catch (Exception ex)
             {
                 // TODO2026 add back
                 //Logger.Firebase("keywords failed " + ex.Message + ex.StackTrace);
                 return new List<Tuple<string, HashSet<string>>>();
-            }
-        }
-
-        private static void AddKeywordsFromParentFolderName(KeywordHelper keywordHelper, string folderName)
-        {
-            //fline = fline.Replace(" - ", " ");
-            //fline = fline.Replace(", ", " ");
-            if (folderName.StartsWith(" - "))
-            {
-                folderName = folderName.Substring(3);
-            }
-            folderName = folderName.Trim();
-
-            //fline = fline.ToLower(); //this should be moved so its only for the keys..
-
-            //test if something is in parenthesis and treat it specially bc its likely attributes???
-
-            foreach (string term in folderName.Split(new string[] { "- ", " -", "{", "}", "[", "]", "(", ")", " _ " }, StringSplitOptions.RemoveEmptyEntries))
-            {
-                bool inParen = false;
-                bool startsWithYear = false;
-                int dateLen = 0;
-                string trimmedTerm = term.Trim();
-
-                if (KeywordHelper.IsCommonParentFolder2(KeywordHelper.GetInvarientKey(trimmedTerm)))
-                {
-                    continue;
-                }
-
-                //Artist_Name-Album_Name-WEB-2021-ESG this is its own thing.. so just continue after processing...
-                if (KeywordHelper.IsNoSpacesFormat(trimmedTerm))
-                {
-                    foreach (string t in trimmedTerm.Replace('_', ' ').Split(new string[] { "-" }, StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        keywordHelper.VoteIfExists(t.Trim());
-                    }
-                    continue;
-                }
-
-                if (KeywordHelper.IsInParenthesis(trimmedTerm, folderName))
-                {
-                    //normally if in parenthesis those are attributes so split them by ','
-                    inParen = true;
-                }
-                if (KeywordHelper.StartsWithYearOrDate(trimmedTerm, out dateLen))
-                {
-                    startsWithYear = true;
-                }
-
-                if (inParen || startsWithYear)
-                {
-                    if (startsWithYear)
-                    {
-                        string year = trimmedTerm.Substring(0, dateLen);
-
-                        keywordHelper.VoteIfExists(year);
-                    }
-                    string rest = trimmedTerm;//.Substring(5).Trim();
-                    if (startsWithYear)
-                    {
-                        rest = rest.Substring(dateLen).Trim();
-                    }
-
-                    if (inParen)
-                    {
-                        foreach (string restTerm in rest.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
-                        {
-                            keywordHelper.VoteIfExists(restTerm.Trim());
-                        }
-                    }
-                    else
-                    {
-                        keywordHelper.VoteIfExists(rest);
-                    }
-                }
-                else
-                {
-                    keywordHelper.VoteIfExists(trimmedTerm);
-                }
             }
         }
 
@@ -528,7 +450,7 @@ namespace Seeker
                 int dateLen = 0;
                 string trimmedTerm = term.Trim();
 
-                if (filterCommonParent && KeywordHelper.IsCommonParentFolder2(KeywordHelper.GetInvarientKey(trimmedTerm)))
+                if (filterCommonParent && KeywordHelper.IsCommonParentFolder2(KeywordHelper.GetInvariantKey(trimmedTerm)))
                 {
                     continue;
                 }
@@ -597,7 +519,7 @@ namespace Seeker
         public class KeywordHelper
         {
 
-            public static string GetInvarientKey(string key)
+            public static string GetInvariantKey(string key)
             {
                 string invariantKey = key.ToLower();
                 invariantKey = invariantKey.Replace("and", "&");
@@ -782,7 +704,7 @@ namespace Seeker
 
             public void VoteIfExists(string term)
             {
-                string invariantTerm = GetInvarientKey(term);
+                string invariantTerm = GetInvariantKey(term);
                 if (invariantKeyCounts.ContainsKey(invariantTerm))
                 {
                     invariantKeyCounts[invariantTerm]++;
@@ -814,7 +736,7 @@ namespace Seeker
 
             public void AddKey(string term)
             {
-                string invariantTerm = GetInvarientKey(term);
+                string invariantTerm = GetInvariantKey(term);
                 if (invariantKeyCounts.ContainsKey(invariantTerm))
                 {
                     invariantKeyCounts[invariantTerm]++;
@@ -847,14 +769,14 @@ namespace Seeker
             public List<Tuple<string, HashSet<string>>> GetTopCandidates(string searchTerm, int topN)
             {
                 //weigh the years, and throw out the just file types.
-                string searchTermInvarient = GetInvarientKey(searchTerm);
+                string searchTermInvariant = GetInvariantKey(searchTerm);
                 foreach (string key in invariantKeyCounts.Keys.ToList())
                 {
                     if (IsSingleFileAttributeType(key)) //todo use collection...
                     {
                         invariantKeyCounts.Remove(key);
                     }
-                    else if (searchTermInvarient.Contains(key))
+                    else if (searchTermInvariant.Contains(key))
                     {
                         invariantKeyCounts.Remove(key);
                     }
@@ -870,21 +792,7 @@ namespace Seeker
                     {
                         invariantKeyCounts[key] = (int)(invariantKeyCounts[key] * .6);
                     }
-                    else
-                    {
-                        //#if USE_PARENT
-                        //                        if(IsCommonParentFolder(key))
-                        //                        {
-                        //                            invarientKeyCounts.Remove(key);
-                        //                        }
-                        //#endif
-                    }
-
                 }
-                //
-                //l.Sort((x, y) => y.Value.CompareTo(x.Value));
-
-
                 var l = invariantKeyCounts.ToList();
                 l.Sort((x, y) => y.Value.CompareTo(x.Value));
                 List<Tuple<string, HashSet<string>>> keyTerms = new List<Tuple<string, HashSet<string>>>();
