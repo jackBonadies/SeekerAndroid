@@ -133,10 +133,10 @@ namespace Seeker
                     string fullFileType = searchResponse.GetDominantFileTypeAndBitRate(hideHidden, out _);
                     if (!string.IsNullOrEmpty(fullFileType))
                     {
-                        if (fullFileTypeCounts.ContainsKey(fullFileType))
+                        if (fullFileTypeCounts.TryGetValue(fullFileType, out int count))
                         {
-                            fullFileTypeCounts[fullFileType]++;
-                        }
+                            fullFileTypeCounts[fullFileType] = count + 1;
+                        } 
                         else
                         {
                             fullFileTypeCounts[fullFileType] = 1;
@@ -144,10 +144,10 @@ namespace Seeker
                     }
 
                     int fcount = hideHidden ? searchResponse.FileCount : searchResponse.FileCount + searchResponse.LockedFileCount;
-                    if (fileCountCounts.ContainsKey(fcount))
+                    if (fileCountCounts.TryGetValue(fcount, out int count))
                     {
-                        fileCountCounts[fcount]++;
-                    }
+                        fileCountCounts[fcount] = count + 1;
+                    } 
                     else
                     {
                         fileCountCounts[fcount] = 1;
@@ -706,33 +706,11 @@ namespace Seeker
             public void VoteIfExists(string term)
             {
                 string invariantTerm = GetInvariantKey(term);
-                if (invariantKeyCounts.ContainsKey(invariantTerm))
-                {
-                    invariantKeyCounts[invariantTerm]++;
-                }
-                else
+                if (!invariantKeyCounts.ContainsKey(invariantTerm))
                 {
                     return;
                 }
-
-                if (realCounts.ContainsKey(term))
-                {
-                    realCounts[term]++;
-                }
-                else
-                {
-                    realCounts[term] = 1;
-                }
-
-                if (invariantToReal.ContainsKey(invariantTerm))
-                {
-                    invariantToReal[invariantTerm].Add(term);
-                }
-                else
-                {
-                    invariantToReal[invariantTerm] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    invariantToReal[invariantTerm].Add(term);
-                }
+                AddKey(term);
             }
 
             public void AddKey(string term)
