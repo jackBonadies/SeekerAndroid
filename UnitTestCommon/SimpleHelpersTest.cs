@@ -435,7 +435,7 @@ namespace UnitTestCommon
             var file = new File(1, "test.mp3", 5 * 1024 * 1024, "mp3", attrs);
             string result = SimpleHelpers.GetSizeLengthAttrString(file);
             Assert.That(result, Does.Contain("•"));
-            Assert.That(result, Does.Contain("3m5s"));
+            Assert.That(result, Does.Contain("3m 5s"));
         }
 
         [Test]

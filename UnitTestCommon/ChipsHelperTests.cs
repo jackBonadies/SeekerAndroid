@@ -449,7 +449,7 @@ namespace UnitTestCommon
 
         private static string Serialize(List<string> chips)
         {
-            return "[\n" + string.Join(",\n", chips.Select(c => "  " + c)) + "\n]";
+            return "[\r\n" + string.Join(",\r\n", chips.Select(c => "  " + c)) + "\r\n]";
         }
 
         [Test]
@@ -470,7 +470,7 @@ namespace UnitTestCommon
                 (1, 1000), (2, 4), (3, 5), (6, 7), (9, 100));
             Assert.AreEqual(@"[
   1 file,
-  2 to 9 files
+  2-9 files
 ]", Serialize(Texts(RunFileCounts(responses))));
         }
 
@@ -481,7 +481,7 @@ namespace UnitTestCommon
                 (1, 300), (2, 5), (3, 8), (7, 2), (10, 250), (11, 3), (20, 200));
             Assert.AreEqual(@"[
   1 file,
-  2 to 7 files,
+  2-7 files,
   10 files,
   11 files,
   20 files
@@ -495,7 +495,7 @@ namespace UnitTestCommon
                 (1, 900), (2, 3), (5, 2), (8, 1), (10, 4));
             Assert.AreEqual(@"[
   1 file,
-  2 to 10 files
+  2-10 files
 ]", Serialize(Texts(RunFileCounts(responses))));
         }
 
@@ -507,11 +507,11 @@ namespace UnitTestCommon
                 (10, 50), (11, 50), (12, 50), (13, 50),
                 (20, 50), (21, 50));
             Assert.AreEqual(@"[
-  1 to 2 files,
-  3 to 5 files,
-  10 to 11 files,
-  12 to 13 files,
-  20 to 21 files
+  1-2 files,
+  3-5 files,
+  10-11 files,
+  12-13 files,
+  20-21 files
 ]", Serialize(Texts(RunFileCounts(responses))));
         }
 
@@ -536,9 +536,9 @@ namespace UnitTestCommon
             var responses = MakeResponsesWithFileCounts(
                 (1, 1), (2, 1), (4, 1), (5, 100), (6, 1), (7, 1));
             Assert.AreEqual(@"[
-  1 to 4 files,
+  1-4 files,
   5 files,
-  6 to 7 files
+  6-7 files
 ]", Serialize(Texts(RunFileCounts(responses))));
         }
 
@@ -552,11 +552,11 @@ namespace UnitTestCommon
             }
             var responses = MakeResponsesWithFileCounts(buckets);
             Assert.AreEqual(@"[
-  1 to 24 files,
-  25 to 48 files,
-  49 to 72 files,
-  73 to 96 files,
-  97 to 100 files
+  1-24 files,
+  25-48 files,
+  49-72 files,
+  73-96 files,
+  97-100 files
 ]", Serialize(Texts(RunFileCounts(responses))));
         }
 
