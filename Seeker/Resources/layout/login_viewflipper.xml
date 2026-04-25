@@ -127,13 +127,18 @@
         android:layout_height="match_parent"
         android:id="@+id/loggingInLayout"
     >
-        <Seeker.MaterialProgressBarPassThrough
-            android:id="@+id/loggingInLoadingCircle"
-            android:layout_marginTop="140dp"
-            android:layout_centerHorizontal="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-        />
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+			android:id="@+id/loggingInLoadingCircle"
+			android:layout_marginTop="140dp"
+			android:layout_centerHorizontal="true"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			app:trackCornerRadius="5dp"
+			app:indicatorSize="120dp"
+			app:trackThickness="6dp"
+			app:indicatorColor="#3498DB"
+			android:indeterminateOnly="true"
+    />
 
         <TextView
             android:layout_width="wrap_content"

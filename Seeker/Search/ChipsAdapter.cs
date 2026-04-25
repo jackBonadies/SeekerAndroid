@@ -140,8 +140,7 @@ namespace Seeker
 
         public static ChipItemView inflate(ViewGroup parent)
         {
-            var c = new ContextThemeWrapper(parent.Context, Resource.Style.MaterialThemeForChip);
-            ChipItemView itemView = (ChipItemView)LayoutInflater.From(c).Inflate(Resource.Layout.chip_item_view_dummy, parent, false);
+            ChipItemView itemView = (ChipItemView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.chip_item_view_dummy, parent, false);
             return itemView;
         }
 
