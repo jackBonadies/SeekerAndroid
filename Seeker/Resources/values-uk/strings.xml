@@ -381,8 +381,8 @@
     <string name="always_light">Світла</string>
     <string name="always_dark">Темна</string>
 
-    <string name="queue_length_">Довжина черги:</string>
-    <string name="upload_slots_">Вільні комірки для завантаження:</string>
+    <string name="queue_length_">Довжина черги</string>
+    <string name="upload_slots_">Вільні комірки для завантаження</string>
     <string name="today">Сьогодні о</string>
 
     <string name="pending_">В очікуванні...</string>

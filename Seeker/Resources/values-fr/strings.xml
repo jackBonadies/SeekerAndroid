@@ -381,8 +381,8 @@ Nombre de dossiers : {5}
     <string name="always_light">Toujours Clair</string>
     <string name="always_dark">Toujours Sombre</string>
 
-    <string name="queue_length_">Longueur de la File d\'Attente :</string>
-    <string name="upload_slots_">Canaux Disponibles:</string>
+    <string name="queue_length_">Longueur de la File d\'Attente</string>
+    <string name="upload_slots_">Canaux Disponibles</string>
     <string name="today">Aujourd’hui</string>
 
     <string name="pending_">En attente...</string>

@@ -381,8 +381,8 @@ Recompte de directoris: {5}\"
     <string name="always_light">Sempre Clar</string>
     <string name="always_dark">Sempre Fosc</string>
 
-    <string name="queue_length_">Longitud de la cua:</string>
-    <string name="upload_slots_">Slots de càrrega gratuïts:</string>
+    <string name="queue_length_">Longitud de la cua</string>
+    <string name="upload_slots_">Slots de càrrega gratuïts</string>
     <string name="today">Avui</string>
 
     <string name="pending_">Pendent...</string>

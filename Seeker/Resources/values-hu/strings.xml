@@ -374,8 +374,8 @@ Könyvtárak száma: {5}\"
     <string name="always_light">Always Light</string>
     <string name="always_dark">Always Dark</string>
 
-    <string name="queue_length_">Queue Length:</string>
-    <string name="upload_slots_">Free Upload Slots:</string>
+    <string name="queue_length_">Queue Length</string>
+    <string name="upload_slots_">Free Upload Slots</string>
     <string name="today">Today</string>
 
     <string name="pending_">Pending...</string>

@@ -102,6 +102,8 @@
     <string name="searching_label">Searching</string>
     <string name="no_results_title">No Results Found</string>
     <string name="no_results_subtitle">Nothing found for \"{0}\"</string>
+    <string name="results_hidden_title">{0} results hidden by filters</string>
+    <string name="results_hidden_subtitle">Open filters to adjust</string>
     <string name="search_results_count_none">No results found</string>
     <string name="search_results_count">{0} Results</string>
     <string name="search_results_count_filtered">Showing {0} of {1} Results</string>
@@ -499,8 +501,8 @@ Directory Count: {5}"
     <string name="always_dark">Always Dark</string>
 
     <!-- info -->
-    <string name="queue_length_">Queue Length:</string>
-    <string name="upload_slots_">Free Upload Slots:</string>
+    <string name="queue_length_">Queue Length</string>
+    <string name="upload_slots_">Free Upload Slots</string>
     <string name="today">Today</string>
 
     <string name="pending_">Pending...</string>

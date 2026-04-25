@@ -14,6 +14,16 @@
         android:focusable="true"
         android:focusableInTouchMode="true"
     />
+	<com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/linearProgressIndicator"
+		android:layout_width="match_parent"
+		android:layout_height="4dp"
+		android:visibility="gone"
+		app:trackCornerRadius="0dp"
+		app:trackInnerCornerRadius="2dp"
+		app:indicatorColor="?attr/mainPurple"
+		android:indeterminateOnly="true" />
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -117,6 +127,40 @@
                 android:id="@+id/noResultsSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="?attr/cellTextColorSubdued"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/allFilteredView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_centerInParent="true"
+            android:translationY="-48dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:src="@drawable/filter_list_96dp"
+                android:tint="?attr/cellTextColorSubdued" />
+
+            <TextView
+                android:id="@+id/allFilteredTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textColor="?attr/cellTextColor"
+                android:layout_marginTop="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/results_hidden_subtitle"
                 android:textSize="14sp"
                 android:textColor="?attr/cellTextColorSubdued"
                 android:layout_marginTop="4dp" />

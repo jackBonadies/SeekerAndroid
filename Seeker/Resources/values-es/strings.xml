@@ -381,8 +381,8 @@ Directorio: {5}
     <string name="always_light">Siempre claro</string>
     <string name="always_dark">Siempre oscuro</string>
 
-    <string name="queue_length_">Tamaño de la Cola:</string>
-    <string name="upload_slots_">Espacios de subida libres:</string>
+    <string name="queue_length_">Tamaño de la Cola</string>
+    <string name="upload_slots_">Espacios de subida libres</string>
     <string name="today">Hoy</string>
 
     <string name="pending_">Procesando...</string>

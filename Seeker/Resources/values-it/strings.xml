@@ -381,8 +381,8 @@ Numero Cartelle: {5}\"
     <string name="always_light">Sempre chiaro</string>
     <string name="always_dark">Sempre scuro</string>
 
-    <string name="queue_length_">Lunghezza coda:</string>
-    <string name="upload_slots_">Posti di caricamento disponibili:</string>
+    <string name="queue_length_">Lunghezza coda</string>
+    <string name="upload_slots_">Posti di caricamento disponibili</string>
     <string name="today">Oggi</string>
 
     <string name="pending_">In sospeso...</string>

@@ -381,8 +381,8 @@ Contador de diretórios: {5}
     <string name="always_light">Sempre Claro</string>
     <string name="always_dark">Sempre Escuro</string>
 
-    <string name="queue_length_">Comprimento da Fila:</string>
-    <string name="upload_slots_">Slots de Upload Gratuitos:</string>
+    <string name="queue_length_">Comprimento da Fila</string>
+    <string name="upload_slots_">Slots de Upload Gratuitos</string>
     <string name="today">Hoje</string>
 
     <string name="pending_">Pendente...</string>

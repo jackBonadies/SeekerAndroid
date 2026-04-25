@@ -381,8 +381,8 @@ Počet adresářů: {5}\"
     <string name="always_light">Vždy světlý</string>
     <string name="always_dark">Vždy tmavý</string>
 
-    <string name="queue_length_">Délka fronty:</string>
-    <string name="upload_slots_">Volné nahrávací sloty:</string>
+    <string name="queue_length_">Délka fronty</string>
+    <string name="upload_slots_">Volné nahrávací sloty</string>
     <string name="today">Dnes</string>
 
     <string name="pending_">Probíhající...</string>

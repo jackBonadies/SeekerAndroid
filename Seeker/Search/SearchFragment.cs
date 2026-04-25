@@ -33,7 +33,10 @@ namespace Seeker
         private View noSearchesView = null;
         private View noResultsView = null;
         private TextView noResultsSubtitle = null;
+        private View allFilteredView = null;
+        private TextView allFilteredTitle = null;
         private View searchLoadingView = null;
+        private View linearProgressIndicator = null;
         private TextView searchLoadingQueryText = null;
         private System.Diagnostics.Stopwatch searchStopwatch;
         private Handler spinnerTimerHandler;
@@ -322,6 +325,7 @@ namespace Seeker
                     UpdateNoSearchesView();
                     UpdateSearchSpinner();
                     UpdateNoResultsView();
+                    UpdateAllFilteredView();
                 });
                 if (SeekerState.MainActivityRef == null)
                 {
@@ -361,6 +365,7 @@ namespace Seeker
                         NotifySearchHeaderChanged();
                         UpdateNoSearchesView();
                         UpdateNoResultsView();
+                        UpdateAllFilteredView();
                         return true;
                     }
                     else
@@ -373,6 +378,7 @@ namespace Seeker
                         NotifySearchHeaderChanged();
                         UpdateNoSearchesView();
                         UpdateNoResultsView();
+                        UpdateAllFilteredView();
                         SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
                         EditText editText = SeekerState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
                         string searchText = string.Empty;
@@ -583,15 +589,35 @@ namespace Seeker
             noResultsView.Visibility = show ? ViewStates.Visible : ViewStates.Gone;
         }
 
+        public void UpdateAllFilteredView()
+        {
+            if (allFilteredView == null)
+            {
+                return;
+            }
+            int total = SearchTabHelper.SearchResponses?.Count ?? 0;
+            int shown = SearchTabHelper.UI_SearchResponses?.Count ?? 0;
+            bool show = !SearchTabHelper.CurrentlySearching
+                        && total > 0
+                        && shown == 0;
+            if (show && allFilteredTitle != null)
+            {
+                allFilteredTitle.Text = string.Format(
+                    GetString(Resource.String.results_hidden_title),
+                    total);
+            }
+            allFilteredView.Visibility = show ? ViewStates.Visible : ViewStates.Gone;
+        }
+
         public void UpdateSearchSpinner()
         {
             if (searchLoadingView == null)
             {
                 return;
             }
-            bool show = SearchTabHelper.CurrentlySearching
+            bool showMainCircleSpinner = SearchTabHelper.CurrentlySearching
                         && (SearchTabHelper.UI_SearchResponses?.Count ?? 0) == 0;
-            if (show)
+            if (showMainCircleSpinner)
             {
                 if (!spinnerTimerRunning)
                 {
@@ -603,7 +629,16 @@ namespace Seeker
             {
                 StopSpinnerTimer();
             }
-            searchLoadingView.Visibility = show ? ViewStates.Visible : ViewStates.Gone;
+            searchLoadingView.Visibility = showMainCircleSpinner ? ViewStates.Visible : ViewStates.Gone;
+
+            if (SearchTabHelper.CurrentlySearching && !showMainCircleSpinner)
+            {
+                linearProgressIndicator.Visibility = ViewStates.Visible;
+            }
+            else
+            {
+                linearProgressIndicator.Visibility = ViewStates.Gone;
+            }
         }
 
         private void StartSpinnerTimer()
@@ -791,12 +826,16 @@ namespace Seeker
 
             noSearchesView = rootView.FindViewById<View>(Resource.Id.noSearchesView);
             searchLoadingView = rootView.FindViewById<View>(Resource.Id.searchLoadingView);
+            linearProgressIndicator = rootView.FindViewById<View>(Resource.Id.linearProgressIndicator);
             searchLoadingQueryText = rootView.FindViewById<TextView>(Resource.Id.searchLoadingQueryText);
             noResultsView = rootView.FindViewById<View>(Resource.Id.noResultsView);
             noResultsSubtitle = rootView.FindViewById<TextView>(Resource.Id.noResultsSubtitle);
+            allFilteredView = rootView.FindViewById<View>(Resource.Id.allFilteredView);
+            allFilteredTitle = rootView.FindViewById<TextView>(Resource.Id.allFilteredTitle);
             UpdateNoSearchesView();
             UpdateSearchSpinner();
             UpdateNoResultsView();
+            UpdateAllFilteredView();
 
             SeekerState.ClearSearchHistoryEventsFromTarget(this);
             SeekerState.ClearSearchHistory += SeekerState_ClearSearchHistory;
@@ -1168,6 +1207,7 @@ namespace Seeker
                 NotifySearchHeaderChanged();
                 UpdateNoSearchesView();
                 UpdateNoResultsView();
+                UpdateAllFilteredView();
                 SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
                 SearchAPI(SearchTabHelper.CancellationTokenSource.Token, transitionDrawable, editSearchText, SearchTabHelper.CurrentTab);
                 (sender as AutoCompleteTextView).DismissDropDown();
@@ -1569,6 +1609,7 @@ namespace Seeker
             searchTab.UI_SearchResponses.Clear();
             searchTab.UI_SearchResponses.AddRange(searchTab.SearchResponses.FindAll(
                 s => SearchFilter.MatchesAllCriteria(s, searchTab.ChipsFilter, mergedFlags, searchTab.TextFilter.WordsToAvoid, searchTab.TextFilter.WordsToInclude, hideLocked)));
+            UpdateAllFilteredView();
         }
 
         internal static FilterSpecialFlags MergeFilterFlags(FilterSpecialFlags textFlags)
@@ -1642,6 +1683,7 @@ namespace Seeker
                 SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
 
                 recyclerSearchAdapter.NotifyDataSetChanged(); //does have the nice effect that if nothing changes, you dont just back to top.
+                UpdateAllFilteredView();
             }
             NotifySearchHeaderChanged();
 
@@ -1727,6 +1769,7 @@ namespace Seeker
             NotifySearchHeaderChanged();
             UpdateNoSearchesView();
             UpdateNoResultsView();
+            UpdateAllFilteredView();
             SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
             EditText editTextSearch = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
             SearchAPI(SearchTabHelper.CancellationTokenSource.Token, transitionDrawable, editTextSearch.Text, SearchTabHelper.CurrentTab);
@@ -1805,6 +1848,7 @@ namespace Seeker
                 SearchFragment.Instance?.NotifySearchHeaderChanged();
                 SearchFragment.Instance?.UpdateNoSearchesView();
                 SearchFragment.Instance?.UpdateNoResultsView();
+                SearchFragment.Instance?.UpdateAllFilteredView();
             }
         }
 
@@ -1887,6 +1931,7 @@ namespace Seeker
             Instance.UpdateNoSearchesView();
             Instance.UpdateSearchSpinner();
             Instance.UpdateNoResultsView();
+            Instance.UpdateAllFilteredView();
         }
 
         /// <summary>
@@ -2183,6 +2228,7 @@ namespace Seeker
                                 SearchFragment.Instance.NotifySearchHeaderChanged();
                                 SearchFragment.Instance.UpdateNoSearchesView();
                                 SearchFragment.Instance.UpdateNoResultsView();
+                                SearchFragment.Instance.UpdateAllFilteredView();
                             }
                             catch (System.ObjectDisposedException e)
                             {
@@ -2279,6 +2325,7 @@ namespace Seeker
                     SearchFragment.Instance?.NotifySearchHeaderChanged();
                     SearchFragment.Instance?.UpdateNoSearchesView();
                     SearchFragment.Instance?.UpdateNoResultsView();
+                    SearchFragment.Instance?.UpdateAllFilteredView();
                 }
                 ));
                 //MainActivity.ShowAlert(ane, this.Context);
@@ -2304,6 +2351,7 @@ namespace Seeker
                     SearchFragment.Instance?.NotifySearchHeaderChanged();
                     SearchFragment.Instance?.UpdateNoSearchesView();
                     SearchFragment.Instance?.UpdateNoResultsView();
+                    SearchFragment.Instance?.UpdateAllFilteredView();
                 }));
                 return;
             }
@@ -2326,6 +2374,7 @@ namespace Seeker
                     SearchFragment.Instance?.NotifySearchHeaderChanged();
                     SearchFragment.Instance?.UpdateNoSearchesView();
                     SearchFragment.Instance?.UpdateNoResultsView();
+                    SearchFragment.Instance?.UpdateAllFilteredView();
                 }));
                 return;
             }
@@ -2380,6 +2429,7 @@ namespace Seeker
                 SearchFragment.Instance?.NotifySearchHeaderChanged();
                 SearchFragment.Instance?.UpdateNoSearchesView();
                 SearchFragment.Instance?.UpdateNoResultsView();
+                SearchFragment.Instance?.UpdateAllFilteredView();
                 return;
             }
             else
