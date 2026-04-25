@@ -625,16 +625,173 @@ namespace UnitTestCommon
                 }
             }
             var keywordChips = RunKeywords(responses, capture.Query);
-            var allChips = RunAll(responses, capture.Query);
             var keywords = string.Join(';',keywordChips.Select(it => (it as KeywordChipDataItem).Keyword));
 
             var encryptedAnswer = System.IO.File.ReadAllBytes(System.IO.Path.Combine(answerDirectory, System.IO.Path.GetFileNameWithoutExtension(fileName) + ".answer"));
             var answer = Encoding.UTF8.GetString(new EncryptedFileHelper().Decrypt(encryptedAnswer));//Encoding.UTF8.GetBytes(keywords));
             //var enryptedAnswer = new EncryptedFileHelper().Encrypt(Encoding.UTF8.GetBytes(keywords));
-            //System.IO.File.WriteAllBytes(System.IO.Path.Combine(answerDirectory, System.IO.Path.GetFileNameWithoutExtension(fileName) + ".answer"), enryptedAnswer);
+            //System.IO.File.WriteAllBytes(System.IO.Path.Combine(@"C:\seeker_newest\UnitTestCommon\TestData\SearchResponseKeywordAnswers", System.IO.Path.GetFileNameWithoutExtension(fileName) + ".answer"), enryptedAnswer);
             Assert.AreEqual(answer, keywords);
             Console.WriteLine(capture.Query);
             Console.WriteLine(keywords);
+        }
+
+        private static SearchResponse MakeResponseWithFolder(string folderName)
+        {
+            var file = new File(1, folderName + @"\track.mp3", 1000, "mp3");
+            return new SearchResponse("testuser", 1, true, 5000, 0, new[] { file });
+        }
+
+        private static SearchResponse MakeLockedOnlyResponseWithFolder(string folderName)
+        {
+            var file = new File(1, folderName + @"\track.mp3", 1000, "mp3");
+            return new SearchResponse("testuser", 1, true, 5000, 0, Array.Empty<File>(), new[] { file });
+        }
+
+        private static List<string> KeywordTexts(List<ChipDataItem> chips)
+        {
+            return chips.Select(c => ((KeywordChipDataItem)c).Keyword).ToList();
+        }
+
+        [Test]
+        public void Keywords_Bug_CaseMismatch_DisplayNameUsesFirstInsertedCasingNotMostCommon()
+        {
+            var responses = new List<SearchResponse>();
+            for (int i = 0; i < 3; i++)
+            {
+                responses.Add(MakeResponseWithFolder("The Helloworlds"));
+            }
+            for (int i = 0; i < 10; i++)
+            {
+                responses.Add(MakeResponseWithFolder("the helloworlds"));
+            }
+
+            var chips = RunKeywords(responses, "album");
+            var keywords = KeywordTexts(chips);
+
+            Assert.Greater(keywords.Count, 0, "expected at least one keyword chip");
+            Assert.AreEqual("the helloworlds", keywords[0],
+                "display for the top keyword should reflect the most common casing (10 lowercase vs 3 title-case)");
+        }
+
+        [Test]
+        public void Keywords_Bug_YearIntegerDivision_WipesLowCountYears()
+        {
+            var responses = new List<SearchResponse>();
+            for (int i = 0; i < 3; i++)
+            {
+                responses.Add(MakeResponseWithFolder("Album (1994)"));
+            }
+            for (int i = 0; i < 7; i++)
+            {
+                responses.Add(MakeResponseWithFolder("Album (1999)"));
+            }
+            responses.Add(MakeResponseWithFolder("Album (Remastered)"));
+
+            var chips = RunKeywords(responses, "search");
+            var keywords = KeywordTexts(chips);
+
+            int year2Idx = keywords.IndexOf("1999");
+            int yearIdx = keywords.IndexOf("1994");
+            int remasterIdx = keywords.IndexOf("Remastered");
+
+            Assert.Greater(yearIdx, -1, "'1994' should appear in the keyword chips");
+            Assert.Greater(remasterIdx, -1, "'Remastered' should appear in the keyword chips");
+            Assert.Less(year2Idx, remasterIdx,
+                "'1999' (count 7/4) should rank higher than 'Remastered' (count 1)");
+        }
+
+        [Test]
+        public void Keywords_Bug_IgnoresHideLockedPreference_MinesLockedOnlyResponses()
+        {
+            PreferencesState.HideLockedResultsInSearch = true;
+
+            var responses = new List<SearchResponse>();
+            for (int i = 0; i < 5; i++)
+            {
+                responses.Add(MakeResponseWithFolder("NormalZone"));
+            }
+            for (int i = 0; i < 10; i++)
+            {
+                responses.Add(MakeLockedOnlyResponseWithFolder("LockedOnlyZone"));
+            }
+
+            var chips = RunKeywords(responses, "search");
+            var keywords = KeywordTexts(chips);
+
+            Assert.IsFalse(keywords.Contains("LockedOnlyZone"),
+                "locked-only responses must not contribute keywords when HideLockedResultsInSearch=true");
+        }
+    }
+
+    [TestFixture]
+    public class KeywordHelper_IsSingleFileAttributeTypeTests
+    {
+        [TestCase("mp3")]
+        [TestCase("flac")]
+        [TestCase("wav")]
+        [TestCase("wma")]
+        [TestCase("aac")]
+        [TestCase("mp4")]
+        [TestCase("aiff")]
+        [TestCase("ogg")]
+        [TestCase("opus")]
+        [TestCase("320")]
+        [TestCase("192k")]
+        [TestCase("mp3 320")]
+        [TestCase("mp3 192")]
+        [TestCase("mp3 v0")]
+        [TestCase("mp3 128")]
+        [TestCase("320 kbps")]
+        [TestCase("320kbps")]
+        [TestCase("m4a 128")]
+        [TestCase("v0")]
+        [TestCase("mp3 320kbps")]
+        [TestCase("@192")]
+        [TestCase("@320")]
+        [TestCase("flac 24bit")]
+        [TestCase("mp3 320 44")]
+        public void ExistingAttributes_AreClassifiedTrue(string term)
+        {
+            Assert.IsTrue(Seeker.ChipsHelper.KeywordHelper.IsSingleFileAttributeType(term),
+                $"\"{term}\" should be classified as a file attribute");
+        }
+
+        [TestCase("mp3 160")]
+        [TestCase("mp3 224")]
+        [TestCase("opus 128")]
+        [TestCase("m4a 256")]
+        [TestCase("mp3 320 cbr")]
+        [TestCase("flac 16/44")]
+        [TestCase("flac 16-44.1")]
+        [TestCase("mp3 cbr")]
+        [TestCase("mp3 vbr")]
+        [TestCase("aac 256k")]
+        public void LongTailAttributes_AreClassifiedTrue(string term)
+        {
+            Assert.IsTrue(Seeker.ChipsHelper.KeywordHelper.IsSingleFileAttributeType(term),
+                $"\"{term}\" should be classified as a file attribute");
+        }
+
+        [TestCase("")]
+        [TestCase("   ")]
+        [TestCase("cant hold these mp3")]
+        [TestCase("mp3 1995")]
+        [TestCase("mp3 live")]
+        [TestCase("greatest hits")]
+        [TestCase("remastered")]
+        [TestCase("mp3 flac")]
+        [TestCase("mp3 123")]
+        [TestCase("mp3 999")]
+        [TestCase("mp3 5")]
+        [TestCase("flac 100")]
+        [TestCase("123")]
+        [TestCase("999")]
+        [TestCase("42")]
+        public void NonAttributes_AreClassifiedFalse(string term)
+        {
+            Assert.IsFalse(Seeker.ChipsHelper.KeywordHelper.IsSingleFileAttributeType(term),
+                $"\"{term}\" should not be classified as a file attribute");
         }
     }
 }

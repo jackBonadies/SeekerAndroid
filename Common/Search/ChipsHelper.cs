@@ -450,7 +450,7 @@ namespace Seeker
                 int dateLen = 0;
                 string trimmedTerm = term.Trim();
 
-                if (ignoreCommonParentNames && KeywordHelper.ShouldIgnoreParentFolder(KeywordHelper.GetInvariantKey(trimmedTerm)))
+                if (ignoreCommonParentNames && KeywordHelper.ShouldIgnoreParentFolderTerm(KeywordHelper.GetInvariantKey(trimmedTerm)))
                 {
                     continue;
                 }
@@ -513,7 +513,8 @@ namespace Seeker
         }
 
         private static readonly ImmutableHashSet<string> IgnoredTerms = ImmutableHashSet.Create<string>(
-            "@eaDir" // NAS storage devices, no meaning
+            "@eaDir", // NAS storage devices, no meaning
+            "!!!"
             );
 
         public class KeywordHelper
@@ -580,14 +581,14 @@ namespace Seeker
                 return false;
             }
 
-            public static bool ShouldIgnoreParentFolder(string t)
+            public static bool ShouldIgnoreParentFolderTerm(string term)
             {
-                if (t.Length == 1)
+                if (term.Length == 1)
                 {
                     return true;
                 }
 
-                switch (t)
+                switch (term)
                 {
                     case "music":
                     case "complete":
@@ -605,41 +606,225 @@ namespace Seeker
                 }
             }
 
-            public static bool IsSingleFileAttributeType(string t)
+            private static readonly ImmutableHashSet<string> KnownAudioFormats = ImmutableHashSet.Create(
+                StringComparer.OrdinalIgnoreCase,
+                "mp3", "flac", "wav", "aiff", "wma", "aac", "ogg", "opus", "m4a", "mp4");
+
+            // bare-integer tokens that should classify as a bitrate/sample-rate modifier.
+            // avoids pruning real keywords that happen to be numbers (e.g. catalog numbers, years already handled elsewhere).
+            private static readonly ImmutableHashSet<int> KnownBareBitrateNumbers = ImmutableHashSet.Create(
+                64, 96, 112, 128, 160, 192, 224, 256, 320, // MP3/AAC bitrates
+                44, 48);                                   // common sample rates (44.1/48kHz abbreviated)
+
+            public static bool IsSingleFileAttributeType(string term)
             {
-                switch (t)
+                if (string.IsNullOrWhiteSpace(term))
                 {
-                    case "mp3":
-                    case "flac":
-                    case "wav":
-                    case "wma":
-                    case "aac":
-                    case "mp4":
-                    case "aiff":
-                    case "ogg":
-                    case "opus":
-                    case "320":
-                    case "16-44.1":
-                    case "192k":
-                    case "mp3 320":
-                    case "mp3 192":
-                    case "mp3 v0":
-                    case "mp3 128":
-                    case "320 kbps":
-                    case "320kbps":
-                    case "m4a 128":
-                    case "v0":
-                    case "mp3 320kbps":
-                    case "!!!":
-                    case "-":
-                    case "@192":
-                    case "@320":
-                    case "flac 24bit":
-                    case "mp3 320 44":
-                        return true;
-                    default:
-                        return false;
+                    return false;
                 }
+
+                int knownFormatCount = 0;
+                int modifierCount = 0;
+
+                ReadOnlySpan<char> remaining = term.AsSpan().Trim();
+                while (!remaining.IsEmpty)
+                {
+                    int spaceIdx = -1;
+                    for (int i = 0; i < remaining.Length; i++)
+                    {
+                        if (remaining[i] == ' ' || remaining[i] == '\t')
+                        {
+                            spaceIdx = i;
+                            break;
+                        }
+                    }
+
+                    ReadOnlySpan<char> token;
+                    if (spaceIdx == -1)
+                    {
+                        token = remaining;
+                        remaining = ReadOnlySpan<char>.Empty;
+                    }
+                    else
+                    {
+                        token = remaining.Slice(0, spaceIdx);
+                        remaining = remaining.Slice(spaceIdx + 1).TrimStart();
+                    }
+
+                    if (token.IsEmpty)
+                    {
+                        continue;
+                    }
+
+                    if (KnownAudioFormats.Contains(token.ToString()))
+                    {
+                        knownFormatCount++;
+                    }
+                    else if (IsBitrateOrFormatModifier(token))
+                    {
+                        modifierCount++;
+                    }
+                    else
+                    {
+                        // any "other" token disqualifies the term
+                        return false;
+                    }
+                }
+
+                // reject "mp3 flac" (multiple formats) — that's a parent-folder keyword, not a single attribute
+                if (knownFormatCount > 1)
+                {
+                    return false;
+                }
+                return (knownFormatCount + modifierCount) > 0;
+            }
+
+            // Matches tokens like: 128, 320, 44.1, 1644.1, 16-44.1, 16/44.1, 192k, 320kbps, 44khz, 24bit, v0, v1, cbr, vbr, @320
+            private static bool IsBitrateOrFormatModifier(ReadOnlySpan<char> token)
+            {
+                if (token.IsEmpty)
+                {
+                    return false;
+                }
+
+                // @<digits> — @192, @320
+                if (token[0] == '@')
+                {
+                    if (token.Length < 2)
+                    {
+                        return false;
+                    }
+                    for (int i = 1; i < token.Length; i++)
+                    {
+                        if (!char.IsDigit(token[i]))
+                        {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+
+                // v0/v1/v2/... — MP3 VBR preset
+                if (token.Length == 2 && (token[0] == 'v' || token[0] == 'V') && char.IsDigit(token[1]))
+                {
+                    return true;
+                }
+
+                // cbr / vbr
+                if (token.Length == 3)
+                {
+                    if (SpanEqualsIgnoreCase(token, "cbr") || SpanEqualsIgnoreCase(token, "vbr"))
+                    {
+                        return true;
+                    }
+                }
+
+                // bare unit tokens — allow "320 kbps" to classify both tokens as modifiers
+                if (SpanEqualsIgnoreCase(token, "kbps")
+                    || SpanEqualsIgnoreCase(token, "khz")
+                    || SpanEqualsIgnoreCase(token, "bit")
+                    || SpanEqualsIgnoreCase(token, "bits"))
+                {
+                    return true;
+                }
+
+                // <digits>[.<digits>][(-|/)<digits>[.<digits>]][unit suffix]
+                int idx = 0;
+                int leadingDigitEnd;
+                if (!TryConsumeDigitRun(token, ref idx))
+                {
+                    return false;
+                }
+                leadingDigitEnd = idx;
+                bool hasDecimal = TryConsumeDotDigits(token, ref idx);
+                bool hasPair = false;
+                if (idx < token.Length && (token[idx] == '-' || token[idx] == '/'))
+                {
+                    idx++;
+                    if (!TryConsumeDigitRun(token, ref idx))
+                    {
+                        return false;
+                    }
+                    TryConsumeDotDigits(token, ref idx);
+                    hasPair = true;
+                }
+
+                if (idx == token.Length)
+                {
+                    // bare number, no suffix — digit pairs ("16-44.1") are unambiguous audio markers;
+                    // pure integers must match the known-bitrates set so "mp3 123" is not pruned.
+                    if (hasPair)
+                    {
+                        return true;
+                    }
+                    if (hasDecimal)
+                    {
+                        return false;
+                    }
+                    if (!int.TryParse(token.Slice(0, leadingDigitEnd), out int value))
+                    {
+                        return false;
+                    }
+                    return KnownBareBitrateNumbers.Contains(value);
+                }
+
+                ReadOnlySpan<char> suffix = token.Slice(idx);
+                return SpanEqualsIgnoreCase(suffix, "k")
+                    || SpanEqualsIgnoreCase(suffix, "kb")
+                    || SpanEqualsIgnoreCase(suffix, "kbps")
+                    || SpanEqualsIgnoreCase(suffix, "khz")
+                    || SpanEqualsIgnoreCase(suffix, "hz")
+                    || SpanEqualsIgnoreCase(suffix, "bit")
+                    || SpanEqualsIgnoreCase(suffix, "bits");
+            }
+
+            private static bool TryConsumeDigitRun(ReadOnlySpan<char> token, ref int idx)
+            {
+                if (idx >= token.Length || !char.IsDigit(token[idx]))
+                {
+                    return false;
+                }
+                while (idx < token.Length && char.IsDigit(token[idx]))
+                {
+                    idx++;
+                }
+                return true;
+            }
+
+            private static bool TryConsumeDotDigits(ReadOnlySpan<char> token, ref int idx)
+            {
+                if (idx >= token.Length || token[idx] != '.')
+                {
+                    return false;
+                }
+                int savedIdx = idx;
+                idx++;
+                if (idx >= token.Length || !char.IsDigit(token[idx]))
+                {
+                    idx = savedIdx;
+                    return false;
+                }
+                while (idx < token.Length && char.IsDigit(token[idx]))
+                {
+                    idx++;
+                }
+                return true;
+            }
+
+            private static bool SpanEqualsIgnoreCase(ReadOnlySpan<char> span, string literal)
+            {
+                if (span.Length != literal.Length)
+                {
+                    return false;
+                }
+                for (int i = 0; i < span.Length; i++)
+                {
+                    if (char.ToLowerInvariant(span[i]) != literal[i])
+                    {
+                        return false;
+                    }
+                }
+                return true;
             }
 
             public static bool IsInParenthesis(string term, string line)
@@ -735,7 +920,7 @@ namespace Seeker
                 string searchTermInvariant = GetInvariantKey(searchTerm);
                 foreach (string key in stats.Keys.ToList())
                 {
-                    if (IsSingleFileAttributeType(key) //todo use collection...
+                    if (IsSingleFileAttributeType(key)
                         || searchTermInvariant.Contains(key) // consequence of: if someone selects "20" we filter for "20" not " 20 "
                         || IgnoredTerms.Contains(key))
                     {
