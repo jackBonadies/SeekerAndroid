@@ -449,7 +449,7 @@ namespace UnitTestCommon
 
         private static string Serialize(List<string> chips)
         {
-            return "[\r\n" + string.Join(",\r\n", chips.Select(c => "  " + c)) + "\r\n]";
+            return "[" + Environment.NewLine + string.Join($",{Environment.NewLine}", chips.Select(c => "  " + c)) + $"{Environment.NewLine}]";
         }
 
         [Test]
