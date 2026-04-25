@@ -6,6 +6,7 @@
 
     <IsPackable>false</IsPackable>
     <UsesVerify>true</UsesVerify>
+    <Configurations>Debug;Release;Debug Mock</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

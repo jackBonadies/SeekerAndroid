@@ -25,6 +25,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstrumentationTests", "Ins
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug Mock|Any CPU = Debug Mock|Any CPU
+		Debug Mock|x64 = Debug Mock|x64
+		Debug Mock|x86 = Debug Mock|x86
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
@@ -36,6 +39,15 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Debug Mock|Any CPU.ActiveCfg = Debug Mock|Any CPU
+		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Debug Mock|Any CPU.Build.0 = Debug Mock|Any CPU
+		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Debug Mock|Any CPU.Deploy.0 = Debug Mock|Any CPU
+		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Debug Mock|x64.ActiveCfg = Debug Mock|Any CPU
+		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Debug Mock|x64.Build.0 = Debug Mock|Any CPU
+		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Debug Mock|x64.Deploy.0 = Debug Mock|Any CPU
+		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Debug Mock|x86.ActiveCfg = Debug Mock|Any CPU
+		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Debug Mock|x86.Build.0 = Debug Mock|Any CPU
+		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Debug Mock|x86.Deploy.0 = Debug Mock|Any CPU
 		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
@@ -57,6 +69,12 @@ Global
 		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Release|x64.Build.0 = Release|Any CPU
 		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Release|x86.ActiveCfg = Release|Any CPU
 		{A7DDF06B-58D9-4673-9E95-B1AA85382C7A}.Release|x86.Build.0 = Release|Any CPU
+		{F4D9D870-A509-463B-90D4-8D9D6CC340FB}.Debug Mock|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4D9D870-A509-463B-90D4-8D9D6CC340FB}.Debug Mock|Any CPU.Build.0 = Debug|Any CPU
+		{F4D9D870-A509-463B-90D4-8D9D6CC340FB}.Debug Mock|x64.ActiveCfg = Debug|Any CPU
+		{F4D9D870-A509-463B-90D4-8D9D6CC340FB}.Debug Mock|x64.Build.0 = Debug|Any CPU
+		{F4D9D870-A509-463B-90D4-8D9D6CC340FB}.Debug Mock|x86.ActiveCfg = Debug|Any CPU
+		{F4D9D870-A509-463B-90D4-8D9D6CC340FB}.Debug Mock|x86.Build.0 = Debug|Any CPU
 		{F4D9D870-A509-463B-90D4-8D9D6CC340FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F4D9D870-A509-463B-90D4-8D9D6CC340FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4D9D870-A509-463B-90D4-8D9D6CC340FB}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -75,6 +93,12 @@ Global
 		{F4D9D870-A509-463B-90D4-8D9D6CC340FB}.Release|x64.Build.0 = Release|Any CPU
 		{F4D9D870-A509-463B-90D4-8D9D6CC340FB}.Release|x86.ActiveCfg = Release|Any CPU
 		{F4D9D870-A509-463B-90D4-8D9D6CC340FB}.Release|x86.Build.0 = Release|Any CPU
+		{EAF87E32-AE91-4B40-AA16-F3F37F2DDFC9}.Debug Mock|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAF87E32-AE91-4B40-AA16-F3F37F2DDFC9}.Debug Mock|Any CPU.Build.0 = Debug|Any CPU
+		{EAF87E32-AE91-4B40-AA16-F3F37F2DDFC9}.Debug Mock|x64.ActiveCfg = Debug|Any CPU
+		{EAF87E32-AE91-4B40-AA16-F3F37F2DDFC9}.Debug Mock|x64.Build.0 = Debug|Any CPU
+		{EAF87E32-AE91-4B40-AA16-F3F37F2DDFC9}.Debug Mock|x86.ActiveCfg = Debug|Any CPU
+		{EAF87E32-AE91-4B40-AA16-F3F37F2DDFC9}.Debug Mock|x86.Build.0 = Debug|Any CPU
 		{EAF87E32-AE91-4B40-AA16-F3F37F2DDFC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EAF87E32-AE91-4B40-AA16-F3F37F2DDFC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAF87E32-AE91-4B40-AA16-F3F37F2DDFC9}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -93,6 +117,12 @@ Global
 		{EAF87E32-AE91-4B40-AA16-F3F37F2DDFC9}.Release|x64.Build.0 = Release|Any CPU
 		{EAF87E32-AE91-4B40-AA16-F3F37F2DDFC9}.Release|x86.ActiveCfg = Release|Any CPU
 		{EAF87E32-AE91-4B40-AA16-F3F37F2DDFC9}.Release|x86.Build.0 = Release|Any CPU
+		{26F55920-8AE4-4FF9-BAD5-FCC3347541AD}.Debug Mock|Any CPU.ActiveCfg = Debug|Any CPU
+		{26F55920-8AE4-4FF9-BAD5-FCC3347541AD}.Debug Mock|Any CPU.Build.0 = Debug|Any CPU
+		{26F55920-8AE4-4FF9-BAD5-FCC3347541AD}.Debug Mock|x64.ActiveCfg = Debug Mock|Any CPU
+		{26F55920-8AE4-4FF9-BAD5-FCC3347541AD}.Debug Mock|x64.Build.0 = Debug Mock|Any CPU
+		{26F55920-8AE4-4FF9-BAD5-FCC3347541AD}.Debug Mock|x86.ActiveCfg = Debug Mock|Any CPU
+		{26F55920-8AE4-4FF9-BAD5-FCC3347541AD}.Debug Mock|x86.Build.0 = Debug Mock|Any CPU
 		{26F55920-8AE4-4FF9-BAD5-FCC3347541AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{26F55920-8AE4-4FF9-BAD5-FCC3347541AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26F55920-8AE4-4FF9-BAD5-FCC3347541AD}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -111,6 +141,12 @@ Global
 		{26F55920-8AE4-4FF9-BAD5-FCC3347541AD}.Release|x64.Build.0 = Release|Any CPU
 		{26F55920-8AE4-4FF9-BAD5-FCC3347541AD}.Release|x86.ActiveCfg = Release|Any CPU
 		{26F55920-8AE4-4FF9-BAD5-FCC3347541AD}.Release|x86.Build.0 = Release|Any CPU
+		{FA0EDBB3-209D-43BA-9D65-CC0A1272B889}.Debug Mock|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA0EDBB3-209D-43BA-9D65-CC0A1272B889}.Debug Mock|Any CPU.Build.0 = Debug|Any CPU
+		{FA0EDBB3-209D-43BA-9D65-CC0A1272B889}.Debug Mock|x64.ActiveCfg = Debug|Any CPU
+		{FA0EDBB3-209D-43BA-9D65-CC0A1272B889}.Debug Mock|x64.Build.0 = Debug|Any CPU
+		{FA0EDBB3-209D-43BA-9D65-CC0A1272B889}.Debug Mock|x86.ActiveCfg = Debug|Any CPU
+		{FA0EDBB3-209D-43BA-9D65-CC0A1272B889}.Debug Mock|x86.Build.0 = Debug|Any CPU
 		{FA0EDBB3-209D-43BA-9D65-CC0A1272B889}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FA0EDBB3-209D-43BA-9D65-CC0A1272B889}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA0EDBB3-209D-43BA-9D65-CC0A1272B889}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -129,6 +165,15 @@ Global
 		{FA0EDBB3-209D-43BA-9D65-CC0A1272B889}.Release|x64.Build.0 = Release|Any CPU
 		{FA0EDBB3-209D-43BA-9D65-CC0A1272B889}.Release|x86.ActiveCfg = Release|Any CPU
 		{FA0EDBB3-209D-43BA-9D65-CC0A1272B889}.Release|x86.Build.0 = Release|Any CPU
+		{F6B61950-EE4A-346F-75F8-F32A33DC685D}.Debug Mock|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6B61950-EE4A-346F-75F8-F32A33DC685D}.Debug Mock|Any CPU.Build.0 = Debug|Any CPU
+		{F6B61950-EE4A-346F-75F8-F32A33DC685D}.Debug Mock|Any CPU.Deploy.0 = Debug|Any CPU
+		{F6B61950-EE4A-346F-75F8-F32A33DC685D}.Debug Mock|x64.ActiveCfg = Debug|Any CPU
+		{F6B61950-EE4A-346F-75F8-F32A33DC685D}.Debug Mock|x64.Build.0 = Debug|Any CPU
+		{F6B61950-EE4A-346F-75F8-F32A33DC685D}.Debug Mock|x64.Deploy.0 = Debug|Any CPU
+		{F6B61950-EE4A-346F-75F8-F32A33DC685D}.Debug Mock|x86.ActiveCfg = Debug|Any CPU
+		{F6B61950-EE4A-346F-75F8-F32A33DC685D}.Debug Mock|x86.Build.0 = Debug|Any CPU
+		{F6B61950-EE4A-346F-75F8-F32A33DC685D}.Debug Mock|x86.Deploy.0 = Debug|Any CPU
 		{F6B61950-EE4A-346F-75F8-F32A33DC685D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F6B61950-EE4A-346F-75F8-F32A33DC685D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6B61950-EE4A-346F-75F8-F32A33DC685D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
