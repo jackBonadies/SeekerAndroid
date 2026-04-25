@@ -1127,6 +1127,31 @@ namespace Seeker
             SearchStateChanged?.Invoke(this, new SearchStateChangedEventArgs(SearchStates.Requested, searchInProgress));
 
             string joinedTerms = string.Join(" ", query.Terms).ToLowerInvariant();
+
+            if (Seeker.Debug.SearchCaptureStore.IsConfigured &&
+                Seeker.Debug.SearchCaptureStore.TryLoad(joinedTerms, out var capturedResponses, out _))
+            {
+                int delayPerCapture = capturedResponses.Count > 0 ? totalTimeMs / capturedResponses.Count : 0;
+                var replayList = new List<SearchResponse>();
+                for (int i = 0; i < capturedResponses.Count; i++)
+                {
+                    if (cancellationToken?.IsCancellationRequested == true)
+                    {
+                        break;
+                    }
+                    replayList.Add(capturedResponses[i]);
+                    var curSearch = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.InProgress, i + 1, 0, 0);
+                    options?.ResponseReceived?.Invoke((curSearch, capturedResponses[i]));
+                    if (delayPerCapture > 0)
+                    {
+                        await Task.Delay(delayPerCapture).ConfigureAwait(false);
+                    }
+                }
+                var replayDone = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.Completed, replayList.Count, 0, 0);
+                SearchStateChanged?.Invoke(this, new SearchStateChangedEventArgs(SearchStates.InProgress, replayDone));
+                return (replayDone, replayList.AsReadOnly());
+            }
+
             bool isBeethovenOverture = joinedTerms.Contains("beethoven") && joinedTerms.Contains("overture");
             bool isChipTestOther = joinedTerms.Contains("chiptest") && joinedTerms.Contains("other");
             bool isCurated = isBeethovenOverture || isChipTestOther;

@@ -140,4 +140,27 @@
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 	<Exec Command="powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File $(ProjectDir)PreBuild.ps1 &quot;$(ProjectDir)Properties\AndroidManifest.xml&quot; &quot;$(ConfigurationName)&quot;" />
   </Target>
+  <Target Name="GenerateDebugSecrets" BeforeTargets="CoreCompile"
+          Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug Mock'">
+    <PropertyGroup>
+      <_SeekerDebugCaptureKey>$([System.Environment]::GetEnvironmentVariable('SeekerEncryptKey'))</_SeekerDebugCaptureKey>
+      <_DebugSecretsFile>$(IntermediateOutputPath)DebugSecrets.g.cs</_DebugSecretsFile>
+    </PropertyGroup>
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <ItemGroup>
+      <_DebugSecretsLines Include="// &lt;auto-generated&gt; Regenerated from SEEKER_DEBUG_CAPTURE_KEY. Do not edit." />
+      <_DebugSecretsLines Include="namespace Seeker.Debug" />
+      <_DebugSecretsLines Include="{" />
+      <_DebugSecretsLines Include="    internal static class DebugSecrets" />
+      <_DebugSecretsLines Include="    {" />
+      <_DebugSecretsLines Include="        public const string SeekerEncryptKey = &quot;$(SeekerEncryptKey)&quot;%3B" />
+      <_DebugSecretsLines Include="    }" />
+      <_DebugSecretsLines Include="}" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(_DebugSecretsFile)" Lines="@(_DebugSecretsLines)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Compile Include="$(_DebugSecretsFile)" />
+      <FileWrites Include="$(_DebugSecretsFile)" />
+    </ItemGroup>
+  </Target>
 </Project>
