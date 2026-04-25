@@ -99,6 +99,7 @@
     <string name="no_uploads_not_sharing_subtitle">You are not currently sharing any files</string>
     <string name="no_searches">No searches</string>
     <string name="no_searches_subtitle">Enter a term to search the Soulseek network</string>
+    <string name="searching_label">Searching</string>
     <string name="search_results_count_none">No results found</string>
     <string name="search_results_count">{0} Results</string>
     <string name="search_results_count_filtered">Showing {0} of {1} Results</string>

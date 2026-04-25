@@ -31,7 +31,12 @@ namespace Seeker
     {
         public View rootView = null;
         private View noSearchesView = null;
-        private View searchLoadingSpinner = null;
+        private View searchLoadingView = null;
+        private TextView searchLoadingQueryText = null;
+        private System.Diagnostics.Stopwatch searchStopwatch;
+        private Handler spinnerTimerHandler;
+        private Java.Lang.Runnable spinnerTimerTick;
+        private bool spinnerTimerRunning;
         private Context context;
         public static bool ExpandAllResults { get => PreferencesState.ExpandAllResults; set => PreferencesState.ExpandAllResults = value; }
         public static IMenu ActionBarMenu = null;
@@ -551,17 +556,79 @@ namespace Seeker
             bool neverSearched = string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm);
             bool searching = SearchTabHelper.CurrentlySearching;
             noSearchesView.Visibility = (neverSearched && !searching) ? ViewStates.Visible : ViewStates.Gone;
+            //bool finishedWithNoResults = !neverSearched && !SearchTabHelper.CurrentlySearching && (SearchTabHelper.SearchResponses?.Count ?? 0) == 0;
+            //noSearchesView.Visibility = finishedWithNoResults ? ViewStates.Visible : ViewStates.Gone;
         }
 
         public void UpdateSearchSpinner()
         {
-            if (searchLoadingSpinner == null)
+            if (searchLoadingView == null)
             {
                 return;
             }
             bool show = SearchTabHelper.CurrentlySearching
                         && (SearchTabHelper.UI_SearchResponses?.Count ?? 0) == 0;
-            searchLoadingSpinner.Visibility = show ? ViewStates.Visible : ViewStates.Gone;
+            if (show)
+            {
+                if (!spinnerTimerRunning)
+                {
+                    StartSpinnerTimer();
+                }
+                RenderSpinnerText();
+            }
+            else if (spinnerTimerRunning)
+            {
+                StopSpinnerTimer();
+            }
+            searchLoadingView.Visibility = show ? ViewStates.Visible : ViewStates.Gone;
+        }
+
+        private void StartSpinnerTimer()
+        {
+            if (searchStopwatch == null)
+            {
+                searchStopwatch = new System.Diagnostics.Stopwatch();
+            }
+            searchStopwatch.Restart();
+            if (spinnerTimerHandler == null)
+            {
+                spinnerTimerHandler = new Handler(Looper.MainLooper);
+            }
+            if (spinnerTimerTick == null)
+            {
+                spinnerTimerTick = new Java.Lang.Runnable(() =>
+                {
+                    if (!spinnerTimerRunning)
+                    {
+                        return;
+                    }
+                    RenderSpinnerText();
+                    spinnerTimerHandler.PostDelayed(spinnerTimerTick, 50);
+                });
+            }
+            spinnerTimerRunning = true;
+            spinnerTimerHandler.PostDelayed(spinnerTimerTick, 50);
+        }
+
+        private void StopSpinnerTimer()
+        {
+            spinnerTimerRunning = false;
+            if (spinnerTimerHandler != null && spinnerTimerTick != null)
+            {
+                spinnerTimerHandler.RemoveCallbacks(spinnerTimerTick);
+            }
+            searchStopwatch?.Stop();
+        }
+
+        private void RenderSpinnerText()
+        {
+            if (searchLoadingQueryText == null)
+            {
+                return;
+            }
+            string term = SearchTabHelper.LastSearchTerm ?? string.Empty;
+            double sec = searchStopwatch?.Elapsed.TotalSeconds ?? 0;
+            searchLoadingQueryText.Text = $"\"{term}\" · {sec:0.0}s";
         }
 
         public void SearchResultStyleChanged()
@@ -700,7 +767,8 @@ namespace Seeker
             }
 
             noSearchesView = rootView.FindViewById<View>(Resource.Id.noSearchesView);
-            searchLoadingSpinner = rootView.FindViewById<View>(Resource.Id.searchLoadingSpinner);
+            searchLoadingView = rootView.FindViewById<View>(Resource.Id.searchLoadingView);
+            searchLoadingQueryText = rootView.FindViewById<TextView>(Resource.Id.searchLoadingQueryText);
             UpdateNoSearchesView();
             UpdateSearchSpinner();
 
