@@ -441,7 +441,7 @@ namespace Seeker.Serialization
                 Resource.Layout.searchitemview_modern_bottom_dummy                ,
                 Resource.Layout.searchitemview_modern_top_dummy                   ,
                 Resource.Layout.search_intent_dialog                              ,
-                Resource.Layout.search_results_expandablexml                      ,
+                Resource.Layout.search_result_style_selection                     ,
                 Resource.Layout.search_result_simple_bottom                       ,
                 Resource.Layout.search_result_simple_top                          ,
                 Resource.Layout.search_result_modern_bottom                       ,

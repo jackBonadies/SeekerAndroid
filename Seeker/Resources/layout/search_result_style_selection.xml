@@ -119,14 +119,50 @@
         />
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
-    <com.google.android.material.checkbox.MaterialCheckBox
-        android:id="@+id/checkExpandable"
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="2dp"
         android:text="@string/search_result_style_expandable"
-        android:textSize="16sp"
         android:textColor="?attr/mainTextColor"
-        app:buttonTint="?attr/slskAccent"
+        android:textSize="14sp"
     />
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/expandableToggleGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+    >
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnExpandableOff"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/search_result_style_off"
+            android:textSize="14sp"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+        />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnExpandableOn"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="@string/search_result_style_on"
+            android:textSize="14sp"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+        />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 </LinearLayout>

@@ -3,7 +3,6 @@ using Android.Views;
 using Common;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.Button;
-using Google.Android.Material.CheckBox;
 using Seeker.Search;
 
 namespace Seeker
@@ -14,15 +13,15 @@ namespace Seeker
         {
             private MaterialButtonToggleGroup styleToggleGroup;
             private MaterialButtonToggleGroup bitrateToggleGroup;
-            private MaterialCheckBox expandableCheckBox;
+            private MaterialButtonToggleGroup expandableToggleGroup;
 
             public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
             {
-                View rootView = inflater.Inflate(Resource.Layout.search_results_expandablexml, container);
+                View rootView = inflater.Inflate(Resource.Layout.search_result_style_selection, container);
 
                 styleToggleGroup = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.styleToggleGroup);
                 bitrateToggleGroup = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.bitrateToggleGroup);
-                expandableCheckBox = rootView.FindViewById<MaterialCheckBox>(Resource.Id.checkExpandable);
+                expandableToggleGroup = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.expandableToggleGroup);
 
                 var current = PreferencesState.SearchResultStyle;
                 styleToggleGroup.Check(current.HasFlag(SearchResultStyleEnum.Modern)
@@ -31,11 +30,14 @@ namespace Seeker
                 bitrateToggleGroup.Check(current.HasFlag(SearchResultStyleEnum.BitrateTop)
                     ? Resource.Id.btnBitrateTop
                     : Resource.Id.btnBitrateBottom);
-                expandableCheckBox.Checked = current.HasFlag(SearchResultStyleEnum.Expandable);
+                expandableToggleGroup.Check(current.HasFlag(SearchResultStyleEnum.Expandable)
+                    ? Resource.Id.btnExpandableOn
+                    : Resource.Id.btnExpandableOff);
 
-                styleToggleGroup.AddOnButtonCheckedListener(new ToggleListener(OnStyleChanged));
-                bitrateToggleGroup.AddOnButtonCheckedListener(new ToggleListener(OnStyleChanged));
-                expandableCheckBox.CheckedChange += (s, e) => OnStyleChanged();
+                var listener = new ToggleListener(OnStyleChanged);
+                styleToggleGroup.AddOnButtonCheckedListener(listener);
+                bitrateToggleGroup.AddOnButtonCheckedListener(listener);
+                expandableToggleGroup.AddOnButtonCheckedListener(listener);
 
                 return rootView;
             }
@@ -52,7 +54,7 @@ namespace Seeker
                 {
                     next |= SearchResultStyleEnum.BitrateTop;
                 }
-                if (expandableCheckBox.Checked)
+                if (expandableToggleGroup.CheckedButtonId == Resource.Id.btnExpandableOn)
                 {
                     next |= SearchResultStyleEnum.Expandable;
                 }
