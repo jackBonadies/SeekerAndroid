@@ -236,7 +236,7 @@ namespace Seeker
                     return;
                 }
 
-                if (SearchTabHelper.CurrentlySearching && (SearchTabHelper.SearchResponses?.Count ?? 0) == 0)
+                if ((SearchTabHelper.SearchResponses?.Count ?? 0) == 0)
                 {
                     holder.ItemView.Visibility = ViewStates.Gone;
                     return;

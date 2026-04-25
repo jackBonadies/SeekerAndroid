@@ -90,6 +90,40 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/noResultsView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_centerInParent="true"
+            android:translationY="-48dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:src="@drawable/search_no_results"
+                android:tint="?attr/cellTextColorSubdued" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/no_results_title"
+                android:textSize="18sp"
+                android:textColor="?attr/cellTextColor"
+                android:layout_marginTop="12dp" />
+
+            <TextView
+                android:id="@+id/noResultsSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="?attr/cellTextColorSubdued"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/noSearchesView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
