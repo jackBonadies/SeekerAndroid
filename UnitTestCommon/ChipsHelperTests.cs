@@ -2,7 +2,9 @@ using Common;
 using Microsoft.VisualStudio.TestPlatform.Utilities.Helpers;
 using NUnit.Framework;
 using Seeker;
+#if DEBUG
 using Seeker.Debug;
+#endif
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -582,8 +584,9 @@ namespace UnitTestCommon
             }
         }
 
+        #if DEBUG
         // --- keyword test ---
-        [Test, TestCaseSource(nameof(SearchResponseFiles))]
+        [Test, Category("RealData"), TestCaseSource(nameof(SearchResponseFiles))]
         public void Keywords_RealData(string fileName)
         {
             var searchResponseFolder = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "SearchResponse");
@@ -618,6 +621,7 @@ namespace UnitTestCommon
             Console.WriteLine(capture.Query);
             Console.WriteLine(keywords);
         }
+        #endif
 
         private static SearchResponse MakeResponseWithFolder(string folderName)
         {
