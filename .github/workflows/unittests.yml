@@ -27,7 +27,7 @@ jobs:
         run: dotnet build UnitTestCommon/UnitTestCommon.csproj --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test UnitTestCommon/UnitTestCommon.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+        run: dotnet test UnitTestCommon/UnitTestCommon.csproj --configuration Release --filter TestCategory!=RealData --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
       - name: Upload test results
         if: always()
