@@ -389,181 +389,30 @@ namespace Seeker
         {
             try
             {
-                //var sw = System.Diagnostics.Stopwatch.StartNew();
+                // here we are looking for keywords - for example - 
+                //   The Album Name (WEB) (2CD) - we want "The Album Name" "Web" "2CD"
+                //   The Album Name - The Artist Name 2020 - we want "The Album Name""The Artist Name" "2020" 
+                //   2020 - The Album Name - we want "The Album Name" "2020" 
+                //   The Album Name (live) (album) (single) (compilation) (video) - we want "The Album Name" "live" "album" "single" "compilation" "video"
+                //   The Album Name (Label, 2020) - we want "The Album Name" "label" "2020"
+                //   The Album Name 2xLP (1996-10) [24B-96kHz] [OPUS 192] - we want "The Album Name" "2xLP" "1996-10" "24B-96kHz" "OPUS 192"
+                //   NAME_CD2_Label_Year_Flac - we want "Name" "CD2" "Label" "Year" "Flac"
+                //   Album Name (1994.01.01) - we want "Album Name" "1994.01.01"
+
                 KeywordHelper keywordHelper = new KeywordHelper();
-                Dictionary<string, int> counts = new Dictionary<string, int>();
-                int totalCount = responses.Count();
+                int totalCount = responses.Count;
                 for (int i = 0; i < totalCount; i++)
                 {
                     string folderName = Common.Helpers.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
-
-                    //fline = fline.Replace(" - ", " ");
-                    //fline = fline.Replace(", ", " ");
-                    if (folderName.StartsWith(" - "))
-                    {
-                        folderName = folderName.Substring(3);
-                    }
-                    folderName = folderName.Trim();
-
-                    //fline = fline.ToLower(); //this should be moved so its only for the keys..
-
-                    //test if something is in parenthesis and treat it specially bc its likely attributes???
-
-                    foreach (string term in folderName.Split(new string[] { "- ", " -", "{", "}", "[", "]", "(", ")", " _ " }, StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        bool inParen = false;
-                        bool startsWithYear = false;
-                        int dateLen = 0;
-                        string trimmedTerm = term.Trim();
-                        //Artist_Name-Album_Name-WEB-2021-ESG this is its own thing.. so just continue after processing...
-                        if (KeywordHelper.IsNoSpacesFormat(trimmedTerm))
-                        {
-                            foreach (string t in trimmedTerm.Replace('_', ' ').Split(new string[] { "-" }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                keywordHelper.AddKey(t.Trim());
-                            }
-                            continue;
-                        }
-
-                        if (KeywordHelper.IsInParenthesis(trimmedTerm, folderName))
-                        {
-                            //normally if in parenthesis those are attributes so split them by ','
-                            inParen = true;
-                        }
-                        if (KeywordHelper.StartsWithYearOrDate(trimmedTerm, out dateLen))
-                        {
-                            startsWithYear = true;
-                        }
-
-                        if (inParen || startsWithYear)
-                        {
-                            if (startsWithYear)
-                            {
-                                string year = trimmedTerm.Substring(0, dateLen);
-
-                                keywordHelper.AddKey(year);
-                            }
-                            string rest = trimmedTerm;//.Substring(5).Trim();
-                            if (startsWithYear)
-                            {
-                                rest = rest.Substring(dateLen).Trim();
-                                //if after stripping date it now starts with - 
-                                if (rest.StartsWith(", ") || rest.StartsWith(". "))
-                                {
-                                    rest = rest.Substring(2);
-                                }
-                            }
-
-                            if (inParen)
-                            {
-                                foreach (string restTerm in rest.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    keywordHelper.AddKey(restTerm.Trim());
-                                }
-                            }
-                            else
-                            {
-                                keywordHelper.AddKey(rest);
-                            }
-                        }
-                        else
-                        {
-                            keywordHelper.AddKey(trimmedTerm);
-                        }
-                    }
-                    //generate all ngrams
+                    AddKeywordsFromFolderName(keywordHelper.AddKey, folderName, false);
                 }
 
-                //#if PARENT_VOTE
-
-                //var alllines = File.ReadLines(@"H:\Seeker_Testing\search_results\the_artist.txt");
-                //var sw = System.Diagnostics.Stopwatch.StartNew();
-                //KeywordHelper keywordHelper = new KeywordHelper();
-                //Dictionary<string, int> counts = new Dictionary<string, int>();
                 for (int i = 0; i < totalCount; i++)
                 {
-                    //string nline = line.Replace("artist name","",StringComparison.InvariantCultureIgnoreCase);
-                    string fline = Common.Helpers.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
-
-                    //fline = fline.Replace(" - ", " ");
-                    //fline = fline.Replace(", ", " ");
-                    if (fline.StartsWith(" - "))
-                    {
-                        fline = fline.Substring(3);
-                    }
-                    fline = fline.Trim();
-
-                    //fline = fline.ToLower(); //this should be moved so its only for the keys..
-
-                    //test if something is in parenthesis and treat it specially bc its likely attributes???
-
-                    foreach (string term in fline.Split(new string[] { "- ", " -", "{", "}", "[", "]", "(", ")", " _ " }, StringSplitOptions.RemoveEmptyEntries))
-                    {
-                        string termTrimmed = term.Trim();
-                        bool inParen = false;
-                        bool startsWithYear = false;
-                        int dateLen = 0;
-
-                        if (KeywordHelper.IsCommonParentFolder2(KeywordHelper.GetInvarientKey(termTrimmed)))
-                        {
-                            continue;
-                        }
-
-                        //Artist_Name-Album_Name-WEB-2021-ESG this is its own thing.. so just continue after processing...
-                        if (KeywordHelper.IsNoSpacesFormat(termTrimmed))
-                        {
-                            foreach (string t in termTrimmed.Replace('_', ' ').Split(new string[] { "-" }, StringSplitOptions.RemoveEmptyEntries))
-                            {
-                                keywordHelper.VoteIfExists(t.Trim());
-                            }
-                            continue;
-                        }
-
-                        if (KeywordHelper.IsInParenthesis(termTrimmed, fline))
-                        {
-                            //normally if in parenthesis those are attributes so split them by ','
-                            inParen = true;
-                        }
-                        if (KeywordHelper.StartsWithYearOrDate(termTrimmed, out dateLen))
-                        {
-                            startsWithYear = true;
-                        }
-
-                        if (inParen || startsWithYear)
-                        {
-                            if (startsWithYear)
-                            {
-                                string year = termTrimmed.Substring(0, dateLen);
-
-                                keywordHelper.VoteIfExists(year);
-                            }
-                            string rest = termTrimmed;//.Substring(5).Trim();
-                            if (startsWithYear)
-                            {
-                                rest = rest.Substring(dateLen).Trim();
-                            }
-
-                            if (inParen)
-                            {
-                                foreach (string restTerm in rest.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
-                                {
-                                    keywordHelper.VoteIfExists(restTerm.Trim());
-                                }
-                            }
-                            else
-                            {
-                                keywordHelper.VoteIfExists(rest);
-                            }
-                        }
-                        else
-                        {
-                            keywordHelper.VoteIfExists(termTrimmed);
-                        }
-                    }
-                    //generate all ngrams
+                    string parentFolderName = Common.Helpers.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
+                    AddKeywordsFromFolderName(keywordHelper.VoteIfExists, parentFolderName, true);
                 }
 
-                //#endif
                 return keywordHelper.GetTopCandidates(searchTerm, 11);
             }
             catch (Exception ex)
@@ -574,6 +423,167 @@ namespace Seeker
             }
         }
 
+        private static void AddKeywordsFromParentFolderName(KeywordHelper keywordHelper, string folderName)
+        {
+            //fline = fline.Replace(" - ", " ");
+            //fline = fline.Replace(", ", " ");
+            if (folderName.StartsWith(" - "))
+            {
+                folderName = folderName.Substring(3);
+            }
+            folderName = folderName.Trim();
+
+            //fline = fline.ToLower(); //this should be moved so its only for the keys..
+
+            //test if something is in parenthesis and treat it specially bc its likely attributes???
+
+            foreach (string term in folderName.Split(new string[] { "- ", " -", "{", "}", "[", "]", "(", ")", " _ " }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                bool inParen = false;
+                bool startsWithYear = false;
+                int dateLen = 0;
+                string trimmedTerm = term.Trim();
+
+                if (KeywordHelper.IsCommonParentFolder2(KeywordHelper.GetInvarientKey(trimmedTerm)))
+                {
+                    continue;
+                }
+
+                //Artist_Name-Album_Name-WEB-2021-ESG this is its own thing.. so just continue after processing...
+                if (KeywordHelper.IsNoSpacesFormat(trimmedTerm))
+                {
+                    foreach (string t in trimmedTerm.Replace('_', ' ').Split(new string[] { "-" }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        keywordHelper.VoteIfExists(t.Trim());
+                    }
+                    continue;
+                }
+
+                if (KeywordHelper.IsInParenthesis(trimmedTerm, folderName))
+                {
+                    //normally if in parenthesis those are attributes so split them by ','
+                    inParen = true;
+                }
+                if (KeywordHelper.StartsWithYearOrDate(trimmedTerm, out dateLen))
+                {
+                    startsWithYear = true;
+                }
+
+                if (inParen || startsWithYear)
+                {
+                    if (startsWithYear)
+                    {
+                        string year = trimmedTerm.Substring(0, dateLen);
+
+                        keywordHelper.VoteIfExists(year);
+                    }
+                    string rest = trimmedTerm;//.Substring(5).Trim();
+                    if (startsWithYear)
+                    {
+                        rest = rest.Substring(dateLen).Trim();
+                    }
+
+                    if (inParen)
+                    {
+                        foreach (string restTerm in rest.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            keywordHelper.VoteIfExists(restTerm.Trim());
+                        }
+                    }
+                    else
+                    {
+                        keywordHelper.VoteIfExists(rest);
+                    }
+                }
+                else
+                {
+                    keywordHelper.VoteIfExists(trimmedTerm);
+                }
+            }
+        }
+
+        public static void AddKeywordsFromFolderName(Action<string> addKey, string folderName, bool filterCommonParent)
+        {
+            //fline = fline.Replace(" - ", " ");
+            //fline = fline.Replace(", ", " ");
+            if (folderName.StartsWith(" - "))
+            {
+                folderName = folderName.Substring(3);
+            }
+            folderName = folderName.Trim();
+
+            //fline = fline.ToLower(); //this should be moved so its only for the keys..
+
+            //test if something is in parenthesis and treat it specially bc its likely attributes???
+
+            foreach (string term in folderName.Split(new string[] { "- ", " -", "{", "}", "[", "]", "(", ")", " _ " }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                bool inParen = false;
+                bool startsWithYear = false;
+                int dateLen = 0;
+                string trimmedTerm = term.Trim();
+
+                if (filterCommonParent && KeywordHelper.IsCommonParentFolder2(KeywordHelper.GetInvarientKey(trimmedTerm)))
+                {
+                    continue;
+                }
+
+                //Artist_Name-Album_Name-WEB-2021-ESG this is its own thing.. so just continue after processing...
+                if (KeywordHelper.IsNoSpacesFormat(trimmedTerm))
+                {
+                    foreach (string t in trimmedTerm.Replace('_', ' ').Split(new string[] { "-" }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        addKey(t.Trim());
+                    }
+                    continue;
+                }
+
+                if (KeywordHelper.IsInParenthesis(trimmedTerm, folderName))
+                {
+                    //normally if in parenthesis those are attributes so split them by ','
+                    inParen = true;
+                }
+                if (KeywordHelper.StartsWithYearOrDate(trimmedTerm, out dateLen))
+                {
+                    startsWithYear = true;
+                }
+
+                if (inParen || startsWithYear)
+                {
+                    if (startsWithYear)
+                    {
+                        string year = trimmedTerm.Substring(0, dateLen);
+                        addKey(year);
+                    }
+                    string rest = trimmedTerm;//.Substring(5).Trim();
+                    if (startsWithYear)
+                    {
+                        rest = rest.Substring(dateLen).Trim();
+                        //if after stripping date it now starts with - 
+                        if (rest.StartsWith(", ") || rest.StartsWith(". "))
+                        {
+                            rest = rest.Substring(2);
+                        }
+                    }
+
+                    if (inParen)
+                    {
+                        foreach (string restTerm in rest.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            addKey(restTerm.Trim());
+                        }
+                    }
+                    else
+                    {
+                        addKey(rest);
+                    }
+                }
+                else
+                {
+                    addKey(trimmedTerm);
+                }
+            }
+        }
 
         public class KeywordHelper
         {
@@ -627,11 +637,11 @@ namespace Seeker
                 }
             }
 
-            public static bool IsYear(string potentialYear)
+            public static bool IsYear(ReadOnlySpan<char> potentialYear)
             {
                 if (int.TryParse(potentialYear, out int potInt))
                 {
-                    if (potInt >= 1900 && potInt <= 2034)
+                    if (potInt >= 1900 && potInt <= 2044)
                     {
                         return true;
                     }
@@ -641,7 +651,6 @@ namespace Seeker
 
             public static bool IsCommonParentFolder2(string t)
             {
-                //#if PARENT_VOTE
                 if (t.Length == 1)
                 {
                     return true;
@@ -662,10 +671,6 @@ namespace Seeker
                     default:
                         return false;
                 }
-                //#else
-                //                return false;
-                //#endif
-
             }
 
             public static bool IsSingleFileAttributeType(string t)
@@ -707,21 +712,9 @@ namespace Seeker
 
             public static bool IsInParenthesis(string term, string line)
             {
-                int i = line.IndexOf(term);
-                if (i > 1)
-                {
-                    int t = term.Length;
-                    if ((line[i - 1] == '(' || line[i - 1] == '{' || line[i - 1] == '[') &&
-                        (i + t < line.Length) && ((line[i + t] == ')' || line[i + t] == '}' || line[i + t] == ']')))
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                return false;
+                return line.Contains("(" + term + ")") ||
+                       line.Contains("[" + term + "]") ||
+                       line.Contains("{" + term + "}");
             }
 
             public static bool IsNoSpacesFormat(string term)
@@ -740,17 +733,21 @@ namespace Seeker
                 {
                     return false;
                 }
-                if (IsYear(line.Substring(0, 4)))
+                if (IsYear(line.AsSpan(0, 4)))
                 {
                     if (IsSpecialChar(line[4]))
                     {
                         //can we also get month and day if available?
                         if (line.Length >= 10)
                         {
-                            if (IsSpecialChar(line[7]) && int.TryParse(line.Substring(5, 2), out _) && int.TryParse(line.Substring(8, 2), out _))
+                            if (IsSpecialChar(line[7]) && int.TryParse(line.AsSpan(5, 2), out int month) && int.TryParse(line.AsSpan(8, 2), out int day))
                             {
-                                dateLen = 10;
-                                return true;
+                                if (month >= 1 && month <= 12 && day >= 1 && day <= 31)
+                                {
+                                    dateLen = 10;
+                                    return true;
+                                }
+                                return false;
                             }
                         }
                         dateLen = 4;
