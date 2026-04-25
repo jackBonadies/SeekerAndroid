@@ -22,7 +22,7 @@ namespace Seeker
         /// <param name="searchTerm"></param>
         /// <param name="smartFilterOptions"></param>
         /// <returns></returns>
-        public static List<ChipDataItem> GetChipDataItemsFromSearchResults(List<Soulseek.SearchResponse> responses, string searchTerm, PreferencesState.SmartFilterState smartFilterOptions, bool hideHidden)
+        public static List<ChipDataItem> CalculateChipItems(List<Soulseek.SearchResponse> responses, string searchTerm, PreferencesState.SmartFilterState smartFilterOptions, bool hideHidden)
         {
             Dictionary<ChipType, IEnumerable<ChipDataItem>> finalData = new Dictionary<ChipType, IEnumerable<ChipDataItem>>();
 

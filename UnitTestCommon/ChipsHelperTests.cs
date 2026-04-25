@@ -111,22 +111,22 @@ namespace UnitTestCommon
 
         private static List<ChipDataItem> RunFileTypes(List<SearchResponse> responses, bool hideHidden = true)
         {
-            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, "search", FileTypesOnly(), hideHidden);
+            return ChipsHelper.CalculateChipItems(responses, "search", FileTypesOnly(), hideHidden);
         }
 
         private static List<ChipDataItem> RunFileCounts(List<SearchResponse> responses, bool hideHidden = true)
         {
-            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, "search", FileCountsOnly(), hideHidden);
+            return ChipsHelper.CalculateChipItems(responses, "search", FileCountsOnly(), hideHidden);
         }
 
         private static List<ChipDataItem> RunKeywords(List<SearchResponse> responses, string search, bool hideHidden = true)
         {
-            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, search, KeywordsOnly(), hideHidden);
+            return ChipsHelper.CalculateChipItems(responses, search, KeywordsOnly(), hideHidden);
         }
 
         private static List<ChipDataItem> RunAll(List<SearchResponse> responses, string search, bool hideHidden = true)
         {
-            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, search, All(), hideHidden);
+            return ChipsHelper.CalculateChipItems(responses, search, All(), hideHidden);
         }
 
         private static List<string> Texts(List<ChipDataItem> chips)
@@ -436,7 +436,7 @@ namespace UnitTestCommon
 
             List<ChipDataItem> result = null;
             Assert.DoesNotThrow(() =>
-                result = ChipsHelper.GetChipDataItemsFromSearchResults(
+                result = ChipsHelper.CalculateChipItems(
                     new List<SearchResponse> { withCache, withoutCache },
                     "search",
                     FileTypesOnly(),

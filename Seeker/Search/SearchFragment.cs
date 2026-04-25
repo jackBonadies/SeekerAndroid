@@ -1028,7 +1028,7 @@ namespace Seeker
                 }
                 if ((SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses?.Count ?? 0) != 0)
                 {
-                    List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].LastSearchTerm, PreferencesState.SmartFilterOptions, PreferencesState.HideLockedResultsInSearch);
+                    List<ChipDataItem> chipDataItems = ChipsHelper.CalculateChipItems(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].LastSearchTerm, PreferencesState.SmartFilterOptions, PreferencesState.HideLockedResultsInSearch);
                     SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
                     SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
                     {
@@ -2189,7 +2189,8 @@ namespace Seeker
 
                 t.ContinueWith(new Action<Task<(Soulseek.Search, IReadOnlyCollection<SearchResponse>)>>(t =>
                 {
-                    SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
+                    var searchTab = SearchTabHelper.SearchTabCollection[fromTab];
+                    searchTab.CurrentlySearching = false;
 
                     if (!t.IsCompletedSuccessfully && t.Exception != null)
                     {
@@ -2254,16 +2255,17 @@ namespace Seeker
                         }
                     }
 #endif
-                    SearchTabHelper.SearchTabCollection[fromTab].LastSearchResultsCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
+                    searchTab.LastSearchResultsCount = searchTab.SearchResponses.Count;
 
                     if (fromWishlist)
                     {
                         WishlistController.SearchCompleted(fromTab);
                     }
-                    else if (SearchTabHelper.SearchTabCollection[fromTab].SearchTarget == SearchTarget.Wishlist)
+                    else if (searchTab.SearchTarget == SearchTarget.Wishlist)
                     {
                         //this is if the search was not automatic (i.e. wishlist timer elapsed) but was performed in the wishlist tab..
                         //therefore save the new results...
+                        searchTab.UpdateChips(PreferencesState.SmartFilterOptions, PreferencesState.HideLockedResultsInSearch);
                         SearchTabHelper.SaveHeadersToSharedPrefs();
                         SearchTabHelper.SaveSearchResultsToDisk(fromTab, SeekerState.ActiveActivityRef);
                     }
@@ -2290,11 +2292,10 @@ namespace Seeker
                             }
 
 #endif
-                            List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses, SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm, PreferencesState.SmartFilterOptions, PreferencesState.HideLockedResultsInSearch);
-                            SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
+                            searchTab.UpdateChips(PreferencesState.SmartFilterOptions, PreferencesState.HideLockedResultsInSearch);
                             SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                             {
-                                SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
+                                SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(searchTab.ChipDataItems);
                                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
                             }));
                         }

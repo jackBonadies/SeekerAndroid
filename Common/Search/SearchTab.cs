@@ -36,6 +36,11 @@ namespace Seeker
             return this.SearchResponses != null;
         }
 
+        public void UpdateChips(PreferencesState.SmartFilterState smartFilterState, bool hideLocked)
+        {
+            this.ChipDataItems = ChipsHelper.CalculateChipItems(this.SearchResponses, this.LastSearchTerm, smartFilterState, hideLocked);
+        }
+
 
         public SearchTab Clone(bool forWishlist)
         {
