@@ -4,23 +4,33 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/searchResultSelection"
     android:orientation="vertical"
-    android:paddingTop="25dp"
     android:paddingBottom="20dp"
     android:paddingStart="10dp"
     android:paddingEnd="10dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+	android:background="@drawable/bottom_sheet_header_bg"
+	android:backgroundTint="?attr/searchBottomSheetBackground"
 >
+	<View
+		android:layout_width="32dp"
+		android:layout_height="4dp"
+		android:layout_gravity="center_horizontal"
+		android:layout_marginTop="8dp"
+		android:layout_marginBottom="8dp"
+		android:background="@drawable/search_bottom_sheet_drag_handle"
+	/>
+
     <TextView
         android:paddingBottom="2dp"
-        android:paddingTop="2dp"
+        android:paddingTop="4dp"
         android:paddingEnd="2dp"
         android:paddingStart="2dp"
         android:textAllCaps="false"
         android:textStyle="bold"
         android:text="@string/search_result_style"
         android:textSize="22sp"
-        android:textColor="?attr/mainTextColor"
+        android:textColor="?attr/searchTabHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
     />
@@ -30,9 +40,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginStart="2dp"
+        android:textColor="?attr/cellTextColorSubdued"
         android:text="@string/search_result_style_style_label"
-        android:textColor="?attr/mainTextColor"
-        android:textSize="14sp"
+        android:textAllCaps="true"
+        android:textSize="11sp"
+        android:letterSpacing="0.08"
     />
     <com.google.android.material.button.MaterialButtonToggleGroup
         android:id="@+id/styleToggleGroup"
@@ -43,12 +55,12 @@
         app:selectionRequired="true"
     >
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnStyleSimple"
+            android:id="@+id/btnStyleModern"
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/search_result_style_simple"
+            android:text="@string/search_result_style_modern"
             android:textSize="14sp"
             android:minWidth="0dp"
             android:paddingStart="0dp"
@@ -57,12 +69,12 @@
             android:insetRight="0dp"
         />
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnStyleModern"
+            android:id="@+id/btnStyleSimple"
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/search_result_style_modern"
+            android:text="@string/search_result_style_simple"
             android:textSize="14sp"
             android:minWidth="0dp"
             android:paddingStart="0dp"
@@ -78,8 +90,10 @@
         android:layout_marginTop="16dp"
         android:layout_marginStart="2dp"
         android:text="@string/search_result_style_filetype_position_label"
-        android:textColor="?attr/mainTextColor"
-        android:textSize="14sp"
+        android:textColor="?attr/cellTextColorSubdued"
+        android:textAllCaps="true"
+        android:textSize="11sp"
+        android:letterSpacing="0.08"
     />
     <com.google.android.material.button.MaterialButtonToggleGroup
         android:id="@+id/bitrateToggleGroup"
@@ -90,12 +104,12 @@
         app:selectionRequired="true"
     >
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnBitrateBottom"
+            android:id="@+id/btnBitrateTop"
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/search_result_style_filetype_bottom"
+            android:text="@string/search_result_style_filetype_top"
             android:textSize="14sp"
             android:minWidth="0dp"
             android:paddingStart="0dp"
@@ -104,12 +118,12 @@
             android:insetRight="0dp"
         />
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnBitrateTop"
+            android:id="@+id/btnBitrateBottom"
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="@string/search_result_style_filetype_top"
+            android:text="@string/search_result_style_filetype_bottom"
             android:textSize="14sp"
             android:minWidth="0dp"
             android:paddingStart="0dp"
@@ -125,8 +139,10 @@
         android:layout_marginTop="16dp"
         android:layout_marginStart="2dp"
         android:text="@string/search_result_style_expandable"
-        android:textColor="?attr/mainTextColor"
-        android:textSize="14sp"
+        android:textColor="?attr/cellTextColorSubdued"
+        android:textAllCaps="true"
+        android:textSize="11sp"
+        android:letterSpacing="0.08"
     />
     <com.google.android.material.button.MaterialButtonToggleGroup
         android:id="@+id/expandableToggleGroup"
