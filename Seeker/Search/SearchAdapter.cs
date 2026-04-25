@@ -242,7 +242,7 @@ namespace Seeker
 
                 holder.ItemView.Visibility = ViewStates.Visible;
                 var ctx = tv.Context;
-                if (shown == 0)
+                if (total == 0)
                 {
                     tv.Text = ctx.GetString(Resource.String.search_results_count_none);
                 }
