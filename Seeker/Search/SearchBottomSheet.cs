@@ -23,6 +23,15 @@ namespace Seeker
                 bitrateToggleGroup = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.bitrateToggleGroup);
                 expandableToggleGroup = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.expandableToggleGroup);
 
+                // Match the look of searches.xml's format/bitrate toggles: purple-when-checked,
+                // dialog_background-when-unchecked, white text on checked. The outlined-button
+                // style alone doesn't get there; same approach as SearchFragment.SetupFilterControls.
+                var bgTint = GetSegmentedButtonBgTint(rootView.Context);
+                var textTint = GetSegmentedButtonTextTint(rootView.Context);
+                ApplyToggleGroupTint(styleToggleGroup, bgTint, textTint);
+                ApplyToggleGroupTint(bitrateToggleGroup, bgTint, textTint);
+                ApplyToggleGroupTint(expandableToggleGroup, bgTint, textTint);
+
                 var current = PreferencesState.SearchResultStyle;
                 styleToggleGroup.Check(current.HasFlag(SearchResultStyleEnum.Modern)
                     ? Resource.Id.btnStyleModern

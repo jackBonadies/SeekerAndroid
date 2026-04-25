@@ -865,8 +865,8 @@ namespace Seeker
 
         private void SetupFilterControls()
         {
-            var bgTint = GetSegmentedButtonBgTint();
-            var textTint = GetSegmentedButtonTextTint();
+            var bgTint = GetSegmentedButtonBgTint(this.Context);
+            var textTint = GetSegmentedButtonTextTint(this.Context);
 
             var formatToggle = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.formatToggleGroup);
             ApplyToggleGroupTint(formatToggle, bgTint, textTint);
@@ -884,13 +884,13 @@ namespace Seeker
             bitrateToggle.ButtonChecked += BitrateToggle_ButtonChecked;
         }
 
-        private Android.Content.Res.ColorStateList GetSegmentedButtonBgTint()
+        private static Android.Content.Res.ColorStateList GetSegmentedButtonBgTint(Android.Content.Context ctx)
         {
             var typedValue = new Android.Util.TypedValue();
-            this.Context.Theme.ResolveAttribute(Resource.Attribute.mainPurple, typedValue, true);
+            ctx.Theme.ResolveAttribute(Resource.Attribute.mainPurple, typedValue, true);
             int accentColor = typedValue.Data;
 
-            this.Context.Theme.ResolveAttribute(Resource.Attribute.dialog_background, typedValue, true);
+            ctx.Theme.ResolveAttribute(Resource.Attribute.dialog_background, typedValue, true);
             int uncheckedColor = typedValue.Data;
 
             var states = new int[][]
@@ -902,10 +902,10 @@ namespace Seeker
             return new Android.Content.Res.ColorStateList(states, colors);
         }
 
-        private Android.Content.Res.ColorStateList GetSegmentedButtonTextTint()
+        private static Android.Content.Res.ColorStateList GetSegmentedButtonTextTint(Android.Content.Context ctx)
         {
             var typedValue = new Android.Util.TypedValue();
-            this.Context.Theme.ResolveAttribute(Resource.Attribute.normalTextColor, typedValue, true);
+            ctx.Theme.ResolveAttribute(Resource.Attribute.normalTextColor, typedValue, true);
             int uncheckedColor = typedValue.Data;
 
             var states = new int[][]
