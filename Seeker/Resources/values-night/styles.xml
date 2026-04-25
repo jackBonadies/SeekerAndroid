@@ -45,7 +45,11 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionModeBackground">?attr/colorPrimary</item>
         <item name="actionModeBackground">?attr/colorPrimary</item>
+
+        <item name="bottomSheetDialogTheme">@style/SeekerBottomSheetDialog</item>
     </style>
+
+    <style name="SeekerBottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog" />
 
     <style name="SeekerButtonStyle">
         <item name="android:textColor">#ffffff</item>

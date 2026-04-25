@@ -57,7 +57,14 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionModeBackground">?attr/mainPurple</item>
         <item name="actionModeBackground">?attr/mainPurple</item>
+
+        <!-- Without this, BottomSheetDialogFragment falls back to Theme.Design.Light.BottomSheetDialog,
+             whose colorPrimary is Material's default teal, not the app's purple. That mismatch is
+             visible on any MaterialButton/MaterialButtonToggleGroup/MaterialCheckBox inside a sheet. -->
+        <item name="bottomSheetDialogTheme">@style/SeekerBottomSheetDialog</item>
     </style>
+
+    <style name="SeekerBottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog" />
 
     <style name="Seeker.Snackbar.Action" parent="Widget.Material3.Button.TextButton.Snackbar">
         <item name="android:textColor">?attr/snackbarActionColor</item>
