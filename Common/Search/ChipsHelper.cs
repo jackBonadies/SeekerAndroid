@@ -58,13 +58,13 @@ namespace Seeker
                 var keywords = getKeywords(responses, searchTerm);
                 foreach (var keyword in keywords)
                 {
-                    if (keyword.Item2 != null)
+                    if (keyword.invariantsCollection != null)
                     {
-                        chipKeywords.Add(new KeywordChipDataItem(keyword.Item1, keyword.Item2));
+                        chipKeywords.Add(new KeywordChipDataItem(keyword.displayKeyword, keyword.invariantsCollection));
                     }
                     else
                     {
-                        chipKeywords.Add(new KeywordChipDataItem(keyword.Item1));
+                        chipKeywords.Add(new KeywordChipDataItem(keyword.displayKeyword));
                     }
                 }
                 finalData[ChipType.Keyword] = chipKeywords;
@@ -387,7 +387,7 @@ namespace Seeker
         }
 
 
-        public static List<Tuple<string, HashSet<string>>> getKeywords(List<Soulseek.SearchResponse> responses, string searchTerm)
+        public static List<(string displayKeyword, HashSet<string>? invariantsCollection)> getKeywords(List<Soulseek.SearchResponse> responses, string searchTerm)
         {
             try
             {
@@ -421,11 +421,11 @@ namespace Seeker
             {
                 // TODO2026 add back
                 //Logger.Firebase("keywords failed " + ex.Message + ex.StackTrace);
-                return new List<Tuple<string, HashSet<string>>>();
+                return new();
             }
         }
 
-        public static void AddKeywordsFromFolderName(Action<string> addKey, string folderName, bool filterCommonParent)
+        public static void AddKeywordsFromFolderName(Action<string> addKey, string folderName, bool ignoreCommonParentNames)
         {
             //fline = fline.Replace(" - ", " ");
             //fline = fline.Replace(", ", " ");
@@ -450,7 +450,7 @@ namespace Seeker
                 int dateLen = 0;
                 string trimmedTerm = term.Trim();
 
-                if (filterCommonParent && KeywordHelper.IsCommonParentFolder2(KeywordHelper.GetInvariantKey(trimmedTerm)))
+                if (ignoreCommonParentNames && KeywordHelper.ShouldIgnoreParentFolder(KeywordHelper.GetInvariantKey(trimmedTerm)))
                 {
                     continue;
                 }
@@ -580,7 +580,7 @@ namespace Seeker
                 return false;
             }
 
-            public static bool IsCommonParentFolder2(string t)
+            public static bool ShouldIgnoreParentFolder(string t)
             {
                 if (t.Length == 1)
                 {
@@ -594,6 +594,7 @@ namespace Seeker
                     case "@flac":
                     case "audio":
                     case "mp#":
+                    case "mp3":
                     case "m?sica":
                     case "album":
                     case "flac albums":
@@ -737,36 +738,33 @@ namespace Seeker
             public void AddKey(string term)
             {
                 string invariantTerm = GetInvariantKey(term);
-                if (invariantKeyCounts.ContainsKey(invariantTerm))
+                if (invariantKeyCounts.TryGetValue(invariantTerm, out int invariantCount))
                 {
-                    invariantKeyCounts[invariantTerm]++;
+                    invariantKeyCounts[invariantTerm] = invariantCount + 1;
                 }
                 else
                 {
                     invariantKeyCounts[invariantTerm] = 1;
                 }
 
-                if (realCounts.ContainsKey(term))
+                if (realCounts.TryGetValue(term, out int termCount))
                 {
-                    realCounts[term]++;
+                    realCounts[term] = termCount + 1;
                 }
                 else
                 {
                     realCounts[term] = 1;
                 }
 
-                if (invariantToReal.ContainsKey(invariantTerm))
+                if (!invariantToReal.TryGetValue(invariantTerm, out var set))
                 {
-                    invariantToReal[invariantTerm].Add(term);
+                    set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    invariantToReal[invariantTerm] = set;
                 }
-                else
-                {
-                    invariantToReal[invariantTerm] = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    invariantToReal[invariantTerm].Add(term);
-                }
+                set.Add(term);
             }
 
-            public List<Tuple<string, HashSet<string>>> GetTopCandidates(string searchTerm, int topN)
+            public List<(string displayKeyword, HashSet<string>?)> GetTopCandidates(string searchTerm, int topN)
             {
                 //weigh the years, and throw out the just file types.
                 string searchTermInvariant = GetInvariantKey(searchTerm);
@@ -793,34 +791,33 @@ namespace Seeker
                         invariantKeyCounts[key] = (int)(invariantKeyCounts[key] * .6);
                     }
                 }
-                var l = invariantKeyCounts.ToList();
-                l.Sort((x, y) => y.Value.CompareTo(x.Value));
-                List<Tuple<string, HashSet<string>>> keyTerms = new List<Tuple<string, HashSet<string>>>();
-                if (topN > l.Count)
+                var invariantsKeyCountList = invariantKeyCounts.ToList();
+                invariantsKeyCountList.Sort((x, y) => y.Value.CompareTo(x.Value));
+                List<(string displayKeyword, HashSet<string>? invariantsCollection)> keyTerms = new();
+                if (topN > invariantsKeyCountList.Count)
                 {
-                    topN = l.Count;
+                    topN = invariantsKeyCountList.Count;
                 }
                 for (int i = 0; i < topN; i++)
                 {
-                    var hs = invariantToReal[l[i].Key];
-                    if (hs.Count > 1)
+                    var realKeywords = invariantToReal[invariantsKeyCountList[i].Key];
+                    if (realKeywords.Count > 1)
                     {
                         int max = -1;
                         string displayName = string.Empty;
-                        for (int iiii = 0; iiii < hs.Count; iiii++)
+                        foreach (string realKeyword in realKeywords)
                         {
-                            string name = hs.ElementAt(iiii);
-                            if (realCounts[name] > max)
+                            if (realCounts[realKeyword] > max)
                             {
-                                max = realCounts[name];
-                                displayName = name;
+                                max = realCounts[realKeyword];
+                                displayName = realKeyword;
                             }
                         }
-                        keyTerms.Add(new Tuple<string, HashSet<string>>(displayName, hs));
+                        keyTerms.Add(new (displayName, realKeywords));
                     }
                     else
                     {
-                        keyTerms.Add(new Tuple<string, HashSet<string>>(hs.ElementAt(0), null));
+                        keyTerms.Add(new (realKeywords.First(), null));
                     }
 
                 }
