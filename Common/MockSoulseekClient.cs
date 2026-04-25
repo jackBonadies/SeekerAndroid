@@ -1154,6 +1154,8 @@ namespace Seeker
 
             bool isBeethovenOverture = joinedTerms.Contains("beethoven") && joinedTerms.Contains("overture");
             bool isChipTestOther = joinedTerms.Contains("chiptest") && joinedTerms.Contains("other");
+            bool isSlowSearch = joinedTerms.Contains("slowsearch");
+            bool is0Results = joinedTerms.Contains("0results");
             bool isCurated = isBeethovenOverture || isChipTestOther;
 
             var allResponses = new List<SearchResponse>();
@@ -1216,8 +1218,16 @@ namespace Seeker
                     }
                 }
             }
+            else if (is0Results)
+            {
+                await Task.Delay(10000).ConfigureAwait(false);
+            }
             else
             {
+                if (isSlowSearch)
+                {
+                    await Task.Delay(3000).ConfigureAwait(false);
+                }
                 for (int i = 0; i < count; i++)
                 {
                     if (cancellationToken?.IsCancellationRequested == true)
