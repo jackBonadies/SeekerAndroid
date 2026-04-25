@@ -102,6 +102,8 @@
     <string name="search_results_count_none">No results found</string>
     <string name="search_results_count">{0} Results</string>
     <string name="search_results_count_filtered">Showing {0} of {1} Results</string>
+    <string name="wishlist_results_count">{0} results</string>
+    <string name="wishlist_never_run">Never run</string>
     <string name="category_file_type">File Type</string>
     <string name="category_keyword">Keyword</string>
     <string name="category_num_files">Num Files</string>
@@ -1343,4 +1345,10 @@ The standard way of requesting folder access does not always persist permissions
 	</string>
 	
 	
+    <string name="just_now">just now</string>
+    <string name="min_ago">min ago</string>
+    <string name="hr_ago">hr ago</string>
+    <string name="yesterday">yesterday</string>
+    <string name="days_ago">days ago</string>
+
 </resources>

@@ -182,16 +182,21 @@ namespace Seeker
             SearchTab searchTab = SearchTabHelper.SearchTabCollection[i];
             if (searchTab.SearchTarget == SearchTarget.Wishlist)
             {
-                string timeString = "-";
+                string timeString = string.Empty;
                 if (searchTab.LastRanTime != DateTime.MinValue)
                 {
-                    timeString = CommonHelpers.GetNiceDateTime(searchTab.LastRanTime);
+                    timeString = " · " + CommonHelpers.GetRecentTimeNiceFormated(searchTab.LastRanTime, SimpleHelpers.GetDateTimeNowSafe().Subtract(searchTab.LastRanTime));
+                } 
+                else
+                {
+                    timeString = this.Context.GetString(Resource.String.wishlist_never_run);
                 }
-                numResults.Text = searchTab.LastSearchResultsCount.ToString() + " Results, Last Ran: " + timeString;
+                var resultsString = string.Format(this.Context.GetString(Resource.String.wishlist_results_count), searchTab.LastSearchResultsCount);
+                numResults.Text = resultsString + timeString;
             }
             else
             {
-                numResults.Text = searchTab.LastSearchResultsCount.ToString() + " Results";
+                numResults.Text = string.Format(this.Context.GetString(Resource.String.wishlist_results_count), searchTab.LastSearchResultsCount);
             }
             string lastTerm = searchTab.LastSearchTerm;
             if (lastTerm != string.Empty && lastTerm != null)

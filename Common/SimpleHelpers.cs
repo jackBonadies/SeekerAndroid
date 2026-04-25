@@ -185,6 +185,31 @@ namespace Seeker
             }
         }
 
+        public static string GetRecentTimeNiceFormated(DateTime absoluteTimeRan, TimeSpan timeSpan, string justNow, string minAgo, string hrAgo, string yesterday, string daysAgo)
+        {
+            if (timeSpan.TotalSeconds < 60)
+            {
+                return justNow;
+            }
+            if (timeSpan.TotalMinutes < 60)
+            {
+                return $"{timeSpan.Minutes} {minAgo}";
+            }
+            if (timeSpan.TotalHours < 24)
+            {
+                return $"{timeSpan.Hours} {hrAgo}";
+            }
+            if (timeSpan.TotalHours < 48)
+            {
+                return yesterday;
+            }
+            if (timeSpan.TotalHours < 30 * 24)
+            {
+                return $"{timeSpan.Days} {daysAgo}";
+            }
+            return absoluteTimeRan.ToString("MMM d");
+        }
+
         public const string NoDocumentOpenTreeToHandle = "No Activity found to handle Intent";
 
         public static bool IsUploadCompleteOrAborted(TransferStates state)
