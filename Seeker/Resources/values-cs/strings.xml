@@ -176,7 +176,7 @@ Počet adresářů: {5}\"
 
     <string name="enter_user_to_message">Zadejte příjemce zprávy</string>
 
-    <string name="search_result_style">Result Style:</string>
+    <string name="search_result_style">Result Style</string>
 
     <string name="new_search_tab">Nové hledání</string>
     <string name="filter_search_results_here">Filter Results</string>

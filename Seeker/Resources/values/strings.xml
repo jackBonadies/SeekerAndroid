@@ -262,11 +262,11 @@ Directory Count: {5}"
     <string name="enter_user_to_message">Enter User to Message</string>
 
     <!--Search Result Styles-->
-    <string name="search_result_style">Result Style:</string>
-    <string name="search_result_style_style_label">Style:</string>
+    <string name="search_result_style">Result Style</string>
+    <string name="search_result_style_style_label">Style</string>
     <string name="search_result_style_simple">Simple</string>
     <string name="search_result_style_modern">Modern</string>
-    <string name="search_result_style_filetype_position_label">File Type Position:</string>
+    <string name="search_result_style_filetype_position_label">File Type Position</string>
     <string name="search_result_style_filetype_bottom">Bottom</string>
     <string name="search_result_style_filetype_top">Top</string>
     <string name="search_result_style_expandable">Expandable</string>

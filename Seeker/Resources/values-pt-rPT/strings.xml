@@ -176,7 +176,7 @@ Directory Count: {5}\"
 
     <string name="enter_user_to_message">Inserir usuário a ser contatado</string>
 
-    <string name="search_result_style">Estilo de resultados:</string>
+    <string name="search_result_style">Estilo de resultados</string>
 
     <string name="new_search_tab">Nova busca</string>
     <string name="filter_search_results_here">Filtrar os resultados aqui</string>

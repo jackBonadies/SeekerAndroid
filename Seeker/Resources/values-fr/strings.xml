@@ -176,7 +176,7 @@ Nombre de dossiers : {5}
 
     <string name="enter_user_to_message">Spécifier l\'utilisateur à contacter</string>
 
-    <string name="search_result_style">Style de résultat :</string>
+    <string name="search_result_style">Style de résultat</string>
 
     <string name="new_search_tab">Nouvelle Recherche</string>
     <string name="filter_search_results_here">Filtrer les Résultats</string>
