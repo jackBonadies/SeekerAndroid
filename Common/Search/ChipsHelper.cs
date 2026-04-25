@@ -144,10 +144,10 @@ namespace Seeker
                     }
 
                     int fcount = hideHidden ? searchResponse.FileCount : searchResponse.FileCount + searchResponse.LockedFileCount;
-                    if (fileCountCounts.TryGetValue(fcount, out int count))
+                    if (fileCountCounts.TryGetValue(fcount, out int fcountCurrent))
                     {
-                        fileCountCounts[fcount] = count + 1;
-                    } 
+                        fileCountCounts[fcount] = fcountCurrent + 1;
+                    }
                     else
                     {
                         fileCountCounts[fcount] = 1;
@@ -699,14 +699,17 @@ namespace Seeker
             }
 
 
-            public Dictionary<string, int> invariantKeyCounts = new Dictionary<string, int>();
-            public Dictionary<string, int> realCounts = new Dictionary<string, int>();
-            public Dictionary<string, HashSet<string>> invariantToReal = new Dictionary<string, HashSet<string>>();
+            private class KeywordStats
+            {
+                public int InvariantCount;
+                public Dictionary<string, int> RealCounts = new Dictionary<string, int>();
+            }
+
+            private readonly Dictionary<string, KeywordStats> stats = new Dictionary<string, KeywordStats>();
 
             public void VoteIfExists(string term)
             {
-                string invariantTerm = GetInvariantKey(term);
-                if (!invariantKeyCounts.ContainsKey(invariantTerm))
+                if (!stats.ContainsKey(GetInvariantKey(term)))
                 {
                     return;
                 }
@@ -716,88 +719,72 @@ namespace Seeker
             public void AddKey(string term)
             {
                 string invariantTerm = GetInvariantKey(term);
-                if (invariantKeyCounts.TryGetValue(invariantTerm, out int invariantCount))
+                if (!stats.TryGetValue(invariantTerm, out var s))
                 {
-                    invariantKeyCounts[invariantTerm] = invariantCount + 1;
+                    s = new KeywordStats();
+                    stats[invariantTerm] = s;
                 }
-                else
-                {
-                    invariantKeyCounts[invariantTerm] = 1;
-                }
-
-                if (realCounts.TryGetValue(term, out int termCount))
-                {
-                    realCounts[term] = termCount + 1;
-                }
-                else
-                {
-                    realCounts[term] = 1;
-                }
-
-                if (!invariantToReal.TryGetValue(invariantTerm, out var set))
-                {
-                    set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    invariantToReal[invariantTerm] = set;
-                }
-                set.Add(term);
+                s.InvariantCount++;
+                s.RealCounts.TryGetValue(term, out int realCount);
+                s.RealCounts[term] = realCount + 1;
             }
 
             public List<(string displayKeyword, HashSet<string>?)> GetTopCandidates(string searchTerm, int topN)
             {
                 //weigh the years, and throw out the just file types.
                 string searchTermInvariant = GetInvariantKey(searchTerm);
-                foreach (string key in invariantKeyCounts.Keys.ToList())
+                foreach (string key in stats.Keys.ToList())
                 {
                     if (IsSingleFileAttributeType(key)) //todo use collection...
                     {
-                        invariantKeyCounts.Remove(key);
+                        stats.Remove(key);
                     }
-                    else if (searchTermInvariant.Contains(key))
+                    else if (searchTermInvariant.Contains(key)) // this is questionable but its a consequence of if someone selects "20" we filter for "20" not " 20 "
                     {
-                        invariantKeyCounts.Remove(key);
+                        stats.Remove(key);
                     }
                     else if (IgnoredTerms.Contains(key))
                     {
-                        invariantKeyCounts.Remove(key);
+                        stats.Remove(key);
                     }
                     else if (IsYear(key))
                     {
-                        invariantKeyCounts[key] /= 4;
+                        stats[key].InvariantCount /= 4;
                     }
                     else if (IsCommonAttribute(key))
                     {
-                        invariantKeyCounts[key] = (int)(invariantKeyCounts[key] * .6);
+                        stats[key].InvariantCount = (int)(stats[key].InvariantCount * .6);
                     }
                 }
-                var invariantsKeyCountList = invariantKeyCounts.ToList();
-                invariantsKeyCountList.Sort((x, y) => y.Value.CompareTo(x.Value));
+                var sorted = stats.ToList();
+                sorted.Sort((x, y) => y.Value.InvariantCount.CompareTo(x.Value.InvariantCount));
                 List<(string displayKeyword, HashSet<string>? invariantsCollection)> keyTerms = new();
-                if (topN > invariantsKeyCountList.Count)
+                if (topN > sorted.Count)
                 {
-                    topN = invariantsKeyCountList.Count;
+                    topN = sorted.Count;
                 }
                 for (int i = 0; i < topN; i++)
                 {
-                    var realKeywords = invariantToReal[invariantsKeyCountList[i].Key];
-                    if (realKeywords.Count > 1)
+                    var realCounts = sorted[i].Value.RealCounts;
+                    string displayName = string.Empty;
+                    int max = -1;
+                    foreach (var kvp in realCounts)
                     {
-                        int max = -1;
-                        string displayName = string.Empty;
-                        foreach (string realKeyword in realKeywords)
+                        if (kvp.Value > max)
                         {
-                            if (realCounts[realKeyword] > max)
-                            {
-                                max = realCounts[realKeyword];
-                                displayName = realKeyword;
-                            }
+                            max = kvp.Value;
+                            displayName = kvp.Key;
                         }
-                        keyTerms.Add(new (displayName, realKeywords));
+                    }
+                    var variants = new HashSet<string>(realCounts.Keys, StringComparer.OrdinalIgnoreCase);
+                    if (variants.Count > 1)
+                    {
+                        keyTerms.Add((displayName, variants));
                     }
                     else
                     {
-                        keyTerms.Add(new (realKeywords.First(), null));
+                        keyTerms.Add((displayName, null));
                     }
-
                 }
                 return keyTerms;
             }
