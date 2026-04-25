@@ -14,29 +14,11 @@ namespace UnitTestCommon
     [TestFixture]
     public class ChipsHelperTests
     {
-        private bool _origHideLocked;
-        private PreferencesState.SmartFilterState _origSmartFilter;
-
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
             SimpleHelpers.STRINGS_KBS = "kbs";
             SimpleHelpers.STRINGS_KHZ = "kHz";
-        }
-
-        [SetUp]
-        public void SetUp()
-        {
-            _origHideLocked = PreferencesState.HideLockedResultsInSearch;
-            _origSmartFilter = PreferencesState.SmartFilterOptions;
-            PreferencesState.HideLockedResultsInSearch = true;
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-            PreferencesState.HideLockedResultsInSearch = _origHideLocked;
-            PreferencesState.SmartFilterOptions = _origSmartFilter;
         }
 
         private static SearchResponse MakeResponse(string cachedType, double cachedBitRate = 128.0)
@@ -125,24 +107,24 @@ namespace UnitTestCommon
             };
         }
 
-        private static List<ChipDataItem> RunFileTypes(List<SearchResponse> responses )
+        private static List<ChipDataItem> RunFileTypes(List<SearchResponse> responses, bool hideHidden = true)
         {
-            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, "search", FileTypesOnly());
+            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, "search", FileTypesOnly(), hideHidden);
         }
 
-        private static List<ChipDataItem> RunFileCounts(List<SearchResponse> responses )
+        private static List<ChipDataItem> RunFileCounts(List<SearchResponse> responses, bool hideHidden = true)
         {
-            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, "search", FileCountsOnly());
+            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, "search", FileCountsOnly(), hideHidden);
         }
 
-        private static List<ChipDataItem> RunKeywords(List<SearchResponse> responses, string search)
+        private static List<ChipDataItem> RunKeywords(List<SearchResponse> responses, string search, bool hideHidden = true)
         {
-            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, search, KeywordsOnly());
+            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, search, KeywordsOnly(), hideHidden);
         }
 
-        private static List<ChipDataItem> RunAll(List<SearchResponse> responses, string search)
+        private static List<ChipDataItem> RunAll(List<SearchResponse> responses, string search, bool hideHidden = true)
         {
-            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, search, All());
+            return ChipsHelper.GetChipDataItemsFromSearchResults(responses, search, All(), hideHidden);
         }
 
         private static List<string> Texts(List<ChipDataItem> chips)
@@ -455,7 +437,8 @@ namespace UnitTestCommon
                 result = ChipsHelper.GetChipDataItemsFromSearchResults(
                     new List<SearchResponse> { withCache, withoutCache },
                     "search",
-                    FileTypesOnly()));
+                    FileTypesOnly(),
+                    hideHidden: true));
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Count > 0);
         }
@@ -702,10 +685,8 @@ namespace UnitTestCommon
         }
 
         [Test]
-        public void Keywords_Bug_IgnoresHideLockedPreference_MinesLockedOnlyResponses()
+        public void Keywords_HideHidden_SkipsLockedOnlyResponses()
         {
-            PreferencesState.HideLockedResultsInSearch = true;
-
             var responses = new List<SearchResponse>();
             for (int i = 0; i < 5; i++)
             {
@@ -716,11 +697,13 @@ namespace UnitTestCommon
                 responses.Add(MakeLockedOnlyResponseWithFolder("LockedOnlyZone"));
             }
 
-            var chips = RunKeywords(responses, "search");
-            var keywords = KeywordTexts(chips);
+            var chipsHiding = RunKeywords(responses, "search", hideHidden: true);
+            Assert.IsFalse(KeywordTexts(chipsHiding).Contains("LockedOnlyZone"),
+                "locked-only responses must not contribute keywords when hideHidden=true");
 
-            Assert.IsFalse(keywords.Contains("LockedOnlyZone"),
-                "locked-only responses must not contribute keywords when HideLockedResultsInSearch=true");
+            var chipsShowing = RunKeywords(responses, "search", hideHidden: false);
+            Assert.IsTrue(KeywordTexts(chipsShowing).Contains("LockedOnlyZone"),
+                "locked-only responses should contribute keywords when hideHidden=false");
         }
     }
 
@@ -776,6 +759,7 @@ namespace UnitTestCommon
         [TestCase("")]
         [TestCase("   ")]
         [TestCase("cant hold these mp3")]
+        [TestCase("mp3world")]
         [TestCase("mp3 1995")]
         [TestCase("mp3 live")]
         [TestCase("greatest hits")]

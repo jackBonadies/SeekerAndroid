@@ -1,5 +1,6 @@
 ﻿using Common;
 using Seeker.Extensions.SearchResponseExtensions;
+using Seeker.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -21,10 +22,9 @@ namespace Seeker
         /// <param name="searchTerm"></param>
         /// <param name="smartFilterOptions"></param>
         /// <returns></returns>
-        public static List<ChipDataItem> GetChipDataItemsFromSearchResults(List<Soulseek.SearchResponse> responses, string searchTerm, PreferencesState.SmartFilterState smartFilterOptions)
+        public static List<ChipDataItem> GetChipDataItemsFromSearchResults(List<Soulseek.SearchResponse> responses, string searchTerm, PreferencesState.SmartFilterState smartFilterOptions, bool hideHidden)
         {
             Dictionary<ChipType, IEnumerable<ChipDataItem>> finalData = new Dictionary<ChipType, IEnumerable<ChipDataItem>>();
-            bool hideHidden = PreferencesState.HideLockedResultsInSearch;
 
             if (smartFilterOptions.FileTypesEnabled || smartFilterOptions.NumFilesEnabled)
             {
@@ -55,7 +55,7 @@ namespace Seeker
             if (smartFilterOptions.KeywordsEnabled)
             {
                 var chipKeywords = new List<KeywordChipDataItem>();
-                var keywords = getKeywords(responses, searchTerm);
+                var keywords = getKeywords(responses, searchTerm, hideHidden);
                 foreach (var keyword in keywords)
                 {
                     if (keyword.invariantsCollection != null)
@@ -387,7 +387,7 @@ namespace Seeker
         }
 
 
-        public static List<(string displayKeyword, HashSet<string>? invariantsCollection)> getKeywords(List<Soulseek.SearchResponse> responses, string searchTerm)
+        public static List<(string displayKeyword, HashSet<string>? invariantsCollection)> getKeywords(List<Soulseek.SearchResponse> responses, string searchTerm, bool hideHidden)
         {
             try
             {
@@ -405,13 +405,21 @@ namespace Seeker
                 int totalCount = responses.Count;
                 for (int i = 0; i < totalCount; i++)
                 {
-                    string folderName = Common.Helpers.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
+                    if (hideHidden && responses[i].IsLockedOnly())
+                    {
+                        continue;
+                    }
+                    string folderName = Common.Helpers.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(hideHidden, 0).Filename);
                     AddKeywordsFromFolderName(keywordHelper.AddKey, folderName, false);
                 }
 
                 for (int i = 0; i < totalCount; i++)
                 {
-                    string parentFolderName = Common.Helpers.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
+                    if (hideHidden && responses[i].IsLockedOnly())
+                    {
+                        continue;
+                    }
+                    string parentFolderName = Common.Helpers.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(hideHidden, 0).Filename);
                     AddKeywordsFromFolderName(keywordHelper.VoteIfExists, parentFolderName, true);
                 }
 
@@ -419,8 +427,7 @@ namespace Seeker
             }
             catch (Exception ex)
             {
-                // TODO2026 add back
-                //Logger.Firebase("keywords failed " + ex.Message + ex.StackTrace);
+                Logger.FirebaseError("keywords failed", ex);
                 return new();
             }
         }
