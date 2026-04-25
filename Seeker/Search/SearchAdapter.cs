@@ -236,6 +236,12 @@ namespace Seeker
                     return;
                 }
 
+                if (SearchTabHelper.CurrentlySearching && (SearchTabHelper.SearchResponses?.Count ?? 0) == 0)
+                {
+                    holder.ItemView.Visibility = ViewStates.Gone;
+                    return;
+                }
+
                 int total = SearchTabHelper.SearchResponses?.Count ?? 0;
                 int shown = SearchTabHelper.UI_SearchResponses?.Count ?? total;
                 bool filterActive = SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive();
