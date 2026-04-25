@@ -61,7 +61,8 @@ namespace Common
         public const string M_MemoryBackedDownload = "Momento_MemoryBackedDownload";
         public const string M_FilterSticky = "Momento_FilterSticky";
         public const string M_FilterStickyString = "Momento_FilterStickyString";
-        public const string M_SearchResultStyle = "Momento_SearchResStyle";
+        public const string M_SearchResultStyle = "Momento_SearchResStyle"; // legacy, migrated to V2 on first read
+        public const string M_SearchResultStyleV2 = "Momento_SearchResStyleV2";
         public const string M_ExpandAllResults = "Momento_ExpandAllResults";
         public const string M_UserList_Legacy = "Cache_UserList";
         public const string M_UserList = "Cache_UserList_v2";

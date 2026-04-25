@@ -20,24 +20,24 @@ namespace Seeker
 
 
 
+                // TODO step N: rebuild this UI as 3 toggles (Modern/Simple, Top/Bottom, Expandable)
+                // now that the enum is orthogonal. For now the existing radio buttons map only to
+                // the 5 originally-supported combinations.
                 switch (PreferencesState.SearchResultStyle)
                 {
-                    case SearchResultStyleEnum.ExpandableLegacy:
+                    case SearchResultStyleEnum.SimpleBottomExpandable:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonExpandable);
                         break;
-                    case SearchResultStyleEnum.ExpandableModern:
+                    case SearchResultStyleEnum.ModernBottomExpandable:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonExpandableModern);
                         break;
-                    case SearchResultStyleEnum.MediumLegacy:
+                    case SearchResultStyleEnum.SimpleBottom:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonMedium);
                         break;
-                    case SearchResultStyleEnum.MinimalLegacy:
-                        resultStyleRadioGroup.Check(Resource.Id.radioButtonMinimal);
-                        break;
-                    case SearchResultStyleEnum.MediumModernBitrateBottom:
+                    case SearchResultStyleEnum.ModernBottom:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonModernBitrateBottom);
                         break;
-                    case SearchResultStyleEnum.MediumModernBitrateTop:
+                    case SearchResultStyleEnum.ModernTop:
                         resultStyleRadioGroup.Check(Resource.Id.radioButtonModernBitrateTop);
                         break;
                 }
@@ -52,22 +52,19 @@ namespace Seeker
                 switch (e.CheckedId)
                 {
                     case Resource.Id.radioButtonExpandable:
-                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.ExpandableLegacy;
+                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.SimpleBottomExpandable;
                         break;
                     case Resource.Id.radioButtonExpandableModern:
-                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.ExpandableModern;
+                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.ModernBottomExpandable;
                         break;
                     case Resource.Id.radioButtonMedium:
-                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.MediumLegacy;
-                        break;
-                    case Resource.Id.radioButtonMinimal:
-                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.MinimalLegacy;
+                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.SimpleBottom;
                         break;
                     case Resource.Id.radioButtonModernBitrateBottom:
-                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateBottom;
+                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.ModernBottom;
                         break;
                     case Resource.Id.radioButtonModernBitrateTop:
-                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.MediumModernBitrateTop;
+                        PreferencesState.SearchResultStyle = SearchResultStyleEnum.ModernTop;
                         break;
                 }
                 if (prev != PreferencesState.SearchResultStyle)

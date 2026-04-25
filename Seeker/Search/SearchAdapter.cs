@@ -52,37 +52,40 @@ namespace Seeker
                 ISearchItemViewBase view = null;
                 switch (this.searchResultStyle)
                 {
-                    case SearchResultStyleEnum.ExpandableLegacy:
+                    case SearchResultStyleEnum.SimpleBottomExpandable:
                         view = SearchItemViewExpandable.inflate(parent);
                         (view as SearchItemViewExpandable).AdapterRef = this;
                         (view as View).FindViewById<ImageView>(Resource.Id.expandableClick).Click += CustomAdapter_Click;
                         (view as View).FindViewById<LinearLayout>(Resource.Id.relativeLayout1).Click += CustomAdapter_Click1;
                         break;
-                    case SearchResultStyleEnum.ExpandableModern:
+                    case SearchResultStyleEnum.ModernBottomExpandable:
                         view = SearchItemViewExpandableModern.inflate(parent);
                         (view as SearchItemViewExpandableModern).AdapterRef = this;
                         (view as View).FindViewById(Resource.Id.expandClickArea).Click += CustomAdapter_ClickModern;
                         (view as View).FindViewById<LinearLayout>(Resource.Id.relativeLayout1).Click += CustomAdapter_Click1Modern;
                         break;
-                    case SearchResultStyleEnum.MediumLegacy:
+                    case SearchResultStyleEnum.SimpleBottom:
                         view = SearchItemViewMedium.inflate(parent);
                         break;
-                    case SearchResultStyleEnum.MinimalLegacy:
-                        view = SearchItemViewMinimal.inflate(parent);
-                        break;
-                    case SearchResultStyleEnum.MediumModernBitrateBottom:
+                    case SearchResultStyleEnum.ModernBottom:
                         view = SearchItemViewMediumBadgeBitrateBottom.inflate(parent);
                         break;
-                    case SearchResultStyleEnum.MediumModernBitrateTop:
+                    case SearchResultStyleEnum.ModernTop:
                         view = SearchItemViewMediumBadgeBitrateTop.inflate(parent);
                         break;
+                    // TODO step 2: wire SimpleTop, SimpleTopExpandable, ModernTopExpandable to
+                    // their unified view classes (search_result_simple_top / _modern_top XMLs).
+                    case SearchResultStyleEnum.SimpleTop:
+                    case SearchResultStyleEnum.SimpleTopExpandable:
+                    case SearchResultStyleEnum.ModernTopExpandable:
+                        throw new System.NotImplementedException(
+                            $"Search result style {this.searchResultStyle} not yet wired up.");
                 }
                 view.setupChildren();
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 //view.LongClick += TransferAdapterRecyclerVersion_LongClick;
                 (view as View).Click += View_Click;
                 return new SearchViewHolder(view as View);
-
             }
 
             private void View_Click(object sender, EventArgs e)

@@ -142,8 +142,7 @@ namespace Seeker
             var toggleItem = menu.FindItem(Resource.Id.action_toggle_expand_all);
             if (toggleItem != null)
             {
-                bool isExpandable = PreferencesState.SearchResultStyle == SearchResultStyleEnum.ExpandableLegacy ||
-                    PreferencesState.SearchResultStyle == SearchResultStyleEnum.ExpandableModern;
+                bool isExpandable = PreferencesState.SearchResultStyle.HasFlag(SearchResultStyleEnum.Expandable);
                 toggleItem.SetVisible(isExpandable);
                 if (isExpandable)
                 {

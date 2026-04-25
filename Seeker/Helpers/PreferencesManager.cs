@@ -86,7 +86,7 @@ namespace Seeker
             PreferencesState.HideLockedResultsInSearch = prefs.GetBoolean(KeyConsts.M_HideLockedSearch, true);
             PreferencesState.FilterSticky = prefs.GetBoolean(KeyConsts.M_FilterSticky, false);
             PreferencesState.FilterStickyString = prefs.GetString(KeyConsts.M_FilterStickyString, string.Empty);
-            PreferencesState.SearchResultStyle = ConvertSafe(prefs.GetInt(KeyConsts.M_SearchResultStyle, 1));
+            PreferencesState.SearchResultStyle = LoadSearchResultStyle(prefs);
             PreferencesState.ExpandAllResults = prefs.GetBoolean(KeyConsts.M_ExpandAllResults, false);
             PreferencesState.DefaultSearchResultSortAlgorithm = (SearchResultSorting)(prefs.GetInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, 0));
 
@@ -96,18 +96,38 @@ namespace Seeker
             PreferencesState.FilterMinBitrateKbs = prefs.GetInt(KeyConsts.M_FilterMinBitrateKbs, 0);
         }
 
-        private static SearchResultStyleEnum ConvertSafe(int value)
+        private static SearchResultStyleEnum LoadSearchResultStyle(ISharedPreferences prefs)
         {
-            if (value == 3) // old ExpandedAll, migrate to ExpandableLegacy with expand on
+            const int sentinel = int.MinValue;
+            int v2 = prefs.GetInt(KeyConsts.M_SearchResultStyleV2, sentinel);
+            if (v2 != sentinel)
             {
-                PreferencesState.ExpandAllResults = true;
-                return SearchResultStyleEnum.ExpandableLegacy;
+                return (SearchResultStyleEnum)v2;
             }
-            if (Enum.IsDefined(typeof(SearchResultStyleEnum), value))
+            int legacy = prefs.GetInt(KeyConsts.M_SearchResultStyle, sentinel);
+            if (legacy == sentinel)
             {
-                return (SearchResultStyleEnum)value;
+                return SearchResultStyleEnum.ModernBottom;
             }
-            return SearchResultStyleEnum.MediumModernBitrateBottom;
+            return MigrateLegacyStyle(legacy);
+        }
+
+        // Maps the pre-V2 persisted ints to the new orthogonal flags layout.
+        private static SearchResultStyleEnum MigrateLegacyStyle(int legacy)
+        {
+            switch (legacy)
+            {
+                case 0: return SearchResultStyleEnum.SimpleBottom;            // MinimalLegacy (removed)
+                case 1: return SearchResultStyleEnum.ModernBottom;            // MediumModernBitrateBottom
+                case 2: return SearchResultStyleEnum.SimpleBottomExpandable;  // ExpandableLegacy
+                case 3:                                                       // legacy ExpandedAll
+                    PreferencesState.ExpandAllResults = true;
+                    return SearchResultStyleEnum.SimpleBottomExpandable;
+                case 4: return SearchResultStyleEnum.ModernBottomExpandable;  // ExpandableModern
+                case 5: return SearchResultStyleEnum.ModernTop;               // MediumModernBitrateTop
+                case 11: return SearchResultStyleEnum.SimpleBottom;           // MediumLegacy
+                default: return SearchResultStyleEnum.ModernBottom;
+            }
         }
 
         private static List<string> GetSearchHistory(ISharedPreferences prefs)
@@ -748,7 +768,7 @@ namespace Seeker
                 editor.PutBoolean(KeyConsts.M_FilterSticky, PreferencesState.FilterSticky);
                 editor.PutString(KeyConsts.M_FilterStickyString, PreferencesState.FilterStickyString);
                 editor.PutBoolean(KeyConsts.M_MemoryBackedDownload, PreferencesState.MemoryBackedDownload);
-                editor.PutInt(KeyConsts.M_SearchResultStyle, (int)PreferencesState.SearchResultStyle);
+                editor.PutInt(KeyConsts.M_SearchResultStyleV2, (int)PreferencesState.SearchResultStyle);
                 editor.PutBoolean(KeyConsts.M_ExpandAllResults, PreferencesState.ExpandAllResults);
                 editor.PutBoolean(KeyConsts.M_DisableToastNotifications, PreferencesState.DisableDownloadToastNotification);
                 editor.PutInt(KeyConsts.M_UploadSpeed, PreferencesState.UploadSpeed);
@@ -777,7 +797,7 @@ namespace Seeker
                     editor.PutBoolean(KeyConsts.M_FilterSticky, filterSticky);
                     editor.PutString(KeyConsts.M_FilterStickyString, filterStickyString);
                 }
-                editor.PutInt(KeyConsts.M_SearchResultStyle, searchResultStyle);
+                editor.PutInt(KeyConsts.M_SearchResultStyleV2, searchResultStyle);
                 editor.PutBoolean(KeyConsts.M_ExpandAllResults, expandAllResults);
                 editor.Apply();
             }
