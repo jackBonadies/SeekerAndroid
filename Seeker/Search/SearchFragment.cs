@@ -149,81 +149,37 @@ namespace Seeker
             base.OnPrepareOptionsMenu(menu);
         }
 
-        public static void SetCustomViewTabNumberInner(ImageView imgView, Context c)
+        public static void SetCustomViewTabNumberInner(View container, Context c)
         {
-            int numTabs = int.MinValue;
-            if (SearchTabHelper.SearchTarget == SearchTarget.Wishlist)
-            {
-                numTabs = -1;
-            }
-            else
-            {
-                numTabs = SearchTabHelper.SearchTabCollection.Keys.Count;
-            }
-            int idOfDrawable = int.MinValue;
-            if (numTabs > 10)
-            {
-                numTabs = 10;
-            }
-            switch (numTabs)
-            {
-                case 1:
-                    idOfDrawable = Resource.Drawable.numeric_1_box_multiple_outline;
-                    break;
-                case 2:
-                    idOfDrawable = Resource.Drawable.numeric_2_box_multiple_outline;
-                    break;
-                case 3:
-                    idOfDrawable = Resource.Drawable.numeric_3_box_multiple_outline;
-                    break;
-                case 4:
-                    idOfDrawable = Resource.Drawable.numeric_4_box_multiple_outline;
-                    break;
-                case 5:
-                    idOfDrawable = Resource.Drawable.numeric_5_box_multiple_outline;
-                    break;
-                case 6:
-                    idOfDrawable = Resource.Drawable.numeric_6_box_multiple_outline;
-                    break;
-                case 7:
-                    idOfDrawable = Resource.Drawable.numeric_7_box_multiple_outline;
-                    break;
-                case 8:
-                    idOfDrawable = Resource.Drawable.numeric_8_box_multiple_outline;
-                    break;
-                case 9:
-                    idOfDrawable = Resource.Drawable.numeric_9_box_multiple_outline;
-                    break;
-                case 10:
-                    idOfDrawable = Resource.Drawable.numeric_9_plus_box_multiple_outline;
-                    break;
-                case -1: //wishlist
-                    idOfDrawable = Resource.Drawable.wishlist_icon;
-                    break;
-            }
+            int numTabs = SearchTabHelper.SearchTabCollection.Keys.Count;
 
-            Android.Graphics.Drawables.Drawable drawable = null;
-            drawable = c.Resources.GetDrawable(idOfDrawable, c.Theme);
-            imgView.SetImageDrawable(drawable);
+            ImageView icon = container.FindViewById<ImageView>(Resource.Id.search_tabs_icon);
+            TextView numberText = container.FindViewById<TextView>(Resource.Id.search_tabs_number);
 
+            int idOfDrawable = Resource.Drawable.numeric_tab_outline;
+            string text = numTabs >= 100 ? "99+" : numTabs.ToString();
+
+            Android.Graphics.Drawables.Drawable drawable = c.Resources.GetDrawable(idOfDrawable, c.Theme);
+            icon.SetImageDrawable(drawable);
+            numberText.Text = text;
         }
 
         public void SetCustomViewTabNumberImageViewState()
         {
-            ImageView imgView = null;
+            View container = null;
             Context c = null;
             if (this.Activity is AndroidX.AppCompat.App.AppCompatActivity appCompat)
             {
                 c = this.Activity;
-                imgView = appCompat.SupportActionBar?.CustomView?.FindViewById<ImageView>(Resource.Id.search_tabs);
+                container = appCompat.SupportActionBar?.CustomView?.FindViewById<FrameLayout>(Resource.Id.search_tabs);
             }
             else
             {
                 c = SeekerState.MainActivityRef;
-                imgView = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<ImageView>(Resource.Id.search_tabs);
+                container = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<FrameLayout>(Resource.Id.search_tabs);
             }
 
-            SetCustomViewTabNumberInner(imgView, c);
+            SetCustomViewTabNumberInner(container, c);
         }
 
         public EditText GetCustomViewSearchHere()
@@ -519,7 +475,7 @@ namespace Seeker
             {
                 Logger.Firebase("catchunspecException Value does not fall within range: " + SearchingText);
             }
-            ImageView iv = customView.FindViewById<ImageView>(Resource.Id.search_tabs);
+            FrameLayout iv = customView.FindViewById<FrameLayout>(Resource.Id.search_tabs);
             iv.Click += Iv_Click;
             actv.EditorAction -= Search_EditorActionHELPER;
             actv.EditorAction += Search_EditorActionHELPER;
@@ -918,7 +874,7 @@ namespace Seeker
                 }
                 if ((SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses?.Count ?? 0) != 0)
                 {
-                    List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].LastSearchTerm, PreferencesState.SmartFilterOptions);
+                    List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].LastSearchTerm, PreferencesState.SmartFilterOptions, PreferencesState.HideLockedResultsInSearch);
                     SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
                     SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
                     {
@@ -2156,7 +2112,7 @@ namespace Seeker
                             }
 
 #endif
-                            List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses, SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm, PreferencesState.SmartFilterOptions);
+                            List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses, SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm, PreferencesState.SmartFilterOptions, PreferencesState.HideLockedResultsInSearch);
                             SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
                             SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                             {
@@ -2168,57 +2124,6 @@ namespace Seeker
                     }
 
                 }));
-
-
-
-                if (SearchTabHelper.TextFilter.IsFiltered && PreferencesState.FilterSticky && !fromWishlist)
-                {
-                    //remind the user that the filter is ON.
-                    t.ContinueWith(new Action<Task>(
-                        (Task t) =>
-                        {
-                            SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
-                            {
-
-                                View bottomSheetView = SearchFragment.Instance.rootView.FindViewById<View>(Resource.Id.bottomSheet);
-                                BottomSheetBehavior bsb = BottomSheetBehavior.From(bottomSheetView);
-                                if (bsb.State == BottomSheetBehavior.StateHidden)
-                                {
-
-                                    View BSButton = SearchFragment.Instance.rootView.FindViewById<View>(Resource.Id.bsbutton);
-                                    ObjectAnimator objectAnimator = new ObjectAnimator();
-                                    ObjectAnimator anim1 = ObjectAnimator.OfFloat(BSButton, "scaleX", 2.0f);
-                                    anim1.SetInterpolator(new Android.Views.Animations.LinearInterpolator());
-                                    anim1.SetDuration(200);
-                                    ObjectAnimator anim2 = ObjectAnimator.OfFloat(BSButton, "scaleY", 2.0f);
-                                    anim2.SetInterpolator(new Android.Views.Animations.LinearInterpolator());
-                                    anim2.SetDuration(200);
-
-                                    ObjectAnimator anim3 = ObjectAnimator.OfFloat(BSButton, "scaleX", 1.0f);
-                                    anim3.SetInterpolator(new Android.Views.Animations.BounceInterpolator());
-                                    anim3.SetDuration(1000);
-                                    ObjectAnimator anim4 = ObjectAnimator.OfFloat(BSButton, "scaleY", 1.0f);
-                                    anim4.SetInterpolator(new Android.Views.Animations.BounceInterpolator());
-                                    anim4.SetDuration(1000);
-
-                                    AnimatorSet set1 = new AnimatorSet();
-                                    set1.PlayTogether(anim1, anim2);
-                                    //set1.Start();
-
-                                    AnimatorSet set2 = new AnimatorSet();
-                                    set2.PlayTogether(anim3, anim4);
-                                    //set2.Start();
-
-                                    AnimatorSet setTotal = new AnimatorSet();
-                                    setTotal.PlaySequentially(set1, set2);
-                                    setTotal.Start();
-
-                                }
-
-                            }));
-                        }
-                        ));
-                }
             }
             catch (ArgumentNullException ane)
             {

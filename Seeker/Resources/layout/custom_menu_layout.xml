@@ -5,17 +5,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 >
-    <ImageView
-        app:srcCompat="@drawable/numeric_1_box_multiple_outline"
+    <FrameLayout
         android:id="@+id/search_tabs"
-        android:tint="@android:color/white"
         android:layout_marginStart="0dp"
         android:paddingTop="2dp"
         android:paddingStart="0dp"
         android:layout_centerVertical="true"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-    />
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:clickable="true"
+        android:focusable="true"
+    >
+        <ImageView
+            android:id="@+id/search_tabs_icon"
+            app:srcCompat="@drawable/numeric_tab_outline"
+            android:tint="@android:color/white"
+            android:layout_gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+        />
+        <TextView
+            android:id="@+id/search_tabs_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:includeFontPadding="false"
+            android:gravity="center"
+            android:text=""
+        />
+    </FrameLayout>
     <com.google.android.material.textfield.MaterialAutoCompleteTextView
         android:layout_toEndOf="@id/search_tabs"
         android:layout_width="fill_parent"
