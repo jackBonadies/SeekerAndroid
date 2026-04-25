@@ -474,18 +474,15 @@ namespace Seeker
                     //generate all ngrams
                 }
 
-
-
-
                 //#if PARENT_VOTE
 
-                //var alllines = File.ReadLines(@"H:\Seeker_Testing\search_results\the_avalanches.txt");
+                //var alllines = File.ReadLines(@"H:\Seeker_Testing\search_results\the_artist.txt");
                 //var sw = System.Diagnostics.Stopwatch.StartNew();
                 //KeywordHelper keywordHelper = new KeywordHelper();
                 //Dictionary<string, int> counts = new Dictionary<string, int>();
                 for (int i = 0; i < totalCount; i++)
                 {
-                    //string nline = line.Replace("animal collective","",StringComparison.InvariantCultureIgnoreCase);
+                    //string nline = line.Replace("artist name","",StringComparison.InvariantCultureIgnoreCase);
                     string fline = Common.Helpers.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(false, 0).Filename);
 
                     //fline = fline.Replace(" - ", " ");
@@ -512,7 +509,7 @@ namespace Seeker
                             continue;
                         }
 
-                        //Trippie_Redd-Trip_At_Knight-WEB-2021-ESG this is its own thing.. so just continue after processing...
+                        //Artist_Name-Album_Name-WEB-2021-ESG this is its own thing.. so just continue after processing...
                         if (KeywordHelper.IsNoSpacesFormat(termTrimmed))
                         {
                             foreach (string t in termTrimmed.Replace('_', ' ').Split(new string[] { "-" }, StringSplitOptions.RemoveEmptyEntries))
