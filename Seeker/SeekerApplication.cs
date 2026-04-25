@@ -251,20 +251,6 @@ namespace Seeker
                 SeekerState.SoulseekClient = new MockSoulseekClient();
                 SharingService.TurnOnSharing();
                 #else
-                new SoulseekClientOptions(
-                    minimumDiagnosticLevel: LOG_DIAGNOSTICS ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info,
-                    messageTimeout: 30000,
-                    enableListener: PreferencesState.ListenerEnabled,
-                    autoAcknowledgePrivateMessages: false,
-                    acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations,
-                    listenPort: PreferencesState.ListenerPort,
-                    maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue,
-                    maximumConcurrentSearches: 5,
-                    serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
-                    addressResolver: ResolveAddressAsync,
-                    userInfoResolver: UserInfoResponseHandler);
-                #endif
-            #else
             SeekerState.SoulseekClient = new SoulseekClient(
                 128,
                 new SoulseekClientOptions(
