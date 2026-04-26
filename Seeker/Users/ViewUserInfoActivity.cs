@@ -283,9 +283,9 @@ namespace Seeker
                 shimmerSpeed.Visibility = ViewStates.Visible;
                 shimmerFiles.Visibility = ViewStates.Visible;
                 shimmerDirs.Visibility = ViewStates.Visible;
-                statSpeedValue.Visibility = ViewStates.Gone;
-                statFilesValue.Visibility = ViewStates.Gone;
-                statDirsValue.Visibility = ViewStates.Gone;
+                statSpeedValue.Visibility = ViewStates.Invisible;
+                statFilesValue.Visibility = ViewStates.Invisible;
+                statDirsValue.Visibility = ViewStates.Invisible;
                 StartShimmerAnimations();
             }
             else

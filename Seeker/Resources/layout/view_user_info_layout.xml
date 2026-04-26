@@ -123,7 +123,8 @@
                                 android:textSize="24sp"
                                 android:textStyle="bold"
                                 android:textColor="?attr/normalTextColor"
-                                android:visibility="gone"
+                                android:text="0"
+                                android:visibility="invisible"
                             />
                             <View
                                 android:id="@+id/stat_speed_shimmer"
@@ -178,7 +179,8 @@
                                 android:textSize="24sp"
                                 android:textStyle="bold"
                                 android:textColor="?attr/normalTextColor"
-                                android:visibility="gone"
+                                android:text="0"
+                                android:visibility="invisible"
                             />
                             <View
                                 android:id="@+id/stat_dirs_shimmer"
@@ -223,7 +225,8 @@
                                 android:textSize="24sp"
                                 android:textStyle="bold"
                                 android:textColor="?attr/normalTextColor"
-                                android:visibility="gone"
+                                android:text="0"
+                                android:visibility="invisible"
                             />
                             <View
                                 android:id="@+id/stat_files_shimmer"
