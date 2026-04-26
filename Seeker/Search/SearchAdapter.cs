@@ -63,11 +63,16 @@ namespace Seeker
                     case SearchResultStyleEnum.ModernTop:
                         view = SearchItemViewModernTop.inflate(parent);
                         break;
+                    case SearchResultStyleEnum.Compact:
+                        view = SearchItemViewCompact.inflate(parent);
+                        break;
                     default:
                         throw new System.InvalidOperationException(
                             $"Unknown search result style family {family}");
                 }
-                view.IsExpandable = this.searchResultStyle.HasFlag(SearchResultStyleEnum.Expandable);
+                // Compact never expands, even if Expandable was somehow left set.
+                view.IsExpandable = !this.searchResultStyle.HasFlag(SearchResultStyleEnum.Compact)
+                    && this.searchResultStyle.HasFlag(SearchResultStyleEnum.Expandable);
                 view.AdapterRef = this;
                 view.setupChildren();
                 view.ApplyExpandableMode();

@@ -117,7 +117,7 @@ namespace Seeker
         {
             switch (legacy)
             {
-                case 0: return SearchResultStyleEnum.SimpleBottom;            // MinimalLegacy (removed)
+                case 0: return SearchResultStyleEnum.Compact;                 // MinimalLegacy → new Compact
                 case 1: return SearchResultStyleEnum.ModernBottom;            // MediumModernBitrateBottom
                 case 2: return SearchResultStyleEnum.SimpleBottomExpandable;  // ExpandableLegacy
                 case 3:                                                       // legacy ExpandedAll

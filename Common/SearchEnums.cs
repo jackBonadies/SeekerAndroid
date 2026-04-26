@@ -16,6 +16,9 @@ namespace Seeker
         Modern = 1 << 0,
         BitrateTop = 1 << 1,
         Expandable = 1 << 2,
+        // Compact is a standalone family — bitrate position and expandable do
+        // not apply, so it must not be combined with BitrateTop / Expandable.
+        Compact = 1 << 3,
 
         SimpleBottom = Simple,
         SimpleTop = Simple | BitrateTop,

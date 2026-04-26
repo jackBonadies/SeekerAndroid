@@ -1,5 +1,6 @@
 using Android.OS;
 using Android.Views;
+using Android.Widget;
 using Common;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.Button;
@@ -14,6 +15,8 @@ namespace Seeker
             private MaterialButtonToggleGroup styleToggleGroup;
             private MaterialButtonToggleGroup bitrateToggleGroup;
             private MaterialButtonToggleGroup expandableToggleGroup;
+            private TextView bitrateToggleLabel;
+            private TextView expandableToggleLabel;
 
             public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
             {
@@ -22,6 +25,8 @@ namespace Seeker
                 styleToggleGroup = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.styleToggleGroup);
                 bitrateToggleGroup = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.bitrateToggleGroup);
                 expandableToggleGroup = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.expandableToggleGroup);
+                bitrateToggleLabel = rootView.FindViewById<TextView>(Resource.Id.bitrateToggleLabel);
+                expandableToggleLabel = rootView.FindViewById<TextView>(Resource.Id.expandableToggleLabel);
 
                 // Match the look of searches.xml's format/bitrate toggles: purple-when-checked,
                 // dialog_background-when-unchecked, white text on checked. The outlined-button
@@ -33,15 +38,27 @@ namespace Seeker
                 ApplyToggleGroupTint(expandableToggleGroup, bgTint, textTint);
 
                 var current = PreferencesState.SearchResultStyle;
-                styleToggleGroup.Check(current.HasFlag(SearchResultStyleEnum.Modern)
-                    ? Resource.Id.btnStyleModern
-                    : Resource.Id.btnStyleSimple);
+                int styleId;
+                if (current.HasFlag(SearchResultStyleEnum.Compact))
+                {
+                    styleId = Resource.Id.btnStyleCompact;
+                }
+                else if (current.HasFlag(SearchResultStyleEnum.Modern))
+                {
+                    styleId = Resource.Id.btnStyleModern;
+                }
+                else
+                {
+                    styleId = Resource.Id.btnStyleSimple;
+                }
+                styleToggleGroup.Check(styleId);
                 bitrateToggleGroup.Check(current.HasFlag(SearchResultStyleEnum.BitrateTop)
                     ? Resource.Id.btnBitrateTop
                     : Resource.Id.btnBitrateBottom);
                 expandableToggleGroup.Check(current.HasFlag(SearchResultStyleEnum.Expandable)
                     ? Resource.Id.btnExpandableOn
                     : Resource.Id.btnExpandableOff);
+                ApplyCompactVisibility(current.HasFlag(SearchResultStyleEnum.Compact));
 
                 var listener = new ToggleListener(OnStyleChanged);
                 styleToggleGroup.AddOnButtonCheckedListener(listener);
@@ -54,24 +71,43 @@ namespace Seeker
             private void OnStyleChanged()
             {
                 var prev = PreferencesState.SearchResultStyle;
-                var next = SearchResultStyleEnum.Simple;
-                if (styleToggleGroup.CheckedButtonId == Resource.Id.btnStyleModern)
+                bool compact = styleToggleGroup.CheckedButtonId == Resource.Id.btnStyleCompact;
+                ApplyCompactVisibility(compact);
+                SearchResultStyleEnum next;
+                if (compact)
                 {
-                    next |= SearchResultStyleEnum.Modern;
+                    next = SearchResultStyleEnum.Compact;
                 }
-                if (bitrateToggleGroup.CheckedButtonId == Resource.Id.btnBitrateTop)
+                else
                 {
-                    next |= SearchResultStyleEnum.BitrateTop;
-                }
-                if (expandableToggleGroup.CheckedButtonId == Resource.Id.btnExpandableOn)
-                {
-                    next |= SearchResultStyleEnum.Expandable;
+                    next = SearchResultStyleEnum.Simple;
+                    if (styleToggleGroup.CheckedButtonId == Resource.Id.btnStyleModern)
+                    {
+                        next |= SearchResultStyleEnum.Modern;
+                    }
+                    if (bitrateToggleGroup.CheckedButtonId == Resource.Id.btnBitrateTop)
+                    {
+                        next |= SearchResultStyleEnum.BitrateTop;
+                    }
+                    if (expandableToggleGroup.CheckedButtonId == Resource.Id.btnExpandableOn)
+                    {
+                        next |= SearchResultStyleEnum.Expandable;
+                    }
                 }
                 if (next != prev)
                 {
                     PreferencesState.SearchResultStyle = next;
                     SearchFragment.Instance.SearchResultStyleChanged();
                 }
+            }
+
+            private void ApplyCompactVisibility(bool compact)
+            {
+                var v = compact ? ViewStates.Gone : ViewStates.Visible;
+                bitrateToggleLabel.Visibility = v;
+                bitrateToggleGroup.Visibility = v;
+                expandableToggleLabel.Visibility = v;
+                expandableToggleGroup.Visibility = v;
             }
 
             // singleSelection + selectionRequired means we get one "checked=false" on the

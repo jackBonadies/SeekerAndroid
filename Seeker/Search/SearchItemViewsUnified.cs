@@ -292,6 +292,48 @@ namespace Seeker
         }
     }
 
+    // Compact style. Single-row variant of Modern: only foldername, queue chip
+    // (conditional), and file-type chip. Never expandable; bitrate position N/A.
+    public class SearchItemViewCompact : SearchItemViewUnifiedBase
+    {
+        private TextView viewBitrate;
+        private TextView viewQueue;
+
+        public SearchItemViewCompact(Context c, IAttributeSet a, int s) : base(c, a, s) { Init(c); }
+        public SearchItemViewCompact(Context c, IAttributeSet a) : base(c, a) { Init(c); }
+
+        private void Init(Context c)
+        {
+            LayoutInflater.From(c).Inflate(Resource.Layout.search_result_compact, this, true);
+            setupChildren();
+        }
+
+        public static SearchItemViewCompact inflate(ViewGroup parent)
+        {
+            return (SearchItemViewCompact)LayoutInflater.From(parent.Context)
+                .Inflate(Resource.Layout.searchitemview_compact_dummy, parent, false);
+        }
+
+        public override void setupChildren()
+        {
+            base.setupChildren();
+            viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
+            viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
+        }
+
+        public override void setItem(SearchResponse item, int position)
+        {
+            viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
+            SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
+            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot, item.QueueLength);
+        }
+
+        public override void PopulateFiles(SearchResponse item)
+        {
+            // Compact is never expandable.
+        }
+    }
+
     public class SearchItemViewModernTop : SearchItemViewModernBase
     {
         public SearchItemViewModernTop(Context c, IAttributeSet a, int s) : base(c, a, s) { Init(c); }
