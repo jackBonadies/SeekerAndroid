@@ -440,6 +440,7 @@ namespace Seeker
                     if (mb > flags.MinFileSizeMB)
                     {
                         match = true;
+                        break;
                     }
                 }
                 if (!match)
@@ -456,9 +457,10 @@ namespace Seeker
                     {
                         continue;
                     }
-                    if ((int)(f.BitRate) > flags.MinBitRateKBS)
+                    if ((int)(f.BitRate) >= flags.MinBitRateKBS)
                     {
                         match = true;
+                        break;
                     }
                 }
                 if (!match)
@@ -474,6 +476,7 @@ namespace Seeker
                     if (f.IsVariableBitRate == false)//this is bool? can have no value...
                     {
                         match = true;
+                        break;
                     }
                 }
                 if (!match)
@@ -489,6 +492,7 @@ namespace Seeker
                     if (f.IsVariableBitRate == true)
                     {
                         match = true;
+                        break;
                     }
                 }
                 if (!match)
