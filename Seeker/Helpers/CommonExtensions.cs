@@ -22,6 +22,20 @@ namespace Seeker.Helpers
             return activity?.Lifecycle?.CurrentState?.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Resumed);
         }
 
+        public static T FindAncestor<T>(this View view) where T : class
+        {
+            IViewParent current = view?.Parent;
+            while (current != null)
+            {
+                if (current is T match)
+                {
+                    return match;
+                }
+                current = current.Parent;
+            }
+            return null;
+        }
+
         /// <summary>
         /// Set width and height of dialog as fraction of window size
         /// i.e. if .9 then 90% of width

@@ -446,7 +446,7 @@ namespace Seeker
 
         private void ChatroomOverviewRecyclerAdapter_Click(object sender, EventArgs e)
         {
-            setPosition(((sender as View).Parent.Parent as IChatroomOverviewBase).ViewHolder.BindingAdapterPosition);
+            setPosition((sender as View).FindAncestor<IChatroomOverviewBase>().ViewHolder.BindingAdapterPosition);
             string roomName = localDataSet[position].Name;
             if (SessionService.Instance.CurrentlyLoggedInButDisconnectedState())
             {

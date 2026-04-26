@@ -38,8 +38,8 @@ namespace Seeker.Search
         public static bool IsInitialized = false;
 
         private static System.Timers.Timer WishlistTimer = null;
-        public static System.Collections.Concurrent.ConcurrentDictionary<int, HashSet<SearchResponse>> OldResultsToCompare = new System.Collections.Concurrent.ConcurrentDictionary<int, HashSet<SearchResponse>>();
-        private static System.Collections.Concurrent.ConcurrentDictionary<int, int> OldNumResults = new System.Collections.Concurrent.ConcurrentDictionary<int, int>();
+        public static System.Collections.Concurrent.ConcurrentDictionary<int, HashSet<SearchResponse>> OldResultsToCompare = new();
+        private static System.Collections.Concurrent.ConcurrentDictionary<int, int> OldNumResults = new();
 
         public static void Initialize() //we need the wishlist interval before we can init
         {
@@ -65,10 +65,6 @@ namespace Seeker.Search
                 searchIntervalMilliseconds = 2 * 60 * 1000; //min of 2 mins...
             }
 
-#if DEBUG
-//            searchIntervalMilliseconds = 1000 * 30; //turn off for now...
-#endif
-
             WishlistTimer = new System.Timers.Timer(searchIntervalMilliseconds);
             WishlistTimer.AutoReset = true;
             WishlistTimer.Elapsed += WishlistTimer_Elapsed;
@@ -81,10 +77,7 @@ namespace Seeker.Search
         public const string FromWishlistStringID = "FromWishlistTabIDToGoTo";
         public static void SearchCompleted(int id)
         {
-            //a search that we initiated completed...
-            //var newResponses = SearchTabHelper.SearchTabCollection[id].SearchResponses.ToList();
-            //var differenceNewResults = newResponses.Except(OldResultsToCompare[id],new SearchResponseComparer(PreferencesState.HideLockedResultsInSearch)).ToList();
-            OldResultsToCompare.TryRemove(id, out _); //save memory. wont always exist if the tab got deleted during the search.  exceptions thrown here dont crash anything tho.
+            OldResultsToCompare.TryRemove(id, out _); 
             int newUniqueResults = SearchTabHelper.SearchTabCollection[id].SearchResponses.Count - OldNumResults[id];
 
             if (newUniqueResults >= 1)

@@ -6,6 +6,7 @@ using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
+using Seeker.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace Seeker
 
         private void View_Click(object sender, EventArgs e)
         {
-            int pos = ((sender as TextView).Parent.Parent as TreePathItemView).ViewHolder.BindingAdapterPosition;
+            int pos = (sender as TextView).FindAncestor<TreePathItemView>().ViewHolder.BindingAdapterPosition;
             Seeker.Helpers.Logger.InfoFirebase("browse click pos " + pos);
             int additionalLevels = localDataSet.Count - pos - 2;
             Seeker.Helpers.Logger.InfoFirebase("browse click pos " + pos + "  additional levels " + additionalLevels);

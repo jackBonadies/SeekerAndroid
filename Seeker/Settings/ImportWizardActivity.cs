@@ -464,7 +464,7 @@ namespace Seeker
 
         private void ImportItemCheckbox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            int pos = ((sender as TextView).Parent.Parent as ImportItemView).ViewHolder.BindingAdapterPosition;
+            int pos = (sender as TextView).FindAncestor<ImportItemView>().ViewHolder.BindingAdapterPosition;
             localDataSet[pos].isChecked = e.IsChecked;
         }
 

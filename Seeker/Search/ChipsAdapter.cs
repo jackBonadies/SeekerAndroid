@@ -41,7 +41,7 @@ namespace Seeker
         private void Chip_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             //results need to update.
-            int pos = ((sender as View).Parent.Parent as ChipItemView).ViewHolder.BindingAdapterPosition;
+            int pos = (sender as View).FindAncestor<ChipItemView>().ViewHolder.BindingAdapterPosition;
             bool prevValue = localDataSet[pos].IsChecked;
             localDataSet[pos].IsChecked = e.IsChecked;
             if (prevValue != e.IsChecked)

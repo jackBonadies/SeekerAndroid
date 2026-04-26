@@ -84,7 +84,7 @@ namespace Seeker
             // Parent chain in the unified XMLs: relativeLayout1 -> horizontal row -> item root (a SearchItemViewUnifiedBase).
             private void UnifiedRowClick(object sender, EventArgs e)
             {
-                var itemRoot = (sender as View).Parent.Parent as ISearchItemViewBase;
+                var itemRoot = (sender as View).FindAncestor<ISearchItemViewBase>();
                 GetSearchFragment().showEditDialog(itemRoot.ViewHolder.BindingAdapterPosition);
             }
 
@@ -102,7 +102,7 @@ namespace Seeker
             // expandClickArea -> horizontal row -> item root (a SearchItemViewUnifiedBase).
             private void UnifiedChevronClick(object sender, EventArgs e)
             {
-                var itemRoot = (sender as View).Parent.Parent as SearchItemViewUnifiedBase;
+                var itemRoot = (sender as View).FindAncestor<SearchItemViewUnifiedBase>();
                 int position = itemRoot.ViewHolder.BindingAdapterPosition;
                 var v = itemRoot.FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
                 var img = itemRoot.FindViewById<ImageView>(Resource.Id.expandableClick);
