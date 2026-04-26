@@ -137,7 +137,7 @@
             android:id="@+id/expandClickArea"
             android:layout_width="44dp"
             android:layout_height="match_parent"
-            android:background="?attr/expandableModernChevronBg"
+            android:background="#ff0000"
             android:clickable="true"
             android:focusable="true"
             android:visibility="gone"

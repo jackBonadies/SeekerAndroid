@@ -25,6 +25,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Common;
+using Common.Search;
 namespace Seeker
 {
     public partial class SearchFragment : Fragment
@@ -42,6 +43,10 @@ namespace Seeker
         private Handler spinnerTimerHandler;
         private Java.Lang.Runnable spinnerTimerTick;
         private bool spinnerTimerRunning;
+        private View wishlistBanner;
+        private TextView wishlistBannerText;
+        private Handler wishlistBannerHandler;
+        private Java.Lang.Runnable wishlistBannerTick;
         private Context context;
         public static bool ExpandAllResults { get => PreferencesState.ExpandAllResults; set => PreferencesState.ExpandAllResults = value; }
         public static IMenu ActionBarMenu = null;
@@ -65,6 +70,7 @@ namespace Seeker
                 this.GoToTab(MainActivity.goToSearchTab, false, true);
                 MainActivity.goToSearchTab = int.MaxValue;
             }
+            RefreshWishlistBanner();
         }
 
         private void ClearFilterStringAndCached(bool force = false)
@@ -315,6 +321,7 @@ namespace Seeker
                 UpdateSearchSpinner();
                 UpdateNoResultsView();
                 UpdateAllFilteredView();
+                RefreshWishlistBanner();
             });
         }
 
@@ -538,6 +545,83 @@ namespace Seeker
             catch (System.Exception err)
             {
                 Logger.Firebase("MainActivity_FocusChange" + err.Message);
+            }
+        }
+
+        public void RefreshWishlistBanner()
+        {
+            if (wishlistBanner == null || wishlistBannerText == null)
+            {
+                return;
+            }
+
+            if (!SearchTabHelper.SearchTabCollection.TryGetValue(SearchTabHelper.CurrentTab, out var tab) || tab.SearchTarget != SearchTarget.Wishlist)
+            {
+                wishlistBanner.Visibility = ViewStates.Gone;
+                StopWishlistBannerTicker();
+                return;
+            }
+
+            wishlistBanner.Visibility = ViewStates.Visible;
+            wishlistBannerText.Text = FormatWishlistNextRunText(tab);
+            StartWishlistBannerTicker();
+        }
+
+        private string FormatWishlistNextRunText(SearchTab tab)
+        {
+            int intervalMs = WishlistController.SearchIntervalMilliseconds;
+            if (intervalMs <= 0 || tab.LastRanTime == DateTime.MinValue)
+            {
+                return "Next Run Unknown";
+            }
+
+            var nextRunTime = WishlistUtil.GetNextRunTime(WishlistController.LastWishlistTimerRun, intervalMs, SearchTabHelper.SearchTabCollection, tab);
+            TimeSpan remaining = nextRunTime.Subtract(DateTime.UtcNow);
+            if (remaining.TotalSeconds <= 30)
+            {
+                return GetString(Resource.String.wishlist_next_run_imminent);
+            }
+
+            int totalMinutes = (int)System.Math.Ceiling(remaining.TotalMinutes);
+            int hours = totalMinutes / 60;
+            int minutes = totalMinutes % 60;
+            if (hours > 0)
+            {
+                return string.Format(GetString(Resource.String.wishlist_next_run_hours_minutes), hours, minutes);
+            }
+            return string.Format(GetString(Resource.String.wishlist_next_run_minutes), totalMinutes);
+        }
+
+        private void StartWishlistBannerTicker()
+        {
+            if (wishlistBannerHandler == null)
+            {
+                wishlistBannerHandler = new Handler(Looper.MainLooper);
+            }
+            if (wishlistBannerTick == null)
+            {
+                wishlistBannerTick = new Java.Lang.Runnable(() =>
+                {
+                    if (wishlistBanner == null || wishlistBanner.Visibility != ViewStates.Visible)
+                    {
+                        return;
+                    }
+                    if (SearchTabHelper.SearchTabCollection.TryGetValue(SearchTabHelper.CurrentTab, out var tab) && tab.SearchTarget == SearchTarget.Wishlist)
+                    {
+                        wishlistBannerText.Text = FormatWishlistNextRunText(tab);
+                        wishlistBannerHandler.PostDelayed(wishlistBannerTick, 60_000);
+                    }
+                });
+            }
+            wishlistBannerHandler.RemoveCallbacks(wishlistBannerTick);
+            wishlistBannerHandler.PostDelayed(wishlistBannerTick, 60_000);
+        }
+
+        private void StopWishlistBannerTicker()
+        {
+            if (wishlistBannerHandler != null && wishlistBannerTick != null)
+            {
+                wishlistBannerHandler.RemoveCallbacks(wishlistBannerTick);
             }
         }
 
@@ -815,10 +899,13 @@ namespace Seeker
             noResultsSubtitle = rootView.FindViewById<TextView>(Resource.Id.noResultsSubtitle);
             allFilteredView = rootView.FindViewById<View>(Resource.Id.allFilteredView);
             allFilteredTitle = rootView.FindViewById<TextView>(Resource.Id.allFilteredTitle);
+            wishlistBanner = rootView.FindViewById<View>(Resource.Id.wishlistBanner);
+            wishlistBannerText = rootView.FindViewById<TextView>(Resource.Id.wishlistHeaderText);
             UpdateNoSearchesView();
             UpdateSearchSpinner();
             UpdateNoResultsView();
             UpdateAllFilteredView();
+            RefreshWishlistBanner();
 
             SeekerState.ClearSearchHistoryEventsFromTarget(this);
             SeekerState.ClearSearchHistory += SeekerState_ClearSearchHistory;
@@ -1717,6 +1804,7 @@ namespace Seeker
             Logger.Debug("SearchFragmentOnPause");
             base.OnPause();
             PreferencesManager.SaveSearchFragmentFilterState(PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)PreferencesState.SearchResultStyle, ExpandAllResults);
+            StopWishlistBannerTicker();
         }
 
         private static void Actv_KeyPressHELPER(object sender, View.KeyEventArgs e)

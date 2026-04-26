@@ -14,60 +14,68 @@
         android:focusable="true"
         android:focusableInTouchMode="true"
     />
-	<com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/linearProgressIndicator"
-		android:layout_width="match_parent"
-		android:layout_height="4dp"
-		android:visibility="gone"
-		app:trackCornerRadius="0dp"
-		app:trackInnerCornerRadius="2dp"
-		app:indicatorColor="?attr/mainPurple"
-		android:indeterminateOnly="true" />
 
-    <RelativeLayout
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:descendantFocusability="beforeDescendants"
-        android:focusableInTouchMode="true"
-        tools:context="android.PageFragment"
-        android:id="@+id/relativeLayout1"
-    >
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_below="@id/header1"
-            android:minWidth="25px"
-            android:minHeight="0px"
-            android:elevation="4dp"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/colorBackground"
+        android:stateListAnimator="@null"
+        app:elevation="0dp"
+        app:liftOnScroll="false">
+
+        <include
+            android:id="@+id/wishlistBanner"
+            layout="@layout/wishlist_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll" />
+
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewChips"
-        />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <View
             android:id="@+id/chipsSeparator"
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_below="@id/recyclerViewChips"
-            android:background="@color/slightTint"
-        />
+            android:background="@color/slightTint" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/linearProgressIndicator"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:visibility="gone"
+        app:trackCornerRadius="0dp"
+        app:trackInnerCornerRadius="2dp"
+        app:indicatorColor="?attr/mainPurple"
+        android:indeterminateOnly="true" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
+        tools:context="android.PageFragment"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:layout_below="@id/chipsSeparator"
-            android:minWidth="25px"
+            android:id="@+id/recyclerViewSearches"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:scrollbars="vertical"
             android:paddingBottom="80dp"
-            android:clipToPadding="false"
-            android:minHeight="25px"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/recyclerViewSearches"
-        />
+            android:clipToPadding="false" />
+
         <LinearLayout
             android:id="@+id/searchLoadingView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:layout_centerInParent="true"
             android:translationY="-48dp"
             android:visibility="gone">
 
@@ -103,9 +111,9 @@
             android:id="@+id/noResultsView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:layout_centerInParent="true"
             android:translationY="-48dp"
             android:visibility="gone">
 
@@ -137,9 +145,9 @@
             android:id="@+id/allFilteredView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:layout_centerInParent="true"
             android:translationY="-48dp"
             android:visibility="gone">
 
@@ -171,9 +179,9 @@
             android:id="@+id/noSearchesView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:orientation="vertical"
             android:gravity="center_horizontal"
-            android:layout_centerInParent="true"
             android:translationY="-48dp"
             android:visibility="gone">
 
@@ -200,7 +208,7 @@
                 android:layout_marginTop="4dp" />
 
         </LinearLayout>
-    </RelativeLayout>
+    </FrameLayout>
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

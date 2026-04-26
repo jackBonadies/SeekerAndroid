@@ -16,7 +16,6 @@ using System.Threading;
 using Common;
 namespace Seeker.Search
 {
-    // TODOORG controllers
     public class WishlistController
     {
         private static int searchIntervalMilliseconds = -1;
@@ -38,6 +37,7 @@ namespace Seeker.Search
         public static bool IsInitialized = false;
 
         private static System.Timers.Timer WishlistTimer = null;
+        public static DateTime LastWishlistTimerRun { get; private set; }
         public static System.Collections.Concurrent.ConcurrentDictionary<int, HashSet<SearchResponse>> OldResultsToCompare = new();
         private static System.Collections.Concurrent.ConcurrentDictionary<int, int> OldNumResults = new();
 
@@ -68,6 +68,7 @@ namespace Seeker.Search
             WishlistTimer = new System.Timers.Timer(searchIntervalMilliseconds);
             WishlistTimer.AutoReset = true;
             WishlistTimer.Elapsed += WishlistTimer_Elapsed;
+            LastWishlistTimerRun = DateTime.UtcNow;
             WishlistTimer.Start();
             IsInitialized = true;
         }
@@ -121,6 +122,7 @@ namespace Seeker.Search
 
         private static void WishlistTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+            LastWishlistTimerRun = DateTime.UtcNow;
             if (SearchTabHelper.SearchTabCollection != null)
             {
                 var wishlistPairs = SearchTabHelper.SearchTabCollection.Where(pair => pair.Value.SearchTarget == SearchTarget.Wishlist);
@@ -131,24 +133,7 @@ namespace Seeker.Search
                 else
                 {
                     Logger.InfoFirebase("wishlist search ran " + searchIntervalMilliseconds);
-                    DateTime oldest = DateTime.MaxValue;
-                    int oldestId = int.MaxValue;
-                    foreach (var pair in wishlistPairs)
-                    {
-                        if (pair.Value.LastRanTime < oldest)
-                        {
-                            oldest = pair.Value.LastRanTime;
-                            oldestId = pair.Key;
-                        }
-                    }
-                    //oldestId is the one we want to autosearch
-
-                    //search response count: 4220 hashSet count: 1000 time 102 ms
-                    //search response count: 13880 hashSet count: 1000 time 71 ms
-                    //search response count: 14655 hashSet count: 1000 time 174 ms
-                    //search response count: 2615 hashSet count: 999 time 21 ms
-                    //search response count: 15758 hashSet count: 1000 time 124 ms
-                    //search response count: 937 hashSet count: 937 time 4 ms
+                    var oldestId = wishlistPairs.MinBy(it=>it.Value.LastRanTime).Key;
 
                     //this is incase someone is privileged (searching every 2 mins) and perhaps they only have 1 wishlist search.  we dont want the second to begin when the first hasnt even ended.
                     //there arent really any downsides if this happens actually....

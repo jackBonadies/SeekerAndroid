@@ -35,7 +35,7 @@ namespace Seeker.Transfers
 
         private void Init()
         {
-            cornerRadius = TypedValue.ApplyDimension(ComplexUnitType.Dip, 4, Resources.DisplayMetrics);
+            cornerRadius = TypedValue.ApplyDimension(ComplexUnitType.Dip, 2, Resources.DisplayMetrics);
             ResolveColors();
         }
 
