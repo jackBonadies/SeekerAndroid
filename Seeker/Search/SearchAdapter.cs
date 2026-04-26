@@ -76,9 +76,16 @@ namespace Seeker
                 view.AdapterRef = this;
                 view.setupChildren();
                 view.ApplyExpandableMode();
-                view.FindViewById<LinearLayout>(Resource.Id.relativeLayout1).Click += UnifiedRowClick;
+                var mainLayout = view.FindViewById<LinearLayout>(Resource.Id.relativeLayout1);
+                mainLayout.Click += UnifiedRowClick;
                 if (view.IsExpandable)
                 {
+                    view.FindViewById<FrameLayout>(Resource.Id.expandClickArea).Click += UnifiedChevronClick;
+                    if (this.searchResultStyle.HasFlag(SearchResultStyleEnum.Modern))
+                    {
+                        int padEnd = (int)(2 * mainLayout.Resources.DisplayMetrics.Density);
+                        mainLayout.SetPaddingRelative(mainLayout.PaddingStart, mainLayout.PaddingTop, padEnd, mainLayout.PaddingBottom);
+                    }
                     view.FindViewById<FrameLayout>(Resource.Id.expandClickArea).Click += UnifiedChevronClick;
                 }
                 return new SearchViewHolder(view);

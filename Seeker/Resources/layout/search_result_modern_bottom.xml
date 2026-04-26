@@ -16,6 +16,7 @@
         <LinearLayout
             android:orientation="vertical"
             android:id="@+id/relativeLayout1"
+            android:paddingEnd="12dp"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -29,7 +30,6 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:paddingStart="12dp"
-                android:paddingEnd="12dp"
                 android:paddingTop="6dp"
             >
                 <TextView
@@ -86,7 +86,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="7"
                     android:gravity="center_vertical"
-                    android:paddingEnd="12dp"
+                    android:paddingEnd="0dp"
                 >
                     <TextView
                         android:id="@+id/fileTypeTextView"
