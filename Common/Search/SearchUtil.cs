@@ -76,6 +76,7 @@ namespace Common.Search
 
                 }
             }
+            searchTab.ChipDataItems = ChipsHelper.CalculateChipItems(searchResponses, oldTab.LastSearchTerm, PreferencesState.SmartFilterOptions, PreferencesState.HideLockedResultsInSearch);
             return searchTab;
         }
     }
