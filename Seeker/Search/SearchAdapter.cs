@@ -197,24 +197,38 @@ namespace Seeker
                 else if (filterActive && shown != total)
                 {
                     string shownStr = shown.ToString();
-                    string full = string.Format(ctx.GetString(Resource.String.search_results_count_filtered), shownStr, total);
-                    tv.TextFormatted = BuildSemiboldCount(full, shownStr);
+                    string totalStr = total.ToString();
+                    string full = string.Format(ctx.GetString(Resource.String.search_results_count_filtered), shownStr, totalStr);
+                    tv.TextFormatted = BuildEmphasizedCount(ctx, full, shownStr, totalStr);
                 }
                 else
                 {
                     string totalStr = total.ToString();
                     string full = string.Format(ctx.GetString(Resource.String.search_results_count), totalStr);
-                    tv.TextFormatted = BuildSemiboldCount(full, totalStr);
+                    tv.TextFormatted = BuildEmphasizedCount(ctx, full, totalStr);
                 }
             }
 
-            private static Android.Text.SpannableString BuildSemiboldCount(string full, string countToken)
+            private static Android.Text.SpannableString BuildEmphasizedCount(Android.Content.Context ctx, string full, params string[] tokens)
             {
                 var ss = new Android.Text.SpannableString(full);
-                int idx = full.IndexOf(countToken);
-                if (idx >= 0)
+                var color = UiHelpers.GetColorFromAttribute(ctx, Resource.Attribute.cellTextColor);
+                int searchFrom = 0;
+                foreach (string token in tokens)
                 {
-                    ss.SetSpan(new Android.Text.Style.TypefaceSpan("sans-serif-medium"), idx, idx + countToken.Length, Android.Text.SpanTypes.ExclusiveExclusive);
+                    if (string.IsNullOrEmpty(token))
+                    {
+                        continue;
+                    }
+                    int idx = full.IndexOf(token, searchFrom, StringComparison.Ordinal);
+                    if (idx < 0)
+                    {
+                        continue;
+                    }
+                    int end = idx + token.Length;
+                    ss.SetSpan(new Android.Text.Style.TypefaceSpan("sans-serif-medium"), idx, end, Android.Text.SpanTypes.ExclusiveExclusive);
+                    ss.SetSpan(new Android.Text.Style.ForegroundColorSpan(color), idx, end, Android.Text.SpanTypes.ExclusiveExclusive);
+                    searchFrom = end;
                 }
                 return ss;
             }
