@@ -46,7 +46,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_scrollFlags="scroll|enterAlways" />
-
+		<View
+			android:layout_width="match_parent"
+			android:layout_height="1dp"
+			app:layout_scrollFlags="scroll|enterAlways"
+			android:background="@color/bolderTint" />
         <include
             android:id="@+id/searchResultsHeader"
             layout="@layout/search_results_header"

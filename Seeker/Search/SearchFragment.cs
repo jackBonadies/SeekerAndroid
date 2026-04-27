@@ -579,7 +579,7 @@ namespace Seeker
             TimeSpan remaining = nextRunTime.Subtract(DateTime.UtcNow);
             if (remaining.TotalSeconds <= 10)
             {
-                return GetString(Resource.String.wishlist_next_run_imminent);
+                return SeekerApplication.GetString(Resource.String.wishlist_next_run_imminent);
             }
 
             int totalMinutes = (int)System.Math.Ceiling(remaining.TotalMinutes);
@@ -587,9 +587,9 @@ namespace Seeker
             int minutes = totalMinutes % 60;
             if (hours > 0)
             {
-                return string.Format(GetString(Resource.String.wishlist_next_run_hours_minutes), hours, minutes);
+                return string.Format(SeekerApplication.GetString(Resource.String.wishlist_next_run_hours_minutes), hours, minutes);
             }
-            return string.Format(GetString(Resource.String.wishlist_next_run_minutes), totalMinutes);
+            return string.Format(SeekerApplication.GetString(Resource.String.wishlist_next_run_minutes), totalMinutes);
         }
 
         private void StartWishlistBannerTicker()
