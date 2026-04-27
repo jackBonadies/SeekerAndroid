@@ -808,6 +808,7 @@ namespace Seeker
             adapter.IsInBatchSelectMode = true;
             ToggleBatchSelect(position);
             adapter.NotifyDataSetChanged();
+            SeekerState.MainActivityRef?.RefreshBackCallbackState();
         }
 
         public void OnActionButtonClick(int position, BrowseResponseItemView view)
@@ -985,6 +986,11 @@ namespace Seeker
             return GoUpDirectory();
         }
 
+        public bool HasBackStackToConsume()
+        {
+            return state != null && !state.IsAtRoot();
+        }
+
         public bool GoUpDirectory(int additionalLevels = 0)
         {
             bool res = state.GoUpDirectory(SetBrowseAdapters, additionalLevels);
@@ -1030,6 +1036,7 @@ namespace Seeker
                 treePathRecyclerView.ScrollToPosition(state.PathItems.Count - 1);
             }
             SeekerState.MainActivityRef?.InvalidateOptionsMenu();
+            SeekerState.MainActivityRef?.RefreshBackCallbackState();
         }
 
 

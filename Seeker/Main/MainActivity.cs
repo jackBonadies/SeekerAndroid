@@ -151,6 +151,35 @@ namespace Seeker
 
 
         private ISharedPreferences sharedPreferences;
+        private GenericOnBackPressedCallback backPressedCallback;
+
+        /// <summary>
+        /// Enables our custom back pressed callback when we are in a state to consume it
+        ///   i.e. inside of browse folder or transfer folder
+        /// </summary>
+        public void RefreshBackCallbackState()
+        {
+            if (backPressedCallback == null)
+            {
+                return;
+            }
+            var pager = FindViewById<AndroidX.ViewPager.Widget.ViewPager>(Resource.Id.pager);
+            bool consumable = false;
+            if (pager != null)
+            {
+                if (pager.CurrentItem == 3)
+                {
+                    consumable = BrowseFragment.BrowseActionMode != null
+                                 || (BrowseFragment.Instance?.HasBackStackToConsume() ?? false);
+                }
+                else if (pager.CurrentItem == 2)
+                {
+                    consumable = TransfersViewState.Instance.GetCurrentlySelectedFolder() != null;
+                }
+            }
+            backPressedCallback.Enabled = consumable;
+        }
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             bool reborn = false;
@@ -179,7 +208,7 @@ namespace Seeker
             myToolbar.InflateMenu(Resource.Menu.account_menu); //twice??
 
 
-            var backPressedCallback = new GenericOnBackPressedCallback(true, onBackPressedAction);
+            backPressedCallback = new GenericOnBackPressedCallback(false, onBackPressedAction);
             OnBackPressedDispatcher.AddCallback(backPressedCallback);
 
             System.Console.WriteLine("Testing.....");
@@ -714,14 +743,12 @@ namespace Seeker
         /// </summary>
         private void onBackPressedAction(OnBackPressedCallback callback)
         {
-            bool relevant = false;
             try
             {
-                //TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs); returns -1
                 var pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
                 if (pager.CurrentItem == 3) //browse tab
                 {
-                    relevant = BrowseFragment.Instance.BackButton();
+                    BrowseFragment.Instance?.BackButton();
                 }
                 else if (pager.CurrentItem == 2) //transfer tab
                 {
@@ -737,11 +764,8 @@ namespace Seeker
                         }
                         SetTransferSupportActionBarState();
                         this.InvalidateOptionsMenu();
-                        //((pager.Adapter as TabsPagerAdapter).GetItem(2) as TransfersFragment).SetRecyclerAdapter();  //if you go to transfers rotate phone and then OnBackPressed gets hit,. the fragment that getitem returns will be very old.
-                        //((pager.Adapter as TabsPagerAdapter).GetItem(2) as TransfersFragment).RestoreScrollPosition();
                         StaticHacks.TransfersFrag.SetRecyclerAdapter();
                         StaticHacks.TransfersFrag.RestoreScrollPosition();
-                        relevant = true;
                     }
                 }
             }
@@ -750,12 +774,7 @@ namespace Seeker
                 //During Back Button: Attempt to invoke virtual method 'java.lang.Object android.content.Context.getSystemService(java.lang.String)' on a null object reference
                 Logger.Firebase("During Back Button: " + e.Message);
             }
-            if (!relevant)
-            {
-                callback.Enabled = false;
-                OnBackPressedDispatcher.OnBackPressed();
-                callback.Enabled = true;
-            }
+            RefreshBackCallbackState();
         }
 
 
@@ -1228,6 +1247,7 @@ namespace Seeker
                     this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.transfers_menu);
                     break;
             }
+            RefreshBackCallbackState();
         }
 
         public void SetTransferSupportActionBarState()
