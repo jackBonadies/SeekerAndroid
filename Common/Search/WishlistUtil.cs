@@ -7,10 +7,10 @@ namespace Common.Search
 {
     public static class WishlistUtil
     {
-        public static DateTime GetNextRunTime(DateTime lastWishlistRun, int intervalMilliSeconds, ConcurrentDictionary<int, SearchTab> wishlistTabs, SearchTab wishlistTab)
+        public static DateTime GetNextRunTime(DateTime lastWishlistTriggerTime, int intervalMilliSeconds, ConcurrentDictionary<int, SearchTab> searchTabs, SearchTab wishlistTab)
         {
-            int tabsThatWillRunBefore = wishlistTabs.Count(it => it.Value != wishlistTab && lastWishlistRun.CompareTo(it.Value.LastRanTime) > 0);
-            return lastWishlistRun.AddMilliseconds(intervalMilliSeconds * (tabsThatWillRunBefore + 1));
+            int tabsThatWillRunBefore = searchTabs.Count(it => it.Value.SearchTarget == SearchTarget.Wishlist && it.Value != wishlistTab && wishlistTab.LastRanTime.CompareTo(it.Value.LastRanTime) > 0);
+            return lastWishlistTriggerTime.AddMilliseconds(intervalMilliSeconds * (tabsThatWillRunBefore + 1));
         }
     }
 }

@@ -14,7 +14,7 @@ namespace UnitTestCommon
             dict[1] = self;
             foreach (var (id, lastRan) in others)
             {
-                dict[id] = new SearchTab { LastRanTime = lastRan };
+                dict[id] = new SearchTab { LastRanTime = lastRan, SearchTarget = SearchTarget.Wishlist };
             }
             return dict;
         }

@@ -577,7 +577,7 @@ namespace Seeker
 
             var nextRunTime = WishlistUtil.GetNextRunTime(WishlistController.LastWishlistTimerRun, intervalMs, SearchTabHelper.SearchTabCollection, tab);
             TimeSpan remaining = nextRunTime.Subtract(DateTime.UtcNow);
-            if (remaining.TotalSeconds <= 30)
+            if (remaining.TotalSeconds <= 10)
             {
                 return GetString(Resource.String.wishlist_next_run_imminent);
             }
@@ -2344,6 +2344,13 @@ namespace Seeker
 
                     if (fromTab == SearchTabHelper.CurrentTab)
                     {
+                        if (searchTab.SearchTarget == SearchTarget.Wishlist)
+                        {
+                            SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                            {
+                                SearchFragment.Instance?.RefreshWishlistBanner();
+                            }));
+                        }
                         if (PreferencesState.ShowSmartFilters)
                         {
 #if DEBUG

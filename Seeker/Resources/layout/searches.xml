@@ -31,6 +31,16 @@
             android:layout_height="wrap_content"
             app:layout_scrollFlags="scroll" />
 
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/linearProgressIndicator"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:visibility="gone"
+        app:trackCornerRadius="0dp"
+        app:trackInnerCornerRadius="2dp"
+        app:indicatorColor="?attr/mainPurple"
+        android:indeterminateOnly="true" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewChips"
             android:layout_width="match_parent"
@@ -43,15 +53,6 @@
             android:background="@color/slightTint" />
     </com.google.android.material.appbar.AppBarLayout>
 
-    <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/linearProgressIndicator"
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:visibility="gone"
-        app:trackCornerRadius="0dp"
-        app:trackInnerCornerRadius="2dp"
-        app:indicatorColor="?attr/mainPurple"
-        android:indeterminateOnly="true" />
 
     <FrameLayout
         android:layout_width="match_parent"
