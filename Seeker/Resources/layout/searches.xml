@@ -29,7 +29,7 @@
             layout="@layout/wishlist_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll" />
+            app:layout_scrollFlags="scroll|enterAlways" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/linearProgressIndicator"
@@ -44,13 +44,15 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewChips"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|enterAlways" />
 
-        <View
-            android:id="@+id/chipsSeparator"
+        <include
+            android:id="@+id/searchResultsHeader"
+            layout="@layout/search_results_header"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/slightTint" />
+            android:layout_height="wrap_content"
+            app:layout_scrollFlags="scroll|enterAlways" />
     </com.google.android.material.appbar.AppBarLayout>
 
 

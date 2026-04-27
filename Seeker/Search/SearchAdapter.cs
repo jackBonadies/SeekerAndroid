@@ -170,89 +170,74 @@ namespace Seeker
             }
         }
 
-        public class SearchResultsHeaderAdapter : RecyclerView.Adapter
+        public static void RefreshSearchResultsHeader(View headerView)
         {
-            public override int ItemCount => 1;
-
-            public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
+            if (headerView == null)
             {
-                var view = LayoutInflater.From(parent.Context).Inflate(Resource.Layout.search_results_header, parent, false);
-                return new SearchResultsHeaderViewHolder(view);
+                return;
             }
 
-            public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
+            if (string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm))
             {
-                var tv = ((SearchResultsHeaderViewHolder)holder).Text;
-
-                if (string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm))
-                {
-                    holder.ItemView.Visibility = ViewStates.Gone;
-                    return;
-                }
-
-                if ((SearchTabHelper.SearchResponses?.Count ?? 0) == 0)
-                {
-                    holder.ItemView.Visibility = ViewStates.Gone;
-                    return;
-                }
-
-                int total = SearchTabHelper.SearchResponses?.Count ?? 0;
-                int shown = SearchTabHelper.UI_SearchResponses?.Count ?? total;
-                bool filterActive = SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive();
-
-                holder.ItemView.Visibility = ViewStates.Visible;
-                var ctx = tv.Context;
-                if (total == 0)
-                {
-                    tv.Text = ctx.GetString(Resource.String.search_results_count_none);
-                }
-                else if (filterActive && shown != total)
-                {
-                    string shownStr = shown.ToString();
-                    string totalStr = total.ToString();
-                    string full = string.Format(ctx.GetString(Resource.String.search_results_count_filtered), shownStr, totalStr);
-                    tv.TextFormatted = BuildEmphasizedCount(ctx, full, shownStr, totalStr);
-                }
-                else
-                {
-                    string totalStr = total.ToString();
-                    string full = string.Format(ctx.GetString(Resource.String.search_results_count), totalStr);
-                    tv.TextFormatted = BuildEmphasizedCount(ctx, full, totalStr);
-                }
+                headerView.Visibility = ViewStates.Gone;
+                return;
             }
 
-            private static Android.Text.SpannableString BuildEmphasizedCount(Android.Content.Context ctx, string full, params string[] tokens)
+            if ((SearchTabHelper.SearchResponses?.Count ?? 0) == 0)
             {
-                var ss = new Android.Text.SpannableString(full);
-                var color = UiHelpers.GetColorFromAttribute(ctx, Resource.Attribute.cellTextColor);
-                int searchFrom = 0;
-                foreach (string token in tokens)
-                {
-                    if (string.IsNullOrEmpty(token))
-                    {
-                        continue;
-                    }
-                    int idx = full.IndexOf(token, searchFrom, StringComparison.Ordinal);
-                    if (idx < 0)
-                    {
-                        continue;
-                    }
-                    int end = idx + token.Length;
-                    ss.SetSpan(new Android.Text.Style.TypefaceSpan("sans-serif-medium"), idx, end, Android.Text.SpanTypes.ExclusiveExclusive);
-                    ss.SetSpan(new Android.Text.Style.ForegroundColorSpan(color), idx, end, Android.Text.SpanTypes.ExclusiveExclusive);
-                    searchFrom = end;
-                }
-                return ss;
+                headerView.Visibility = ViewStates.Gone;
+                return;
+            }
+
+            var tv = headerView.FindViewById<TextView>(Resource.Id.searchResultsHeaderText);
+
+            int total = SearchTabHelper.SearchResponses?.Count ?? 0;
+            int shown = SearchTabHelper.UI_SearchResponses?.Count ?? total;
+            bool filterActive = SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive();
+
+            headerView.Visibility = ViewStates.Visible;
+            var ctx = tv.Context;
+            if (total == 0)
+            {
+                tv.Text = ctx.GetString(Resource.String.search_results_count_none);
+            }
+            else if (filterActive && shown != total)
+            {
+                string shownStr = shown.ToString();
+                string totalStr = total.ToString();
+                string full = string.Format(ctx.GetString(Resource.String.search_results_count_filtered), shownStr, totalStr);
+                tv.TextFormatted = BuildEmphasizedCount(ctx, full, shownStr, totalStr);
+            }
+            else
+            {
+                string totalStr = total.ToString();
+                string full = string.Format(ctx.GetString(Resource.String.search_results_count), totalStr);
+                tv.TextFormatted = BuildEmphasizedCount(ctx, full, totalStr);
             }
         }
 
-        public class SearchResultsHeaderViewHolder : RecyclerView.ViewHolder
+        private static Android.Text.SpannableString BuildEmphasizedCount(Android.Content.Context ctx, string full, params string[] tokens)
         {
-            public TextView Text;
-            public SearchResultsHeaderViewHolder(View view) : base(view)
+            var ss = new Android.Text.SpannableString(full);
+            var color = UiHelpers.GetColorFromAttribute(ctx, Resource.Attribute.cellTextColor);
+            int searchFrom = 0;
+            foreach (string token in tokens)
             {
-                Text = view.FindViewById<TextView>(Resource.Id.searchResultsHeaderText);
+                if (string.IsNullOrEmpty(token))
+                {
+                    continue;
+                }
+                int idx = full.IndexOf(token, searchFrom, StringComparison.Ordinal);
+                if (idx < 0)
+                {
+                    continue;
+                }
+                int end = idx + token.Length;
+                ss.SetSpan(new Android.Text.Style.TypefaceSpan("sans-serif-medium"), idx, end, Android.Text.SpanTypes.ExclusiveExclusive);
+                ss.SetSpan(new Android.Text.Style.ForegroundColorSpan(color), idx, end, Android.Text.SpanTypes.ExclusiveExclusive);
+                searchFrom = end;
             }
+            return ss;
         }
 
         public class SearchDiffCallback : DiffUtil.Callback

@@ -294,12 +294,12 @@ namespace Seeker
                         Logger.Debug("filtering...");
                         UpdateFilteredResponses(searchTab);
                     }
-                    recyclerViewTransferItems.SetAdapter(CreateSearchConcatAdapter(searchTab.UI_SearchResponses));
+                    recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(searchTab.UI_SearchResponses));
                 }
                 else
                 {
                     searchTab.UI_SearchResponses = searchTab.SearchResponses.ToList();
-                    recyclerViewTransferItems.SetAdapter(CreateSearchConcatAdapter(searchTab.UI_SearchResponses));
+                    recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(searchTab.UI_SearchResponses));
                 }
 
                 SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(searchTab.ChipDataItems);
@@ -763,12 +763,12 @@ namespace Seeker
 
             if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
             {
-                rv.SetAdapter(CreateSearchConcatAdapter(SearchTabHelper.UI_SearchResponses));
+                rv.SetAdapter(CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
             }
             else
             {
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses.ToList();
-                rv.SetAdapter(CreateSearchConcatAdapter(SearchTabHelper.UI_SearchResponses));
+                rv.SetAdapter(CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
             }
         }
 
@@ -883,13 +883,16 @@ namespace Seeker
             recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
             if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
             {
-                recyclerViewTransferItems.SetAdapter(CreateSearchConcatAdapter(SearchTabHelper.UI_SearchResponses));
+                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
             }
             else
             {
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses.ToList();
-                recyclerViewTransferItems.SetAdapter(CreateSearchConcatAdapter(SearchTabHelper.UI_SearchResponses));
+                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
             }
+
+            searchResultsHeaderView = rootView.FindViewById<View>(Resource.Id.searchResultsHeader);
+            RefreshSearchResultsHeader(searchResultsHeaderView);
 
             noSearchesView = rootView.FindViewById<View>(Resource.Id.noSearchesView);
             searchLoadingView = rootView.FindViewById<View>(Resource.Id.searchLoadingView);
@@ -1910,7 +1913,7 @@ namespace Seeker
                 SearchFragment.Instance.ClearFilterStringAndCached();
 
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses?.ToList();
-                SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.CreateSearchConcatAdapter(SearchTabHelper.UI_SearchResponses));
+                SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
 
                 SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
@@ -1938,18 +1941,17 @@ namespace Seeker
         private RecyclerView.LayoutManager recycleLayoutManager;
         private RecyclerView recyclerViewTransferItems;
         private SearchAdapterRecyclerVersion recyclerSearchAdapter;
-        private SearchResultsHeaderAdapter recyclerSearchHeaderAdapter;
+        private View searchResultsHeaderView;
 
-        private ConcatAdapter CreateSearchConcatAdapter(List<SearchResponse> responses)
+        private SearchAdapterRecyclerVersion CreateSearchAdapter(List<SearchResponse> responses)
         {
             recyclerSearchAdapter = new SearchAdapterRecyclerVersion(responses);
-            recyclerSearchHeaderAdapter = new SearchResultsHeaderAdapter();
-            return new ConcatAdapter(recyclerSearchHeaderAdapter, recyclerSearchAdapter);
+            return recyclerSearchAdapter;
         }
 
         private void NotifySearchHeaderChanged()
         {
-            recyclerSearchHeaderAdapter?.NotifyItemChanged(0);
+            RefreshSearchResultsHeader(searchResultsHeaderView);
         }
 
 
@@ -1980,7 +1982,7 @@ namespace Seeker
             var prevList = GetOldList(cacheKey);
             if (prevList == null)
             {
-                Instance.recyclerViewTransferItems.SetAdapter(Instance.CreateSearchConcatAdapter(newResults));
+                Instance.recyclerViewTransferItems.SetAdapter(Instance.CreateSearchAdapter(newResults));
             }
             else
             {
