@@ -522,6 +522,8 @@ namespace Seeker
         private static readonly string[] _mockArtists = { "bach", "beethoven", "mozart" };
         private static readonly string[] _mockAlbums = { "Greatest Hits", "Live Sessions", "Remastered Edition", "Deluxe", "The Collection", "Anthology", "Unplugged", "B-Sides" };
         private static readonly string[] _extensions = { "mp3", "flac", "ogg", "wav", "m4a" };
+        private static readonly string[] _lossy = { "mp3", "ogg", "m4a" };
+        private static readonly string[] _lossless = { "flac", "wav" };
 
         private static (int count, int totalTimeMs, string search) ParseMockSearchParams(SearchQuery query)
         {
@@ -566,7 +568,20 @@ namespace Seeker
                 if (ext == "flac" && _random.Next(2) == 0)
                 {
                     fileAttributes = fileAttributes.Concat(new[] { new FileAttribute(FileAttributeType.SampleRate, 44100), new FileAttribute(FileAttributeType.BitDepth, 16) }).ToArray();
-
+                }
+                else if (_lossy.Contains(ext))
+                {
+                    switch(_random.Next(3))
+                    {
+                        case 0:
+                            fileAttributes = fileAttributes.Concat(new[] { new FileAttribute(FileAttributeType.VariableBitRate, 0) }).ToArray();
+                            break;
+                        case 1:
+                            fileAttributes = fileAttributes.Concat(new[] { new FileAttribute(FileAttributeType.VariableBitRate, 1) }).ToArray();
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 files.Add(new Soulseek.File(1, filename, size, ext, fileAttributes));
             }
@@ -1073,6 +1088,29 @@ namespace Seeker
             return new BrowseResponse(dirs);
         }
 
+        private static SearchResponse MakeResponseFileTypeBitRate(int resolvedToken, string search, string cachedType, double cachedBitRate = 128.0)
+        {
+            var resp = GenerateMockSearchResponse(resolvedToken, search);
+            resp.cachedDominantFileType = cachedType;
+            resp.cachedCalcBitRate = cachedBitRate;
+            return resp;
+        }
+
+        private static List<SearchResponse> MakeChipResponses(int resolvedToken, string search, params (string type, int count)[] buckets)
+        {
+            var list = new List<SearchResponse>();
+            foreach (var (t, c) in buckets)
+            {
+                for (int i = 0; i < c; i++)
+                {
+                    list.Add(MakeResponseFileTypeBitRate(resolvedToken, search, t));
+                }
+            }
+            return list;
+        }
+
+
+
         public async Task<(Soulseek.Search Search, IReadOnlyCollection<SearchResponse> Responses)> SearchAsync(SearchQuery query, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null)
         {
             if (SearchAsyncHandler != null) return await SearchAsyncHandler(query, scope, token, options, cancellationToken);
@@ -1089,12 +1127,81 @@ namespace Seeker
             SearchStateChanged?.Invoke(this, new SearchStateChangedEventArgs(SearchStates.Requested, searchInProgress));
 
             string joinedTerms = string.Join(" ", query.Terms).ToLowerInvariant();
+
+            if (Seeker.Debug.SearchCaptureStore.IsConfigured &&
+                Seeker.Debug.SearchCaptureStore.TryLoad(joinedTerms, out var capturedResponses, out _))
+            {
+                int delayPerCapture = capturedResponses.Count > 0 ? totalTimeMs / capturedResponses.Count : 0;
+                var replayList = new List<SearchResponse>();
+                for (int i = 0; i < capturedResponses.Count; i++)
+                {
+                    if (cancellationToken?.IsCancellationRequested == true)
+                    {
+                        break;
+                    }
+                    replayList.Add(capturedResponses[i]);
+                    var curSearch = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.InProgress, i + 1, 0, 0);
+                    options?.ResponseReceived?.Invoke((curSearch, capturedResponses[i]));
+                    if (delayPerCapture > 0)
+                    {
+                        await Task.Delay(delayPerCapture).ConfigureAwait(false);
+                    }
+                }
+                var replayDone = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.Completed, replayList.Count, 0, 0);
+                SearchStateChanged?.Invoke(this, new SearchStateChangedEventArgs(SearchStates.InProgress, replayDone));
+                return (replayDone, replayList.AsReadOnly());
+            }
+
             bool isBeethovenOverture = joinedTerms.Contains("beethoven") && joinedTerms.Contains("overture");
+            bool isChipTestOther = joinedTerms.Contains("chiptest") && joinedTerms.Contains("other");
+            bool isSlowSearch = joinedTerms.Contains("slowsearch");
+            bool is0Results = joinedTerms.Contains("0results");
+            bool isCurated = isBeethovenOverture || isChipTestOther;
 
             var allResponses = new List<SearchResponse>();
-            if (isBeethovenOverture)
+            if (isCurated)
             {
-                var curatedResponses = GenerateBeethovenOvertureResponses(resolvedToken);
+                List<SearchResponse> curatedResponses = new();
+                if (isBeethovenOverture)
+                {
+                    curatedResponses = GenerateBeethovenOvertureResponses(resolvedToken);
+                } 
+                else if (isChipTestOther)
+                {
+                    curatedResponses = MakeChipResponses(resolvedToken, search,
+                        ("mp3", 10),
+                        ("mp3 (vbr)", 10),
+                        ("mp3 (320kbs)", 10),
+                        ("mp3 (256kbs)", 10),
+                        ("mp3 (196kbs)", 1),
+                        ("mp3 (128kbs)", 1),
+                        ("mp3 (120kbs)", 1),
+                        ("mp3 (96kbs)", 1),
+                        ("flac", 10),
+                        ("flac (vbr)", 10),
+                        ("flac (16, 44.1 kHz)", 20),
+                        ("flac (24, 44.1 kHz)", 10),
+                        ("flac (16, 48 kHz)", 10),
+                        ("flac (test)", 1),
+                        ("flac (test2)", 1),
+                        ("m4a", 10),
+                        ("aac", 10),
+                        ("alac", 10),
+                        ("test3", 1),
+                        ("test4", 1),
+                        ("test5", 1),
+                        ("test6", 1),
+                        ("test7", 1),
+                        ("test8", 1),
+                        ("test9", 1),
+                        ("test10", 1),
+                        ("tar.gz", 10),
+                        ("epub", 7),
+                        ("txt", 7),
+                        ("", 1),
+                        ("flac (test3)", 1)
+                    );
+                }
                 int delayPerCurated = curatedResponses.Count > 0 ? totalTimeMs / curatedResponses.Count : 0;
                 for (int i = 0; i < curatedResponses.Count; i++)
                 {
@@ -1111,8 +1218,16 @@ namespace Seeker
                     }
                 }
             }
+            else if (is0Results)
+            {
+                await Task.Delay(10000).ConfigureAwait(false);
+            }
             else
             {
+                if (isSlowSearch)
+                {
+                    await Task.Delay(3000).ConfigureAwait(false);
+                }
                 for (int i = 0; i < count; i++)
                 {
                     if (cancellationToken?.IsCancellationRequested == true)

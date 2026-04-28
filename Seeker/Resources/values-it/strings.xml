@@ -176,7 +176,7 @@ Numero Cartelle: {5}\"
 
     <string name="enter_user_to_message">Inserisci utente a cui inviare un messaggio</string>
 
-    <string name="search_result_style">Visualizzazione risultati:</string>
+    <string name="search_result_style">Visualizzazione risultati</string>
 
     <string name="new_search_tab">Nuova Ricerca</string>
     <string name="filter_search_results_here">Filtra i risultati</string>
@@ -381,8 +381,8 @@ Numero Cartelle: {5}\"
     <string name="always_light">Sempre chiaro</string>
     <string name="always_dark">Sempre scuro</string>
 
-    <string name="queue_length_">Lunghezza coda:</string>
-    <string name="upload_slots_">Posti di caricamento disponibili:</string>
+    <string name="queue_length_">Lunghezza coda</string>
+    <string name="upload_slots_">Posti di caricamento disponibili</string>
     <string name="today">Oggi</string>
 
     <string name="pending_">In sospeso...</string>

@@ -435,7 +435,7 @@ namespace UnitTestCommon
             var file = new File(1, "test.mp3", 5 * 1024 * 1024, "mp3", attrs);
             string result = SimpleHelpers.GetSizeLengthAttrString(file);
             Assert.That(result, Does.Contain("•"));
-            Assert.That(result, Does.Contain("3m5s"));
+            Assert.That(result, Does.Contain("3m 5s"));
         }
 
         [Test]
@@ -468,6 +468,51 @@ namespace UnitTestCommon
             Assert.That(files[0].Filename, Is.EqualTo("a.mp3"));
             Assert.That(files[1].Filename, Is.EqualTo("b.mp3"));
             Assert.That(files[2].Filename, Is.EqualTo("c.mp3"));
+        }
+
+        // --- GetRecentTimeNiceFormated ---
+
+        [Test]
+        public void GetRecentTimeNiceFormated_UnderOneMinute_ReturnsJustNow()
+        {
+            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromSeconds(30), "just now", "min ago", "hr ago", "yesterday", "days ago");
+            Assert.That(result, Is.EqualTo("just now"));
+        }
+
+        [Test]
+        public void GetRecentTimeNiceFormated_45Minutes_ReturnsMinAgo()
+        {
+            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromMinutes(45), "just now", "min ago", "hr ago", "yesterday", "days ago");
+            Assert.That(result, Is.EqualTo("45 min ago"));
+        }
+
+        [Test]
+        public void GetRecentTimeNiceFormated_3Hours_ReturnsHrAgo()
+        {
+            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromHours(3), "just now", "min ago", "hr ago", "yesterday", "days ago");
+            Assert.That(result, Is.EqualTo("3 hr ago"));
+        }
+
+        [Test]
+        public void GetRecentTimeNiceFormated_36Hours_ReturnsYesterday()
+        {
+            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromHours(36), "just now", "min ago", "hr ago", "yesterday", "days ago");
+            Assert.That(result, Is.EqualTo("yesterday"));
+        }
+
+        [Test]
+        public void GetRecentTimeNiceFormated_5Days_ReturnsDaysAgo()
+        {
+            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromDays(5), "just now", "min ago", "hr ago", "yesterday", "days ago");
+            Assert.That(result, Is.EqualTo("5 days ago"));
+        }
+
+        [Test]
+        public void GetRecentTimeNiceFormated_OverOneMonth_ReturnsFormattedDate()
+        {
+            var timeRan = new DateTime(2025, 4, 14);
+            string result = SimpleHelpers.GetRecentTimeNiceFormated(timeRan, TimeSpan.FromDays(35), "just now", "min ago", "hr ago", "yesterday", "days ago");
+            Assert.That(result, Is.EqualTo("Apr 14"));
         }
 
         // --- KNOWN_TYPES ---

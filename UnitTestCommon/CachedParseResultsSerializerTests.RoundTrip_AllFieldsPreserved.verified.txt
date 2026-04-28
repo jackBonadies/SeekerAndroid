@@ -1,5 +1,5 @@
 ﻿{
-  keys: {
+  PresentableNameToFullFileInfo: {
     key1: {
       Item1: 100,
       Item2: val1,
@@ -25,8 +25,8 @@
       Item5: true
     }
   },
-  directoryCount: 2,
-  browseResponse: {
+  DirectoryCount: 2,
+  BrowseResponse: {
     Directories: [
       {
         Name: Music/Album1,
@@ -95,14 +95,14 @@
     ],
     DirectoryCount: 2
   },
-  browseResponseHiddenPortion: [
+  BrowseResponseHiddenPortion: [
     {
       Name: Private/Stuff,
       DecodedViaLatin1: false,
       OrderedFiles: []
     }
   ],
-  friendlyDirNameToUriMapping: [
+  PresentableDirectoryNameToDirectoryUriMappings: [
     {
       Item1: friendly1,
       Item2: uri1
@@ -112,7 +112,7 @@
       Item2: uri2
     }
   ],
-  tokenIndex: {
+  SearchTermTokenToListOfFileKeys: {
     token1: [
       1,
       2,
@@ -123,9 +123,9 @@
       5
     ]
   },
-  helperIndex: {
+  FileKeyToPresentableName: {
     1: helper1,
     2: helper2
   },
-  nonHiddenFileCount: 42
+  NonHiddenFileCount: 42
 }

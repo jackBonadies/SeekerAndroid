@@ -2,6 +2,7 @@ using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
 using Common;
+using Seeker.Helpers;
 using Seeker.Search;
 using Soulseek;
 using System;
@@ -46,45 +47,56 @@ namespace Seeker
 
             public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
             {
-                ISearchItemViewBase view = null;
-                switch (this.searchResultStyle)
+                var family = this.searchResultStyle & ~SearchResultStyleEnum.Expandable;
+                SearchItemViewUnifiedBase view;
+                switch (family)
                 {
-                    case SearchResultStyleEnum.ExpandableLegacy:
-                        view = SearchItemViewExpandable.inflate(parent);
-                        (view as SearchItemViewExpandable).AdapterRef = this;
-                        (view as View).FindViewById<ImageView>(Resource.Id.expandableClick).Click += CustomAdapter_Click;
-                        (view as View).FindViewById<LinearLayout>(Resource.Id.relativeLayout1).Click += CustomAdapter_Click1;
+                    case SearchResultStyleEnum.SimpleBottom:
+                        view = SearchItemViewSimpleBottom.inflate(parent);
                         break;
-                    case SearchResultStyleEnum.ExpandableModern:
-                        view = SearchItemViewExpandableModern.inflate(parent);
-                        (view as SearchItemViewExpandableModern).AdapterRef = this;
-                        (view as View).FindViewById(Resource.Id.expandClickArea).Click += CustomAdapter_ClickModern;
-                        (view as View).FindViewById<LinearLayout>(Resource.Id.relativeLayout1).Click += CustomAdapter_Click1Modern;
+                    case SearchResultStyleEnum.SimpleTop:
+                        view = SearchItemViewSimpleTop.inflate(parent);
                         break;
-                    case SearchResultStyleEnum.MediumLegacy:
-                        view = SearchItemViewMedium.inflate(parent);
+                    case SearchResultStyleEnum.ModernBottom:
+                        view = SearchItemViewModernBottom.inflate(parent);
                         break;
-                    case SearchResultStyleEnum.MinimalLegacy:
-                        view = SearchItemViewMinimal.inflate(parent);
+                    case SearchResultStyleEnum.ModernTop:
+                        view = SearchItemViewModernTop.inflate(parent);
                         break;
-                    case SearchResultStyleEnum.MediumModernBitrateBottom:
-                        view = SearchItemViewMediumBadgeBitrateBottom.inflate(parent);
+                    case SearchResultStyleEnum.Compact:
+                        view = SearchItemViewCompact.inflate(parent);
                         break;
-                    case SearchResultStyleEnum.MediumModernBitrateTop:
-                        view = SearchItemViewMediumBadgeBitrateTop.inflate(parent);
-                        break;
+                    default:
+                        throw new System.InvalidOperationException(
+                            $"Unknown search result style family {family}");
                 }
+                // Compact never expands, even if Expandable was somehow left set.
+                view.IsExpandable = !this.searchResultStyle.HasFlag(SearchResultStyleEnum.Compact)
+                    && this.searchResultStyle.HasFlag(SearchResultStyleEnum.Expandable);
+                view.AdapterRef = this;
                 view.setupChildren();
-                // .inflate(R.layout.text_row_item, viewGroup, false);
-                //view.LongClick += TransferAdapterRecyclerVersion_LongClick;
-                (view as View).Click += View_Click;
-                return new SearchViewHolder(view as View);
-
+                view.ApplyExpandableMode();
+                var mainLayout = view.FindViewById<LinearLayout>(Resource.Id.relativeLayout1);
+                mainLayout.Click += UnifiedRowClick;
+                if (view.IsExpandable)
+                {
+                    view.FindViewById<FrameLayout>(Resource.Id.expandClickArea).Click += UnifiedChevronClick;
+                    if (this.searchResultStyle.HasFlag(SearchResultStyleEnum.Modern))
+                    {
+                        int padEnd = (int)(2 * mainLayout.Resources.DisplayMetrics.Density);
+                        mainLayout.SetPaddingRelative(mainLayout.PaddingStart, mainLayout.PaddingTop, padEnd, mainLayout.PaddingBottom);
+                    }
+                }
+                return new SearchViewHolder(view);
             }
 
-            private void View_Click(object sender, EventArgs e)
+            // Row click: relativeLayout1 fills the content area (chevron column has width=0 when hidden),
+            // so this catches taps anywhere on the row that aren't on the chevron itself.
+            // Parent chain in the unified XMLs: relativeLayout1 -> horizontal row -> item root (a SearchItemViewUnifiedBase).
+            private void UnifiedRowClick(object sender, EventArgs e)
             {
-                GetSearchFragment().showEditDialog((sender as ISearchItemViewBase).ViewHolder.BindingAdapterPosition);
+                var itemRoot = (sender as View).FindAncestor<ISearchItemViewBase>();
+                GetSearchFragment().showEditDialog(itemRoot.ViewHolder.BindingAdapterPosition);
             }
 
             private SearchResultStyleEnum searchResultStyle;
@@ -97,34 +109,19 @@ namespace Seeker
                 oppositePositions = new List<int>();
             }
 
-            private void CustomAdapter_Click1(object sender, EventArgs e)
+            // Chevron click: parent chain in unified XMLs is
+            // expandClickArea -> horizontal row -> item root (a SearchItemViewUnifiedBase).
+            private void UnifiedChevronClick(object sender, EventArgs e)
             {
-                //Logger.InfoFirebase("CustomAdapter_Click1");
-                int position = ((sender as View).Parent.Parent.Parent as RecyclerView).GetChildAdapterPosition((sender as View).Parent.Parent as View);
-                SearchFragment.Instance.showEditDialog(position);
-            }
-
-            private void CustomAdapter_Click1Modern(object sender, EventArgs e)
-            {
-                // sender = relativeLayout1, parent = header horizontal, parent.parent = root vertical, parent.parent.parent = item root
-                var itemRoot = (sender as View).Parent.Parent.Parent as View;
-                int position = ((itemRoot as IViewParent).Parent as RecyclerView).GetChildAdapterPosition(itemRoot);
-                SearchFragment.Instance.showEditDialog(position);
-            }
-
-            private void CustomAdapter_ClickModern(object sender, EventArgs e)
-            {
-                // sender = expandClickArea, parent = header horizontal, parent.parent = root vertical, parent.parent.parent = item root
-                var itemRoot = (sender as View).Parent.Parent.Parent as View;
-                int position = ((itemRoot as IViewParent).Parent as RecyclerView).GetChildAdapterPosition(itemRoot);
+                var itemRoot = (sender as View).FindAncestor<SearchItemViewUnifiedBase>();
+                int position = itemRoot.ViewHolder.BindingAdapterPosition;
                 var v = itemRoot.FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
                 var img = itemRoot.FindViewById<ImageView>(Resource.Id.expandableClick);
                 if (v.Visibility == ViewStates.Gone)
                 {
-                    img.Animate().RotationBy((float)(180.0)).SetDuration(100).Start();
+                    img.Animate().RotationBy(180f).SetDuration(100).Start();
                     v.Visibility = ViewStates.Visible;
-                    //sep.Visibility = ViewStates.Visible;
-                    (itemRoot as SearchItemViewExpandableModern).PopulateFilesListView(v as LinearLayout, this.localDataSet[position]);
+                    itemRoot.PopulateFiles(this.localDataSet[position]);
                     if (!SearchFragment.ExpandAllResults)
                     {
                         oppositePositions.Add(position);
@@ -137,48 +134,7 @@ namespace Seeker
                 }
                 else
                 {
-                    img.Animate().RotationBy((float)(-180.0)).SetDuration(350).Start();
-                    v.Visibility = ViewStates.Gone;
-                    if (!SearchFragment.ExpandAllResults)
-                    {
-                        oppositePositions.Remove(position);
-                    }
-                    else
-                    {
-                        oppositePositions.Add(position);
-                        oppositePositions.Sort();
-                    }
-                }
-            }
-
-            private void CustomAdapter_Click(object sender, EventArgs e)
-            {
-                //throw new NotImplementedException();
-
-
-                int position = ((sender as View).Parent.Parent.Parent as RecyclerView).GetChildAdapterPosition((sender as View).Parent.Parent as View);
-
-                //int position = ((sender as View).Parent.Parent.Parent as ListView).GetPositionForView((sender as View).Parent.Parent as View);
-                var v = ((sender as View).Parent.Parent as View).FindViewById<View>(Resource.Id.detailsExpandable);
-                var img = ((sender as View).Parent.Parent as View).FindViewById<ImageView>(Resource.Id.expandableClick);
-                if (v.Visibility == ViewStates.Gone)
-                {
-                    img.Animate().RotationBy((float)(180.0)).SetDuration(350).Start();
-                    v.Visibility = ViewStates.Visible;
-                    SearchItemViewExpandable.PopulateFilesListView(v as LinearLayout, this.localDataSet[position]);
-                    if (!SearchFragment.ExpandAllResults)
-                    {
-                        oppositePositions.Add(position);
-                        oppositePositions.Sort();
-                    }
-                    else
-                    {
-                        oppositePositions.Remove(position);
-                    }
-                }
-                else
-                {
-                    img.Animate().RotationBy((float)(-180.0)).SetDuration(350).Start();
+                    img.Animate().RotationBy(-180f).SetDuration(350).Start();
                     v.Visibility = ViewStates.Gone;
                     if (!SearchFragment.ExpandAllResults)
                     {
@@ -211,6 +167,76 @@ namespace Seeker
             {
                 return searchItemView;
             }
+        }
+
+        public static void RefreshSearchResultsHeader(View headerView)
+        {
+            if (headerView == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm))
+            {
+                headerView.Visibility = ViewStates.Gone;
+                return;
+            }
+
+            if ((SearchTabHelper.SearchResponses?.Count ?? 0) == 0)
+            {
+                headerView.Visibility = ViewStates.Gone;
+                return;
+            }
+
+            var tv = headerView.FindViewById<TextView>(Resource.Id.searchResultsHeaderText);
+
+            int total = SearchTabHelper.SearchResponses?.Count ?? 0;
+            int shown = SearchTabHelper.UI_SearchResponses?.Count ?? total;
+            bool filterActive = SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive();
+
+            headerView.Visibility = ViewStates.Visible;
+            var ctx = tv.Context;
+            if (total == 0)
+            {
+                tv.Text = ctx.GetString(Resource.String.search_results_count_none);
+            }
+            else if (filterActive && shown != total)
+            {
+                string shownStr = shown.ToString();
+                string totalStr = total.ToString();
+                string full = string.Format(ctx.GetString(Resource.String.search_results_count_filtered), shownStr, totalStr);
+                tv.TextFormatted = BuildEmphasizedCount(ctx, full, shownStr, totalStr);
+            }
+            else
+            {
+                string totalStr = total.ToString();
+                string full = string.Format(ctx.GetString(Resource.String.search_results_count), totalStr);
+                tv.TextFormatted = BuildEmphasizedCount(ctx, full, totalStr);
+            }
+        }
+
+        private static Android.Text.SpannableString BuildEmphasizedCount(Android.Content.Context ctx, string full, params string[] tokens)
+        {
+            var ss = new Android.Text.SpannableString(full);
+            var color = UiHelpers.GetColorFromAttribute(ctx, Resource.Attribute.cellTextColor);
+            int searchFrom = 0;
+            foreach (string token in tokens)
+            {
+                if (string.IsNullOrEmpty(token))
+                {
+                    continue;
+                }
+                int idx = full.IndexOf(token, searchFrom, StringComparison.Ordinal);
+                if (idx < 0)
+                {
+                    continue;
+                }
+                int end = idx + token.Length;
+                ss.SetSpan(new Android.Text.Style.TypefaceSpan("sans-serif-medium"), idx, end, Android.Text.SpanTypes.ExclusiveExclusive);
+                ss.SetSpan(new Android.Text.Style.ForegroundColorSpan(color), idx, end, Android.Text.SpanTypes.ExclusiveExclusive);
+                searchFrom = end;
+            }
+            return ss;
         }
 
         public class SearchDiffCallback : DiffUtil.Callback

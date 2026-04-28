@@ -176,7 +176,7 @@ Directorio: {5}
 
     <string name="enter_user_to_message">Introducir usuario a mensajear</string>
 
-    <string name="search_result_style">Estilo de resultado:</string>
+    <string name="search_result_style">Estilo de resultado</string>
 
     <string name="new_search_tab">Nueva Búsqueda</string>
     <string name="filter_search_results_here">Filtrar resultados aquí</string>
@@ -381,8 +381,8 @@ Directorio: {5}
     <string name="always_light">Siempre claro</string>
     <string name="always_dark">Siempre oscuro</string>
 
-    <string name="queue_length_">Tamaño de la Cola:</string>
-    <string name="upload_slots_">Espacios de subida libres:</string>
+    <string name="queue_length_">Tamaño de la Cola</string>
+    <string name="upload_slots_">Espacios de subida libres</string>
     <string name="today">Hoy</string>
 
     <string name="pending_">Procesando...</string>

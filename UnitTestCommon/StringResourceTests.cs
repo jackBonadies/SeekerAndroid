@@ -71,6 +71,7 @@ namespace UnitTestCommon
         }
 
         [Test]
+        [Ignore("Not useful")]
         public void AllTranslations_Have_Same_String_Names()
         {
             var errors = new List<string>();

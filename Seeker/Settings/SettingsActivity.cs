@@ -77,7 +77,7 @@ namespace Seeker
         public const int SCROLL_TO_SHARING_SECTION = 10;
         public const string SCROLL_TO_SHARING_SECTION_STRING = "SCROLL_TO_SHARING_SECTION";
 
-        private List<Tuple<int, int>> positionNumberPairs = new List<Tuple<int, int>>();
+        private static readonly int[] searchResultOptions = { 25, 50, 100, 250, 500, 1000, 2000 };
         internal CheckBox allowPrivateRoomInvitations;
 
         public override bool OnCreateOptionsMenu(IMenu menu)
@@ -397,24 +397,8 @@ namespace Seeker
 
 
             Spinner searchNumSpinner = FindViewById<Spinner>(Resource.Id.searchNumberSpinner);
-            positionNumberPairs.Add(new Tuple<int, int>(0, 5));
-            positionNumberPairs.Add(new Tuple<int, int>(1, 10));
-            positionNumberPairs.Add(new Tuple<int, int>(2, 15));
-            positionNumberPairs.Add(new Tuple<int, int>(3, 30));
-            positionNumberPairs.Add(new Tuple<int, int>(4, 50));
-            positionNumberPairs.Add(new Tuple<int, int>(5, 100));
-            positionNumberPairs.Add(new Tuple<int, int>(6, 250));
-            positionNumberPairs.Add(new Tuple<int, int>(7, 1000));
-            String[] options = new String[]{ positionNumberPairs[0].Item2.ToString(),
-                                             positionNumberPairs[1].Item2.ToString(),
-                                             positionNumberPairs[2].Item2.ToString(),
-                                             positionNumberPairs[3].Item2.ToString(),
-                                             positionNumberPairs[4].Item2.ToString(),
-                                             positionNumberPairs[5].Item2.ToString(),
-                                             positionNumberPairs[6].Item2.ToString(),
-                                             positionNumberPairs[7].Item2.ToString(),
-                };
-            ArrayAdapter<String> searchNumOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, options);
+            string[] options = Array.ConvertAll(searchResultOptions, x => x.ToString());
+            ArrayAdapter<string> searchNumOptions = new ArrayAdapter<string>(this, Resource.Layout.support_simple_spinner_dropdown_item, options);
             searchNumSpinner.Adapter = searchNumOptions;
             SetSpinnerPosition(searchNumSpinner);
             searchNumSpinner.ItemSelected += SearchNumSpinner_ItemSelected;
@@ -2356,15 +2340,8 @@ namespace Seeker
 
         private void SetSpinnerPosition(Spinner s)
         {
-            int selectionIndex = 3;
-            foreach (var pair in positionNumberPairs)
-            {
-                if (pair.Item2 == PreferencesState.NumberSearchResults)
-                {
-                    selectionIndex = pair.Item1;
-                }
-            }
-            s.SetSelection(selectionIndex);
+            int selectionIndex = Array.IndexOf(searchResultOptions, PreferencesState.NumberSearchResults);
+            s.SetSelection(selectionIndex >= 0 ? selectionIndex : 3);
         }
 
         private void SetSpinnerPositionDayNight(AutoCompleteTextView s, String[] options)
@@ -2558,7 +2535,7 @@ namespace Seeker
 
         private void SearchNumSpinner_ItemSelected(object sender, AdapterView.ItemSelectedEventArgs e)
         {
-            PreferencesState.NumberSearchResults = positionNumberPairs[e.Position].Item2;
+            PreferencesState.NumberSearchResults = searchResultOptions[e.Position];
         }
 
         private void ChangeDownloadDirectory(object sender, EventArgs e)

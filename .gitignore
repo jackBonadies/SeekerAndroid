@@ -351,3 +351,6 @@ healthchecksdb
 /Seeker/Assets/seeker_logo_source2-03.png
 /Seeker/Assets/seeker_logo_source_back.svg
 /Seeker/Assets/seeker_logo_source_icon_test-01.png
+
+# Verify Recieved Files
+*.received.txt

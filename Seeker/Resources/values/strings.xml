@@ -99,6 +99,24 @@
     <string name="no_uploads_not_sharing_subtitle">You are not currently sharing any files</string>
     <string name="no_searches">No searches</string>
     <string name="no_searches_subtitle">Enter a term to search the Soulseek network</string>
+    <string name="searching_label">Searching</string>
+    <string name="no_results_title">No Results Found</string>
+    <string name="no_results_subtitle">Nothing found for \"{0}\"</string>
+    <string name="results_hidden_title">{0} results hidden by filters</string>
+    <string name="results_hidden_subtitle">Open filters to adjust</string>
+    <string name="search_results_count_none">No results found</string>
+    <string name="search_results_count">{0} Results</string>
+    <string name="search_results_count_filtered">Showing {0} of {1} Results</string>
+    <string name="wishlist_results_count">{0} results</string>
+    <string name="wishlist_never_run">Never run</string>
+    <string name="category_file_type">File Type</string>
+    <string name="category_keyword">Keyword</string>
+    <string name="category_num_files">Num Files</string>
+    <string name="grouped_chip_n_selected">{0} selected</string>
+    <string name="grouped_chips_toggle">Grouped filter chips</string>
+    <string name="filter_sheet_close_desc">Close</string>
+    <string name="filter_sheet_count_filtered">{0} / {1}</string>
+    <string name="filter_sheet_count">{0}</string>
     <string name="messages">Messages</string>
     <string name="browse_files">Browse Files</string>
     <string name="chatroomListLoading">
@@ -155,7 +173,7 @@ Directory Count: {5}"
     <string name="clear">Clear</string>
     <string name="get_user_info">Get User Info</string>
     <string name="quick_info">Quick Info</string>
-    <string name="filer_files">Filter Files Here</string>
+    <string name="filter">Filter</string>
     <string name="enter_user_to_browse">Enter User to Browse</string>
     <!--
   These are search targets
@@ -244,22 +262,31 @@ Directory Count: {5}"
     <string name="enter_user_to_message">Enter User to Message</string>
 
     <!--Search Result Styles-->
-    <string name="search_result_style">Result Style:</string>
-    <string name="search_result_style_expandable_modern">Expandable: Modern</string>
-    <string name="search_result_style_expandable_legacy">Expandable: Simple Text</string>
+    <string name="search_result_style">Result Style</string>
+    <string name="search_result_style_style_label">Style</string>
+    <string name="search_result_style_simple">Simple</string>
+    <string name="search_result_style_modern">Modern</string>
+    <string name="search_result_style_compact">Compact</string>
+    <string name="search_result_style_filetype_position_label">File Type Position</string>
+    <string name="search_result_style_filetype_bottom">Bottom</string>
+    <string name="search_result_style_filetype_top">Top</string>
+    <string name="search_result_style_expandable">Expandable</string>
+    <string name="search_result_style_off">Off</string>
+    <string name="search_result_style_on">On</string>
     <string name="expand_all">Expand All</string>
     <string name="collapse_all">Collapse All</string>
-    <string name="search_result_style_standard_legacy">Default: Simple Text</string>
-    <string name="search_result_style_dense_legacy">Dense: Simple Text</string>
-    <string name="search_result_style_standard_bitrate_bottom_row">Default: Filetype Bottom</string>
-    <string name="search_result_style_standard_bitrate_top_row">Default: Filetype Top</string>
 
     <string name="new_search_tab">New Search</string>
     <string name="search_tabs_header">SEARCH TABS</string>
     <string name="wishlist_header">WISHLIST</string>
     <string name="wishlist_empty_header">WISHLIST (EMPTY)</string>
-    <string name="filter_search_results_here">Filter Results Here</string>
+    <string name="filter_search_results_here">Filter Results</string>
     <string name="persist_it">Sticky</string>
+    <string name="filter_format_label">Format</string>
+    <string name="filter_any">Any</string>
+    <string name="filter_format_lossless">Lossless</string>
+    <string name="filter_format_lossy">Lossy</string>
+    <string name="filter_min_bitrate_label">Min Bitrate</string>
     <string name="type_chatroom_ticker_message">Type Ticker Message</string>
 
     <string name="section_downloads">Downloads</string>
@@ -478,8 +505,8 @@ Directory Count: {5}"
     <string name="always_dark">Always Dark</string>
 
     <!-- info -->
-    <string name="queue_length_">Queue Length:</string>
-    <string name="upload_slots_">Free Upload Slots:</string>
+    <string name="queue_length_">Queue Length</string>
+    <string name="upload_slots_">Free Upload Slots</string>
     <string name="today">Today</string>
 
     <string name="pending_">Pending...</string>
@@ -545,6 +572,9 @@ Directory Count: {5}"
     <string name="wishlist_tab_error">
         Desired Wishlist tab no longer exists
     </string>
+    <string name="wishlist_next_run_hours_minutes">next run in {0} hr {1} min</string>
+    <string name="wishlist_next_run_minutes">next run in {0} min</string>
+    <string name="wishlist_next_run_imminent">next run any moment</string>
     <string name="perform_search_first">
         Must perform a search first to add to wishlist
     </string>
@@ -1327,4 +1357,10 @@ The standard way of requesting folder access does not always persist permissions
 	</string>
 	
 	
+    <string name="just_now">just now</string>
+    <string name="min_ago">min ago</string>
+    <string name="hr_ago">hr ago</string>
+    <string name="yesterday">yesterday</string>
+    <string name="days_ago">days ago</string>
+
 </resources>

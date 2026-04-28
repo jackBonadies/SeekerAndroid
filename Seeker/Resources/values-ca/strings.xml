@@ -176,7 +176,7 @@ Recompte de directoris: {5}\"
 
     <string name="enter_user_to_message">Introduïu l\'usuari al missatge</string>
 
-    <string name="search_result_style">Estil de resultats:</string>
+    <string name="search_result_style">Estil de resultats</string>
 
     <string name="new_search_tab">Nova cerca</string>
     <string name="filter_search_results_here">Filtreu els resultats aquí</string>
@@ -381,8 +381,8 @@ Recompte de directoris: {5}\"
     <string name="always_light">Sempre Clar</string>
     <string name="always_dark">Sempre Fosc</string>
 
-    <string name="queue_length_">Longitud de la cua:</string>
-    <string name="upload_slots_">Slots de càrrega gratuïts:</string>
+    <string name="queue_length_">Longitud de la cua</string>
+    <string name="upload_slots_">Slots de càrrega gratuïts</string>
     <string name="today">Avui</string>
 
     <string name="pending_">Pendent...</string>

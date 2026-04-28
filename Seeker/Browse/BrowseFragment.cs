@@ -315,7 +315,7 @@ namespace Seeker
             filterText.Touch += FilterText_Touch;
             SearchFragment.UpdateDrawableState(filterText, true);
 
-            RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
+            View rel = rootView.FindViewById<View>(Resource.Id.bottomSheet);
             BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.From(rel);
             bottomSheetBehavior.Hideable = true;
             bottomSheetBehavior.PeekHeight = BOTTOM_SHEET_PEEK_HEIGHT;
@@ -361,7 +361,7 @@ namespace Seeker
 
         private void FloatingActionButtonClick(object sender, EventArgs e)
         {
-            RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
+            View rel = rootView.FindViewById<View>(Resource.Id.bottomSheet);
             BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
             if (bsb.State != BottomSheetBehavior.StateExpanded && bsb.State != BottomSheetBehavior.StateCollapsed)
             {
@@ -808,6 +808,7 @@ namespace Seeker
             adapter.IsInBatchSelectMode = true;
             ToggleBatchSelect(position);
             adapter.NotifyDataSetChanged();
+            SeekerState.MainActivityRef?.RefreshBackCallbackState();
         }
 
         public void OnActionButtonClick(int position, BrowseResponseItemView view)
@@ -985,6 +986,11 @@ namespace Seeker
             return GoUpDirectory();
         }
 
+        public bool HasBackStackToConsume()
+        {
+            return state != null && !state.IsAtRoot();
+        }
+
         public bool GoUpDirectory(int additionalLevels = 0)
         {
             bool res = state.GoUpDirectory(SetBrowseAdapters, additionalLevels);
@@ -1030,6 +1036,7 @@ namespace Seeker
                 treePathRecyclerView.ScrollToPosition(state.PathItems.Count - 1);
             }
             SeekerState.MainActivityRef?.InvalidateOptionsMenu();
+            SeekerState.MainActivityRef?.RefreshBackCallbackState();
         }
 
 

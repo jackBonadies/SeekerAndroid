@@ -167,10 +167,10 @@
 
     <string name="enter_user_to_message">Enter User to Message</string>
 
-    <string name="search_result_style">Result Style:</string>
+    <string name="search_result_style">Result Style</string>
 
     <string name="new_search_tab">New Search</string>
-    <string name="filter_search_results_here">Filter Results Here</string>
+    <string name="filter_search_results_here">Filter Results</string>
     <string name="persist_it">Sticky</string>
     <string name="type_chatroom_ticker_message">Type Ticker Message</string>
 
@@ -372,8 +372,8 @@
     <string name="always_light">Always Light</string>
     <string name="always_dark">Always Dark</string>
 
-    <string name="queue_length_">Queue Length:</string>
-    <string name="upload_slots_">Free Upload Slots:</string>
+    <string name="queue_length_">Queue Length</string>
+    <string name="upload_slots_">Free Upload Slots</string>
     <string name="today">Today</string>
 
     <string name="pending_">Pending...</string>

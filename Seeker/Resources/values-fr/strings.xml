@@ -176,7 +176,7 @@ Nombre de dossiers : {5}
 
     <string name="enter_user_to_message">Spécifier l\'utilisateur à contacter</string>
 
-    <string name="search_result_style">Style de résultat :</string>
+    <string name="search_result_style">Style de résultat</string>
 
     <string name="new_search_tab">Nouvelle Recherche</string>
     <string name="filter_search_results_here">Filtrer les Résultats</string>
@@ -381,8 +381,8 @@ Nombre de dossiers : {5}
     <string name="always_light">Toujours Clair</string>
     <string name="always_dark">Toujours Sombre</string>
 
-    <string name="queue_length_">Longueur de la File d\'Attente :</string>
-    <string name="upload_slots_">Canaux Disponibles:</string>
+    <string name="queue_length_">Longueur de la File d\'Attente</string>
+    <string name="upload_slots_">Canaux Disponibles</string>
     <string name="today">Aujourd’hui</string>
 
     <string name="pending_">En attente...</string>

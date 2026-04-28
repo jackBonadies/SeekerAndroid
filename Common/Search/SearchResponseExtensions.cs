@@ -36,6 +36,7 @@ namespace Seeker.Extensions
                 return System.IO.Path.GetExtension(filename);
             }
             
+            // returns string of form ex. mp3 (vbr), flac, flac (16, 44.1kHz)
             public static string GetDominantFileTypeAndBitRate(this SearchResponse searchResponse, bool hideLocked, out double calcBitRate)
             {
                 if(!string.IsNullOrEmpty(searchResponse.cachedDominantFileType))

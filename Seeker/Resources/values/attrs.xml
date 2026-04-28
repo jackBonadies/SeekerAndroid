@@ -20,13 +20,16 @@
     <attr name="mainPurpleStatusBar" format="color" />
     <attr name="whitePurpleForNavBar" format="color" />
     <attr name="slskAccent" format="color" />
-    <attr name="mainTextColorHinted" format="color" />
+	<attr name="searchTabHeader" format="color" />
+	<attr name="mainTextColorHinted" format="color" />
+    <attr name="mainTextColorHintedFlair" format="color" />
     <attr name="searchTabButtonColor" format="color" />
     <attr name="cellStroke" format="color" />
     <attr name="checkBoxColor" format="color" />
     <attr name="expandIconColor" format="color" />
     <attr name="mainPurpleForNavBar" format="color" />
     <attr name="pseudo_window_background_color" format="color" />
+    <attr name="searchBottomSheetBackground" format="color" />
     <attr name="user_info_chip_background" format="color" />
 
     <attr name="android_default_notification_blue_color" format="color" />
@@ -61,4 +64,6 @@
     <attr name="expandableModernChevronBg" format="color" />
     <attr name="expandableModernFilesBg" format="color" />
     <attr name="expandableModernSeparatorColor" format="color" />
+
+    <attr name="searchHeaderBackground" format="color" />
 </resources>

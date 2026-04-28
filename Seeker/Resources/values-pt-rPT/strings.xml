@@ -176,7 +176,7 @@ Directory Count: {5}\"
 
     <string name="enter_user_to_message">Inserir usuário a ser contatado</string>
 
-    <string name="search_result_style">Estilo de resultados:</string>
+    <string name="search_result_style">Estilo de resultados</string>
 
     <string name="new_search_tab">Nova busca</string>
     <string name="filter_search_results_here">Filtrar os resultados aqui</string>
@@ -381,8 +381,8 @@ Directory Count: {5}\"
     <string name="always_light">Always Light</string>
     <string name="always_dark">Always Dark</string>
 
-    <string name="queue_length_">Queue Length:</string>
-    <string name="upload_slots_">Free Upload Slots:</string>
+    <string name="queue_length_">Queue Length</string>
+    <string name="upload_slots_">Free Upload Slots</string>
     <string name="today">Today</string>
 
     <string name="pending_">Pending...</string>

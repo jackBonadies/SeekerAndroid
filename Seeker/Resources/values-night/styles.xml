@@ -36,6 +36,7 @@
         <item name="whitePurpleForNavBar">#858ddd</item>
 
         <item name="checkBoxColor">@color/colorAccent</item>
+        <item name="checkboxStyle">@style/checkBoxStyle</item>
 
         <item name="mainPurpleForNavBar">?attr/mainPurple</item>
 
@@ -44,17 +45,11 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionModeBackground">?attr/colorPrimary</item>
         <item name="actionModeBackground">?attr/colorPrimary</item>
+
+        <item name="bottomSheetDialogTheme">@style/SeekerBottomSheetDialog</item>
     </style>
 
-    <style
-        name="MaterialThemeForChip"
-        parent="Theme.MaterialComponents.Light.DarkActionBar"
-    >
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-    </style>
+    <style name="SeekerBottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog" />
 
     <style name="SeekerButtonStyle">
         <item name="android:textColor">#ffffff</item>
@@ -68,9 +63,12 @@
         <item name="elevation">0dp</item>
     </style>
 
-    <style name="checkBoxStyle" parent="AppTheme.NoActionBar">
-        <item name="colorAccent">?attr/checkBoxColor</item>
-        <!--<item name="android:textColorSecondary">UNCHECKEDCOLOR</item>-->
+    <style name="checkBoxStyle" parent="Widget.Material3.CompoundButton.CheckBox">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Seeker.CheckBox</item>
+    </style>
+
+    <style name="ThemeOverlay.Seeker.CheckBox" parent="">
+        <item name="colorPrimary">?attr/checkBoxColor</item>
     </style>
 
     <style name="navTextInactive">

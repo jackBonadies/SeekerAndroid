@@ -107,6 +107,7 @@ namespace Seeker
                     TransfersFragment.SetRecyclerAdapter();
                     SeekerState.MainActivityRef.SetTransferSupportActionBarState();
                     SeekerState.MainActivityRef.InvalidateOptionsMenu();
+                    SeekerState.MainActivityRef.RefreshBackCallbackState();
                 }
             }
 

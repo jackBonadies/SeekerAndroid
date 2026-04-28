@@ -12,6 +12,7 @@ using Android.Widget;
 using AndroidX.Core.Content;
 using AndroidX.Fragment.App;
 using AndroidX.RecyclerView.Widget;
+using Google.Android.Material.Button;
 using Google.Android.Material.BottomNavigation;
 using Google.Android.Material.BottomSheet;
 using Google.Android.Material.FloatingActionButton;
@@ -24,12 +25,28 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Common;
+using Common.Search;
 namespace Seeker
 {
     public partial class SearchFragment : Fragment
     {
         public View rootView = null;
         private View noSearchesView = null;
+        private View noResultsView = null;
+        private TextView noResultsSubtitle = null;
+        private View allFilteredView = null;
+        private TextView allFilteredTitle = null;
+        private View searchLoadingView = null;
+        private View linearProgressIndicator = null;
+        private TextView searchLoadingQueryText = null;
+        private System.Diagnostics.Stopwatch searchStopwatch;
+        private Handler spinnerTimerHandler;
+        private Java.Lang.Runnable spinnerTimerTick;
+        private bool spinnerTimerRunning;
+        private View wishlistBanner;
+        private TextView wishlistBannerText;
+        private Handler wishlistBannerHandler;
+        private Java.Lang.Runnable wishlistBannerTick;
         private Context context;
         public static bool ExpandAllResults { get => PreferencesState.ExpandAllResults; set => PreferencesState.ExpandAllResults = value; }
         public static IMenu ActionBarMenu = null;
@@ -53,6 +70,7 @@ namespace Seeker
                 this.GoToTab(MainActivity.goToSearchTab, false, true);
                 MainActivity.goToSearchTab = int.MaxValue;
             }
+            RefreshWishlistBanner();
         }
 
         private void ClearFilterStringAndCached(bool force = false)
@@ -69,7 +87,21 @@ namespace Seeker
                     UpdateDrawableState(filterText, true);
                 }
                 PreferencesState.FilterStickyString = string.Empty;
+
+                PreferencesState.FilterFormat = FormatFilterType.Any;
+                PreferencesState.FilterMinBitrateKbs = 0;
+                PreferencesManager.SaveFilterControlsState();
+                ResetFilterControlsUI();
             }
+        }
+
+        private void ResetFilterControlsUI()
+        {
+            var formatToggle = rootView?.FindViewById<MaterialButtonToggleGroup>(Resource.Id.formatToggleGroup);
+            formatToggle?.Check(Resource.Id.formatAny);
+
+            var bitrateToggle = rootView?.FindViewById<MaterialButtonToggleGroup>(Resource.Id.bitrateToggleGroup);
+            bitrateToggle?.Check(Resource.Id.bitrateAny);
         }
 
 
@@ -116,8 +148,7 @@ namespace Seeker
             var toggleItem = menu.FindItem(Resource.Id.action_toggle_expand_all);
             if (toggleItem != null)
             {
-                bool isExpandable = PreferencesState.SearchResultStyle == SearchResultStyleEnum.ExpandableLegacy ||
-                    PreferencesState.SearchResultStyle == SearchResultStyleEnum.ExpandableModern;
+                bool isExpandable = PreferencesState.SearchResultStyle.HasFlag(SearchResultStyleEnum.Expandable);
                 toggleItem.SetVisible(isExpandable);
                 if (isExpandable)
                 {
@@ -126,84 +157,45 @@ namespace Seeker
                         : Resource.String.expand_all);
                 }
             }
+            //var groupedItem = menu.FindItem(Resource.Id.action_toggle_grouped_chips);
+            //if (groupedItem != null)
+            //{
+            //    groupedItem.SetChecked(PreferencesState.SmartFilterStyle == SmartFilterStyle.Grouped);
+            //}
             base.OnPrepareOptionsMenu(menu);
         }
 
-        public static void SetCustomViewTabNumberInner(ImageView imgView, Context c)
+        public static void SetCustomViewTabNumberInner(View container, Context c)
         {
-            int numTabs = int.MinValue;
-            if (SearchTabHelper.SearchTarget == SearchTarget.Wishlist)
-            {
-                numTabs = -1;
-            }
-            else
-            {
-                numTabs = SearchTabHelper.SearchTabCollection.Keys.Count;
-            }
-            int idOfDrawable = int.MinValue;
-            if (numTabs > 10)
-            {
-                numTabs = 10;
-            }
-            switch (numTabs)
-            {
-                case 1:
-                    idOfDrawable = Resource.Drawable.numeric_1_box_multiple_outline;
-                    break;
-                case 2:
-                    idOfDrawable = Resource.Drawable.numeric_2_box_multiple_outline;
-                    break;
-                case 3:
-                    idOfDrawable = Resource.Drawable.numeric_3_box_multiple_outline;
-                    break;
-                case 4:
-                    idOfDrawable = Resource.Drawable.numeric_4_box_multiple_outline;
-                    break;
-                case 5:
-                    idOfDrawable = Resource.Drawable.numeric_5_box_multiple_outline;
-                    break;
-                case 6:
-                    idOfDrawable = Resource.Drawable.numeric_6_box_multiple_outline;
-                    break;
-                case 7:
-                    idOfDrawable = Resource.Drawable.numeric_7_box_multiple_outline;
-                    break;
-                case 8:
-                    idOfDrawable = Resource.Drawable.numeric_8_box_multiple_outline;
-                    break;
-                case 9:
-                    idOfDrawable = Resource.Drawable.numeric_9_box_multiple_outline;
-                    break;
-                case 10:
-                    idOfDrawable = Resource.Drawable.numeric_9_plus_box_multiple_outline;
-                    break;
-                case -1: //wishlist
-                    idOfDrawable = Resource.Drawable.wishlist_icon;
-                    break;
-            }
+            int numTabs = SearchTabHelper.SearchTabCollection.Keys.Count;
 
-            Android.Graphics.Drawables.Drawable drawable = null;
-            drawable = c.Resources.GetDrawable(idOfDrawable, c.Theme);
-            imgView.SetImageDrawable(drawable);
+            ImageView icon = container.FindViewById<ImageView>(Resource.Id.search_tabs_icon);
+            TextView numberText = container.FindViewById<TextView>(Resource.Id.search_tabs_number);
 
+            int idOfDrawable = Resource.Drawable.numeric_tab_outline;
+            string text = numTabs >= 100 ? "99+" : numTabs.ToString();
+
+            Android.Graphics.Drawables.Drawable drawable = c.Resources.GetDrawable(idOfDrawable, c.Theme);
+            icon.SetImageDrawable(drawable);
+            numberText.Text = text;
         }
 
         public void SetCustomViewTabNumberImageViewState()
         {
-            ImageView imgView = null;
+            View container = null;
             Context c = null;
             if (this.Activity is AndroidX.AppCompat.App.AppCompatActivity appCompat)
             {
                 c = this.Activity;
-                imgView = appCompat.SupportActionBar?.CustomView?.FindViewById<ImageView>(Resource.Id.search_tabs);
+                container = appCompat.SupportActionBar?.CustomView?.FindViewById<FrameLayout>(Resource.Id.search_tabs);
             }
             else
             {
                 c = SeekerState.MainActivityRef;
-                imgView = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<ImageView>(Resource.Id.search_tabs);
+                container = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<FrameLayout>(Resource.Id.search_tabs);
             }
 
-            SetCustomViewTabNumberInner(imgView, c);
+            SetCustomViewTabNumberInner(container, c);
         }
 
         public EditText GetCustomViewSearchHere()
@@ -260,91 +252,77 @@ namespace Seeker
 
         public void GoToTab(int tabToGoTo, bool force, bool fromIntent = false)
         {
-            if (force || tabToGoTo != SearchTabHelper.CurrentTab)
+            if (!force && tabToGoTo == SearchTabHelper.CurrentTab)
             {
-                int lastTab = SearchTabHelper.CurrentTab;
-                SearchTabHelper.CurrentTab = tabToGoTo;
-
-                //update for current tab
-                //set icon state
-                //set search text
-                //set results
-                //set filter if not sticky
-                int fromTab = SearchTabHelper.CurrentTab;
-
-                Action a = new Action(() =>
-                {
-
-                    if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabToGoTo))
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.search_tab_error), ToastLength.Long);
-                        SearchTabHelper.CurrentTab = lastTab;
-                        fromTab = lastTab;
-                        return;
-                    }
-
-                    if (tabToGoTo < 0)
-                    {
-                        if (!SearchTabHelper.SearchTabCollection[fromTab].IsLoaded())
-                        {
-                            SearchTabHelper.RestoreSearchResultsFromDisk(tabToGoTo, SeekerState.ActiveActivityRef);
-                        }
-                    }
-
-                    GetCustomViewSearchHere().Text = SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm;
-                    SetSearchHintTarget(SearchTabHelper.SearchTabCollection[fromTab].SearchTarget);
-                    if (!fromIntent)
-                    {
-                        SetTransitionDrawableState();
-                    }//timing issue where menu options invalidate etc. may not be done yet...
-                    SetFilterState();
-
-                    if (SearchTabHelper.SearchTabCollection[fromTab].TextFilter.IsFiltered || AreChipsFiltering())
-                    {
-                        if (SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount != SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count)
-                        {
-                            Logger.Debug("filtering...");
-                            UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[fromTab]);  //WE JUST NEED TO FILTER THE NEW RESPONSES!!
-                        }
-                        SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
-
-                        recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses);
-                        recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
-
-                        SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
-                        SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
-
-                    }
-                    else
-                    {
-                        SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.ToList();
-                        recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.SearchTabCollection[fromTab].UI_SearchResponses);
-                        recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
-
-                        SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
-                        SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
-                    }
-                    SearchTabHelper.SearchTabCollection[fromTab].LastSearchResponseCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
-
-                    if (!fromIntent)
-                    {
-                        GetTransitionDrawable().InvalidateSelf();
-                    }
-                    this.SetCustomViewTabNumberImageViewState();
-                    this.Activity?.InvalidateOptionsMenu(); //this wil be the new nullref if fragment isnt ready...
-
-                    if (!fromIntent)
-                    {
-                        SetTransitionDrawableState();
-                    }
-                    UpdateNoSearchesView();
-                });
-                if (SeekerState.MainActivityRef == null)
-                {
-                    Logger.Firebase("mainActivityRef is null GoToTab");
-                }
-                SeekerState.MainActivityRef?.RunOnUiThread(a);
+                return;
             }
+
+            if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabToGoTo))
+            {
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.search_tab_error), ToastLength.Long);
+                return;
+            }
+
+            SearchTabHelper.CurrentTab = tabToGoTo;
+
+            if (SeekerState.MainActivityRef == null)
+            {
+                Logger.Firebase("mainActivityRef is null GoToTab");
+            }
+
+            SeekerState.MainActivityRef?.RunOnUiThread(() =>
+            {
+                if (tabToGoTo < 0 && !SearchTabHelper.SearchTabCollection[tabToGoTo].IsLoaded())
+                {
+                    SearchTabHelper.RestoreSearchResultsFromDisk(tabToGoTo, SeekerState.ActiveActivityRef);
+                }
+
+                var searchTab = SearchTabHelper.SearchTabCollection[tabToGoTo];
+
+                GetCustomViewSearchHere().Text = searchTab.LastSearchTerm;
+                SetSearchHintTarget(searchTab.SearchTarget);
+                if (!fromIntent)
+                {
+                    SetTransitionDrawableState();
+                }
+                SetFilterState();
+
+                if (searchTab.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
+                {
+                    if (searchTab.LastSearchResponseCount != searchTab.SearchResponses.Count)
+                    {
+                        Logger.Debug("filtering...");
+                        UpdateFilteredResponses(searchTab);
+                    }
+                    recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(searchTab.UI_SearchResponses));
+                }
+                else
+                {
+                    searchTab.UI_SearchResponses = searchTab.SearchResponses.ToList();
+                    recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(searchTab.UI_SearchResponses));
+                }
+
+                SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(searchTab.ChipDataItems);
+                SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
+                searchTab.LastSearchResponseCount = searchTab.SearchResponses.Count;
+
+                if (!fromIntent)
+                {
+                    GetTransitionDrawable().InvalidateSelf();
+                }
+                this.SetCustomViewTabNumberImageViewState();
+                this.Activity?.InvalidateOptionsMenu();
+
+                if (!fromIntent)
+                {
+                    SetTransitionDrawableState();
+                }
+                UpdateNoSearchesView();
+                UpdateSearchSpinner();
+                UpdateNoResultsView();
+                UpdateAllFilteredView();
+                RefreshWishlistBanner();
+            });
         }
 
 
@@ -373,6 +351,11 @@ namespace Seeker
                         (item.Icon as Android.Graphics.Drawables.TransitionDrawable).ReverseTransition(SearchToCloseDuration); //you cannot hit reverse twice, it will put it back to the original state...
                         SearchTabHelper.CancellationTokenSource.Cancel();
                         SearchTabHelper.CurrentlySearching = false;
+                        UpdateSearchSpinner();
+                        NotifySearchHeaderChanged();
+                        UpdateNoSearchesView();
+                        UpdateNoResultsView();
+                        UpdateAllFilteredView();
                         return true;
                     }
                     else
@@ -381,6 +364,11 @@ namespace Seeker
                         PerformBackUpRefresh();
                         Logger.Debug("START TRANSITION");
                         SearchTabHelper.CurrentlySearching = true;
+                        UpdateSearchSpinner();
+                        NotifySearchHeaderChanged();
+                        UpdateNoSearchesView();
+                        UpdateNoResultsView();
+                        UpdateAllFilteredView();
                         SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
                         EditText editText = SeekerState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
                         string searchText = string.Empty;
@@ -403,6 +391,15 @@ namespace Seeker
                     this.Activity?.InvalidateOptionsMenu();
                     SearchResultStyleChanged();
                     return true;
+                //case Resource.Id.action_toggle_grouped_chips:
+                //    PreferencesState.SmartFilterStyle =
+                //        PreferencesState.SmartFilterStyle == SmartFilterStyle.Grouped
+                //            ? SmartFilterStyle.Flat
+                //            : SmartFilterStyle.Grouped;
+                //    PreferencesManager.SaveSmartFilterStyle();
+                //    SwapChipAdapter();
+                //    this.Activity?.InvalidateOptionsMenu();
+                //    return true;
                 case Resource.Id.action_add_to_wishlist:
                     AddSearchToWishlist();
                     return true;
@@ -492,7 +489,7 @@ namespace Seeker
             {
                 Logger.Firebase("catchunspecException Value does not fall within range: " + SearchingText);
             }
-            ImageView iv = customView.FindViewById<ImageView>(Resource.Id.search_tabs);
+            FrameLayout iv = customView.FindViewById<FrameLayout>(Resource.Id.search_tabs);
             iv.Click += Iv_Click;
             actv.EditorAction -= Search_EditorActionHELPER;
             actv.EditorAction += Search_EditorActionHELPER;
@@ -551,6 +548,83 @@ namespace Seeker
             }
         }
 
+        public void RefreshWishlistBanner()
+        {
+            if (wishlistBanner == null || wishlistBannerText == null)
+            {
+                return;
+            }
+
+            if (!SearchTabHelper.SearchTabCollection.TryGetValue(SearchTabHelper.CurrentTab, out var tab) || tab.SearchTarget != SearchTarget.Wishlist)
+            {
+                wishlistBanner.Visibility = ViewStates.Gone;
+                StopWishlistBannerTicker();
+                return;
+            }
+
+            wishlistBanner.Visibility = ViewStates.Visible;
+            wishlistBannerText.Text = FormatWishlistNextRunText(tab);
+            StartWishlistBannerTicker();
+        }
+
+        private string FormatWishlistNextRunText(SearchTab tab)
+        {
+            int intervalMs = WishlistController.SearchIntervalMilliseconds;
+            if (intervalMs <= 0 || tab.LastRanTime == DateTime.MinValue)
+            {
+                return "Next Run Unknown";
+            }
+
+            var nextRunTime = WishlistUtil.GetNextRunTime(WishlistController.LastWishlistTimerRun, intervalMs, SearchTabHelper.SearchTabCollection, tab);
+            TimeSpan remaining = nextRunTime.Subtract(DateTime.UtcNow);
+            if (remaining.TotalSeconds <= 10)
+            {
+                return SeekerApplication.GetString(Resource.String.wishlist_next_run_imminent);
+            }
+
+            int totalMinutes = (int)System.Math.Ceiling(remaining.TotalMinutes);
+            int hours = totalMinutes / 60;
+            int minutes = totalMinutes % 60;
+            if (hours > 0)
+            {
+                return string.Format(SeekerApplication.GetString(Resource.String.wishlist_next_run_hours_minutes), hours, minutes);
+            }
+            return string.Format(SeekerApplication.GetString(Resource.String.wishlist_next_run_minutes), totalMinutes);
+        }
+
+        private void StartWishlistBannerTicker()
+        {
+            if (wishlistBannerHandler == null)
+            {
+                wishlistBannerHandler = new Handler(Looper.MainLooper);
+            }
+            if (wishlistBannerTick == null)
+            {
+                wishlistBannerTick = new Java.Lang.Runnable(() =>
+                {
+                    if (wishlistBanner == null || wishlistBanner.Visibility != ViewStates.Visible)
+                    {
+                        return;
+                    }
+                    if (SearchTabHelper.SearchTabCollection.TryGetValue(SearchTabHelper.CurrentTab, out var tab) && tab.SearchTarget == SearchTarget.Wishlist)
+                    {
+                        wishlistBannerText.Text = FormatWishlistNextRunText(tab);
+                        wishlistBannerHandler.PostDelayed(wishlistBannerTick, 60_000);
+                    }
+                });
+            }
+            wishlistBannerHandler.RemoveCallbacks(wishlistBannerTick);
+            wishlistBannerHandler.PostDelayed(wishlistBannerTick, 60_000);
+        }
+
+        private void StopWishlistBannerTicker()
+        {
+            if (wishlistBannerHandler != null && wishlistBannerTick != null)
+            {
+                wishlistBannerHandler.RemoveCallbacks(wishlistBannerTick);
+            }
+        }
+
         public void UpdateNoSearchesView()
         {
             if (noSearchesView == null)
@@ -558,7 +632,128 @@ namespace Seeker
                 return;
             }
             bool neverSearched = string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm);
-            noSearchesView.Visibility = neverSearched ? ViewStates.Visible : ViewStates.Gone;
+            bool searching = SearchTabHelper.CurrentlySearching;
+            noSearchesView.Visibility = (neverSearched && !searching) ? ViewStates.Visible : ViewStates.Gone;
+            bool finishedWithNoResults = !neverSearched && !SearchTabHelper.CurrentlySearching && (SearchTabHelper.SearchResponses?.Count ?? 0) == 0;
+            //noSearchesView.Visibility = finishedWithNoResults ? ViewStates.Visible : ViewStates.Gone;
+        }
+
+        public void UpdateNoResultsView()
+        {
+            if (noResultsView == null)
+            {
+                return;
+            }
+            bool show = !SearchTabHelper.CurrentlySearching
+                        && !string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm)
+                        && (SearchTabHelper.SearchResponses?.Count ?? 0) == 0;
+            if (show && noResultsSubtitle != null)
+            {
+                noResultsSubtitle.Text = string.Format(
+                    GetString(Resource.String.no_results_subtitle),
+                    SearchTabHelper.LastSearchTerm ?? string.Empty);
+            }
+            noResultsView.Visibility = show ? ViewStates.Visible : ViewStates.Gone;
+        }
+
+        public void UpdateAllFilteredView()
+        {
+            if (allFilteredView == null)
+            {
+                return;
+            }
+            int total = SearchTabHelper.SearchResponses?.Count ?? 0;
+            int shown = SearchTabHelper.UI_SearchResponses?.Count ?? 0;
+            bool show = !SearchTabHelper.CurrentlySearching
+                        && total > 0
+                        && shown == 0;
+            if (show && allFilteredTitle != null)
+            {
+                allFilteredTitle.Text = string.Format(
+                    GetString(Resource.String.results_hidden_title),
+                    total);
+            }
+            allFilteredView.Visibility = show ? ViewStates.Visible : ViewStates.Gone;
+        }
+
+        public void UpdateSearchSpinner()
+        {
+            if (searchLoadingView == null)
+            {
+                return;
+            }
+            bool showMainCircleSpinner = SearchTabHelper.CurrentlySearching
+                        && (SearchTabHelper.UI_SearchResponses?.Count ?? 0) == 0;
+            if (showMainCircleSpinner)
+            {
+                if (!spinnerTimerRunning)
+                {
+                    StartSpinnerTimer();
+                }
+                RenderSpinnerText();
+            }
+            else if (spinnerTimerRunning)
+            {
+                StopSpinnerTimer();
+            }
+            searchLoadingView.Visibility = showMainCircleSpinner ? ViewStates.Visible : ViewStates.Gone;
+
+            if (SearchTabHelper.CurrentlySearching && !showMainCircleSpinner)
+            {
+                linearProgressIndicator.Visibility = ViewStates.Visible;
+            }
+            else
+            {
+                linearProgressIndicator.Visibility = ViewStates.Gone;
+            }
+        }
+
+        private void StartSpinnerTimer()
+        {
+            if (searchStopwatch == null)
+            {
+                searchStopwatch = new System.Diagnostics.Stopwatch();
+            }
+            searchStopwatch.Restart();
+            if (spinnerTimerHandler == null)
+            {
+                spinnerTimerHandler = new Handler(Looper.MainLooper);
+            }
+            if (spinnerTimerTick == null)
+            {
+                spinnerTimerTick = new Java.Lang.Runnable(() =>
+                {
+                    if (!spinnerTimerRunning)
+                    {
+                        return;
+                    }
+                    RenderSpinnerText();
+                    spinnerTimerHandler.PostDelayed(spinnerTimerTick, 50);
+                });
+            }
+            spinnerTimerRunning = true;
+            spinnerTimerHandler.PostDelayed(spinnerTimerTick, 50);
+        }
+
+        private void StopSpinnerTimer()
+        {
+            spinnerTimerRunning = false;
+            if (spinnerTimerHandler != null && spinnerTimerTick != null)
+            {
+                spinnerTimerHandler.RemoveCallbacks(spinnerTimerTick);
+            }
+            searchStopwatch?.Stop();
+        }
+
+        private void RenderSpinnerText()
+        {
+            if (searchLoadingQueryText == null)
+            {
+                return;
+            }
+            string term = SearchTabHelper.LastSearchTerm ?? string.Empty;
+            double sec = searchStopwatch?.Elapsed.TotalSeconds ?? 0;
+            searchLoadingQueryText.Text = $"\"{term}\" · {sec:0.0}s";
         }
 
         public void SearchResultStyleChanged()
@@ -566,16 +761,14 @@ namespace Seeker
             this.Activity?.InvalidateOptionsMenu();
             RecyclerView rv = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches); //TODO //TODO //TODO
 
-            if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
+            if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
             {
-                SearchAdapterRecyclerVersion customAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
-                rv.SetAdapter(customAdapter);
+                rv.SetAdapter(CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
             }
             else
             {
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses.ToList();
-                SearchAdapterRecyclerVersion customAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
-                rv.SetAdapter(customAdapter);
+                rv.SetAdapter(CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
             }
         }
 
@@ -613,7 +806,30 @@ namespace Seeker
 
         public static volatile SearchFragment Instance = null;
         public RecyclerView recyclerViewChips;
-        public ChipsItemRecyclerAdapter recyclerChipsAdapter;
+        public RecyclerView.Adapter recyclerChipsAdapter;
+
+        private static RecyclerView.Adapter CreateChipsAdapter(List<ChipDataItem> items)
+        {
+            if (PreferencesState.SmartFilterStyle == SmartFilterStyle.Grouped)
+            {
+                return new GroupedChipsItemRecyclerAdapter(items);
+            }
+            return new ChipsItemRecyclerAdapter(items);
+        }
+
+        /// <summary>
+        /// Rebuilds the chip row adapter for the current tab using the current SmartFilterStyle
+        /// preference and attaches it to recyclerViewChips. Call whenever the preference toggles.
+        /// </summary>
+        public void SwapChipAdapter()
+        {
+            if (recyclerViewChips == null)
+            {
+                return;
+            }
+            recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
+            recyclerViewChips.SetAdapter(recyclerChipsAdapter);
+        }
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             Instance = this;
@@ -630,11 +846,11 @@ namespace Seeker
             var manager = new LinearLayoutManager(this.Context, LinearLayoutManager.Horizontal, false);
             recyclerViewChips.SetItemAnimator(null);
             recyclerViewChips.SetLayoutManager(manager);
-            recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
+            recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
             recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
 
-            RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
-            BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
+            View bottomSheetView = rootView.FindViewById<View>(Resource.Id.bottomSheet);
+            BottomSheetBehavior bsb = BottomSheetBehavior.From(bottomSheetView);
             bsb.Hideable = true;
             bsb.PeekHeight = 320;
             bsb.State = BottomSheetBehavior.StateHidden;
@@ -665,20 +881,34 @@ namespace Seeker
             recycleLayoutManager = new LinearLayoutManager(Activity);
             recyclerViewTransferItems.SetItemAnimator(null); //todo
             recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
-            if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
+            if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
             {
-                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
-                recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
+                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
             }
             else
             {
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses.ToList();
-                recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
-                recyclerViewTransferItems.SetAdapter(recyclerSearchAdapter);
+                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
             }
 
+            searchResultsHeaderView = rootView.FindViewById<View>(Resource.Id.searchResultsHeader);
+            RefreshSearchResultsHeader(searchResultsHeaderView);
+
             noSearchesView = rootView.FindViewById<View>(Resource.Id.noSearchesView);
+            searchLoadingView = rootView.FindViewById<View>(Resource.Id.searchLoadingView);
+            linearProgressIndicator = rootView.FindViewById<View>(Resource.Id.linearProgressIndicator);
+            searchLoadingQueryText = rootView.FindViewById<TextView>(Resource.Id.searchLoadingQueryText);
+            noResultsView = rootView.FindViewById<View>(Resource.Id.noResultsView);
+            noResultsSubtitle = rootView.FindViewById<TextView>(Resource.Id.noResultsSubtitle);
+            allFilteredView = rootView.FindViewById<View>(Resource.Id.allFilteredView);
+            allFilteredTitle = rootView.FindViewById<TextView>(Resource.Id.allFilteredTitle);
+            wishlistBanner = rootView.FindViewById<View>(Resource.Id.wishlistBanner);
+            wishlistBannerText = rootView.FindViewById<TextView>(Resource.Id.wishlistHeaderText);
             UpdateNoSearchesView();
+            UpdateSearchSpinner();
+            UpdateNoResultsView();
+            UpdateAllFilteredView();
+            RefreshWishlistBanner();
 
             SeekerState.ClearSearchHistoryEventsFromTarget(this);
             SeekerState.ClearSearchHistory += SeekerState_ClearSearchHistory;
@@ -702,7 +932,161 @@ namespace Seeker
             showHideSmartFilters.Text = PreferencesState.ShowSmartFilters ? this.GetString(Resource.String.HideSmartFilters) : this.GetString(Resource.String.ShowSmartFilters);
             showHideSmartFilters.Click += ShowHideSmartFilters_Click;
 
+            SetupFilterControls();
+
             return rootView;
+        }
+
+        private void SetupFilterControls()
+        {
+            var bgTint = GetSegmentedButtonBgTint(this.Context);
+            var textTint = GetSegmentedButtonTextTint(this.Context);
+
+            var formatToggle = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.formatToggleGroup);
+            ApplyToggleGroupTint(formatToggle, bgTint, textTint);
+            formatToggle.Check(GetFormatButtonId(PreferencesState.FilterFormat));
+            formatToggle.ButtonChecked += FormatToggle_ButtonChecked;
+
+            var bitrateToggle = rootView.FindViewById<MaterialButtonToggleGroup>(Resource.Id.bitrateToggleGroup);
+            ApplyToggleGroupTint(bitrateToggle, bgTint, textTint);
+            for (int i = 0; i < bitrateToggle.ChildCount; i++)
+            {
+                var btn = (MaterialButton)bitrateToggle.GetChildAt(i);
+                btn.SetPadding(0, btn.PaddingTop, 0, btn.PaddingBottom);
+            }
+            bitrateToggle.Check(GetBitrateButtonId(PreferencesState.FilterMinBitrateKbs));
+            bitrateToggle.ButtonChecked += BitrateToggle_ButtonChecked;
+        }
+
+        private static Android.Content.Res.ColorStateList GetSegmentedButtonBgTint(Android.Content.Context ctx)
+        {
+            var typedValue = new Android.Util.TypedValue();
+            ctx.Theme.ResolveAttribute(Resource.Attribute.mainPurple, typedValue, true);
+            int accentColor = typedValue.Data;
+
+            ctx.Theme.ResolveAttribute(Resource.Attribute.dialog_background, typedValue, true);
+            int uncheckedColor = typedValue.Data;
+
+            var states = new int[][]
+            {
+                new int[] { Android.Resource.Attribute.StateChecked },
+                new int[] { -Android.Resource.Attribute.StateChecked }
+            };
+            var colors = new int[] { accentColor, uncheckedColor };
+            return new Android.Content.Res.ColorStateList(states, colors);
+        }
+
+        private static Android.Content.Res.ColorStateList GetSegmentedButtonTextTint(Android.Content.Context ctx)
+        {
+            var typedValue = new Android.Util.TypedValue();
+            ctx.Theme.ResolveAttribute(Resource.Attribute.normalTextColor, typedValue, true);
+            int uncheckedColor = typedValue.Data;
+
+            var states = new int[][]
+            {
+                new int[] { Android.Resource.Attribute.StateChecked },
+                new int[] { -Android.Resource.Attribute.StateChecked }
+            };
+            var colors = new int[] { Android.Graphics.Color.White, uncheckedColor };
+            return new Android.Content.Res.ColorStateList(states, colors);
+        }
+
+        private static void ApplyToggleGroupTint(MaterialButtonToggleGroup group, Android.Content.Res.ColorStateList bgTint, Android.Content.Res.ColorStateList textTint)
+        {
+            for (int i = 0; i < group.ChildCount; i++)
+            {
+                var btn = (MaterialButton)group.GetChildAt(i);
+                btn.BackgroundTintList = bgTint;
+                btn.SetTextColor(textTint);
+            }
+        }
+
+        private void FormatToggle_ButtonChecked(object sender, MaterialButtonToggleGroup.ButtonCheckedEventArgs e)
+        {
+            if (!e.P2)
+            {
+                return;
+            }
+            switch (e.P1)
+            {
+                case Resource.Id.formatLossless:
+                    PreferencesState.FilterFormat = FormatFilterType.Lossless;
+                    break;
+                case Resource.Id.formatLossy:
+                    PreferencesState.FilterFormat = FormatFilterType.Lossy;
+                    break;
+                default:
+                    PreferencesState.FilterFormat = FormatFilterType.Any;
+                    break;
+            }
+            PreferencesManager.SaveFilterControlsState();
+            ApplyFilterControls();
+        }
+
+        private void BitrateToggle_ButtonChecked(object sender, MaterialButtonToggleGroup.ButtonCheckedEventArgs e)
+        {
+            if (!e.P2)
+            {
+                return;
+            }
+            switch (e.P1)
+            {
+                case Resource.Id.bitrate320:
+                    PreferencesState.FilterMinBitrateKbs = 320;
+                    break;
+                case Resource.Id.bitrate256:
+                    PreferencesState.FilterMinBitrateKbs = 256;
+                    break;
+                case Resource.Id.bitrate192:
+                    PreferencesState.FilterMinBitrateKbs = 192;
+                    break;
+                case Resource.Id.bitrate128:
+                    PreferencesState.FilterMinBitrateKbs = 128;
+                    break;
+                default:
+                    PreferencesState.FilterMinBitrateKbs = 0;
+                    break;
+            }
+            PreferencesManager.SaveFilterControlsState();
+            ApplyFilterControls();
+        }
+
+        private void ApplyFilterControls()
+        {
+            if (AreFilterControlsActive() || AreChipsFiltering() || SearchTabHelper.TextFilter.IsFiltered)
+            {
+                UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
+                recyclerSearchAdapter.NotifyDataSetChanged();
+            }
+            else
+            {
+                SearchTabHelper.UI_SearchResponses.Clear();
+                SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
+                recyclerSearchAdapter.NotifyDataSetChanged();
+            }
+            NotifySearchHeaderChanged();
+        }
+
+        private static int GetFormatButtonId(FormatFilterType format)
+        {
+            switch (format)
+            {
+                case FormatFilterType.Lossless: return Resource.Id.formatLossless;
+                case FormatFilterType.Lossy: return Resource.Id.formatLossy;
+                default: return Resource.Id.formatAny;
+            }
+        }
+
+        private static int GetBitrateButtonId(int bitrateKbs)
+        {
+            switch (bitrateKbs)
+            {
+                case 320: return Resource.Id.bitrate320;
+                case 256: return Resource.Id.bitrate256;
+                case 192: return Resource.Id.bitrate192;
+                case 128: return Resource.Id.bitrate128;
+                default: return Resource.Id.bitrateAny;
+            }
         }
 
         private void ShowHideSmartFilters_Click(object sender, EventArgs e)
@@ -718,11 +1102,11 @@ namespace Seeker
                 }
                 if ((SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses?.Count ?? 0) != 0)
                 {
-                    List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].LastSearchTerm, PreferencesState.SmartFilterOptions);
+                    List<ChipDataItem> chipDataItems = ChipsHelper.CalculateChipItems(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].SearchResponses, SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].LastSearchTerm, PreferencesState.SmartFilterOptions, PreferencesState.HideLockedResultsInSearch);
                     SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
                     SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
                     {
-                        SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
+                        SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                         SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
                     }));
                 }
@@ -732,7 +1116,7 @@ namespace Seeker
                 SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = null;
                 SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipsFilter = null; //in case there was previously a filter
                 SearchFragment.Instance.RefreshOnChipChanged();
-                SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(null);
+                SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(null);
                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
             }
         }
@@ -757,7 +1141,7 @@ namespace Seeker
         /// Are chips filtering out results..
         /// </summary>
         /// <returns></returns>
-        private static bool AreChipsFiltering()
+        internal static bool AreChipsFiltering()
         {
             if (!PreferencesState.ShowSmartFilters || (SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems?.Count ?? 0) == 0)
             {
@@ -767,6 +1151,12 @@ namespace Seeker
             {
                 return SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems.Any(i => i.IsChecked);
             }
+        }
+
+        internal static bool AreFilterControlsActive()
+        {
+            return PreferencesState.FilterFormat != FormatFilterType.Any
+                || PreferencesState.FilterMinBitrateKbs > 0;
         }
 
         private void FilterText_FocusChange(object sender, View.FocusChangeEventArgs e)
@@ -783,8 +1173,8 @@ namespace Seeker
 
         private void B_Click(object sender, EventArgs e)
         {
-            RelativeLayout rel = rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
-            BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
+            View bottomSheetView = rootView.FindViewById<View>(Resource.Id.bottomSheet);
+            BottomSheetBehavior bsb = BottomSheetBehavior.From(bottomSheetView);
             if (bsb.State != BottomSheetBehavior.StateExpanded && bsb.State != BottomSheetBehavior.StateCollapsed)
             {
                 bsb.State = BottomSheetBehavior.StateExpanded;
@@ -886,6 +1276,11 @@ namespace Seeker
                     PerformBackUpRefresh();
                     SearchTabHelper.CurrentlySearching = true;
                 }
+                UpdateSearchSpinner();
+                NotifySearchHeaderChanged();
+                UpdateNoSearchesView();
+                UpdateNoResultsView();
+                UpdateAllFilteredView();
                 SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
                 SearchAPI(SearchTabHelper.CancellationTokenSource.Token, transitionDrawable, editSearchText, SearchTabHelper.CurrentTab);
                 (sender as AutoCompleteTextView).DismissDropDown();
@@ -1108,7 +1503,7 @@ namespace Seeker
                     //now that they are sorted, replace them.
                     SearchTabHelper.SearchResponses = SearchTabHelper.SortHelper.Keys.ToList();
 
-                    if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
+                    if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
                     {
                         UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
                         recyclerSearchAdapter.NotifyDataSetChanged();
@@ -1119,6 +1514,7 @@ namespace Seeker
                         SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
                         recyclerSearchAdapter.NotifyDataSetChanged();
                     }
+                    NotifySearchHeaderChanged();
 
 
 
@@ -1282,16 +1678,44 @@ namespace Seeker
             Logger.Debug("Whether to Filter: " + searchTab.TextFilter.IsFiltered);
             Logger.Debug("FilterString: " + searchTab.TextFilter.FilterString);
             bool hideLocked = PreferencesState.HideLockedResultsInSearch;
+            var mergedFlags = MergeFilterFlags(searchTab.TextFilter.FilterSpecialFlags);
             searchTab.UI_SearchResponses.Clear();
             searchTab.UI_SearchResponses.AddRange(searchTab.SearchResponses.FindAll(
-                s => SearchFilter.MatchesAllCriteria(s, searchTab.ChipsFilter, searchTab.TextFilter.FilterSpecialFlags, searchTab.TextFilter.WordsToAvoid, searchTab.TextFilter.WordsToInclude, hideLocked)));
+                s => SearchFilter.MatchesAllCriteria(s, searchTab.ChipsFilter, mergedFlags, searchTab.TextFilter.WordsToAvoid, searchTab.TextFilter.WordsToInclude, hideLocked)));
+            UpdateAllFilteredView();
+        }
+
+        internal static FilterSpecialFlags MergeFilterFlags(FilterSpecialFlags textFlags)
+        {
+            var merged = new FilterSpecialFlags();
+            if (textFlags != null)
+            {
+                merged.MinBitRateKBS = textFlags.MinBitRateKBS;
+                merged.MinFileSizeMB = textFlags.MinFileSizeMB;
+                merged.MinFoldersInFile = textFlags.MinFoldersInFile;
+                merged.IsVBR = textFlags.IsVBR;
+                merged.IsCBR = textFlags.IsCBR;
+                merged.FormatFilter = textFlags.FormatFilter;
+                merged.ContainsSpecialFlags = textFlags.ContainsSpecialFlags;
+            }
+            if (PreferencesState.FilterFormat != FormatFilterType.Any)
+            {
+                merged.FormatFilter = PreferencesState.FilterFormat;
+                merged.ContainsSpecialFlags = true;
+            }
+            if (PreferencesState.FilterMinBitrateKbs > 0)
+            {
+                merged.MinBitRateKBS = System.Math.Max(merged.MinBitRateKBS, PreferencesState.FilterMinBitrateKbs);
+                merged.ContainsSpecialFlags = true;
+            }
+            return merged;
         }
 
         private void FilterText_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
             Logger.Debug("Text Changed: " + e.Text);
             string oldFilterString = SearchTabHelper.TextFilter.IsFiltered ? SearchTabHelper.TextFilter.FilterString : string.Empty;
-            if ((e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null) || AreChipsFiltering())
+            if ((e.Text != null && e.Text.ToString() != string.Empty && SearchTabHelper.SearchResponses != null) || AreChipsFiltering() || AreFilterControlsActive())
             {
 
 #if DEBUG
@@ -1332,7 +1756,9 @@ namespace Seeker
                 SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
 
                 recyclerSearchAdapter.NotifyDataSetChanged(); //does have the nice effect that if nothing changes, you dont just back to top.
+                UpdateAllFilteredView();
             }
+            NotifySearchHeaderChanged();
 
             if (oldFilterString == string.Empty && e.Text.ToString() != string.Empty)
             {
@@ -1351,7 +1777,7 @@ namespace Seeker
         /// <param name="e"></param>
         public void RefreshOnChipChanged()
         {
-            if (AreChipsFiltering() || SearchTabHelper.TextFilter.IsFiltered)
+            if (AreChipsFiltering() || SearchTabHelper.TextFilter.IsFiltered || AreFilterControlsActive())
             {
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
                 recyclerSearchAdapter.NotifyDataSetChanged();
@@ -1362,6 +1788,7 @@ namespace Seeker
                 SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
                 recyclerSearchAdapter.NotifyDataSetChanged();
             }
+            NotifySearchHeaderChanged();
         }
 
         private void SeekerState_ClearSearchHistory(object sender, EventArgs e)
@@ -1380,6 +1807,7 @@ namespace Seeker
             Logger.Debug("SearchFragmentOnPause");
             base.OnPause();
             PreferencesManager.SaveSearchFragmentFilterState(PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)PreferencesState.SearchResultStyle, ExpandAllResults);
+            StopWishlistBannerTicker();
         }
 
         private static void Actv_KeyPressHELPER(object sender, View.KeyEventArgs e)
@@ -1411,6 +1839,11 @@ namespace Seeker
                 Logger.Debug("START TRANSITION");
                 SearchTabHelper.CurrentlySearching = true;
             }
+            UpdateSearchSpinner();
+            NotifySearchHeaderChanged();
+            UpdateNoSearchesView();
+            UpdateNoResultsView();
+            UpdateAllFilteredView();
             SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
             EditText editTextSearch = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
             SearchAPI(SearchTabHelper.CancellationTokenSource.Token, transitionDrawable, editTextSearch.Text, SearchTabHelper.CurrentTab);
@@ -1480,13 +1913,16 @@ namespace Seeker
                 SearchFragment.Instance.ClearFilterStringAndCached();
 
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses?.ToList();
-                SearchFragment.Instance.recyclerSearchAdapter = new SearchAdapterRecyclerVersion(SearchTabHelper.UI_SearchResponses);
-                SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.recyclerSearchAdapter);
+                SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
 
-                SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
+                SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
 
-                SearchFragment.Instance.UpdateNoSearchesView();
+                SearchFragment.Instance?.UpdateSearchSpinner();
+                SearchFragment.Instance?.NotifySearchHeaderChanged();
+                SearchFragment.Instance?.UpdateNoSearchesView();
+                SearchFragment.Instance?.UpdateNoResultsView();
+                SearchFragment.Instance?.UpdateAllFilteredView();
             }
         }
 
@@ -1505,6 +1941,18 @@ namespace Seeker
         private RecyclerView.LayoutManager recycleLayoutManager;
         private RecyclerView recyclerViewTransferItems;
         private SearchAdapterRecyclerVersion recyclerSearchAdapter;
+        private View searchResultsHeaderView;
+
+        private SearchAdapterRecyclerVersion CreateSearchAdapter(List<SearchResponse> responses)
+        {
+            recyclerSearchAdapter = new SearchAdapterRecyclerVersion(responses);
+            return recyclerSearchAdapter;
+        }
+
+        private void NotifySearchHeaderChanged()
+        {
+            RefreshSearchResultsHeader(searchResultsHeaderView);
+        }
 
 
         private static List<SearchResponse> GetOldList(string filter)
@@ -1534,8 +1982,7 @@ namespace Seeker
             var prevList = GetOldList(cacheKey);
             if (prevList == null)
             {
-                Instance.recyclerSearchAdapter = new SearchAdapterRecyclerVersion(newResults);
-                Instance.recyclerViewTransferItems.SetAdapter(Instance.recyclerSearchAdapter);
+                Instance.recyclerViewTransferItems.SetAdapter(Instance.CreateSearchAdapter(newResults));
             }
             else
             {
@@ -1552,8 +1999,12 @@ namespace Seeker
                 diff.DispatchUpdatesTo(Instance.recyclerSearchAdapter);
                 Instance.recycleLayoutManager.OnRestoreInstanceState(state);
             }
+            Instance.NotifySearchHeaderChanged();
             SetOldList(cacheKey, newResults.ToList());
             Instance.UpdateNoSearchesView();
+            Instance.UpdateSearchSpinner();
+            Instance.UpdateNoResultsView();
+            Instance.UpdateAllFilteredView();
         }
 
         /// <summary>
@@ -1623,7 +2074,7 @@ namespace Seeker
                         return;
                     }
 
-                    if (tab.TextFilter.IsFiltered || AreChipsFiltering())
+                    if (tab.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
                     {
                         SearchFragment.Instance.UpdateFilteredResponses(tab);
                         ApplySearchResults(tab.UI_SearchResponses, tab.TextFilter.FilterString);
@@ -1667,7 +2118,7 @@ namespace Seeker
                 }
                 dlDialogShown = true;
                 SearchResponse dlDiagResp = null;
-                if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
+                if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
                 {
                     dlDiagResp = SearchTabHelper.UI_SearchResponses.ElementAt<SearchResponse>(pos);
                 }
@@ -1682,7 +2133,7 @@ namespace Seeker
             catch (System.Exception e)
             {
                 System.String msg = string.Empty;
-                if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering())
+                if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
                 {
                     msg = "Filtered.Count " + SearchTabHelper.UI_SearchResponses.Count.ToString() + " position selected = " + pos.ToString();
                 }
@@ -1812,7 +2263,8 @@ namespace Seeker
 
                 t.ContinueWith(new Action<Task<(Soulseek.Search, IReadOnlyCollection<SearchResponse>)>>(t =>
                 {
-                    SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
+                    var searchTab = SearchTabHelper.SearchTabCollection[fromTab];
+                    searchTab.CurrentlySearching = false;
 
                     if (!t.IsCompletedSuccessfully && t.Exception != null)
                     {
@@ -1846,6 +2298,11 @@ namespace Seeker
 
 
                                 }
+                                SearchFragment.Instance.UpdateSearchSpinner();
+                                SearchFragment.Instance.NotifySearchHeaderChanged();
+                                SearchFragment.Instance.UpdateNoSearchesView();
+                                SearchFragment.Instance.UpdateNoResultsView();
+                                SearchFragment.Instance.UpdateAllFilteredView();
                             }
                             catch (System.ObjectDisposedException e)
                             {
@@ -1859,22 +2316,43 @@ namespace Seeker
                     {
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_search_results), ToastLength.Short);
                     }
-                    SearchTabHelper.SearchTabCollection[fromTab].LastSearchResultsCount = SearchTabHelper.SearchTabCollection[fromTab].SearchResponses.Count;
+#if DEBUG && !MOCK
+                    if (!t.IsCanceled && t.IsCompletedSuccessfully && t.Result.Item2 != null && t.Result.Item2.Count > 0)
+                    {
+                        try
+                        {
+                            Seeker.Debug.SearchCaptureStore.Save(searchString, t.Result.Item2);
+                        }
+                        catch (System.Exception ex)
+                        {
+                            Logger.Debug("SearchCaptureStore save failed: " + ex);
+                        }
+                    }
+#endif
+                    searchTab.LastSearchResultsCount = searchTab.SearchResponses.Count;
 
                     if (fromWishlist)
                     {
                         WishlistController.SearchCompleted(fromTab);
                     }
-                    else if (SearchTabHelper.SearchTabCollection[fromTab].SearchTarget == SearchTarget.Wishlist)
+                    else if (searchTab.SearchTarget == SearchTarget.Wishlist)
                     {
                         //this is if the search was not automatic (i.e. wishlist timer elapsed) but was performed in the wishlist tab..
                         //therefore save the new results...
+                        searchTab.UpdateChips(PreferencesState.SmartFilterOptions, PreferencesState.HideLockedResultsInSearch);
                         SearchTabHelper.SaveHeadersToSharedPrefs();
                         SearchTabHelper.SaveSearchResultsToDisk(fromTab, SeekerState.ActiveActivityRef);
                     }
 
                     if (fromTab == SearchTabHelper.CurrentTab)
                     {
+                        if (searchTab.SearchTarget == SearchTarget.Wishlist)
+                        {
+                            SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                            {
+                                SearchFragment.Instance?.RefreshWishlistBanner();
+                            }));
+                        }
                         if (PreferencesState.ShowSmartFilters)
                         {
 #if DEBUG
@@ -1895,11 +2373,10 @@ namespace Seeker
                             }
 
 #endif
-                            List<ChipDataItem> chipDataItems = ChipsHelper.GetChipDataItemsFromSearchResults(SearchTabHelper.SearchTabCollection[fromTab].SearchResponses, SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm, PreferencesState.SmartFilterOptions);
-                            SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems = chipDataItems;
+                            searchTab.UpdateChips(PreferencesState.SmartFilterOptions, PreferencesState.HideLockedResultsInSearch);
                             SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
                             {
-                                SearchFragment.Instance.recyclerChipsAdapter = new ChipsItemRecyclerAdapter(SearchTabHelper.SearchTabCollection[fromTab].ChipDataItems);
+                                SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(searchTab.ChipDataItems);
                                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
                             }));
                         }
@@ -1907,57 +2384,6 @@ namespace Seeker
                     }
 
                 }));
-
-
-
-                if (SearchTabHelper.TextFilter.IsFiltered && PreferencesState.FilterSticky && !fromWishlist)
-                {
-                    //remind the user that the filter is ON.
-                    t.ContinueWith(new Action<Task>(
-                        (Task t) =>
-                        {
-                            SeekerState.MainActivityRef.RunOnUiThread(new Action(() =>
-                            {
-
-                                RelativeLayout rel = SearchFragment.Instance.rootView.FindViewById<RelativeLayout>(Resource.Id.bottomSheet);
-                                BottomSheetBehavior bsb = BottomSheetBehavior.From(rel);
-                                if (bsb.State == BottomSheetBehavior.StateHidden)
-                                {
-
-                                    View BSButton = SearchFragment.Instance.rootView.FindViewById<View>(Resource.Id.bsbutton);
-                                    ObjectAnimator objectAnimator = new ObjectAnimator();
-                                    ObjectAnimator anim1 = ObjectAnimator.OfFloat(BSButton, "scaleX", 2.0f);
-                                    anim1.SetInterpolator(new Android.Views.Animations.LinearInterpolator());
-                                    anim1.SetDuration(200);
-                                    ObjectAnimator anim2 = ObjectAnimator.OfFloat(BSButton, "scaleY", 2.0f);
-                                    anim2.SetInterpolator(new Android.Views.Animations.LinearInterpolator());
-                                    anim2.SetDuration(200);
-
-                                    ObjectAnimator anim3 = ObjectAnimator.OfFloat(BSButton, "scaleX", 1.0f);
-                                    anim3.SetInterpolator(new Android.Views.Animations.BounceInterpolator());
-                                    anim3.SetDuration(1000);
-                                    ObjectAnimator anim4 = ObjectAnimator.OfFloat(BSButton, "scaleY", 1.0f);
-                                    anim4.SetInterpolator(new Android.Views.Animations.BounceInterpolator());
-                                    anim4.SetDuration(1000);
-
-                                    AnimatorSet set1 = new AnimatorSet();
-                                    set1.PlayTogether(anim1, anim2);
-                                    //set1.Start();
-
-                                    AnimatorSet set2 = new AnimatorSet();
-                                    set2.PlayTogether(anim3, anim4);
-                                    //set2.Start();
-
-                                    AnimatorSet setTotal = new AnimatorSet();
-                                    setTotal.PlaySequentially(set1, set2);
-                                    setTotal.Start();
-
-                                }
-
-                            }));
-                        }
-                        ));
-                }
             }
             catch (ArgumentNullException ane)
             {
@@ -1976,6 +2402,11 @@ namespace Seeker
                     {
                         transitionDrawable.ResetTransition();
                     }
+                    SearchFragment.Instance?.UpdateSearchSpinner();
+                    SearchFragment.Instance?.NotifySearchHeaderChanged();
+                    SearchFragment.Instance?.UpdateNoSearchesView();
+                    SearchFragment.Instance?.UpdateNoResultsView();
+                    SearchFragment.Instance?.UpdateAllFilteredView();
                 }
                 ));
                 //MainActivity.ShowAlert(ane, this.Context);
@@ -1997,6 +2428,11 @@ namespace Seeker
                     {
                         transitionDrawable.ResetTransition();
                     }
+                    SearchFragment.Instance?.UpdateSearchSpinner();
+                    SearchFragment.Instance?.NotifySearchHeaderChanged();
+                    SearchFragment.Instance?.UpdateNoSearchesView();
+                    SearchFragment.Instance?.UpdateNoResultsView();
+                    SearchFragment.Instance?.UpdateAllFilteredView();
                 }));
                 return;
             }
@@ -2015,6 +2451,11 @@ namespace Seeker
                     {
                         transitionDrawable.ResetTransition();
                     }
+                    SearchFragment.Instance?.UpdateSearchSpinner();
+                    SearchFragment.Instance?.NotifySearchHeaderChanged();
+                    SearchFragment.Instance?.UpdateNoSearchesView();
+                    SearchFragment.Instance?.UpdateNoResultsView();
+                    SearchFragment.Instance?.UpdateAllFilteredView();
                 }));
                 return;
             }
@@ -2065,6 +2506,11 @@ namespace Seeker
                 }
 
                 SearchTabHelper.CurrentlySearching = false;
+                SearchFragment.Instance?.UpdateSearchSpinner();
+                SearchFragment.Instance?.NotifySearchHeaderChanged();
+                SearchFragment.Instance?.UpdateNoSearchesView();
+                SearchFragment.Instance?.UpdateNoResultsView();
+                SearchFragment.Instance?.UpdateAllFilteredView();
                 return;
             }
             else

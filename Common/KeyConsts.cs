@@ -61,7 +61,8 @@ namespace Common
         public const string M_MemoryBackedDownload = "Momento_MemoryBackedDownload";
         public const string M_FilterSticky = "Momento_FilterSticky";
         public const string M_FilterStickyString = "Momento_FilterStickyString";
-        public const string M_SearchResultStyle = "Momento_SearchResStyle";
+        public const string M_SearchResultStyle = "Momento_SearchResStyle"; // legacy, migrated to V2 on first read
+        public const string M_SearchResultStyleV2 = "Momento_SearchResStyleV2";
         public const string M_ExpandAllResults = "Momento_ExpandAllResults";
         public const string M_UserList_Legacy = "Cache_UserList";
         public const string M_UserList = "Cache_UserList_v2";
@@ -74,6 +75,7 @@ namespace Common
         public const string M_ServiceOnStartup = "Momento_ServiceOnStartup";
         public const string M_NoSubfolderForSingle = "Momento_NoSubfolderForSingle";
         public const string M_ShowSmartFilters = "Momento_ShowSmartFilters";
+        public const string M_SmartFilterStyle = "Momento_SmartFilterStyle";
         public const string M_chatroomsToNotify_Legacy = "Momento_chatroomsToNotify";
         public const string M_chatroomsToNotify = "Momento_chatroomsToNotify_v2";
         public const string M_SearchTabsState_LEGACY = "Momento_SearchTabsState";
@@ -136,6 +138,9 @@ namespace Common
         public const string M_AdditionalUsernameSubdirectories = "Momento_M_AdditionalUsernameSubdirectories";
 
         public const string M_PostNotificationRequestAlreadyShown = "Momento_M_PostNotificationRequestAlreadyShown";
+
+        public const string M_FilterFormat = "Momento_FilterFormat";
+        public const string M_FilterMinBitrateKbs = "Momento_FilterMinBitrateKbs";
 
         public const string M_SmartFilter_KeywordsEnabled = "Momento_SmartFilterKeywordsEnabled";
         public const string M_SmartFilter_CountsEnabled = "Momento_SmartFilterCountsEnabled";

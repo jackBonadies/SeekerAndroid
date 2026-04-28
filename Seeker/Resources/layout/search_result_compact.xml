@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Compact style. Single row: foldername, queue chip (conditional), file-type chip.
+     Based on the modern style; no bitrate position, no expand area, no second row. -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:descendantFocusability="beforeDescendants"
+>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:id="@+id/relativeLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
+    >
+        <TextView
+            android:id="@+id/folderNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:textColor="?attr/cellTextColor"
+            android:textSize="14sp"
+            android:singleLine="true"
+        />
+        <TextView
+            android:id="@+id/queueTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/search_format_chip_bg"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:paddingTop="1dp"
+            android:paddingBottom="1dp"
+            android:layout_marginStart="6dp"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+            android:visibility="gone"
+        />
+        <TextView
+            android:id="@+id/fileTypeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/search_format_chip_bg"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:paddingTop="1dp"
+            android:paddingBottom="1dp"
+            android:layout_marginStart="6dp"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:singleLine="true"
+        />
+        <!-- Hidden bitrate slot kept so SearchChipHelper.StyleFormatAndBitrateChips
+             (which always writes both views) can be reused unchanged. -->
+        <TextView
+            android:id="@+id/bitrateTextView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+        />
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/slightTint"
+    />
+</LinearLayout>

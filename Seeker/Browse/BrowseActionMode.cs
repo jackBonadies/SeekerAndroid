@@ -100,6 +100,7 @@ namespace Seeker
                 Adapter.SelectedPositions.Clear();
                 Adapter.IsInBatchSelectMode = false;
                 Adapter.NotifyDataSetChanged();
+                SeekerState.MainActivityRef?.RefreshBackCallbackState();
             }
         }
 

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+        <TextView
+            android:id="@+id/categoryFilterSheetTitle"
+            android:textStyle="bold"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textColor="?attr/normalTextColor" />
+        <ImageButton
+            android:id="@+id/categoryFilterSheetClose"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="2dp"
+			android:layout_marginEnd="10dp"
+            android:src="@drawable/ic_close_small"
+            android:tint="?attr/normalTextColor"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/filter_sheet_close_desc" />
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/slightTint" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/categoryFilterSheetRecycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp" />
+</LinearLayout>

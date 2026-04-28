@@ -178,7 +178,7 @@ Ordneranzahl: {5}\"
 
     <string name="enter_user_to_message">Gebe Benutzername für die Nachricht ein</string>
 
-    <string name="search_result_style">Result Style:</string>
+    <string name="search_result_style">Result Style</string>
 
     <string name="new_search_tab">Neue Suche</string>
     <string name="filter_search_results_here">Ergebnisse hier filtern</string>
@@ -383,8 +383,8 @@ Ordneranzahl: {5}\"
     <string name="always_light">Immer hell</string>
     <string name="always_dark">Immer dunkel</string>
 
-    <string name="queue_length_">Queue Length:</string>
-    <string name="upload_slots_">Free Upload Slots:</string>
+    <string name="queue_length_">Queue Length</string>
+    <string name="upload_slots_">Free Upload Slots</string>
     <string name="today">Heute</string>
 
     <string name="pending_">Ausstehend...</string>

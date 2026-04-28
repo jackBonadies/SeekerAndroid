@@ -176,7 +176,7 @@
 
     <string name="enter_user_to_message">Ввести ім\'я користувача, щоб написати</string>
 
-    <string name="search_result_style">Вигляд результату:</string>
+    <string name="search_result_style">Вигляд результату</string>
 
     <string name="new_search_tab">Нова вкладка</string>
     <string name="filter_search_results_here">Фільтрувати результати тут</string>
@@ -381,8 +381,8 @@
     <string name="always_light">Світла</string>
     <string name="always_dark">Темна</string>
 
-    <string name="queue_length_">Довжина черги:</string>
-    <string name="upload_slots_">Вільні комірки для завантаження:</string>
+    <string name="queue_length_">Довжина черги</string>
+    <string name="upload_slots_">Вільні комірки для завантаження</string>
     <string name="today">Сьогодні о</string>
 
     <string name="pending_">В очікуванні...</string>

@@ -176,10 +176,10 @@ Počet adresářů: {5}\"
 
     <string name="enter_user_to_message">Zadejte příjemce zprávy</string>
 
-    <string name="search_result_style">Result Style:</string>
+    <string name="search_result_style">Result Style</string>
 
     <string name="new_search_tab">Nové hledání</string>
-    <string name="filter_search_results_here">Filter Results Here</string>
+    <string name="filter_search_results_here">Filter Results</string>
     <string name="persist_it">Připnout</string>
     <string name="type_chatroom_ticker_message">Type Ticker Message</string>
 
@@ -381,8 +381,8 @@ Počet adresářů: {5}\"
     <string name="always_light">Vždy světlý</string>
     <string name="always_dark">Vždy tmavý</string>
 
-    <string name="queue_length_">Délka fronty:</string>
-    <string name="upload_slots_">Volné nahrávací sloty:</string>
+    <string name="queue_length_">Délka fronty</string>
+    <string name="upload_slots_">Volné nahrávací sloty</string>
     <string name="today">Dnes</string>
 
     <string name="pending_">Probíhající...</string>

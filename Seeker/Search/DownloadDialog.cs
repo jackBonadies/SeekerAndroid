@@ -399,6 +399,76 @@ namespace Seeker
             (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
         }
 
+        private void ShowMoreInfoDialog()
+        {
+            var metrics = this.Context.Resources.DisplayMetrics;
+            int dp24 = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 24, metrics);
+            int dp20 = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 20, metrics);
+            int dp8 = (int)TypedValue.ApplyDimension(ComplexUnitType.Dip, 8, metrics);
+
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
+
+            if (!string.IsNullOrEmpty(SearchResponse.Username))
+            {
+                var titleView = new TextView(this.Context);
+                titleView.Text = SearchResponse.Username;
+                titleView.SetPadding(dp24, dp20, dp24, 0);
+                titleView.SetTextSize(ComplexUnitType.Sp, 20);
+                titleView.SetTextColor(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor));
+                titleView.SetMaxLines(2);
+                titleView.Ellipsize = Android.Text.TextUtils.TruncateAt.End;
+                builder.SetCustomTitle(titleView);
+            }
+
+            var labelColor = UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.cellTextColorSubdued);
+            var valueColor = UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.normalTextColor);
+
+            string queueLengthLabel = this.Context.GetString(Resource.String.queue_length_);
+            string uploadSlotsLabel = this.Context.GetString(Resource.String.upload_slots_);
+            string freeSlotValue = this.Context.GetString(SearchResponse.HasFreeUploadSlot ? Resource.String.yes : Resource.String.No);
+
+            var rows = new (string label, string value)[]
+            {
+                (queueLengthLabel, SearchResponse.QueueLength.ToString()),
+                (uploadSlotsLabel, freeSlotValue),
+            };
+
+            var container = new LinearLayout(this.Context);
+            container.Orientation = Android.Widget.Orientation.Vertical;
+            container.SetPadding(dp24, dp20, dp24, dp8);
+
+            foreach (var (label, value) in rows)
+            {
+                var row = new LinearLayout(this.Context);
+                row.Orientation = Android.Widget.Orientation.Horizontal;
+                row.SetPadding(0, 0, 0, dp8);
+
+                var labelView = new TextView(this.Context);
+                labelView.Text = label;
+                labelView.SetTextSize(ComplexUnitType.Sp, 16);
+                labelView.SetTextColor(labelColor);
+                labelView.LayoutParameters = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WrapContent, 1f);
+
+                var valueView = new TextView(this.Context);
+                valueView.Text = value;
+                valueView.SetTextSize(ComplexUnitType.Sp, 16);
+                valueView.SetTextColor(valueColor);
+                valueView.SetTypeface(valueView.Typeface, TypefaceStyle.Bold);
+                valueView.LayoutParameters = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent);
+
+                row.AddView(labelView);
+                row.AddView(valueView);
+                container.AddView(row);
+            }
+
+            builder.SetView(container);
+
+            var diag = builder.SetPositiveButton(Resource.String.close, OnCloseClick).Create();
+            diag.Show();
+            diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
+        }
+
         public static bool InNightMode(Context c)
         {
             try
@@ -533,27 +603,7 @@ namespace Seeker
                     Browse.BrowseService.RequestFilesApi(SearchResponse.Username, this.View, action, startingDir);
                     return true;
                 case Resource.Id.moreInfo:
-                    //TransferItem[] tempArry = new TransferItem[transferItems.Count]();
-                    //transferItems.CopyTo(tempArry);
-                    //TODOASAP - hasfreeupload slots is now a boolean, fix the string.
-                    var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
-                    var diag = builder.SetMessage(this.Context.GetString(Resource.String.queue_length_) +
-                        SearchResponse.QueueLength +
-                        System.Environment.NewLine +
-                        System.Environment.NewLine +
-                        this.Context.GetString(Resource.String.upload_slots_) +
-                        SearchResponse.HasFreeUploadSlot).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
-                    diag.Show();
-                    //System.Threading.Thread.Sleep(100); Is this required?
-                    //diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(new Android.Graphics.Color(9804764)); makes the whole button invisible...
-                    //if(InNightMode(this.Context))
-                    //{
-                    //    diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(new Android.Graphics.Color(Android.Graphics.Color.ParseColor("#bcc1f7")));
-                    //}
-                    //else
-                    //{
-                    diag.GetButton((int)Android.Content.DialogButtonType.Positive).SetTextColor(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor));
-                    //}
+                    ShowMoreInfoDialog();
                     return true;
                 case Resource.Id.getUserInfo:
                     RequestedUserInfoHelper.RequestUserInfoApi(SearchResponse.Username);

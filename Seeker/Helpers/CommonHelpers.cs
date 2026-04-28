@@ -508,6 +508,18 @@ namespace Seeker
                 atomicFile.FinishWrite(fileStream);
             }
         }
+
+        public static string GetRecentTimeNiceFormated(DateTime timeRan, TimeSpan timeSpan)
+        {
+            return SimpleHelpers.GetRecentTimeNiceFormated(
+                timeRan,
+                timeSpan,
+                SeekerApplication.GetString(Resource.String.just_now),
+                SeekerApplication.GetString(Resource.String.min_ago),
+                SeekerApplication.GetString(Resource.String.hr_ago),
+                SeekerApplication.GetString(Resource.String.yesterday),
+                SeekerApplication.GetString(Resource.String.days_ago));
+        }
     }
 
 }
