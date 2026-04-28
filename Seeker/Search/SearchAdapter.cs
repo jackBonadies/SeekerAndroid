@@ -86,7 +86,6 @@ namespace Seeker
                         int padEnd = (int)(2 * mainLayout.Resources.DisplayMetrics.Density);
                         mainLayout.SetPaddingRelative(mainLayout.PaddingStart, mainLayout.PaddingTop, padEnd, mainLayout.PaddingBottom);
                     }
-                    view.FindViewById<FrameLayout>(Resource.Id.expandClickArea).Click += UnifiedChevronClick;
                 }
                 return new SearchViewHolder(view);
             }
