@@ -75,6 +75,8 @@
         <item name="expandableModernFilesBg">#ffffff</item>
         <item name="expandableModernSeparatorColor">#18000000</item>
 
+        <item name="searchHeaderBackground">@android:color/transparent</item>
+
         <item name="the_rounded_corner_background_drawable">
             @drawable/rounded_corner_background_light
         </item>
@@ -227,6 +229,8 @@
         <item name="mainTextColorHinted">#dddddd</item>
         <item name="mainTextColorHintedFlair">#bcc1f7</item>
         <item name="searchTabButtonColor">?attr/mainTextColorHinted</item>
+
+        <item name="searchHeaderBackground">#303030</item>
     </style>
 
     <style name="DefaultDark_Blue" parent="DefaultDark">
@@ -339,6 +343,8 @@
             ?attr/the_rounded_corner_dialog_background_drawable
         </item>
         <!--<item name="dialogBackground">#52000000</item>-->
+
+        <item name="searchHeaderBackground">#00000000</item>
     </style>
 
     <style name="Amoled_Grey" parent="Amoled">

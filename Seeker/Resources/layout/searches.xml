@@ -45,6 +45,7 @@
             android:id="@+id/recyclerViewChips"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="?attr/searchHeaderBackground"
             app:layout_scrollFlags="scroll|enterAlways" />
 		<View
 			android:layout_width="match_parent"
@@ -269,6 +270,7 @@
                 android:textColor="?attr/cellTextColorSubdued"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="4dp"
+				android:visibility="gone"
             />
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/formatToggleGroup"
@@ -280,6 +282,7 @@
                 app:singleSelection="true"
                 app:selectionRequired="true"
                 app:checkedButton="@id/formatAny"
+				android:visibility="gone"
             >
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/formatAny"
@@ -338,6 +341,7 @@
                 android:textColor="?attr/cellTextColorSubdued"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="8dp"
+				android:visibility="gone"
             />
             <com.google.android.material.button.MaterialButtonToggleGroup
                 android:id="@+id/bitrateToggleGroup"
@@ -350,6 +354,7 @@
                 app:singleSelection="true"
                 app:selectionRequired="true"
                 app:checkedButton="@id/bitrateAny"
+				android:visibility="gone"
             >
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/bitrateAny"
