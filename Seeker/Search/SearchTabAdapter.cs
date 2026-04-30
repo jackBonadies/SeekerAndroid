@@ -186,13 +186,22 @@ namespace Seeker
                 if (searchTab.LastRanTime != DateTime.MinValue)
                 {
                     timeString = " · " + CommonHelpers.GetRecentTimeNiceFormated(searchTab.LastRanTime, SimpleHelpers.GetDateTimeNowSafe().Subtract(searchTab.LastRanTime));
-                } 
+                }
                 else
                 {
                     timeString = this.Context.GetString(Resource.String.wishlist_never_run);
                 }
                 var resultsString = string.Format(this.Context.GetString(Resource.String.wishlist_results_count), searchTab.LastSearchResultsCount);
-                numResults.Text = resultsString + timeString;
+                string unseenString = string.Empty;
+                if (searchTab.UnseenCount > 0)
+                {
+                    int n = searchTab.UnseenCount;
+                    string label = n == 1
+                        ? this.Context.GetString(Resource.String.new_result)
+                        : this.Context.GetString(Resource.String.new_results);
+                    unseenString = " · " + n + " " + label;
+                }
+                numResults.Text = resultsString + timeString + unseenString;
             }
             else
             {

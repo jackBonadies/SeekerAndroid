@@ -78,8 +78,13 @@ namespace Seeker.Search
         public const string FromWishlistStringID = "FromWishlistTabIDToGoTo";
         public static void SearchCompleted(int id)
         {
-            OldResultsToCompare.TryRemove(id, out _); 
-            int newUniqueResults = SearchTabHelper.SearchTabCollection[id].SearchResponses.Count - OldNumResults[id];
+            OldResultsToCompare.TryRemove(id, out _);
+            var completedTab = SearchTabHelper.SearchTabCollection[id];
+            lock (completedTab.SortHelperLockObject)
+            {
+                completedTab.UnseenCount = completedTab.UnseenResults?.Count ?? 0;
+            }
+            int newUniqueResults = completedTab.SearchResponses.Count - OldNumResults[id];
 
             if (newUniqueResults >= 1)
             {

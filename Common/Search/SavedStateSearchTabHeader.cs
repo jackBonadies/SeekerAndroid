@@ -19,6 +19,9 @@ namespace Seeker
         [JsonInclude]
         public int LastSearchResultsCount { get; private set; }
 
+        [JsonInclude]
+        public int UnseenCount { get; set; }
+
         public SavedStateSearchTabHeader()
         {
 
@@ -35,6 +38,14 @@ namespace Seeker
             LastSearchTerm = info.GetString("LastSearchTerm");
             LastRanTime = info.GetInt64("LastRanTime");
             LastSearchResultsCount = info.GetInt32("LastSearchResultsCount");
+            try
+            {
+                UnseenCount = info.GetInt32("UnseenCount");
+            }
+            catch (SerializationException)
+            {
+                UnseenCount = 0;
+            }
         }
 
         /// <summary>
@@ -47,17 +58,19 @@ namespace Seeker
             info.AddValue("LastSearchTerm", LastSearchTerm);
             info.AddValue("LastRanTime", LastRanTime);
             info.AddValue("LastSearchResultsCount", LastSearchResultsCount);
+            info.AddValue("UnseenCount", UnseenCount);
         }
 
         /// <summary>
         /// Get what you need to display the tab (i.e. result count, term, last ran)
         /// </summary>
-        public static SavedStateSearchTabHeader GetSavedStateHeaderFromTab(string lastSearchTerm, int lastSearchResultsCount, long lastRanTimeTicks)
+        public static SavedStateSearchTabHeader GetSavedStateHeaderFromTab(string lastSearchTerm, int lastSearchResultsCount, long lastRanTimeTicks, int unseenCount)
         {
             SavedStateSearchTabHeader searchTabState = new SavedStateSearchTabHeader();
             searchTabState.LastSearchResultsCount = lastSearchResultsCount;
             searchTabState.LastSearchTerm = lastSearchTerm;
             searchTabState.LastRanTime = lastRanTimeTicks;
+            searchTabState.UnseenCount = unseenCount;
             return searchTabState;
         }
     }

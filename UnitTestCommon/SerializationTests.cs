@@ -146,7 +146,7 @@ namespace UnitTestCommon
         [Test]
         public void SavedStateSearchTabHeader_RoundTrip_Json()
         {
-            var header = SavedStateSearchTabHeader.GetSavedStateHeaderFromTab("my search term", 42, 637500000000000000L);
+            var header = SavedStateSearchTabHeader.GetSavedStateHeaderFromTab("my search term", 42, 637500000000000000L, 5);
 
             var dict = new Dictionary<int, SavedStateSearchTabHeader> { { 1, header } };
             var serialized = SerializationHelper.SaveSavedStateHeaderDictToString(dict);
@@ -157,6 +157,7 @@ namespace UnitTestCommon
             Assert.AreEqual("my search term", restored[1].LastSearchTerm);
             Assert.AreEqual(42, restored[1].LastSearchResultsCount);
             Assert.AreEqual(637500000000000000L, restored[1].LastRanTime);
+            Assert.AreEqual(5, restored[1].UnseenCount);
         }
 
         [Test]

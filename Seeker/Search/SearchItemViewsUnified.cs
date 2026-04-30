@@ -6,6 +6,7 @@ using Android.Views;
 using Android.Widget;
 using Common;
 using Seeker.Extensions.SearchResponseExtensions;
+using Seeker.Helpers;
 using Seeker.Search;
 using Soulseek;
 
@@ -82,6 +83,7 @@ namespace Seeker
         protected LinearLayout viewToHideShow;
         protected FrameLayout expandClickArea;
         protected ImageView imageViewExpandable;
+        protected View viewNewIndicator;
         protected bool hideLocked;
 
         public bool IsExpandable;
@@ -101,6 +103,34 @@ namespace Seeker
             expandClickArea = FindViewById<FrameLayout>(Resource.Id.expandClickArea);
             imageViewExpandable = FindViewById<ImageView>(Resource.Id.expandableClick);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
+        }
+
+        public bool HasNewIndicator => viewNewIndicator != null;
+
+        public void ApplyNewIndicator(bool isNew)
+        {
+            if (isNew)
+            {
+                if (viewNewIndicator == null)
+                {
+                    var bar = new View(Context);
+                    float density = Resources.DisplayMetrics.Density;
+                    var lp = new RelativeLayout.LayoutParams((int)(4 * density), RelativeLayout.LayoutParams.MatchParent);
+                    lp.AddRule(LayoutRules.AlignParentStart);
+                    lp.AddRule(LayoutRules.AlignParentTop);
+                    lp.AddRule(LayoutRules.AlignParentBottom);
+                    bar.LayoutParameters = lp;
+                    int accent = UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.colorPrimary);
+                    bar.SetBackgroundColor(new Color(accent));
+                    AddView(bar);
+                    viewNewIndicator = bar;
+                }
+                viewNewIndicator.Visibility = ViewStates.Visible;
+            }
+            else if (viewNewIndicator != null)
+            {
+                viewNewIndicator.Visibility = ViewStates.Gone;
+            }
         }
 
         public void ApplyExpandableMode()

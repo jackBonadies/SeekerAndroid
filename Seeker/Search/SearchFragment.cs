@@ -261,7 +261,13 @@ namespace Seeker
                 return;
             }
 
+            int previousTab = SearchTabHelper.CurrentTab;
             SearchTabHelper.CurrentTab = tabToGoTo;
+
+            if (previousTab != tabToGoTo)
+            {
+                SearchTabHelper.ClearUnseenForTab(previousTab, SeekerState.ActiveActivityRef);
+            }
 
             if (SeekerState.MainActivityRef == null)
             {
@@ -315,12 +321,12 @@ namespace Seeker
                     Logger.Debug("filtering...");
                     UpdateFilteredResponses(searchTab);
                 }
-                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(searchTab.UI_SearchResponses));
+                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(searchTab, searchTab.UI_SearchResponses));
             }
             else
             {
                 searchTab.UI_SearchResponses = responsesForRender.ToList();
-                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(searchTab.UI_SearchResponses));
+                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(searchTab, searchTab.UI_SearchResponses));
             }
 
             SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(searchTab.ChipDataItems ?? new List<ChipDataItem>());
@@ -819,12 +825,12 @@ namespace Seeker
 
             if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
             {
-                rv.SetAdapter(CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
+                rv.SetAdapter(CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
             }
             else
             {
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses.ToList();
-                rv.SetAdapter(CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
+                rv.SetAdapter(CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
             }
         }
 
@@ -939,12 +945,12 @@ namespace Seeker
             recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
             if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
             {
-                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
+                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
             }
             else
             {
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses.ToList();
-                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
+                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
             }
 
             searchResultsHeaderView = rootView.FindViewById<View>(Resource.Id.searchResultsHeader);
@@ -1963,7 +1969,7 @@ namespace Seeker
                 SearchFragment.Instance.ClearFilterStringAndCached();
 
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses?.ToList();
-                SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.CreateSearchAdapter(SearchTabHelper.UI_SearchResponses));
+                SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
 
                 SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
@@ -1990,9 +1996,9 @@ namespace Seeker
         private SearchAdapterRecyclerVersion recyclerSearchAdapter;
         private View searchResultsHeaderView;
 
-        private SearchAdapterRecyclerVersion CreateSearchAdapter(List<SearchResponse> responses)
+        private SearchAdapterRecyclerVersion CreateSearchAdapter(SearchTab tab, List<SearchResponse> responses)
         {
-            recyclerSearchAdapter = new SearchAdapterRecyclerVersion(responses);
+            recyclerSearchAdapter = new SearchAdapterRecyclerVersion(tab, responses);
             return recyclerSearchAdapter;
         }
 
@@ -2029,7 +2035,7 @@ namespace Seeker
             var prevList = GetOldList(cacheKey);
             if (prevList == null)
             {
-                Instance.recyclerViewTransferItems.SetAdapter(Instance.CreateSearchAdapter(newResults));
+                Instance.recyclerViewTransferItems.SetAdapter(Instance.CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, newResults));
             }
             else
             {
@@ -2080,6 +2086,10 @@ namespace Seeker
                                 continue;
                             }
                             tab.SortHelper.Add(splitResponse, null);
+                            if (fromWishlist)
+                            {
+                                tab.UnseenResults.Add(splitResponse);
+                            }
                         }
                     }
                     else
@@ -2087,6 +2097,10 @@ namespace Seeker
                         if (!fromWishlist || !WishlistController.OldResultsToCompare[fromTab].Contains(resp))
                         {
                             tab.SortHelper.Add(resp, null);
+                            if (fromWishlist)
+                            {
+                                tab.UnseenResults.Add(resp);
+                            }
                         }
                     }
                 }

@@ -12,6 +12,8 @@ namespace Seeker
     public class SearchTab
     {
         public List<SearchResponse> SearchResponses = new List<SearchResponse>();
+        public HashSet<SearchResponse> UnseenResults = new HashSet<SearchResponse>(new SearchResponseComparer(PreferencesState.HideLockedResultsInSearch));
+        public int UnseenCount = 0;
         public Task DiskLoadTask = null;
         public bool DiskLoadInProgress => DiskLoadTask != null && !DiskLoadTask.IsCompleted;
         public readonly object DiskLoadLock = new object();
@@ -79,6 +81,11 @@ namespace Seeker
             clone.LastRanTime = this.LastRanTime;
             clone.ChipDataItems = this.ChipDataItems;
             clone.ChipsFilter = this.ChipsFilter;
+            foreach (var r in this.UnseenResults)
+            {
+                clone.UnseenResults.Add(r);
+            }
+            clone.UnseenCount = this.UnseenCount;
             return clone;
         }
     }

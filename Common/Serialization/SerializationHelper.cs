@@ -279,5 +279,15 @@ namespace Seeker
         {
                 return MessagePack.MessagePackSerializer.Deserialize<List<SearchResponse>>(inputStream, options: SearchResponseOptions);
         }
+
+        public static byte[] SaveUnseenIndicesToByteArray(int[] indices)
+        {
+            return MessagePack.MessagePackSerializer.Serialize(indices);
+        }
+
+        public static int[] RestoreUnseenIndicesFromStream(System.IO.Stream inputStream)
+        {
+            return MessagePack.MessagePackSerializer.Deserialize<int[]>(inputStream);
+        }
     }
 }

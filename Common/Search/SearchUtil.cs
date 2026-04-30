@@ -51,7 +51,7 @@ namespace Common.Search
         /// </summary>
         /// <param name="savedState"></param>
         /// <returns></returns>
-        public static SearchTab GetTabFromSavedState(List<SearchResponse> searchResponses, SearchTab oldTab = null)
+        public static SearchTab GetTabFromSavedState(List<SearchResponse> searchResponses, SearchTab oldTab = null, int[] unseenIndices = null)
         {
             SearchTab searchTab = new SearchTab();
             searchTab.SearchResponses = searchResponses;
@@ -75,6 +75,21 @@ namespace Common.Search
                 {
 
                 }
+            }
+            if (unseenIndices != null)
+            {
+                foreach (int idx in unseenIndices)
+                {
+                    if (idx >= 0 && idx < searchResponses.Count)
+                    {
+                        searchTab.UnseenResults.Add(searchResponses[idx]);
+                    }
+                }
+                searchTab.UnseenCount = searchTab.UnseenResults.Count;
+            }
+            else
+            {
+                searchTab.UnseenCount = oldTab.UnseenCount;
             }
             searchTab.ChipDataItems = ChipsHelper.CalculateChipItems(searchResponses, oldTab.LastSearchTerm, PreferencesState.SmartFilterOptions, PreferencesState.HideLockedResultsInSearch);
             return searchTab;
