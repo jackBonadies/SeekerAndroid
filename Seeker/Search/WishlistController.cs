@@ -138,9 +138,17 @@ namespace Seeker.Search
                     //this is incase someone is privileged (searching every 2 mins) and perhaps they only have 1 wishlist search.  we dont want the second to begin when the first hasnt even ended.
                     //there arent really any downsides if this happens actually....
 
-                    if (!SearchTabHelper.SearchTabCollection[oldestId].IsLoaded())
+                    var oldestTab = SearchTabHelper.SearchTabCollection[oldestId];
+                    if (!oldestTab.IsLoaded())
                     {
-                        SearchTabHelper.RestoreSearchResultsFromDisk(oldestId, SeekerState.ActiveActivityRef);
+                        if (oldestTab.DiskLoadTask != null)
+                        {
+                            oldestTab.DiskLoadTask.Wait();
+                        }
+                        else
+                        {
+                            SearchTabHelper.RestoreSearchResultsFromDisk(oldestId, SeekerState.ActiveActivityRef);
+                        }
                     }
 
 

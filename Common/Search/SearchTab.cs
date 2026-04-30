@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 using Common;
 namespace Seeker
@@ -11,6 +12,9 @@ namespace Seeker
     public class SearchTab
     {
         public List<SearchResponse> SearchResponses = new List<SearchResponse>();
+        public Task DiskLoadTask = null;
+        public bool DiskLoadInProgress => DiskLoadTask != null && !DiskLoadTask.IsCompleted;
+        public readonly object DiskLoadLock = new object();
         public SortedDictionary<SearchResponse, object> SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparable(PreferencesState.DefaultSearchResultSortAlgorithm));
         public SearchResultSorting SortHelperSorting = PreferencesState.DefaultSearchResultSortAlgorithm;
         public object SortHelperLockObject = new object();

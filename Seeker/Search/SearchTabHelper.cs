@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+using System.Threading.Tasks;
 using Seeker.Helpers;
 using Common;
 using Common.Search;
@@ -148,6 +149,51 @@ namespace Seeker.Helpers
 
                 var restoredSearchResponses = SerializationHelper.RestoreSearchResponsesFromStream(inputStream);
                 return restoredSearchResponses;
+            }
+        }
+
+        public static Task EnsureLoadedAsync(int tabId, Context c)
+        {
+            var tab = SearchTabHelper.SearchTabCollection[tabId];
+            if (tab.IsLoaded())
+            {
+                return Task.CompletedTask;
+            }
+
+            lock (tab.DiskLoadLock)
+            {
+                if (tab.DiskLoadTask != null)
+                {
+                    return tab.DiskLoadTask;
+                }
+                if (tab.IsLoaded())
+                {
+                    return Task.CompletedTask;
+                }
+
+                var tcs = new TaskCompletionSource<bool>();
+                tab.DiskLoadTask = tcs.Task;
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        RestoreSearchResultsFromDisk(tabId, c);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Logger.Firebase("async restore fail " + ex.Message);
+                    }
+                    finally
+                    {
+                        var newTab = SearchTabHelper.SearchTabCollection[tabId];
+                        if (newTab != tab)
+                        {
+                            newTab.DiskLoadTask = tcs.Task;
+                        }
+                        tcs.SetResult(true);
+                    }
+                });
+                return tcs.Task;
             }
         }
 
