@@ -366,6 +366,12 @@ namespace Seeker
             }
         }
 
+        public void SetItems(List<Soulseek.RoomInfo> items)
+        {
+            localDataSet = items ?? new List<Soulseek.RoomInfo>();
+            NotifyDataSetChanged();
+        }
+
         public void notifyRoomStatusChanged(string roomName)
         {
             for (int i = 0; i < localDataSet.Count; i++)

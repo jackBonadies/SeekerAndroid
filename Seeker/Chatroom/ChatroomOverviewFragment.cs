@@ -49,7 +49,6 @@ namespace Seeker.Chatroom
             recyclerAdapter = new ChatroomOverviewRecyclerAdapter(FilterRoomList(CurrentParsedList)); //this depends tightly on MessageController... since these are just strings..
             recyclerViewOverview.SetAdapter(recyclerAdapter);
             recyclerViewOverview.SetLayoutManager(recycleLayoutManager);
-            recyclerAdapter.NotifyDataSetChanged();
 
             HookUpOverviewEventHandlers(true);
 
@@ -154,10 +153,8 @@ namespace Seeker.Chatroom
             var activity = this.Activity != null ? this.Activity : ChatroomActivity.ChatroomActivityRef;
             activity?.RunOnUiThread(new Action(() =>
             {
-                recyclerAdapter = new ChatroomOverviewRecyclerAdapter(filteredRoomList); //this depends tightly on MessageController... since these are just strings..
                 chatroomsListLoadingView.Visibility = ViewStates.Gone;
-                recyclerViewOverview.SetAdapter(recyclerAdapter);
-                recyclerAdapter.NotifyDataSetChanged();
+                recyclerAdapter?.SetItems(filteredRoomList);
             }
             ));
         }
@@ -169,9 +166,7 @@ namespace Seeker.Chatroom
             if (created) //attach can happen before we created our view...
             {
                 ChatroomController.RefreshParsedList();
-                recyclerAdapter = new ChatroomOverviewRecyclerAdapter(FilterRoomList(CurrentParsedList)); //this depends tightly on MessageController... since these are just strings..
-                recyclerViewOverview.SetAdapter(recyclerAdapter);
-                recyclerAdapter.NotifyDataSetChanged();
+                UpdateChatroomList();
                 Logger.Debug("on chatroom overview attach");
                 ChatroomController.RoomListReceived -= OnChatListReceived;
                 ChatroomController.RoomListReceived += OnChatListReceived;
