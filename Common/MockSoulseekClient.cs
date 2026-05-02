@@ -1156,6 +1156,7 @@ namespace Seeker
             bool isChipTestOther = joinedTerms.Contains("chiptest") && joinedTerms.Contains("other");
             bool isSlowSearch = joinedTerms.Contains("slowsearch");
             bool is0Results = joinedTerms.Contains("0results");
+            bool is1Results = joinedTerms.Contains("1results");
             bool isCurated = isBeethovenOverture || isChipTestOther;
 
             var allResponses = new List<SearchResponse>();
@@ -1221,6 +1222,15 @@ namespace Seeker
             else if (is0Results)
             {
                 await Task.Delay(10000).ConfigureAwait(false);
+            }
+            else if (is1Results)
+            {
+                await Task.Delay(8000).ConfigureAwait(false);
+                var response = GenerateMockSearchResponse(resolvedToken, search);
+                allResponses.Add(response);
+                var currentSearch = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.InProgress, 1, 0, 0);
+                options?.ResponseReceived?.Invoke((currentSearch, response));
+                await Task.Delay(2000).ConfigureAwait(false);
             }
             else
             {
