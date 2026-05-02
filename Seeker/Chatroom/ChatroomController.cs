@@ -249,11 +249,11 @@ namespace Seeker.Chatroom
 
         public static void RefreshParsedList()
         {
-            RoomListParsed = RoomList != null ? GetParsedList(RoomList) : null;
+            RoomListParsed = RoomList != null ? ParseRoomListForPresentation(RoomList) : null;
         }
 
         //TODO2026 move to lower
-        public static List<Soulseek.RoomInfo> GetParsedList(Soulseek.RoomList roomList)
+        public static List<Soulseek.RoomInfo> ParseRoomListForPresentation(Soulseek.RoomList roomList)
         {
             List<Soulseek.RoomInfo> ownedList = roomList.Owned.ToList();
             List<Soulseek.RoomInfo> publicList = roomList.Public.ToList();
@@ -908,7 +908,7 @@ namespace Seeker.Chatroom
                 else
                 {
                     RoomList = task.Result;
-                    RoomListParsed = GetParsedList(RoomList);
+                    RoomListParsed = ParseRoomListForPresentation(RoomList);
                     if (feedback)
                     {
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.room_list_received), ToastLength.Short);

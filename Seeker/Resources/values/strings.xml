@@ -120,9 +120,7 @@
     <string name="filter_sheet_count">{0}</string>
     <string name="messages">Messages</string>
     <string name="browse_files">Browse Files</string>
-    <string name="chatroomListLoading">
-        Requesting list of available chatrooms.  Please Wait...
-    </string>
+    <string name="chatroomsLoading">Loading chatrooms...</string>
     <string name="privateRoomCreation">Requesting private room creation</string>
     <string name="requesting_room_list">Requesting Room List</string>
     <string name="requesting_user_info">Requesting User\'s Info</string>

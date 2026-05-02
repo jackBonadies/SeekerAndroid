@@ -20,7 +20,7 @@ namespace Seeker.Chatroom
         private ChatroomOverviewRecyclerAdapter recyclerAdapter;
         private SearchView filterChatroomView;
         private static string FilterString = string.Empty;
-        private TextView chatroomsListLoadingView = null;
+        private View chatroomsListLoadingView = null;
         private bool created = false;
 
         private static List<Soulseek.RoomInfo> CurrentParsedList =>
@@ -30,7 +30,7 @@ namespace Seeker.Chatroom
             Logger.Debug("create chatroom overview view");
             ChatroomController.RoomListReceived += OnChatListReceived;
             View rootView = inflater.Inflate(Resource.Layout.chatroom_overview, container, false);
-            chatroomsListLoadingView = rootView.FindViewById<TextView>(Resource.Id.chatroomListLoading);
+            chatroomsListLoadingView = rootView.FindViewById<View>(Resource.Id.chatroomListLoading);
             filterChatroomView = rootView.FindViewById<SearchView>(Resource.Id.filterChatroom);
             filterChatroomView.QueryTextChange += FilterChatroomView_QueryTextChange;
             recyclerViewOverview = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewOverview);

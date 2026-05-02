@@ -26,16 +26,33 @@
         android:layout_height="wrap_content"
         android:id="@+id/recyclerViewOverview"
     />
-    <TextView
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:text="@string/chatroomListLoading"
-        android:id="@+id/chatroomListLoading"
-        android:textAlignment="center"
-        android:layout_centerHorizontal="true"
-        android:paddingBottom="150dp"
-        android:layout_centerVertical="true"
-        android:textColor="?attr/mainTextColorHinted"
-        android:textSize="20dp"
-    />
+
+	<LinearLayout
+	android:id="@+id/chatroomListLoading"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:layout_below="@id/filterChatroom"
+	android:layout_centerHorizontal="true"
+	android:layout_marginTop="130dp"
+	android:orientation="vertical"
+	android:gravity="center_horizontal">
+
+		<com.google.android.material.progressindicator.CircularProgressIndicator
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			app:indicatorSize="120dp"
+			app:trackCornerRadius="5dp"
+			app:trackThickness="6dp"
+			app:indicatorColor="?attr/mainPurple"
+			android:indeterminateOnly="true" />
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/chatroomsLoading"
+			android:textSize="18sp"
+			android:textColor="?attr/cellTextColor"
+			android:layout_marginTop="16dp" />
+
+	</LinearLayout>
 </RelativeLayout>
