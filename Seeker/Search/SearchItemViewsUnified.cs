@@ -84,6 +84,7 @@ namespace Seeker
         protected FrameLayout expandClickArea;
         protected ImageView imageViewExpandable;
         protected View viewNewIndicator;
+        protected LinearLayout primaryRow;
         protected bool hideLocked;
 
         public bool IsExpandable;
@@ -102,6 +103,8 @@ namespace Seeker
             viewToHideShow = FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
             expandClickArea = FindViewById<FrameLayout>(Resource.Id.expandClickArea);
             imageViewExpandable = FindViewById<ImageView>(Resource.Id.expandableClick);
+            primaryRow = FindViewById<LinearLayout>(Resource.Id.searchItemPrimaryRow)
+                ?? FindViewById<LinearLayout>(Resource.Id.relativeLayout1);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
         }
 
@@ -115,14 +118,10 @@ namespace Seeker
                 {
                     var bar = new View(Context);
                     float density = Resources.DisplayMetrics.Density;
-                    var lp = new RelativeLayout.LayoutParams((int)(4 * density), RelativeLayout.LayoutParams.MatchParent);
-                    lp.AddRule(LayoutRules.AlignParentStart);
-                    lp.AddRule(LayoutRules.AlignParentTop);
-                    lp.AddRule(LayoutRules.AlignParentBottom);
-                    bar.LayoutParameters = lp;
-                    int accent = UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.colorPrimary);
-                    bar.SetBackgroundColor(new Color(accent));
-                    AddView(bar);
+                    bar.LayoutParameters = new LinearLayout.LayoutParams(
+                        (int)(4 * density), LinearLayout.LayoutParams.MatchParent);
+                    bar.SetBackgroundColor(UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.colorPrimary));
+                    primaryRow.AddView(bar, 0);
                     viewNewIndicator = bar;
                 }
                 viewNewIndicator.Visibility = ViewStates.Visible;
