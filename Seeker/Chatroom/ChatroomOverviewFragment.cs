@@ -19,11 +19,12 @@ namespace Seeker.Chatroom
         private LinearLayoutManager recycleLayoutManager;
         private ChatroomOverviewRecyclerAdapter recyclerAdapter;
         private SearchView filterChatroomView;
-        private Soulseek.RoomList internalList = null;
-        private List<Soulseek.RoomInfo> internalListParsed = null;
         private static string FilterString = string.Empty;
         private TextView chatroomsListLoadingView = null;
         private bool created = false;
+
+        private static List<Soulseek.RoomInfo> CurrentParsedList =>
+            ChatroomController.RoomListParsed ?? new List<Soulseek.RoomInfo>();
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             Logger.Debug("create chatroom overview view");
@@ -32,29 +33,20 @@ namespace Seeker.Chatroom
             chatroomsListLoadingView = rootView.FindViewById<TextView>(Resource.Id.chatroomListLoading);
             filterChatroomView = rootView.FindViewById<SearchView>(Resource.Id.filterChatroom);
             filterChatroomView.QueryTextChange += FilterChatroomView_QueryTextChange;
-            if (ChatroomController.RoomList == null)
-            {
-                chatroomsListLoadingView.Visibility = ViewStates.Visible;
-            }
-            else
-            {
-                chatroomsListLoadingView.Visibility = ViewStates.Gone;
-            }
             recyclerViewOverview = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewOverview);
             recyclerViewOverview.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
             recycleLayoutManager = new LinearLayoutManager(Activity);
             if (ChatroomController.RoomList == null)
             {
-                internalList = null;
-                internalListParsed = new List<Soulseek.RoomInfo>();
+                chatroomsListLoadingView.Visibility = ViewStates.Visible;
                 ChatroomController.GetRoomListApi();
             }
             else
             {
-                internalList = ChatroomController.RoomList;
-                internalListParsed = ChatroomController.GetParsedList(ChatroomController.RoomList);
+                chatroomsListLoadingView.Visibility = ViewStates.Gone;
+                ChatroomController.RefreshParsedList();
             }
-            recyclerAdapter = new ChatroomOverviewRecyclerAdapter(FilterRoomList(internalListParsed)); //this depends tightly on MessageController... since these are just strings..
+            recyclerAdapter = new ChatroomOverviewRecyclerAdapter(FilterRoomList(CurrentParsedList)); //this depends tightly on MessageController... since these are just strings..
             recyclerViewOverview.SetAdapter(recyclerAdapter);
             recyclerViewOverview.SetLayoutManager(recycleLayoutManager);
             recyclerAdapter.NotifyDataSetChanged();
@@ -112,9 +104,7 @@ namespace Seeker.Chatroom
         public void OnJoinedRoomsHaveUpdated(object sender, EventArgs e)
         {
             Logger.Debug("OnJoinedRoomsHaveUpdated");
-            ChatroomController.RoomListParsed = ChatroomController.GetParsedList(ChatroomController.RoomList); //reparse this for our newly joined rooms.
-            internalList = ChatroomController.RoomList;
-            internalListParsed = ChatroomController.RoomListParsed;
+            ChatroomController.RefreshParsedList(); //reparse this for our newly joined rooms.
             this.UpdateChatroomList();
         }
 
@@ -154,16 +144,13 @@ namespace Seeker.Chatroom
 
         public void OnChatListReceived(object sender, EventArgs eventArgs)
         {
-            internalList = ChatroomController.RoomList;
-            internalListParsed = ChatroomController.RoomListParsed; //here it is already parsed.
-
             this.UpdateChatroomList();
         }
 
         private void UpdateChatroomList()
         {
             Logger.Debug("update chatroom list");
-            var filteredRoomList = FilterRoomList(internalListParsed);
+            var filteredRoomList = FilterRoomList(CurrentParsedList);
             var activity = this.Activity != null ? this.Activity : ChatroomActivity.ChatroomActivityRef;
             activity?.RunOnUiThread(new Action(() =>
             {
@@ -177,36 +164,12 @@ namespace Seeker.Chatroom
 
 
 
-        //public void OnMessageReceived(object sender, Message msg)
-        //{
-        //    var activity = this.Activity != null ? this.Activity : MessagesActivity.MessagesActivityRef;
-        //    activity.RunOnUiThread(new Action(() => {
-        //        if (internalList != null && internalList.Contains(msg.Username))
-        //        {
-        //            //update this one...
-        //            recyclerAdapter.NotifyItemChanged(internalList.IndexOf(msg.Username));
-        //        }
-        //        else
-        //        {
-        //            internalList = MessageController.Messages.Keys.ToList();
-        //            if (internalList.Count != 0)
-        //            {
-        //                noMessagesView.Visibility = ViewStates.Gone;
-        //            }
-        //            recyclerAdapter = new MessagesOverviewRecyclerAdapter(internalList); //this depends tightly on MessageController... since these are just strings..
-        //            recyclerViewOverview.SetAdapter(recyclerAdapter);
-        //            recyclerAdapter.NotifyDataSetChanged();
-        //        }
-        //    }));
-        //}
-
         public override void OnAttach(Context activity)
         {
             if (created) //attach can happen before we created our view...
             {
-                internalList = ChatroomController.RoomList;
-                internalListParsed = ChatroomController.GetParsedList(ChatroomController.RoomList);
-                recyclerAdapter = new ChatroomOverviewRecyclerAdapter(FilterRoomList(internalListParsed)); //this depends tightly on MessageController... since these are just strings..
+                ChatroomController.RefreshParsedList();
+                recyclerAdapter = new ChatroomOverviewRecyclerAdapter(FilterRoomList(CurrentParsedList)); //this depends tightly on MessageController... since these are just strings..
                 recyclerViewOverview.SetAdapter(recyclerAdapter);
                 recyclerAdapter.NotifyDataSetChanged();
                 Logger.Debug("on chatroom overview attach");
@@ -215,12 +178,6 @@ namespace Seeker.Chatroom
             }
             base.OnAttach(activity);
         }
-
-        //public override void OnDetach()
-        //{
-        //    Logger.Debug("chat overview OnDetach -- nulling");
-        //    base.OnDetach();
-        //}
     }
 
 }

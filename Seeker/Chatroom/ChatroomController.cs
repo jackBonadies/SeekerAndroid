@@ -247,6 +247,11 @@ namespace Seeker.Chatroom
             }
         }
 
+        public static void RefreshParsedList()
+        {
+            RoomListParsed = RoomList != null ? GetParsedList(RoomList) : null;
+        }
+
         //TODO2026 move to lower
         public static List<Soulseek.RoomInfo> GetParsedList(Soulseek.RoomList roomList)
         {
@@ -308,9 +313,9 @@ namespace Seeker.Chatroom
             if (roomList.PublicCount != 0)
             {
                 allRooms.Add(new RoomInfoCategory(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.public_room)));
-                List<Soulseek.RoomInfo> noSpam = publicList.Where((roomInfo) => { return !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
-                noSpam.Sort(new RoomCountComparer());
-                allRooms.AddRange(noSpam);
+                List<Soulseek.RoomInfo> filtered = publicList.Where((roomInfo) => { return !JoinedRoomNames.Contains(roomInfo.Name); }).ToList();
+                filtered.Sort(new RoomCountComparer());
+                allRooms.AddRange(filtered);
             }
 
             return allRooms;
