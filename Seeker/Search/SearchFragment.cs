@@ -155,11 +155,11 @@ namespace Seeker
                         : Resource.String.expand_all);
                 }
             }
-            //var groupedItem = menu.FindItem(Resource.Id.action_toggle_grouped_chips);
-            //if (groupedItem != null)
-            //{
-            //    groupedItem.SetChecked(PreferencesState.SmartFilterStyle == SmartFilterStyle.Grouped);
-            //}
+            var groupedItem = menu.FindItem(Resource.Id.action_toggle_grouped_chips);
+            if (groupedItem != null)
+            {
+                groupedItem.SetChecked(PreferencesState.SmartFilterStyle == SmartFilterStyle.Grouped);
+            }
             base.OnPrepareOptionsMenu(menu);
         }
 
@@ -408,15 +408,15 @@ namespace Seeker
                     this.Activity?.InvalidateOptionsMenu();
                     SearchResultStyleChanged();
                     return true;
-                //case Resource.Id.action_toggle_grouped_chips:
-                //    PreferencesState.SmartFilterStyle =
-                //        PreferencesState.SmartFilterStyle == SmartFilterStyle.Grouped
-                //            ? SmartFilterStyle.Flat
-                //            : SmartFilterStyle.Grouped;
-                //    PreferencesManager.SaveSmartFilterStyle();
-                //    SwapChipAdapter();
-                //    this.Activity?.InvalidateOptionsMenu();
-                //    return true;
+                case Resource.Id.action_toggle_grouped_chips:
+                    PreferencesState.SmartFilterStyle =
+                        PreferencesState.SmartFilterStyle == SmartFilterStyle.Grouped
+                            ? SmartFilterStyle.Flat
+                            : SmartFilterStyle.Grouped;
+                    PreferencesManager.SaveSmartFilterStyle();
+                    SwapChipAdapter();
+                    this.Activity?.InvalidateOptionsMenu();
+                    return true;
                 case Resource.Id.action_add_to_wishlist:
                     AddSearchToWishlist();
                     return true;
