@@ -56,6 +56,22 @@
             />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/unseenBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="26dp"
+            android:minWidth="26dp"
+            android:layout_marginStart="8dp"
+            android:gravity="center"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:background="@drawable/search_tab_unseen_badge_bg"
+			android:textColor="@color/unreadBadgeText"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+        />
+
         <ImageView
             android:layout_marginStart="6dp"
             android:layout_width="30dp"

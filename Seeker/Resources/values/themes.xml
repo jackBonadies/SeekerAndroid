@@ -67,6 +67,7 @@
         <item name="mainTextColor">#4f58c4</item>
 
         <item name="searchTabHeader">#303030</item>
+        <item name="searchTabPillInactiveColor">#e0e0e0</item>
         <item name="mainTextColorHinted">#4D4D4D</item>
         <item name="mainTextColorHintedFlair">#959BDC</item>
         <item name="searchTabButtonColor">?attr/mainPurple</item>
@@ -226,6 +227,7 @@
         <item name="expandableModernSeparatorColor">#18FFFFFF</item>
 
         <item name="searchTabHeader">#dddddd</item>
+        <item name="searchTabPillInactiveColor">#525252</item>
         <item name="mainTextColorHinted">#dddddd</item>
         <item name="mainTextColorHintedFlair">#bcc1f7</item>
         <item name="searchTabButtonColor">?attr/mainTextColorHinted</item>
@@ -343,6 +345,7 @@
             ?attr/the_rounded_corner_dialog_background_drawable
         </item>
         <!--<item name="dialogBackground">#52000000</item>-->
+        <item name="searchTabPillInactiveColor">#303030</item>
 
         <item name="searchHeaderBackground">#00000000</item>
     </style>

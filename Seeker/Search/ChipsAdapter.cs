@@ -79,15 +79,6 @@ namespace Seeker
             (holder as ChipItemViewHolder).chipItemView.setItem(localDataSet[position]);
         }
 
-
-        //private void SearchTabLayout_Click(object sender, EventArgs e)
-        //{
-        //    position = ((sender as View).Parent.Parent as SearchTabView).ViewHolder.BindingAdapterPosition;
-        //    int tabToGoTo = localDataSet[position];
-        //    SearchFragment.Instance.GoToTab(tabToGoTo, false);
-        //    SearchTabDialog.Instance.Dismiss();
-        //}
-
         public ChipsItemRecyclerAdapter(List<ChipDataItem> ti)
         {
             if (ti == null)

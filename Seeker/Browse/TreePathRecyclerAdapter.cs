@@ -25,9 +25,6 @@ namespace Seeker
             TreePathItemView view = TreePathItemView.inflate(parent);
             view.setupChildren();
             view.ViewFolderName.Click += View_Click;
-            // .inflate(R.layout.text_row_item, viewGroup, false);
-            //(view as SearchTabView).searchTabLayout.Click += SearchTabLayout_Click;
-            //(view as SearchTabView).removeSearch.Click += RemoveSearch_Click;
             return new TreePathItemViewHolder(view as View);
 
 
