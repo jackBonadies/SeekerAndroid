@@ -708,7 +708,7 @@ namespace Seeker
                     }
                     if (searchLoadingTitle != null)
                     {
-                        searchLoadingTitle.Text = GetString(Resource.String.loading_wishlist_label);
+                        searchLoadingTitle.Text = SeekerApplication.GetString(Resource.String.loading_wishlist_label);
                     }
                     if (searchLoadingQueryText != null)
                     {
@@ -733,13 +733,13 @@ namespace Seeker
             if (state == SearchEmptyState.NoResults && noResultsSubtitle != null)
             {
                 noResultsSubtitle.Text = string.Format(
-                    GetString(Resource.String.no_results_subtitle),
+                    SeekerApplication.GetString(Resource.String.no_results_subtitle),
                     SearchTabHelper.LastSearchTerm ?? string.Empty);
             }
             else if (state == SearchEmptyState.AllFiltered && allFilteredTitle != null)
             {
                 allFilteredTitle.Text = string.Format(
-                    GetString(Resource.String.results_hidden_title),
+                    SeekerApplication.GetString(Resource.String.results_hidden_title),
                     total);
             }
 
@@ -811,7 +811,7 @@ namespace Seeker
             }
             if (searchLoadingTitle != null)
             {
-                searchLoadingTitle.Text = GetString(Resource.String.searching_label);
+                searchLoadingTitle.Text = SeekerApplication.GetString(Resource.String.searching_label);
             }
             string term = SearchTabHelper.LastSearchTerm ?? string.Empty;
             double sec = searchStopwatch?.Elapsed.TotalSeconds ?? 0;
@@ -1867,6 +1867,7 @@ namespace Seeker
             base.OnPause();
             PreferencesManager.SaveSearchFragmentFilterState(PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)PreferencesState.SearchResultStyle, ExpandAllResults);
             StopWishlistBannerTicker();
+            StopSpinnerTimer();
         }
 
         private static void Actv_KeyPressHELPER(object sender, View.KeyEventArgs e)
