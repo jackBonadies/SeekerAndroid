@@ -294,6 +294,7 @@ namespace Seeker
         public void RaiseRoomMessageReceived(RoomMessageReceivedEventArgs args) => RoomMessageReceived?.Invoke(this, args);
         public void RaiseRoomJoined(RoomJoinedEventArgs args) => RoomJoined?.Invoke(this, args);
         public void RaiseRoomLeft(RoomLeftEventArgs args) => RoomLeft?.Invoke(this, args);
+        public void RaiseRoomListReceived(RoomList args) => RoomListReceived?.Invoke(this, args);
         public void RaiseUserStatusChanged(UserStatus args) => UserStatusChanged?.Invoke(this, args);
         public void RaiseUserStatisticsChanged(UserStatistics args) => UserStatisticsChanged?.Invoke(this, args);
         public void RaisePrivilegedUserListReceived(IReadOnlyCollection<string> args) => PrivilegedUserListReceived?.Invoke(this, args);
@@ -519,6 +520,43 @@ namespace Seeker
 
         private static readonly Random _random = new Random();
         private static readonly string[] _mockUsernames = { "musiclover42", "vinyl_rips", "flac_hoarder", "mp3collector", "audiophile99", "shareking", "basshead", "djmix", "recorddigger", "soundwave" };
+
+        private static readonly string[] _mockAdjectives =
+        {
+            "happy", "lazy", "brave", "silly", "swift", "quiet", "loud",
+            "mighty", "tiny", "gentle", "fierce", "wise", "lucky", "cool", "wild"
+        };
+
+        private static readonly string[] _mockNouns =
+        {
+            "tiger", "falcon", "river", "mountain", "forest", "panda", "dragon",
+            "wolf", "eagle", "otter", "dolphin", "fox", "lion", "bear", "owl"
+        };
+
+        private static readonly string[] _mockRoomBaseNames =
+        {
+            "records", "indie", "test", "flac", "mp3", "programming",
+            "math", "music", "books", "jazz", "electronic", "rock",
+            "ambient", "metal", "classical", "hiphop"
+        };
+
+        private static string GenerateMockUsername() =>
+            _mockAdjectives[_random.Next(_mockAdjectives.Length)]
+            + _mockNouns[_random.Next(_mockNouns.Length)]
+            + _random.Next(1, 1000);
+
+        private static IEnumerable<RoomInfo> GenerateMockRooms(int count, int stableCount, string suffix)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                string baseName = i < stableCount
+                    ? _mockRoomBaseNames[i % _mockRoomBaseNames.Length]
+                    : _mockRoomBaseNames[_random.Next(_mockRoomBaseNames.Length)]
+                      + "_" + _random.Next(1000, 10000);
+                yield return new RoomInfo(baseName + suffix, _random.Next(1, 1301));
+            }
+        }
+
         private static readonly string[] _mockArtists = { "bach", "beethoven", "mozart" };
         private static readonly string[] _mockAlbums = { "Greatest Hits", "Live Sessions", "Remastered Edition", "Deluxe", "The Collection", "Anthology", "Unplugged", "B-Sides" };
         private static readonly string[] _extensions = { "mp3", "flac", "ogg", "wav", "m4a" };
@@ -1586,10 +1624,20 @@ namespace Seeker
             return Task.FromResult(true);
         }
 
-        public Task<RoomList> GetRoomListAsync(CancellationToken? cancellationToken = null)
+        public async Task<RoomList> GetRoomListAsync(CancellationToken? cancellationToken = null)
         {
-            if (GetRoomListAsyncHandler != null) return GetRoomListAsyncHandler(cancellationToken);
-            return Task.FromResult<RoomList>(null!);
+            if (GetRoomListAsyncHandler != null) return await GetRoomListAsyncHandler(cancellationToken);
+
+            await Task.Delay(20_000).ConfigureAwait(false);
+
+            var roomList = new RoomList(
+                publicList:            GenerateMockRooms(20, stableCount: 8, suffix: "_public"),
+                privateList:           GenerateMockRooms(10, stableCount: 4, suffix: "_private"),
+                ownedList:             GenerateMockRooms(10, stableCount: 4, suffix: "_owned"),
+                moderatedRoomNameList: GenerateMockRooms(10, stableCount: 4, suffix: "_moderated").Select(r => r.Name));
+
+            RaiseRoomListReceived(roomList);
+            return roomList;
         }
 
         public async Task<UserData> WatchUserAsync(string username, CancellationToken? cancellationToken = null)
