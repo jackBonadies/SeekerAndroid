@@ -650,7 +650,7 @@ namespace Seeker
             if (show && noResultsSubtitle != null)
             {
                 noResultsSubtitle.Text = string.Format(
-                    GetString(Resource.String.no_results_subtitle),
+                    SeekerApplication.GetString(Resource.String.no_results_subtitle),
                     SearchTabHelper.LastSearchTerm ?? string.Empty);
             }
             noResultsView.Visibility = show ? ViewStates.Visible : ViewStates.Gone;
@@ -670,7 +670,7 @@ namespace Seeker
             if (show && allFilteredTitle != null)
             {
                 allFilteredTitle.Text = string.Format(
-                    GetString(Resource.String.results_hidden_title),
+                    SeekerApplication.GetString(Resource.String.results_hidden_title),
                     total);
             }
             allFilteredView.Visibility = show ? ViewStates.Visible : ViewStates.Gone;
@@ -1808,6 +1808,7 @@ namespace Seeker
             base.OnPause();
             PreferencesManager.SaveSearchFragmentFilterState(PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)PreferencesState.SearchResultStyle, ExpandAllResults);
             StopWishlistBannerTicker();
+            StopSpinnerTimer();
         }
 
         private static void Actv_KeyPressHELPER(object sender, View.KeyEventArgs e)
