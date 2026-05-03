@@ -1115,34 +1115,6 @@ namespace Seeker
         protected override void OnSaveInstanceState(Bundle outState)
         {
             base.OnSaveInstanceState(outState);
-            outState.PutBoolean(KeyConsts.M_CurrentlyLoggedIn, PreferencesState.CurrentlyLoggedIn);
-            outState.PutString(KeyConsts.M_Username, PreferencesState.Username);
-            outState.PutString(KeyConsts.M_Password, PreferencesState.Password);
-            outState.PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, PreferencesState.SaveDataDirectoryUriIsFromTree);
-            outState.PutString(KeyConsts.M_SaveDataDirectoryUri, PreferencesState.SaveDataDirectoryUri);
-            outState.PutInt(KeyConsts.M_NumberSearchResults, PreferencesState.NumberSearchResults);
-            outState.PutInt(KeyConsts.M_DayNightMode, PreferencesState.DayNightMode);
-            outState.PutBoolean(KeyConsts.M_AutoClearComplete, PreferencesState.AutoClearCompleteDownloads);
-            outState.PutBoolean(KeyConsts.M_AutoClearCompleteUploads, PreferencesState.AutoClearCompleteUploads);
-            outState.PutBoolean(KeyConsts.M_RememberSearchHistory, PreferencesState.RememberSearchHistory);
-            outState.PutBoolean(KeyConsts.M_RememberUserHistory, PreferencesState.ShowRecentUsers);
-            outState.PutBoolean(KeyConsts.M_MemoryBackedDownload, PreferencesState.MemoryBackedDownload);
-            outState.PutBoolean(KeyConsts.M_FilterSticky, PreferencesState.FilterSticky);
-            outState.PutBoolean(KeyConsts.M_OnlyFreeUploadSlots, PreferencesState.FreeUploadSlotsOnly);
-            outState.PutBoolean(KeyConsts.M_HideLockedSearch, PreferencesState.HideLockedResultsInSearch);
-            outState.PutBoolean(KeyConsts.M_HideLockedBrowse, PreferencesState.HideLockedResultsInBrowse);
-            outState.PutBoolean(KeyConsts.M_DisableToastNotifications, PreferencesState.DisableDownloadToastNotification);
-            outState.PutInt(KeyConsts.M_SearchResultStyle, (int)(PreferencesState.SearchResultStyle));
-            outState.PutString(KeyConsts.M_FilterStickyString, SearchTabHelper.TextFilter.FilterString);
-            outState.PutInt(KeyConsts.M_UploadSpeed, PreferencesState.UploadSpeed);
-            //outState.PutString(KeyConsts.M_UploadDirectoryUri, SeekerState.UploadDataDirectoryUri);
-            outState.PutBoolean(KeyConsts.M_AllowPrivateRooomInvitations, PreferencesState.AllowPrivateRoomInvitations);
-            outState.PutBoolean(KeyConsts.M_SharingOn, PreferencesState.SharingOn);
-            if (CommonState.UserList != null)
-            {
-                outState.PutString(KeyConsts.M_UserList, SerializationHelper.SaveUserListToString(CommonState.UserList));
-            }
-
         }
 
         private void Tabs_TabSelected(object sender, TabLayout.TabSelectedEventArgs e)
