@@ -181,7 +181,7 @@ Nombre de dossiers : {5}
     <string name="new_search_tab">Nouvelle Recherche</string>
     <string name="filter_search_results_here">Filtrer les Résultats</string>
     <string name="persist_it">Epinglé</string>
-    <string name="type_chatroom_ticker_message">Poster sur le Salon</string>
+    <string name="type_chatroom_ticker_message">Message du ticker</string>
 
     <string name="change_download_folder">Changer de Dossier de Téléchargement</string>
     <string name="max_search_results">Nombre Max. de Résultats :</string>
@@ -574,7 +574,7 @@ Nombre de dossiers : {5}
     <string name="mod">Modo</string>
 
     <string name="user_">Utilisateur :</string>
-    <string name="set_ticker">Changer le ticker :</string>
+    <string name="set_ticker">Changer le ticker</string>
     <string name="setticker">Changer le ticker</string>
     <string name="chatrooms">Salons de discussion</string>
     <string name="create_chatroom_">Créer un salon de discussion</string>

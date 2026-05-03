@@ -174,7 +174,7 @@ Könyvtárak száma: {5}\"
     <string name="new_search_tab">New Search</string>
     <string name="filter_search_results_here">Filter Results</string>
     <string name="persist_it">Sticky</string>
-    <string name="type_chatroom_ticker_message">Type Ticker Message</string>
+    <string name="type_chatroom_ticker_message">Ticker Message</string>
 
     <string name="change_download_folder">Change Download Folder</string>
     <string name="max_search_results">Max Search Results:</string>
@@ -567,7 +567,7 @@ Könyvtárak száma: {5}\"
     <string name="mod">Mod</string>
 
     <string name="user_">User:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Create Chatroom</string>

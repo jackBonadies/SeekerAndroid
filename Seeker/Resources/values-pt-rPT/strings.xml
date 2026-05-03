@@ -181,7 +181,7 @@ Directory Count: {5}\"
     <string name="new_search_tab">Nova busca</string>
     <string name="filter_search_results_here">Filtrar os resultados aqui</string>
     <string name="persist_it">Persistente</string>
-    <string name="type_chatroom_ticker_message">Digitar mensagem ticker</string>
+    <string name="type_chatroom_ticker_message">Mensagem ticker</string>
 
     <string name="change_download_folder">Alterar Diretório de Download</string>
     <string name="max_search_results">Máximo de resultados de pesquisa:</string>
@@ -574,7 +574,7 @@ Directory Count: {5}\"
     <string name="mod">Mod</string>
 
     <string name="user_">User:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Create Chatroom</string>

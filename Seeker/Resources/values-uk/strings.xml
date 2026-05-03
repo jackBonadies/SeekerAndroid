@@ -181,7 +181,7 @@
     <string name="new_search_tab">Нова вкладка</string>
     <string name="filter_search_results_here">Фільтрувати результати тут</string>
     <string name="persist_it">Закріпити</string>
-    <string name="type_chatroom_ticker_message">Ввести тикер (закріплене повідомлення)</string>
+    <string name="type_chatroom_ticker_message">Тикер (закріплене повідомлення)</string>
 
     <string name="change_download_folder">Змінити папку завантаження</string>
     <string name="max_search_results">Макс. кількість результатів пошуку:</string>
@@ -574,7 +574,7 @@
     <string name="mod">Модератор</string>
 
     <string name="user_">Користувач:</string>
-    <string name="set_ticker">Встановити тикер:</string>
+    <string name="set_ticker">Встановити тикер</string>
     <string name="setticker">Встановити тикер</string>
     <string name="chatrooms">Чат кімнати</string>
     <string name="create_chatroom_">Створити чат кімнату</string>

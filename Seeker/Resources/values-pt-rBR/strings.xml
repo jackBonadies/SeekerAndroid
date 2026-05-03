@@ -181,7 +181,7 @@ Contador de diretórios: {5}
     <string name="new_search_tab">Nova pesquisa</string>
     <string name="filter_search_results_here">Filtrar resultados por</string>
     <string name="persist_it">Afixado</string>
-    <string name="type_chatroom_ticker_message">Digite mensagem de apresentação</string>
+    <string name="type_chatroom_ticker_message">Mensagem de apresentação</string>
 
     <string name="change_download_folder">Alterar pasta de download</string>
     <string name="max_search_results">Máximo de resultados de pesquisa:</string>
@@ -574,7 +574,7 @@ Contador de diretórios: {5}
     <string name="mod">Mod</string>
 
     <string name="user_">Usuário:</string>
-    <string name="set_ticker">Definir Ticker:</string>
+    <string name="set_ticker">Definir Ticker</string>
     <string name="setticker">Definir Ticker</string>
     <string name="chatrooms">Salas de conversa</string>
     <string name="create_chatroom_">Criar sala de bate-papo</string>

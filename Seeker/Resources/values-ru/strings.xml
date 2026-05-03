@@ -182,7 +182,7 @@
     <string name="new_search_tab">Новая вкладка</string>
     <string name="filter_search_results_here">Введите фильтр...</string>
     <string name="persist_it">Закрепить</string>
-    <string name="type_chatroom_ticker_message">Введите закрепленное сообщение</string>
+    <string name="type_chatroom_ticker_message">Закреплённое сообщение</string>
 
     <string name="change_download_folder">Изменить папку для загрузок</string>
     <string name="max_search_results">Макс. кол-во результатов поиска:</string>
@@ -575,7 +575,7 @@
     <string name="mod">Мод</string>
 
     <string name="user_">Пользователь:</string>
-    <string name="set_ticker">Закрепить сообщение:</string>
+    <string name="set_ticker">Закрепить сообщение</string>
     <string name="setticker">Закрепить сообщение</string>
     <string name="chatrooms">Чаты</string>
     <string name="create_chatroom_">Создать чат комнату</string>

@@ -181,7 +181,7 @@ Numero Cartelle: {5}\"
     <string name="new_search_tab">Nuova Ricerca</string>
     <string name="filter_search_results_here">Filtra i risultati</string>
     <string name="persist_it">Fissa</string>
-    <string name="type_chatroom_ticker_message">Type Ticker Message</string>
+    <string name="type_chatroom_ticker_message">Ticker Message</string>
 
     <string name="change_download_folder">Modifica cartella di download</string>
     <string name="max_search_results">Numero massimo risultati di ricerca:</string>
@@ -574,7 +574,7 @@ Numero Cartelle: {5}\"
     <string name="mod">Moderatore</string>
 
     <string name="user_">Utente:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Stanze</string>
     <string name="create_chatroom_">Crea stanza</string>

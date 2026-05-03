@@ -181,7 +181,7 @@ Directorio: {5}
     <string name="new_search_tab">Nueva Búsqueda</string>
     <string name="filter_search_results_here">Filtrar resultados aquí</string>
     <string name="persist_it">Fijado</string>
-    <string name="type_chatroom_ticker_message">Escribir mensaje Ticker</string>
+    <string name="type_chatroom_ticker_message">Mensaje Ticker</string>
 
     <string name="change_download_folder">Cambiar carpeta de descargas</string>
     <string name="max_search_results">Resultado máx. de búsqueda:</string>
@@ -574,7 +574,7 @@ Directorio: {5}
     <string name="mod">Moderador</string>
 
     <string name="user_">Usuario:</string>
-    <string name="set_ticker">Asignar Ticker:</string>
+    <string name="set_ticker">Asignar Ticker</string>
     <string name="setticker">Asignar Ticker</string>
     <string name="chatrooms">Salas de chat</string>
     <string name="create_chatroom_">Crear sala de chat</string>

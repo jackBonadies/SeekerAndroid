@@ -181,7 +181,7 @@ Recompte de directoris: {5}\"
     <string name="new_search_tab">Nova cerca</string>
     <string name="filter_search_results_here">Filtreu els resultats aquí</string>
     <string name="persist_it">Fixat</string>
-    <string name="type_chatroom_ticker_message">Escriviu Ticker Message</string>
+    <string name="type_chatroom_ticker_message">Missatge Ticker</string>
 
     <string name="change_download_folder">Canvia la carpeta de descàrrega</string>
     <string name="max_search_results">Màxim resultats de cerca:</string>
@@ -574,7 +574,7 @@ Recompte de directoris: {5}\"
     <string name="mod">Mod</string>
 
     <string name="user_">User:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Create Chatroom</string>

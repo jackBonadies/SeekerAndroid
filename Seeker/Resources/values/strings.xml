@@ -286,7 +286,7 @@ Directory Count: {5}"
     <string name="filter_format_lossless">Lossless</string>
     <string name="filter_format_lossy">Lossy</string>
     <string name="filter_min_bitrate_label">Min Bitrate</string>
-    <string name="type_chatroom_ticker_message">Type Ticker Message</string>
+    <string name="type_chatroom_ticker_message">Ticker Message</string>
 
     <string name="section_downloads">Downloads</string>
     <string name="section_search">Search</string>
@@ -714,7 +714,7 @@ Directory Count: {5}"
 
     <!--Title-->
     <string name="user_">User:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Create Chatroom</string>

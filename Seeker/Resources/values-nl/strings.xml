@@ -181,7 +181,7 @@ Aantal mappen: {5}
     <string name="new_search_tab">Nieuwe Zoekopdracht</string>
     <string name="filter_search_results_here">Hier Resultaten Filteren</string>
     <string name="persist_it">Vastgeplakt (sticky)</string>
-    <string name="type_chatroom_ticker_message">Voer Ticker Bericht In</string>
+    <string name="type_chatroom_ticker_message">Ticker Bericht</string>
 
     <string name="change_download_folder">Wijzig downloadmap</string>
     <string name="max_search_results">Max. aantal zoekresultaten:</string>
@@ -574,7 +574,7 @@ Aantal mappen: {5}
     <string name="mod">Mod</string>
 
     <string name="user_">User:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Create Chatroom</string>
