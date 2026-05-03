@@ -26,8 +26,12 @@ namespace Seeker
         public int PrivateMessageIntervalSec { get; set; } = 60;
         public int ExcludedPhrasesIntervalSec { get; set; } = 60;
         public int UserStatusIntervalSec { get; set; } = 10;
+        public int RoomActivityIntervalSec { get; set; } = 8;
 
         private CancellationTokenSource? _backgroundTimersCts;
+
+        private readonly ConcurrentDictionary<string, List<string>> _mockJoinedRoomUsers = new ConcurrentDictionary<string, List<string>>();
+        private readonly ConcurrentDictionary<string, UserPresence> _mockRoomUserPresence = new ConcurrentDictionary<string, UserPresence>();
 
         private static readonly string[] _mockMessages =
         {
@@ -65,6 +69,10 @@ namespace Seeker
             {
                 _ = RunBrowseUploadLoop(ct);
             }
+            if (RoomActivityIntervalSec > 0)
+            {
+                _ = RunRoomActivityLoop(ct);
+            }
         }
 
         public void StopBackgroundTimers()
@@ -90,6 +98,99 @@ namespace Seeker
                         message,
                         false);
                     RaisePrivateMessageReceived(args);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+        }
+
+        private async Task RunRoomActivityLoop(CancellationToken ct)
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                try
+                {
+                    await Task.Delay(RoomActivityIntervalSec * 1000, ct);
+
+                    var joined = _mockJoinedRoomUsers.Keys.ToList();
+                    if (joined.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    string room = joined[_random.Next(joined.Count)];
+                    int eventRoll = _random.Next(0, 100);
+
+                    if (eventRoll < 40)
+                    {
+                        if (_mockJoinedRoomUsers.TryGetValue(room, out var users) && users.Count > 0)
+                        {
+                            string user = users[_random.Next(users.Count)];
+                            string msg = _mockMessages[_random.Next(_mockMessages.Length)];
+                            RaiseRoomMessageReceived(new RoomMessageReceivedEventArgs(room, user, msg));
+                        }
+                    }
+                    else if (eventRoll < 55)
+                    {
+                        string newUser = GenerateMockUsername();
+                        if (_mockJoinedRoomUsers.TryGetValue(room, out var users))
+                        {
+                            lock (users)
+                            {
+                                users.Add(newUser);
+                            }
+                        }
+                        _mockRoomUserPresence[newUser] = UserPresence.Online;
+                        var userData = new UserData(newUser, UserPresence.Online, 0, 0, 0, 0, string.Empty);
+                        RaiseRoomJoined(new RoomJoinedEventArgs(room, newUser, userData));
+                    }
+                    else if (eventRoll < 70)
+                    {
+                        if (_mockJoinedRoomUsers.TryGetValue(room, out var users) && users.Count > 1)
+                        {
+                            string leaver;
+                            lock (users)
+                            {
+                                int idx = _random.Next(users.Count);
+                                leaver = users[idx];
+                                users.RemoveAt(idx);
+                            }
+                            _mockRoomUserPresence.TryRemove(leaver, out _);
+                            RaiseRoomLeft(new RoomLeftEventArgs(room, leaver));
+                        }
+                    }
+                    else if (eventRoll < 80)
+                    {
+                        string user = GenerateMockUsername();
+                        string msg = _mockMessages[_random.Next(_mockMessages.Length)];
+                        var ticker = new RoomTicker(user, msg);
+                        RaiseRoomTickerAdded(new RoomTickerAddedEventArgs(room, ticker));
+                    }
+                    else if (eventRoll < 85)
+                    {
+                        if (_mockJoinedRoomUsers.TryGetValue(room, out var users) && users.Count > 0)
+                        {
+                            string user = users[_random.Next(users.Count)];
+                            RaiseRoomTickerRemoved(new RoomTickerRemovedEventArgs(room, user));
+                        }
+                    }
+                    else
+                    {
+                        if (_mockJoinedRoomUsers.TryGetValue(room, out var users) && users.Count > 0)
+                        {
+                            string user;
+                            lock (users)
+                            {
+                                user = users[_random.Next(users.Count)];
+                            }
+                            var current = _mockRoomUserPresence.GetOrAdd(user, UserPresence.Online);
+                            var next = current == UserPresence.Away ? UserPresence.Online : UserPresence.Away;
+                            _mockRoomUserPresence[user] = next;
+                            RaiseUserStatusChanged(new UserStatus(user, next, false));
+                        }
+                    }
                 }
                 catch (OperationCanceledException)
                 {
@@ -553,7 +654,19 @@ namespace Seeker
                     ? _mockRoomBaseNames[i % _mockRoomBaseNames.Length]
                     : _mockRoomBaseNames[_random.Next(_mockRoomBaseNames.Length)]
                       + "_" + _random.Next(1000, 10000);
-                yield return new RoomInfo(baseName + suffix, _random.Next(1, 1301));
+
+                string failureSuffix = string.Empty;
+                int roll = _random.Next(0, 100);
+                if (roll < 10)
+                {
+                    failureSuffix = "_forbidden";
+                }
+                else if (roll < 20)
+                {
+                    failureSuffix = "_timeout";
+                }
+
+                yield return new RoomInfo(baseName + failureSuffix + suffix, _random.Next(1, 1301));
             }
         }
 
@@ -1572,14 +1685,74 @@ namespace Seeker
         public async Task<RoomData> JoinRoomAsync(string roomName, bool isPrivate = false, CancellationToken? cancellationToken = null)
         {
             if (JoinRoomAsyncHandler != null) return await JoinRoomAsyncHandler(roomName, isPrivate, cancellationToken);
+
+            if (roomName.Contains("_timeout"))
+            {
+                await Task.Delay(8000).ConfigureAwait(false);
+                throw new TimeoutException($"Timed out joining room {roomName}.");
+            }
+            if (roomName.Contains("_forbidden"))
+            {
+                await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
+                throw new RoomJoinForbiddenException($"The server rejected the request to join room {roomName}.");
+            }
+
             await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
-            return new RoomData(roomName, Array.Empty<UserData>(), isPrivate);
+
+            int userCount = _random.Next(3, 25);
+            var usernames = Enumerable.Range(0, userCount)
+                .Select(_ => _mockUsernames[_random.Next(_mockUsernames.Length)])
+                .Distinct()
+                .ToList();
+
+            var userDataList = usernames
+                .Select(u => new UserData(u, UserPresence.Online,
+                    _random.Next(0, 5_000_000), _random.Next(0, 100_000),
+                    _random.Next(0, 100_000), _random.Next(0, 10_000), string.Empty))
+                .ToList();
+
+            string? owner = _random.Next(0, 2) == 0
+                ? null
+                : (usernames.Count > 0 ? usernames[_random.Next(usernames.Count)] : GenerateMockUsername());
+
+            var roomData = new RoomData(roomName, userDataList, isPrivate, owner);
+
+            _mockJoinedRoomUsers[roomName] = usernames.ToList();
+
+            int tickerCount = _random.Next(0, 5);
+            var tickers = Enumerable.Range(0, tickerCount)
+                .Select(_ => new RoomTicker(
+                    _mockUsernames[_random.Next(_mockUsernames.Length)],
+                    _mockMessages[_random.Next(_mockMessages.Length)]))
+                .ToList();
+
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(50).ConfigureAwait(false);
+                RaiseRoomTickerListReceived(new RoomTickerListReceivedEventArgs(roomName, tickers));
+            });
+
+            return roomData;
         }
 
         public async Task LeaveRoomAsync(string roomName, CancellationToken? cancellationToken = null)
         {
             if (LeaveRoomAsyncHandler != null) { await LeaveRoomAsyncHandler(roomName, cancellationToken); return; }
+
+            int roll = _random.Next(0, 100);
+            if (roll < 10)
+            {
+                await Task.Delay(8000).ConfigureAwait(false);
+                throw new TimeoutException($"Timed out leaving room {roomName}.");
+            }
+            if (roll < 20)
+            {
+                await Task.Delay(SimulatedDelayMs / 2).ConfigureAwait(false);
+                throw new Exception($"Simulated failure leaving room {roomName}.");
+            }
+
             await Task.Delay(SimulatedDelayMs / 2).ConfigureAwait(false);
+            _mockJoinedRoomUsers.TryRemove(roomName, out _);
         }
 
         public async Task SendRoomMessageAsync(string roomName, string message, CancellationToken? cancellationToken = null)
