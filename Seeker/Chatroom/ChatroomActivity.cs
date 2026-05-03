@@ -48,6 +48,8 @@ namespace Seeker
     {
         public static ChatroomActivity ChatroomActivityRef = null;
 
+        private GenericOnBackPressedCallback backPressedCallback;
+
         public static bool ShowStatusesView
         {
             get => Common.PreferencesState.ShowStatusesView;
@@ -79,7 +81,7 @@ namespace Seeker
             //this.SupportActionBar.SetDisplayShowHomeEnabled(true);
             bool startWithUserFragment = false;
 
-            var backPressedCallback = new GenericOnBackPressedCallback(true, onBackPressedAction);
+            backPressedCallback = new GenericOnBackPressedCallback(false, onBackPressedAction);
             OnBackPressedDispatcher.AddCallback(backPressedCallback);
 
             if (savedInstanceState != null && savedInstanceState.GetBoolean("SaveStateAtChatroomInner"))
@@ -94,6 +96,7 @@ namespace Seeker
                 }
                 startWithUserFragment = true;
                 SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(ChatroomInnerFragment.OurRoomInfo), "ChatroomInnerFragment").Commit();
+                backPressedCallback.Enabled = true;
                 //savedInstanceState.Clear(); //else we will keep doing the first even if the second was done by intent..
             }
             else if (Intent != null) //if an intent started this activity
@@ -110,6 +113,7 @@ namespace Seeker
                         startWithUserFragment = true;
                         Soulseek.RoomInfo roomInfo = ChatroomController.RoomListParsed.FirstOrDefault((roomInfo) => { return roomInfo.Name == goToRoom; }); //roomListParsed can be null, causing crash.
                         SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), "ChatroomInnerFragment").Commit();
+                        backPressedCallback.Enabled = true;
                         //switch in that fragment...
                         //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame,new MessagesOverviewFragment()).Commit();
                     }
@@ -150,6 +154,10 @@ namespace Seeker
                 this.SupportActionBar.SetHomeButtonEnabled(true);
                 SupportFragmentManager.BeginTransaction().Remove(f).Commit();
                 //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomOverviewFragment(), "OuterListChatroomFragment").Commit();
+                callback.Enabled = false;
+                OnBackPressedDispatcher.OnBackPressed();
+                // we are now on outer — leave the callback disabled so predictive back works on the overview list
+                return;
             }
             callback.Enabled = false;
             OnBackPressedDispatcher.OnBackPressed();
@@ -172,6 +180,7 @@ namespace Seeker
                     Soulseek.RoomInfo roomInfo = ChatroomController.RoomListParsed.FirstOrDefault((roomInfo) => { return roomInfo.Name == goToRoom; });
                     SupportFragmentManager.BeginTransaction().Remove(new ChatroomInnerFragment()).Commit();
                     SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), "ChatroomInnerFragment").Commit();
+                    backPressedCallback.Enabled = true;
                     //switch in that fragment...
                     //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame,new MessagesOverviewFragment()).Commit();
                 }
@@ -647,6 +656,7 @@ namespace Seeker
             {
                 //when you first click a room before you have joined, all the info you have is roomname and count. userlist is empty.
                 SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), "ChatroomInnerFragment").AddToBackStack("ChatroomInnerFragmentBackStack").Commit();
+                backPressedCallback.Enabled = true;
             }
         }
 

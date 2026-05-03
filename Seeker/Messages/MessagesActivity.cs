@@ -55,6 +55,8 @@ namespace Seeker
     {
         public static MessagesActivity MessagesActivityRef = null;
 
+        private GenericOnBackPressedCallback backPressedCallback;
+
         /// <summary>
         /// basically this keeps track of the direct reply messages stack.
         /// if a user replies to a message from notification or gets a new one when the notificaiton is up, then it gets added to.
@@ -71,6 +73,7 @@ namespace Seeker
             else
             {
                 SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(username), "InnerUserFragment").AddToBackStack("InnerUserFragmentBackStack").Commit();
+                backPressedCallback.Enabled = true;
             }
         }
 
@@ -397,6 +400,10 @@ namespace Seeker
                 SupportFragmentManager.BeginTransaction().Remove(f).Commit();
 
                 //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesOverviewFragment(), "OuterUserFragment").Commit();
+                callback.Enabled = false;
+                OnBackPressedDispatcher.OnBackPressed();
+                // we are now on outer — leave the callback disabled so predictive back works on the overview list
+                return;
             }
             callback.Enabled = false;
             OnBackPressedDispatcher.OnBackPressed();
@@ -426,6 +433,7 @@ namespace Seeker
             {
                 SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesOverviewFragment(), "OuterUserFragment").Commit();
             }
+            backPressedCallback.Enabled = false;
             //this.SupportActionBar.InvalidateOptionsMenu(); occurs to soon... outer fragment is not yet visible...
         }
 
@@ -444,6 +452,7 @@ namespace Seeker
                 {
                     SupportFragmentManager.BeginTransaction().Remove(new MessagesInnerFragment()).Commit();
                     SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(goToUsersMessages), "InnerUserFragment").Commit();
+                    backPressedCallback.Enabled = true;
                     //switch in that fragment...
                     //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame,new MessagesOverviewFragment()).Commit();
                 }
@@ -459,7 +468,7 @@ namespace Seeker
         {
             base.OnCreate(savedInstanceState);
 
-            var backPressedCallback = new GenericOnBackPressedCallback(true, onBackPressedAction);
+            backPressedCallback = new GenericOnBackPressedCallback(false, onBackPressedAction);
             OnBackPressedDispatcher.AddCallback(backPressedCallback);
 
             if (savedInstanceState == null)
@@ -490,6 +499,7 @@ namespace Seeker
             {
                 startWithUserFragment = true;
                 SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(MessagesInnerFragment.Username), "InnerUserFragment").Commit();
+                backPressedCallback.Enabled = true;
                 //savedInstanceState.Clear(); //else we will keep doing the first even if the second was done by intent..
             }
             else if (Intent != null) //if an intent started this activity
@@ -506,6 +516,7 @@ namespace Seeker
                     {
                         startWithUserFragment = true;
                         SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(goToUsersMessages), "InnerUserFragment").Commit();
+                        backPressedCallback.Enabled = true;
                         //switch in that fragment...
                         //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame,new MessagesOverviewFragment()).Commit();
                     }
