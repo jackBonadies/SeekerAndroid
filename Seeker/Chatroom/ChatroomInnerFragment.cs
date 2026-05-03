@@ -1,21 +1,24 @@
 ﻿using Android.App;
-using Seeker.Services;
 using Android.Content;
+using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
+using Android.Text;
+using Android.Text.Style;
 using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
+using Common;
+using Common.Messages;
 using Google.Android.Material.FloatingActionButton;
+using Seeker.Helpers;
+using Seeker.Services;
+using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Seeker.Helpers;
-
-using Common;
-using Common.Messages;
 namespace Seeker.Chatroom
 {
     public class ChatroomInnerFragment : AndroidX.Fragment.App.Fragment //,PopupMenu.IOnMenuItemClickListener
@@ -643,14 +646,20 @@ namespace Seeker.Chatroom
         {
             if (t != null && currentTickerView != null)
             {
+                var builder = new SpannableStringBuilder();
                 if (t.Username == string.Empty)
                 {
-                    //for the no tickers msg
-                    currentTickerView.Text = t.Message;
+                    builder.Append(t.Message);
+                    builder.SetSpan(new StyleSpan(TypefaceStyle.Italic), 0, builder.Length(), SpanTypes.InclusiveExclusive);
+                    currentTickerView.SetText(builder, TextView.BufferType.Spannable);
                 }
                 else
                 {
-                    currentTickerView.Text = t.Message + " --" + t.Username;
+                    builder.Append(t.Message);
+                    var messageEnd = builder.Length();
+                    builder.Append(" -" + t.Username);
+                    builder.SetSpan(new StyleSpan(TypefaceStyle.Bold), messageEnd, builder.Length(), SpanTypes.ExclusiveExclusive);
+                    currentTickerView.SetText(builder, TextView.BufferType.Spannable);
                 }
             }
             else
