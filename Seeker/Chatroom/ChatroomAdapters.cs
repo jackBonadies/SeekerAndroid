@@ -79,10 +79,11 @@ namespace Seeker
                     break;
             }
 
-            viewUserStatusIcon.SetImageResource(iconRes);
-
             Color primaryColor = UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.cellTextColor);
             Color subduedColor = UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.cellTextColorSubdued);
+
+            viewUserStatusIcon.SetImageResource(iconRes);
+            viewUserStatusIcon.SetColorFilter(subduedColor, PorterDuff.Mode.SrcIn);
 
             var builder = new SpannableStringBuilder();
             int usernameStart = builder.Length();
