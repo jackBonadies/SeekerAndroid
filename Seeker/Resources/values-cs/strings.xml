@@ -597,10 +597,8 @@ Počet adresářů: {5}\"
     <string name="online">Online</string>
     <string name="offline">Offline</string>
 
-    <string name="auto_join_on">Automatické připojení [On]</string>
-    <string name="auto_join_off">Automatické připojení [Off]</string>
-    <string name="notification_on">Oznámení [On]</string>
-    <string name="notification_off">Oznámení [Off]</string>
+    <string name="auto_join">Automatické připojení</string>
+    <string name="notification">Oznámení</string>
     <string name="copy_text">Kopírovat Text</string>
     <string name="ignore_user">Ignorovat Uživatele</string>
     <string name="remove_user">Odebrat uživatele</string>

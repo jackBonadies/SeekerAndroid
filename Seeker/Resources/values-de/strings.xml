@@ -599,10 +599,8 @@ Ordneranzahl: {5}\"
     <string name="online">Online</string>
     <string name="offline">Offline</string>
 
-    <string name="auto_join_on">Automatisch beitreten [An]</string>
-    <string name="auto_join_off">Automatisch beitreten [Aus]</string>
-    <string name="notification_on">Benachrichtigungen [An]</string>
-    <string name="notification_off">Benachrichtigungen [Aus]</string>
+    <string name="auto_join">Automatisch beitreten</string>
+    <string name="notification">Benachrichtigungen</string>
     <string name="copy_text">Text kopieren</string>
     <string name="ignore_user">Benutzer ignorieren</string>
     <string name="remove_user">Benutzer entfernen</string>

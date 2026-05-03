@@ -597,10 +597,8 @@ Contador de diretórios: {5}
     <string name="online">On-line</string>
     <string name="offline">Offline</string>
 
-    <string name="auto_join_on">Entrar automaticamente [On]</string>
-    <string name="auto_join_off">Entrar automaticamente [Off]</string>
-    <string name="notification_on">Notificações [On]</string>
-    <string name="notification_off">Notificações [Off]</string>
+    <string name="auto_join">Entrar automaticamente</string>
+    <string name="notification">Notificações</string>
     <string name="copy_text">Copiar texto</string>
     <string name="ignore_user">Ignorar usuário</string>
     <string name="remove_user">Remover usuário</string>

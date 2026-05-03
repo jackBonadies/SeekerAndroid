@@ -598,10 +598,8 @@
     <string name="online">Онлайн</string>
     <string name="offline">Не в сети</string>
 
-    <string name="auto_join_on">Авто вход [Включен]</string>
-    <string name="auto_join_off">Авто вход [Отключен]</string>
-    <string name="notification_on">Уведомления [On]</string>
-    <string name="notification_off">Уведомления [Off]</string>
+    <string name="auto_join">Авто вход</string>
+    <string name="notification">Уведомления</string>
     <string name="copy_text">Копировать текст</string>
     <string name="ignore_user">Игнорировать пользователя</string>
     <string name="remove_user">Удалить пользователя</string>

@@ -259,10 +259,6 @@ namespace Seeker
                 }
                 else if (Intent.GetBooleanExtra(GoToSearchExtra, false))
                 {
-                    //var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
-                    //navigator.NavigationItemReselected += Navigator_NavigationItemReselected;
-                    //navigator.NavigationItemSelected += Navigator_NavigationItemSelected;
-                    //navigator.ViewAttachedToWindow += Navigator_ViewAttachedToWindow;
                     pager.SetCurrentItem(1, false);
                 }
                 else if (Intent.GetIntExtra(UserListActivity.IntentSearchRoom, -1) == 1)

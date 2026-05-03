@@ -26,14 +26,16 @@
     <item
         android:id="@+id/toggle_autojoin_action"
         android:icon="@drawable/baseline_refresh_white_24"
-        android:title="@string/auto_join_off"
+        android:title="@string/auto_join"
+        android:checkable="true"
         app:showAsAction="never"
     />
 
     <item
         android:id="@+id/toggle_notify_room_action"
         android:icon="@drawable/baseline_refresh_white_24"
-        android:title="@string/notification_off"
+        android:title="@string/notification"
+        android:checkable="true"
         app:showAsAction="never"
     />
 

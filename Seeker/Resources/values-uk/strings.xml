@@ -597,10 +597,8 @@
     <string name="online">В мережі</string>
     <string name="offline">Не в мережі</string>
 
-    <string name="auto_join_on">Авто вхід [Увімк]</string>
-    <string name="auto_join_off">Авто вхід [Вимк]</string>
-    <string name="notification_on">Сповіщення [Увімк]</string>
-    <string name="notification_off">Сповіщення [Вимк]</string>
+    <string name="auto_join">Авто вхід</string>
+    <string name="notification">Сповіщення</string>
     <string name="copy_text">Копіювати текст</string>
     <string name="ignore_user">Ігнорувати користувача</string>
     <string name="remove_user">Вилучити користувача</string>

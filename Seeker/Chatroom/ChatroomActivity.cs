@@ -308,23 +308,8 @@ namespace Seeker
                 menu.FindItem(Resource.Id.give_up_room_action).SetVisible(isOwnedByUs);
                 menu.FindItem(Resource.Id.give_up_membership_action).SetVisible(isPrivate && !isOwnedByUs);
 
-                if ((fInner as ChatroomInnerFragment).IsAutoJoin())
-                {
-                    menu.FindItem(Resource.Id.toggle_autojoin_action).SetTitle(this.Resources.GetString(Resource.String.auto_join_on)); //brackets mean current.. thats how desktop does it..
-                }
-                else
-                {
-                    menu.FindItem(Resource.Id.toggle_autojoin_action).SetTitle(this.Resources.GetString(Resource.String.auto_join_off));
-                }
-
-                if ((fInner as ChatroomInnerFragment).IsNotifyOn())
-                {
-                    menu.FindItem(Resource.Id.toggle_notify_room_action).SetTitle(this.Resources.GetString(Resource.String.notification_on)); //brackets mean current.. thats how desktop does it..
-                }
-                else
-                {
-                    menu.FindItem(Resource.Id.toggle_notify_room_action).SetTitle(this.Resources.GetString(Resource.String.notification_off));
-                }
+                menu.FindItem(Resource.Id.toggle_autojoin_action).SetChecked((fInner as ChatroomInnerFragment).IsAutoJoin());
+                menu.FindItem(Resource.Id.toggle_notify_room_action).SetChecked((fInner as ChatroomInnerFragment).IsNotifyOn());
 
                 if (ChatroomActivity.ShowTickerView)
                 {
