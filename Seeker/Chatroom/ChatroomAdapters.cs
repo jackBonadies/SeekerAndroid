@@ -4,6 +4,8 @@ using Seeker.Helpers;
 using Seeker.Messages;
 using Android.Content;
 using Android.Graphics;
+using Android.Text;
+using Android.Text.Style;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
@@ -20,6 +22,8 @@ namespace Seeker
     {
         public RecyclerView.ViewHolder ViewHolder { get; set; }
         private TextView viewUserStatus;
+        private TextView viewUserStatusTimestamp;
+        private ImageView viewUserStatusIcon;
 
         public UserStatusView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
@@ -41,29 +45,61 @@ namespace Seeker
         public void setupChildren()
         {
             viewUserStatus = FindViewById<TextView>(Resource.Id.userStatusMessage);
+            viewUserStatusTimestamp = FindViewById<TextView>(Resource.Id.userStatusTimestamp);
+            viewUserStatusIcon = FindViewById<ImageView>(Resource.Id.userStatusIcon);
         }
 
         private void SetMessageText(TextView userStatus, StatusMessageUpdate data)
         {
-            string statusMessage = null;
             DateTime dateTimeLocal = data.DateTimeUtc.Add(SeekerState.OffsetFromUtcCached);
-            string timePrefix = $"[{CommonHelpers.GetNiceDateTimeGroupChat(dateTimeLocal)}]";
+
+            int iconRes;
+            string actionText;
             switch (data.StatusType)
             {
                 case StatusMessageType.Joined:
-                    statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserJoined);
+                    iconRes = Resource.Drawable.arrow_right;
+                    actionText = SeekerApplication.GetString(Resource.String.theUserJoined);
                     break;
                 case StatusMessageType.Left:
-                    statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserLeft);
+                    iconRes = Resource.Drawable.arrow_left;
+                    actionText = SeekerApplication.GetString(Resource.String.theUserLeft);
                     break;
                 case StatusMessageType.WentAway:
-                    statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserWentAway);
+                    iconRes = Resource.Drawable.status_dot;
+                    actionText = SeekerApplication.GetString(Resource.String.theUserWentAway);
                     break;
                 case StatusMessageType.CameBack:
-                    statusMessage = "{0} {1} " + SeekerApplication.GetString(Resource.String.theUserCameBack);
+                    iconRes = Resource.Drawable.status_dot;
+                    actionText = SeekerApplication.GetString(Resource.String.theUserCameBack);
+                    break;
+                default:
+                    iconRes = Resource.Drawable.status_dot;
+                    actionText = string.Empty;
                     break;
             }
-            userStatus.Text = string.Format(statusMessage, timePrefix, data.Username);
+
+            viewUserStatusIcon.SetImageResource(iconRes);
+
+            Color primaryColor = UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.cellTextColor);
+            Color subduedColor = UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.cellTextColorSubdued);
+
+            var builder = new SpannableStringBuilder();
+            int usernameStart = builder.Length();
+            builder.Append(data.Username);
+            int usernameEnd = builder.Length();
+            builder.SetSpan(new StyleSpan(TypefaceStyle.Bold), usernameStart, usernameEnd, SpanTypes.ExclusiveExclusive);
+            builder.SetSpan(new ForegroundColorSpan(primaryColor), usernameStart, usernameEnd, SpanTypes.ExclusiveExclusive);
+
+            int actionStart = builder.Length();
+            builder.Append(" ");
+            builder.Append(actionText);
+            int actionEnd = builder.Length();
+            builder.SetSpan(new ForegroundColorSpan(subduedColor), actionStart, actionEnd, SpanTypes.ExclusiveExclusive);
+
+            userStatus.SetText(builder, TextView.BufferType.Spannable);
+
+            viewUserStatusTimestamp.Text = CommonHelpers.GetNiceDateTimeGroupChat(dateTimeLocal);
         }
 
         public void setItem(StatusMessageUpdate userStatusMessage)
