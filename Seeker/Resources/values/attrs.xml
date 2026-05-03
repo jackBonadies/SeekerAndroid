@@ -13,6 +13,7 @@
     <attr name="slightestContrastColor" format="color" />
     <attr name="slightContrastColor" format="color" />
     <attr name="dialog_background" format="color" />
+    <attr name="surface_variant1" format="color" />
     <attr name="normalTextColorNonTinted" format="color" />
     <attr name="mainPurple" format="color" />
     <attr name="swipeToRefreshProgress" format="color" />
@@ -24,6 +25,9 @@
 	<attr name="mainTextColorHinted" format="color" />
     <attr name="mainTextColorHintedFlair" format="color" />
     <attr name="searchTabButtonColor" format="color" />
+    <attr name="cellStroke" format="color" />
+    <attr name="chat_join" format="color" />
+    <attr name="chat_left" format="color" />
     <attr name="cellStroke" format="color" />
     <attr name="checkBoxColor" format="color" />
     <attr name="expandIconColor" format="color" />

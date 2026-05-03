@@ -54,6 +54,8 @@ namespace Seeker
             DateTime dateTimeLocal = data.DateTimeUtc.Add(SeekerState.OffsetFromUtcCached);
 
             int iconRes;
+            int joinLeftAttr = data.StatusType == StatusMessageType.Joined || data.StatusType == StatusMessageType.CameBack ? Resource.Attribute.chat_join
+                    : Resource.Attribute.chat_left;
             string actionText;
             switch (data.StatusType)
             {
@@ -81,9 +83,10 @@ namespace Seeker
 
             Color primaryColor = UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.cellTextColor);
             Color subduedColor = UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.cellTextColorSubdued);
+            Color iconColor = UiHelpers.GetColorFromAttribute(Context, joinLeftAttr);
 
             viewUserStatusIcon.SetImageResource(iconRes);
-            viewUserStatusIcon.SetColorFilter(subduedColor, PorterDuff.Mode.SrcIn);
+            viewUserStatusIcon.SetColorFilter(iconColor, PorterDuff.Mode.SrcIn);
 
             var builder = new SpannableStringBuilder();
             int usernameStart = builder.Length();
