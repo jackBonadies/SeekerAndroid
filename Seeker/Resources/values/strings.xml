@@ -411,7 +411,6 @@ Directory Count: {5}"
     <string name="room_data_still_loading">
         Too fast! Still retrieving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>

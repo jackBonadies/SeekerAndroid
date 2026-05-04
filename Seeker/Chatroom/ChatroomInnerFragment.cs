@@ -474,7 +474,7 @@ namespace Seeker.Chatroom
             }
             else
             {
-                var s = new SpannableString(this.Resources.GetString(Resource.String.loading_current_ticker));
+                var s = new SpannableString(this.Resources.GetString(Resource.String.chatroom_loading_ticker));
                 s.SetSpan(new StyleSpan(TypefaceStyle.Italic), 0, s.Length(), SpanTypes.ExclusiveExclusive);
                 currentTickerView.TextFormatted = s;
             }
