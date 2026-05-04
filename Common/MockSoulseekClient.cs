@@ -631,7 +631,7 @@ namespace Seeker
         }
 
         private static readonly Random _random = new Random();
-        private static readonly string[] _mockUsernames = { "musiclover42", "vinyl_rips", "flac_hoarder", "mp3collector", "audiophile99", "shareking", "basshead", "djmix", "recorddigger", "soundwave" };
+        private static readonly string[] _mockUsernames = { "musiclover42", "vinyl_rips", "flac_hoarder", "mp3collector", "audiophile99", "shareking", "basshead", "djmix", "recorddigger", "soundwave", "testUser", "test_user2_long_username_12345" };
 
         private static readonly string[] _mockAdjectives =
         {
@@ -668,17 +668,25 @@ namespace Seeker
 
                 string specialSuffix = string.Empty;
                 int roll = _random.Next(0, 100);
-                if (roll < 10)
+                if (i >= stableCount)
                 {
-                    specialSuffix = "_forbidden";
-                }
-                else if (roll < 20)
-                {
-                    specialSuffix = "_timeout";
-                }
-                else if (roll < 30)
-                {
-                    specialSuffix = "_ticker";
+                    if (roll < 10)
+                    {
+                        specialSuffix = "_forbidden";
+                    }
+                    else if (roll < 20)
+                    {
+                        specialSuffix = "_timeoutalways";
+                    }
+                    else if (roll < 30)
+                    {
+                        specialSuffix = "_ticker";
+                    }
+                    else if (roll < 40)
+                    {
+                        specialSuffix = "_timeout";
+                    }
+
                 }
 
                 yield return new RoomInfo(baseName + specialSuffix + suffix, _random.Next(1, 1301));
@@ -1703,8 +1711,11 @@ namespace Seeker
 
             if (roomName.Contains("_timeout"))
             {
-                await Task.Delay(8000).ConfigureAwait(false);
-                throw new TimeoutException($"Timed out joining room {roomName}.");
+                if (roomName.Contains("_timeoutalways") || _random.Next(0, 5) != 0)
+                {
+                    await Task.Delay(8000).ConfigureAwait(false);
+                    throw new TimeoutException($"Timed out joining room {roomName}.");
+                }
             }
             if (roomName.Contains("_forbidden"))
             {
