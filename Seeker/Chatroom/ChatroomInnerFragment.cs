@@ -443,7 +443,7 @@ namespace Seeker.Chatroom
                 Logger.Debug("joining room " + OurRoomInfo.Name);
                 if (PreferencesState.CurrentlyLoggedIn)
                 {
-                    ChatroomController.JoinRoomApi(OurRoomInfo.Name, true, true, false, false);
+                    ChatroomController.JoinRoomApi(OurRoomInfo.Name, true, true, feedback: true, false);
                 }
                 else
                 {
@@ -474,7 +474,9 @@ namespace Seeker.Chatroom
             }
             else
             {
-                currentTickerView.Text = this.Resources.GetString(Resource.String.loading_current_ticker);
+                var s = new SpannableString(this.Resources.GetString(Resource.String.loading_current_ticker));
+                s.SetSpan(new StyleSpan(TypefaceStyle.Italic), 0, s.Length(), SpanTypes.ExclusiveExclusive);
+                currentTickerView.TextFormatted = s;
             }
 
             if (ChatroomActivity.ShowTickerView)

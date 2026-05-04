@@ -1247,7 +1247,7 @@ namespace Seeker.Chatroom
                 }
                 else
                 {
-                    task = SeekerState.SoulseekClient.LeaveRoomAsync(roomName); //this will create it if it does not exist..
+                    task = SeekerState.SoulseekClient.LeaveRoomAsync(roomName);
                 }
 
             }
@@ -1261,25 +1261,43 @@ namespace Seeker.Chatroom
                 {
                     Logger.Debug(task.Exception.GetType().Name);
                     Logger.Debug(task.Exception.Message);
+                    var baseException = task.Exception?.GetBaseException();
+                    bool isForbiddenException = baseException is Soulseek.RoomJoinForbiddenException;
                     if (fromAutoJoin)
                     {
-                        if (task.Exception != null && task.Exception.InnerException != null && task.Exception.InnerException.InnerException != null)
+                        if (isForbiddenException)
                         {
-                            if (task.Exception.InnerException.InnerException is Soulseek.RoomJoinForbiddenException)
+                            Logger.Debug("forbidden room exception!! remove it from autojoin.." + joining);
+                            Logger.Firebase("forbidden room exception!! remove it from autojoin.." + joining + "room name" + roomName); //these should only be private rooms else we are doing something wrong...
+                            if (AutoJoinRoomNames != null && AutoJoinRoomNames.Contains(roomName))
                             {
-                                Logger.Debug("forbidden room exception!! remove it from autojoin.." + joining);
-                                Logger.Firebase("forbidden room exception!! remove it from autojoin.." + joining + "room name" + roomName); //these should only be private rooms else we are doing something wrong...
-                                if (AutoJoinRoomNames != null && AutoJoinRoomNames.Contains(roomName))
-                                {
-                                    AutoJoinRoomNames.Remove(roomName);
-                                    SaveAutoJoinRoomsToSharedPrefs();
-                                }
+                                AutoJoinRoomNames.Remove(roomName);
+                                SaveAutoJoinRoomsToSharedPrefs();
                             }
                         }
                         else
                         {
                             Logger.Debug("failed to join autojoin... join?" + joining);
                         }
+                    } 
+                    else if (feedback)
+                    {
+                        if (joining)
+                        {
+                            if (isForbiddenException)
+                            {
+                                SeekerApplication.Toaster.ShowToast("Failed to Join Room '" + roomName + "' - Forbidden", ToastLength.Long);
+                            } 
+                            else
+                            {
+                                SeekerApplication.Toaster.ShowToast("Failed to Join Room '" + roomName + "': " + baseException?.Message, ToastLength.Long);
+                            }
+                        }
+                        else
+                        {
+                            SeekerApplication.Toaster.ShowToast("Failed to Leave Room '" + roomName + "': " + baseException?.Message, ToastLength.Long);
+                        }
+
                     }
                     Logger.Debug("join / leave task failed... join?" + joining);
                 }
