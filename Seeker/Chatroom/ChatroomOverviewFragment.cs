@@ -35,6 +35,7 @@ namespace Seeker.Chatroom
             filterChatroomView.QueryTextChange += FilterChatroomView_QueryTextChange;
             recyclerViewOverview = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewOverview);
             recyclerViewOverview.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
+            AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(recyclerViewOverview, new BottomOnlyInsetsListener());
             recycleLayoutManager = new LinearLayoutManager(Activity);
             if (ChatroomController.RoomList == null)
             {
