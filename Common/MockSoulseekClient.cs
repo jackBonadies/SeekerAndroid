@@ -47,6 +47,17 @@ namespace Seeker
             "testArtistA", "testArtistB"
         };
 
+        private static readonly string[] _mockLongTickers =
+        {
+            "Welcome to the room!\nPlease read the rules before posting.\nNo spam, no ads, no drama.\nEnjoy your stay and share good music.",
+            "RULES:\n1. Be respectful to everyone.\n2. No advertising other rooms or services.\n3. Keep discussion music-related.\n4. Mods have final say. Repeated violations = ban.",
+            "Currently spinning: a deep dive into 70s krautrock.\nIf you have rare, drop them in chat.\nLooking specifically for recordings from 1972-1975.\nTrades welcome!",
+            "Server maintenance scheduled for this weekend.\nExpect brief disconnects between 02:00 and 04:00 UTC.\nAll uploads will resume automatically.\nThanks for your patience.",
+            "New users: please share - We have a fair-share policy here. - Leechers will be removed without warning. - Happy sharing! to repeat: New users: please share - We have a fair-share policy here. - Leechers will be removed without warning. - Happy sharing!",
+            "Looking for: anything ambient.\nWilling to trade my full collection.\nMessage me directly with what you have.\nNo MP3s under 320 please.",
+            "Friendly reminder:\nSet Tickers.\nKeep them short and useful.\nLong tickers are reserved for room rules and announcements.",
+        };
+
         public void StartBackgroundTimers()
         {
             StopBackgroundTimers();
@@ -655,18 +666,22 @@ namespace Seeker
                     : _mockRoomBaseNames[_random.Next(_mockRoomBaseNames.Length)]
                       + "_" + _random.Next(1000, 10000);
 
-                string failureSuffix = string.Empty;
+                string specialSuffix = string.Empty;
                 int roll = _random.Next(0, 100);
                 if (roll < 10)
                 {
-                    failureSuffix = "_forbidden";
+                    specialSuffix = "_forbidden";
                 }
                 else if (roll < 20)
                 {
-                    failureSuffix = "_timeout";
+                    specialSuffix = "_timeout";
+                }
+                else if (roll < 30)
+                {
+                    specialSuffix = "_ticker";
                 }
 
-                yield return new RoomInfo(baseName + failureSuffix + suffix, _random.Next(1, 1301));
+                yield return new RoomInfo(baseName + specialSuffix + suffix, _random.Next(1, 1301));
             }
         }
 
@@ -1719,11 +1734,13 @@ namespace Seeker
 
             _mockJoinedRoomUsers[roomName] = usernames.ToList();
 
-            int tickerCount = _random.Next(0, 5);
+            bool longTickers = roomName.IndexOf("ticker", StringComparison.OrdinalIgnoreCase) >= 0;
+            int tickerCount = longTickers ? _random.Next(20, 40) : _random.Next(0, 5);
+            string[] tickerPool = longTickers ? _mockLongTickers : _mockMessages;
             var tickers = Enumerable.Range(0, tickerCount)
                 .Select(_ => new RoomTicker(
                     _mockUsernames[_random.Next(_mockUsernames.Length)],
-                    _mockMessages[_random.Next(_mockMessages.Length)]))
+                    tickerPool[_random.Next(tickerPool.Length)]))
                 .ToList();
 
             _ = Task.Run(async () =>
