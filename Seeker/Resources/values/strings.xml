@@ -827,6 +827,7 @@ Directory Count: {5}"
     <string name="view_users">View Users</string>
     <string name="view_self">View Self</string>
     <string name="view_all_tickers">View all Tickers</string>
+    <string name="all_tickers">All Tickers</string>
 
     <string name="resume_all">Resume All</string>
     <string name="pause_all">Pause All</string>

@@ -1,72 +1,114 @@
-﻿using Android.App;
-using Android.Content;
 using Android.Graphics;
 using Android.OS;
-using Android.Runtime;
+using Android.Text;
+using Android.Text.Style;
 using Android.Views;
 using Android.Widget;
-using Seeker.Helpers;
-using System;
+using AndroidX.RecyclerView.Widget;
+using Google.Android.Material.BottomSheet;
+using Soulseek;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Seeker.Chatroom
 {
-    public class AllTickersDialog : AndroidX.Fragment.App.DialogFragment
+    public class AllTickersDialog : BottomSheetDialogFragment
     {
-        public static string OurRoomName = string.Empty;
-        private ListView listViewTickers = null;
-        private RoomTickerAdapter tickerAdapter = null;
+        private const string ArgRoomName = "roomName";
+
+        private string ourRoomName = string.Empty;
+        private RecyclerView recyclerView;
+
         public AllTickersDialog(string ourRoomName)
         {
-            OurRoomName = ourRoomName;
+            this.ourRoomName = ourRoomName;
+            var args = new Bundle();
+            args.PutString(ArgRoomName, ourRoomName);
+            Arguments = args;
         }
+
         public AllTickersDialog()
         {
-
-        }
-
-        public override void OnResume()
-        {
-            base.OnResume();
-
-            Dialog.SetSizeProportional(.9, -1);
         }
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            return inflater.Inflate(Resource.Layout.all_ticker_dialog, container); //container is parent
+            if (Arguments != null)
+            {
+                ourRoomName = Arguments.GetString(ArgRoomName, ourRoomName);
+            }
+
+            var root = inflater.Inflate(Resource.Layout.all_ticker_dialog, container, false);
+
+            recyclerView = root.FindViewById<RecyclerView>(Resource.Id.recyclerViewTickers);
+            recyclerView.SetLayoutManager(new LinearLayoutManager(root.Context));
+
+            var tickers = new List<RoomTicker>();
+            if (ChatroomController.JoinedRoomTickers.TryGetValue(ourRoomName, out var stored))
+            {
+                tickers = stored.ToList();
+                tickers.Reverse();
+            }
+
+            recyclerView.SetAdapter(new TickerRowAdapter(tickers));
+
+            return root;
         }
 
-        /// <summary>
-        /// Called after on create view
-        /// </summary>
-        /// <param name="view"></param>
-        /// <param name="savedInstanceState"></param>
-        public override void OnViewCreated(View view, Bundle savedInstanceState)
+        private class TickerRowAdapter : RecyclerView.Adapter
         {
-            //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
-            base.OnViewCreated(view, savedInstanceState);
-            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
+            private readonly List<RoomTicker> tickers;
 
-            this.SetStyle((int)DialogFragmentStyle.Normal, 0);
-            this.Dialog.SetTitle(OurRoomName);
+            public TickerRowAdapter(List<RoomTicker> tickers)
+            {
+                this.tickers = tickers;
+            }
 
-            listViewTickers = view.FindViewById<ListView>(Resource.Id.listViewTickers);
+            public override int ItemCount => tickers.Count;
 
+            public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
+            {
+                var view = LayoutInflater.From(parent.Context).Inflate(Resource.Layout.ticker_row, parent, false);
+                return new TickerRowHolder(view);
+            }
 
-            UpdateListView();
+            public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
+            {
+                var h = (TickerRowHolder)holder;
+                var ticker = tickers[position];
+                h.Message.SetText(BuildTickerSpan(ticker), TextView.BufferType.Spannable);
+                h.Separator.Visibility = position == tickers.Count - 1 ? ViewStates.Gone : ViewStates.Visible;
+            }
+
+            private static SpannableStringBuilder BuildTickerSpan(RoomTicker ticker)
+            {
+                var builder = new SpannableStringBuilder();
+                if (string.IsNullOrEmpty(ticker.Username))
+                {
+                    builder.Append(ticker.Message);
+                    builder.SetSpan(new StyleSpan(TypefaceStyle.Italic), 0, builder.Length(), SpanTypes.InclusiveExclusive);
+                }
+                else
+                {
+                    builder.Append(ticker.Message);
+                    var messageEnd = builder.Length();
+                    builder.Append(" -" + ticker.Username);
+                    builder.SetSpan(new StyleSpan(TypefaceStyle.Bold), messageEnd, builder.Length(), SpanTypes.ExclusiveExclusive);
+                }
+                return builder;
+            }
         }
 
-        private void UpdateListView()
+        private class TickerRowHolder : RecyclerView.ViewHolder
         {
-            var roomTickers = ChatroomController.JoinedRoomTickers[OurRoomName].ToList();
-            roomTickers.Reverse();
-            tickerAdapter = new RoomTickerAdapter(this.Activity, roomTickers);
-            tickerAdapter.Owner = this;
-            listViewTickers.Adapter = tickerAdapter;
+            public TextView Message;
+            public View Separator;
+
+            public TickerRowHolder(View view) : base(view)
+            {
+                Message = view.FindViewById<TextView>(Resource.Id.tickerRowMessage);
+                Separator = view.FindViewById<View>(Resource.Id.tickerRowSeparator);
+            }
         }
     }
-
 }

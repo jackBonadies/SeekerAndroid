@@ -1,18 +1,31 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
->
-    <ListView
-        android:layout_below="@id/header1"
-        android:minWidth="25px"
-        android:minHeight="25px"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+    <TextView
+        android:id="@+id/allTickersTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="120dp"
-        android:clipToPadding="false"
-        android:id="@+id/listViewTickers"
-    />
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="?attr/normalTextColor"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:text="@string/all_tickers" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/slightTint" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewTickers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:paddingBottom="8dp"
+        android:clipToPadding="false" />
 </LinearLayout>
