@@ -17,6 +17,21 @@ using System.Text;
 using System.Threading.Tasks;
 namespace Seeker.Chatroom
 {
+    public enum RoomJoinState
+    {
+        Pending,
+        Joined,
+        Failed,
+        Forbidden
+    }
+
+    public class RoomJoinStatus
+    {
+        public RoomJoinState State;
+        public string FailureMessage;
+        public bool IsForbidden;
+    }
+
     public class ChatroomController
     {
         public static Soulseek.RoomList RoomList = null;
@@ -41,12 +56,16 @@ namespace Seeker.Chatroom
         public static EventHandler<string> CurrentlyJoinedRoomHasUpdated;
         public static EventHandler<List<string>> CurrentlyJoinedRoomsCleared;
         public static EventHandler<EventArgs> JoinedRoomsHaveUpdated;
+        public static EventHandler<RoomJoinFailedEventArgs> RoomJoinFailed;
 
 
         public static bool IsInitialized;
 
         //these are the rooms that we are currnetly joined and connected to.  These clear on disconnect and get readded.  These will always be a subset of JoinedRoomNames.
         public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> CurrentlyJoinedRoomNames = null;
+
+        //tracks the state of any join attempt so the inner fragment can render Pending/Failed/Forbidden UI without racing the event. The status carries the failure message so a fragment opened after a background auto-join failure can still render meaningfully.
+        public static System.Collections.Concurrent.ConcurrentDictionary<string, RoomJoinStatus> RoomJoinStates = new System.Collections.Concurrent.ConcurrentDictionary<string, RoomJoinStatus>();
 
         public static List<string> JoinedRoomNames = null; //these are the ones that the user joined.
         public static List<string> AutoJoinRoomNames = null; //we automatically join these at startup.  if all goes well then JoinedRoomNames should contain all of these...
@@ -775,6 +794,7 @@ namespace Seeker.Chatroom
             }
 
             CurrentlyJoinedRoomNames.Clear();
+            RoomJoinStates.Clear();
             SetConnectionLapsedMessage(false);
         }
 
@@ -1233,6 +1253,10 @@ namespace Seeker.Chatroom
                     SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.leaving_room), roomName), ToastLength.Short);
                 }
             }
+            if (joining)
+            {
+                RoomJoinStates[roomName] = new RoomJoinStatus { State = RoomJoinState.Pending };
+            }
             SessionService.Instance.RunWithReconnect(() => JoinRoomLogic(roomName, joining, refreshViewAfter, feedback, fromAutoJoin));
         }
 
@@ -1263,6 +1287,16 @@ namespace Seeker.Chatroom
                     Logger.Debug(task.Exception.Message);
                     var baseException = task.Exception?.GetBaseException();
                     bool isForbiddenException = baseException is Soulseek.RoomJoinForbiddenException;
+                    if (joining)
+                    {
+                        RoomJoinStates[roomName] = new RoomJoinStatus
+                        {
+                            State = isForbiddenException ? RoomJoinState.Forbidden : RoomJoinState.Failed,
+                            FailureMessage = baseException?.Message,
+                            IsForbidden = isForbiddenException,
+                        };
+                        RoomJoinFailed?.Invoke(null, new RoomJoinFailedEventArgs(roomName, baseException, isForbiddenException, fromAutoJoin));
+                    }
                     if (fromAutoJoin)
                     {
                         if (isForbiddenException)
@@ -1321,6 +1355,7 @@ namespace Seeker.Chatroom
                         }
                         //we will be part of the room data!!! we also get this AFTER we get the user joined event for ourself.
                         JoinedRoomData[roomName] = taskRoomData.Result;
+                        RoomJoinStates[roomName] = new RoomJoinStatus { State = RoomJoinState.Joined };
                         RoomDataReceived?.Invoke(null, new EventArgs());
                     }
                     else
@@ -1358,6 +1393,7 @@ namespace Seeker.Chatroom
         {
             //add to joined list and save joined list...
             bool isChanged = false;
+            RoomJoinStates.TryRemove(roomName, out _);
             if (JoinedRoomNames.Contains(roomName))
             {
                 JoinedRoomNames.Remove(roomName);

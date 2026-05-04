@@ -37,6 +37,21 @@ namespace Common.Messages
         }
     }
 
+    public class RoomJoinFailedEventArgs
+    {
+        public string RoomName;
+        public Exception Exception;
+        public bool IsForbidden;
+        public bool FromAutoJoin;
+        public RoomJoinFailedEventArgs(string roomName, Exception exception, bool isForbidden, bool fromAutoJoin)
+        {
+            RoomName = roomName;
+            Exception = exception;
+            IsForbidden = isForbidden;
+            FromAutoJoin = fromAutoJoin;
+        }
+    }
+
     public class MessageReceivedArgs
     {
         public MessageReceivedArgs(string roomName, Message m)

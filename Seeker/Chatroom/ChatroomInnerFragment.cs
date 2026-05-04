@@ -37,6 +37,19 @@ namespace Seeker.Chatroom
         private ImageButton sendMessage = null;
         public TextView currentTickerView = null;
 
+        private ViewFlipper joinEmptyStateFlipper = null;
+        private TextView joinPendingTitle = null;
+        private TextView joinFailedMessage = null;
+        private TextView joinFailedSubtitle = null;
+        private Button joinFailedRetry = null;
+
+        private enum JoinEmptyState
+        {
+            None = -1,
+            Pending = 0,
+            Error = 1,
+        }
+
         private RecyclerView2 recyclerViewStatusesView;
         private LinearLayoutManager recycleLayoutManagerStatuses;
         private ChatroomStatusesRecyclerAdapter recyclerUserStatusAdapter;
@@ -97,6 +110,8 @@ namespace Seeker.Chatroom
             ChatroomController.UserRoomStatusChanged -= OnUserRoomStatusChanged;
             ChatroomController.RoomTickerListReceived -= OnRoomTickerListReceived;
             ChatroomController.RoomTickerAdded -= OnRoomTickerAdded;
+            ChatroomController.RoomJoinFailed -= OnRoomJoinFailed;
+            ChatroomController.RoomDataReceived -= OnRoomDataReceivedForJoinState;
             if (binding)
             {
                 ChatroomController.MessageReceived += OnMessageRecieved;
@@ -105,8 +120,133 @@ namespace Seeker.Chatroom
                 ChatroomController.RoomTickerListReceived += OnRoomTickerListReceived;
                 ChatroomController.RoomTickerAdded += OnRoomTickerAdded;
                 ChatroomController.RoomMembershipRemoved += OnRoomMembershipRemoved;
-
+                ChatroomController.RoomJoinFailed += OnRoomJoinFailed;
+                ChatroomController.RoomDataReceived += OnRoomDataReceivedForJoinState;
             }
+        }
+
+        private void ApplyInitialJoinStateUi()
+        {
+            if (ChatroomController.HasRoomData(OurRoomInfo.Name))
+            {
+                SetJoinEmptyState(JoinEmptyState.None);
+                return;
+            }
+            if (ChatroomController.RoomJoinStates.TryGetValue(OurRoomInfo.Name, out var status))
+            {
+                ApplyJoinStateUi(status.State, status.FailureMessage);
+            }
+            else
+            {
+                ApplyJoinStateUi(RoomJoinState.Pending, null);
+            }
+        }
+
+        private void ApplyJoinStateUi(RoomJoinState state, string failureMessage)
+        {
+            if (joinEmptyStateFlipper == null)
+            {
+                return;
+            }
+            switch (state)
+            {
+                case RoomJoinState.Joined:
+                    SetJoinEmptyState(JoinEmptyState.None);
+                    UpdateSendEnabled();
+                    this.Activity?.InvalidateOptionsMenu();
+                    break;
+                case RoomJoinState.Pending:
+                    if (joinPendingTitle != null)
+                    {
+                        joinPendingTitle.Text = string.Format(this.Resources.GetString(Resource.String.room_join_pending), OurRoomInfo.Name);
+                    }
+                    SetJoinEmptyState(JoinEmptyState.Pending);
+                    UpdateSendEnabled();
+                    this.Activity?.InvalidateOptionsMenu();
+                    break;
+                case RoomJoinState.Forbidden:
+                    if (joinFailedMessage != null)
+                    {
+                        joinFailedMessage.Text = string.Format(this.Resources.GetString(Resource.String.room_join_failed), OurRoomInfo.Name);
+                    }
+                    if (joinFailedSubtitle != null)
+                    {
+                        joinFailedSubtitle.Text = string.Format(this.Resources.GetString(Resource.String.room_join_forbidden), OurRoomInfo.Name);
+                    }
+                    SetJoinEmptyState(JoinEmptyState.Error);
+                    UpdateSendEnabled();
+                    break;
+                case RoomJoinState.Failed:
+                    if (joinFailedMessage != null)
+                    {
+                        joinFailedMessage.Text = string.Format(this.Resources.GetString(Resource.String.room_join_failed), OurRoomInfo.Name);
+                    }
+                    if (joinFailedSubtitle != null)
+                    {
+                        joinFailedSubtitle.Text = string.Format(this.Resources.GetString(Resource.String.room_join_generic), OurRoomInfo.Name, failureMessage ?? string.Empty);
+                    }
+                    SetJoinEmptyState(JoinEmptyState.Error);
+                    UpdateSendEnabled();
+                    break;
+            }
+        }
+
+        private void SetJoinEmptyState(JoinEmptyState state)
+        {
+            if (joinEmptyStateFlipper == null)
+            {
+                return;
+            }
+            if (state == JoinEmptyState.None)
+            {
+                joinEmptyStateFlipper.Visibility = ViewStates.Gone;
+                return;
+            }
+            if (joinEmptyStateFlipper.DisplayedChild != (int)state)
+            {
+                joinEmptyStateFlipper.DisplayedChild = (int)state;
+            }
+            joinEmptyStateFlipper.Visibility = ViewStates.Visible;
+        }
+
+        private void JoinFailedRetry_Click(object sender, EventArgs e)
+        {
+            if (!PreferencesState.CurrentlyLoggedIn)
+            {
+                return;
+            }
+            ApplyJoinStateUi(RoomJoinState.Pending, null);
+            ChatroomController.JoinRoomApi(OurRoomInfo.Name, true, true, feedback: true, false);
+        }
+
+        private void OnRoomJoinFailed(object sender, RoomJoinFailedEventArgs e)
+        {
+            if (OurRoomInfo == null || OurRoomInfo.Name != e.RoomName)
+            {
+                return;
+            }
+            this.Activity?.RunOnUiThread(() =>
+            {
+                ApplyJoinStateUi(
+                    e.IsForbidden ? RoomJoinState.Forbidden : RoomJoinState.Failed,
+                    e.Exception?.Message);
+            });
+        }
+
+        private void OnRoomDataReceivedForJoinState(object sender, EventArgs e)
+        {
+            if (OurRoomInfo == null)
+            {
+                return;
+            }
+            if (!ChatroomController.RoomJoinStates.TryGetValue(OurRoomInfo.Name, out var status) || status.State != RoomJoinState.Joined)
+            {
+                return;
+            }
+            this.Activity?.RunOnUiThread(() =>
+            {
+                ApplyJoinStateUi(RoomJoinState.Joined, null);
+            });
         }
 
         public void OnRoomTickerAdded(object sender, Soulseek.RoomTickerAddedEventArgs e)
@@ -507,16 +647,7 @@ namespace Seeker.Chatroom
 
 
 
-            if (editTextEnterMessage.Text == null || editTextEnterMessage.Text.ToString() == string.Empty)
-            {
-                sendMessage.Enabled = false;
-                sendMessage.Alpha = 0.38f;
-            }
-            else
-            {
-                sendMessage.Enabled = true;
-                sendMessage.Alpha = 1.0f;
-            }
+            UpdateSendEnabled();
             editTextEnterMessage.TextChanged += EditTextEnterMessage_TextChanged;
             editTextEnterMessage.EditorAction += EditTextEnterMessage_EditorAction;
             editTextEnterMessage.KeyPress += EditTextEnterMessage_KeyPress;
@@ -543,6 +674,14 @@ namespace Seeker.Chatroom
             Logger.Debug("currentlyInsideRoomName -- OnCreateView Inner -- " + ChatroomController.currentlyInsideRoomName);
             ChatroomController.currentlyInsideRoomName = OurRoomInfo.Name;
             ChatroomController.UnreadRooms.TryRemove(OurRoomInfo.Name, out _);
+            joinEmptyStateFlipper = rootView.FindViewById<ViewFlipper>(Resource.Id.joinEmptyStateFlipper);
+            joinPendingTitle = rootView.FindViewById<TextView>(Resource.Id.joinPendingTitle);
+            joinFailedMessage = rootView.FindViewById<TextView>(Resource.Id.joinFailedMessage);
+            joinFailedSubtitle = rootView.FindViewById<TextView>(Resource.Id.joinFailedSubtitle);
+            joinFailedRetry = rootView.FindViewById<Button>(Resource.Id.joinFailedRetry);
+            joinFailedRetry.Click += JoinFailedRetry_Click;
+            ApplyInitialJoinStateUi();
+
             HookUpEventHandlers(true); //this NEEDS to be strictly before SetStatusesView
             Logger.Debug("set up statuses view");
             SetStatusesView();
@@ -823,16 +962,20 @@ namespace Seeker.Chatroom
 
         private void EditTextEnterMessage_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
-            if (e.Text != null && e.Text.ToString() != string.Empty) //ICharSequence..
+            UpdateSendEnabled();
+        }
+
+        private void UpdateSendEnabled()
+        {
+            if (sendMessage == null || editTextEnterMessage == null)
             {
-                sendMessage.Enabled = true;
-                sendMessage.Alpha = 1.0f;
+                return;
             }
-            else
-            {
-                sendMessage.Enabled = false;
-                sendMessage.Alpha = 0.38f;
-            }
+            bool hasText = editTextEnterMessage.Text != null && editTextEnterMessage.Text.ToString() != string.Empty;
+            bool joined = OurRoomInfo != null && ChatroomController.HasRoomData(OurRoomInfo.Name);
+            bool enabled = hasText && joined;
+            sendMessage.Enabled = enabled;
+            sendMessage.Alpha = enabled ? 1.0f : 0.38f;
         }
     }
 }

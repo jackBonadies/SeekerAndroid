@@ -195,6 +195,11 @@ Directory Count: {5}"
     <string name="chatroom_disconnected_at">We disconnected: {0}</string>
     <string name="chatroom_reconnected_at">We reconnected: {0}</string>
     <string name="chatroom_loading_ticker">Loading current ticker...</string>
+    <string name="room_join_pending">Joining \"{0}\"…</string>
+    <string name="room_join_failed">Failed to join</string>
+    <string name="room_join_forbidden">Failed to join \"{0}\": Forbidden</string>
+    <string name="room_join_generic">Failed to join \"{0}\": {1}</string>
+    <string name="retry">Retry</string>
     <string name="chatroom_enter_message">Enter Message</string>
     <string name="send_message">Send</string>
     <string name="filter_chatrooms_here">Filter here</string>

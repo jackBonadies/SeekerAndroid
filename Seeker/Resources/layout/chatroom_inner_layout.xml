@@ -59,6 +59,92 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
         />
+
+        <ViewFlipper
+            android:id="@+id/joinEmptyStateFlipper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center_horizontal"
+            android:inAnimation="@null"
+            android:outAnimation="@null"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/joinPendingView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/joinPendingSpinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:indicatorSize="120dp"
+                    app:trackCornerRadius="5dp"
+                    app:trackThickness="6dp"
+                    app:indicatorColor="?attr/mainPurple"
+                    android:indeterminateOnly="true" />
+
+                <TextView
+                    android:id="@+id/joinPendingTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:textColor="?attr/cellTextColor"
+                    android:layout_marginTop="16dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/joinFailedView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp">
+
+                <ImageView
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    android:src="@drawable/chat_error96dp"
+                    android:tint="?attr/cellTextColorSubdued" />
+
+                <TextView
+                    android:id="@+id/joinFailedMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    android:textColor="?attr/cellTextColor"
+                    android:layout_marginTop="12dp" />
+
+                <TextView
+                    android:id="@+id/joinFailedSubtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+					android:gravity="center_horizontal"
+                    android:textSize="14sp"
+                    android:textColor="?attr/cellTextColorSubdued"
+                    android:layout_marginTop="4dp" />
+
+                <Button
+                    android:id="@+id/joinFailedRetry"
+                    style="@style/SeekerButtonStyle"
+                    android:foreground="@drawable/button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:paddingStart="7dp"
+                    android:paddingEnd="7dp"
+                    android:text="@string/retry" />
+
+            </LinearLayout>
+
+        </ViewFlipper>
     </RelativeLayout>
 
     <View

@@ -313,9 +313,18 @@ namespace Seeker
                     isOperator = ChatroomInnerFragment.cachedMod;
                 }
                 Logger.Debug("isPrivate: " + isPrivate + "isOwnedByUs: " + isOwnedByUs + "isOperator: " + isOperator);
-                menu.FindItem(Resource.Id.invite_user_action).SetVisible(isOperator || isOwnedByUs); //tho what about a public room owned by us ?? if such a thing exists???
-                menu.FindItem(Resource.Id.give_up_room_action).SetVisible(isOwnedByUs);
-                menu.FindItem(Resource.Id.give_up_membership_action).SetVisible(isPrivate && !isOwnedByUs);
+
+                //while the join is pending/failed, the only meaningful actions are auto-join, notifications, and search-room.
+                bool joined = ChatroomInnerFragment.OurRoomInfo != null
+                    && ChatroomController.HasRoomData(ChatroomInnerFragment.OurRoomInfo.Name);
+
+                menu.FindItem(Resource.Id.view_user_list_action).SetVisible(joined);
+                menu.FindItem(Resource.Id.show_all_tickers_action).SetVisible(joined);
+                menu.FindItem(Resource.Id.set_ticker_action).SetVisible(joined);
+                menu.FindItem(Resource.Id.invite_user_action).SetVisible(joined && (isOperator || isOwnedByUs)); //tho what about a public room owned by us ?? if such a thing exists???
+                menu.FindItem(Resource.Id.give_up_room_action).SetVisible(joined && isOwnedByUs);
+                menu.FindItem(Resource.Id.give_up_membership_action).SetVisible(joined && isPrivate && !isOwnedByUs);
+                menu.FindItem(Resource.Id.chatStyleOptions).SetVisible(joined);
 
                 menu.FindItem(Resource.Id.toggle_autojoin_action).SetChecked((fInner as ChatroomInnerFragment).IsAutoJoin());
                 menu.FindItem(Resource.Id.toggle_notify_room_action).SetChecked((fInner as ChatroomInnerFragment).IsNotifyOn());
