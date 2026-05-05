@@ -96,85 +96,14 @@ namespace Seeker
             base.OnRestoreInstanceState(savedInstanceState);
         }
 
-        public override bool OnCreateOptionsMenu(IMenu menu)
-        {
-            var fOuter = SupportFragmentManager.FindFragmentByTag("OuterUserFragment");
-            var fInner = SupportFragmentManager.FindFragmentByTag("InnerUserFragment");
-            if (fOuter != null && fOuter.IsVisible)
-            {
-                MenuInflater.Inflate(Resource.Menu.messages_overview_list_menu, menu);
-            }
-            else if (fInner != null && fInner.IsVisible)
-            {
-                MenuInflater.Inflate(Resource.Menu.messages_inner_list_menu, menu);
-
-            }
-            else
-            {
-                MenuInflater.Inflate(Resource.Menu.messages_overview_list_menu, menu);
-            }
-            return base.OnCreateOptionsMenu(menu);
-        }
-
-        public override bool OnPrepareOptionsMenu(IMenu menu)
-        {
-            UiHelpers.SetMenuTitles(menu, MessagesInnerFragment.Username);
-            UiHelpers.SetIgnoreAddExclusive(menu, MessagesInnerFragment.Username);
-            return base.OnPrepareOptionsMenu(menu);
-        }
-
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), MessagesInnerFragment.Username, this, this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId)))
+            // Inner and overview fragments contribute their own menu items via IMenuProvider.
+            // The activity only handles the toolbar back arrow, which is not part of either menu.
+            if (item.ItemId == Android.Resource.Id.Home)
             {
+                OnBackPressedDispatcher.OnBackPressed();
                 return true;
-            }
-            switch (item.ItemId)
-            {
-                case Resource.Id.message_user_action:
-                    ShowEditTextMessageUserDialog();
-                    return true;
-                case Resource.Id.action_add_to_user_list:
-                    UserListService.AddUserAPI(this, MessagesInnerFragment.Username, new Action(() => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.success_added_user), ToastLength.Short); }));
-                    return true;
-                case Resource.Id.action_search_files:
-                    SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
-                    SearchTabHelper.SearchTargetChosenUser = MessagesInnerFragment.Username;
-                    //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                    Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(MainActivity.GoToSearchExtra, true);
-                    this.StartActivity(intent);
-                    return true;
-                case Resource.Id.action_browse_files:
-                    BrowseService.RequestFilesApi(MessagesInnerFragment.Username, null);
-                    return true;
-                case Android.Resource.Id.Home:
-                    OnBackPressedDispatcher.OnBackPressed();
-                    return true;
-                case Resource.Id.action_delete_messages:
-                    var usernameToDelete = MessagesInnerFragment.Username;
-                    var (deletedMessages, deletedReadCount) = MessageController.DeleteMessageFromUserWithUndo(MessagesInnerFragment.Username);
-                    Snackbar sb1 = Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content),
-                            string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
-                            usernameToDelete),
-                            Snackbar.LengthLong)
-                        .SetAction(Resource.String.undo, (View v) => ItemTouchHelperMessageOverviewCallback.UndoSingleUserMessagesDeleteAction(null, (usernameToDelete, deletedMessages, deletedReadCount), -1, true)) ;
-
-                    sb1.Show();
-                    this.SwitchToOuter(SupportFragmentManager.FindFragmentByTag("InnerUserFragment"), true);
-                    return true;
-                case Resource.Id.action_delete_all_messages:
-                    if (MessageController.Messages.Count == 0) //nullref
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.deleted_all_no_messages), ToastLength.Long);
-                        return true;
-                    }
-                    var (deletedAllMessages, deletedAllLastReadMessageCounts) = MessageController.DeleteAllMessagesWithUndo();
-                    this.GetOverviewFragment().RefreshAdapter();
-                    Snackbar sb = Snackbar.Make(this.GetOverviewFragment().View, SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong).SetAction("Undo", (View v) => GetUndoDeleteAllSnackBarAction(deletedAllMessages, deletedAllLastReadMessageCounts));
-                    sb.Show();
-                    return true;
-
             }
             return base.OnOptionsItemSelected(item);
         }
@@ -385,7 +314,6 @@ namespace Seeker
                     }
                 }
                 AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
-                myToolbar.InflateMenu(Resource.Menu.messages_overview_list_menu);
                 myToolbar.Title = SeekerState.ActiveActivityRef.GetString(Resource.String.messages);
                 this.SetSupportActionBar(myToolbar);
                 this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
@@ -412,7 +340,6 @@ namespace Seeker
         public void SwitchToOuter(AndroidX.Fragment.App.Fragment innerFragment, bool forDeleteMessage)
         {
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
-            myToolbar.InflateMenu(Resource.Menu.messages_overview_list_menu);
             myToolbar.Title = SeekerState.ActiveActivityRef.GetString(Resource.String.messages);
             this.SetSupportActionBar(myToolbar);
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
@@ -482,7 +409,6 @@ namespace Seeker
 
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
-            myToolbar.InflateMenu(Resource.Menu.messages_overview_list_menu);
             myToolbar.Title = SeekerState.ActiveActivityRef.GetString(Resource.String.messages);
             this.SetSupportActionBar(myToolbar);
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
