@@ -22,7 +22,6 @@ namespace Seeker.Messages
         private RecyclerView recyclerViewInner;
         private LinearLayoutManager recycleLayoutManager;
         private MessagesInnerRecyclerAdapter recyclerAdapter;
-        private List<Message> messagesInternal = null;
         private bool created = false;
         private View rootView = null;
         private EditText editTextEnterMessage = null;
@@ -83,20 +82,13 @@ namespace Seeker.Messages
             recycleLayoutManager = new LinearLayoutManager(Activity);
             recycleLayoutManager.StackFromEnd = true;
             recycleLayoutManager.ReverseLayout = false;
-            if (MessageController.Messages.Keys.Contains(Username))
-            {
-                messagesInternal = MessageController.Messages[Username].ToList();
-            }
-            else
-            {
-                messagesInternal = new List<Message>();
-            }
-            recyclerAdapter = new MessagesInnerRecyclerAdapter(messagesInternal); //this depends tightly on MessageController... since these are just strings..
+            var messages = MessageController.Messages.GetValueOrDefault(Username, new List<Message>()).ToList();
+            recyclerAdapter = new MessagesInnerRecyclerAdapter(messages); //this depends tightly on MessageController... since these are just strings..
             recyclerViewInner.SetAdapter(recyclerAdapter);
             recyclerViewInner.SetLayoutManager(recycleLayoutManager);
-            if (messagesInternal.Count != 0)
+            if (messages.Count != 0)
             {
-                recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
+                recyclerViewInner.ScrollToPosition(messages.Count - 1);
             }
             created = true;
             return rootView;
@@ -176,12 +168,12 @@ namespace Seeker.Messages
         {
             if (created) //attach can happen before we created our view...
             {
-                messagesInternal = MessageController.Messages[Username].ToList();
-                recyclerAdapter = new MessagesInnerRecyclerAdapter(messagesInternal); //this depends tightly on MessageController... since these are just strings..
+                var messages = MessageController.Messages.GetValueOrDefault(Username, new List<Message>()).ToList();
+                recyclerAdapter = new MessagesInnerRecyclerAdapter(messages); //this depends tightly on MessageController... since these are just strings..
                 recyclerViewInner.SetAdapter(recyclerAdapter);
-                if (messagesInternal.Count != 0)
+                if (messages.Count != 0)
                 {
-                    recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
+                    recyclerViewInner.ScrollToPosition(messages.Count - 1);
                 }
                 MessageController.MessageReceived -= OnMessageReceived;
                 MessageController.MessageReceived += OnMessageReceived;
@@ -222,20 +214,25 @@ namespace Seeker.Messages
 
         public void OnMessageReceived(object sender, Message msg)
         {
-            this.Activity.RunOnUiThread(new Action(() =>
+            if (msg.Username != Username)
             {
-                messagesInternal = MessageController.Messages[Username];
-                recyclerAdapter = new MessagesInnerRecyclerAdapter(messagesInternal); //this depends tightly on MessageController... since these are just strings..
-                recyclerViewInner.SetAdapter(recyclerAdapter);
-                recyclerAdapter.NotifyDataSetChanged();
-                if (messagesInternal.Count != 0)
+                return;
+            }
+
+            this.Activity?.RunOnUiThread(new Action(() =>
+            {
+                if (MessageController.Messages.TryGetValue(Username, out var messages))
                 {
-                    recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
-                }
-                // If we're currently viewing this conversation, keep it marked as read
-                if (currentlyResumed && msg.Username == Username)
-                {
-                    MessageController.MarkAsRead(Username);
+                    recyclerAdapter = new MessagesInnerRecyclerAdapter(messages); //this depends tightly on MessageController... since these are just strings..
+                    recyclerViewInner.SetAdapter(recyclerAdapter);
+                    if (messages.Count != 0)
+                    {
+                        recyclerViewInner.ScrollToPosition(messages.Count - 1);
+                    }
+                    if (currentlyResumed)
+                    {
+                        MessageController.MarkAsRead(Username);
+                    }
                 }
             }));
         }
