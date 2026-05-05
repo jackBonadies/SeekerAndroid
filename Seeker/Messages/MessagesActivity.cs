@@ -77,20 +77,6 @@ namespace Seeker
             }
         }
 
-        protected override void OnSaveInstanceState(Bundle outState)
-        {
-            var f = SupportFragmentManager.FindFragmentByTag("InnerUserFragment");
-            if (f != null && f.IsVisible)
-            {
-                outState.PutBoolean("SaveStateAtInner", true);
-            }
-            else
-            {
-                outState.PutBoolean("SaveStateAtInner", false);
-            }
-            base.OnSaveInstanceState(outState);
-        }
-
         protected override void OnRestoreInstanceState(Bundle savedInstanceState)
         {
             base.OnRestoreInstanceState(savedInstanceState);
@@ -354,7 +340,6 @@ namespace Seeker
                 SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesOverviewFragment(), "OuterUserFragment").Commit();
             }
             backPressedCallback.Enabled = false;
-            //this.SupportActionBar.InvalidateOptionsMenu(); occurs to soon... outer fragment is not yet visible...
         }
 
         protected override void OnNewIntent(Intent intent)
@@ -415,37 +400,30 @@ namespace Seeker
             this.SupportActionBar.SetHomeButtonEnabled(true);
             //this.SupportActionBar.SetDisplayShowHomeEnabled(true);
 
-            bool startWithUserFragment = false;
-
-            if (savedInstanceState != null && savedInstanceState.GetBoolean("SaveStateAtInner"))
+            // FragmentManager has already auto-restored fragments from savedInstanceState in base.OnCreate.
+            // If the inner fragment was showing before recreation, it's already back — just re-enable the back callback.
+            bool startWithUserFragment = SupportFragmentManager.FindFragmentByTag("InnerUserFragment") != null;
+            if (startWithUserFragment)
             {
-                startWithUserFragment = true;
-                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(MessagesInnerFragment.Username), "InnerUserFragment").Commit();
                 backPressedCallback.Enabled = true;
-                //savedInstanceState.Clear(); //else we will keep doing the first even if the second was done by intent..
             }
-            else if (Intent != null) //if an intent started this activity
+            else if (Intent != null && Intent.GetBooleanExtra(MessageController.ComingFromMessageTapped, false))
             {
-                if (Intent.GetBooleanExtra(MessageController.ComingFromMessageTapped, false))
+                Logger.Debug("coming from message tapped");
+                string goToUsersMessages = Intent.GetStringExtra(MessageController.FromUserName);
+                if (goToUsersMessages == string.Empty)
                 {
-                    Logger.Debug("coming from message tapped");
-                    string goToUsersMessages = Intent.GetStringExtra(MessageController.FromUserName);
-                    if (goToUsersMessages == string.Empty)
-                    {
-                        Logger.Firebase("empty goToUsersMessages");
-                    }
-                    else
-                    {
-                        startWithUserFragment = true;
-                        SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(goToUsersMessages), "InnerUserFragment").Commit();
-                        backPressedCallback.Enabled = true;
-                        //switch in that fragment...
-                        //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame,new MessagesOverviewFragment()).Commit();
-                    }
+                    Logger.Firebase("empty goToUsersMessages");
+                }
+                else
+                {
+                    startWithUserFragment = true;
+                    SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(goToUsersMessages), "InnerUserFragment").Commit();
+                    backPressedCallback.Enabled = true;
                 }
             }
 
-            if (!startWithUserFragment)
+            if (!startWithUserFragment && SupportFragmentManager.FindFragmentByTag("OuterUserFragment") == null)
             {
                 SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesOverviewFragment(), "OuterUserFragment").Commit();
             }

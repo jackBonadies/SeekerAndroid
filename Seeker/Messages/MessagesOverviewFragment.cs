@@ -70,7 +70,6 @@ namespace Seeker.Messages
         public override void OnResume()
         {
             base.OnResume();
-            SeekerState.ActiveActivityRef.InvalidateOptionsMenu();
             MessagesBroadcastReceiver.MarkAsReadFromNotification += UpdateMarkAsReadFromNotif;
             SeekerApplication.UserStatusChangedUIEvent += OnUserStatusChanged;
         }
@@ -102,7 +101,6 @@ namespace Seeker.Messages
 
         public class MessageOverviewComparer : IComparer<KeyValuePair<string, List<Message>>>
         {
-            // Compares by UserCount then Name
             public int Compare(KeyValuePair<string, List<Message>> x, KeyValuePair<string, List<Message>> y)
             {
                 if (x.Value.Count == 0 && y.Value.Count == 0)
@@ -136,15 +134,7 @@ namespace Seeker.Messages
             var activity = this.Activity != null ? this.Activity : MessagesActivity.MessagesActivityRef;
             activity.RunOnUiThread(new Action(() =>
             {
-                //if(internalList!=null && internalList.Contains(msg.Username))
-                //{
-                //    //update this one...
-                //    recyclerAdapter.NotifyDataSetChanged();//NotifyItemChanged(internalList.IndexOf(msg.Username));
-                //}
-                //else
-                //{
                 this.RefreshAdapter();
-                //}
             }));
         }
 

@@ -28,8 +28,7 @@ namespace Seeker.Messages
         private View rootView = null;
         private EditText editTextEnterMessage = null;
         private ImageButton sendMessage = null;
-        public static string Username = null;
-        public static bool currentlyResumed = false;
+        public string Username = null;
 
         public MessagesInnerFragment() : base()
         {
@@ -160,8 +159,8 @@ namespace Seeker.Messages
 
             public void OnPrepareMenu(IMenu menu)
             {
-                UiHelpers.SetMenuTitles(menu, Username);
-                UiHelpers.SetIgnoreAddExclusive(menu, Username);
+                UiHelpers.SetMenuTitles(menu, fragment.Username);
+                UiHelpers.SetIgnoreAddExclusive(menu, fragment.Username);
             }
 
             public void OnMenuClosed(IMenu menu)
@@ -175,33 +174,33 @@ namespace Seeker.Messages
                 {
                     return false;
                 }
-                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), Username, activity, activity.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId)))
+                var username = fragment.Username;
+                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, activity, activity.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId)))
                 {
                     return true;
                 }
                 switch (item.ItemId)
                 {
                     case Resource.Id.action_add_to_user_list:
-                        UserListService.AddUserAPI(activity, Username, new Action(() => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.success_added_user), ToastLength.Short); }));
+                        UserListService.AddUserAPI(activity, username, new Action(() => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.success_added_user), ToastLength.Short); }));
                         return true;
                     case Resource.Id.action_search_files:
                         SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
-                        SearchTabHelper.SearchTargetChosenUser = Username;
+                        SearchTabHelper.SearchTargetChosenUser = username;
                         Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(MainActivity.GoToSearchExtra, true);
                         fragment.StartActivity(intent);
                         return true;
                     case Resource.Id.action_browse_files:
-                        BrowseService.RequestFilesApi(Username, null);
+                        BrowseService.RequestFilesApi(username, null);
                         return true;
                     case Resource.Id.action_delete_messages:
-                        var usernameToDelete = Username;
-                        var (deletedMessages, deletedReadCount) = MessageController.DeleteMessageFromUserWithUndo(Username);
+                        var (deletedMessages, deletedReadCount) = MessageController.DeleteMessageFromUserWithUndo(username);
                         Snackbar sb1 = Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content),
                                 string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
-                                usernameToDelete),
+                                username),
                                 Snackbar.LengthLong)
-                            .SetAction(Resource.String.undo, (View v) => ItemTouchHelperMessageOverviewCallback.UndoSingleUserMessagesDeleteAction(null, (usernameToDelete, deletedMessages, deletedReadCount), -1, true));
+                            .SetAction(Resource.String.undo, (View v) => ItemTouchHelperMessageOverviewCallback.UndoSingleUserMessagesDeleteAction(null, (username, deletedMessages, deletedReadCount), -1, true));
                         sb1.Show();
                         (activity as MessagesActivity)?.SwitchToOuter(fragment, true);
                         return true;
@@ -265,14 +264,12 @@ namespace Seeker.Messages
             }
 
             MessageController.UnsetAsUnreadAndSaveIfApplicable(Username);
-            currentlyResumed = true;
             base.OnResume();
         }
 
         public override void OnPause()
         {
             Logger.Debug("inner frag pause");
-            currentlyResumed = false;
             base.OnPause();
         }
 
@@ -292,7 +289,7 @@ namespace Seeker.Messages
             this.Activity?.RunOnUiThread(new Action(() =>
             {
                 RebuildMessagesAdapter();
-                if (currentlyResumed)
+                if (IsResumed)
                 {
                     MessageController.MarkAsRead(Username);
                 }

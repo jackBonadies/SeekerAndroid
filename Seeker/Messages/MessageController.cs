@@ -719,7 +719,8 @@ namespace Seeker.Messages
 
         public static void SetAsUnreadAndSaveIfApplicable(string username)
         {
-            if (MessagesInnerFragment.currentlyResumed && MessagesInnerFragment.Username == username)
+            var inner = MessagesActivity.MessagesActivityRef?.SupportFragmentManager?.FindFragmentByTag("InnerUserFragment") as MessagesInnerFragment;
+            if (inner != null && inner.IsResumed && inner.Username == username)
             {
                 //if we are already at this user then update last-read count to current.
                 MarkAsRead(username);
