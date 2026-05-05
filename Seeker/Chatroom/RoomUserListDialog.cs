@@ -499,14 +499,7 @@ namespace Seeker.Chatroom
                     SeekerState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
                     return true;
                 case 3: //browse user
-                    Action<View> action = new Action<View>((v) =>
-                    {
-                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(MainActivity.GoToBrowseExtra, true);
-                        this.StartActivity(intent);
-                    });
-                    View snackView = this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom);
-                    BrowseService.RequestFilesApi(userdata.Username, snackView, action, null);
+                    BrowseService.RequestFilesApi(userdata.Username, null);
                     return true;
                 case 4: //search users files
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;

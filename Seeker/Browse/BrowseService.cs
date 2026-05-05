@@ -50,17 +50,17 @@ namespace Seeker.Browse
             SessionService.Instance.RunWithReconnect(actualActionToPerform);
         }
 
-        public static void RequestFilesApi(string username, View viewForSnackBar, Action<View> goSnackBarAction, string atLocation = null)
+        public static void RequestFilesApi(string username, string atLocation = null)
         {
             if (!PreferencesState.CurrentlyLoggedIn)
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short);
                 return;
             }
-            SessionService.Instance.RunWithReconnect(() => RequestFilesLogic(username, viewForSnackBar, goSnackBarAction, atLocation));
+            SessionService.Instance.RunWithReconnect(() => RequestFilesLogic(username, atLocation));
         }
 
-        private static void RequestFilesLogic(string username, View viewForSnackBar, Action<View> goSnackBarAction, string atLocation)
+        private static void RequestFilesLogic(string username, string atLocation)
         {
             try
             {
@@ -153,6 +153,7 @@ namespace Seeker.Browse
                     {
                         Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(MainActivity.GoToBrowseExtra, true);
+                        intent.AddFlags(ActivityFlags.SingleTop);
                         SeekerState.ActiveActivityRef.StartActivity(intent);
                     });
 

@@ -36,6 +36,7 @@ namespace Seeker.Messages
             }
             recyclerViewOverview = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewOverview);
             recyclerViewOverview.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
+            AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(recyclerViewOverview, new Seeker.Helpers.BottomOnlyInsetsListener());
 
             recycleLayoutManager = new LinearLayoutManager(Activity);
             if (MessageController.Messages == null)

@@ -314,12 +314,7 @@ namespace Seeker
 
         private void Browse_Click(object sender, EventArgs e)
         {
-            Action<View> browseAction = new Action<View>((v) =>
-            {
-                this.Dismiss();
-                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
-            });
-            Browse.BrowseService.RequestFilesApi(SearchResponse.Username, this.View, browseAction, null);
+            Browse.BrowseService.RequestFilesApi(SearchResponse.Username, null);
         }
 
         private void Close_Click(object sender, EventArgs e)
@@ -600,7 +595,7 @@ namespace Seeker
                         //this is if the user has show locked in search results but hide in browse results, then we cannot go to the folder if it is locked.
                         startingDir = null;
                     }
-                    Browse.BrowseService.RequestFilesApi(SearchResponse.Username, this.View, action, startingDir);
+                    Browse.BrowseService.RequestFilesApi(SearchResponse.Username, startingDir);
                     return true;
                 case Resource.Id.moreInfo:
                     ShowMoreInfoDialog();

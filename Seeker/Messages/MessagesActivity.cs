@@ -53,7 +53,7 @@ namespace Seeker
     [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, Exported = false)]
     public class MessagesActivity : SlskLinkMenuActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
-        public static MessagesActivity MessagesActivityRef = null;
+        public static MessagesActivity MessagesActivityRef { private set; get; } = null;
 
         private GenericOnBackPressedCallback backPressedCallback;
 
@@ -146,14 +146,7 @@ namespace Seeker
                     this.StartActivity(intent);
                     return true;
                 case Resource.Id.action_browse_files:
-                    Action<View> action = new Action<View>((v) =>
-                    {
-                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(MainActivity.GoToBrowseExtra, true);
-                        this.StartActivity(intent);
-                    });
-                    View snackView = this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId);
-                    BrowseService.RequestFilesApi(MessagesInnerFragment.Username, snackView, action, null);
+                    BrowseService.RequestFilesApi(MessagesInnerFragment.Username, null);
                     return true;
                 case Android.Resource.Id.Home:
                     OnBackPressedDispatcher.OnBackPressed();
@@ -461,6 +454,9 @@ namespace Seeker
 
         protected override void OnResume()
         {
+            // this needs to be set here. otherwise we can create a new messages activity, go back to previous
+            // and the ref will point to the now finished activity.
+            MessagesActivityRef = this;
             base.OnResume();
         }
 

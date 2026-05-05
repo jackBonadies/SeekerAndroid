@@ -46,7 +46,7 @@ namespace Seeker
     [Activity(Label = "ChatroomActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, Exported = false)]
     public class ChatroomActivity : SlskLinkMenuActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
-        public static ChatroomActivity ChatroomActivityRef = null;
+        public static ChatroomActivity ChatroomActivityRef { private set; get; } = null;
 
         private GenericOnBackPressedCallback backPressedCallback;
 
@@ -61,6 +61,14 @@ namespace Seeker
             set => Common.PreferencesState.ShowTickerView = value;
         }
         public static bool ShowUserOnlineAwayStatusUpdates = true;
+
+        protected override void OnResume()
+        {
+            // this needs to be set here. otherwise we can create a new chatroom activity, go back to previous
+            // and the ref will point to the now finished activity.
+            ChatroomActivityRef = this;
+            base.OnResume();
+        }
 
         protected override void OnCreate(Bundle savedInstanceState)
         {

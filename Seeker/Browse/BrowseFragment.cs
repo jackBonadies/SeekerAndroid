@@ -1265,7 +1265,7 @@ namespace Seeker
                     return;
                 }
                 SeekerState.RecentUsersManager.AddUserToTop(usernameToBrowse, true);
-                BrowseService.RequestFilesApi(usernameToBrowse, this.View, goSnackBarAction, null);
+                BrowseService.RequestFilesApi(usernameToBrowse, null);
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
                     aDiag.Dismiss();

@@ -228,6 +228,10 @@ namespace Seeker
             //this is a relatively safe way that prevents rotates from redoing the intent.
             bool alreadyHandled = Intent.GetBooleanExtra("ALREADY_HANDLED", false);
             Intent = Intent.PutExtra("ALREADY_HANDLED", true);
+
+            SeekerState.MainActivityRef = this;
+            SeekerState.ActiveActivityRef = this;
+
             //Intent = i;
             if (Intent != null)
             {
@@ -241,9 +245,6 @@ namespace Seeker
                 //    //-clicking app icon or intent filter
                 //    Logger.Debug("new task | launched from history");
                 //}
-                SeekerState.MainActivityRef = this; //set these early. they are needed
-                SeekerState.ActiveActivityRef = this;
-
 
                 if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
                 {
@@ -280,8 +281,6 @@ namespace Seeker
                 }
                 else if (SearchSendIntentHelper.IsFromActionSend(Intent) && !reborn) //this will always create a new instance, so if its reborn then its an old intent that we already followed.
                 {
-                    SeekerState.MainActivityRef = this;
-                    SeekerState.ActiveActivityRef = this;
                     Logger.Debug("MainActivity action send intent");
                     //give us a new fresh tab if the current one has a search in it...
                     if (!string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm))
@@ -328,9 +327,6 @@ namespace Seeker
                 }
             }
 
-            SeekerState.MainActivityRef = this;
-            SeekerState.ActiveActivityRef = this;
-
             //TODO2026 - need to think about this
             //if we have all the conditions to share, then set sharing up.
             if (SharedFileService.MeetsSharingConditions() && !SeekerState.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
@@ -344,9 +340,6 @@ namespace Seeker
             }
 
             SeekerState.SharedPreferences = sharedPreferences;
-            SeekerState.MainActivityRef = this;
-            SeekerState.ActiveActivityRef = this;
-
             UpdateForScreenSize();
 
             // Document files are initialized once per process in SeekerApplication.OnCreate.

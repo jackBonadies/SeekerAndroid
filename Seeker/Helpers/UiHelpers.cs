@@ -557,15 +557,7 @@ namespace Seeker
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.browse_user))
             {
-                Action<View> action = new Action<View>((v) =>
-                {
-                    Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(MainActivity.GoToBrowseExtra, true);
-                    intent.AddFlags(ActivityFlags.SingleTop); //??
-                    activity.StartActivity(intent);
-                    //((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
-                });
-                BrowseService.RequestFilesApi(usernameInQuestion, browseSnackView, action, null);
+                BrowseService.RequestFilesApi(usernameInQuestion, null);
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.get_user_info))

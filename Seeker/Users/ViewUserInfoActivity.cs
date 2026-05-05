@@ -59,12 +59,11 @@ namespace Seeker
             switch (item.ItemId)
             {
                 case Resource.Id.browseUsersFiles:
-                    BrowseService.RequestFilesApi(UserToView, null, null, null); //TODO2026 im pretty sure this is a bug... no action! unless a default one is used later on..
+                    BrowseService.RequestFilesApi(UserToView, null); 
                     return true;
                 case Resource.Id.searchUserFiles:
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
                     SearchTabHelper.SearchTargetChosenUser = this.UserToView;
-                    //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
                     Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(MainActivity.GoToSearchExtra, true);
                     this.StartActivity(intent);

@@ -94,15 +94,7 @@ namespace Seeker
             switch (item.ItemId)
             {
                 case Resource.Id.browseUsersFiles:
-                    //do browse thing...
-                    Action<View> action = new Action<View>((v) =>
-                    {
-                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(MainActivity.GoToBrowseExtra, true);
-                        this.StartActivity(intent);
-                    });
-                    View snackView = this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId);
-                    BrowseService.RequestFilesApi(PopUpMenuOwnerHack, snackView, action, null);
+                    BrowseService.RequestFilesApi(PopUpMenuOwnerHack, null);
                     return true;
                 case Resource.Id.searchUserFiles:
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;

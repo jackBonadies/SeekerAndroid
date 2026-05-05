@@ -83,14 +83,7 @@ namespace Seeker.Messages
                         string username = GetSelectedUsernames().FirstOrDefault();
                         if (username != null)
                         {
-                            Action<View> action = new Action<View>((v) =>
-                            {
-                                Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                                intent.PutExtra(MainActivity.GoToBrowseExtra, true);
-                                SeekerState.ActiveActivityRef.StartActivity(intent);
-                            });
-                            View snackView = SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId);
-                            BrowseService.RequestFilesApi(username, snackView, action, null);
+                            BrowseService.RequestFilesApi(username, null);
                         }
                         MessagesOverviewActionMode?.Finish();
                         return true;

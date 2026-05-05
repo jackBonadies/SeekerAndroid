@@ -58,15 +58,7 @@ namespace Seeker
             {
                 case FromSlskLinkBrowseAtLocation: //Browse At Location
                     CommonHelpers.ParseSlskLinkString(SimpleHelpers.SlskLinkClickedData, out string username, out string dirPath, out _, out _);
-                    Action<View> action = new Action<View>((v) =>
-                    {
-                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(MainActivity.GoToBrowseExtra, true);
-                        this.StartActivity(intent);
-                        //((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
-                    });
-
-                    Browse.BrowseService.RequestFilesApi(username, null, action, dirPath);
+                    Browse.BrowseService.RequestFilesApi(username, dirPath);
                     return true;
                 case FromSlskLinkCopyLink:
                     CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, SimpleHelpers.SlskLinkClickedData);

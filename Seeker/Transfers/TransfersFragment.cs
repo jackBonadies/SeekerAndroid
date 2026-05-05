@@ -842,12 +842,7 @@ namespace Seeker
                         if (ti is TransferItem ttti)
                         {
                             string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(ttti.FullFilename);
-                            Action<View> action = new Action<View>((v) =>
-                            {
-                                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
-                            });
-
-                            BrowseService.RequestFilesApi(ttti.Username, this.View, action, startingDir);
+                            BrowseService.RequestFilesApi(ttti.Username, startingDir);
                         }
                         else if (ti is FolderItem fi)
                         {
@@ -862,14 +857,7 @@ namespace Seeker
                             {
                                 startingDir = SimpleHelpers.GetDirectoryRequestFolderName(startingDir); //keep going up..
                             }
-
-
-                            Action<View> action = new Action<View>((v) =>
-                            {
-                                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
-                            });
-
-                            BrowseService.RequestFilesApi(fi.Username, this.View, action, startingDir);
+                            BrowseService.RequestFilesApi(fi.Username, startingDir);
                         }
                         break;
                     case TransferContextMenuItem.ResumeFolder: //resume folder
