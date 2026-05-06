@@ -94,8 +94,10 @@ namespace Seeker
         private ObjectAnimator shimmerAnimSpeed, shimmerAnimFiles, shimmerAnimDirs;
 
         private View noPicture = null;
+        private TextView noPictureText = null;
         private ImageView picture = null;
         private TextView userBio = null;
+        private bool pictureFailedToLoad = false;
 
         protected override void OnSaveInstanceState(Bundle outState)
         {
@@ -103,9 +105,15 @@ namespace Seeker
             if (userInfo != null)
             {
                 outState.PutBoolean("UserInfo.HasPicture", userInfo.HasPicture);
-                if (userInfo.HasPicture)
+                if (userInfo.HasPicture && userInfo.Picture != null && userInfo.Picture.Length > 0)
                 {
-                    outState.PutByteArray("UserInfo.Picture", userInfo.Picture);
+                    // Picture bytes can easily exceed Binder's ~1 MB transaction limit.
+                    // Store on disk and put only the filename in the bundle.
+                    string filename = Services.UserInfoPictureCacheService.Instance.TryWrite(UserToView, userInfo.Picture);
+                    if (filename != null)
+                    {
+                        outState.PutString("UserInfo.PicturePath", filename);
+                    }
                 }
                 outState.PutString("UserInfo.Description", userInfo.Description);
                 outState.PutInt("UserInfo.QueueLength", userInfo.QueueLength);
@@ -149,13 +157,19 @@ namespace Seeker
                         byte[] pic = null;
                         if (hasPic)
                         {
-                            pic = savedInstanceState.GetByteArray("UserInfo.Picture");
+                            string filename = savedInstanceState.GetString("UserInfo.PicturePath");
+                            if (!string.IsNullOrEmpty(filename))
+                            {
+                                pic = Services.UserInfoPictureCacheService.Instance.TryRead(filename);
+                                Services.UserInfoPictureCacheService.Instance.Delete(filename);
+                            }
                         }
                         string desc = savedInstanceState.GetString("UserInfo.Description", string.Empty);
                         int ql = savedInstanceState.GetInt("UserInfo.QueueLength");
                         int uploadSlots = savedInstanceState.GetInt("UserInfo.UploadSlots");
                         bool freeSlot = savedInstanceState.GetBoolean("UserInfo.HasFreeUploadSlot");
                         userInfo = new Soulseek.UserInfo(desc, uploadSlots, ql, freeSlot, pic);
+                        pictureFailedToLoad = hasPic && pic == null;
                     }
 
                     if (savedInstanceState.ContainsKey("userData.AverageSpeed"))
@@ -232,6 +246,7 @@ namespace Seeker
             SetupShimmerPlaceholder(shimmerDirs);
 
             noPicture = FindViewById(Resource.Id.user_info_no_picture);
+            noPictureText = FindViewById<TextView>(Resource.Id.user_info_no_picture_text);
             picture = FindViewById<ImageView>(Resource.Id.user_info_picture);
             userBio = FindViewById<TextView>(Resource.Id.textViewBio);
 
@@ -259,6 +274,19 @@ namespace Seeker
             RequestedUserInfoHelper.UserDataReceivedUI -= UserDataReceivedUIHandler;
             StopShimmerAnimations();
             base.OnPause();
+        }
+
+        protected override void OnDestroy()
+        {
+            // Only when the user is actually leaving (not on rotation / config change).
+            // Process death never reaches OnDestroy, so this is a best-effort cleanup;
+            // the per-write LRU trim is the actual size bound.
+            if (IsFinishing && !string.IsNullOrEmpty(UserToView) && userInfo != null && userInfo.HasPicture)
+            {
+                var cache = Services.UserInfoPictureCacheService.Instance;
+                cache.Delete(cache.GetFilenameFor(UserToView));
+            }
+            base.OnDestroy();
         }
 
         private void SetUserStatsStatus()
@@ -403,7 +431,7 @@ namespace Seeker
         private string originalImageMimetype = null;
         private void SetPictureStatus()
         {
-            if (userInfo.HasPicture)
+            if (userInfo.HasPicture && !pictureFailedToLoad)
             {
                 noPicture.Visibility = ViewStates.Gone;
                 picture.Visibility = ViewStates.Visible;
@@ -432,6 +460,12 @@ namespace Seeker
             {
                 noPicture.Visibility = ViewStates.Visible;
                 picture.Visibility = ViewStates.Gone;
+                if (noPictureText != null)
+                {
+                    noPictureText.SetText(pictureFailedToLoad
+                        ? Resource.String.user_picture_failed_to_load
+                        : Resource.String.user_has_no_pic);
+                }
             }
         }
 

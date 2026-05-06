@@ -340,6 +340,7 @@ Directory Count: {5}"
 
     <string name="user_has_no_bio">User has no bio.</string>
     <string name="user_has_no_pic">User has no picture.</string>
+    <string name="user_picture_failed_to_load">Failed to load user picture.</string>
     <string name="no_pic_set">No picture is set</string>
     <string name="select_pic">Select Picture</string>
     <string name="success_set_pic">Successfully set picture</string>
