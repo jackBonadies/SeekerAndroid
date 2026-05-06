@@ -486,11 +486,11 @@ namespace Seeker.Messages
                     bool systemIsInNightMode = GetIfSystemIsInNightMode(contextToUse);
 
 
-                    AndroidX.Core.App.RemoteInput remoteInput = new AndroidX.Core.App.RemoteInput.Builder("key_text_result").SetLabel(SeekerApplication.GetString(Resource.String.sendmessage_)).Build();
+                    AndroidX.Core.App.RemoteInput remoteInput = new AndroidX.Core.App.RemoteInput.Builder(MessagesBroadcastReceiver.KeyTextResult).SetLabel(SeekerApplication.GetString(Resource.String.sendmessage_)).Build();
                     Intent replayIntent = new Intent(contextToUse, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
                     replayIntent.PutExtra("direct_reply_extra", true);
-                    replayIntent.SetAction("seeker_direct_reply");
-                    replayIntent.PutExtra("seeker_username", msg.Username);
+                    replayIntent.SetAction(MessagesBroadcastReceiver.ActionDirectReply);
+                    replayIntent.PutExtra(MessagesBroadcastReceiver.ExtraUsername, msg.Username);
                     PendingIntent replyPendingIntent = PendingIntent.GetBroadcast(contextToUse, msg.Username.GetHashCode(), replayIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, false)); //mutable, the end user needs to be able to mutate with direct replay action..
                     NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(Resource.Drawable.baseline_chat_bubble_white_24, "Reply", replyPendingIntent).SetAllowGeneratedReplies(false).AddRemoteInput(remoteInput).Build(); //TODO icon
 
@@ -528,18 +528,18 @@ namespace Seeker.Messages
 
                     Intent clearNotifIntent = new Intent(contextToUse, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
                     clearNotifIntent.PutExtra("clear_notif_extra", true);
-                    clearNotifIntent.SetAction("seeker_clear_notification");
-                    clearNotifIntent.PutExtra("seeker_username", msg.Username);
+                    clearNotifIntent.SetAction(MessagesBroadcastReceiver.ActionClearNotification);
+                    clearNotifIntent.PutExtra(MessagesBroadcastReceiver.ExtraUsername, msg.Username);
                     PendingIntent clearNotifPendingIntent = PendingIntent.GetBroadcast(contextToUse, msg.Username.GetHashCode(), clearNotifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
 
 
 
                     Intent markAsReadIntent = new Intent(contextToUse, typeof(MessagesBroadcastReceiver)); //TODO TODO we need a broadcast receiver...
                     markAsReadIntent.PutExtra("mark_as_read_extra", true);
-                    markAsReadIntent.SetAction("seeker_mark_as_read");
+                    markAsReadIntent.SetAction(MessagesBroadcastReceiver.ActionMarkAsRead);
 
 
-                    markAsReadIntent.PutExtra("seeker_username", msg.Username);
+                    markAsReadIntent.PutExtra(MessagesBroadcastReceiver.ExtraUsername, msg.Username);
                     PendingIntent markAsReadPendingIntent = PendingIntent.GetBroadcast(contextToUse, msg.Username.GetHashCode(), markAsReadIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true)); //else the new extras will not arrive...
 
                     string markAsRead = "Mark As Read";
@@ -719,7 +719,7 @@ namespace Seeker.Messages
 
         public static void SetAsUnreadAndSaveIfApplicable(string username)
         {
-            var inner = MessagesActivity.MessagesActivityRef?.SupportFragmentManager?.FindFragmentByTag("InnerUserFragment") as MessagesInnerFragment;
+            var inner = MessagesActivity.MessagesActivityRef?.SupportFragmentManager?.FindFragmentByTag(MessagesActivity.InnerFragmentTag) as MessagesInnerFragment;
             if (inner != null && inner.IsResumed && inner.Username == username)
             {
                 //if we are already at this user then update last-read count to current.
