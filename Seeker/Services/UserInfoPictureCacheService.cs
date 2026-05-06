@@ -18,6 +18,9 @@
  */
 
 using System;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using Seeker.Helpers;
 
 namespace Seeker.Services
@@ -25,7 +28,9 @@ namespace Seeker.Services
     /// <summary>
     /// On-disk cache for peer profile pictures so that a Bundle save (which travels through
     /// Binder, ~1 MB cap) can store a filename instead of multi-megabyte byte arrays.
-    /// Eviction is size-bounded LRU (and done on write), mirroring how Glide / DiskLruCache bound their caches.
+    /// Eviction is size-bounded, oldest-write-first by mtime, done on every write — mirroring
+    /// how Glide / DiskLruCache bound their caches. Reads do not bump mtime, so this is FIFO
+    /// by write rather than true LRU; fine here because reads are one-shot per restore.
     /// </summary>
     public class UserInfoPictureCacheService
     {
@@ -37,7 +42,7 @@ namespace Seeker.Services
 
         public string GetFilenameFor(string username)
         {
-            return SanitizeUsernameForFilename(username) + FileExtension;
+            return SanitizeAndHashUsername(username) + FileExtension;
         }
 
         public string TryWrite(string username, byte[] bytes)
@@ -45,10 +50,14 @@ namespace Seeker.Services
             try
             {
                 string filename = GetFilenameFor(username);
-                var dir = GetCacheDir(createIfMissing: true);
-                var file = new Java.IO.File(dir, filename);
-                System.IO.File.WriteAllBytes(file.AbsolutePath, bytes);
-                TrimToBudget();
+                string dir = GetCacheDir(createIfMissing: true);
+                if (dir == null)
+                {
+                    return null;
+                }
+                string path = Path.Combine(dir, filename);
+                File.WriteAllBytes(path, bytes);
+                TrimToBudget(filename);
                 return filename;
             }
             catch (Exception ex)
@@ -62,17 +71,17 @@ namespace Seeker.Services
         {
             try
             {
-                var dir = GetCacheDir(createIfMissing: false);
+                string dir = GetCacheDir(createIfMissing: false);
                 if (dir == null)
                 {
                     return null;
                 }
-                var file = new Java.IO.File(dir, filename);
-                if (!file.Exists())
+                string path = Path.Combine(dir, filename);
+                if (!File.Exists(path))
                 {
                     return null;
                 }
-                return System.IO.File.ReadAllBytes(file.AbsolutePath);
+                return File.ReadAllBytes(path);
             }
             catch (Exception ex)
             {
@@ -85,60 +94,72 @@ namespace Seeker.Services
         {
             try
             {
-                var dir = GetCacheDir(createIfMissing: false);
+                string dir = GetCacheDir(createIfMissing: false);
                 if (dir == null)
                 {
                     return;
                 }
-                var file = new Java.IO.File(dir, filename);
-                if (file.Exists())
+                string path = Path.Combine(dir, filename);
+                if (File.Exists(path))
                 {
-                    file.Delete();
+                    File.Delete(path);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logger.Firebase("Failed to delete user info picture cache entry: " + ex.Message);
             }
         }
 
-        // Sorts entries oldest-first by mtime, evicts until under budget. Never evicts
-        // the newest entry: a single picture larger than the budget would otherwise be
-        // deleted moments after being written.
-        public void TrimToBudget()
+        // Sorts entries oldest-first by mtime, evicts until under budget. The just-written
+        // filename is preserved explicitly: filesystem mtime resolution can be 1s, so a sort
+        // tie could otherwise leave the new file eligible for eviction the moment it lands.
+        public void TrimToBudget(string preserveFilename = null)
         {
             try
             {
-                var dir = GetCacheDir(createIfMissing: false);
+                string dir = GetCacheDir(createIfMissing: false);
                 if (dir == null)
                 {
                     return;
                 }
-                var files = dir.ListFiles();
-                if (files == null || files.Length == 0)
+                string[] paths = Directory.GetFiles(dir);
+                if (paths.Length == 0)
                 {
                     return;
                 }
+                var infos = new FileInfo[paths.Length];
                 long total = 0;
-                foreach (var f in files)
+                for (int i = 0; i < paths.Length; i++)
                 {
-                    total += f.Length();
+                    infos[i] = new FileInfo(paths[i]);
+                    total += infos[i].Length;
                 }
                 if (total <= BudgetBytes)
                 {
                     return;
                 }
-                Array.Sort(files, (a, b) => a.LastModified().CompareTo(b.LastModified()));
-                for (int i = 0; i < files.Length - 1; i++)
+                Array.Sort(infos, (a, b) => a.LastWriteTimeUtc.CompareTo(b.LastWriteTimeUtc));
+                for (int i = 0; i < infos.Length; i++)
                 {
                     if (total <= BudgetBytes)
                     {
                         break;
                     }
-                    var f = files[i];
-                    long size = f.Length();
-                    if (f.Delete())
+                    var info = infos[i];
+                    if (preserveFilename != null && string.Equals(info.Name, preserveFilename, StringComparison.Ordinal))
                     {
+                        continue;
+                    }
+                    long size = info.Length;
+                    try
+                    {
+                        info.Delete();
                         total -= size;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Firebase("Failed to evict user info picture cache entry: " + ex.Message);
                     }
                 }
             }
@@ -148,32 +169,35 @@ namespace Seeker.Services
             }
         }
 
-        private static Java.IO.File GetCacheDir(bool createIfMissing)
+        private static string GetCacheDir(bool createIfMissing)
         {
             var ctx = SeekerApplication.ApplicationContext;
             if (ctx == null || ctx.CacheDir == null)
             {
                 return null;
             }
-            var dir = new Java.IO.File(ctx.CacheDir, CacheDirName);
-            if (!dir.Exists())
+            string dir = Path.Combine(ctx.CacheDir.AbsolutePath, CacheDirName);
+            if (!Directory.Exists(dir))
             {
                 if (!createIfMissing)
                 {
                     return null;
                 }
-                dir.Mkdirs();
+                Directory.CreateDirectory(dir);
             }
             return dir;
         }
 
-        private static string SanitizeUsernameForFilename(string username)
+        // Sanitized stem keeps cache files vaguely human-readable; the hash suffix is what
+        // guarantees uniqueness across distinct usernames that would otherwise collapse to
+        // the same sanitized form (e.g. "user@1" and "user 1" both -> "user_1").
+        private static string SanitizeAndHashUsername(string username)
         {
             if (string.IsNullOrEmpty(username))
             {
                 return "_";
             }
-            var sb = new System.Text.StringBuilder(username.Length);
+            var sb = new StringBuilder(username.Length + 9);
             foreach (char c in username)
             {
                 if (char.IsLetterOrDigit(c) || c == '-' || c == '_' || c == '.')
@@ -185,7 +209,23 @@ namespace Seeker.Services
                     sb.Append('_');
                 }
             }
+            sb.Append('_');
+            sb.Append(ShortHash(username));
             return sb.ToString();
+        }
+
+        private static string ShortHash(string username)
+        {
+            using (var sha = SHA1.Create())
+            {
+                byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(username));
+                var hex = new StringBuilder(8);
+                for (int i = 0; i < 4; i++)
+                {
+                    hex.Append(hash[i].ToString("x2"));
+                }
+                return hex.ToString();
+            }
         }
     }
 }

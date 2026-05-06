@@ -431,6 +431,12 @@ namespace Seeker
         private string originalImageMimetype = null;
         private void SetPictureStatus()
         {
+            // If a fresh userInfo arrives with real bytes, the "cache miss after restore"
+            // flag from a prior recreation is stale — clear it so we render normally.
+            if (userInfo != null && userInfo.Picture != null && userInfo.Picture.Length > 0)
+            {
+                pictureFailedToLoad = false;
+            }
             if (userInfo.HasPicture && !pictureFailedToLoad)
             {
                 noPicture.Visibility = ViewStates.Gone;

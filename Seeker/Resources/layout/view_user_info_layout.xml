@@ -128,7 +128,7 @@
                             />
                             <View
                                 android:id="@+id/stat_speed_shimmer"
-								android:layout_gravity="center"
+                                android:layout_gravity="center"
                                 android:layout_width="60dp"
                                 android:layout_height="24dp"
                             />
@@ -185,7 +185,7 @@
                             />
                             <View
                                 android:id="@+id/stat_dirs_shimmer"
-								android:layout_gravity="center"
+                                android:layout_gravity="center"
                                 android:layout_width="60dp"
                                 android:layout_height="24dp"
                             />
@@ -232,7 +232,7 @@
                             />
                             <View
                                 android:id="@+id/stat_files_shimmer"
-								android:layout_gravity="center"
+                                android:layout_gravity="center"
                                 android:layout_width="60dp"
                                 android:layout_height="24dp"
                             />
