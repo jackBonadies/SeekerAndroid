@@ -429,20 +429,13 @@ namespace Seeker
                 case Resource.Id.hide_show_ticker_action:
                     ChatroomActivity.ShowTickerView = !ChatroomActivity.ShowTickerView;
                     var f = SupportFragmentManager.FindFragmentByTag("ChatroomInnerFragment") as ChatroomInnerFragment;
-                    if (ChatroomActivity.ShowTickerView)
-                    {
-                        f.currentTickerView.Visibility = ViewStates.Visible;
-                    }
-                    else
-                    {
-                        f.currentTickerView.Visibility = ViewStates.Gone;
-                    }
+                    f.SetTickerVisibility();
                     PreferencesManager.SaveShowTickerView();
                     return true;
                 case Resource.Id.hide_show_user_status_action:
                     ChatroomActivity.ShowStatusesView = !ChatroomActivity.ShowStatusesView;
                     var f1 = SupportFragmentManager.FindFragmentByTag("ChatroomInnerFragment") as ChatroomInnerFragment;
-                    f1.SetStatusesView();
+                    f1.SetActivityStatusesView();
                     PreferencesManager.SaveShowStatusesView();
                     return true;
             }

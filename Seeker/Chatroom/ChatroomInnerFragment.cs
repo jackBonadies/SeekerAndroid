@@ -35,7 +35,7 @@ namespace Seeker.Chatroom
         private View fabScrollToNewest = null;
         private EditText editTextEnterMessage = null;
         private ImageButton sendMessage = null;
-        public TextView currentTickerView = null;
+        private TextView currentTickerView = null;
 
         private ViewFlipper joinEmptyStateFlipper = null;
         private TextView joinPendingTitle = null;
@@ -49,6 +49,8 @@ namespace Seeker.Chatroom
             Pending = 0,
             Error = 1,
         }
+
+        private JoinEmptyState currentJoinEmptyState = JoinEmptyState.None;
 
         private RecyclerView2 recyclerViewStatusesView;
         private LinearLayoutManager recycleLayoutManagerStatuses;
@@ -189,10 +191,13 @@ namespace Seeker.Chatroom
                     UpdateSendEnabled();
                     break;
             }
+            SetActivityStatusesVisibility();
+            SetTickerVisibility();
         }
 
         private void SetJoinEmptyState(JoinEmptyState state)
         {
+            currentJoinEmptyState = state;
             if (joinEmptyStateFlipper == null)
             {
                 return;
@@ -471,18 +476,23 @@ namespace Seeker.Chatroom
             }
         }
 
-        public void SetStatusesView()
+        private void SetActivityStatusesVisibility()
         {
-            //#if DEBUG //exposes bug that is now fixed.
-            //System.Threading.Thread.Sleep(1000);
-            //#endif
-            if (ChatroomActivity.ShowStatusesView)
+            if (ChatroomActivity.ShowStatusesView && currentJoinEmptyState != JoinEmptyState.Error)
             {
                 recyclerViewStatusesView.Visibility = ViewStates.Visible;
             }
             else
             {
                 recyclerViewStatusesView.Visibility = ViewStates.Gone;
+            }
+        }
+
+        public void SetActivityStatusesView()
+        {
+            SetActivityStatusesVisibility();
+            if (!ChatroomActivity.ShowStatusesView)
+            {
                 return;
             }
 
@@ -619,14 +629,7 @@ namespace Seeker.Chatroom
                 currentTickerView.TextFormatted = s;
             }
 
-            if (ChatroomActivity.ShowTickerView)
-            {
-                currentTickerView.Visibility = ViewStates.Visible;
-            }
-            else
-            {
-                currentTickerView.Visibility = ViewStates.Gone;
-            }
+            SetTickerVisibility();
 
             recyclerViewSmall = true;
             recyclerViewStatusesView = rootView.FindViewById<RecyclerView2>(Resource.Id.room_statuses_recycler_view);
@@ -684,7 +687,7 @@ namespace Seeker.Chatroom
 
             HookUpEventHandlers(true); //this NEEDS to be strictly before SetStatusesView
             Logger.Debug("set up statuses view");
-            SetStatusesView();
+            SetActivityStatusesView();
             Logger.Debug("finish set up statuses view");
 
             created = true;
@@ -696,6 +699,18 @@ namespace Seeker.Chatroom
             ChatroomActivity.ChatroomActivityRef.InvalidateOptionsMenu();
             return rootView;
 
+        }
+
+        public void SetTickerVisibility() 
+        {
+            if (ChatroomActivity.ShowTickerView && currentJoinEmptyState != JoinEmptyState.Error)
+            {
+                currentTickerView.Visibility = ViewStates.Visible;
+            }
+            else
+            {
+                currentTickerView.Visibility = ViewStates.Gone;
+            }
         }
 
         private const int scroll_pos_too_far = 16;
@@ -878,7 +893,7 @@ namespace Seeker.Chatroom
 
 
                 Logger.Debug("set setatus view");
-                SetStatusesView();
+                SetActivityStatusesView();
                 Logger.Debug("set setatus view end");
                 Logger.Debug("hook up event handlers ");
                 HookUpEventHandlers(true);
