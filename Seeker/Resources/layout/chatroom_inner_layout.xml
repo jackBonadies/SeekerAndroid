@@ -8,78 +8,90 @@
     android:animateLayoutChanges="true"
     android:layout_height="match_parent"
 >
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/current_ticker"
-        android:padding="6dp"
-        android:minLines="1"
-        android:maxLines="2"
-        android:clickable="true"
-        android:ellipsize="end"
-        android:text="@string/chatroom_loading_ticker"
-        android:background="@drawable/room_statuses_background"
-    />
     <FrameLayout
-        android:id="@+id/room_statuses_container"
         android:layout_width="match_parent"
-        android:layout_height="82dp"
-        android:background="@drawable/room_statuses_background"
-    >
-        <Seeker.RecyclerView2
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/room_statuses_recycler_view"
-            android:clickable="true"
-            android:paddingBottom="4dp"
-        />
-        <TextView
-            android:id="@+id/room_statuses_empty"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:textStyle="italic"
-            android:text="@string/room_statuses_empty_placeholder"
-            android:visibility="gone"
-        />
-    </FrameLayout>
-    <RelativeLayout
-        android:id="@+id/test1"
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginBottom="8dp"
     >
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_messages"
-            android:layout_height="fill_parent"
+        <LinearLayout
             android:layout_width="match_parent"
-        />
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+        >
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/current_ticker"
+                android:padding="6dp"
+                android:minLines="1"
+                android:maxLines="2"
+                android:clickable="true"
+                android:ellipsize="end"
+                android:text="@string/chatroom_loading_ticker"
+                android:background="@drawable/room_statuses_background"
+            />
+            <FrameLayout
+                android:id="@+id/room_statuses_container"
+                android:layout_width="match_parent"
+                android:layout_height="82dp"
+                android:background="@drawable/room_statuses_background"
+            >
+                <Seeker.RecyclerView2
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/room_statuses_recycler_view"
+                    android:clickable="true"
+                    android:paddingBottom="4dp"
+                />
+                <TextView
+                    android:id="@+id/room_statuses_empty"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:textStyle="italic"
+                    android:text="@string/room_statuses_empty_placeholder"
+                    android:visibility="gone"
+                />
+            </FrameLayout>
+            <RelativeLayout
+                android:id="@+id/test1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+            >
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_messages"
+                    android:layout_height="fill_parent"
+                    android:layout_width="match_parent"
+                />
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:visibility="gone"
-            android:background="?attr/floating_action_bar_to_bottom_background"
-            android:backgroundTint="?attr/floating_action_bar_to_bottom_background"
-            android:tint="?attr/floating_action_bar_to_bottom_icon"
-            app:backgroundTint="?attr/floating_action_bar_to_bottom_background"
-            app:fabSize="mini"
-            android:elevation="1000dp"
-            android:translationZ="100dp"
-            android:id="@+id/bsbutton"
-            android:layout_marginBottom="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-        />
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:visibility="gone"
+                    android:background="?attr/floating_action_bar_to_bottom_background"
+                    android:backgroundTint="?attr/floating_action_bar_to_bottom_background"
+                    android:tint="?attr/floating_action_bar_to_bottom_icon"
+                    app:backgroundTint="?attr/floating_action_bar_to_bottom_background"
+                    app:fabSize="mini"
+                    android:elevation="1000dp"
+                    android:translationZ="100dp"
+                    android:id="@+id/bsbutton"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                />
+            </RelativeLayout>
+        </LinearLayout>
 
         <ViewFlipper
             android:id="@+id/joinEmptyStateFlipper"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_gravity="center"
             android:gravity="center_horizontal"
             android:inAnimation="@null"
             android:outAnimation="@null"
@@ -160,7 +172,7 @@
             </LinearLayout>
 
         </ViewFlipper>
-    </RelativeLayout>
+    </FrameLayout>
 
     <View
         android:id="@+id/view"
