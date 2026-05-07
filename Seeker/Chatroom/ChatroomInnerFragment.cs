@@ -167,11 +167,11 @@ namespace Seeker.Chatroom
                 case RoomJoinState.Forbidden:
                     if (joinFailedMessage != null)
                     {
-                        joinFailedMessage.Text = string.Format(this.Resources.GetString(Resource.String.room_join_failed), OurRoomInfo.Name);
+                        joinFailedMessage.Text = this.Resources.GetString(Resource.String.room_join_failed);
                     }
                     if (joinFailedSubtitle != null)
                     {
-                        joinFailedSubtitle.Text = string.Format(this.Resources.GetString(Resource.String.room_join_forbidden), OurRoomInfo.Name);
+                        joinFailedSubtitle.Text = this.Resources.GetString(Resource.String.room_join_forbidden);
                     }
                     SetJoinEmptyState(JoinEmptyState.Error);
                     UpdateSendEnabled();
@@ -179,11 +179,11 @@ namespace Seeker.Chatroom
                 case RoomJoinState.Failed:
                     if (joinFailedMessage != null)
                     {
-                        joinFailedMessage.Text = string.Format(this.Resources.GetString(Resource.String.room_join_failed), OurRoomInfo.Name);
+                        joinFailedMessage.Text = this.Resources.GetString(Resource.String.room_join_failed);
                     }
                     if (joinFailedSubtitle != null)
                     {
-                        joinFailedSubtitle.Text = string.Format(this.Resources.GetString(Resource.String.room_join_generic), OurRoomInfo.Name, failureMessage ?? string.Empty);
+                        joinFailedSubtitle.Text = failureMessage ?? string.Empty;
                     }
                     SetJoinEmptyState(JoinEmptyState.Error);
                     UpdateSendEnabled();

@@ -40,11 +40,13 @@ namespace Seeker.Chatroom
             if (ChatroomController.RoomList == null)
             {
                 chatroomsListLoadingView.Visibility = ViewStates.Visible;
+                filterChatroomView.Visibility = ViewStates.Gone;
                 ChatroomController.GetRoomListApi();
             }
             else
             {
                 chatroomsListLoadingView.Visibility = ViewStates.Gone;
+                filterChatroomView.Visibility = ViewStates.Visible;
                 ChatroomController.RefreshParsedList();
             }
             recyclerAdapter = new ChatroomOverviewRecyclerAdapter(FilterRoomList(CurrentParsedList)); //this depends tightly on MessageController... since these are just strings..
@@ -155,6 +157,7 @@ namespace Seeker.Chatroom
             activity?.RunOnUiThread(new Action(() =>
             {
                 chatroomsListLoadingView.Visibility = ViewStates.Gone;
+                filterChatroomView.Visibility = ViewStates.Visible;
                 recyclerAdapter?.SetItems(filteredRoomList);
             }
             ));
