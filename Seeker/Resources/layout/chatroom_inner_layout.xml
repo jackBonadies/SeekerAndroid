@@ -20,14 +20,29 @@
         android:text="@string/chatroom_loading_ticker"
         android:background="@drawable/room_statuses_background"
     />
-    <Seeker.RecyclerView2
+    <FrameLayout
+        android:id="@+id/room_statuses_container"
         android:layout_width="match_parent"
         android:layout_height="82dp"
-        android:id="@+id/room_statuses_recycler_view"
-        android:clickable="true"
-        android:paddingBottom="4dp"
         android:background="@drawable/room_statuses_background"
-    />
+    >
+        <Seeker.RecyclerView2
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/room_statuses_recycler_view"
+            android:clickable="true"
+            android:paddingBottom="4dp"
+        />
+        <TextView
+            android:id="@+id/room_statuses_empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textStyle="italic"
+            android:text="@string/room_statuses_empty_placeholder"
+            android:visibility="gone"
+        />
+    </FrameLayout>
     <RelativeLayout
         android:id="@+id/test1"
         android:layout_width="match_parent"

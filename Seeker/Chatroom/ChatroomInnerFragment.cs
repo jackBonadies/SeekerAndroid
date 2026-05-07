@@ -53,6 +53,8 @@ namespace Seeker.Chatroom
         private JoinEmptyState currentJoinEmptyState = JoinEmptyState.None;
 
         private RecyclerView2 recyclerViewStatusesView;
+        private View statusesContainer;
+        private TextView statusesEmptyPlaceholder;
         private LinearLayoutManager recycleLayoutManagerStatuses;
         private ChatroomStatusesRecyclerAdapter recyclerUserStatusAdapter;
 
@@ -422,6 +424,7 @@ namespace Seeker.Chatroom
                     }
                 }
                 UI_statusMessagesInternal.Add(statusMessage);
+                UpdateStatusesEmptyPlaceholder();
                 int lastVisibleItemPosition = recycleLayoutManagerStatuses.FindLastVisibleItemPosition();
                 Logger.Debug("lastVisibleItemPosition : " + lastVisibleItemPosition);
                 recyclerUserStatusAdapter.NotifyItemInserted(UI_statusMessagesInternal.Count - 1);
@@ -478,14 +481,29 @@ namespace Seeker.Chatroom
 
         private void SetActivityStatusesVisibility()
         {
+            if (statusesContainer == null)
+            {
+                return;
+            }
             if (ChatroomActivity.ShowStatusesView && currentJoinEmptyState != JoinEmptyState.Error)
             {
-                recyclerViewStatusesView.Visibility = ViewStates.Visible;
+                statusesContainer.Visibility = ViewStates.Visible;
             }
             else
             {
-                recyclerViewStatusesView.Visibility = ViewStates.Gone;
+                statusesContainer.Visibility = ViewStates.Gone;
             }
+        }
+
+        private void UpdateStatusesEmptyPlaceholder()
+        {
+            if (recyclerViewStatusesView == null || statusesEmptyPlaceholder == null)
+            {
+                return;
+            }
+            bool isEmpty = UI_statusMessagesInternal == null || UI_statusMessagesInternal.Count == 0;
+            recyclerViewStatusesView.Visibility = isEmpty ? ViewStates.Gone : ViewStates.Visible;
+            statusesEmptyPlaceholder.Visibility = isEmpty ? ViewStates.Visible : ViewStates.Gone;
         }
 
         public void SetActivityStatusesView()
@@ -510,6 +528,8 @@ namespace Seeker.Chatroom
 
             recyclerUserStatusAdapter = new ChatroomStatusesRecyclerAdapter(UI_statusMessagesInternal); //this depends tightly on MessageController... since these are just strings..
             recyclerViewStatusesView.SetAdapter(recyclerUserStatusAdapter);
+
+            UpdateStatusesEmptyPlaceholder();
 
             if (UI_statusMessagesInternal.Count != 0)
             {
@@ -633,6 +653,8 @@ namespace Seeker.Chatroom
 
             recyclerViewSmall = true;
             recyclerViewStatusesView = rootView.FindViewById<RecyclerView2>(Resource.Id.room_statuses_recycler_view);
+            statusesContainer = rootView.FindViewById<View>(Resource.Id.room_statuses_container);
+            statusesEmptyPlaceholder = rootView.FindViewById<TextView>(Resource.Id.room_statuses_empty);
 
             CustomClickEvent cce = new CustomClickEvent();
             cce.RecyclerView = recyclerViewStatusesView;
@@ -761,10 +783,10 @@ namespace Seeker.Chatroom
             float scale = this.Context.Resources.DisplayMetrics.Density;
             int pixels = (int)(dps * scale + 0.5f);
 
-            recyclerViewStatusesView.LayoutParameters.Height = pixels;//in px
-            recyclerViewStatusesView.ForceLayout(); //include children in the remeasure and relayout (not sure if necessary)
-            recyclerViewStatusesView.Invalidate(); //redraw
-            recyclerViewStatusesView.RequestLayout(); //relayout (for size changes)
+            statusesContainer.LayoutParameters.Height = pixels;//in px
+            statusesContainer.ForceLayout(); //include children in the remeasure and relayout (not sure if necessary)
+            statusesContainer.Invalidate(); //redraw
+            statusesContainer.RequestLayout(); //relayout (for size changes)
         }
 
         //happens too late...

@@ -198,6 +198,7 @@ Directory Count: {5}"
     <string name="room_join_pending">Joining \"{0}\"…</string>
     <string name="room_join_failed">Failed to join</string>
     <string name="room_join_forbidden">Forbidden</string>
+    <string name="room_statuses_empty_placeholder">User activity will appear here</string>
     <string name="retry">Retry</string>
     <string name="chatroom_enter_message">Enter Message</string>
     <string name="send_message">Send</string>
