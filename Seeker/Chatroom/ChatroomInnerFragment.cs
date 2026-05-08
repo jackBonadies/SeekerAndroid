@@ -102,10 +102,6 @@ namespace Seeker.Chatroom
             Logger.Debug("Chatroom Inner Fragment ROOMINFO Constructor");
 
             OurRoomInfo = roomInfo;
-
-
-
-
         }
 
         public void HookUpEventHandlers(bool binding)
@@ -389,7 +385,7 @@ namespace Seeker.Chatroom
             }
         }
 
-        public void OnRoomMembershipRemoved(object sender, string room)
+        private void OnRoomMembershipRemoved(object sender, string room)
         {
             Logger.Debug("handler remove from " + room);
 
@@ -441,7 +437,7 @@ namespace Seeker.Chatroom
             });
         }
 
-        public void OnUserJoinedOrLeft(object sender, UserJoinedOrLeftEventArgs e)
+        private void OnUserJoinedOrLeft(object sender, UserJoinedOrLeftEventArgs e)
         {
             //nothing to do UNLESS you are planning on showing something live.
             //maybe if you have a number counter, then its useful..
@@ -461,7 +457,7 @@ namespace Seeker.Chatroom
             }
         }
 
-        public void OnUserRoomStatusChanged(object sender, UserRoomStatusChangedEventArgs e)
+        private void OnUserRoomStatusChanged(object sender, UserRoomStatusChangedEventArgs e)
         {
             //nothing to do UNLESS you are planning on showing something live.
             //maybe if you have a number counter, then its useful..
