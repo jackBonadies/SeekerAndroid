@@ -5,6 +5,14 @@
     android:orientation="vertical"
     android:paddingTop="8dp"
     android:paddingBottom="8dp">
+    <View
+		android:layout_width="32dp"
+		android:layout_height="4dp"
+		android:layout_gravity="center_horizontal"
+		android:layout_marginTop="0dp"
+		android:layout_marginBottom="0dp"
+		android:background="@drawable/search_bottom_sheet_drag_handle"
+	/>
     <TextView
         android:id="@+id/allTickersTitle"
         android:layout_width="match_parent"
