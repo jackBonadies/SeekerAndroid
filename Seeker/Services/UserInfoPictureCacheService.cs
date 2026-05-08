@@ -21,16 +21,22 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Seeker.Helpers;
 
 namespace Seeker.Services
 {
     /// <summary>
-    /// On-disk cache for peer profile pictures so that a Bundle save (which travels through
-    /// Binder, ~1 MB cap) can store a filename instead of multi-megabyte byte arrays.
-    /// Eviction is size-bounded, oldest-write-first by mtime, done on every write — mirroring
-    /// how Glide / DiskLruCache bound their caches. Reads do not bump mtime, so this is FIFO
-    /// by write rather than true LRU; fine here because reads are one-shot per restore.
+    /// Size-bounded on-disk cache for peer profile pictures, keyed by username. Lets a Bundle
+    /// save (Binder, ~1 MB cap) carry a username string instead of multi-megabyte byte arrays
+    /// — the picture survives process death on disk and is read back on restore. Eviction is
+    /// FIFO-by-write (oldest mtime first), enforced on every write.
+    ///
+    /// Public surface is async-by-default so I/O never lands on the UI thread by accident.
+    /// INVARIANT: the async methods MUST stay implemented as `Task.Run(() => SyncBody())` with
+    /// no `await` inside — this keeps `.Result` from the UI thread deadlock-safe (no captured
+    /// SynchronizationContext to marshal back to). If you ever need to `await` something here,
+    /// you must `.ConfigureAwait(false)` it AND remove .Result from any UI-thread caller.
     /// </summary>
     public class UserInfoPictureCacheService
     {
@@ -38,14 +44,32 @@ namespace Seeker.Services
 
         private const string CacheDirName = "userinfo_pictures";
         private const string FileExtension = ".bin";
-        private const long BudgetBytes = 30L * 1024 * 1024;
+        private const long DiskBudgetBytes = 30L * 1024 * 1024;
 
-        public string GetFilenameFor(string username)
+        public Task PutAsync(string username, byte[] bytes)
+        {
+            if (string.IsNullOrEmpty(username) || bytes == null || bytes.Length == 0)
+            {
+                return Task.CompletedTask;
+            }
+            return Task.Run(() => TryWrite(username, bytes));
+        }
+
+        public Task<byte[]> GetAsync(string username)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                return Task.FromResult<byte[]>(null);
+            }
+            return Task.Run(() => TryRead(GetFilenameFor(username)));
+        }
+
+        private static string GetFilenameFor(string username)
         {
             return SanitizeAndHashUsername(username) + FileExtension;
         }
 
-        public string TryWrite(string username, byte[] bytes)
+        private static string TryWrite(string username, byte[] bytes)
         {
             try
             {
@@ -67,7 +91,7 @@ namespace Seeker.Services
             }
         }
 
-        public byte[] TryRead(string filename)
+        private static byte[] TryRead(string filename)
         {
             try
             {
@@ -90,31 +114,10 @@ namespace Seeker.Services
             }
         }
 
-        public void Delete(string filename)
-        {
-            try
-            {
-                string dir = GetCacheDir(createIfMissing: false);
-                if (dir == null)
-                {
-                    return;
-                }
-                string path = Path.Combine(dir, filename);
-                if (File.Exists(path))
-                {
-                    File.Delete(path);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Firebase("Failed to delete user info picture cache entry: " + ex.Message);
-            }
-        }
-
         // Sorts entries oldest-first by mtime, evicts until under budget. The just-written
         // filename is preserved explicitly: filesystem mtime resolution can be 1s, so a sort
         // tie could otherwise leave the new file eligible for eviction the moment it lands.
-        public void TrimToBudget(string preserveFilename = null)
+        private static void TrimToBudget(string preserveFilename = null)
         {
             try
             {
@@ -135,14 +138,14 @@ namespace Seeker.Services
                     infos[i] = new FileInfo(paths[i]);
                     total += infos[i].Length;
                 }
-                if (total <= BudgetBytes)
+                if (total <= DiskBudgetBytes)
                 {
                     return;
                 }
                 Array.Sort(infos, (a, b) => a.LastWriteTimeUtc.CompareTo(b.LastWriteTimeUtc));
                 for (int i = 0; i < infos.Length; i++)
                 {
-                    if (total <= BudgetBytes)
+                    if (total <= DiskBudgetBytes)
                     {
                         break;
                     }
