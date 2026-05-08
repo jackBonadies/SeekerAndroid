@@ -860,21 +860,8 @@ namespace Seeker.Chatroom
             if (t != null && currentTickerView != null)
             {
                 StopTickerLoadingPulse();
-                var builder = new SpannableStringBuilder();
-                if (t.Username == string.Empty)
-                {
-                    builder.Append(t.Message);
-                    builder.SetSpan(new StyleSpan(TypefaceStyle.Italic), 0, builder.Length(), SpanTypes.InclusiveExclusive);
-                    currentTickerView.SetText(builder, TextView.BufferType.Spannable);
-                }
-                else
-                {
-                    builder.Append(t.Message);
-                    var messageEnd = builder.Length();
-                    builder.Append(" -" + t.Username);
-                    builder.SetSpan(new StyleSpan(TypefaceStyle.Bold), messageEnd, builder.Length(), SpanTypes.ExclusiveExclusive);
-                    currentTickerView.SetText(builder, TextView.BufferType.Spannable);
-                }
+                var builder = UiHelpers.BuildTickerSpan(t, currentTickerView.Context);
+                currentTickerView.SetText(builder, TextView.BufferType.Spannable);
             }
             else
             {

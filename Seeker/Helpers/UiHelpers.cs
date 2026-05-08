@@ -1,19 +1,22 @@
-using Seeker.Browse;
-using Android.App;
+﻿using Android.App;
 using Android.Content;
+using Android.Content.Res;
+using Android.Graphics;
 using Android.OS;
+using Android.Text;
+using Android.Text.Style;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.Core.Content;
 using Common;
+using Seeker.Browse;
 using Seeker.Helpers;
 using Seeker.Managers;
 using Seeker.Messages;
+using Soulseek;
 using System;
 using System.Threading.Tasks;
-using Android.Graphics;
-using Android.Util;
-using Android.Content.Res;
-using AndroidX.Core.Content;
 
 namespace Seeker
 {
@@ -62,6 +65,27 @@ namespace Seeker
                 Logger.Firebase("FocusChange_SoftInputMode " + err.Message);
             }
         }
+
+        public static SpannableStringBuilder BuildTickerSpan(RoomTicker ticker, Android.Content.Context context)
+        {
+            var builder = new SpannableStringBuilder();
+            if (string.IsNullOrEmpty(ticker.Username))
+            {
+                builder.Append(ticker.Message);
+                builder.SetSpan(new StyleSpan(TypefaceStyle.Italic), 0, builder.Length(), SpanTypes.InclusiveExclusive);
+            }
+            else
+            {
+                builder.Append(ticker.Message);
+                var messageEnd = builder.Length();
+                builder.Append(" —⁠" + ticker.Username);
+                var mutedColor = UiHelpers.GetColorFromAttribute(context, Resource.Attribute.cellTextColorSubdued);
+                builder.SetSpan(new StyleSpan(TypefaceStyle.Italic), messageEnd, builder.Length(), SpanTypes.ExclusiveExclusive);
+                builder.SetSpan(new ForegroundColorSpan(mutedColor), messageEnd, builder.Length(), SpanTypes.ExclusiveExclusive);
+            }
+            return builder;
+        }
+
 
         public static void OnFocusAdjustNothing(object sender, View.FocusChangeEventArgs e)
         {

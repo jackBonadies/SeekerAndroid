@@ -76,27 +76,10 @@ namespace Seeker.Chatroom
             {
                 var h = (TickerRowHolder)holder;
                 var ticker = tickers[position];
-                h.Message.SetText(BuildTickerSpan(ticker), TextView.BufferType.Spannable);
+                h.Message.SetText(UiHelpers.BuildTickerSpan(ticker, h.Message.Context), TextView.BufferType.Spannable);
                 h.Separator.Visibility = position == tickers.Count - 1 ? ViewStates.Gone : ViewStates.Visible;
             }
 
-            private static SpannableStringBuilder BuildTickerSpan(RoomTicker ticker)
-            {
-                var builder = new SpannableStringBuilder();
-                if (string.IsNullOrEmpty(ticker.Username))
-                {
-                    builder.Append(ticker.Message);
-                    builder.SetSpan(new StyleSpan(TypefaceStyle.Italic), 0, builder.Length(), SpanTypes.InclusiveExclusive);
-                }
-                else
-                {
-                    builder.Append(ticker.Message);
-                    var messageEnd = builder.Length();
-                    builder.Append(" -" + ticker.Username);
-                    builder.SetSpan(new StyleSpan(TypefaceStyle.Bold), messageEnd, builder.Length(), SpanTypes.ExclusiveExclusive);
-                }
-                return builder;
-            }
         }
 
         private class TickerRowHolder : RecyclerView.ViewHolder
