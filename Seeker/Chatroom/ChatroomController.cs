@@ -172,7 +172,7 @@ namespace Seeker.Chatroom
 
         public static bool AreWeMod(string roomname)
         {
-            return ChatroomController.JoinedRoomData[roomname].Operators.Contains(PreferencesState.Username);
+            return ChatroomController.JoinedRoomData[roomname].Operators?.Contains(PreferencesState.Username) ?? false;
         }
 
         public static bool AreWeOwner(string roomname)
@@ -197,7 +197,7 @@ namespace Seeker.Chatroom
                     {
                         userRole = Soulseek.UserRole.Owner;
                     }
-                    else if (opList.Contains(user.Username))
+                    else if (opList != null && opList.Contains(user.Username))
                     {
                         userRole = Soulseek.UserRole.Operator;
                     }
