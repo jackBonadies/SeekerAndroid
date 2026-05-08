@@ -25,6 +25,13 @@ namespace Seeker.Chatroom
 
         private static List<Soulseek.RoomInfo> CurrentParsedList =>
             ChatroomController.RoomListParsed ?? new List<Soulseek.RoomInfo>();
+
+        public override void OnViewCreated(View view, Bundle savedInstanceState)
+        {
+            base.OnViewCreated(view, savedInstanceState);
+            Activity?.AddMenuProvider(new OverviewMenuProvider(this), ViewLifecycleOwner, AndroidX.Lifecycle.Lifecycle.State.Resumed);
+        }
+
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             Logger.Debug("create chatroom overview view");
@@ -176,6 +183,48 @@ namespace Seeker.Chatroom
                 ChatroomController.RoomListReceived += OnChatListReceived;
             }
             base.OnAttach(activity);
+        }
+
+        private class OverviewMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
+        {
+            private readonly ChatroomOverviewFragment fragment;
+
+            public OverviewMenuProvider(ChatroomOverviewFragment fragment)
+            {
+                this.fragment = fragment;
+            }
+
+            public void OnCreateMenu(IMenu menu, MenuInflater menuInflater)
+            {
+                menuInflater.Inflate(Resource.Menu.chatroom_overview_list_menu, menu);
+            }
+
+            public void OnPrepareMenu(IMenu menu)
+            {
+            }
+
+            public void OnMenuClosed(IMenu menu)
+            {
+            }
+
+            public bool OnMenuItemSelected(IMenuItem item)
+            {
+                var activity = fragment.Activity as ChatroomActivity;
+                if (activity == null)
+                {
+                    return false;
+                }
+                switch (item.ItemId)
+                {
+                    case Resource.Id.create_room_action:
+                        activity.ShowEditCreateChatroomDialog();
+                        return true;
+                    case Resource.Id.refresh_room_list_action:
+                        ChatroomController.GetRoomListApi(true);
+                        return true;
+                }
+                return false;
+            }
         }
     }
 

@@ -104,6 +104,12 @@ namespace Seeker.Chatroom
             OurRoomInfo = roomInfo;
         }
 
+        public override void OnViewCreated(View view, Bundle savedInstanceState)
+        {
+            base.OnViewCreated(view, savedInstanceState);
+            Activity?.AddMenuProvider(new InnerMenuProvider(this), ViewLifecycleOwner, AndroidX.Lifecycle.Lifecycle.State.Resumed);
+        }
+
         public void HookUpEventHandlers(bool binding)
         {
             ChatroomController.MessageReceived -= OnMessageRecieved;
@@ -1044,6 +1050,331 @@ namespace Seeker.Chatroom
             bool enabled = hasText && joined;
             sendMessage.Enabled = enabled;
             sendMessage.Alpha = enabled ? 1.0f : 0.38f;
+        }
+
+        public void ShowSetTickerDialog(string roomToInvite)
+        {
+            void OkayAction(object sender, string textInput)
+            {
+                ChatroomController.SetTickerApi(roomToInvite, textInput, true);
+                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                {
+                    aDiag.Dismiss();
+                }
+                else
+                {
+                    UiHelpers._dialogInstance?.Dismiss(); // TODO why?
+                }
+            }
+
+            UiHelpers.ShowSimpleDialog(
+                this.Activity,
+                Resource.Layout.edit_text_dialog_content,
+                this.Resources.GetString(Resource.String.set_ticker),
+                OkayAction,
+                this.Resources.GetString(Resource.String.send),
+                null,
+                this.Resources.GetString(Resource.String.type_chatroom_ticker_message),
+                this.Resources.GetString(Resource.String.cancel),
+                this.Resources.GetString(Resource.String.must_type_ticker_text),
+                true);
+        }
+
+        public void ShowAllTickersDialog(string roomName)
+        {
+            Logger.InfoFirebase("ShowAllTickersDialog" + (Activity?.IsFinishing) + (Activity?.IsDestroyed) + ParentFragmentManager.IsDestroyed);
+            var tickerDialog = new AllTickersDialog(roomName);
+            tickerDialog.Show(ParentFragmentManager, "ticker dialog");
+        }
+
+        public void ShowUserListDialog(Soulseek.RoomInfo roomInfo, bool isPrivate)
+        {
+            if (!ChatroomController.JoinedRoomData.ContainsKey(roomInfo.Name))
+            {
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.room_data_still_loading), ToastLength.Short);
+                return;
+            }
+            var roomUserListDialog = new RoomUserListDialog(roomInfo.Name, isPrivate);
+            roomUserListDialog.Show(ParentFragmentManager, "room user list dialog");
+        }
+
+        private AndroidX.AppCompat.App.AlertDialog inviteDialogInstance;
+
+        public void ShowInviteUserDialog(string roomToInvite)
+        {
+            Logger.InfoFirebase("ShowInviteUserDialog" + (Activity?.IsFinishing) + (Activity?.IsDestroyed));
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(RequireContext());
+            builder.SetTitle(Resources.GetString(Resource.String.inviteuser));
+
+            View viewInflated = LayoutInflater.From(RequireContext()).Inflate(Resource.Layout.autocomplete_user_dialog_content, (ViewGroup)Activity.FindViewById(Android.Resource.Id.Content).RootView, false);
+
+            AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
+            SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
+
+            builder.SetView(viewInflated);
+
+            EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
+            {
+                //Do the Browse Logic...
+                string userToAdd = input.Text;
+                if (userToAdd == null || userToAdd == string.Empty)
+                {
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_a_username_to_invite), ToastLength.Short);
+                    (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
+                    return;
+                }
+                SeekerState.RecentUsersManager.AddUserToTop(userToAdd, true);
+                ChatroomController.AddRemoveUserToPrivateRoomAPI(roomToInvite, userToAdd, true, false);
+                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                {
+                    aDiag.Dismiss();
+                }
+                else
+                {
+                    inviteDialogInstance.Dismiss();
+                }
+            });
+            EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
+            {
+                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                {
+                    aDiag.Dismiss();
+                }
+                else
+                {
+                    inviteDialogInstance.Dismiss();
+                }
+            });
+
+            System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
+            {
+                if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Send ||
+                    e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
+                {
+                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
+                    try
+                    {
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
+                        imm.HideSoftInputFromWindow(Activity.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Logger.Firebase(ex.Message + " error closing keyboard");
+                    }
+                    //Do the Browse Logic...
+                    eventHandler(sender, null);
+                }
+            };
+
+            System.EventHandler<TextView.KeyEventArgs> keypressAction = (object sender, TextView.KeyEventArgs e) =>
+            {
+                if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
+                {
+                    Logger.Debug("keypress: " + e.Event.KeyCode.ToString());
+                    try
+                    {
+                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
+                        imm.HideSoftInputFromWindow(Activity.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Logger.Firebase(ex.Message + " error closing keyboard");
+                    }
+                    //Do the Browse Logic...
+                    eventHandler(sender, null);
+                }
+                else
+                {
+                    e.Handled = false;
+                }
+            };
+
+            input.KeyPress += keypressAction;
+            input.EditorAction += editorAction;
+            input.FocusChange += Input_FocusChange;
+
+            builder.SetPositiveButton(Resources.GetString(Resource.String.invite), eventHandler);
+            builder.SetNegativeButton(Resources.GetString(Resource.String.cancel), eventHandlerCancel);
+
+            inviteDialogInstance = builder.Create();
+            try
+            {
+                inviteDialogInstance.Show();
+                UiHelpers.DoNotEnablePositiveUntilText(inviteDialogInstance, input);
+            }
+            catch (WindowManagerBadTokenException e)
+            {
+                if (SeekerState.ActiveActivityRef == null)
+                {
+                    Logger.Firebase("invite WindowManagerBadTokenException null activities");
+                }
+                else
+                {
+                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
+                    bool isOurActivityFinishing = Activity?.IsFinishing == true;
+                    Logger.Firebase("invite WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                }
+            }
+            catch (Exception err)
+            {
+                if (SeekerState.ActiveActivityRef == null)
+                {
+                    Logger.Firebase("invite Exception null activities");
+                }
+                else
+                {
+                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
+                    bool isOurActivityFinishing = Activity?.IsFinishing == true;
+                    Logger.Firebase("invite Exception are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                }
+            }
+        }
+
+        private void Input_FocusChange(object sender, View.FocusChangeEventArgs e)
+        {
+            try
+            {
+                SeekerState.ActiveActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
+            }
+            catch (System.Exception err)
+            {
+                Logger.Firebase("createroomMainActivity_FocusChange" + err.Message);
+            }
+        }
+
+        private class InnerMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
+        {
+            private readonly ChatroomInnerFragment fragment;
+
+            public InnerMenuProvider(ChatroomInnerFragment fragment)
+            {
+                this.fragment = fragment;
+            }
+
+            public void OnCreateMenu(IMenu menu, MenuInflater menuInflater)
+            {
+                menuInflater.Inflate(Resource.Menu.chatroom_inner_menu, menu);
+            }
+
+            public void OnPrepareMenu(IMenu menu)
+            {
+                Logger.Debug("inner menu provider OnPrepareMenu");
+                if (OurRoomInfo == null)
+                {
+                    return;
+                }
+
+                bool isPrivate;
+                bool isOwnedByUs;
+                bool isOperator;
+                if (ChatroomController.RoomList != null)
+                {
+                    isPrivate = fragment.IsPrivate();
+                    isOwnedByUs = fragment.IsOwned();
+                    isOperator = fragment.IsOperatedByUs();
+                }
+                else
+                {
+                    //we were killed and started back on the inner page; room list may not be available yet.
+                    isPrivate = cachedPrivate;
+                    isOwnedByUs = cachedOwned;
+                    isOperator = cachedMod;
+                }
+                Logger.Debug("isPrivate: " + isPrivate + "isOwnedByUs: " + isOwnedByUs + "isOperator: " + isOperator);
+
+                //while the join is pending/failed, the only meaningful actions are auto-join, notifications, and search-room.
+                bool joined = ChatroomController.HasRoomData(OurRoomInfo.Name);
+
+                menu.FindItem(Resource.Id.view_user_list_action)?.SetVisible(joined);
+                menu.FindItem(Resource.Id.show_all_tickers_action)?.SetVisible(joined);
+                menu.FindItem(Resource.Id.set_ticker_action)?.SetVisible(joined);
+                menu.FindItem(Resource.Id.invite_user_action)?.SetVisible(joined && (isOperator || isOwnedByUs));
+                menu.FindItem(Resource.Id.give_up_room_action)?.SetVisible(joined && isOwnedByUs);
+                menu.FindItem(Resource.Id.give_up_membership_action)?.SetVisible(joined && isPrivate && !isOwnedByUs);
+                menu.FindItem(Resource.Id.chatStyleOptions)?.SetVisible(joined);
+
+                menu.FindItem(Resource.Id.toggle_autojoin_action)?.SetChecked(fragment.IsAutoJoin());
+                menu.FindItem(Resource.Id.toggle_notify_room_action)?.SetChecked(fragment.IsNotifyOn());
+
+                if (ChatroomActivity.ShowTickerView)
+                {
+                    menu.FindItem(Resource.Id.hide_show_ticker_action)?.SetTitle(Resource.String.HideTickerView);
+                }
+                else
+                {
+                    menu.FindItem(Resource.Id.hide_show_ticker_action)?.SetTitle(Resource.String.ShowTickerView);
+                }
+
+                if (ChatroomActivity.ShowStatusesView)
+                {
+                    menu.FindItem(Resource.Id.hide_show_user_status_action)?.SetTitle(Resource.String.HideStatusView);
+                }
+                else
+                {
+                    menu.FindItem(Resource.Id.hide_show_user_status_action)?.SetTitle(Resource.String.ShowStatusView);
+                }
+            }
+
+            public void OnMenuClosed(IMenu menu)
+            {
+            }
+
+            public bool OnMenuItemSelected(IMenuItem item)
+            {
+                var activity = fragment.Activity as ChatroomActivity;
+                if (activity == null || OurRoomInfo == null)
+                {
+                    return false;
+                }
+                switch (item.ItemId)
+                {
+                    case Resource.Id.toggle_autojoin_action:
+                        ChatroomController.ToggleAutoJoin(OurRoomInfo.Name, true, activity);
+                        return true;
+                    case Resource.Id.toggle_notify_room_action:
+                        ChatroomController.ToggleNotifyRoom(OurRoomInfo.Name, true, activity);
+                        return true;
+                    case Resource.Id.view_user_list_action:
+                        fragment.ShowUserListDialog(OurRoomInfo, ChatroomController.IsPrivate(OurRoomInfo.Name));
+                        return true;
+                    case Resource.Id.show_all_tickers_action:
+                        fragment.ShowAllTickersDialog(OurRoomInfo.Name);
+                        return true;
+                    case Resource.Id.set_ticker_action:
+                        fragment.ShowSetTickerDialog(OurRoomInfo.Name);
+                        return true;
+                    case Resource.Id.invite_user_action:
+                        fragment.ShowInviteUserDialog(OurRoomInfo.Name);
+                        return true;
+                    case Resource.Id.give_up_room_action:
+                        ChatroomController.DropMembershipOrOwnershipApi(OurRoomInfo.Name, true, true);
+                        return true;
+                    case Resource.Id.give_up_membership_action:
+                        ChatroomController.DropMembershipOrOwnershipApi(OurRoomInfo.Name, false, true);
+                        return true;
+                    case Resource.Id.search_room_action:
+                        SearchTabHelper.SearchTarget = SearchTarget.Room;
+                        SearchTabHelper.SearchTargetChosenRoom = OurRoomInfo.Name;
+                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
+                        intent.PutExtra(UserListActivity.IntentSearchRoom, 1);
+                        fragment.StartActivity(intent);
+                        return true;
+                    case Resource.Id.hide_show_ticker_action:
+                        ChatroomActivity.ShowTickerView = !ChatroomActivity.ShowTickerView;
+                        fragment.SetTickerVisibility();
+                        PreferencesManager.SaveShowTickerView();
+                        return true;
+                    case Resource.Id.hide_show_user_status_action:
+                        ChatroomActivity.ShowStatusesView = !ChatroomActivity.ShowStatusesView;
+                        fragment.SetActivityStatusesView();
+                        PreferencesManager.SaveShowStatusesView();
+                        return true;
+                }
+                return false;
+            }
         }
     }
 }
