@@ -1,4 +1,5 @@
-﻿using Android.App;
+﻿using Android.Animation;
+using Android.App;
 using Android.Content;
 using Android.Graphics;
 using Android.OS;
@@ -36,6 +37,7 @@ namespace Seeker.Chatroom
         private EditText editTextEnterMessage = null;
         private ImageButton sendMessage = null;
         private TextView currentTickerView = null;
+        private ObjectAnimator tickerLoadingPulseAnimator = null;
 
         private ViewFlipper joinEmptyStateFlipper = null;
         private TextView joinPendingTitle = null;
@@ -647,6 +649,7 @@ namespace Seeker.Chatroom
                 var s = new SpannableString(this.Resources.GetString(Resource.String.chatroom_loading_ticker));
                 s.SetSpan(new StyleSpan(TypefaceStyle.Italic), 0, s.Length(), SpanTypes.ExclusiveExclusive);
                 currentTickerView.TextFormatted = s;
+                StartTickerLoadingPulse();
             }
 
             SetTickerVisibility();
@@ -723,7 +726,7 @@ namespace Seeker.Chatroom
 
         }
 
-        public void SetTickerVisibility() 
+        public void SetTickerVisibility()
         {
             if (ChatroomActivity.ShowTickerView && currentJoinEmptyState != JoinEmptyState.Error)
             {
@@ -732,6 +735,36 @@ namespace Seeker.Chatroom
             else
             {
                 currentTickerView.Visibility = ViewStates.Gone;
+            }
+        }
+
+        private void StartTickerLoadingPulse()
+        {
+            if (currentTickerView == null)
+            {
+                return;
+            }
+            if (tickerLoadingPulseAnimator != null && tickerLoadingPulseAnimator.IsRunning)
+            {
+                return;
+            }
+            tickerLoadingPulseAnimator = ObjectAnimator.OfFloat(currentTickerView, "alpha", 1f, 0.3f);
+            tickerLoadingPulseAnimator.SetDuration(800);
+            tickerLoadingPulseAnimator.RepeatMode = ValueAnimatorRepeatMode.Reverse;
+            tickerLoadingPulseAnimator.RepeatCount = ValueAnimator.Infinite;
+            tickerLoadingPulseAnimator.Start();
+        }
+
+        private void StopTickerLoadingPulse()
+        {
+            if (tickerLoadingPulseAnimator != null)
+            {
+                tickerLoadingPulseAnimator.Cancel();
+                tickerLoadingPulseAnimator = null;
+            }
+            if (currentTickerView != null)
+            {
+                currentTickerView.Alpha = 1f;
             }
         }
 
@@ -824,6 +857,7 @@ namespace Seeker.Chatroom
         {
             if (t != null && currentTickerView != null)
             {
+                StopTickerLoadingPulse();
                 var builder = new SpannableStringBuilder();
                 if (t.Username == string.Empty)
                 {
@@ -929,6 +963,7 @@ namespace Seeker.Chatroom
         {
             Logger.Debug("currentlyInsideRoomName OnPause -- nulling");
             ChatroomController.currentlyInsideRoomName = string.Empty;
+            StopTickerLoadingPulse();
             base.OnPause();
         }
 
