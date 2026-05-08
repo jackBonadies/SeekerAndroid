@@ -163,9 +163,9 @@ namespace Seeker
             passwordTextEdit = rootView.FindViewById<EditText>(Resource.Id.etPassword);
             usernameInputLayout = rootView.FindViewById<TextInputLayout>(Resource.Id.usernameTextInputLayout);
             usernameTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
-            usernameTextEdit.FocusChange += SearchFragment.MainActivity_FocusChange;
+            usernameTextEdit.FocusChange += UiHelpers.OnFocusAdjustNothing;
             passwordTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
-            passwordTextEdit.FocusChange += SearchFragment.MainActivity_FocusChange;
+            passwordTextEdit.FocusChange += UiHelpers.OnFocusAdjustNothing;
             bool hasError = ValidateUsername();
             EnableDisableLoginButton(usernameTextEdit, passwordTextEdit, loginButton, hasError);
         }

@@ -1146,55 +1146,13 @@ namespace Seeker.Chatroom
                 }
             });
 
-            System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
-            {
-                if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Send ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
-                {
-                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(Activity.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Logger.Firebase(ex.Message + " error closing keyboard");
-                    }
-                    //Do the Browse Logic...
-                    eventHandler(sender, null);
-                }
-            };
+            var editorAction = UiHelpers.MakeDialogEditorAction(Activity?.FindViewById(Android.Resource.Id.Content)?.RootView, eventHandler);
 
-            System.EventHandler<TextView.KeyEventArgs> keypressAction = (object sender, TextView.KeyEventArgs e) =>
-            {
-                if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
-                {
-                    Logger.Debug("keypress: " + e.Event.KeyCode.ToString());
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(Activity.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Logger.Firebase(ex.Message + " error closing keyboard");
-                    }
-                    //Do the Browse Logic...
-                    eventHandler(sender, null);
-                }
-                else
-                {
-                    e.Handled = false;
-                }
-            };
+            var keypressAction = UiHelpers.MakeDialogKeyPressAction(Activity?.FindViewById(Android.Resource.Id.Content)?.RootView, eventHandler);
 
             input.KeyPress += keypressAction;
             input.EditorAction += editorAction;
-            input.FocusChange += Input_FocusChange;
+            input.FocusChange += UiHelpers.OnFocusAdjustNothing;
 
             builder.SetPositiveButton(Resources.GetString(Resource.String.invite), eventHandler);
             builder.SetNegativeButton(Resources.GetString(Resource.String.cancel), eventHandlerCancel);
@@ -1230,18 +1188,6 @@ namespace Seeker.Chatroom
                     bool isOurActivityFinishing = Activity?.IsFinishing == true;
                     Logger.Firebase("invite Exception are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
                 }
-            }
-        }
-
-        private void Input_FocusChange(object sender, View.FocusChangeEventArgs e)
-        {
-            try
-            {
-                SeekerState.ActiveActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
-            }
-            catch (System.Exception err)
-            {
-                Logger.Firebase("createroomMainActivity_FocusChange" + err.Message);
             }
         }
 

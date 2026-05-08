@@ -529,7 +529,7 @@ namespace Seeker
             actv.Adapter = new ArrayAdapter<string>(contextToUse, Resource.Layout.search_dropdown_item, PreferencesState.SearchHistory);
             actv.KeyPress -= Actv_KeyPressHELPER;
             actv.KeyPress += Actv_KeyPressHELPER;
-            actv.FocusChange += MainActivity_FocusChange;
+            actv.FocusChange += UiHelpers.OnFocusAdjustNothing;
             actv.TextChanged += Actv_TextChanged;
 
             SetCustomViewTabNumberInner(iv, contextToUse);
@@ -563,18 +563,6 @@ namespace Seeker
                 UpdateDrawableState(sender as EditText);
             }
             SearchingText = e.Text.ToString();
-        }
-
-        public static void MainActivity_FocusChange(object sender, View.FocusChangeEventArgs e)
-        {
-            try
-            {
-                SeekerState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
-            }
-            catch (System.Exception err)
-            {
-                Logger.Firebase("MainActivity_FocusChange" + err.Message);
-            }
         }
 
         public void RefreshWishlistBanner()
@@ -976,7 +964,7 @@ namespace Seeker
 
             EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
             filterText.TextChanged += FilterText_TextChanged;
-            filterText.FocusChange += FilterText_FocusChange;
+            filterText.FocusChange += UiHelpers.OnFocusAdjustResize;
             filterText.EditorAction += FilterText_EditorAction;
             filterText.Touch += FilterText_Touch;
             if (PreferencesState.FilterSticky)
@@ -1216,18 +1204,6 @@ namespace Seeker
                 || PreferencesState.FilterMinBitrateKbs > 0;
         }
 
-        private void FilterText_FocusChange(object sender, View.FocusChangeEventArgs e)
-        {
-            try
-            {
-                SeekerState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustResize);
-            }
-            catch (System.Exception err)
-            {
-                Logger.Firebase("MainActivity_FocusChange" + err.Message);
-            }
-        }
-
         private void B_Click(object sender, EventArgs e)
         {
             View bottomSheetView = rootView.FindViewById<View>(Resource.Id.bottomSheet);
@@ -1309,15 +1285,7 @@ namespace Seeker
                     editSearchText = editTextSearch.Text;
                 }
                 Logger.Debug("IME ACTION: " + e.ActionId.ToString());
-                try
-                {
-                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
-                    imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
-                }
-                catch (System.Exception ex)
-                {
-                    Logger.Firebase(ex.Message + " error closing keyboard");
-                }
+                UiHelpers.HideSoftKeyboard(rootView);
                 var transitionDrawable = GetTransitionDrawable();
                 if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
                 {
@@ -1652,26 +1620,7 @@ namespace Seeker
                 }
             });
 
-            System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
-            {
-                if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Search) //i get a lot of imenull..
-                {
-                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Logger.Firebase(ex.Message + " error closing keyboard");
-                    }
-                    eventHandlerClose(sender, null);
-                }
-            };
+            var editorAction = UiHelpers.MakeDialogEditorAction(rootView, eventHandlerClose);
 
             chooseUserInput.EditorAction += editorAction;
             targetRoomInput.EditorAction += editorAction;
@@ -1705,16 +1654,7 @@ namespace Seeker
                 Logger.Debug("IME ACTION: " + e.ActionId.ToString());
                 rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                 rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                //overriding this, the keyboard fails to go down by default for some reason.....
-                try
-                {
-                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
-                    imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
-                }
-                catch (System.Exception ex)
-                {
-                    Logger.Firebase(ex.Message + " error closing keyboard");
-                }
+                UiHelpers.HideSoftKeyboard(rootView);
             }
         }
 

@@ -374,7 +374,7 @@ namespace Seeker
             });
 
             //input.EditorAction += editorAction;
-            chatNameInput.FocusChange += Input_FocusChange;
+            chatNameInput.FocusChange += UiHelpers.OnFocusAdjustNothing;
 
             builder.SetPositiveButton(this.Resources.GetString(Resource.String.create_chatroom), eventHandler);
             builder.SetNegativeButton(this.Resources.GetString(Resource.String.cancel), eventHandlerCancel);
@@ -414,17 +414,6 @@ namespace Seeker
             }
         }
 
-        private void Input_FocusChange(object sender, View.FocusChangeEventArgs e)
-        {
-            try
-            {
-                SeekerState.ActiveActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
-            }
-            catch (System.Exception err)
-            {
-                Logger.Firebase("createroomMainActivity_FocusChange" + err.Message);
-            }
-        }
     }
 
 

@@ -385,56 +385,9 @@ namespace Seeker
                 (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
             });
 
-            System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
-            {
-                if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Search)
-                {
-                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(Window.DecorView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Logger.Firebase(ex.Message + " error closing keyboard");
-                    }
-                    //Do the Browse Logic...
-                    eventHandler(sender, null);
-                }
-            };
+            var editorAction = UiHelpers.MakeDialogEditorAction(Window?.DecorView, eventHandler);
 
-            System.EventHandler<TextView.KeyEventArgs> keypressAction = (object sender, TextView.KeyEventArgs e) =>
-            {
-                if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
-                {
-                    Logger.Debug("keypress: " + e.Event.KeyCode.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(Window.DecorView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Logger.Firebase(ex.Message + " error closing keyboard");
-                    }
-                    //Do the Browse Logic...
-                    eventHandler(sender, null);
-                }
-                else
-                {
-                    e.Handled = false;
-                }
-            };
+            var keypressAction = UiHelpers.MakeDialogKeyPressAction(Window?.DecorView, eventHandler);
 
             input.KeyPress += keypressAction;
 
