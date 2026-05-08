@@ -92,7 +92,7 @@ namespace Seeker
             backPressedCallback = new GenericOnBackPressedCallback(false, onBackPressedAction);
             OnBackPressedDispatcher.AddCallback(backPressedCallback);
 
-            if (savedInstanceState != null && savedInstanceState.GetBoolean("SaveStateAtChatroomInner"))
+            if (savedInstanceState != null && savedInstanceState.GetBoolean(SAVE_STATE_AT_INNER_KEY))
             {
                 Logger.Debug("restoring chatroom inner fragment");
                 if (ChatroomInnerFragment.OurRoomInfo == null)
@@ -103,7 +103,7 @@ namespace Seeker
                     //this means we have since been killed
                 }
                 startWithUserFragment = true;
-                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(ChatroomInnerFragment.OurRoomInfo), "ChatroomInnerFragment").Commit();
+                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(ChatroomInnerFragment.OurRoomInfo), INNER_FRAGMENT_TAG).Commit();
                 backPressedCallback.Enabled = true;
                 //savedInstanceState.Clear(); //else we will keep doing the first even if the second was done by intent..
             }
@@ -120,7 +120,7 @@ namespace Seeker
                     {
                         startWithUserFragment = true;
                         Soulseek.RoomInfo roomInfo = ChatroomController.RoomListParsed.FirstOrDefault((roomInfo) => { return roomInfo.Name == goToRoom; }); //roomListParsed can be null, causing crash.
-                        SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), "ChatroomInnerFragment").Commit();
+                        SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), INNER_FRAGMENT_TAG).Commit();
                         backPressedCallback.Enabled = true;
                         //switch in that fragment...
                         //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame,new MessagesOverviewFragment()).Commit();
@@ -130,7 +130,7 @@ namespace Seeker
 
             if (!startWithUserFragment)
             {
-                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomOverviewFragment(), "OuterListChatroomFragment").Commit();
+                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomOverviewFragment(), OVERVIEW_FRAGMENT_TAG).Commit();
             }
 
             //this.SupportActionBar.SetBackgroundDrawable turn off overflow....
@@ -144,7 +144,7 @@ namespace Seeker
         private void onBackPressedAction(OnBackPressedCallback callback)
         {
             //if f is non null and f is visible then that means you are backing out from the inner user fragment..
-            var f = SupportFragmentManager.FindFragmentByTag("ChatroomInnerFragment");
+            var f = SupportFragmentManager.FindFragmentByTag(INNER_FRAGMENT_TAG);
             if (f != null && f.IsVisible)
             {
                 if (SupportFragmentManager.BackStackEntryCount == 0) //this is if we got to inner messages through a notification, in which case we are done..
@@ -187,7 +187,7 @@ namespace Seeker
                 {
                     Soulseek.RoomInfo roomInfo = ChatroomController.RoomListParsed.FirstOrDefault((roomInfo) => { return roomInfo.Name == goToRoom; });
                     SupportFragmentManager.BeginTransaction().Remove(new ChatroomInnerFragment()).Commit();
-                    SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), "ChatroomInnerFragment").Commit();
+                    SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), INNER_FRAGMENT_TAG).Commit();
                     backPressedCallback.Enabled = true;
                     //switch in that fragment...
                     //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame,new MessagesOverviewFragment()).Commit();
@@ -200,6 +200,11 @@ namespace Seeker
         private const string INNER_ROOM_PRIV_CONST = "INNER_ROOM_PRIV_CONST";
         private const string INNER_ROOM_OWNED_CONST = "INNER_ROOM_OWNED_CONST";
         private const string INNER_ROOM_MOD_CONST = "INNER_ROOM_MOD_CONST";
+
+        private const string INNER_FRAGMENT_TAG = "ChatroomInnerFragment";
+        private const string OVERVIEW_FRAGMENT_TAG = "OuterListChatroomFragment";
+        private const string INNER_FRAGMENT_BACKSTACK = "ChatroomInnerFragmentBackStack";
+        private const string SAVE_STATE_AT_INNER_KEY = "SaveStateAtChatroomInner";
 
         /// <summary>
         /// This saves the starting room info in case we get "am state killed"
@@ -239,10 +244,10 @@ namespace Seeker
 
         protected override void OnSaveInstanceState(Bundle outState) //gets hit on rotate, home button press
         {
-            var f = SupportFragmentManager.FindFragmentByTag("ChatroomInnerFragment");
+            var f = SupportFragmentManager.FindFragmentByTag(INNER_FRAGMENT_TAG);
             if (f != null && f.IsVisible)
             {
-                outState.PutBoolean("SaveStateAtChatroomInner", true);
+                outState.PutBoolean(SAVE_STATE_AT_INNER_KEY, true);
                 Logger.Debug("SaveStateAtChatroomInner OnSaveInstanceState");
                 SaveStartingRoomInfo(outState, f as ChatroomInnerFragment);
                 Logger.Debug("currentlyInsideRoomName -- OnSaveInstanceState -- " + ChatroomController.currentlyInsideRoomName);
@@ -250,7 +255,7 @@ namespace Seeker
             }
             else
             {
-                outState.PutBoolean("SaveStateAtChatroomInner", false);
+                outState.PutBoolean(SAVE_STATE_AT_INNER_KEY, false);
             }
             base.OnSaveInstanceState(outState);
         }
@@ -313,7 +318,7 @@ namespace Seeker
             else
             {
                 //when you first click a room before you have joined, all the info you have is roomname and count. userlist is empty.
-                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), "ChatroomInnerFragment").AddToBackStack("ChatroomInnerFragmentBackStack").Commit();
+                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), INNER_FRAGMENT_TAG).AddToBackStack(INNER_FRAGMENT_BACKSTACK).Commit();
                 backPressedCallback.Enabled = true;
             }
         }
