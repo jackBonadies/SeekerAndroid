@@ -743,6 +743,33 @@ namespace Seeker.Messages
             SaveLastReadCounts(SeekerState.SharedPreferences);
         }
 
+        public static void MarkAsRead(IEnumerable<string> usernames)
+        {
+            if (Messages == null || usernames == null)
+            {
+                return;
+            }
+            foreach (var username in usernames)
+            {
+                if (!Messages.TryGetValue(username, out var msgList))
+                {
+                    continue;
+                }
+                int newCount = msgList.Count;
+                int existing = LastReadMessageCounts.TryGetValue(username, out int v) ? v : 0;
+                if (existing != newCount)
+                {
+                    LastReadMessageCounts[username] = newCount;
+                }
+            }
+            SaveLastReadCounts(SeekerState.SharedPreferences);
+        }
+
+        public static void MarkAllAsRead()
+        {
+            MarkAsRead(Messages?.Keys);
+        }
+
         public static void BroadcastFriendlyRunOnUiThread(Action action)
         {
             if (SeekerState.ActiveActivityRef != null)

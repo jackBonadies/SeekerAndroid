@@ -83,6 +83,11 @@ namespace Seeker.Messages
 
         private void UpdateMarkAsReadFromNotif(object o, string uname)
         {
+            if (uname == null)
+            {
+                recyclerAdapter.NotifyDataSetChanged();
+                return;
+            }
             recyclerAdapter.NotifyNameChanged(uname);
         }
 
@@ -202,6 +207,7 @@ namespace Seeker.Messages
 
             public void OnPrepareMenu(IMenu menu)
             {
+                menu.FindItem(Resource.Id.action_delete_all_messages)?.SetVisible(!MessageController.Messages.IsEmpty);
             }
 
             public void OnMenuClosed(IMenu menu)
@@ -220,8 +226,13 @@ namespace Seeker.Messages
                     case Resource.Id.message_user_action:
                         activity.ShowEditTextMessageUserDialog();
                         return true;
+                    case Resource.Id.mark_all_as_read_action:
+                        MessageController.MarkAllAsRead();
+                        fragment.recyclerAdapter.NotifyDataSetChanged();
+                        MessagesBroadcastReceiver.MarkAsReadFromNotification?.Invoke(null, null);
+                        return true;
                     case Resource.Id.action_delete_all_messages:
-                        if (MessageController.Messages.Count == 0)
+                        if (MessageController.Messages.IsEmpty)
                         {
                             SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.deleted_all_no_messages), ToastLength.Long);
                             return true;

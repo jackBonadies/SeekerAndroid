@@ -756,6 +756,7 @@ Directory Count: {5}"
     <string name="search_user_files">Search User\'s Files</string>
     <string name="add_to_user_list">Add to User List</string>
     <string name="msg_user">Message User</string>
+    <string name="mark_all_as_read">Mark All as Read</string>
     <string name="copy_image">Copy Image</string>
     <string name="save_image">Save Image</string>
 
