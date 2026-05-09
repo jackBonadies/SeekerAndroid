@@ -748,6 +748,7 @@ Directory Count: {5}"
     <string name="notification">Notifications</string>
     <string name="copy_text">Copy Text</string>
     <string name="ignore_user">Ignore User</string>
+    <string name="ignore_users">Ignore Users</string>
     <string name="remove_user">Remove User</string>
     <string name="remove_mod_priv">Remove Moderator Privilege</string>
     <string name="add_mod_priv">Add Moderator Privilege</string>
@@ -757,6 +758,7 @@ Directory Count: {5}"
     <string name="add_to_user_list">Add to User List</string>
     <string name="msg_user">Message User</string>
     <string name="mark_all_as_read">Mark All as Read</string>
+    <string name="mark_as_read">Mark as Read</string>
     <string name="copy_image">Copy Image</string>
     <string name="save_image">Save Image</string>
 

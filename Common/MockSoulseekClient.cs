@@ -39,7 +39,7 @@ namespace Seeker
             "test - how are you doing?",
             "what is in your collection? anything of note?",
             "how is everything going?",
-            "test",
+            "test - this is going to be a very long message - New users: please share - We have a fair-share policy here. - Leechers will be removed without warning. - Happy sharing! to repeat: New users: please share - We have a fair-share policy here. - Leechers will be removed without warning. - Happy sharing!",
         };
 
         private static readonly string[] _mockExcludedPhrases =

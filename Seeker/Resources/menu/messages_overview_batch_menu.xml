@@ -54,6 +54,11 @@
         app:showAsAction="never"
     />
     <item
+        android:id="@+id/action_mark_as_read"
+        android:title="@string/mark_as_read"
+        app:showAsAction="never"
+    />
+    <item
         android:id="@+id/action_ignore"
         android:title="@string/ignore_user"
         app:showAsAction="never"

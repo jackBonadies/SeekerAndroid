@@ -50,6 +50,7 @@ namespace Seeker.Messages
                 // Single + multi items
                 menu.FindItem(Resource.Id.action_add_to_user_list)?.SetVisible(anySelected);
                 menu.FindItem(Resource.Id.action_ignore)?.SetVisible(anySelected);
+                menu.FindItem(Resource.Id.action_mark_as_read)?.SetVisible(anySelected && GetSelectedUsernames().Any(u => MessageController.GetUnreadCount(u) > 0));
 
                 if (singleSelected)
                 {
@@ -60,7 +61,7 @@ namespace Seeker.Messages
                 else if (anySelected)
                 {
                     menu.FindItem(Resource.Id.action_add_to_user_list)?.SetTitle(Resource.String.add_to_user_list);
-                    menu.FindItem(Resource.Id.action_ignore)?.SetTitle(Resource.String.ignore_user);
+                    menu.FindItem(Resource.Id.action_ignore)?.SetTitle(singleSelected ? Resource.String.ignore_user : Resource.String.ignore_users);
                 }
 
                 return true;
@@ -163,6 +164,12 @@ namespace Seeker.Messages
                     }
                     case Resource.Id.action_delete_selected_batch:
                         Frag.DeleteBatchSelected();
+                        return true;
+                    case Resource.Id.action_mark_as_read:
+                        MessageController.MarkAsRead(GetSelectedUsernames());
+                        Adapter.NotifyDataSetChanged();
+                        MessagesBroadcastReceiver.MarkAsReadFromNotification?.Invoke(null, null);
+                        MessagesOverviewActionMode?.Finish();
                         return true;
                     case Resource.Id.select_all:
                         Adapter.SelectedPositions.Clear();
