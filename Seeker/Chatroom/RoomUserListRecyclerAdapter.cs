@@ -250,12 +250,12 @@ namespace Seeker.Chatroom
                 else if (cData.ChatroomUserRole == Soulseek.UserRole.Operator)
                 {
                     viewOperatorStatus.Visibility = ViewStates.Visible;
-                    viewOperatorStatus.Text = string.Format("({0})", SeekerState.ActiveActivityRef.GetString(Resource.String.mod).ToUpper());
+                    viewOperatorStatus.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.mod).ToUpper();
                 }
                 else
                 {
                     viewOperatorStatus.Visibility = ViewStates.Visible;
-                    viewOperatorStatus.Text = string.Format("({0})", SeekerState.ActiveActivityRef.GetString(Resource.String.owner).ToUpper());
+                    viewOperatorStatus.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.owner).ToUpper();
                 }
             }
             else

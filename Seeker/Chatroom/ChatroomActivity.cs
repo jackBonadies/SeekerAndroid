@@ -296,7 +296,7 @@ namespace Seeker
 
         public static System.String LocaleToEmoji(string locale)
         {
-            if (locale == string.Empty)
+            if (string.IsNullOrEmpty(locale))
             {
                 int unicode = 0x1F310;
                 return new System.String(Java.Lang.Character.ToChars(unicode));
