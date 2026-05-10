@@ -1,74 +1,71 @@
-using MessagePack;
 using System;
 
 namespace Seeker
 {
-    [MessagePackObject]
     [System.Serializable]
     public class Message
     {
-        [Key(0)]
         public readonly string Username;
-        [Key(1)]
         public readonly int Id;
-        [Key(2)]
         public readonly bool Replayed;
-        [Key(3)]
-        public readonly DateTime LocalDateTime;
-        [Key(4)]
         public readonly DateTime UtcDateTime;
-        [Key(5)]
         public readonly string MessageText;
-        [Key(6)]
         public readonly bool FromMe = false;
-        [Key(7)]
         public SentStatus SentMsgStatus = SentStatus.None;
-        [Key(8)]
         public readonly SpecialMessageCode SpecialCode = SpecialMessageCode.None;
-        [Key(9)]
         public bool SameAsLastUser = false;
 
-        public Message(string username, int id, bool replayed, DateTime localDateTime, DateTime utcDateTime, string messageText, bool fromMe)
+        private DateTime _localDateTime;
+        private bool _localComputed;
+
+        public DateTime LocalDateTime
         {
-            Username = username;
-            Id = id;
-            Replayed = replayed;
+            get
+            {
+                if (!_localComputed)
+                {
+                    var utc = DateTime.SpecifyKind(UtcDateTime, DateTimeKind.Utc);
+                    try
+                    {
+                        _localDateTime = utc.ToLocalTime();
+                    }
+                    catch
+                    {
+                        _localDateTime = utc;
+                    }
+                    _localComputed = true;
+                }
+                return _localDateTime;
+            }
+            set
+            {
+                _localDateTime = value;
+                _localComputed = true;
+            }
+        }
+
+        public Message(string username, int id, bool replayed, DateTime localDateTime, DateTime utcDateTime, string messageText, bool fromMe)
+            : this(username, id, replayed, utcDateTime, messageText, fromMe, SentStatus.None, SpecialMessageCode.None, false)
+        {
             LocalDateTime = localDateTime;
-            UtcDateTime = utcDateTime;
-            MessageText = messageText;
-            FromMe = fromMe;
         }
 
         public Message(string username, int id, bool replayed, DateTime localDateTime, DateTime utcDateTime, string messageText, bool fromMe, SentStatus sentStatus)
+            : this(username, id, replayed, utcDateTime, messageText, fromMe, sentStatus, SpecialMessageCode.None, false)
         {
-            Username = username;
-            Id = id;
-            Replayed = replayed;
             LocalDateTime = localDateTime;
-            UtcDateTime = utcDateTime;
-            MessageText = messageText;
-            FromMe = fromMe;
-            SentMsgStatus = sentStatus;
         }
 
         public Message(DateTime localDateTime, DateTime utcDateTime, SpecialMessageCode connectOrDisconnect, string messageText)
+            : this(string.Empty, -2, false, utcDateTime, messageText, false, SentStatus.None, connectOrDisconnect, false)
         {
-            Username = string.Empty;
-            Id = -2;
-            Replayed = false;
             LocalDateTime = localDateTime;
-            UtcDateTime = utcDateTime;
-            MessageText = messageText;
-            SentMsgStatus = 0;
-            SpecialCode = connectOrDisconnect;
         }
 
-        [SerializationConstructor]
         public Message(
             string username,
             int id,
             bool replayed,
-            DateTime localDateTime,
             DateTime utcDateTime,
             string messageText,
             bool fromMe,
@@ -79,7 +76,6 @@ namespace Seeker
             Username = username;
             Id = id;
             Replayed = replayed;
-            LocalDateTime = localDateTime;
             UtcDateTime = utcDateTime;
             MessageText = messageText;
             FromMe = fromMe;

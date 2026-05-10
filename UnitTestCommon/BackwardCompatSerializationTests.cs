@@ -100,6 +100,16 @@ namespace UnitTestCommon
         }
 
         [Test]
+        public async Task Messages9Key_DeserializesFromDisk()
+        {
+            var path = Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "Messages", "messages_v2_9key.b64");
+            var raw = System.IO.File.ReadAllText(path);
+            var result = SerializationHelper.RestoreMessagesFromString(raw);
+
+            await Verifier.Verify(result).DontScrubDateTimes();
+        }
+
+        [Test]
         public void SearchHistory_DeserializesFromDisk()
         {
             var raw = GetPreferenceString("Momento_SearchHistoryArray");

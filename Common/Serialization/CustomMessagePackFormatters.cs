@@ -749,4 +749,146 @@ namespace Seeker.Serialization
         }
     }
 
+    public class MessageFormatter : IMessagePackFormatter<Seeker.Message>
+    {
+        public void Serialize(ref MessagePackWriter writer, Seeker.Message value, MessagePackSerializerOptions options)
+        {
+            if (value == null)
+            {
+                writer.WriteNil();
+                return;
+            }
+
+            // new format - dont persist LocalDateTime
+            writer.WriteArrayHeader(9);
+            writer.Write(value.Username);
+            writer.WriteInt32(value.Id);
+            writer.Write(value.Replayed);
+            writer.Write(value.UtcDateTime);
+            writer.Write(value.MessageText);
+            writer.Write(value.FromMe);
+            writer.WriteInt32((int)value.SentMsgStatus);
+            writer.WriteInt32((int)value.SpecialCode);
+            writer.Write(value.SameAsLastUser);
+        }
+
+        public Seeker.Message Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
+        {
+            if (reader.TryReadNil())
+            {
+                return null;
+            }
+            options.Security.DepthStep(ref reader);
+
+            string username = null;
+            int id = 0;
+            bool replayed = false;
+            DateTime utcDateTime = default;
+            string messageText = null;
+            bool fromMe = false;
+            Seeker.SentStatus sentStatus = Seeker.SentStatus.None;
+            Seeker.SpecialMessageCode specialCode = Seeker.SpecialMessageCode.None;
+            bool sameAsLastUser = false;
+
+            int count = reader.ReadArrayHeader();
+
+            // Disambiguate by array length:
+            //   10 fields = old layout: Username, Id, Replayed, LocalDateTime, UtcDateTime, MessageText, FromMe, SentMsgStatus, SpecialCode, SameAsLastUser
+            //    9 fields = new layout: Username, Id, Replayed, UtcDateTime,    MessageText, FromMe, SentMsgStatus, SpecialCode, SameAsLastUser
+            bool oldLayout = count >= 10;
+
+            for (int i = 0; i < count; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        username = reader.ReadString();
+                        break;
+                    case 1:
+                        id = reader.ReadInt32();
+                        break;
+                    case 2:
+                        replayed = reader.ReadBoolean();
+                        break;
+                    case 3:
+                        if (oldLayout)
+                        {
+                            reader.Skip(); // legacy LocalDateTime — discarded; LocalDateTime is now lazy-computed
+                        }
+                        else
+                        {
+                            utcDateTime = reader.ReadDateTime();
+                        }
+                        break;
+                    case 4:
+                        if (oldLayout)
+                        {
+                            utcDateTime = reader.ReadDateTime();
+                        }
+                        else
+                        {
+                            messageText = reader.ReadString();
+                        }
+                        break;
+                    case 5:
+                        if (oldLayout)
+                        {
+                            messageText = reader.ReadString();
+                        }
+                        else
+                        {
+                            fromMe = reader.ReadBoolean();
+                        }
+                        break;
+                    case 6:
+                        if (oldLayout)
+                        {
+                            fromMe = reader.ReadBoolean();
+                        }
+                        else
+                        {
+                            sentStatus = (Seeker.SentStatus)reader.ReadInt32();
+                        }
+                        break;
+                    case 7:
+                        if (oldLayout)
+                        {
+                            sentStatus = (Seeker.SentStatus)reader.ReadInt32();
+                        }
+                        else
+                        {
+                            specialCode = (Seeker.SpecialMessageCode)reader.ReadInt32();
+                        }
+                        break;
+                    case 8:
+                        if (oldLayout)
+                        {
+                            specialCode = (Seeker.SpecialMessageCode)reader.ReadInt32();
+                        }
+                        else
+                        {
+                            sameAsLastUser = reader.ReadBoolean();
+                        }
+                        break;
+                    case 9:
+                        if (oldLayout)
+                        {
+                            sameAsLastUser = reader.ReadBoolean();
+                        }
+                        else
+                        {
+                            reader.Skip();
+                        }
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
+            }
+
+            reader.Depth--;
+            return new Seeker.Message(username, id, replayed, utcDateTime, messageText, fromMe, sentStatus, specialCode, sameAsLastUser);
+        }
+    }
+
 }
