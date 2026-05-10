@@ -126,7 +126,7 @@
     <string name="requesting_user_info">Requesting User\'s Info</string>
     <string name="room_list_received">Room List Received</string>
 
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Wishlist</string>
     <string name="wishlist_bold">
@@ -837,6 +837,10 @@ Directory Count: {5}"
     <string name="view_self">View Self</string>
     <string name="view_all_tickers">View all Tickers</string>
     <string name="all_tickers">All Tickers</string>
+    <string name="members">Members</string>
+    <string name="sort_users_by_desc">Sort users</string>
+    <string name="search_users_desc">Search users</string>
+    <string name="back_desc">Back</string>
 
     <string name="resume_all">Resume All</string>
     <string name="pause_all">Pause All</string>

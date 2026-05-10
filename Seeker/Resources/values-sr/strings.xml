@@ -53,7 +53,7 @@
     <string name="requesting_user_info">Requesting User\'s Info</string>
     <string name="room_list_received">Room List Received</string>
 
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Wishlist</string>
     <string name="wishlist_bold">

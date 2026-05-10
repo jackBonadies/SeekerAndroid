@@ -62,7 +62,7 @@
     <string name="requesting_user_info">Richiesta Informazioni Utente</string>
     <string name="room_list_received">Elenco Stanze Ricevuto</string>
 
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Lista desideri</string>
     <string name="wishlist_bold">

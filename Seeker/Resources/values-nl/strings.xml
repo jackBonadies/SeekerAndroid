@@ -62,7 +62,7 @@
     <string name="requesting_user_info">Verzoek om gebruikersinfo</string>
     <string name="room_list_received">Kamerlijst ontvangen</string>
 
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Verlanglijst</string>
     <string name="wishlist_bold">
