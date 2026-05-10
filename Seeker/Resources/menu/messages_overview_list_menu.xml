@@ -3,13 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
 >
     <item
-        android:id="@+id/message_user_action"
-        android:icon="@drawable/baseline_add_white_24"
-        android:title="@string/msg_user"
-        app:showAsAction="always"
-    />
-
-    <item
         android:id="@+id/mark_all_as_read_action"
         android:title="@string/mark_all_as_read"
         app:showAsAction="never"

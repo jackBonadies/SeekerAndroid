@@ -61,6 +61,9 @@ namespace Seeker.Messages
             ItemTouchHelper itemTouchHelper = new ItemTouchHelper(itemTouchHelperMessageOverviewCallback);
             itemTouchHelper.AttachToRecyclerView(recyclerViewOverview);
 
+            var fabNewMessage = rootView.FindViewById<Google.Android.Material.FloatingActionButton.FloatingActionButton>(Resource.Id.fabNewMessage);
+            fabNewMessage.Click += (s, e) => (Activity as MessagesActivity)?.ShowEditTextMessageUserDialog();
+
             created = true;
             return rootView;
         }
@@ -224,9 +227,6 @@ namespace Seeker.Messages
                 }
                 switch (item.ItemId)
                 {
-                    case Resource.Id.message_user_action:
-                        activity.ShowEditTextMessageUserDialog();
-                        return true;
                     case Resource.Id.mark_all_as_read_action:
                         MessageController.MarkAllAsRead();
                         fragment.recyclerAdapter.NotifyDataSetChanged();
