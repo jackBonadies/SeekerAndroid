@@ -8,29 +8,25 @@ namespace Seeker
     public class Message
     {
         [Key(0)]
-        public string Username;
+        public readonly string Username;
         [Key(1)]
-        public int Id;
+        public readonly int Id;
         [Key(2)]
-        public bool Replayed;
+        public readonly bool Replayed;
         [Key(3)]
-        public DateTime LocalDateTime;
+        public readonly DateTime LocalDateTime;
         [Key(4)]
-        public DateTime UtcDateTime;
+        public readonly DateTime UtcDateTime;
         [Key(5)]
-        public string MessageText;
+        public readonly string MessageText;
         [Key(6)]
-        public bool FromMe = false;
+        public readonly bool FromMe = false;
         [Key(7)]
         public SentStatus SentMsgStatus = SentStatus.None;
         [Key(8)]
-        public SpecialMessageCode SpecialCode = SpecialMessageCode.None;
+        public readonly SpecialMessageCode SpecialCode = SpecialMessageCode.None;
         [Key(9)]
         public bool SameAsLastUser = false;
-
-        public Message()
-        {
-        }
 
         public Message(string username, int id, bool replayed, DateTime localDateTime, DateTime utcDateTime, string messageText, bool fromMe)
         {
@@ -65,6 +61,31 @@ namespace Seeker
             MessageText = messageText;
             SentMsgStatus = 0;
             SpecialCode = connectOrDisconnect;
+        }
+
+        [SerializationConstructor]
+        public Message(
+            string username,
+            int id,
+            bool replayed,
+            DateTime localDateTime,
+            DateTime utcDateTime,
+            string messageText,
+            bool fromMe,
+            SentStatus sentMsgStatus,
+            SpecialMessageCode specialCode,
+            bool sameAsLastUser)
+        {
+            Username = username;
+            Id = id;
+            Replayed = replayed;
+            LocalDateTime = localDateTime;
+            UtcDateTime = utcDateTime;
+            MessageText = messageText;
+            FromMe = fromMe;
+            SentMsgStatus = sentMsgStatus;
+            SpecialCode = specialCode;
+            SameAsLastUser = sameAsLastUser;
         }
     }
 
