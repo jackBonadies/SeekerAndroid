@@ -125,7 +125,7 @@ namespace Seeker.Messages
                 }
                 else
                 {
-                    return y.Value.Last().LocalDateTime.CompareTo(x.Value.Last().LocalDateTime);
+                    return y.Value.Last().UtcDateTime.CompareTo(x.Value.Last().UtcDateTime);
                 }
             }
         }
