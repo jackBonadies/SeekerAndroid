@@ -130,19 +130,6 @@ namespace Seeker.Messages
             }
         }
 
-        public override bool OnContextItemSelected(IMenuItem item)
-        {
-            switch (item.ItemId)
-            {
-                case 0: //"Copy Text"
-                    CommonHelpers.CopyTextToClipboard(this.Activity, ChatroomInnerFragment.MessagesLongClickData.MessageText);
-                    break;
-                default:
-                    return base.OnContextItemSelected(item);
-            }
-            return true;
-        }
-
         private class InnerMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
         {
             private readonly MessagesInnerFragment fragment;
