@@ -25,9 +25,6 @@ namespace Seeker.Chatroom
     public class RoomUserListDialog : BottomSheetDialogFragment
     {
 
-        public static Soulseek.UserData longClickedUserData = null;
-
-
         public static string OurRoomName = string.Empty;
         public static bool IsPrivate = false;
         private RecyclerView recyclerViewUsers = null;
@@ -379,7 +376,6 @@ namespace Seeker.Chatroom
             recycleLayoutManager = new LinearLayoutManager(Activity);
             this.RefreshUserListFull();
             recyclerViewUsers.SetLayoutManager(recycleLayoutManager);
-            this.RegisterForContextMenu(recyclerViewUsers);
         }
 
         private void ShowSearchRow()
@@ -488,7 +484,7 @@ namespace Seeker.Chatroom
 
         private void NotifyItemChanged(Soulseek.UserData userData)
         {
-            int i = this.roomUserListAdapter.GetPositionForUserData(longClickedUserData);
+            int i = this.roomUserListAdapter.GetPositionForUserData(userData);
             if (i == -1)
             {
                 return;
@@ -496,7 +492,7 @@ namespace Seeker.Chatroom
             this.roomUserListAdapter.NotifyItemChanged(i);
         }
 
-        private Action GetUpdateUserListRoomAction(Soulseek.UserData longClickedUserData)
+        public Action GetUpdateUserListRoomAction(Soulseek.UserData longClickedUserData)
         {
             Action a = new Action(() =>
             {
@@ -505,7 +501,7 @@ namespace Seeker.Chatroom
             return a;
         }
 
-        private Action GetUpdateUserListRoomActionAddedRemoved(Soulseek.UserData longClickedUserData)
+        public Action GetUpdateUserListRoomActionAddedRemoved(Soulseek.UserData longClickedUserData)
         {
             Action a = null;
             if (PreferencesState.PutFriendsOnTop)
@@ -568,56 +564,6 @@ namespace Seeker.Chatroom
                 });
             }
             return a;
-        }
-
-        public override bool OnContextItemSelected(IMenuItem item)
-        {
-            var userdata = longClickedUserData;
-            if (item.ItemId != 0) //this is "Remove User" as in Remove User from Room!
-            {
-                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), userdata.Username, SeekerState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
-                {
-                    Logger.Debug("Handled by commons");
-                    return base.OnContextItemSelected(item);
-                }
-            }
-            switch (item.ItemId)
-            {
-                case 0: //"Remove User"
-                    ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username, true, false, true);
-                    //                    SeekerState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
-                    return true;
-                case 1: //"Remove Moderator Privilege"
-                    ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username, true, true, true);
-                    SeekerState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
-                    return true;
-                case 2:
-                    ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username, true, true, false);
-                    SeekerState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
-                    return true;
-                case 3: //browse user
-                    BrowseService.RequestFilesApi(userdata.Username, null);
-                    return true;
-                case 4: //search users files
-                    SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
-                    SearchTabHelper.SearchTargetChosenUser = userdata.Username;
-                    //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                    Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(MainActivity.GoToSearchExtra, true);
-                    this.StartActivity(intent);
-                    return true;
-                case 7: //message user
-                    Intent intentMsg = new Intent(SeekerState.ActiveActivityRef, typeof(MessagesActivity));
-                    intentMsg.AddFlags(ActivityFlags.SingleTop);
-                    intentMsg.PutExtra(MessageController.FromUserName, userdata.Username); //so we can go to this user..
-                    intentMsg.PutExtra(MessageController.ComingFromMessageTapped, true); //so we can go to this user..
-                    this.StartActivity(intentMsg);
-                    return true;
-                default:
-                    break;
-            }
-
-            return base.OnContextItemSelected(item);
         }
 
     }

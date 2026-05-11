@@ -215,25 +215,22 @@ namespace Seeker
             }
         }
 
-        public static void AddUserOnlineAlertMenuItem(IMenu menu, int i, int j, int k, string username)
+        public static void ShowCopyMessageTextPopup(View anchor, Message msg, GravityFlags gravity)
         {
-            string title = null;
-            if (SeekerState.UserOnlineAlerts.ContainsKey(username))
+            anchor.PerformHapticFeedback(FeedbackConstants.LongPress);
+
+            var ctx = new AndroidX.AppCompat.View.ContextThemeWrapper(anchor.Context, Resource.Style.AppPopupOverlay);
+            var popup = new AndroidX.AppCompat.Widget.PopupMenu(ctx, anchor, (int)gravity);
+            popup.Inflate(Resource.Menu.message_long_press_popup);
+            popup.SetForceShowIcon(true);
+            popup.MenuItemClick += (s, args) =>
             {
-                title = SeekerState.ActiveActivityRef.GetString(Resource.String.remove_online_alert);
-            }
-            else
-            {
-                title = SeekerState.ActiveActivityRef.GetString(Resource.String.set_online_alert);
-            }
-            if (i != -1)
-            {
-                menu.Add(i, j, k, title);
-            }
-            else
-            {
-                menu.Add(title);
-            }
+                if (args.Item.ItemId == Resource.Id.action_copy_text)
+                {
+                    CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, msg.MessageText);
+                }
+            };
+            popup.Show();
         }
 
         public static void SetIgnoreUnignoreTitle(IMenuItem menuItem, string username)
@@ -371,32 +368,6 @@ namespace Seeker
                 {
                     title = SeekerState.ActiveActivityRef.GetString(Resource.String.remove_user);
                 }
-            }
-            if (i != -1)
-            {
-                menu.Add(i, j, k, title);
-            }
-            else
-            {
-                menu.Add(title);
-            }
-        }
-
-        public static void AddIgnoreUnignoreUserMenuItem(IMenu menu, int i, int j, int k, string username)
-        {
-            //ignored and added are mutually exclusive.  you cannot have a user be both ignored and added.
-            if (UserListService.Instance.ContainsUser(username))
-            {
-                return;
-            }
-            string title = null;
-            if (!SeekerApplication.IsUserInIgnoreList(username))
-            {
-                title = SeekerState.ActiveActivityRef.GetString(Resource.String.ignore_user);
-            }
-            else
-            {
-                title = SeekerState.ActiveActivityRef.GetString(Resource.String.remove_from_ignored);
             }
             if (i != -1)
             {

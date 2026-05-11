@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Seeker.Helpers;
+using Seeker.Helpers.ActionSheet;
+using Seeker.Services;
 
 namespace Seeker.Users
 {
@@ -122,50 +124,19 @@ namespace Seeker.Users
     }
 
 
-    public class UserRowViewHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
+    public class UserRowViewHolder : RecyclerView.ViewHolder
     {
         public UserRowView userRowView;
 
-
-
         public UserRowViewHolder(View view) : base(view)
         {
-            //super(view);
-            // Define click listener for the ViewHolder's View
-
             userRowView = (UserRowView)view;
             userRowView.ViewHolder = this;
-            userRowView.SetOnCreateContextMenuListener(this);
         }
 
         public UserRowView getUnderlyingView()
         {
             return userRowView;
-        }
-
-        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-        {
-
-            //base.OnCreateContextMenu(menu, v, menuInfo);
-            UserRowView userRowView = v as UserRowView;
-            string username = userRowView.viewUsername.Text;
-            UserListActivity.PopUpMenuOwnerHack = username;
-            Logger.Debug(username + " clicked");
-            UserListItem userListItem = userRowView.BoundItem;
-            bool isIgnored = userListItem.Role == UserRole.Ignored;
-
-            if (isIgnored)
-            {
-                SeekerState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_ignored_user_menu, menu);
-                UiHelpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
-            }
-            else
-            {
-                SeekerState.ActiveActivityRef.MenuInflater.Inflate(Resource.Menu.selected_user_options, menu);
-                UiHelpers.AddUserNoteMenuItem(menu, -1, -1, -1, userListItem.Username);
-                UiHelpers.AddUserOnlineAlertMenuItem(menu, -1, -1, -1, userListItem.Username);
-                UiHelpers.AddGivePrivilegesIfApplicable(menu, -1);
-            }
         }
     }
 
@@ -234,13 +205,63 @@ namespace Seeker.Users
         public void UserRowView_LongClick(object sender, View.LongClickEventArgs e)
         {
             (ViewHolder.BindingAdapter as RecyclerUserListAdapter).setPosition((sender as UserRowView).ViewHolder.BindingAdapterPosition);
-            (sender as View).ShowContextMenu();
+            ShowActionSheet(sender as UserRowView);
+            e.Handled = true;
         }
 
         public void UserRowView_Click(object sender, EventArgs e)
         {
             (ViewHolder.BindingAdapter as RecyclerUserListAdapter).setPosition((sender as UserRowView).ViewHolder.BindingAdapterPosition);
-            (sender as View).ShowContextMenu();
+            ShowActionSheet(sender as UserRowView);
+        }
+
+        private void ShowActionSheet(UserRowView row)
+        {
+            string username = row.viewUsername.Text;
+            var activity = this.UserListActivity ?? (SeekerState.ActiveActivityRef as Seeker.UserListActivity);
+            if (activity == null)
+            {
+                return;
+            }
+            var snackView = activity.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId);
+            bool isIgnored = row.BoundItem.Role == UserRole.Ignored;
+
+            var config = new ActionSheetConfig();
+            if (isIgnored)
+            {
+                config.Sections.Add(ActionSheetActions.BuildIgnoredUserActionsSection(
+                    username,
+                    activity,
+                    snackView,
+                    () =>
+                    {
+                        SeekerApplication.RemoveFromIgnoreList(username);
+                        activity?.NotifyItemRemovedExternal(username);
+                    },
+                    activity?.GetUpdateUserListItemActionExternal(username)));
+            }
+            else
+            {
+                Action refresh = activity?.GetUpdateUserListItemActionExternal(username);
+                var options = new UserActionsOptions
+                {
+                    IncludeOnlineAlert = true,
+                    IncludeGivePrivileges = true,
+                    OnAddRemoved = refresh,
+                    OnIgnoreChanged = refresh,
+                    OnNoteChanged = refresh,
+                    OnOnlineAlertChanged = refresh,
+                    OverrideRemoveFromFriends = () =>
+                    {
+                        UserListService.Instance.RemoveUser(username);
+                        activity?.NotifyItemRemovedExternal(username);
+                    }
+                };
+                config.Sections.Add(ActionSheetActions.BuildUserActionsSection(username, activity, snackView, options));
+            }
+
+            ActionSheetDialog.PendingConfig = config;
+            new ActionSheetDialog().Show(activity.SupportFragmentManager, "actionSheet");
         }
 
         public static UserRowView inflate(ViewGroup parent)

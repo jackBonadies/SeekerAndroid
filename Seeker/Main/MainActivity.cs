@@ -262,7 +262,7 @@ namespace Seeker
                 {
                     pager.SetCurrentItem(1, false);
                 }
-                else if (Intent.GetIntExtra(UserListActivity.IntentSearchRoom, -1) == 1)
+                else if (Intent.GetIntExtra(IntentSearchRoomExtra, -1) == 1)
                 {
                     pager.SetCurrentItem(1, false);
                 }
@@ -703,6 +703,7 @@ namespace Seeker
         public const string FolderAlertExtra = "FolderAlert";
         public const string FolderAlertUsernameExtra = "FolderAlertUsername";
         public const string FolderAlertFoldernameExtra = "FolderAlertFoldername";
+        public const string IntentSearchRoomExtra = "SearchRoom";
 
         /// <summary>
         ///     Creates and returns an <see cref="IEnumerable{T}"/> of <see cref="Soulseek.Directory"/> in response to a remote request.

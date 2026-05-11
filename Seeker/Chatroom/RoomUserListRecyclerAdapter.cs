@@ -8,6 +8,7 @@ using Android.Widget;
 using AndroidX.Core.Content;
 using AndroidX.RecyclerView.Widget;
 using Common.Messages;
+using Seeker.Helpers.ActionSheet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ using System.Text;
 
 namespace Seeker.Chatroom
 {
-    public class RoomUserListRecyclerAdapter : RecyclerView.Adapter, PopupMenu.IOnMenuItemClickListener
+    public class RoomUserListRecyclerAdapter : RecyclerView.Adapter
     {
         private List<Soulseek.UserData> localDataSet;
         public override int ItemCount => localDataSet.Count;
@@ -74,22 +75,78 @@ namespace Seeker.Chatroom
 
         private void RoomUserListRecyclerAdapter_Click(object sender, EventArgs e)
         {
-            RoomUserListDialog.longClickedUserData = (sender as RoomUserItemView).DataItem;
-
-            (sender as View).ShowContextMenu();
+            ShowUserActionSheet((sender as RoomUserItemView).DataItem);
         }
 
         private void RoomUserListRecyclerAdapter_LongClick(object sender, View.LongClickEventArgs e)
         {
-
-            RoomUserListDialog.longClickedUserData = (sender as RoomUserItemView).DataItem;
-
-            (sender as View).ShowContextMenu();
+            ShowUserActionSheet((sender as RoomUserItemView).DataItem);
+            e.Handled = true;
         }
 
-        public bool OnMenuItemClick(IMenuItem item)
+        private void ShowUserActionSheet(Soulseek.UserData userdata)
         {
-            throw new NotImplementedException();
+            var dialog = RoomUserListDialog.forContextHelp;
+            var activity = SeekerState.ActiveActivityRef;
+            var snackView = dialog?.View?.FindViewById<ViewGroup>(Resource.Id.userListRoom);
+
+            var options = new UserActionsOptions
+            {
+                OnAddRemoved = dialog?.GetUpdateUserListRoomActionAddedRemoved(userdata),
+                OnIgnoreChanged = dialog?.GetUpdateUserListRoomAction(userdata),
+                OnNoteChanged = dialog?.GetUpdateUserListRoomAction(userdata),
+                RoomAdmin = BuildRoomAdminContext(userdata, dialog)
+            };
+
+            var config = new ActionSheetConfig();
+            config.Sections.Add(ActionSheetActions.BuildUserActionsSection(userdata.Username, activity, snackView, options));
+
+            ActionSheetDialog.PendingConfig = config;
+            new ActionSheetDialog().Show(activity.SupportFragmentManager, "actionSheet");
+        }
+
+        private static RoomAdminContext BuildRoomAdminContext(Soulseek.UserData userdata, RoomUserListDialog dialog)
+        {
+            string roomName = RoomUserListDialog.OurRoomName;
+            bool isPrivate = ChatroomController.IsPrivate(roomName);
+            if (!isPrivate || !(userdata is ChatroomUserData cData))
+            {
+                return null;
+            }
+            bool canRemoveUser = false;
+            bool canAddMod = false;
+            bool canRemoveMod = false;
+            if (ChatroomController.AreWeOwner(roomName))
+            {
+                canRemoveUser = true;
+                if (cData.ChatroomUserRole == Soulseek.UserRole.Operator)
+                {
+                    canRemoveMod = true;
+                }
+                else
+                {
+                    canAddMod = true;
+                }
+            }
+            else if (ChatroomController.AreWeMod(roomName))
+            {
+                if (cData.ChatroomUserRole == Soulseek.UserRole.Normal)
+                {
+                    canRemoveUser = true;
+                }
+            }
+            if (!canRemoveUser && !canAddMod && !canRemoveMod)
+            {
+                return null;
+            }
+            return new RoomAdminContext
+            {
+                RoomName = roomName,
+                CanRemoveUser = canRemoveUser,
+                CanAddMod = canAddMod,
+                CanRemoveMod = canRemoveMod,
+                OnAdminChanged = dialog?.GetUpdateUserListRoomAction(userdata)
+            };
         }
 
         public RoomUserListRecyclerAdapter(List<Soulseek.UserData> ti)
@@ -99,97 +156,19 @@ namespace Seeker.Chatroom
 
     }
 
-    public class RoomUserItemViewHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
+    public class RoomUserItemViewHolder : RecyclerView.ViewHolder
     {
         public RoomUserItemView userInnerView;
 
-
         public RoomUserItemViewHolder(View view) : base(view)
         {
-            //super(view);
-            // Define click listener for the ViewHolder's View
-
             userInnerView = (RoomUserItemView)view;
             userInnerView.ViewHolder = this;
-            (view as View).SetOnCreateContextMenuListener(this);
         }
 
         public RoomUserItemView getUnderlyingView()
         {
             return userInnerView;
-        }
-
-        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-        {
-            RoomUserItemView roomUserItemView = v as RoomUserItemView;
-            //private room specific options
-            bool canRemoveModPriviledgesAndApplicable = false;
-            bool canAddModPriviledgesAndApplicable = false;
-            bool canRemoveUser = false;
-            bool isPrivate = ChatroomController.IsPrivate(RoomUserListDialog.OurRoomName);
-            if (isPrivate && roomUserItemView.DataItem is ChatroomUserData cData) //that means we are in a private room
-            {
-                if (ChatroomController.AreWeOwner(RoomUserListDialog.OurRoomName))
-                {
-                    if (cData.ChatroomUserRole == Soulseek.UserRole.Operator)
-                    {
-                        canRemoveModPriviledgesAndApplicable = true;
-                    }
-                    else
-                    {
-                        canAddModPriviledgesAndApplicable = true; //i.e. if the other user is non operator
-                    }
-                    canRemoveUser = true;
-                }
-                else if (ChatroomController.AreWeMod(RoomUserListDialog.OurRoomName))
-                {
-                    //we do not have any priviledges regarding fellow mods
-                    if (cData.ChatroomUserRole == Soulseek.UserRole.Normal)
-                    {
-                        canRemoveUser = true;
-                    }
-                }
-            }
-
-            //AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-
-
-            if (canRemoveUser)
-            {
-                menu.Add(0, 0, 0, SeekerState.ActiveActivityRef.GetString(Resource.String.remove_user));
-            }
-            if (canRemoveModPriviledgesAndApplicable)
-            {
-                menu.Add(0, 1, 1, SeekerState.ActiveActivityRef.GetString(Resource.String.remove_mod_priv));
-            }
-            if (canAddModPriviledgesAndApplicable)
-            {
-                menu.Add(0, 2, 2, SeekerState.ActiveActivityRef.GetString(Resource.String.add_mod_priv));
-            }
-
-
-            //normal - add to user list, browse, etc...
-            menu.Add(1, 3, 3, SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user));
-            menu.Add(1, 4, 4, SeekerState.ActiveActivityRef.GetString(Resource.String.search_user_files));
-            UiHelpers.AddAddRemoveUserMenuItem(menu, 1, 5, 5, roomUserItemView.DataItem.Username, true);
-            UiHelpers.AddIgnoreUnignoreUserMenuItem(menu, 1, 6, 6, roomUserItemView.DataItem.Username);
-            menu.Add(1, 7, 7, SeekerState.ActiveActivityRef.GetString(Resource.String.msg_user));
-            UiHelpers.AddUserNoteMenuItem(menu, 1, 8, 8, roomUserItemView.DataItem.Username);
-
-            var hackFixDialogContext = new FixForDialogFragmentContext();
-            for (int i = 0; i < menu.Size(); i++)
-            {
-                menu.GetItem(i).SetOnMenuItemClickListener(hackFixDialogContext);
-            }
-
-        }
-
-        public class FixForDialogFragmentContext : Java.Lang.Object, IMenuItemOnMenuItemClickListener
-        {
-            public bool OnMenuItemClick(Android.Views.IMenuItem item)
-            {
-                return RoomUserListDialog.forContextHelp.OnContextItemSelected(item);
-            }
         }
     }
 

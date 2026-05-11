@@ -747,6 +747,7 @@ Directory Count: {5}"
     <string name="auto_join">Auto Join</string>
     <string name="notification">Notifications</string>
     <string name="copy_text">Copy Text</string>
+    <string name="this_message">This Message</string>
     <string name="ignore_user">Ignore User</string>
     <string name="ignore_users">Ignore Users</string>
     <string name="remove_user">Remove User</string>

@@ -1,6 +1,7 @@
 using Seeker.Services;
 using Seeker.Chatroom;
 using Seeker.Helpers;
+using Seeker.Helpers.ActionSheet;
 using Seeker.Messages;
 using Android.Content;
 using Android.Graphics;
@@ -232,16 +233,51 @@ namespace Seeker
 
         private void ChatroomReceivedAdapter_LongClick(object sender, View.LongClickEventArgs e)
         {
+            Message message = null;
             if (sender is GroupMessageInnerViewReceived recv)
             {
-                ChatroomInnerFragment.MessagesLongClickData = recv.DataItem;
+                message = recv.DataItem;
             }
             else if (sender is MessageInnerViewSent sent)
             {
-                ChatroomInnerFragment.MessagesLongClickData = sent.DataItem;
+                message = sent.DataItem;
+                UiHelpers.ShowCopyMessageTextPopup(sent, message, GravityFlags.End);
+                e.Handled = true;
+                return;
+            }
+            if (message == null)
+            {
+                return;
             }
 
-            (sender as View).ShowContextMenu();
+            // Preserve legacy guard: when a slsk:// link tap is in flight, suppress our menu.
+            if (SimpleHelpers.ShowSlskLinkContextMenu)
+            {
+                SimpleHelpers.ShowSlskLinkContextMenu = false;
+                return;
+            }
+
+            var activity = SeekerState.ActiveActivityRef;
+            var view = sender as View;
+            var config = new ActionSheetConfig();
+
+            var messageSection = new ActionSheetSection
+            {
+                HeaderText = activity.GetString(Resource.String.this_message)
+            };
+            messageSection.Rows.Add(new ActionSheetRow
+            {
+                IconResId = Resource.Drawable.content_copy_24,
+                Label = activity.GetString(Resource.String.copy_text),
+                OnClick = () => CommonHelpers.CopyTextToClipboard(activity, message.MessageText)
+            });
+            config.Sections.Add(messageSection);
+
+            config.Sections.Add(ActionSheetActions.BuildUserActionsSection(message.Username, activity, view));
+
+            ActionSheetDialog.PendingConfig = config;
+            new ActionSheetDialog().Show(activity.SupportFragmentManager, "actionSheet");
+            e.Handled = true;
         }
 
         public ChatroomInnerRecyclerAdapter(List<Message> ti)
@@ -251,49 +287,14 @@ namespace Seeker
     }
 
 
-    public class GroupMessageInnerViewReceivedHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
+    public class GroupMessageInnerViewReceivedHolder : RecyclerView.ViewHolder
     {
-        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-        {
-            Logger.Debug("ShowSlskLinkContextMenu " + SimpleHelpers.ShowSlskLinkContextMenu);
-
-            if (menu.FindItem(SlskLinkMenuActivity.FromSlskLinkBrowseAtLocation) != null)
-            {
-                return;
-            }
-            else if (SimpleHelpers.ShowSlskLinkContextMenu)
-            {
-                SimpleHelpers.ShowSlskLinkContextMenu = false;
-                return;
-            }
-
-            if (v is GroupMessageInnerViewReceived)
-            {
-                ChatroomInnerFragment.MessagesLongClickData = (v as GroupMessageInnerViewReceived).DataItem;
-            }
-            else
-            {
-                Logger.Firebase("sender for GroupMessageInnerViewReceivedHolder.GroupMessageInnerViewReceived is " + v.GetType().Name);
-            }
-
-            menu.Add(0, 0, 0, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
-            menu.Add(1, 1, 1, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.ignore_user));
-            UiHelpers.AddAddRemoveUserMenuItem(menu, 2, 2, 2, ChatroomInnerFragment.MessagesLongClickData.Username);
-            var subMenu = menu.AddSubMenu(3, 3, 3, SeekerState.ActiveActivityRef.GetString(Resource.String.more_options));
-            subMenu.Add(4, 4, 4, Resource.String.search_user_files);
-            subMenu.Add(5, 5, 5, Resource.String.browse_user);
-            subMenu.Add(6, 6, 6, Resource.String.get_user_info);
-            subMenu.Add(7, 7, 7, Resource.String.msg_user);
-            UiHelpers.AddUserNoteMenuItem(subMenu, 8, 8, 8, ChatroomInnerFragment.MessagesLongClickData.Username);
-        }
-
         public GroupMessageInnerViewReceived messageInnerView;
 
         public GroupMessageInnerViewReceivedHolder(View view) : base(view)
         {
             messageInnerView = (GroupMessageInnerViewReceived)view;
             messageInnerView.ViewHolder = this;
-            view.SetOnCreateContextMenuListener(this);
         }
 
         public GroupMessageInnerViewReceived getUnderlyingView()

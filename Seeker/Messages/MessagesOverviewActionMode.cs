@@ -237,14 +237,15 @@ namespace Seeker.Messages
             adapter.NotifyItemChanged(position);
 
             int cnt = adapter.SelectedPositions.Count;
+            var actionMode = MessagesOverviewActionMode;
             if (cnt == 0)
             {
-                MessagesOverviewActionMode?.Finish();
+                actionMode?.Finish();
             }
-            else
+            else if (actionMode != null)
             {
-                MessagesOverviewActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                MessagesOverviewActionMode.Invalidate();
+                actionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
+                actionMode.Invalidate();
             }
         }
 
@@ -300,8 +301,14 @@ namespace Seeker.Messages
                 return;
             }
 
+            var act = this.Activity as MessagesActivity ?? MessagesActivity.MessagesActivityRef;
+            if (act == null)
+            {
+                Logger.Firebase("On Long Click Messages Activity is Null");
+                return;
+            }
             MessagesOverviewActionModeCallbackInstance = new MessagesOverviewActionModeCallback() { Adapter = adapter, Frag = this };
-            MessagesOverviewActionMode = (SeekerState.ActiveActivityRef as MessagesActivity).StartSupportActionMode(MessagesOverviewActionModeCallbackInstance);
+            MessagesOverviewActionMode = act.StartSupportActionMode(MessagesOverviewActionModeCallbackInstance);
             adapter.IsInBatchSelectMode = true;
             ToggleBatchSelect(position);
             adapter.NotifyDataSetChanged();

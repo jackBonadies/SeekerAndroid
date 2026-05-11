@@ -40,9 +40,6 @@ namespace Seeker
     [Activity(Label = "UserListActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
     public class UserListActivity : ThemeableActivity
     {
-        public static string PopUpMenuOwnerHack = string.Empty; //hack to get which listview item owns the popup menu (for on menu item click).
-
-        public static string IntentSearchRoom = "SearchRoom";
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
             MenuInflater.Inflate(Resource.Menu.user_list_menu, menu);
@@ -58,6 +55,10 @@ namespace Seeker
             }
             this.recyclerAdapter.NotifyItemChanged(i);
         }
+
+        public Action GetUpdateUserListItemActionExternal(string username) => GetUpdateUserListItemAction(username);
+
+        public void NotifyItemRemovedExternal(string username) => NotifyItemRemoved(username);
 
         private Action GetUpdateUserListItemAction(string username)
         {
@@ -79,52 +80,6 @@ namespace Seeker
             this.recyclerAdapter.NotifyItemRemoved(i);
         }
 
-
-        public override bool OnContextItemSelected(IMenuItem item)
-        {
-            if (item.ItemId != Resource.Id.removeUser && item.ItemId != Resource.Id.removeUserFromIgnored)
-            {
-                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null, null, GetUpdateUserListItemAction(PopUpMenuOwnerHack)))
-                {
-                    Logger.Debug("handled by commons");
-                    return true;
-                }
-            }
-            //TODO: handle common is below because actions like remove user also do an additional call.  it would be good to move that to an event.. OnResume to subscribe etc...
-            switch (item.ItemId)
-            {
-                case Resource.Id.browseUsersFiles:
-                    BrowseService.RequestFilesApi(PopUpMenuOwnerHack, null);
-                    return true;
-                case Resource.Id.searchUserFiles:
-                    SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
-                    SearchTabHelper.SearchTargetChosenUser = PopUpMenuOwnerHack;
-                    //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                    Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(MainActivity.GoToSearchExtra, true);
-                    this.StartActivity(intent);
-                    return true;
-                case Resource.Id.removeUser:
-                    UserListService.Instance.RemoveUser(PopUpMenuOwnerHack);
-                    this.NotifyItemRemoved(PopUpMenuOwnerHack);
-                    return true;
-                case Resource.Id.removeUserFromIgnored:
-                    SeekerApplication.RemoveFromIgnoreList(PopUpMenuOwnerHack);
-                    this.NotifyItemRemoved(PopUpMenuOwnerHack);
-                    return true;
-                case Resource.Id.messageUser:
-                    Intent intentMsg = new Intent(SeekerState.ActiveActivityRef, typeof(MessagesActivity));
-                    intentMsg.AddFlags(ActivityFlags.SingleTop);
-                    intentMsg.PutExtra(MessageController.FromUserName, PopUpMenuOwnerHack); //so we can go to this user..
-                    intentMsg.PutExtra(MessageController.ComingFromMessageTapped, true); //so we can go to this user..
-                    this.StartActivity(intentMsg);
-                    return true;
-                case Resource.Id.getUserInfo:
-                    RequestedUserInfoHelper.RequestUserInfoApi(PopUpMenuOwnerHack);
-                    return true;
-            }
-            return true; //idk
-        }
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {

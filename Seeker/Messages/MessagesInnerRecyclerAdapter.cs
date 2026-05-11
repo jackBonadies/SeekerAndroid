@@ -104,20 +104,7 @@ namespace Seeker.Messages
                 return;
             }
 
-            anchor.PerformHapticFeedback(FeedbackConstants.LongPress);
-
-            var ctx = new AndroidX.AppCompat.View.ContextThemeWrapper(anchor.Context, Resource.Style.AppPopupOverlay);
-            var popup = new AndroidX.AppCompat.Widget.PopupMenu(ctx, anchor, (int)gravity);
-            popup.Inflate(Resource.Menu.message_long_press_popup);
-            popup.SetForceShowIcon(true);
-            popup.MenuItemClick += (s, args) =>
-            {
-                if (args.Item.ItemId == Resource.Id.action_copy_text)
-                {
-                    CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, msg.MessageText);
-                }
-            };
-            popup.Show();
+            UiHelpers.ShowCopyMessageTextPopup(anchor, msg, gravity);
             e.Handled = true;
         }
 

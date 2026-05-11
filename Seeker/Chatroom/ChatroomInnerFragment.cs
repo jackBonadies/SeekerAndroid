@@ -292,38 +292,6 @@ namespace Seeker.Chatroom
             }
         }
 
-        //TODO: Why is this sometimes a popup anchored at (x,y) and otherwise a full screen context menu??
-        //It goes through LongPress sometimes but other times it just shows the context menu on its own...
-        public static Message MessagesLongClickData = null;
-        public override bool OnContextItemSelected(IMenuItem item)
-        {
-            //if(Helpers.ShowSlskLinkContextMenu)
-            //{
-            //    return base.OnContextItemSelected(item);
-            //}
-            //Logger.Debug(MessagesLongClickData.MessageText + MessagesLongClickData.Username);
-            string username = MessagesLongClickData.Username;
-            if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SeekerState.ActiveActivityRef, this.View))
-            {
-                Logger.Debug("Handled by commons");
-                return base.OnContextItemSelected(item);
-            }
-            switch (item.ItemId)
-            {
-                case 0: //"Copy Text"
-                    CommonHelpers.CopyTextToClipboard(this.Activity, MessagesLongClickData.MessageText);
-                    break;
-                case 1: //"Ignore User"
-                    SeekerApplication.AddToIgnoreListFeedback(this.Activity, username);
-                    break;
-                case 2://"Add User"
-                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, username, null);
-                    break;
-
-            }
-            return base.OnContextItemSelected(item);
-        }
-
         public void OnMessageRecieved(object sender, MessageReceivedArgs roomArgs)
         {
             if (OurRoomInfo != null && OurRoomInfo.Name == roomArgs.RoomName)
@@ -696,7 +664,6 @@ namespace Seeker.Chatroom
 
             recyclerViewInner.ScrollChange += RecyclerViewInner_ScrollChange;
 
-            this.RegisterForContextMenu(recyclerViewInner);
             if (messagesInternal.Count != 0)
             {
                 recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
@@ -1292,7 +1259,7 @@ namespace Seeker.Chatroom
                         SearchTabHelper.SearchTarget = SearchTarget.Room;
                         SearchTabHelper.SearchTargetChosenRoom = OurRoomInfo.Name;
                         Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(UserListActivity.IntentSearchRoom, 1);
+                        intent.PutExtra(MainActivity.IntentSearchRoomExtra, 1);
                         fragment.StartActivity(intent);
                         return true;
                     case Resource.Id.hide_show_ticker_action:
