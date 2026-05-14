@@ -195,6 +195,11 @@ namespace Seeker
                 Intent intent = new Intent(SeekerState.MainActivityRef, typeof(MessagesActivity));
                 SeekerState.MainActivityRef.StartActivityForResult(intent, 142);
             };
+            menuSetUpSharing.Click += (s, e) => {
+                Intent intent = new Intent(SeekerState.MainActivityRef, typeof(SettingsActivity));
+                intent.PutExtra(SettingsActivity.SCROLL_TO_SHARING_SECTION_STRING, SettingsActivity.SCROLL_TO_SHARING_SECTION);
+                SeekerState.MainActivityRef.StartActivityForResult(intent, 140);
+            };
             menuSettings.Click += Settings_Click;
             menuLogout.Click += LogoutClick;
         }
