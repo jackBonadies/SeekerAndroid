@@ -13,6 +13,7 @@ using Common;
 using Common.Messages;
 using Google.Android.Material.FloatingActionButton;
 using Seeker.Helpers;
+using Seeker.Helpers.AnchoredMenu;
 using Seeker.Services;
 using Soulseek;
 using System;
@@ -1157,15 +1158,48 @@ namespace Seeker.Chatroom
             public void OnCreateMenu(IMenu menu, MenuInflater menuInflater)
             {
                 menuInflater.Inflate(Resource.Menu.chatroom_inner_menu, menu);
+                var overflowItem = menu.FindItem(Resource.Id.action_chatroom_overflow);
+                var overflowView = overflowItem?.ActionView;
+                if (overflowView != null)
+                {
+                    overflowView.Click -= OnOverflowClick;
+                    overflowView.Click += OnOverflowClick;
+                }
             }
 
             public void OnPrepareMenu(IMenu menu)
             {
-                Logger.Debug("inner menu provider OnPrepareMenu");
-                if (OurRoomInfo == null)
+            }
+
+            public void OnMenuClosed(IMenu menu)
+            {
+            }
+
+            public bool OnMenuItemSelected(IMenuItem item)
+            {
+                return false;
+            }
+
+            private void OnOverflowClick(object sender, EventArgs e)
+            {
+                var anchor = sender as View;
+                if (anchor == null || OurRoomInfo == null)
                 {
                     return;
                 }
+                var config = BuildConfig();
+                if (config.Rows.Count == 0)
+                {
+                    return;
+                }
+                AnchoredMenuPopup.Show(anchor, config);
+            }
+
+            private AnchoredMenuConfig BuildConfig()
+            {
+                var ctx = fragment.RequireContext();
+                var activity = fragment.Activity as ChatroomActivity;
+                string roomName = OurRoomInfo.Name;
 
                 bool isPrivate;
                 bool isOwnedByUs;
@@ -1178,102 +1212,141 @@ namespace Seeker.Chatroom
                 }
                 else
                 {
-                    //we were killed and started back on the inner page; room list may not be available yet.
                     isPrivate = cachedPrivate;
                     isOwnedByUs = cachedOwned;
                     isOperator = cachedMod;
                 }
-                Logger.Debug("isPrivate: " + isPrivate + "isOwnedByUs: " + isOwnedByUs + "isOperator: " + isOperator);
+                bool joined = ChatroomController.HasRoomData(roomName);
 
-                //while the join is pending/failed, the only meaningful actions are auto-join, notifications, and search-room.
-                bool joined = ChatroomController.HasRoomData(OurRoomInfo.Name);
+                var config = new AnchoredMenuConfig();
 
-                menu.FindItem(Resource.Id.view_user_list_action)?.SetVisible(joined);
-                menu.FindItem(Resource.Id.show_all_tickers_action)?.SetVisible(joined);
-                menu.FindItem(Resource.Id.set_ticker_action)?.SetVisible(joined);
-                menu.FindItem(Resource.Id.invite_user_action)?.SetVisible(joined && (isOperator || isOwnedByUs));
-                menu.FindItem(Resource.Id.give_up_room_action)?.SetVisible(joined && isOwnedByUs);
-                menu.FindItem(Resource.Id.give_up_membership_action)?.SetVisible(joined && isPrivate && !isOwnedByUs);
-                menu.FindItem(Resource.Id.chatStyleOptions)?.SetVisible(joined);
-
-                menu.FindItem(Resource.Id.toggle_autojoin_action)?.SetChecked(fragment.IsAutoJoin());
-                menu.FindItem(Resource.Id.toggle_notify_room_action)?.SetChecked(fragment.IsNotifyOn());
-
-                if (ChatroomActivity.ShowTickerView)
+                if (joined)
                 {
-                    menu.FindItem(Resource.Id.hide_show_ticker_action)?.SetTitle(Resource.String.HideTickerView);
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.all_users_group_30dp,
+                        Label = ctx.GetString(Resource.String.view_users),
+                        OnClick = () => fragment.ShowUserListDialog(OurRoomInfo, ChatroomController.IsPrivate(roomName))
+                    });
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.pinboard_all_tickers_30dp,
+                        Label = ctx.GetString(Resource.String.view_all_tickers),
+                        OnClick = () => fragment.ShowAllTickersDialog(roomName)
+                    });
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.keep_set_ticker_30dp,
+                        Label = ctx.GetString(Resource.String.setticker),
+                        OnClick = () => fragment.ShowSetTickerDialog(roomName)
+                    });
                 }
-                else
-                {
-                    menu.FindItem(Resource.Id.hide_show_ticker_action)?.SetTitle(Resource.String.ShowTickerView);
-                }
 
-                if (ChatroomActivity.ShowStatusesView)
+                config.Rows.Add(new AnchoredMenuRow
                 {
-                    menu.FindItem(Resource.Id.hide_show_user_status_action)?.SetTitle(Resource.String.HideStatusView);
-                }
-                else
+                    Kind = AnchoredMenuRowKind.Checkable,
+                    IconResId = Resource.Drawable.autorenew_autojoin_30dp,
+                    Label = ctx.GetString(Resource.String.auto_join),
+                    GetChecked = () => fragment.IsAutoJoin(),
+                    OnChecked = _ => ChatroomController.ToggleAutoJoin(roomName, true, activity)
+                });
+                config.Rows.Add(new AnchoredMenuRow
                 {
-                    menu.FindItem(Resource.Id.hide_show_user_status_action)?.SetTitle(Resource.String.ShowStatusView);
-                }
-            }
+                    Kind = AnchoredMenuRowKind.Checkable,
+                    IconResId = Resource.Drawable.notifications_outline_30dp,
+                    Label = ctx.GetString(Resource.String.notification),
+                    GetChecked = () => fragment.IsNotifyOn(),
+                    OnChecked = _ => ChatroomController.ToggleNotifyRoom(roomName, true, activity)
+                });
 
-            public void OnMenuClosed(IMenu menu)
-            {
-            }
-
-            public bool OnMenuItemSelected(IMenuItem item)
-            {
-                var activity = fragment.Activity as ChatroomActivity;
-                if (activity == null || OurRoomInfo == null)
+                config.Rows.Add(new AnchoredMenuRow
                 {
-                    return false;
-                }
-                switch (item.ItemId)
-                {
-                    case Resource.Id.toggle_autojoin_action:
-                        ChatroomController.ToggleAutoJoin(OurRoomInfo.Name, true, activity);
-                        return true;
-                    case Resource.Id.toggle_notify_room_action:
-                        ChatroomController.ToggleNotifyRoom(OurRoomInfo.Name, true, activity);
-                        return true;
-                    case Resource.Id.view_user_list_action:
-                        fragment.ShowUserListDialog(OurRoomInfo, ChatroomController.IsPrivate(OurRoomInfo.Name));
-                        return true;
-                    case Resource.Id.show_all_tickers_action:
-                        fragment.ShowAllTickersDialog(OurRoomInfo.Name);
-                        return true;
-                    case Resource.Id.set_ticker_action:
-                        fragment.ShowSetTickerDialog(OurRoomInfo.Name);
-                        return true;
-                    case Resource.Id.invite_user_action:
-                        fragment.ShowInviteUserDialog(OurRoomInfo.Name);
-                        return true;
-                    case Resource.Id.give_up_room_action:
-                        ChatroomController.DropMembershipOrOwnershipApi(OurRoomInfo.Name, true, true);
-                        return true;
-                    case Resource.Id.give_up_membership_action:
-                        ChatroomController.DropMembershipOrOwnershipApi(OurRoomInfo.Name, false, true);
-                        return true;
-                    case Resource.Id.search_room_action:
+                    IconResId = Resource.Drawable.search_small_30dp,
+                    Label = ctx.GetString(Resource.String.search_room),
+                    OnClick = () =>
+                    {
                         SearchTabHelper.SearchTarget = SearchTarget.Room;
-                        SearchTabHelper.SearchTargetChosenRoom = OurRoomInfo.Name;
+                        SearchTabHelper.SearchTargetChosenRoom = roomName;
                         Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                         intent.PutExtra(MainActivity.IntentSearchRoomExtra, 1);
                         fragment.StartActivity(intent);
-                        return true;
-                    case Resource.Id.hide_show_ticker_action:
+                    }
+                });
+
+                if (joined && (isOperator || isOwnedByUs))
+                {
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.user_add,
+                        Label = ctx.GetString(Resource.String.inviteuser),
+                        OnClick = () => fragment.ShowInviteUserDialog(roomName)
+                    });
+                }
+
+                if (joined && isOwnedByUs)
+                {
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.logout_material,
+                        Label = ctx.GetString(Resource.String.give_up_room),
+                        Destructive = true,
+                        OnClick = () => ChatroomController.DropMembershipOrOwnershipApi(roomName, true, true)
+                    });
+                }
+
+                if (joined && isPrivate && !isOwnedByUs)
+                {
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.logout_material,
+                        Label = ctx.GetString(Resource.String.give_up_membership),
+                        Destructive = true,
+                        OnClick = () => ChatroomController.DropMembershipOrOwnershipApi(roomName, false, true)
+                    });
+                }
+
+                if (joined)
+                {
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        Kind = AnchoredMenuRowKind.Submenu,
+                        Label = ctx.GetString(Resource.String.Options),
+                        SubMenuTitle = ctx.GetString(Resource.String.Options),
+                        SubMenu = BuildStyleSubMenu(ctx),
+                    });
+                }
+
+                return config;
+            }
+
+            private AnchoredMenuConfig BuildStyleSubMenu(Context ctx)
+            {
+                var sub = new AnchoredMenuConfig();
+                sub.Rows.Add(new AnchoredMenuRow
+                {
+                    Label = ChatroomActivity.ShowTickerView
+                        ? ctx.GetString(Resource.String.HideTickerView)
+                        : ctx.GetString(Resource.String.ShowTickerView),
+                    OnClick = () =>
+                    {
                         ChatroomActivity.ShowTickerView = !ChatroomActivity.ShowTickerView;
                         fragment.SetTickerVisibility();
                         PreferencesManager.SaveShowTickerView();
-                        return true;
-                    case Resource.Id.hide_show_user_status_action:
+                    }
+                });
+                sub.Rows.Add(new AnchoredMenuRow
+                {
+                    Label = ChatroomActivity.ShowStatusesView
+                        ? ctx.GetString(Resource.String.HideStatusView)
+                        : ctx.GetString(Resource.String.ShowStatusView),
+                    OnClick = () =>
+                    {
                         ChatroomActivity.ShowStatusesView = !ChatroomActivity.ShowStatusesView;
                         fragment.SetActivityStatusesView();
                         PreferencesManager.SaveShowStatusesView();
-                        return true;
-                }
-                return false;
+                    }
+                });
+                return sub;
             }
         }
     }

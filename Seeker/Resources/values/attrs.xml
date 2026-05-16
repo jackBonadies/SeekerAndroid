@@ -71,4 +71,6 @@
     <attr name="expandableModernSeparatorColor" format="color" />
 
     <attr name="searchHeaderBackground" format="color" />
+
+    <attr name="destructiveColor" format="color" />
 </resources>

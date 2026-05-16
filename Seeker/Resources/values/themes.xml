@@ -24,6 +24,8 @@
         <item name="normalTextColor">#000000</item>
         <item name="normalTextColorNonTinted">#000000</item>
 
+        <item name="destructiveColor">#B3261E</item>
+
 		<item name="chat_left">#a12e2e</item>
         <item name="chat_join">#2e8a5f</item>
         <!--<item name="dialogBackground">#52000000</item>-->
@@ -162,6 +164,8 @@
 		<item name="colorOnBackground">?attr/normalTextColor</item>
         <item name="mainTextColor">#bcc1f7</item>
         <item name="checkBoxColor">#4f58c4</item>
+
+        <item name="destructiveColor">#F2B8B5</item>
 
 		<item name="chat_left">#F7636A</item>
         <item name="chat_join">#89B38F</item>
