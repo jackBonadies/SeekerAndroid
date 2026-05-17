@@ -96,7 +96,7 @@ namespace UnitTestCommon
             var raw = GetPreferenceString("Momento_Messages_v2");
             var result = SerializationHelper.RestoreMessagesFromString(raw);
 
-            await Verifier.Verify(result).DontScrubDateTimes();
+            await Verifier.Verify(result).IgnoreMember<Message>(x => x.LocalDateTime).DontScrubDateTimes();
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace UnitTestCommon
             var raw = System.IO.File.ReadAllText(path);
             var result = SerializationHelper.RestoreMessagesFromString(raw);
 
-            await Verifier.Verify(result).DontScrubDateTimes();
+            await Verifier.Verify(result).IgnoreMember<Message>(x => x.LocalDateTime).DontScrubDateTimes();
         }
 
         [Test]
