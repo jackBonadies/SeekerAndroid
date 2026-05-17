@@ -30,24 +30,6 @@ namespace Seeker.Helpers.ActionSheet
                 AppendRoomAdminRows(section, username, options.RoomAdmin);
             }
 
-            bool ignored = SeekerApplication.IsUserInIgnoreList(username);
-            string ignoreLabel = ctx.GetString(ignored ? Resource.String.remove_from_ignored : Resource.String.ignore_user);
-            section.Rows.Add(new ActionSheetRow
-            {
-                IconResId = Resource.Drawable.account_cancel_outline,
-                Label = ignoreLabel,
-                OnClick = () =>
-                {
-                    if (ignored && options.OverrideRemoveFromIgnored != null)
-                    {
-                        options.OverrideRemoveFromIgnored();
-                        return;
-                    }
-                    UiHelpers.HandleCommonContextMenuActions(ignoreLabel, username, ctx, snackView,
-                        options.OnNoteChanged, options.OnAddRemoved, options.OnIgnoreChanged, options.OnOnlineAlertChanged);
-                }
-            });
-
             bool added = UserListService.Instance.ContainsUser(username);
             string friendLabel = ctx.GetString(added ? Resource.String.remove_user : Resource.String.add_user);
             section.Rows.Add(new ActionSheetRow
@@ -86,6 +68,25 @@ namespace Seeker.Helpers.ActionSheet
             {
                 section.Rows.Add(MakeCommonRow(Resource.Drawable.star_wishlist, Resource.String.give_privileges, username, ctx, snackView, options));
             }
+
+            bool ignored = SeekerApplication.IsUserInIgnoreList(username);
+            string ignoreLabel = ctx.GetString(ignored ? Resource.String.remove_from_ignored : Resource.String.ignore_user);
+            section.Rows.Add(new ActionSheetRow
+            {
+                Destructive = !ignored,
+                IconResId = Resource.Drawable.account_cancel_outline,
+                Label = ignoreLabel,
+                OnClick = () =>
+                {
+                    if (ignored && options.OverrideRemoveFromIgnored != null)
+                    {
+                        options.OverrideRemoveFromIgnored();
+                        return;
+                    }
+                    UiHelpers.HandleCommonContextMenuActions(ignoreLabel, username, ctx, snackView,
+                        options.OnNoteChanged, options.OnAddRemoved, options.OnIgnoreChanged, options.OnOnlineAlertChanged);
+                }
+            });
 
             return section;
         }

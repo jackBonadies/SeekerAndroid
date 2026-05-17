@@ -150,21 +150,6 @@ namespace Seeker.Helpers.AnchoredMenu
             adapter.SetItems(items);
         }
 
-        private static int ResolveThemeColor(Context ctx, int attrResId)
-        {
-            var tv = new Android.Util.TypedValue();
-            ctx.Theme.ResolveAttribute(attrResId, tv, true);
-            if (tv.Type >= Android.Util.DataType.FirstColorInt && tv.Type <= Android.Util.DataType.LastColorInt)
-            {
-                return tv.Data;
-            }
-            if (tv.ResourceId != 0)
-            {
-                return AndroidX.Core.Content.ContextCompat.GetColor(ctx, tv.ResourceId);
-            }
-            return tv.Data;
-        }
-
         private static List<Item> BuildItems(AnchoredMenuConfig config, string backHeaderTitle)
         {
             var list = new List<Item>();
@@ -283,7 +268,7 @@ namespace Seeker.Helpers.AnchoredMenu
                 // ripple programmatically. Color = normalTextColor at 20% alpha,
                 // so light themes get a dim-dark ripple and dark themes get a
                 // dim-light ripple.
-                int textColor = ResolveThemeColor(itemView.Context, Resource.Attribute.normalTextColor);
+                int textColor = UiHelpers.GetColorFromAttribute(itemView.Context, Resource.Attribute.normalTextColor);
                 int rippleArgb = (textColor & 0x00FFFFFF) | (0x33 << 24);
                 var rippleColor = Android.Content.Res.ColorStateList.ValueOf(new Android.Graphics.Color(rippleArgb));
                 var mask = new Android.Graphics.Drawables.ColorDrawable(Android.Graphics.Color.White);
@@ -326,7 +311,7 @@ namespace Seeker.Helpers.AnchoredMenu
                 int attrResId = row.Destructive
                     ? Resource.Attribute.destructiveColor
                     : Resource.Attribute.normalTextColor;
-                var color = new Android.Graphics.Color(ResolveThemeColor(ItemView.Context, attrResId));
+                var color = new Android.Graphics.Color(UiHelpers.GetColorFromAttribute(ItemView.Context, attrResId));
                 label.SetTextColor(color);
                 icon.SetColorFilter(color);
             }

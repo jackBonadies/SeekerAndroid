@@ -16,6 +16,7 @@ namespace Seeker.Helpers.ActionSheet
 
     public class ActionSheetRow
     {
+        public bool Destructive;
         public int IconResId;
         public string Label;
         public Action OnClick;

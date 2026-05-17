@@ -172,6 +172,12 @@ namespace Seeker.Helpers.ActionSheet
                 current = row;
                 icon.SetImageResource(row.IconResId);
                 label.Text = row.Label;
+                int attrResId = row.Destructive
+                    ? Resource.Attribute.destructiveColor
+                    : Resource.Attribute.normalTextColor;
+                var color = new Android.Graphics.Color(UiHelpers.GetColorFromAttribute(ItemView.Context, attrResId));
+                label.SetTextColor(color);
+                icon.SetColorFilter(color);
             }
         }
     }
