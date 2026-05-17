@@ -1154,6 +1154,16 @@ namespace Seeker.Chatroom
                 }
             }
 
+#pragma warning disable S1186 // Required override - omitting causes java.lang.AbstractMethodError at runtime
+            public void OnPrepareMenu(IMenu menu)
+            {
+            }
+
+            public void OnMenuClosed(IMenu menu)
+            {
+            }
+#pragma warning restore S1186
+
             public bool OnMenuItemSelected(IMenuItem item)
             {
                 return false;

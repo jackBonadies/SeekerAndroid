@@ -150,6 +150,12 @@ namespace Seeker.Messages
                 UiHelpers.SetIgnoreAddExclusive(menu, fragment.Username);
             }
 
+#pragma warning disable S1186 // Required override - omitting causes java.lang.AbstractMethodError at runtime
+            public void OnMenuClosed(IMenu menu)
+            {
+            }
+#pragma warning restore S1186
+
             public bool OnMenuItemSelected(IMenuItem item)
             {
                 var activity = fragment.Activity;

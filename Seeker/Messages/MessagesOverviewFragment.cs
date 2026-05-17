@@ -214,6 +214,12 @@ namespace Seeker.Messages
                 menu.FindItem(Resource.Id.mark_all_as_read_action)?.SetVisible(MessageController.GetTotalUnreadCount() > 0);
             }
 
+#pragma warning disable S1186 // Required override - omitting causes java.lang.AbstractMethodError at runtime
+            public void OnMenuClosed(IMenu menu)
+            {
+            }
+#pragma warning restore S1186
+
             public bool OnMenuItemSelected(IMenuItem item)
             {
                 var activity = fragment.Activity as MessagesActivity;
