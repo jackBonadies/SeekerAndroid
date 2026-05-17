@@ -103,7 +103,7 @@ namespace Seeker
             return inflater.Inflate(Resource.Layout.downloaddialog, container); //container is parent
         }
 
-        private class OnRefreshListenerGetFolder : Java.Lang.Object, AndroidX.SwipeRefreshLayout.Widget.SwipeRefreshLayout.IOnRefreshListener
+        private sealed class OnRefreshListenerGetFolder : Java.Lang.Object, AndroidX.SwipeRefreshLayout.Widget.SwipeRefreshLayout.IOnRefreshListener
         {
             private DownloadDialog diagParent;
 
@@ -118,7 +118,7 @@ namespace Seeker
             }
         }
 
-        private class SheetStateCallback : BottomSheetBehavior.BottomSheetCallback
+        private sealed class SheetStateCallback : BottomSheetBehavior.BottomSheetCallback
         {
             private readonly View contentView;
             private readonly float density;

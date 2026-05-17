@@ -10,7 +10,7 @@ namespace Seeker
 {
     public partial class MainActivity
     {
-        private class ListenerKeyboard : Java.Lang.Object, ViewTreeObserver.IOnGlobalLayoutListener
+        private sealed class ListenerKeyboard : Java.Lang.Object, ViewTreeObserver.IOnGlobalLayoutListener
         {   //oh so it just needs the Java.Lang.Object and then you can make it like a Java Anon Class where you only implement that one thing that you truly need
             //Since C# doesn't support anonymous classes
 
@@ -42,7 +42,7 @@ namespace Seeker
             }
         }
 
-        private class BottomNavigationViewAnimationListener : Java.Lang.Object, Android.Animation.Animator.IAnimatorListener
+        private sealed class BottomNavigationViewAnimationListener : Java.Lang.Object, Android.Animation.Animator.IAnimatorListener
         {
             public void OnAnimationCancel(Animator animation)
             {

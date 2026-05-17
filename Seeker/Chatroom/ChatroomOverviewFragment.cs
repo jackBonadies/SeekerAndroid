@@ -185,7 +185,7 @@ namespace Seeker.Chatroom
             base.OnAttach(activity);
         }
 
-        private class OverviewMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
+        private sealed class OverviewMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
         {
             private readonly ChatroomOverviewFragment fragment;
 
@@ -197,14 +197,6 @@ namespace Seeker.Chatroom
             public void OnCreateMenu(IMenu menu, MenuInflater menuInflater)
             {
                 menuInflater.Inflate(Resource.Menu.chatroom_overview_list_menu, menu);
-            }
-
-            public void OnPrepareMenu(IMenu menu)
-            {
-            }
-
-            public void OnMenuClosed(IMenu menu)
-            {
             }
 
             public bool OnMenuItemSelected(IMenuItem item)

@@ -76,14 +76,14 @@ namespace Seeker.Helpers.ActionSheet
 
         private enum ItemType { Header, Row, Divider }
 
-        private class Item
+        private sealed class Item
         {
             public ItemType Type;
             public string HeaderText;
             public ActionSheetRow Row;
         }
 
-        private class Adapter : RecyclerView.Adapter
+        private sealed class Adapter : RecyclerView.Adapter
         {
             private readonly List<Item> items;
             private readonly Action<ActionSheetRow> onClick;
@@ -130,7 +130,7 @@ namespace Seeker.Helpers.ActionSheet
             }
         }
 
-        private class HeaderVh : RecyclerView.ViewHolder
+        private sealed class HeaderVh : RecyclerView.ViewHolder
         {
             private readonly TextView label;
             public HeaderVh(View view) : base(view)
@@ -143,12 +143,12 @@ namespace Seeker.Helpers.ActionSheet
             }
         }
 
-        private class DividerVh : RecyclerView.ViewHolder
+        private sealed class DividerVh : RecyclerView.ViewHolder
         {
             public DividerVh(View view) : base(view) { }
         }
 
-        private class RowVh : RecyclerView.ViewHolder
+        private sealed class RowVh : RecyclerView.ViewHolder
         {
             private readonly ImageView icon;
             private readonly TextView label;

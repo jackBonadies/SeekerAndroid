@@ -55,7 +55,7 @@ namespace Seeker.Chatroom
             return root;
         }
 
-        private class TickerRowAdapter : RecyclerView.Adapter
+        private sealed class TickerRowAdapter : RecyclerView.Adapter
         {
             private readonly List<RoomTicker> tickers;
 
@@ -82,7 +82,7 @@ namespace Seeker.Chatroom
 
         }
 
-        private class TickerRowHolder : RecyclerView.ViewHolder
+        private sealed class TickerRowHolder : RecyclerView.ViewHolder
         {
             public TextView Message;
             public View Separator;

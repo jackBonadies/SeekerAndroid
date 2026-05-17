@@ -130,7 +130,7 @@ namespace Seeker.Messages
             }
         }
 
-        private class InnerMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
+        private sealed class InnerMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
         {
             private readonly MessagesInnerFragment fragment;
 
@@ -148,10 +148,6 @@ namespace Seeker.Messages
             {
                 UiHelpers.SetMenuTitles(menu, fragment.Username);
                 UiHelpers.SetIgnoreAddExclusive(menu, fragment.Username);
-            }
-
-            public void OnMenuClosed(IMenu menu)
-            {
             }
 
             public bool OnMenuItemSelected(IMenuItem item)

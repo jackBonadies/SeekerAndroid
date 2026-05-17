@@ -10,7 +10,7 @@ namespace Seeker
 {
     public partial class SearchFragment
     {
-        private class BottomSheetDialogFragmentMenu : BottomSheetDialogFragment
+        private sealed class BottomSheetDialogFragmentMenu : BottomSheetDialogFragment
         {
             private MaterialButtonToggleGroup styleToggleGroup;
             private MaterialButtonToggleGroup bitrateToggleGroup;
@@ -113,7 +113,7 @@ namespace Seeker
             // singleSelection + selectionRequired means we get one "checked=false" on the
             // outgoing button before the "checked=true" on the incoming one. Recompute on
             // the checked-true edge so we don't react to a transient empty state.
-            private class ToggleListener : Java.Lang.Object, MaterialButtonToggleGroup.IOnButtonCheckedListener
+            private sealed class ToggleListener : Java.Lang.Object, MaterialButtonToggleGroup.IOnButtonCheckedListener
             {
                 private readonly System.Action onChanged;
                 public ToggleListener(System.Action onChanged) { this.onChanged = onChanged; }

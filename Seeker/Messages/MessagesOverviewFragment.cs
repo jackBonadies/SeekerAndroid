@@ -194,7 +194,7 @@ namespace Seeker.Messages
             base.OnDetach();
         }
 
-        private class OverviewMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
+        private sealed class OverviewMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
         {
             private readonly MessagesOverviewFragment fragment;
 
@@ -212,10 +212,6 @@ namespace Seeker.Messages
             {
                 menu.FindItem(Resource.Id.action_delete_all_messages)?.SetVisible(!MessageController.Messages.IsEmpty);
                 menu.FindItem(Resource.Id.mark_all_as_read_action)?.SetVisible(MessageController.GetTotalUnreadCount() > 0);
-            }
-
-            public void OnMenuClosed(IMenu menu)
-            {
             }
 
             public bool OnMenuItemSelected(IMenuItem item)

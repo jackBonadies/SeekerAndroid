@@ -909,7 +909,7 @@ namespace Seeker
             builder.Show();
         }
 
-        private class IconMenuAdapter : ArrayAdapter<string>
+        private sealed class IconMenuAdapter : ArrayAdapter<string>
         {
             private readonly int[] iconRes;
             private readonly int tintColor;

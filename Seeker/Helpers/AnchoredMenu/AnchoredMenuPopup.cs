@@ -169,19 +169,19 @@ namespace Seeker.Helpers.AnchoredMenu
 
         private enum ItemType { Row, BackHeader }
 
-        private class Item
+        private sealed class Item
         {
             public ItemType Type;
             public AnchoredMenuRow Row;
             public string HeaderText;
         }
 
-        private class Frame
+        private sealed class Frame
         {
             public List<Item> Items;
         }
 
-        private class Adapter : RecyclerView.Adapter
+        private sealed class Adapter : RecyclerView.Adapter
         {
             private const int ViewTypeBack = 0;
             private const int ViewTypePlain = 1;
@@ -284,7 +284,7 @@ namespace Seeker.Helpers.AnchoredMenu
             }
         }
 
-        private class PlainVh : RowVh
+        private sealed class PlainVh : RowVh
         {
             private readonly ImageView icon;
             private readonly TextView label;
@@ -317,7 +317,7 @@ namespace Seeker.Helpers.AnchoredMenu
             }
         }
 
-        private class CheckableVh : RowVh
+        private sealed class CheckableVh : RowVh
         {
             private readonly ImageView icon;
             private readonly TextView label;
@@ -346,7 +346,7 @@ namespace Seeker.Helpers.AnchoredMenu
             }
         }
 
-        private class SubmenuVh : RowVh
+        private sealed class SubmenuVh : RowVh
         {
             private readonly ImageView icon;
             private readonly TextView label;
@@ -372,7 +372,7 @@ namespace Seeker.Helpers.AnchoredMenu
             }
         }
 
-        private class BackVh : RowVh
+        private sealed class BackVh : RowVh
         {
             private readonly TextView label;
             public BackVh(View v, Action<Item> onClick) : base(v, onClick)

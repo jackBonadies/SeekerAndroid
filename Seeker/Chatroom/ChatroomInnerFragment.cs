@@ -1133,7 +1133,7 @@ namespace Seeker.Chatroom
             }
         }
 
-        private class InnerMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
+        private sealed class InnerMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
         {
             private readonly ChatroomInnerFragment fragment;
 
@@ -1152,14 +1152,6 @@ namespace Seeker.Chatroom
                     overflowView.Click -= OnOverflowClick;
                     overflowView.Click += OnOverflowClick;
                 }
-            }
-
-            public void OnPrepareMenu(IMenu menu)
-            {
-            }
-
-            public void OnMenuClosed(IMenu menu)
-            {
             }
 
             public bool OnMenuItemSelected(IMenuItem item)
