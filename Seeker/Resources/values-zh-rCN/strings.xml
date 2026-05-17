@@ -124,7 +124,6 @@ Directory Count: {5}\"
 
     <string name="enter_listening_port">Enter Port to Listen On</string>
 
-    <string name="create_chatroom_name">Room Name to Create</string>
     <string name="create_chatroom_private">Make Private</string>
 
     <string name="search_here">Search Here</string>

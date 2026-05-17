@@ -115,7 +115,6 @@
 
     <string name="enter_listening_port">リスンポートを入力</string>
 
-    <string name="create_chatroom_name">作成するルーム名</string>
     <string name="create_chatroom_private">非公開にする</string>
 
     <string name="search_here">ここで検索</string>

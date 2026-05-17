@@ -117,7 +117,6 @@ Könyvtárak száma: {5}\"
 
     <string name="enter_listening_port">Adja meg a figyelőportot</string>
 
-    <string name="create_chatroom_name">A létrehozandó szoba neve</string>
     <string name="create_chatroom_private">Legyen privát</string>
 
     <string name="search_here">Keresés itt</string>

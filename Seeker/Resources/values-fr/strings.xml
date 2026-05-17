@@ -124,7 +124,6 @@ Nombre de dossiers : {5}
 
     <string name="enter_listening_port">Saisissez le port à écouter</string>
 
-    <string name="create_chatroom_name">Nom du salon à créer</string>
     <string name="create_chatroom_private">Rendre privé</string>
 
     <string name="search_here">Rechercher ici</string>

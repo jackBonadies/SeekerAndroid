@@ -124,7 +124,6 @@ Directory Count: {5}\"
 
     <string name="enter_listening_port">Digitar porta para escutar</string>
 
-    <string name="create_chatroom_name">Nome da sala a ser criada</string>
     <string name="create_chatroom_private">Tornar privada</string>
 
     <string name="search_here">Pesquisar aqui</string>

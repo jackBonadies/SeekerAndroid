@@ -124,7 +124,6 @@ Directorio: {5}
 
     <string name="enter_listening_port">Introduzca el puerto en el que escuchar</string>
 
-    <string name="create_chatroom_name">Nombre de la sala a crear</string>
     <string name="create_chatroom_private">Hacerlo privado</string>
 
     <string name="search_here">Buscar aquí</string>

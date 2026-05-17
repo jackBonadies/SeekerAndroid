@@ -125,7 +125,6 @@
 
     <string name="enter_listening_port">Введите порт для прослушивания</string>
 
-    <string name="create_chatroom_name">Имя комнаты</string>
     <string name="create_chatroom_private">Сделать приватной</string>
 
     <string name="search_here">Поиск</string>
