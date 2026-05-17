@@ -268,6 +268,12 @@ namespace Seeker.Messages
 
         public void OnMessageReceived(object sender, Message msg)
         {
+            if (msg == null)
+            {
+                Logger.Firebase("MessagesInnerFragment.OnMessageReceived: msg is null. Username=" + (Username ?? "<null>") + " sender=" + (sender?.GetType().FullName ?? "<null>"));
+                return;
+            }
+
             if (msg.Username != Username)
             {
                 return;
@@ -275,10 +281,24 @@ namespace Seeker.Messages
 
             this.Activity?.RunOnUiThread(new Action(() =>
             {
-                RebuildMessagesAdapter();
-                if (IsResumed)
+                try
                 {
-                    MessageController.MarkAsRead(Username);
+                    RebuildMessagesAdapter();
+                    if (IsResumed)
+                    {
+                        MessageController.MarkAsRead(Username);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Firebase("MessagesInnerFragment.OnMessageReceived UI lambda failed: "
+                        + ex.GetType().Name + ": " + ex.Message
+                        + " Username=" + (Username ?? "<null>")
+                        + " msgUsername=" + (msg.Username ?? "<null>")
+                        + " recyclerViewInner==null:" + (recyclerViewInner == null)
+                        + " rootView==null:" + (rootView == null)
+                        + " activity==null:" + (this.Activity == null)
+                        + " stack=" + ex.StackTrace);
                 }
             }));
         }

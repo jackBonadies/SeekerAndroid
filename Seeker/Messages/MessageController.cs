@@ -214,7 +214,21 @@ namespace Seeker.Messages
 
         public static void RaiseMessageReceived(Message msg) //normally this is if it is a message from us...
         {
-            MessageReceived?.Invoke(null, msg);
+            if (msg == null)
+            {
+                Logger.Firebase("RaiseMessageReceived called with null msg. stack=" + System.Environment.StackTrace);
+                return;
+            }
+            try
+            {
+                MessageReceived?.Invoke(null, msg);
+            }
+            catch (Exception ex)
+            {
+                Logger.Firebase("RaiseMessageReceived invoke failed: " + ex.GetType().Name + ": " + ex.Message
+                    + " msgUsername=" + (msg.Username ?? "<null>")
+                    + " stack=" + ex.StackTrace);
+            }
         }
 
         public static void LogIfFaulted(Task t)
