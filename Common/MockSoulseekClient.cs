@@ -23,7 +23,7 @@ namespace Seeker
         public int SimulatedDelayMs { get; set; } = 200;
 
         public int BrowseUploadIntervalSec { get; set; } = 180;
-        public int PrivateMessageIntervalSec { get; set; } = 60;
+        public int PrivateMessageIntervalSec { get; set; } = 20;
         public int ExcludedPhrasesIntervalSec { get; set; } = 60;
         public int UserStatusIntervalSec { get; set; } = 10;
         public int RoomActivityIntervalSec { get; set; } = 8;
@@ -154,7 +154,7 @@ namespace Seeker
                             }
                         }
                         _mockRoomUserPresence[newUser] = UserPresence.Online;
-                        var userData = new UserData(newUser, UserPresence.Online, 0, 0, 0, 0, string.Empty);
+                        var userData = new UserData(newUser, UserPresence.Online, 0, 0, 0, 0, GenerateMockCountryCode());
                         RaiseRoomJoined(new RoomJoinedEventArgs(room, newUser, userData));
                     }
                     else if (eventRoll < 70)
@@ -632,6 +632,12 @@ namespace Seeker
 
         private static readonly Random _random = new Random();
         private static readonly string[] _mockUsernames = { "musiclover42", "vinyl_rips", "flac_hoarder", "mp3collector", "audiophile99", "shareking", "basshead", "djmix", "recorddigger", "soundwave", "testUser", "test_user2_long_username_12345" };
+        private static readonly string[] _mockCountryCodes = { "US", "GB", "DE", "FR", "JP", "BR", "CA", "AU", "SE", "NL", "IT", "ES", "PL", "RU", "MX", "KR", "IN", "AR", "NO", "FI" };
+
+        private static string GenerateMockCountryCode()
+        {
+            return _mockCountryCodes[_random.Next(_mockCountryCodes.Length)];
+        }
 
         private static readonly string[] _mockAdjectives =
         {
@@ -1734,7 +1740,7 @@ namespace Seeker
             var userDataList = usernames
                 .Select(u => new UserData(u, UserPresence.Online,
                     _random.Next(0, 5_000_000), _random.Next(0, 100_000),
-                    _random.Next(0, 100_000), _random.Next(0, 10_000), string.Empty))
+                    _random.Next(0, 100_000), _random.Next(0, 10_000), GenerateMockCountryCode()))
                 .ToList();
 
             string? owner = _random.Next(0, 2) == 0
@@ -1829,7 +1835,7 @@ namespace Seeker
         {
             if (GetRoomListAsyncHandler != null) return await GetRoomListAsyncHandler(cancellationToken);
 
-            await Task.Delay(20_000).ConfigureAwait(false);
+            await Task.Delay(200).ConfigureAwait(false);
 
             var roomList = new RoomList(
                 publicList:            GenerateMockRooms(20, stableCount: 8, suffix: "_public"),
@@ -1845,7 +1851,7 @@ namespace Seeker
         {
             if (WatchUserAsyncHandler != null) return await WatchUserAsyncHandler(username, cancellationToken);
             await Task.Delay(SimulatedDelayMs / 2).ConfigureAwait(false);
-            return new UserData(username, UserPresence.Online, 0, 0, 0, 0, string.Empty);
+            return new UserData(username, UserPresence.Online, 0, 0, 0, 0, GenerateMockCountryCode());
         }
 
         public async Task UnwatchUserAsync(string username, CancellationToken? cancellationToken = null)
