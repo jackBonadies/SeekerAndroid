@@ -61,7 +61,7 @@ namespace Seeker.Helpers.ActionSheet
             {
                 bool alertSet = SeekerState.UserOnlineAlerts.ContainsKey(username);
                 int alertStringId = alertSet ? Resource.String.remove_online_alert : Resource.String.set_online_alert;
-                section.Rows.Add(MakeCommonRow(Resource.Drawable.bell, alertStringId, username, ctx, snackView, options));
+                section.Rows.Add(MakeCommonRow(Resource.Drawable.notifications_outline_30dp, alertStringId, username, ctx, snackView, options));
             }
 
             if (options.IncludeGivePrivileges && PrivilegesManager.Instance.GetRemainingDays() >= 1)
