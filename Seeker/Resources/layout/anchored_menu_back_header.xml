@@ -5,27 +5,19 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:minHeight="48dp"
+    android:minHeight="30dp"
     android:paddingStart="16dp"
     android:paddingEnd="20dp"
-    android:clickable="true"
-    android:focusable="true">
-
-    <ImageView
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-		android:layout_marginHorizontal="2dp"
-        android:src="@drawable/chevron_left"
-        android:tint="?attr/normalTextColor" />
+    android:clickable="false"
+    android:focusable="false">
 
     <TextView
         android:id="@+id/anchoredMenuBackLabel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginStart="20dp"
-        android:alpha="0.8"
-        android:textSize="16sp"
+        android:layout_marginStart="0dp"
+        android:textSize="14sp"
         android:textStyle="bold"
-        android:textColor="?attr/normalTextColor" />
+        android:textColor="?attr/cellTextColorSubdued" />
 </LinearLayout>
