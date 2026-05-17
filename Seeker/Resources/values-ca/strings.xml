@@ -54,15 +54,12 @@
     <string name="no_messages">Sense missatges. Premeu \"+\" per començar.</string>
     <string name="messages">Missatges</string>
     <string name="browse_files">Examinar fitxers</string>
-    <string name="chatroomListLoading">
-        Sol·licitud de llista de sales de xat disponibles. Si us plau, espereu...
-    </string>
     <string name="privateRoomCreation">Sol·licitant la creació d\'una sala privada</string>
     <string name="requesting_room_list">Sol·licitud de llista d\'habitacions</string>
     <string name="requesting_user_info">Sol·licitud d\'informació de l\'usuari</string>
     <string name="room_list_received">S\'ha rebut la llista d\'habitacions</string>
 
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Llista de desitjos</string>
     <string name="wishlist_bold">
@@ -99,7 +96,6 @@ Recompte de directoris: {5}\"
     <string name="clear">Buida</string>
     <string name="get_user_info">Obteniu informació de l\'usuari</string>
     <string name="quick_info">Informació ràpida</string>
-    <string name="filer_files">Filtreu els fitxers aquí</string>
     <string name="enter_user_to_browse">Introduïu l\'usuari per navegar</string>
     <string name="all_target">Tots els Usuaris</string>
     <string name="target_user_list">Llista d\'usuaris</string>
@@ -124,7 +120,6 @@ Recompte de directoris: {5}\"
 
     <string name="enter_listening_port">Introduïu el port a escoltar</string>
 
-    <string name="create_chatroom_name">Nom de la sala a crear</string>
     <string name="create_chatroom_private">Fes privat</string>
 
     <string name="search_here">Cerca aquí</string>
@@ -181,7 +176,7 @@ Recompte de directoris: {5}\"
     <string name="new_search_tab">Nova cerca</string>
     <string name="filter_search_results_here">Filtreu els resultats aquí</string>
     <string name="persist_it">Fixat</string>
-    <string name="type_chatroom_ticker_message">Escriviu Ticker Message</string>
+    <string name="type_chatroom_ticker_message">Missatge Ticker</string>
 
     <string name="change_download_folder">Canvia la carpeta de descàrrega</string>
     <string name="max_search_results">Màxim resultats de cerca:</string>
@@ -290,7 +285,6 @@ Recompte de directoris: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>
@@ -574,7 +568,7 @@ Recompte de directoris: {5}\"
     <string name="mod">Mod</string>
 
     <string name="user_">User:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Create Chatroom</string>
@@ -597,10 +591,8 @@ Recompte de directoris: {5}\"
     <string name="online">Online</string>
     <string name="offline">Offline</string>
 
-    <string name="auto_join_on">Auto Join [On]</string>
-    <string name="auto_join_off">Auto Join [Off]</string>
-    <string name="notification_on">Notifications [On]</string>
-    <string name="notification_off">Notifications [Off]</string>
+    <string name="auto_join">Auto Join</string>
+    <string name="notification">Notifications</string>
     <string name="copy_text">Copy Text</string>
     <string name="ignore_user">Ignore User</string>
     <string name="remove_user">Remove User</string>

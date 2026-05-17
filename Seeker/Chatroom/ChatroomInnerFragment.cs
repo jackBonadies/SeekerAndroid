@@ -1,21 +1,26 @@
-﻿using Android.App;
-using Seeker.Services;
+﻿using Android.Animation;
+using Android.App;
 using Android.Content;
+using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
+using Android.Text;
+using Android.Text.Style;
 using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
+using Common;
+using Common.Messages;
 using Google.Android.Material.FloatingActionButton;
+using Seeker.Helpers;
+using Seeker.Helpers.AnchoredMenu;
+using Seeker.Services;
+using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Seeker.Helpers;
-
-using Common;
-using Common.Messages;
 namespace Seeker.Chatroom
 {
     public class ChatroomInnerFragment : AndroidX.Fragment.App.Fragment //,PopupMenu.IOnMenuItemClickListener
@@ -32,9 +37,27 @@ namespace Seeker.Chatroom
         private View fabScrollToNewest = null;
         private EditText editTextEnterMessage = null;
         private ImageButton sendMessage = null;
-        public TextView currentTickerView = null;
+        private TextView currentTickerView = null;
+        private ObjectAnimator tickerLoadingPulseAnimator = null;
+
+        private ViewFlipper joinEmptyStateFlipper = null;
+        private TextView joinPendingTitle = null;
+        private TextView joinFailedMessage = null;
+        private TextView joinFailedSubtitle = null;
+        private Button joinFailedRetry = null;
+
+        private enum JoinEmptyState
+        {
+            None = -1,
+            Pending = 0,
+            Error = 1,
+        }
+
+        private JoinEmptyState currentJoinEmptyState = JoinEmptyState.None;
 
         private RecyclerView2 recyclerViewStatusesView;
+        private View statusesContainer;
+        private TextView statusesEmptyPlaceholder;
         private LinearLayoutManager recycleLayoutManagerStatuses;
         private ChatroomStatusesRecyclerAdapter recyclerUserStatusAdapter;
 
@@ -80,10 +103,12 @@ namespace Seeker.Chatroom
             Logger.Debug("Chatroom Inner Fragment ROOMINFO Constructor");
 
             OurRoomInfo = roomInfo;
+        }
 
-
-
-
+        public override void OnViewCreated(View view, Bundle savedInstanceState)
+        {
+            base.OnViewCreated(view, savedInstanceState);
+            Activity?.AddMenuProvider(new InnerMenuProvider(this), ViewLifecycleOwner, AndroidX.Lifecycle.Lifecycle.State.Resumed);
         }
 
         public void HookUpEventHandlers(bool binding)
@@ -94,6 +119,8 @@ namespace Seeker.Chatroom
             ChatroomController.UserRoomStatusChanged -= OnUserRoomStatusChanged;
             ChatroomController.RoomTickerListReceived -= OnRoomTickerListReceived;
             ChatroomController.RoomTickerAdded -= OnRoomTickerAdded;
+            ChatroomController.RoomJoinFailed -= OnRoomJoinFailed;
+            ChatroomController.RoomDataReceived -= OnRoomDataReceivedForJoinState;
             if (binding)
             {
                 ChatroomController.MessageReceived += OnMessageRecieved;
@@ -102,8 +129,136 @@ namespace Seeker.Chatroom
                 ChatroomController.RoomTickerListReceived += OnRoomTickerListReceived;
                 ChatroomController.RoomTickerAdded += OnRoomTickerAdded;
                 ChatroomController.RoomMembershipRemoved += OnRoomMembershipRemoved;
-
+                ChatroomController.RoomJoinFailed += OnRoomJoinFailed;
+                ChatroomController.RoomDataReceived += OnRoomDataReceivedForJoinState;
             }
+        }
+
+        private void ApplyInitialJoinStateUi()
+        {
+            if (ChatroomController.HasRoomData(OurRoomInfo.Name))
+            {
+                SetJoinEmptyState(JoinEmptyState.None);
+                return;
+            }
+            if (ChatroomController.RoomJoinStates.TryGetValue(OurRoomInfo.Name, out var status))
+            {
+                ApplyJoinStateUi(status.State, status.FailureMessage);
+            }
+            else
+            {
+                ApplyJoinStateUi(RoomJoinState.Pending, null);
+            }
+        }
+
+        private void ApplyJoinStateUi(RoomJoinState state, string failureMessage)
+        {
+            if (joinEmptyStateFlipper == null)
+            {
+                return;
+            }
+            switch (state)
+            {
+                case RoomJoinState.Joined:
+                    SetJoinEmptyState(JoinEmptyState.None);
+                    UpdateSendEnabled();
+                    this.Activity?.InvalidateOptionsMenu();
+                    break;
+                case RoomJoinState.Pending:
+                    if (joinPendingTitle != null)
+                    {
+                        joinPendingTitle.Text = string.Format(this.Resources.GetString(Resource.String.room_join_pending), OurRoomInfo.Name);
+                    }
+                    SetJoinEmptyState(JoinEmptyState.Pending);
+                    UpdateSendEnabled();
+                    this.Activity?.InvalidateOptionsMenu();
+                    break;
+                case RoomJoinState.Forbidden:
+                    if (joinFailedMessage != null)
+                    {
+                        joinFailedMessage.Text = this.Resources.GetString(Resource.String.room_join_failed);
+                    }
+                    if (joinFailedSubtitle != null)
+                    {
+                        joinFailedSubtitle.Text = this.Resources.GetString(Resource.String.room_join_forbidden);
+                    }
+                    SetJoinEmptyState(JoinEmptyState.Error);
+                    UpdateSendEnabled();
+                    break;
+                case RoomJoinState.Failed:
+                    if (joinFailedMessage != null)
+                    {
+                        joinFailedMessage.Text = this.Resources.GetString(Resource.String.room_join_failed);
+                    }
+                    if (joinFailedSubtitle != null)
+                    {
+                        joinFailedSubtitle.Text = failureMessage ?? string.Empty;
+                    }
+                    SetJoinEmptyState(JoinEmptyState.Error);
+                    UpdateSendEnabled();
+                    break;
+            }
+            SetActivityStatusesVisibility();
+            SetTickerVisibility();
+        }
+
+        private void SetJoinEmptyState(JoinEmptyState state)
+        {
+            currentJoinEmptyState = state;
+            if (joinEmptyStateFlipper == null)
+            {
+                return;
+            }
+            if (state == JoinEmptyState.None)
+            {
+                joinEmptyStateFlipper.Visibility = ViewStates.Gone;
+                return;
+            }
+            if (joinEmptyStateFlipper.DisplayedChild != (int)state)
+            {
+                joinEmptyStateFlipper.DisplayedChild = (int)state;
+            }
+            joinEmptyStateFlipper.Visibility = ViewStates.Visible;
+        }
+
+        private void JoinFailedRetry_Click(object sender, EventArgs e)
+        {
+            if (!PreferencesState.CurrentlyLoggedIn)
+            {
+                return;
+            }
+            ApplyJoinStateUi(RoomJoinState.Pending, null);
+            ChatroomController.JoinRoomApi(OurRoomInfo.Name, true, true, feedback: true, false);
+        }
+
+        private void OnRoomJoinFailed(object sender, RoomJoinFailedEventArgs e)
+        {
+            if (OurRoomInfo == null || OurRoomInfo.Name != e.RoomName)
+            {
+                return;
+            }
+            this.Activity?.RunOnUiThread(() =>
+            {
+                ApplyJoinStateUi(
+                    e.IsForbidden ? RoomJoinState.Forbidden : RoomJoinState.Failed,
+                    e.Exception?.Message);
+            });
+        }
+
+        private void OnRoomDataReceivedForJoinState(object sender, EventArgs e)
+        {
+            if (OurRoomInfo == null)
+            {
+                return;
+            }
+            if (!ChatroomController.RoomJoinStates.TryGetValue(OurRoomInfo.Name, out var status) || status.State != RoomJoinState.Joined)
+            {
+                return;
+            }
+            this.Activity?.RunOnUiThread(() =>
+            {
+                ApplyJoinStateUi(RoomJoinState.Joined, null);
+            });
         }
 
         public void OnRoomTickerAdded(object sender, Soulseek.RoomTickerAddedEventArgs e)
@@ -136,38 +291,6 @@ namespace Seeker.Chatroom
                     }
                 }));
             }
-        }
-
-        //TODO: Why is this sometimes a popup anchored at (x,y) and otherwise a full screen context menu??
-        //It goes through LongPress sometimes but other times it just shows the context menu on its own...
-        public static Message MessagesLongClickData = null;
-        public override bool OnContextItemSelected(IMenuItem item)
-        {
-            //if(Helpers.ShowSlskLinkContextMenu)
-            //{
-            //    return base.OnContextItemSelected(item);
-            //}
-            //Logger.Debug(MessagesLongClickData.MessageText + MessagesLongClickData.Username);
-            string username = MessagesLongClickData.Username;
-            if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, SeekerState.ActiveActivityRef, this.View))
-            {
-                Logger.Debug("Handled by commons");
-                return base.OnContextItemSelected(item);
-            }
-            switch (item.ItemId)
-            {
-                case 0: //"Copy Text"
-                    CommonHelpers.CopyTextToClipboard(this.Activity, MessagesLongClickData.MessageText);
-                    break;
-                case 1: //"Ignore User"
-                    SeekerApplication.AddToIgnoreListFeedback(this.Activity, username);
-                    break;
-                case 2://"Add User"
-                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, username, null);
-                    break;
-
-            }
-            return base.OnContextItemSelected(item);
         }
 
         public void OnMessageRecieved(object sender, MessageReceivedArgs roomArgs)
@@ -237,7 +360,7 @@ namespace Seeker.Chatroom
             }
         }
 
-        public void OnRoomMembershipRemoved(object sender, string room)
+        private void OnRoomMembershipRemoved(object sender, string room)
         {
             Logger.Debug("handler remove from " + room);
 
@@ -274,6 +397,7 @@ namespace Seeker.Chatroom
                     }
                 }
                 UI_statusMessagesInternal.Add(statusMessage);
+                UpdateStatusesEmptyPlaceholder();
                 int lastVisibleItemPosition = recycleLayoutManagerStatuses.FindLastVisibleItemPosition();
                 Logger.Debug("lastVisibleItemPosition : " + lastVisibleItemPosition);
                 recyclerUserStatusAdapter.NotifyItemInserted(UI_statusMessagesInternal.Count - 1);
@@ -288,7 +412,7 @@ namespace Seeker.Chatroom
             });
         }
 
-        public void OnUserJoinedOrLeft(object sender, UserJoinedOrLeftEventArgs e)
+        private void OnUserJoinedOrLeft(object sender, UserJoinedOrLeftEventArgs e)
         {
             //nothing to do UNLESS you are planning on showing something live.
             //maybe if you have a number counter, then its useful..
@@ -308,7 +432,7 @@ namespace Seeker.Chatroom
             }
         }
 
-        public void OnUserRoomStatusChanged(object sender, UserRoomStatusChangedEventArgs e)
+        private void OnUserRoomStatusChanged(object sender, UserRoomStatusChangedEventArgs e)
         {
             //nothing to do UNLESS you are planning on showing something live.
             //maybe if you have a number counter, then its useful..
@@ -328,18 +452,38 @@ namespace Seeker.Chatroom
             }
         }
 
-        public void SetStatusesView()
+        private void SetActivityStatusesVisibility()
         {
-            //#if DEBUG //exposes bug that is now fixed.
-            //System.Threading.Thread.Sleep(1000);
-            //#endif
-            if (ChatroomActivity.ShowStatusesView)
+            if (statusesContainer == null)
             {
-                recyclerViewStatusesView.Visibility = ViewStates.Visible;
+                return;
+            }
+            if (ChatroomActivity.ShowStatusesView && currentJoinEmptyState != JoinEmptyState.Error)
+            {
+                statusesContainer.Visibility = ViewStates.Visible;
             }
             else
             {
-                recyclerViewStatusesView.Visibility = ViewStates.Gone;
+                statusesContainer.Visibility = ViewStates.Gone;
+            }
+        }
+
+        private void UpdateStatusesEmptyPlaceholder()
+        {
+            if (recyclerViewStatusesView == null || statusesEmptyPlaceholder == null)
+            {
+                return;
+            }
+            bool isEmpty = UI_statusMessagesInternal == null || UI_statusMessagesInternal.Count == 0;
+            recyclerViewStatusesView.Visibility = isEmpty ? ViewStates.Gone : ViewStates.Visible;
+            statusesEmptyPlaceholder.Visibility = isEmpty ? ViewStates.Visible : ViewStates.Gone;
+        }
+
+        public void SetActivityStatusesView()
+        {
+            SetActivityStatusesVisibility();
+            if (!ChatroomActivity.ShowStatusesView)
+            {
                 return;
             }
 
@@ -357,6 +501,8 @@ namespace Seeker.Chatroom
 
             recyclerUserStatusAdapter = new ChatroomStatusesRecyclerAdapter(UI_statusMessagesInternal); //this depends tightly on MessageController... since these are just strings..
             recyclerViewStatusesView.SetAdapter(recyclerUserStatusAdapter);
+
+            UpdateStatusesEmptyPlaceholder();
 
             if (UI_statusMessagesInternal.Count != 0)
             {
@@ -440,7 +586,7 @@ namespace Seeker.Chatroom
                 Logger.Debug("joining room " + OurRoomInfo.Name);
                 if (PreferencesState.CurrentlyLoggedIn)
                 {
-                    ChatroomController.JoinRoomApi(OurRoomInfo.Name, true, true, false, false);
+                    ChatroomController.JoinRoomApi(OurRoomInfo.Name, true, true, feedback: true, false);
                 }
                 else
                 {
@@ -471,20 +617,18 @@ namespace Seeker.Chatroom
             }
             else
             {
-                currentTickerView.Text = this.Resources.GetString(Resource.String.loading_current_ticker);
+                var s = new SpannableString(this.Resources.GetString(Resource.String.chatroom_loading_ticker));
+                s.SetSpan(new StyleSpan(TypefaceStyle.Italic), 0, s.Length(), SpanTypes.ExclusiveExclusive);
+                currentTickerView.TextFormatted = s;
+                StartTickerLoadingPulse();
             }
 
-            if (ChatroomActivity.ShowTickerView)
-            {
-                currentTickerView.Visibility = ViewStates.Visible;
-            }
-            else
-            {
-                currentTickerView.Visibility = ViewStates.Gone;
-            }
+            SetTickerVisibility();
 
             recyclerViewSmall = true;
             recyclerViewStatusesView = rootView.FindViewById<RecyclerView2>(Resource.Id.room_statuses_recycler_view);
+            statusesContainer = rootView.FindViewById<View>(Resource.Id.room_statuses_container);
+            statusesEmptyPlaceholder = rootView.FindViewById<TextView>(Resource.Id.room_statuses_empty);
 
             CustomClickEvent cce = new CustomClickEvent();
             cce.RecyclerView = recyclerViewStatusesView;
@@ -502,16 +646,7 @@ namespace Seeker.Chatroom
 
 
 
-            if (editTextEnterMessage.Text == null || editTextEnterMessage.Text.ToString() == string.Empty)
-            {
-                sendMessage.Enabled = false;
-                sendMessage.Alpha = 0.38f;
-            }
-            else
-            {
-                sendMessage.Enabled = true;
-                sendMessage.Alpha = 1.0f;
-            }
+            UpdateSendEnabled();
             editTextEnterMessage.TextChanged += EditTextEnterMessage_TextChanged;
             editTextEnterMessage.EditorAction += EditTextEnterMessage_EditorAction;
             editTextEnterMessage.KeyPress += EditTextEnterMessage_KeyPress;
@@ -530,7 +665,6 @@ namespace Seeker.Chatroom
 
             recyclerViewInner.ScrollChange += RecyclerViewInner_ScrollChange;
 
-            this.RegisterForContextMenu(recyclerViewInner);
             if (messagesInternal.Count != 0)
             {
                 recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
@@ -538,9 +672,17 @@ namespace Seeker.Chatroom
             Logger.Debug("currentlyInsideRoomName -- OnCreateView Inner -- " + ChatroomController.currentlyInsideRoomName);
             ChatroomController.currentlyInsideRoomName = OurRoomInfo.Name;
             ChatroomController.UnreadRooms.TryRemove(OurRoomInfo.Name, out _);
+            joinEmptyStateFlipper = rootView.FindViewById<ViewFlipper>(Resource.Id.joinEmptyStateFlipper);
+            joinPendingTitle = rootView.FindViewById<TextView>(Resource.Id.joinPendingTitle);
+            joinFailedMessage = rootView.FindViewById<TextView>(Resource.Id.joinFailedMessage);
+            joinFailedSubtitle = rootView.FindViewById<TextView>(Resource.Id.joinFailedSubtitle);
+            joinFailedRetry = rootView.FindViewById<Button>(Resource.Id.joinFailedRetry);
+            joinFailedRetry.Click += JoinFailedRetry_Click;
+            ApplyInitialJoinStateUi();
+
             HookUpEventHandlers(true); //this NEEDS to be strictly before SetStatusesView
             Logger.Debug("set up statuses view");
-            SetStatusesView();
+            SetActivityStatusesView();
             Logger.Debug("finish set up statuses view");
 
             created = true;
@@ -552,6 +694,48 @@ namespace Seeker.Chatroom
             ChatroomActivity.ChatroomActivityRef.InvalidateOptionsMenu();
             return rootView;
 
+        }
+
+        public void SetTickerVisibility()
+        {
+            if (ChatroomActivity.ShowTickerView && currentJoinEmptyState != JoinEmptyState.Error)
+            {
+                currentTickerView.Visibility = ViewStates.Visible;
+            }
+            else
+            {
+                currentTickerView.Visibility = ViewStates.Gone;
+            }
+        }
+
+        private void StartTickerLoadingPulse()
+        {
+            if (currentTickerView == null)
+            {
+                return;
+            }
+            if (tickerLoadingPulseAnimator != null && tickerLoadingPulseAnimator.IsRunning)
+            {
+                return;
+            }
+            tickerLoadingPulseAnimator = ObjectAnimator.OfFloat(currentTickerView, "alpha", 1f, 0.3f);
+            tickerLoadingPulseAnimator.SetDuration(800);
+            tickerLoadingPulseAnimator.RepeatMode = ValueAnimatorRepeatMode.Reverse;
+            tickerLoadingPulseAnimator.RepeatCount = ValueAnimator.Infinite;
+            tickerLoadingPulseAnimator.Start();
+        }
+
+        private void StopTickerLoadingPulse()
+        {
+            if (tickerLoadingPulseAnimator != null)
+            {
+                tickerLoadingPulseAnimator.Cancel();
+                tickerLoadingPulseAnimator = null;
+            }
+            if (currentTickerView != null)
+            {
+                currentTickerView.Alpha = 1f;
+            }
         }
 
         private const int scroll_pos_too_far = 16;
@@ -602,24 +786,11 @@ namespace Seeker.Chatroom
             float scale = this.Context.Resources.DisplayMetrics.Density;
             int pixels = (int)(dps * scale + 0.5f);
 
-            recyclerViewStatusesView.LayoutParameters.Height = pixels;//in px
-            recyclerViewStatusesView.ForceLayout(); //include children in the remeasure and relayout (not sure if necessary)
-            recyclerViewStatusesView.Invalidate(); //redraw
-            recyclerViewStatusesView.RequestLayout(); //relayout (for size changes)
+            statusesContainer.LayoutParameters.Height = pixels;//in px
+            statusesContainer.ForceLayout(); //include children in the remeasure and relayout (not sure if necessary)
+            statusesContainer.Invalidate(); //redraw
+            statusesContainer.RequestLayout(); //relayout (for size changes)
         }
-
-        //happens too late...
-        //private void RecyclerViewStatusesView_LayoutChange(object sender, View.LayoutChangeEventArgs e)
-        //{
-        //    Logger.Debug("RecyclerViewStatusesView_LayoutChange" + e.OldTop + "   " + e.Top);
-        //    Logger.Debug("RecyclerViewStatusesView_LayoutChange" + e.OldBottom + "   " + e.Bottom);
-        //    Logger.Debug("RecyclerViewStatusesView_LayoutChange" + this.recycleLayoutManagerStatuses.FindLastCompletelyVisibleItemPosition());
-        //    Logger.Debug("RecyclerViewStatusesView_LayoutChange" + this.recycleLayoutManagerStatuses.FindFirstCompletelyVisibleItemPosition());
-        //    if(e.OldBottom > e.Bottom)
-        //    {
-        //        this.recycleLayoutManagerStatuses.ScrollToPosition(this.recycleLayoutManagerStatuses.ItemCount - 1);
-        //    }
-        //}
 
         private void CurrentTickerView_Click(object sender, EventArgs e)
         {
@@ -643,15 +814,9 @@ namespace Seeker.Chatroom
         {
             if (t != null && currentTickerView != null)
             {
-                if (t.Username == string.Empty)
-                {
-                    //for the no tickers msg
-                    currentTickerView.Text = t.Message;
-                }
-                else
-                {
-                    currentTickerView.Text = t.Message + " --" + t.Username;
-                }
+                StopTickerLoadingPulse();
+                var builder = UiHelpers.BuildTickerSpan(t, currentTickerView.Context);
+                currentTickerView.SetText(builder, TextView.BufferType.Spannable);
             }
             else
             {
@@ -728,7 +893,7 @@ namespace Seeker.Chatroom
 
 
                 Logger.Debug("set setatus view");
-                SetStatusesView();
+                SetActivityStatusesView();
                 Logger.Debug("set setatus view end");
                 Logger.Debug("hook up event handlers ");
                 HookUpEventHandlers(true);
@@ -742,6 +907,7 @@ namespace Seeker.Chatroom
         {
             Logger.Debug("currentlyInsideRoomName OnPause -- nulling");
             ChatroomController.currentlyInsideRoomName = string.Empty;
+            StopTickerLoadingPulse();
             base.OnPause();
         }
 
@@ -812,15 +978,367 @@ namespace Seeker.Chatroom
 
         private void EditTextEnterMessage_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
         {
-            if (e.Text != null && e.Text.ToString() != string.Empty) //ICharSequence..
+            UpdateSendEnabled();
+        }
+
+        private void UpdateSendEnabled()
+        {
+            if (sendMessage == null || editTextEnterMessage == null)
             {
-                sendMessage.Enabled = true;
-                sendMessage.Alpha = 1.0f;
+                return;
             }
-            else
+            bool hasText = editTextEnterMessage.Text != null && editTextEnterMessage.Text.ToString() != string.Empty;
+            bool joined = OurRoomInfo != null && ChatroomController.HasRoomData(OurRoomInfo.Name);
+            bool enabled = hasText && joined;
+            sendMessage.Enabled = enabled;
+            sendMessage.Alpha = enabled ? 1.0f : 0.38f;
+        }
+
+        public void ShowSetTickerDialog(string roomToInvite)
+        {
+            void OkayAction(object sender, string textInput)
             {
-                sendMessage.Enabled = false;
-                sendMessage.Alpha = 0.38f;
+                ChatroomController.SetTickerApi(roomToInvite, textInput, true);
+                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                {
+                    aDiag.Dismiss();
+                }
+                else
+                {
+                    UiHelpers._dialogInstance?.Dismiss(); // TODO why?
+                }
+            }
+
+            UiHelpers.ShowSimpleDialog(
+                this.Activity,
+                Resource.Layout.edit_text_dialog_content,
+                this.Resources.GetString(Resource.String.set_ticker),
+                OkayAction,
+                this.Resources.GetString(Resource.String.send),
+                null,
+                this.Resources.GetString(Resource.String.type_chatroom_ticker_message),
+                this.Resources.GetString(Resource.String.cancel),
+                this.Resources.GetString(Resource.String.must_type_ticker_text),
+                true);
+        }
+
+        public void ShowAllTickersDialog(string roomName)
+        {
+            Logger.InfoFirebase("ShowAllTickersDialog" + (Activity?.IsFinishing) + (Activity?.IsDestroyed) + ParentFragmentManager.IsDestroyed);
+            var tickerDialog = new AllTickersDialog(roomName);
+            tickerDialog.Show(ParentFragmentManager, "ticker dialog");
+        }
+
+        public void ShowUserListDialog(Soulseek.RoomInfo roomInfo, bool isPrivate)
+        {
+            if (!ChatroomController.JoinedRoomData.ContainsKey(roomInfo.Name))
+            {
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.room_data_still_loading), ToastLength.Short);
+                return;
+            }
+            var roomUserListDialog = new RoomUserListDialog(roomInfo.Name, isPrivate);
+            roomUserListDialog.Show(ParentFragmentManager, "room user list dialog");
+        }
+
+        private AndroidX.AppCompat.App.AlertDialog inviteDialogInstance;
+
+        public void ShowInviteUserDialog(string roomToInvite)
+        {
+            Logger.InfoFirebase("ShowInviteUserDialog" + (Activity?.IsFinishing) + (Activity?.IsDestroyed));
+            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(RequireContext());
+            builder.SetTitle(Resources.GetString(Resource.String.inviteuser));
+
+            View viewInflated = LayoutInflater.From(RequireContext()).Inflate(Resource.Layout.autocomplete_user_dialog_content, (ViewGroup)Activity.FindViewById(Android.Resource.Id.Content).RootView, false);
+
+            AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
+            SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
+
+            builder.SetView(viewInflated);
+
+            EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
+            {
+                //Do the Browse Logic...
+                string userToAdd = input.Text;
+                if (userToAdd == null || userToAdd == string.Empty)
+                {
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_a_username_to_invite), ToastLength.Short);
+                    (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
+                    return;
+                }
+                SeekerState.RecentUsersManager.AddUserToTop(userToAdd, true);
+                ChatroomController.AddRemoveUserToPrivateRoomAPI(roomToInvite, userToAdd, true, false);
+                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                {
+                    aDiag.Dismiss();
+                }
+                else
+                {
+                    inviteDialogInstance.Dismiss();
+                }
+            });
+            EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
+            {
+                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
+                {
+                    aDiag.Dismiss();
+                }
+                else
+                {
+                    inviteDialogInstance.Dismiss();
+                }
+            });
+
+            var editorAction = UiHelpers.MakeDialogEditorAction(Activity?.FindViewById(Android.Resource.Id.Content)?.RootView, eventHandler);
+
+            var keypressAction = UiHelpers.MakeDialogKeyPressAction(Activity?.FindViewById(Android.Resource.Id.Content)?.RootView, eventHandler);
+
+            input.KeyPress += keypressAction;
+            input.EditorAction += editorAction;
+            input.FocusChange += UiHelpers.OnFocusAdjustNothing;
+
+            builder.SetPositiveButton(Resources.GetString(Resource.String.invite), eventHandler);
+            builder.SetNegativeButton(Resources.GetString(Resource.String.cancel), eventHandlerCancel);
+
+            inviteDialogInstance = builder.Create();
+            try
+            {
+                inviteDialogInstance.Show();
+                UiHelpers.DoNotEnablePositiveUntilText(inviteDialogInstance, input);
+            }
+            catch (WindowManagerBadTokenException e)
+            {
+                if (SeekerState.ActiveActivityRef == null)
+                {
+                    Logger.Firebase("invite WindowManagerBadTokenException null activities");
+                }
+                else
+                {
+                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
+                    bool isOurActivityFinishing = Activity?.IsFinishing == true;
+                    Logger.Firebase("invite WindowManagerBadTokenException are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                }
+            }
+            catch (Exception err)
+            {
+                if (SeekerState.ActiveActivityRef == null)
+                {
+                    Logger.Firebase("invite Exception null activities");
+                }
+                else
+                {
+                    bool isCachedMainActivityFinishing = SeekerState.ActiveActivityRef.IsFinishing;
+                    bool isOurActivityFinishing = Activity?.IsFinishing == true;
+                    Logger.Firebase("invite Exception are we finishing:" + isCachedMainActivityFinishing + isOurActivityFinishing);
+                }
+            }
+        }
+
+        private sealed class InnerMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
+        {
+            private readonly ChatroomInnerFragment fragment;
+
+            public InnerMenuProvider(ChatroomInnerFragment fragment)
+            {
+                this.fragment = fragment;
+            }
+
+            public void OnCreateMenu(IMenu menu, MenuInflater menuInflater)
+            {
+                menuInflater.Inflate(Resource.Menu.chatroom_inner_menu, menu);
+                var overflowItem = menu.FindItem(Resource.Id.action_chatroom_overflow);
+                var overflowView = overflowItem?.ActionView;
+                if (overflowView != null)
+                {
+                    overflowView.Click -= OnOverflowClick;
+                    overflowView.Click += OnOverflowClick;
+                }
+            }
+
+#pragma warning disable S1186 // Required override - omitting causes java.lang.AbstractMethodError at runtime
+            public void OnPrepareMenu(IMenu menu)
+            {
+            }
+
+            public void OnMenuClosed(IMenu menu)
+            {
+            }
+#pragma warning restore S1186
+
+            public bool OnMenuItemSelected(IMenuItem item)
+            {
+                return false;
+            }
+
+            private void OnOverflowClick(object sender, EventArgs e)
+            {
+                var anchor = sender as View;
+                if (anchor == null || OurRoomInfo == null)
+                {
+                    return;
+                }
+                var config = BuildConfig();
+                if (config.Rows.Count == 0)
+                {
+                    return;
+                }
+                AnchoredMenuPopup.Show(anchor, config);
+            }
+
+            private AnchoredMenuConfig BuildConfig()
+            {
+                var ctx = fragment.RequireContext();
+                var activity = fragment.Activity as ChatroomActivity;
+                string roomName = OurRoomInfo.Name;
+
+                bool isPrivate;
+                bool isOwnedByUs;
+                bool isOperator;
+                if (ChatroomController.RoomList != null)
+                {
+                    isPrivate = fragment.IsPrivate();
+                    isOwnedByUs = fragment.IsOwned();
+                    isOperator = fragment.IsOperatedByUs();
+                }
+                else
+                {
+                    isPrivate = cachedPrivate;
+                    isOwnedByUs = cachedOwned;
+                    isOperator = cachedMod;
+                }
+                bool joined = ChatroomController.HasRoomData(roomName);
+
+                var config = new AnchoredMenuConfig();
+
+                if (joined)
+                {
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.all_users_group_30dp,
+                        Label = ctx.GetString(Resource.String.view_users),
+                        OnClick = () => fragment.ShowUserListDialog(OurRoomInfo, ChatroomController.IsPrivate(roomName))
+                    });
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.pinboard_all_tickers_30dp,
+                        Label = ctx.GetString(Resource.String.view_all_tickers),
+                        OnClick = () => fragment.ShowAllTickersDialog(roomName)
+                    });
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.keep_set_ticker_30dp,
+                        Label = ctx.GetString(Resource.String.setticker),
+                        OnClick = () => fragment.ShowSetTickerDialog(roomName)
+                    });
+                }
+
+                config.Rows.Add(new AnchoredMenuRow
+                {
+                    Kind = AnchoredMenuRowKind.Checkable,
+                    IconResId = Resource.Drawable.autorenew_autojoin_30dp,
+                    Label = ctx.GetString(Resource.String.auto_join),
+                    GetChecked = () => fragment.IsAutoJoin(),
+                    OnChecked = _ => ChatroomController.ToggleAutoJoin(roomName, true, activity)
+                });
+                config.Rows.Add(new AnchoredMenuRow
+                {
+                    Kind = AnchoredMenuRowKind.Checkable,
+                    IconResId = Resource.Drawable.notifications_outline_30dp,
+                    Label = ctx.GetString(Resource.String.notification),
+                    GetChecked = () => fragment.IsNotifyOn(),
+                    OnChecked = _ => ChatroomController.ToggleNotifyRoom(roomName, true, activity)
+                });
+
+                config.Rows.Add(new AnchoredMenuRow
+                {
+                    IconResId = Resource.Drawable.search_users_files,
+                    Label = ctx.GetString(Resource.String.search_room),
+                    OnClick = () =>
+                    {
+                        SearchTabHelper.SearchTarget = SearchTarget.Room;
+                        SearchTabHelper.SearchTargetChosenRoom = roomName;
+                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
+                        intent.PutExtra(MainActivity.IntentSearchRoomExtra, 1);
+                        fragment.StartActivity(intent);
+                    }
+                });
+
+                if (joined && (isOperator || isOwnedByUs))
+                {
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.user_add,
+                        Label = ctx.GetString(Resource.String.inviteuser),
+                        OnClick = () => fragment.ShowInviteUserDialog(roomName)
+                    });
+                }
+
+                if (joined && isOwnedByUs)
+                {
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.logout_material,
+                        Label = ctx.GetString(Resource.String.give_up_room),
+                        Destructive = true,
+                        OnClick = () => ChatroomController.DropMembershipOrOwnershipApi(roomName, true, true)
+                    });
+                }
+
+                if (joined && isPrivate && !isOwnedByUs)
+                {
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.logout_material,
+                        Label = ctx.GetString(Resource.String.give_up_membership),
+                        Destructive = true,
+                        OnClick = () => ChatroomController.DropMembershipOrOwnershipApi(roomName, false, true)
+                    });
+                }
+
+                if (joined)
+                {
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.settings_outline_30dp,
+                        Kind = AnchoredMenuRowKind.Submenu,
+                        Label = ctx.GetString(Resource.String.Options),
+                        SubMenuTitle = ctx.GetString(Resource.String.Options),
+                        SubMenu = BuildStyleSubMenu(ctx),
+                    });
+                }
+
+                return config;
+            }
+
+            private AnchoredMenuConfig BuildStyleSubMenu(Context ctx)
+            {
+                var sub = new AnchoredMenuConfig();
+                sub.Rows.Add(new AnchoredMenuRow
+                {
+                    IconResId = Resource.Drawable.pinboard_all_tickers_30dp,
+                    Label = ChatroomActivity.ShowTickerView
+                        ? ctx.GetString(Resource.String.HideTickerView)
+                        : ctx.GetString(Resource.String.ShowTickerView),
+                    OnClick = () =>
+                    {
+                        ChatroomActivity.ShowTickerView = !ChatroomActivity.ShowTickerView;
+                        fragment.SetTickerVisibility();
+                        PreferencesManager.SaveShowTickerView();
+                    }
+                });
+                sub.Rows.Add(new AnchoredMenuRow
+                {
+                    IconResId = Resource.Drawable.person_text_user_status_view_30dp,
+                    Label = ChatroomActivity.ShowStatusesView
+                        ? ctx.GetString(Resource.String.HideStatusView)
+                        : ctx.GetString(Resource.String.ShowStatusView),
+                    OnClick = () =>
+                    {
+                        ChatroomActivity.ShowStatusesView = !ChatroomActivity.ShowStatusesView;
+                        fragment.SetActivityStatusesView();
+                        PreferencesManager.SaveShowStatusesView();
+                    }
+                });
+                return sub;
             }
         }
     }

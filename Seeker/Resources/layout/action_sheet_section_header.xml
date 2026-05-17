@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/actionSheetSectionHeader"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="8dp"
+    android:textColor="?attr/cellTextColorSubdued"
+    android:textStyle="bold"
+    android:textAllCaps="true"
+    android:letterSpacing="0.05"
+    android:textSize="11sp" />

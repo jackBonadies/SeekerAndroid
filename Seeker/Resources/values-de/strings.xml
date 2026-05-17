@@ -56,15 +56,12 @@
     <string name="no_messages">Keine Nachrichten. Drücken Sie + um loszulegen.</string>
     <string name="messages">Nachrichten</string>
     <string name="browse_files">Dateien durchsuchen</string>
-    <string name="chatroomListLoading">
-        Liste der verfügbaren Chaträume wird angefordert. Bitte warten...
-    </string>
     <string name="privateRoomCreation">Anfrage für Privatraum</string>
     <string name="requesting_room_list">Raumliste wird angefordert</string>
     <string name="requesting_user_info">Benutzerinformationen anfordern</string>
     <string name="room_list_received">Raumliste empfangen</string>
 
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Wunschliste</string>
     <string name="wishlist_bold">
@@ -101,7 +98,6 @@ Ordneranzahl: {5}\"
     <string name="clear">Leeren</string>
     <string name="get_user_info">Benutzerinformationen abrufen</string>
     <string name="quick_info">Kurzinfo</string>
-    <string name="filer_files">Hier Dateien filtern</string>
     <string name="enter_user_to_browse">Benutzer eingeben zum Durchsuchen</string>
     <string name="all_target">Alle Benutzer</string>
     <string name="target_user_list">Benutzerliste</string>
@@ -126,7 +122,6 @@ Ordneranzahl: {5}\"
 
     <string name="enter_listening_port">Port zum Abhören eingeben</string>
 
-    <string name="create_chatroom_name">Room Name to Create</string>
     <string name="create_chatroom_private">Privat stellen</string>
 
     <string name="search_here">Hier suchen</string>
@@ -183,7 +178,7 @@ Ordneranzahl: {5}\"
     <string name="new_search_tab">Neue Suche</string>
     <string name="filter_search_results_here">Ergebnisse hier filtern</string>
     <string name="persist_it">Sticky</string>
-    <string name="type_chatroom_ticker_message">Type Ticker Message</string>
+    <string name="type_chatroom_ticker_message">Ticker Message</string>
 
     <string name="change_download_folder">Ändere Download-Ordner</string>
     <string name="max_search_results">Max Search Results:</string>
@@ -292,7 +287,6 @@ Ordneranzahl: {5}\"
     <string name="room_data_still_loading">
         Zu schnell! Raumdaten werden noch geladen...
     </string>
-    <string name="loading_current_ticker">Lade aktuellen Ticker...</string>
     <string name="must_be_logged_to_browse">
         Login erforderlich um nach User zu suchen
     </string>
@@ -576,7 +570,7 @@ Ordneranzahl: {5}\"
     <string name="mod">Moderator</string>
 
     <string name="user_">Benutzer:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Chatroom erstellen</string>
@@ -599,10 +593,8 @@ Ordneranzahl: {5}\"
     <string name="online">Online</string>
     <string name="offline">Offline</string>
 
-    <string name="auto_join_on">Automatisch beitreten [An]</string>
-    <string name="auto_join_off">Automatisch beitreten [Aus]</string>
-    <string name="notification_on">Benachrichtigungen [An]</string>
-    <string name="notification_off">Benachrichtigungen [Aus]</string>
+    <string name="auto_join">Automatisch beitreten</string>
+    <string name="notification">Benachrichtigungen</string>
     <string name="copy_text">Text kopieren</string>
     <string name="ignore_user">Benutzer ignorieren</string>
     <string name="remove_user">Benutzer entfernen</string>

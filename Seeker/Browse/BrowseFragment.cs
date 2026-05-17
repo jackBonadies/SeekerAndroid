@@ -310,7 +310,7 @@ namespace Seeker
 
             EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
             filterText.TextChanged += FilterText_TextChanged;
-            filterText.FocusChange += FilterText_FocusChange;
+            filterText.FocusChange += UiHelpers.OnFocusAdjustResize;
             filterText.EditorAction += FilterText_EditorAction;
             filterText.Touch += FilterText_Touch;
             SearchFragment.UpdateDrawableState(filterText, true);
@@ -339,18 +339,6 @@ namespace Seeker
                     editText.Text = string.Empty;
                     SearchFragment.UpdateDrawableState(editText, true);
                 }
-            }
-        }
-
-        private void FilterText_FocusChange(object sender, View.FocusChangeEventArgs e)
-        {
-            try
-            {
-                SeekerState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustResize);
-            }
-            catch (System.Exception err)
-            {
-                Logger.Firebase("MainActivity_FocusChange" + err.Message);
             }
         }
 
@@ -415,16 +403,7 @@ namespace Seeker
                 }
                 rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
                 rootView.FindViewById<View>(Resource.Id.relativeLayout1).RequestFocus();
-                //overriding this, the keyboard fails to go down by default for some reason.....
-                try
-                {
-                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
-                    imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
-                }
-                catch (System.Exception ex)
-                {
-                    Logger.Firebase(ex.Message + " error closing keyboard");
-                }
+                UiHelpers.HideSoftKeyboard(rootView);
             }
         }
 
@@ -930,7 +909,7 @@ namespace Seeker
             builder.Show();
         }
 
-        private class IconMenuAdapter : ArrayAdapter<string>
+        private sealed class IconMenuAdapter : ArrayAdapter<string>
         {
             private readonly int[] iconRes;
             private readonly int tintColor;
@@ -1215,15 +1194,7 @@ namespace Seeker
 
         private void DismissKeyboard()
         {
-            try
-            {
-                Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.MainActivityRef.GetSystemService(Context.InputMethodService);
-                imm.HideSoftInputFromWindow(rootView.WindowToken, 0);
-            }
-            catch (System.Exception ex)
-            {
-                Logger.Firebase(ex.Message + " error closing keyboard");
-            }
+            UiHelpers.HideSoftKeyboard(rootView);
         }
 
         private static AndroidX.AppCompat.App.AlertDialog browseUserDialog = null;
@@ -1265,7 +1236,7 @@ namespace Seeker
                     return;
                 }
                 SeekerState.RecentUsersManager.AddUserToTop(usernameToBrowse, true);
-                BrowseService.RequestFilesApi(usernameToBrowse, this.View, goSnackBarAction, null);
+                BrowseService.RequestFilesApi(usernameToBrowse, null);
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
                     aDiag.Dismiss();
@@ -1287,36 +1258,13 @@ namespace Seeker
                 }
             });
 
-            System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
-            {
-                if (e.ActionId == Android.Views.InputMethods.ImeAction.Done ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Search)
-                {
-                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
-                    DismissKeyboard();
-                    eventHandler(sender, null);
-                }
-            };
+            var editorAction = UiHelpers.MakeDialogEditorAction(rootView, eventHandler);
 
-            System.EventHandler<TextView.KeyEventArgs> keypressAction = (object sender, TextView.KeyEventArgs e) =>
-            {
-                if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
-                {
-                    Logger.Debug("keypress: " + e.Event.KeyCode.ToString());
-                    DismissKeyboard();
-                    eventHandler(sender, null);
-                }
-                else
-                {
-                    e.Handled = false;
-                }
-            };
+            var keypressAction = UiHelpers.MakeDialogKeyPressAction(rootView, eventHandler);
 
             input.KeyPress += keypressAction;
             input.EditorAction += editorAction;
-            input.FocusChange += Input_FocusChange;
+            input.FocusChange += UiHelpers.OnFocusAdjustNothing;
 
             builder.SetPositiveButton(this.Resources.GetString(Resource.String.okay), eventHandler);
             builder.SetNegativeButton(this.Resources.GetString(Resource.String.cancel), eventHandlerCancel);
@@ -1358,16 +1306,5 @@ namespace Seeker
 
         }
 
-        private void Input_FocusChange(object sender, View.FocusChangeEventArgs e)
-        {
-            try
-            {
-                SeekerState.MainActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
-            }
-            catch (System.Exception err)
-            {
-                Logger.Firebase("MainActivity_FocusChange" + err.Message);
-            }
-        }
     }
 }

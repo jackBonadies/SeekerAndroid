@@ -53,7 +53,14 @@ namespace Seeker
     [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, Exported = false)]
     public class MessagesActivity : SlskLinkMenuActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
-        public static MessagesActivity MessagesActivityRef = null;
+        public const string InnerFragmentTag = "InnerUserFragment";
+        public const string OuterFragmentTag = "OuterUserFragment";
+        private const string InnerFragmentBackStackName = "InnerUserFragmentBackStack";
+        private const string EmptyGoToUsersMessagesLog = "empty goToUsersMessages";
+
+        public static MessagesActivity MessagesActivityRef { private set; get; } = null;
+
+        private GenericOnBackPressedCallback backPressedCallback;
 
         /// <summary>
         /// basically this keeps track of the direct reply messages stack.
@@ -70,22 +77,9 @@ namespace Seeker
             }
             else
             {
-                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(username), "InnerUserFragment").AddToBackStack("InnerUserFragmentBackStack").Commit();
+                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(username), InnerFragmentTag).AddToBackStack(InnerFragmentBackStackName).Commit();
+                backPressedCallback.Enabled = true;
             }
-        }
-
-        protected override void OnSaveInstanceState(Bundle outState)
-        {
-            var f = SupportFragmentManager.FindFragmentByTag("InnerUserFragment");
-            if (f != null && f.IsVisible)
-            {
-                outState.PutBoolean("SaveStateAtInner", true);
-            }
-            else
-            {
-                outState.PutBoolean("SaveStateAtInner", false);
-            }
-            base.OnSaveInstanceState(outState);
         }
 
         protected override void OnRestoreInstanceState(Bundle savedInstanceState)
@@ -93,98 +87,17 @@ namespace Seeker
             base.OnRestoreInstanceState(savedInstanceState);
         }
 
-        public override bool OnCreateOptionsMenu(IMenu menu)
-        {
-            var fOuter = SupportFragmentManager.FindFragmentByTag("OuterUserFragment");
-            var fInner = SupportFragmentManager.FindFragmentByTag("InnerUserFragment");
-            if (fOuter != null && fOuter.IsVisible)
-            {
-                MenuInflater.Inflate(Resource.Menu.messages_overview_list_menu, menu);
-            }
-            else if (fInner != null && fInner.IsVisible)
-            {
-                MenuInflater.Inflate(Resource.Menu.messages_inner_list_menu, menu);
-
-            }
-            else
-            {
-                MenuInflater.Inflate(Resource.Menu.messages_overview_list_menu, menu);
-            }
-            return base.OnCreateOptionsMenu(menu);
-        }
-
-        public override bool OnPrepareOptionsMenu(IMenu menu)
-        {
-            UiHelpers.SetMenuTitles(menu, MessagesInnerFragment.Username);
-            UiHelpers.SetIgnoreAddExclusive(menu, MessagesInnerFragment.Username);
-            return base.OnPrepareOptionsMenu(menu);
-        }
-
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), MessagesInnerFragment.Username, this, this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId)))
+            // Inner and overview fragments contribute their own menu items via IMenuProvider.
+            // The activity only handles the toolbar back arrow, which is not part of either menu.
+            if (item.ItemId == Android.Resource.Id.Home)
             {
+                OnBackPressedDispatcher.OnBackPressed();
                 return true;
-            }
-            switch (item.ItemId)
-            {
-                case Resource.Id.message_user_action:
-                    ShowEditTextMessageUserDialog();
-                    return true;
-                case Resource.Id.action_add_to_user_list:
-                    UserListService.AddUserAPI(this, MessagesInnerFragment.Username, new Action(() => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.success_added_user), ToastLength.Short); }));
-                    return true;
-                case Resource.Id.action_search_files:
-                    SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
-                    SearchTabHelper.SearchTargetChosenUser = MessagesInnerFragment.Username;
-                    //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                    Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(MainActivity.GoToSearchExtra, true);
-                    this.StartActivity(intent);
-                    return true;
-                case Resource.Id.action_browse_files:
-                    Action<View> action = new Action<View>((v) =>
-                    {
-                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(MainActivity.GoToBrowseExtra, true);
-                        this.StartActivity(intent);
-                    });
-                    View snackView = this.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId);
-                    BrowseService.RequestFilesApi(MessagesInnerFragment.Username, snackView, action, null);
-                    return true;
-                case Android.Resource.Id.Home:
-                    OnBackPressedDispatcher.OnBackPressed();
-                    return true;
-                case Resource.Id.action_delete_messages:
-                    var usernameToDelete = MessagesInnerFragment.Username;
-                    var (deletedMessages, deletedReadCount) = MessageController.DeleteMessageFromUserWithUndo(MessagesInnerFragment.Username);
-                    Snackbar sb1 = Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content),
-                            string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
-                            usernameToDelete),
-                            Snackbar.LengthLong)
-                        .SetAction(Resource.String.undo, (View v) => ItemTouchHelperMessageOverviewCallback.UndoSingleUserMessagesDeleteAction(null, (usernameToDelete, deletedMessages, deletedReadCount), -1, true)) ;
-
-                    sb1.Show();
-                    this.SwitchToOuter(SupportFragmentManager.FindFragmentByTag("InnerUserFragment"), true);
-                    return true;
-                case Resource.Id.action_delete_all_messages:
-                    if (MessageController.Messages.Count == 0) //nullref
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.deleted_all_no_messages), ToastLength.Long);
-                        return true;
-                    }
-                    var (deletedAllMessages, deletedAllLastReadMessageCounts) = MessageController.DeleteAllMessagesWithUndo();
-                    this.GetOverviewFragment().RefreshAdapter();
-                    Snackbar sb = Snackbar.Make(this.GetOverviewFragment().View, SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong).SetAction("Undo", (View v) => GetUndoDeleteAllSnackBarAction(deletedAllMessages, deletedAllLastReadMessageCounts));
-                    sb.Show();
-                    return true;
-
             }
             return base.OnOptionsItemSelected(item);
         }
-
-        //note: when the undo snackbar is up and you click into an inner then the snackbar is still there, I tested it and clicking undo works properly in this case :)
-
 
         public void GetUndoDeleteAllSnackBarAction(Dictionary<string, List<Message>> deletedMessageDictionary, Dictionary<string, int> deletedMessageCountDictionary)
         {
@@ -214,7 +127,7 @@ namespace Seeker
 
         public MessagesOverviewFragment GetOverviewFragment()
         {
-            return (SupportFragmentManager.FindFragmentByTag("OuterUserFragment") as MessagesOverviewFragment);
+            return (SupportFragmentManager.FindFragmentByTag(OuterFragmentTag) as MessagesOverviewFragment);
         }
 
         private static AndroidX.AppCompat.App.AlertDialog messageUserDialog = null;
@@ -283,61 +196,14 @@ namespace Seeker
                 }
             });
 
-            System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
-            {
-                if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Search) //ImeNull if being called due to the enter key being pressed. (MSDN) but ImeNull gets called all the time....
-                {
-                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)this.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(this.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Logger.Firebase(ex.Message + " error closing keyboard");
-                    }
-                    //Do the Message User logic
-                    eventHandler(sender, null);
-                }
-            };
+            var editorAction = UiHelpers.MakeDialogEditorAction(this.FindViewById(Android.Resource.Id.Content)?.RootView, eventHandler);
 
 
-            System.EventHandler<TextView.KeyEventArgs> keypressAction = (object sender, TextView.KeyEventArgs e) =>
-            {
-                if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
-                {
-                    Logger.Debug("keypress: " + e.Event.KeyCode.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(this.FindViewById(Android.Resource.Id.Content).RootView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Logger.Firebase(ex.Message + " error closing keyboard");
-                    }
-                    //Do the Browse Logic...
-                    eventHandler(sender, null);
-                }
-                else
-                {
-                    e.Handled = false;
-                }
-            };
+            var keypressAction = UiHelpers.MakeDialogKeyPressAction(this.FindViewById(Android.Resource.Id.Content)?.RootView, eventHandler);
 
             input.KeyPress += keypressAction;
             input.EditorAction += editorAction;
-            input.FocusChange += Input_FocusChange;
+            input.FocusChange += UiHelpers.OnFocusAdjustNothing;
 
             builder.SetPositiveButton(Resource.String.okay, eventHandler);
             builder.SetNegativeButton(Resource.String.cancel, eventHandlerCancel);
@@ -348,23 +214,11 @@ namespace Seeker
             UiHelpers.DoNotEnablePositiveUntilText(messageUserDialog, input);
         }
 
-        private void Input_FocusChange(object sender, View.FocusChangeEventArgs e)
-        {
-            try
-            {
-                SeekerState.ActiveActivityRef.Window.SetSoftInputMode(SoftInput.AdjustNothing);
-            }
-            catch (System.Exception err)
-            {
-                Logger.Firebase("MainActivity_FocusChange" + err.Message);
-            }
-        }
-
 
         private void onBackPressedAction(OnBackPressedCallback callback)
         {
             //if f is non null and f is visible then that means you are backing out from the inner user fragment..
-            var f = SupportFragmentManager.FindFragmentByTag("InnerUserFragment");
+            var f = SupportFragmentManager.FindFragmentByTag(InnerFragmentTag);
             if (f != null && f.IsVisible)
             {
                 if (SupportFragmentManager.BackStackEntryCount == 0) //this is if we got to inner messages through a notification, in which case we are done..
@@ -389,7 +243,6 @@ namespace Seeker
                     }
                 }
                 AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
-                myToolbar.InflateMenu(Resource.Menu.messages_overview_list_menu);
                 myToolbar.Title = SeekerState.ActiveActivityRef.GetString(Resource.String.messages);
                 this.SetSupportActionBar(myToolbar);
                 this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
@@ -397,6 +250,10 @@ namespace Seeker
                 SupportFragmentManager.BeginTransaction().Remove(f).Commit();
 
                 //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesOverviewFragment(), "OuterUserFragment").Commit();
+                callback.Enabled = false;
+                OnBackPressedDispatcher.OnBackPressed();
+                // we are now on outer — leave the callback disabled so predictive back works on the overview list
+                return;
             }
             callback.Enabled = false;
             OnBackPressedDispatcher.OnBackPressed();
@@ -412,21 +269,20 @@ namespace Seeker
         public void SwitchToOuter(AndroidX.Fragment.App.Fragment innerFragment, bool forDeleteMessage)
         {
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
-            myToolbar.InflateMenu(Resource.Menu.messages_overview_list_menu);
             myToolbar.Title = SeekerState.ActiveActivityRef.GetString(Resource.String.messages);
             this.SetSupportActionBar(myToolbar);
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
-            var outerExists = SupportFragmentManager.FindFragmentByTag("OuterUserFragment");
+            var outerExists = SupportFragmentManager.FindFragmentByTag(OuterFragmentTag);
             if (outerExists != null)
             {
                 SupportFragmentManager.PopBackStack();
             }
             else
             {
-                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesOverviewFragment(), "OuterUserFragment").Commit();
+                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesOverviewFragment(), OuterFragmentTag).Commit();
             }
-            //this.SupportActionBar.InvalidateOptionsMenu(); occurs to soon... outer fragment is not yet visible...
+            backPressedCallback.Enabled = false;
         }
 
         protected override void OnNewIntent(Intent intent)
@@ -438,12 +294,13 @@ namespace Seeker
                 string goToUsersMessages = intent.GetStringExtra(MessageController.FromUserName);
                 if (goToUsersMessages == string.Empty)
                 {
-                    Logger.Firebase("empty goToUsersMessages");
+                    Logger.Firebase(EmptyGoToUsersMessagesLog);
                 }
                 else
                 {
                     SupportFragmentManager.BeginTransaction().Remove(new MessagesInnerFragment()).Commit();
-                    SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(goToUsersMessages), "InnerUserFragment").Commit();
+                    SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(goToUsersMessages), InnerFragmentTag).Commit();
+                    backPressedCallback.Enabled = true;
                     //switch in that fragment...
                     //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame,new MessagesOverviewFragment()).Commit();
                 }
@@ -452,6 +309,9 @@ namespace Seeker
 
         protected override void OnResume()
         {
+            // this needs to be set here. otherwise we can create a new messages activity, go back to previous
+            // and the ref will point to the now finished activity.
+            MessagesActivityRef = this;
             base.OnResume();
         }
 
@@ -459,7 +319,7 @@ namespace Seeker
         {
             base.OnCreate(savedInstanceState);
 
-            var backPressedCallback = new GenericOnBackPressedCallback(true, onBackPressedAction);
+            backPressedCallback = new GenericOnBackPressedCallback(false, onBackPressedAction);
             OnBackPressedDispatcher.AddCallback(backPressedCallback);
 
             if (savedInstanceState == null)
@@ -477,57 +337,51 @@ namespace Seeker
 
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
-            myToolbar.InflateMenu(Resource.Menu.messages_overview_list_menu);
             myToolbar.Title = SeekerState.ActiveActivityRef.GetString(Resource.String.messages);
             this.SetSupportActionBar(myToolbar);
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
             //this.SupportActionBar.SetDisplayShowHomeEnabled(true);
 
-            bool startWithUserFragment = false;
-
-            if (savedInstanceState != null && savedInstanceState.GetBoolean("SaveStateAtInner"))
+            // FragmentManager has already auto-restored fragments from savedInstanceState in base.OnCreate.
+            // If the inner fragment was showing before recreation, it's already back — just re-enable the back callback.
+            bool startWithUserFragment = SupportFragmentManager.FindFragmentByTag(InnerFragmentTag) != null;
+            if (startWithUserFragment)
             {
-                startWithUserFragment = true;
-                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(MessagesInnerFragment.Username), "InnerUserFragment").Commit();
-                //savedInstanceState.Clear(); //else we will keep doing the first even if the second was done by intent..
+                backPressedCallback.Enabled = true;
             }
-            else if (Intent != null) //if an intent started this activity
+            else if (Intent != null && Intent.GetBooleanExtra(MessageController.ComingFromMessageTapped, false))
             {
-                if (Intent.GetBooleanExtra(MessageController.ComingFromMessageTapped, false))
+                Logger.Debug("coming from message tapped");
+                string goToUsersMessages = Intent.GetStringExtra(MessageController.FromUserName);
+                if (goToUsersMessages == string.Empty)
                 {
-                    Logger.Debug("coming from message tapped");
-                    string goToUsersMessages = Intent.GetStringExtra(MessageController.FromUserName);
-                    if (goToUsersMessages == string.Empty)
-                    {
-                        Logger.Firebase("empty goToUsersMessages");
-                    }
-                    else
-                    {
-                        startWithUserFragment = true;
-                        SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(goToUsersMessages), "InnerUserFragment").Commit();
-                        //switch in that fragment...
-                        //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame,new MessagesOverviewFragment()).Commit();
-                    }
+                    Logger.Firebase(EmptyGoToUsersMessagesLog);
+                }
+                else
+                {
+                    startWithUserFragment = true;
+                    SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesInnerFragment(goToUsersMessages), InnerFragmentTag).Commit();
+                    backPressedCallback.Enabled = true;
                 }
             }
 
-            if (!startWithUserFragment)
+            if (!startWithUserFragment && SupportFragmentManager.FindFragmentByTag(OuterFragmentTag) == null)
             {
-                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesOverviewFragment(), "OuterUserFragment").Commit();
+                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new MessagesOverviewFragment(), OuterFragmentTag).Commit();
             }
-
-            //this.SupportActionBar.SetBackgroundDrawable turn off overflow....
-
-            //ListView userList = this.FindViewById<ListView>(Resource.Id.userList);
-
-            //RefreshUserList();
         }
     }
 
     [BroadcastReceiver(Exported = false, Label = "OurMessagesBroadcastReceiver")]
     public class MessagesBroadcastReceiver : BroadcastReceiver
     {
+        public const string ExtraUsername = "seeker_username";
+        public const string ActionClearNotification = "seeker_clear_notification";
+        public const string ActionMarkAsRead = "seeker_mark_as_read";
+        public const string ActionDirectReply = "seeker_direct_reply";
+        public const string KeyTextResult = "key_text_result";
+
         /// <summary>
         /// Just in case we press it while on the message overview page
         /// </summary>
@@ -535,16 +389,11 @@ namespace Seeker
 
         public override void OnReceive(Context context, Intent intent)
         {
-            //bool directReply = intent.GetBooleanExtra("direct_reply_extra",false);
+            string uname = intent.GetStringExtra(ExtraUsername);
 
-            //bool markAsRead = intent.GetBooleanExtra("mark_as_read_extra", false);
-            string uname = intent.GetStringExtra("seeker_username");
-
-            //bool delete = intent.GetBooleanExtra("clear_notif_extra", false);
-
-            bool delete = intent.Action == "seeker_clear_notification";
-            bool markAsRead = intent.Action == "seeker_mark_as_read";
-            bool directReply = intent.Action == "seeker_direct_reply";
+            bool delete = intent.Action == ActionClearNotification;
+            bool markAsRead = intent.Action == ActionMarkAsRead;
+            bool directReply = intent.Action == ActionDirectReply;
 
             Logger.Debug(intent.Action == null ? "MessagesBroadcastReceiver null" : ("MessagesBroadcastReceiver " + intent.Action));
 
@@ -576,7 +425,7 @@ namespace Seeker
                 MarkAsReadFromNotification?.Invoke(null, uname);
                 if (remoteInputBundle != null)
                 {
-                    string replyText = remoteInputBundle.GetString("key_text_result");
+                    string replyText = remoteInputBundle.GetString(KeyTextResult);
                     //Message msg = new Message(PreferencesState.Username, -1, false, Helpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, false);
                     Logger.Debug("direct reply " + replyText + " " + uname);
                     MessageController.SendMessageAPI(new Message(uname, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, replyText, true, SentStatus.Pending), true, context);

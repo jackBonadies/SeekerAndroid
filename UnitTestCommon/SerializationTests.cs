@@ -116,6 +116,36 @@ namespace UnitTestCommon
         }
 
         [Test]
+        public void Message_RoundTrip_LocalDateTimeRecomputed()
+        {
+            var utc = new DateTime(2026, 5, 9, 19, 0, 0, DateTimeKind.Utc);
+
+            var messages = new ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>>();
+            var inner = new ConcurrentDictionary<string, List<Message>>();
+            inner["userX"] = new List<Message>
+            {
+                new Message("userX", 1, false, utc.ToLocalTime(), utc, "hello", false),
+            };
+            messages["user1"] = inner;
+
+            var serialized = SerializationHelper.SaveMessagesToString(messages);
+            var restored = SerializationHelper.RestoreMessagesFromString(serialized);
+            var m = restored["user1"]["userX"][0];
+
+            Assert.AreEqual(utc.Ticks, m.UtcDateTime.Ticks, "UtcDateTime ticks must round-trip");
+
+            var expectedLocal = DateTime.SpecifyKind(m.UtcDateTime, DateTimeKind.Utc).ToLocalTime();
+            Assert.AreEqual(expectedLocal.Ticks, m.LocalDateTime.Ticks, "LocalDateTime must equal UtcDateTime.ToLocalTime()");
+            Assert.AreEqual(DateTimeKind.Local, m.LocalDateTime.Kind, "LocalDateTime must be Kind=Local");
+
+            // In any non-UTC timezone, local and utc ticks must differ.
+            if (TimeZoneInfo.Local.GetUtcOffset(utc) != TimeSpan.Zero)
+            {
+                Assert.AreNotEqual(m.UtcDateTime.Ticks, m.LocalDateTime.Ticks, "LocalDateTime should differ from UtcDateTime outside UTC");
+            }
+        }
+
+        [Test]
         public void UploadDirectoryInfo_RoundTrip_Json()
         {
             var infos = new List<UploadDirectoryInfo>
@@ -146,7 +176,7 @@ namespace UnitTestCommon
         [Test]
         public void SavedStateSearchTabHeader_RoundTrip_Json()
         {
-            var header = SavedStateSearchTabHeader.GetSavedStateHeaderFromTab("my search term", 42, 637500000000000000L);
+            var header = SavedStateSearchTabHeader.GetSavedStateHeaderFromTab("my search term", 42, 637500000000000000L, 5);
 
             var dict = new Dictionary<int, SavedStateSearchTabHeader> { { 1, header } };
             var serialized = SerializationHelper.SaveSavedStateHeaderDictToString(dict);
@@ -157,6 +187,7 @@ namespace UnitTestCommon
             Assert.AreEqual("my search term", restored[1].LastSearchTerm);
             Assert.AreEqual(42, restored[1].LastSearchResultsCount);
             Assert.AreEqual(637500000000000000L, restored[1].LastRanTime);
+            Assert.AreEqual(5, restored[1].UnseenCount);
         }
 
         [Test]

@@ -54,9 +54,6 @@
     <string name="no_messages">Нет сообщений. Нажмите «+», чтобы начать.</string>
     <string name="messages">Сообщения</string>
     <string name="browse_files">Обзор файлов</string>
-    <string name="chatroomListLoading">
-        Запрашиваем список доступных чат комнат. Пожалуйста, подождите...
-    </string>
     <string name="privateRoomCreation">Создаем новую приватную комнату...</string>
     <string name="requesting_room_list">Обновить список комнат</string>
     <string name="requesting_user_info">Запрос информации о пользователе</string>
@@ -100,7 +97,6 @@
     <string name="clear">Очистить</string>
     <string name="get_user_info">Получить информацию о пользователе</string>
     <string name="quick_info">Краткая информация</string>
-    <string name="filer_files">Фильтр файлов</string>
     <string name="enter_user_to_browse">Введите имя пользователя</string>
     <string name="all_target">Все пользователи</string>
     <string name="target_user_list">Список пользователей</string>
@@ -125,7 +121,6 @@
 
     <string name="enter_listening_port">Введите порт для прослушивания</string>
 
-    <string name="create_chatroom_name">Имя комнаты</string>
     <string name="create_chatroom_private">Сделать приватной</string>
 
     <string name="search_here">Поиск</string>
@@ -182,7 +177,7 @@
     <string name="new_search_tab">Новая вкладка</string>
     <string name="filter_search_results_here">Введите фильтр...</string>
     <string name="persist_it">Закрепить</string>
-    <string name="type_chatroom_ticker_message">Введите закрепленное сообщение</string>
+    <string name="type_chatroom_ticker_message">Закреплённое сообщение</string>
 
     <string name="change_download_folder">Изменить папку для загрузок</string>
     <string name="max_search_results">Макс. кол-во результатов поиска:</string>
@@ -291,7 +286,6 @@
     <string name="room_data_still_loading">
         Слишком быстро! Все еще загружаем данные комнаты...
     </string>
-    <string name="loading_current_ticker">Загрузка текущего тикера...</string>
     <string name="must_be_logged_to_browse">
         Необходимо войти для просмотра пользователя
     </string>
@@ -575,7 +569,7 @@
     <string name="mod">Мод</string>
 
     <string name="user_">Пользователь:</string>
-    <string name="set_ticker">Закрепить сообщение:</string>
+    <string name="set_ticker">Закрепить сообщение</string>
     <string name="setticker">Закрепить сообщение</string>
     <string name="chatrooms">Чаты</string>
     <string name="create_chatroom_">Создать чат комнату</string>
@@ -598,10 +592,8 @@
     <string name="online">Онлайн</string>
     <string name="offline">Не в сети</string>
 
-    <string name="auto_join_on">Авто вход [Включен]</string>
-    <string name="auto_join_off">Авто вход [Отключен]</string>
-    <string name="notification_on">Уведомления [On]</string>
-    <string name="notification_off">Уведомления [Off]</string>
+    <string name="auto_join">Авто вход</string>
+    <string name="notification">Уведомления</string>
     <string name="copy_text">Копировать текст</string>
     <string name="ignore_user">Игнорировать пользователя</string>
     <string name="remove_user">Удалить пользователя</string>

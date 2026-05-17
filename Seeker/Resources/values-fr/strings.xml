@@ -54,9 +54,6 @@
     <string name="no_messages">Aucun message. Appuyez sur \"+\" pour commencer.</string>
     <string name="messages">Messages</string>
     <string name="browse_files">Parcourir les fichiers</string>
-    <string name="chatroomListLoading">
-        Requête de la liste des salons disponibles. Veuillez patienter...
-    </string>
     <string name="privateRoomCreation">Requête de création d\'un salon privé</string>
     <string name="requesting_room_list">Requête de la Liste des Salons</string>
     <string name="requesting_user_info">Requête des Infos d\'Utilisateur</string>
@@ -99,7 +96,6 @@ Nombre de dossiers : {5}
     <string name="clear">Nettoyer</string>
     <string name="get_user_info">Obtenir les Informations de l\'Utilisateur</string>
     <string name="quick_info">Information Rapide</string>
-    <string name="filer_files">Filtrer les Fichiers ici</string>
     <string name="enter_user_to_browse">Entrez l\'Utilisateur à Parcourir</string>
     <string name="all_target">Tous les Utilisateurs</string>
     <string name="target_user_list">Liste d’Utilisateurs</string>
@@ -124,7 +120,6 @@ Nombre de dossiers : {5}
 
     <string name="enter_listening_port">Saisissez le port à écouter</string>
 
-    <string name="create_chatroom_name">Nom du salon à créer</string>
     <string name="create_chatroom_private">Rendre privé</string>
 
     <string name="search_here">Rechercher ici</string>
@@ -181,7 +176,7 @@ Nombre de dossiers : {5}
     <string name="new_search_tab">Nouvelle Recherche</string>
     <string name="filter_search_results_here">Filtrer les Résultats</string>
     <string name="persist_it">Epinglé</string>
-    <string name="type_chatroom_ticker_message">Poster sur le Salon</string>
+    <string name="type_chatroom_ticker_message">Message du ticker</string>
 
     <string name="change_download_folder">Changer de Dossier de Téléchargement</string>
     <string name="max_search_results">Nombre Max. de Résultats :</string>
@@ -290,7 +285,6 @@ Nombre de dossiers : {5}
     <string name="room_data_still_loading">
         Trop vite ! La récupération des donnés de la salle est toujours en cours...
     </string>
-    <string name="loading_current_ticker">Chargement du message...</string>
     <string name="must_be_logged_to_browse">
         Vous devez être connecté pour parcourir un utilisateur
     </string>
@@ -574,7 +568,7 @@ Nombre de dossiers : {5}
     <string name="mod">Modo</string>
 
     <string name="user_">Utilisateur :</string>
-    <string name="set_ticker">Changer le ticker :</string>
+    <string name="set_ticker">Changer le ticker</string>
     <string name="setticker">Changer le ticker</string>
     <string name="chatrooms">Salons de discussion</string>
     <string name="create_chatroom_">Créer un salon de discussion</string>
@@ -597,10 +591,8 @@ Nombre de dossiers : {5}
     <string name="online">En ligne</string>
     <string name="offline">Hors ligne</string>
 
-    <string name="auto_join_on">Rejoindre automatiquement [On]</string>
-    <string name="auto_join_off">Rejoindre automatiquement [Off]</string>
-    <string name="notification_on">Notifications [On]</string>
-    <string name="notification_off">Notifications [Off]</string>
+    <string name="auto_join">Rejoindre automatiquement</string>
+    <string name="notification">Notifications</string>
     <string name="copy_text">Copier le texte</string>
     <string name="ignore_user">Ignorer l\'utilisateur</string>
     <string name="remove_user">Retirer l\'utilisateur</string>

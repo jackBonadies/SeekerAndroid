@@ -57,6 +57,23 @@ namespace Seeker
             }
         }
 
+        public static MessagePackSerializerOptions MessageOptions
+        {
+            get
+            {
+                var messageResolver = MessagePack.Resolvers.CompositeResolver.Create(
+                    new IMessagePackFormatter[]
+                    {
+                        new MessageFormatter(),
+                    },
+                    new IFormatterResolver[]
+                    {
+                        StandardResolver.Instance
+                    });
+                return MessagePackSerializerOptions.Standard.WithResolver(messageResolver);
+            }
+        }
+
         public static MessagePackSerializerOptions UserListOptions
         {
             get
@@ -257,14 +274,14 @@ namespace Seeker
 
         public static string SaveMessagesToString(ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>> rootMessages)
         {
-            var byteArray = MessagePack.MessagePackSerializer.Serialize(rootMessages);
+            var byteArray = MessagePack.MessagePackSerializer.Serialize(rootMessages, MessageOptions);
             return Convert.ToBase64String(byteArray);
         }
 
         public static ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>> RestoreMessagesFromString(string rootMessagesString)
         {
             var bytesArray = Convert.FromBase64String(rootMessagesString);
-            return MessagePack.MessagePackSerializer.Deserialize<ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>>>(bytesArray);
+            return MessagePack.MessagePackSerializer.Deserialize<ConcurrentDictionary<string, ConcurrentDictionary<string, List<Message>>>>(bytesArray, MessageOptions);
         }
 
 
@@ -278,6 +295,16 @@ namespace Seeker
         public static List<SearchResponse> RestoreSearchResponsesFromStream(System.IO.Stream inputStream)
         {
                 return MessagePack.MessagePackSerializer.Deserialize<List<SearchResponse>>(inputStream, options: SearchResponseOptions);
+        }
+
+        public static byte[] SaveUnseenIndicesToByteArray(int[] indices)
+        {
+            return MessagePack.MessagePackSerializer.Serialize(indices);
+        }
+
+        public static int[] RestoreUnseenIndicesFromStream(System.IO.Stream inputStream)
+        {
+            return MessagePack.MessagePackSerializer.Deserialize<int[]>(inputStream);
         }
     }
 }

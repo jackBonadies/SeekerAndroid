@@ -54,15 +54,12 @@
     <string name="no_messages">Geen berichten. Druk op \"+\" om te beginnen.</string>
     <string name="messages">Berichten</string>
     <string name="browse_files">Door bestanden bladeren</string>
-    <string name="chatroomListLoading">
-        Lijst met beschikbare chatrooms opgevraagd. Een ogenblik geduld...
-    </string>
     <string name="privateRoomCreation">Verzoek voor aanmaken van privéruimte</string>
     <string name="requesting_room_list">Kamerlijst aanvragen</string>
     <string name="requesting_user_info">Verzoek om gebruikersinfo</string>
     <string name="room_list_received">Kamerlijst ontvangen</string>
 
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Verlanglijst</string>
     <string name="wishlist_bold">
@@ -99,7 +96,6 @@ Aantal mappen: {5}
     <string name="clear">Wissen</string>
     <string name="get_user_info">Gebruikerinfo ophalen</string>
     <string name="quick_info">Beknopte Info</string>
-    <string name="filer_files">Hier bestanden filteren</string>
     <string name="enter_user_to_browse">Voer gebruiker in om door te bladeren</string>
     <string name="all_target">Alle Gebruikers</string>
     <string name="target_user_list">Gebruiker Lijst</string>
@@ -124,7 +120,6 @@ Aantal mappen: {5}
 
     <string name="enter_listening_port">Voer Poort om te luisteren in</string>
 
-    <string name="create_chatroom_name">Voer een chatkamer naam in</string>
     <string name="create_chatroom_private">Privé maken</string>
 
     <string name="search_here">Zoek Hier</string>
@@ -181,7 +176,7 @@ Aantal mappen: {5}
     <string name="new_search_tab">Nieuwe Zoekopdracht</string>
     <string name="filter_search_results_here">Hier Resultaten Filteren</string>
     <string name="persist_it">Vastgeplakt (sticky)</string>
-    <string name="type_chatroom_ticker_message">Voer Ticker Bericht In</string>
+    <string name="type_chatroom_ticker_message">Ticker Bericht</string>
 
     <string name="change_download_folder">Wijzig downloadmap</string>
     <string name="max_search_results">Max. aantal zoekresultaten:</string>
@@ -290,7 +285,6 @@ Aantal mappen: {5}
     <string name="room_data_still_loading">
         Te snel! Nog bezig met het ophalen van kamer gegevens...
     </string>
-    <string name="loading_current_ticker">Huidige ticker wordt geladen...</string>
     <string name="must_be_logged_to_browse">
         Je moet ingelogd zijn om een gebruiker te bladeren
     </string>
@@ -574,7 +568,7 @@ Aantal mappen: {5}
     <string name="mod">Mod</string>
 
     <string name="user_">User:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Create Chatroom</string>
@@ -597,10 +591,8 @@ Aantal mappen: {5}
     <string name="online">Online</string>
     <string name="offline">Offline</string>
 
-    <string name="auto_join_on">Auto Join [On]</string>
-    <string name="auto_join_off">Auto Join [Off]</string>
-    <string name="notification_on">Notifications [On]</string>
-    <string name="notification_off">Notifications [Off]</string>
+    <string name="auto_join">Auto Join</string>
+    <string name="notification">Notifications</string>
     <string name="copy_text">Copy Text</string>
     <string name="ignore_user">Ignore User</string>
     <string name="remove_user">Remove User</string>

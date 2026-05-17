@@ -891,7 +891,7 @@ namespace Seeker
             }
 
 
-            private class KeywordStats
+            private sealed class KeywordStats
             {
                 public int InvariantCount;
                 public Dictionary<string, int> RealCounts = new Dictionary<string, int>();

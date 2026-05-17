@@ -151,6 +151,7 @@ namespace Common
 
         public const string M_wishlist_tab = "_wishlist_tab_v2";
         public const string M_wishlist_tab_legacy = "_wishlist_tab";
+        public const string M_wishlist_unseen = "_wishlist_unseen";
         public const string M_wishlist_directory = "wishlist_dir";
 
         public const string M_fileshare_cache_dir = "fileshare_cache_dir";

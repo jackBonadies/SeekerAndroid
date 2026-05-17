@@ -6,6 +6,7 @@ using Android.Views;
 using Android.Widget;
 using Common;
 using Seeker.Extensions.SearchResponseExtensions;
+using Seeker.Helpers;
 using Seeker.Search;
 using Soulseek;
 
@@ -82,6 +83,8 @@ namespace Seeker
         protected LinearLayout viewToHideShow;
         protected FrameLayout expandClickArea;
         protected ImageView imageViewExpandable;
+        protected View viewNewIndicator;
+        protected LinearLayout primaryRow;
         protected bool hideLocked;
 
         public bool IsExpandable;
@@ -100,7 +103,33 @@ namespace Seeker
             viewToHideShow = FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
             expandClickArea = FindViewById<FrameLayout>(Resource.Id.expandClickArea);
             imageViewExpandable = FindViewById<ImageView>(Resource.Id.expandableClick);
+            primaryRow = FindViewById<LinearLayout>(Resource.Id.searchItemPrimaryRow)
+                ?? FindViewById<LinearLayout>(Resource.Id.relativeLayout1);
             hideLocked = PreferencesState.HideLockedResultsInSearch;
+        }
+
+        public bool HasNewIndicator => viewNewIndicator != null;
+
+        public void ApplyNewIndicator(bool isNew)
+        {
+            if (isNew)
+            {
+                if (viewNewIndicator == null)
+                {
+                    var bar = new View(Context);
+                    float density = Resources.DisplayMetrics.Density;
+                    bar.LayoutParameters = new LinearLayout.LayoutParams(
+                        (int)(4 * density), LinearLayout.LayoutParams.MatchParent);
+                    bar.SetBackgroundColor(UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.colorPrimary));
+                    primaryRow.AddView(bar, 0);
+                    viewNewIndicator = bar;
+                }
+                viewNewIndicator.Visibility = ViewStates.Visible;
+            }
+            else if (viewNewIndicator != null)
+            {
+                viewNewIndicator.Visibility = ViewStates.Gone;
+            }
         }
 
         public void ApplyExpandableMode()

@@ -30,6 +30,7 @@ using Android.Util;
 using Android.Views;
 using Android.Widget;
 using System;
+using System.Threading.Tasks;
 
 using Common;
 namespace Seeker
@@ -59,12 +60,11 @@ namespace Seeker
             switch (item.ItemId)
             {
                 case Resource.Id.browseUsersFiles:
-                    BrowseService.RequestFilesApi(UserToView, null, null, null); //TODO2026 im pretty sure this is a bug... no action! unless a default one is used later on..
+                    BrowseService.RequestFilesApi(UserToView, null); 
                     return true;
                 case Resource.Id.searchUserFiles:
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
                     SearchTabHelper.SearchTargetChosenUser = this.UserToView;
-                    //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
                     Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(MainActivity.GoToSearchExtra, true);
                     this.StartActivity(intent);
@@ -95,19 +95,24 @@ namespace Seeker
         private ObjectAnimator shimmerAnimSpeed, shimmerAnimFiles, shimmerAnimDirs;
 
         private View noPicture = null;
+        private TextView noPictureText = null;
         private ImageView picture = null;
         private TextView userBio = null;
+        private bool pictureFailedToLoad = false;
+        // Independent of userInfo.HasPicture, which is derived from picture != null on the
+        // stripped UserInfo we hold. This flag tracks "the peer originally sent a picture",
+        // sourced from UserListItem.HasPicture / the bundle / a self-user's UserInfo.
+        private bool hasPicture = false;
+        private bool pictureLoadInFlight = false;
 
         protected override void OnSaveInstanceState(Bundle outState)
         {
             outState.PutString("UserToView", UserToView);
             if (userInfo != null)
             {
-                outState.PutBoolean("UserInfo.HasPicture", userInfo.HasPicture);
-                if (userInfo.HasPicture)
-                {
-                    outState.PutByteArray("UserInfo.Picture", userInfo.Picture);
-                }
+                // Picture bytes are not in the bundle — they live in UserInfoPictureCacheService
+                // keyed by username, and survive process death via the disk tier.
+                outState.PutBoolean("UserInfo.HasPicture", hasPicture);
                 outState.PutString("UserInfo.Description", userInfo.Description);
                 outState.PutInt("UserInfo.QueueLength", userInfo.QueueLength);
                 outState.PutInt("UserInfo.UploadSlots", userInfo.UploadSlots);
@@ -146,17 +151,13 @@ namespace Seeker
 
                     if (savedInstanceState.ContainsKey("UserInfo.HasPicture"))
                     {
-                        bool hasPic = savedInstanceState.GetBoolean("UserInfo.HasPicture", false);
-                        byte[] pic = null;
-                        if (hasPic)
-                        {
-                            pic = savedInstanceState.GetByteArray("UserInfo.Picture");
-                        }
+                        hasPicture = savedInstanceState.GetBoolean("UserInfo.HasPicture", false);
                         string desc = savedInstanceState.GetString("UserInfo.Description", string.Empty);
                         int ql = savedInstanceState.GetInt("UserInfo.QueueLength");
                         int uploadSlots = savedInstanceState.GetInt("UserInfo.UploadSlots");
                         bool freeSlot = savedInstanceState.GetBoolean("UserInfo.HasFreeUploadSlot");
-                        userInfo = new Soulseek.UserInfo(desc, uploadSlots, ql, freeSlot, pic);
+                        // Picture bytes (if any) come from the cache by username at render time.
+                        userInfo = new Soulseek.UserInfo(desc, uploadSlots, ql, freeSlot, picture: null);
                     }
 
                     if (savedInstanceState.ContainsKey("userData.AverageSpeed"))
@@ -203,15 +204,18 @@ namespace Seeker
 
             if (UserToView == PreferencesState.Username)
             {
+                // viewing self
                 //for UserData we only care about Online Status, upload speed, file count, and dir count
                 userData = new Soulseek.UserData(UserToView, Soulseek.UserPresence.Online, PreferencesState.UploadSpeed, 0, SeekerState.SharedFileCache?.FileCount ?? 0, SeekerState.SharedFileCache?.DirectoryCount ?? 0, "");
                 userInfo = SeekerApplication.UserInfoResponseHandler(UserToView, null).Result; //the task is already completed.  (task.fromresult).
+                hasPicture = userInfo != null && userInfo.HasPicture && userInfo.Picture != null && userInfo.Picture.Length > 0;
             }
             else if (UserToView != null && RequestedUserInfoHelper.GetInfoForUser(UserToView) != null)
             {
                 UserListItem uli = RequestedUserInfoHelper.GetInfoForUser(UserToView);
                 userInfo = uli.UserInfo; //null ref on uli.
                 userData = uli.UserData;
+                hasPicture = uli.HasPicture;
             }
             else
             {
@@ -233,6 +237,7 @@ namespace Seeker
             SetupShimmerPlaceholder(shimmerDirs);
 
             noPicture = FindViewById(Resource.Id.user_info_no_picture);
+            noPictureText = FindViewById<TextView>(Resource.Id.user_info_no_picture_text);
             picture = FindViewById<ImageView>(Resource.Id.user_info_picture);
             userBio = FindViewById<TextView>(Resource.Id.textViewBio);
 
@@ -402,81 +407,186 @@ namespace Seeker
 
         private Bitmap loadedBitmap = null;
         private string originalImageMimetype = null;
+
+        private struct PictureLoadResult
+        {
+            public byte[] Bytes;        // null = cache miss
+            public Bitmap Bitmap;       // null with Bytes != null = decode failed
+            public int ViewWidth;
+            public int ViewHeight;
+            public string MimeType;
+        }
+
         private void SetPictureStatus()
         {
-            if (userInfo.HasPicture)
+            if (!hasPicture || string.IsNullOrEmpty(UserToView))
             {
+                pictureFailedToLoad = false;
+                ShowNoPictureView();
+                return;
+            }
+
+            if (loadedBitmap != null)
+            {
+                // Already decoded earlier in this activity instance — just re-assert visibility
+                // (e.g. coming back through OnResume after pause without rotation).
                 noPicture.Visibility = ViewStates.Gone;
                 picture.Visibility = ViewStates.Visible;
-                Tuple<int, int> dimensions = null;
-                string mimeType = null;
-                loadedBitmap = LoadBitmapFromImage(out dimensions, out mimeType);
-                //loadedBitmap will be null if image cannot be decoded.
-                //remember, the picture is simply a byte array that another user sends you.
-                //  it can be literally anything (a gif - which actually decodes fine, a .svg - 
-                //  which doesnt, a .txt, etc.). Nicotine for example allows any file to be selected.
-                if (loadedBitmap == null)
-                {
-                    SeekerApplication.Toaster.ShowToast("Failed to decode the user's picture.", ToastLength.Long);
-                    string uname = userData != null ? userData.Username : "no user";
-                    Logger.Firebase("FAILURE TO DECODE USERS PICTURE " + uname);
-                    return;
-                }
-                originalImageMimetype = mimeType;
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(dimensions.Item1, dimensions.Item2);
-                layoutParams.Gravity = GravityFlags.CenterHorizontal;
-                picture.LayoutParameters = (layoutParams);
-                picture.SetImageBitmap(loadedBitmap);
-                picture.RequestLayout();
+                return;
             }
-            else
+
+            if (pictureLoadInFlight)
             {
-                noPicture.Visibility = ViewStates.Visible;
-                picture.Visibility = ViewStates.Gone;
+                return;
+            }
+
+            // WindowManager.DefaultDisplay must be touched on the UI thread; capture the
+            // metrics here and pass them into the worker so the decode can run off-thread.
+            var displayMetrics = new Android.Util.DisplayMetrics();
+            this.WindowManager.DefaultDisplay.GetMetrics(displayMetrics);
+            int screenWidthPx = displayMetrics.WidthPixels;
+            int screenHeightPx = displayMetrics.HeightPixels;
+
+            // Hide both views during the load. A few-hundred-KB read + decode is typically
+            // fast enough that a placeholder would just flicker.
+            noPicture.Visibility = ViewStates.Gone;
+            picture.Visibility = ViewStates.Gone;
+
+            pictureLoadInFlight = true;
+            string requestedUser = UserToView;
+            var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
+
+            byte[] inMemory = userInfo?.Picture;
+            if (inMemory != null && inMemory.Length > 0)
+            {
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        var result = DecodeBitmap(inMemory, screenWidthPx, screenHeightPx);
+                        result.Bytes = inMemory;
+                        return result;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Firebase("Failed to decode user picture asynchronously: " + ex.Message);
+                        return default(PictureLoadResult);
+                    }
+                })
+                .ContinueWith(t => ApplyPictureLoadResult(t.Result, requestedUser), uiScheduler);
+                return;
+            }
+
+            Services.UserInfoPictureCacheService.Instance.GetAsync(requestedUser)
+                .ContinueWith(getTask =>
+                {
+                    try
+                    {
+                        byte[] bytes = getTask.Result;
+                        if (bytes == null)
+                        {
+                            return default(PictureLoadResult);
+                        }
+                        var result = DecodeBitmap(bytes, screenWidthPx, screenHeightPx);
+                        result.Bytes = bytes;
+                        return result;
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Firebase("Failed to decode user picture asynchronously: " + ex.Message);
+                        return default(PictureLoadResult);
+                    }
+                }, TaskScheduler.Default)
+                .ContinueWith(t => ApplyPictureLoadResult(t.Result, requestedUser), uiScheduler);
+        }
+
+        private void ApplyPictureLoadResult(PictureLoadResult result, string requestedUser)
+        {
+            pictureLoadInFlight = false;
+            if (IsFinishing || IsDestroyed)
+            {
+                return;
+            }
+            if (!string.Equals(requestedUser, UserToView, StringComparison.Ordinal))
+            {
+                // UserToView changed under us — drop this stale result.
+                return;
+            }
+            if (result.Bytes == null)
+            {
+                pictureFailedToLoad = true;
+                ShowNoPictureView();
+                return;
+            }
+            if (result.Bitmap == null)
+            {
+                // The picture is just a byte array another user sent — could be a .svg,
+                // .txt, etc. Nicotine lets peers attach any file. Surface decode failure.
+                SeekerApplication.Toaster.ShowToast("Failed to decode the user's picture.", ToastLength.Long);
+                string uname = userData != null ? userData.Username : "no user";
+                Logger.Firebase("FAILURE TO DECODE USERS PICTURE " + uname);
+                pictureFailedToLoad = true;
+                ShowNoPictureView();
+                return;
+            }
+
+            if (userInfo != null)
+            {
+                userInfo = userInfo.WithPicture(result.Bytes);
+            }
+            loadedBitmap = result.Bitmap;
+            originalImageMimetype = result.MimeType;
+
+            noPicture.Visibility = ViewStates.Gone;
+            picture.Visibility = ViewStates.Visible;
+            var layoutParams = new LinearLayout.LayoutParams(result.ViewWidth, result.ViewHeight);
+            layoutParams.Gravity = GravityFlags.CenterHorizontal;
+            picture.LayoutParameters = layoutParams;
+            picture.SetImageBitmap(loadedBitmap);
+            picture.RequestLayout();
+        }
+
+        private void ShowNoPictureView()
+        {
+            noPicture.Visibility = ViewStates.Visible;
+            picture.Visibility = ViewStates.Gone;
+            if (noPictureText != null)
+            {
+                noPictureText.SetText(pictureFailedToLoad
+                    ? Resource.String.user_picture_failed_to_load
+                    : Resource.String.user_has_no_pic);
             }
         }
 
-        private Bitmap LoadBitmapFromImage(out Tuple<int, int> widthHeightForImageView, out string mimeType)
+        // Pure decode + sizing math. No Android.Views.WindowManager access — caller must pass
+        // screen dimensions captured on the UI thread so this can run on a worker.
+        // Pixel 2 1920x1080 = 8MB fullscreen bitmap; Pixel 5 1080x2340 = 10MB; tablet 2560x1600 = 16MB.
+        // Result.Bitmap may be null if the bytes are not a decodable image.
+        private static PictureLoadResult DecodeBitmap(byte[] pictureBytes, int screenWidthPx, int screenHeightPx)
         {
-            //bounds check
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.InJustDecodeBounds = true;
-            BitmapFactory.DecodeByteArray(userInfo.Picture, 0, userInfo.Picture.Length, options);
+            BitmapFactory.DecodeByteArray(pictureBytes, 0, pictureBytes.Length, options);
             int imageHeight = options.OutHeight;
             int imageWidth = options.OutWidth;
-            mimeType = options.OutMimeType;
+            string mimeType = options.OutMimeType;
 
-            //pixel 2 screen resolution 1920x1080 pixels = 8MB for fullscreen bitmap
-            //pixel 5 screen resolution 1080x2340 pixels = 10MB for fullscreen bitmap
-            //samsung galaxy tablet 2560x1600 pixels = 16MB for fullscreen bitmap
-
-            //we are going to try to show the image as large as we can 
-            //with the width and height of the device as bounds.
-
-
-            Android.Util.DisplayMetrics displayMetrics = new Android.Util.DisplayMetrics();
-            this.WindowManager.DefaultDisplay.GetMetrics(displayMetrics);
-            int screenHeight = displayMetrics.HeightPixels;
-            int screenWidth = displayMetrics.WidthPixels;
+            int screenHeight = screenHeightPx;
+            int screenWidth = screenWidthPx;
             if (screenHeight > screenWidth)
             {
-                screenHeight = (int)(screenHeight * .7); //the .7 is arbitrary... we just dont want the picture to be filling up the screen to such an extent..
+                screenHeight = (int)(screenHeight * .7); //arbitrary; keeps the picture from filling the screen.
                 screenWidth = (int)(screenWidth * .95);
             }
             else
             {
-                screenWidth = (int)(screenWidth * .95); //landscape
+                screenWidth = (int)(screenWidth * .95);
                 screenHeight = (int)(screenHeight * .95);
             }
 
-
             double imageRatio = (double)imageHeight / (double)imageWidth;
             double screenRatio = (double)screenHeight / (double)screenWidth;
-            bool limitedByHeight = false;
-            if (imageRatio > screenRatio)
-            {
-                limitedByHeight = true;
-            }
+            bool limitedByHeight = imageRatio > screenRatio;
 
             int subsampling = 1;
             if (limitedByHeight)
@@ -487,15 +597,11 @@ namespace Seeker
             {
                 subsampling = Math.Max((int)(imageWidth / screenWidth), 1);
             }
-
-            // Calculate inSampleSize
-            options.InSampleSize = subsampling; //in the docs it says this rounds down to nearest power of two.. but it actually does work with any integer value!
-
-            // Decode bitmap with inSampleSize set
+            // Docs say this rounds to nearest power of two, but any integer actually works.
+            options.InSampleSize = subsampling;
             options.InJustDecodeBounds = false;
 
-            int imageViewHeight = 0;
-            int imageViewWidth = 0;
+            int imageViewHeight, imageViewWidth;
             if (limitedByHeight)
             {
                 imageViewHeight = screenHeight;
@@ -506,9 +612,13 @@ namespace Seeker
                 imageViewWidth = screenWidth;
                 imageViewHeight = (int)(imageViewWidth * imageRatio);
             }
-            widthHeightForImageView = new Tuple<int, int>(imageViewWidth, imageViewHeight);
-            return BitmapFactory.DecodeByteArray(userInfo.Picture, 0, userInfo.Picture.Length, options);
-
+            return new PictureLoadResult
+            {
+                Bitmap = BitmapFactory.DecodeByteArray(pictureBytes, 0, pictureBytes.Length, options),
+                ViewWidth = imageViewWidth,
+                ViewHeight = imageViewHeight,
+                MimeType = mimeType,
+            };
         }
 
 

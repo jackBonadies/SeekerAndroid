@@ -78,8 +78,13 @@ namespace Seeker.Search
         public const string FromWishlistStringID = "FromWishlistTabIDToGoTo";
         public static void SearchCompleted(int id)
         {
-            OldResultsToCompare.TryRemove(id, out _); 
-            int newUniqueResults = SearchTabHelper.SearchTabCollection[id].SearchResponses.Count - OldNumResults[id];
+            OldResultsToCompare.TryRemove(id, out _);
+            var completedTab = SearchTabHelper.SearchTabCollection[id];
+            lock (completedTab.SortHelperLockObject)
+            {
+                completedTab.UnseenCount = completedTab.UnseenResults?.Count ?? 0;
+            }
+            int newUniqueResults = completedTab.SearchResponses.Count - OldNumResults[id];
 
             if (newUniqueResults >= 1)
             {
@@ -138,9 +143,17 @@ namespace Seeker.Search
                     //this is incase someone is privileged (searching every 2 mins) and perhaps they only have 1 wishlist search.  we dont want the second to begin when the first hasnt even ended.
                     //there arent really any downsides if this happens actually....
 
-                    if (!SearchTabHelper.SearchTabCollection[oldestId].IsLoaded())
+                    var oldestTab = SearchTabHelper.SearchTabCollection[oldestId];
+                    if (!oldestTab.IsLoaded())
                     {
-                        SearchTabHelper.RestoreSearchResultsFromDisk(oldestId, SeekerState.ActiveActivityRef);
+                        if (oldestTab.DiskLoadTask != null)
+                        {
+                            oldestTab.DiskLoadTask.Wait();
+                        }
+                        else
+                        {
+                            SearchTabHelper.RestoreSearchResultsFromDisk(oldestId, SeekerState.ActiveActivityRef);
+                        }
                     }
 
 

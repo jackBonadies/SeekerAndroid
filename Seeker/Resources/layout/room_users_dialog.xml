@@ -1,33 +1,128 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:id="@+id/userListRoom"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/userListRoom"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/roomUsersDialogToolbar"
+    android:layout_height="match_parent">
+
+    <View
+        android:layout_width="32dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"
+        android:background="@drawable/search_bottom_sheet_drag_handle" />
+
+    <FrameLayout
+        android:id="@+id/roomUsersHeaderContainer"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/mainPurple"
-        android:minHeight="100dp"
-        app:titleTextColor="@android:color/white"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        app:popupTheme="@style/AppTheme.PopupOverlay"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp"
-    />
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/roomUsersHeaderTitleRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/roomUsersHeaderRoomName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="?attr/cellTextColorSubdued"
+                    android:singleLine="true"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/roomUsersHeaderMembersLine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textColor="?attr/normalTextColor" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/roomUsersHeaderSearch"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/baseline_search_white_24"
+                android:tint="?attr/normalTextColor"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/search_users_desc" />
+
+            <ImageButton
+                android:id="@+id/roomUsersHeaderSort"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="8dp"
+                android:layout_marginEnd="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/baseline_swap_vert_white_24"
+                android:tint="?attr/normalTextColor"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/sort_users_by_desc" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/roomUsersHeaderSearchRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+			android:layout_gravity="center"
+            android:paddingStart="12dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:visibility="gone">
+
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/roomUsersHeaderSearchView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:iconifiedByDefault="false"
+                app:queryBackground="@android:color/transparent" />
+
+            <ImageButton
+                android:id="@+id/roomUsersHeaderSearchClose"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="10dp"
+                android:layout_marginEnd="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_close_small"
+                android:tint="?attr/normalTextColor"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/back_desc" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/slightTint" />
+
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_below="@id/header1"
-        android:minWidth="25px"
-        android:minHeight="25px"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="120dp"
-        android:clipToPadding="false"
         android:id="@+id/recyclerViewUsers"
-    />
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingBottom="16dp"
+        android:clipToPadding="false" />
 </LinearLayout>

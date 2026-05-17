@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ImageButton
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/anchoredMenuOverflowButton"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:background="?attr/actionBarItemBackground"
+    android:src="@drawable/ic_more_vert_white_vector_32dp"
+    android:scaleType="centerInside"
+    android:contentDescription="@string/Options" />

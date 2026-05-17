@@ -47,15 +47,12 @@
     <string name="no_messages">Nincsenek üzenetek. A kezdéshez érintse meg a „+” jelet.</string>
     <string name="messages">Üzenetek</string>
     <string name="browse_files">Fájlok böngészése</string>
-    <string name="chatroomListLoading">
-        Az elérhető csevegőszobák listájának lekérése. Kérem várjon...
-    </string>
     <string name="privateRoomCreation">Privát szoba létrehozásának kérése</string>
     <string name="requesting_room_list">Szobalista lekérése</string>
     <string name="requesting_user_info">Felhasználói adatok lekérése</string>
     <string name="room_list_received">A szobalista átvéve</string>
 
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Kívánságlista</string>
     <string name="wishlist_bold">
@@ -92,7 +89,6 @@ Könyvtárak száma: {5}\"
     <string name="clear">Töröl</string>
     <string name="get_user_info">Felhasználói információ lekérése</string>
     <string name="quick_info">Gyors információ</string>
-    <string name="filer_files">Fájlok szűrése itt</string>
     <string name="enter_user_to_browse">Adja meg a felhasználó nevét a böngészéshez</string>
     <string name="all_target">Minden felhasználó</string>
     <string name="target_user_list">Felhasználó lista</string>
@@ -117,7 +113,6 @@ Könyvtárak száma: {5}\"
 
     <string name="enter_listening_port">Adja meg a figyelőportot</string>
 
-    <string name="create_chatroom_name">A létrehozandó szoba neve</string>
     <string name="create_chatroom_private">Legyen privát</string>
 
     <string name="search_here">Keresés itt</string>
@@ -174,7 +169,7 @@ Könyvtárak száma: {5}\"
     <string name="new_search_tab">New Search</string>
     <string name="filter_search_results_here">Filter Results</string>
     <string name="persist_it">Sticky</string>
-    <string name="type_chatroom_ticker_message">Type Ticker Message</string>
+    <string name="type_chatroom_ticker_message">Ticker Message</string>
 
     <string name="change_download_folder">Change Download Folder</string>
     <string name="max_search_results">Max Search Results:</string>
@@ -283,7 +278,6 @@ Könyvtárak száma: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>
@@ -567,7 +561,7 @@ Könyvtárak száma: {5}\"
     <string name="mod">Mod</string>
 
     <string name="user_">User:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Create Chatroom</string>
@@ -590,10 +584,8 @@ Könyvtárak száma: {5}\"
     <string name="online">Online</string>
     <string name="offline">Offline</string>
 
-    <string name="auto_join_on">Auto Join [On]</string>
-    <string name="auto_join_off">Auto Join [Off]</string>
-    <string name="notification_on">Notifications [On]</string>
-    <string name="notification_off">Notifications [Off]</string>
+    <string name="auto_join">Auto Join</string>
+    <string name="notification">Notifications</string>
     <string name="copy_text">Copy Text</string>
     <string name="ignore_user">Ignore User</string>
     <string name="remove_user">Remove User</string>

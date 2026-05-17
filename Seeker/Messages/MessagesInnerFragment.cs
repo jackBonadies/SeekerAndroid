@@ -1,4 +1,5 @@
 ﻿using Seeker.Chatroom;
+using Seeker.Browse;
 using Android.App;
 using Android.Content;
 using Android.OS;
@@ -7,6 +8,7 @@ using Android.Views;
 using Android.Widget;
 using AndroidX.Core.App;
 using AndroidX.RecyclerView.Widget;
+using Google.Android.Material.Snackbar;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,13 +24,11 @@ namespace Seeker.Messages
         private RecyclerView recyclerViewInner;
         private LinearLayoutManager recycleLayoutManager;
         private MessagesInnerRecyclerAdapter recyclerAdapter;
-        private List<Message> messagesInternal = null;
         private bool created = false;
         private View rootView = null;
         private EditText editTextEnterMessage = null;
         private ImageButton sendMessage = null;
-        public static string Username = null;
-        public static bool currentlyResumed = false;
+        public string Username = null;
 
         public MessagesInnerFragment() : base()
         {
@@ -40,6 +40,12 @@ namespace Seeker.Messages
             Username = username;
         }
 
+        public override void OnViewCreated(View view, Bundle savedInstanceState)
+        {
+            base.OnViewCreated(view, savedInstanceState);
+            Activity?.AddMenuProvider(new InnerMenuProvider(this), ViewLifecycleOwner, AndroidX.Lifecycle.Lifecycle.State.Resumed);
+        }
+
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             if (Username == null)
@@ -47,14 +53,11 @@ namespace Seeker.Messages
                 Username = savedInstanceState.GetString("Inner_Username_ToMessage");
             }
 
-
-
             MessageController.MessageReceived += OnMessageReceived;
             rootView = inflater.Inflate(Resource.Layout.messages_inner_layout, container, false);
             AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(rootView, new BottomOnlyInsetsListener());
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)MessagesActivity.MessagesActivityRef.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
-            myToolbar.InflateMenu(Resource.Menu.messages_inner_list_menu);
             myToolbar.Title = Username;
             MessagesActivity.MessagesActivityRef.SetSupportActionBar(myToolbar);
 
@@ -83,23 +86,21 @@ namespace Seeker.Messages
             recycleLayoutManager = new LinearLayoutManager(Activity);
             recycleLayoutManager.StackFromEnd = true;
             recycleLayoutManager.ReverseLayout = false;
-            if (MessageController.Messages.Keys.Contains(Username))
-            {
-                messagesInternal = MessageController.Messages[Username].ToList();
-            }
-            else
-            {
-                messagesInternal = new List<Message>();
-            }
-            recyclerAdapter = new MessagesInnerRecyclerAdapter(messagesInternal); //this depends tightly on MessageController... since these are just strings..
-            recyclerViewInner.SetAdapter(recyclerAdapter);
             recyclerViewInner.SetLayoutManager(recycleLayoutManager);
-            if (messagesInternal.Count != 0)
-            {
-                recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
-            }
+            RebuildMessagesAdapter();
             created = true;
             return rootView;
+        }
+
+        private void RebuildMessagesAdapter()
+        {
+            var messages = MessageController.Messages.GetValueOrDefault(Username, new List<Message>()).ToList();
+            recyclerAdapter = new MessagesInnerRecyclerAdapter(messages); //this depends tightly on MessageController... since these are just strings..
+            recyclerViewInner.SetAdapter(recyclerAdapter);
+            if (messages.Count != 0)
+            {
+                recyclerViewInner.ScrollToPosition(messages.Count - 1);
+            }
         }
 
         private void EditTextEnterMessage_KeyPress(object sender, View.KeyEventArgs e)
@@ -129,17 +130,72 @@ namespace Seeker.Messages
             }
         }
 
-        public override bool OnContextItemSelected(IMenuItem item)
+        private sealed class InnerMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
         {
-            switch (item.ItemId)
+            private readonly MessagesInnerFragment fragment;
+
+            public InnerMenuProvider(MessagesInnerFragment fragment)
             {
-                case 0: //"Copy Text"
-                    CommonHelpers.CopyTextToClipboard(this.Activity, ChatroomInnerFragment.MessagesLongClickData.MessageText);
-                    break;
-                default:
-                    return base.OnContextItemSelected(item);
+                this.fragment = fragment;
             }
-            return true;
+
+            public void OnCreateMenu(IMenu menu, MenuInflater menuInflater)
+            {
+                menuInflater.Inflate(Resource.Menu.messages_inner_list_menu, menu);
+            }
+
+            public void OnPrepareMenu(IMenu menu)
+            {
+                UiHelpers.SetMenuTitles(menu, fragment.Username);
+                UiHelpers.SetIgnoreAddExclusive(menu, fragment.Username);
+            }
+
+#pragma warning disable S1186 // Required override - omitting causes java.lang.AbstractMethodError at runtime
+            public void OnMenuClosed(IMenu menu)
+            {
+            }
+#pragma warning restore S1186
+
+            public bool OnMenuItemSelected(IMenuItem item)
+            {
+                var activity = fragment.Activity;
+                if (activity == null)
+                {
+                    return false;
+                }
+                var username = fragment.Username;
+                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, activity, activity.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId)))
+                {
+                    return true;
+                }
+                switch (item.ItemId)
+                {
+                    case Resource.Id.action_add_to_user_list:
+                        UserListService.AddUserAPI(activity, username, new Action(() => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.success_added_user), ToastLength.Short); }));
+                        return true;
+                    case Resource.Id.action_search_files:
+                        SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
+                        SearchTabHelper.SearchTargetChosenUser = username;
+                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
+                        intent.PutExtra(MainActivity.GoToSearchExtra, true);
+                        fragment.StartActivity(intent);
+                        return true;
+                    case Resource.Id.action_browse_files:
+                        BrowseService.RequestFilesApi(username, null);
+                        return true;
+                    case Resource.Id.action_delete_messages:
+                        var (deletedMessages, deletedReadCount) = MessageController.DeleteMessageFromUserWithUndo(username);
+                        Snackbar sb1 = Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content),
+                                string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
+                                username),
+                                Snackbar.LengthLong)
+                            .SetAction(Resource.String.undo, (View v) => ItemTouchHelperMessageOverviewCallback.UndoSingleUserMessagesDeleteAction(null, (username, deletedMessages, deletedReadCount), -1, true));
+                        sb1.Show();
+                        (activity as MessagesActivity)?.SwitchToOuter(fragment, true);
+                        return true;
+                }
+                return false;
+            }
         }
 
         public override void OnSaveInstanceState(Bundle outState)
@@ -176,13 +232,7 @@ namespace Seeker.Messages
         {
             if (created) //attach can happen before we created our view...
             {
-                messagesInternal = MessageController.Messages[Username].ToList();
-                recyclerAdapter = new MessagesInnerRecyclerAdapter(messagesInternal); //this depends tightly on MessageController... since these are just strings..
-                recyclerViewInner.SetAdapter(recyclerAdapter);
-                if (messagesInternal.Count != 0)
-                {
-                    recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
-                }
+                RebuildMessagesAdapter();
                 MessageController.MessageReceived -= OnMessageReceived;
                 MessageController.MessageReceived += OnMessageReceived;
             }
@@ -203,14 +253,12 @@ namespace Seeker.Messages
             }
 
             MessageController.UnsetAsUnreadAndSaveIfApplicable(Username);
-            currentlyResumed = true;
             base.OnResume();
         }
 
         public override void OnPause()
         {
             Logger.Debug("inner frag pause");
-            currentlyResumed = false;
             base.OnPause();
         }
 
@@ -222,20 +270,37 @@ namespace Seeker.Messages
 
         public void OnMessageReceived(object sender, Message msg)
         {
-            this.Activity.RunOnUiThread(new Action(() =>
+            if (msg == null)
             {
-                messagesInternal = MessageController.Messages[Username];
-                recyclerAdapter = new MessagesInnerRecyclerAdapter(messagesInternal); //this depends tightly on MessageController... since these are just strings..
-                recyclerViewInner.SetAdapter(recyclerAdapter);
-                recyclerAdapter.NotifyDataSetChanged();
-                if (messagesInternal.Count != 0)
+                Logger.Firebase("MessagesInnerFragment.OnMessageReceived: msg is null. Username=" + (Username ?? "<null>") + " sender=" + (sender?.GetType().FullName ?? "<null>"));
+                return;
+            }
+
+            if (msg.Username != Username)
+            {
+                return;
+            }
+
+            this.Activity?.RunOnUiThread(new Action(() =>
+            {
+                try
                 {
-                    recyclerViewInner.ScrollToPosition(messagesInternal.Count - 1);
+                    RebuildMessagesAdapter();
+                    if (IsResumed)
+                    {
+                        MessageController.MarkAsRead(Username);
+                    }
                 }
-                // If we're currently viewing this conversation, keep it marked as read
-                if (currentlyResumed && msg.Username == Username)
+                catch (Exception ex)
                 {
-                    MessageController.MarkAsRead(Username);
+                    Logger.Firebase("MessagesInnerFragment.OnMessageReceived UI lambda failed: "
+                        + ex.GetType().Name + ": " + ex.Message
+                        + " Username=" + (Username ?? "<null>")
+                        + " msgUsername=" + (msg.Username ?? "<null>")
+                        + " recyclerViewInner==null:" + (recyclerViewInner == null)
+                        + " rootView==null:" + (rootView == null)
+                        + " activity==null:" + (this.Activity == null)
+                        + " stack=" + ex.StackTrace);
                 }
             }));
         }

@@ -54,15 +54,12 @@
     <string name="no_messages">Sem mensagens. Toque em \"+\" para começar.</string>
     <string name="messages">Mensagens</string>
     <string name="browse_files">Navegar arquivos</string>
-    <string name="chatroomListLoading">
-        Solicitando lista de salas de bate-papo disponíveis. Por favor, aguarde...
-    </string>
     <string name="privateRoomCreation">Solicitando criação de sala privada</string>
     <string name="requesting_room_list">Solicitando lista de salas</string>
     <string name="requesting_user_info">Solicitando informações de usuário</string>
     <string name="room_list_received">Lista de salas recebida</string>
 
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Lista de Desejos</string>
     <string name="wishlist_bold">
@@ -99,7 +96,6 @@ Directory Count: {5}\"
     <string name="clear">Limpar</string>
     <string name="get_user_info">Obter informações de usuário</string>
     <string name="quick_info">Informações rápidas</string>
-    <string name="filer_files">Filtrar arquivos aqui</string>
     <string name="enter_user_to_browse">Inserir usuário para navegar</string>
     <string name="all_target">Todos os usuários</string>
     <string name="target_user_list">Lista de usuários</string>
@@ -124,7 +120,6 @@ Directory Count: {5}\"
 
     <string name="enter_listening_port">Digitar porta para escutar</string>
 
-    <string name="create_chatroom_name">Nome da sala a ser criada</string>
     <string name="create_chatroom_private">Tornar privada</string>
 
     <string name="search_here">Pesquisar aqui</string>
@@ -181,7 +176,7 @@ Directory Count: {5}\"
     <string name="new_search_tab">Nova busca</string>
     <string name="filter_search_results_here">Filtrar os resultados aqui</string>
     <string name="persist_it">Persistente</string>
-    <string name="type_chatroom_ticker_message">Digitar mensagem ticker</string>
+    <string name="type_chatroom_ticker_message">Mensagem ticker</string>
 
     <string name="change_download_folder">Alterar Diretório de Download</string>
     <string name="max_search_results">Máximo de resultados de pesquisa:</string>
@@ -290,7 +285,6 @@ Directory Count: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>
@@ -574,7 +568,7 @@ Directory Count: {5}\"
     <string name="mod">Mod</string>
 
     <string name="user_">User:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Create Chatroom</string>
@@ -597,10 +591,8 @@ Directory Count: {5}\"
     <string name="online">Online</string>
     <string name="offline">Offline</string>
 
-    <string name="auto_join_on">Auto Join [On]</string>
-    <string name="auto_join_off">Auto Join [Off]</string>
-    <string name="notification_on">Notifications [On]</string>
-    <string name="notification_off">Notifications [Off]</string>
+    <string name="auto_join">Auto Join</string>
+    <string name="notification">Notifications</string>
     <string name="copy_text">Copy Text</string>
     <string name="ignore_user">Ignore User</string>
     <string name="remove_user">Remove User</string>

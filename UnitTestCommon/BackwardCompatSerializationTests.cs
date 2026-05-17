@@ -91,29 +91,22 @@ namespace UnitTestCommon
         }
 
         [Test]
-        public void Messages_DeserializesFromDisk()
+        public async Task Messages_DeserializesFromDisk()
         {
             var raw = GetPreferenceString("Momento_Messages_v2");
             var result = SerializationHelper.RestoreMessagesFromString(raw);
 
-            Assert.IsTrue(result.ContainsKey("testingclient123"), "Missing outer key 'testingclient123'");
+            await Verifier.Verify(result).IgnoreMember<Message>(x => x.LocalDateTime).DontScrubDateTimes();
+        }
 
-            var messagesForUser = result["testingclient123"];
+        [Test]
+        public async Task Messages9Key_DeserializesFromDisk()
+        {
+            var path = Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "Messages", "messages_v2_9key.b64");
+            var raw = System.IO.File.ReadAllText(path);
+            var result = SerializationHelper.RestoreMessagesFromString(raw);
 
-            Assert.IsTrue(messagesForUser.ContainsKey("xiuxiu4"), "No messages with user 'xiuxiu4'");
-            var messages = messagesForUser["xiuxiu4"];
-            Assert.AreEqual(3, messages.Count);
-            Assert.AreEqual("hello", messages[0].MessageText);
-            Assert.AreEqual(-1, messages[0].Id);
-            Assert.AreEqual(true, messages[0].FromMe);
-            Assert.AreEqual(2026, messages[0].LocalDateTime.Year);
-            Assert.AreEqual(16, messages[0].LocalDateTime.Day);
-
-            Assert.AreEqual("hi", messages[1].MessageText);
-            Assert.AreEqual(457177, messages[1].Id);
-            Assert.AreEqual(false, messages[1].FromMe);
-            Assert.AreEqual(2026, messages[1].LocalDateTime.Year);
-            Assert.AreEqual(16, messages[1].LocalDateTime.Day);
+            await Verifier.Verify(result).IgnoreMember<Message>(x => x.LocalDateTime).DontScrubDateTimes();
         }
 
         [Test]

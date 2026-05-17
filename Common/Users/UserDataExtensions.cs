@@ -16,5 +16,10 @@ namespace Seeker
             }
             return new UserData(userData.Username, status, userData.AverageSpeed, userData.UploadCount, userData.FileCount, userData.DirectoryCount, userData.CountryCode, userData.SlotsFree);
         }
+
+        public static UserInfo WithPicture(this UserInfo userInfo, byte[]? picture = null)
+        {
+            return new UserInfo(userInfo.Description, userInfo.UploadSlots, userInfo.QueueLength, userInfo.HasFreeUploadSlot, picture);
+        }
     }
 }

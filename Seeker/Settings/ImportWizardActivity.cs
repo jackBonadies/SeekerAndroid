@@ -447,16 +447,12 @@ namespace Seeker
 
         public List<ImportItem> localDataSet; //tab id's
         public override int ItemCount => localDataSet.Count;
-        //public BrowseFragment Owner;
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {
 
             ImportItemView view = ImportItemView.inflate(parent);
             view.setupChildren();
             view.ImportItemCheckbox.CheckedChange += ImportItemCheckbox_CheckedChange;
-            // .inflate(R.layout.text_row_item, viewGroup, false);
-            //(view as SearchTabView).searchTabLayout.Click += SearchTabLayout_Click;
-            //(view as SearchTabView).removeSearch.Click += RemoveSearch_Click;
             return new ImportItemViewHolder(view as View);
 
 
@@ -468,25 +464,10 @@ namespace Seeker
             localDataSet[pos].isChecked = e.IsChecked;
         }
 
-        //private void View_Click(object sender, EventArgs e)
-        //{
-        //    int pos = ((sender as TextView).Parent.Parent as TreePathItemView).ViewHolder.BindingAdapterPosition;
-        //    Owner.GoUpDirectory(localDataSet.Count - pos - 2);
-        //}
-
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
         {
             (holder as ImportItemViewHolder).pathItemView.setItem(localDataSet[position]);
         }
-
-
-        //private void SearchTabLayout_Click(object sender, EventArgs e)
-        //{
-        //    position = ((sender as View).Parent.Parent as SearchTabView).ViewHolder.BindingAdapterPosition;
-        //    int tabToGoTo = localDataSet[position];
-        //    SearchFragment.Instance.GoToTab(tabToGoTo, false);
-        //    SearchTabDialog.Instance.Dismiss();
-        //}
 
         public ImportListAdapter(List<ImportItem> ti)
         {

@@ -18,7 +18,8 @@ namespace Seeker
         public UserRole Role;
         public Soulseek.UserStatus? UserStatus; //add user updates this..
         public Soulseek.UserData? UserData; //add user updates this as well...
-        public Soulseek.UserInfo? UserInfo; //this is the "picture and everything" one that we have to explicitly request from the peer (not server)...
+        public Soulseek.UserInfo? UserInfo; // can be metadata only — picture bytes live in UserInfoPictureCacheService keyed by Username.
+        public bool HasPicture; //preserved across the strip-on-store; UserInfo.HasPicture would otherwise be derived from picture != null.
         public bool DoesNotExist; //we dont allow someone to add a user that does not exist, BUT if they add someone and their username expires or such, then this will happen...
         public UserListItem(string username, UserRole role)
         {

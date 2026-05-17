@@ -137,7 +137,7 @@ namespace Seeker
 
         private enum RowKind { Leaf, Parent, Child }
 
-        private class SheetRow
+        private sealed class SheetRow
         {
             public RowKind Kind;
             public ChipDataItem Chip;       // null for the synthetic "Other" parent
@@ -427,7 +427,7 @@ namespace Seeker
             groupedAdapter?.NotifyCategoryChanged(category);
         }
 
-        private class RowAdapter : RecyclerView.Adapter
+        private sealed class RowAdapter : RecyclerView.Adapter
         {
             // Mirrors Material's MaterialCheckBox.STATE_* constants. Using local copies
             // because the Xamarin binding surface for these constants varies by version;
@@ -585,7 +585,7 @@ namespace Seeker
             }
         }
 
-        private class RowHolder : RecyclerView.ViewHolder
+        private sealed class RowHolder : RecyclerView.ViewHolder
         {
             public View TopSeparator;
             public ViewGroup Horizontal;

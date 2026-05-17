@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
+using System.Threading.Tasks;
 using Seeker.Helpers;
 using Common;
 using Common.Search;
@@ -31,8 +32,23 @@ namespace Seeker.Helpers
                 Logger.Firebase("HEADERS - Delete Search Results: FAILED TO DELETE");
             }
 
+            if (!legacy)
+            {
+                DeleteUnseenSidecar(wishlistSearchResultsToRemove, wishlist_dir);
+            }
+
             sw.Stop();
             Logger.Debug("HEADERS - Delete Search Results: " + sw.ElapsedMilliseconds);
+        }
+
+        private static void DeleteUnseenSidecar(int tabId, Java.IO.File wishlist_dir)
+        {
+            string unseenName = System.Math.Abs(tabId) + KeyConsts.M_wishlist_unseen;
+            Java.IO.File unseenFile = new Java.IO.File(wishlist_dir, unseenName);
+            if (unseenFile.Exists())
+            {
+                unseenFile.Delete();
+            }
         }
 
 
@@ -119,8 +135,105 @@ namespace Seeker.Helpers
 
         public static void SaveSearchResultsToDisk(int wishlistSearchResultsToSave, Context c)
         {
-            var searchResultsToSave = SearchTabHelper.SearchTabCollection[wishlistSearchResultsToSave].SearchResponses;
-            SaveSearchResultsToDisk_Imp(wishlistSearchResultsToSave, c, searchResultsToSave);
+            var tab = SearchTabHelper.SearchTabCollection[wishlistSearchResultsToSave];
+            SaveSearchResultsToDisk_Imp(wishlistSearchResultsToSave, c, tab.SearchResponses);
+            SaveUnseenSidecarToDisk(wishlistSearchResultsToSave, c, tab);
+        }
+
+        private static void SaveUnseenSidecarToDisk(int tabId, Context c, SearchTab tab)
+        {
+            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, KeyConsts.M_wishlist_directory);
+            if (!wishlist_dir.Exists())
+            {
+                wishlist_dir.Mkdir();
+            }
+
+            int[] indices;
+            lock (tab.SortHelperLockObject)
+            {
+                if (tab.UnseenResults == null || tab.UnseenResults.Count == 0 || tab.SearchResponses == null)
+                {
+                    DeleteUnseenSidecar(tabId, wishlist_dir);
+                    return;
+                }
+                var responses = tab.SearchResponses;
+                var idxList = new List<int>(tab.UnseenResults.Count);
+                for (int i = 0; i < responses.Count; i++)
+                {
+                    if (tab.UnseenResults.Contains(responses[i]))
+                    {
+                        idxList.Add(i);
+                    }
+                }
+                indices = idxList.ToArray();
+            }
+
+            string name = System.Math.Abs(tabId) + KeyConsts.M_wishlist_unseen;
+            byte[] arr = SerializationHelper.SaveUnseenIndicesToByteArray(indices);
+            CommonHelpers.SaveToDisk(c, arr, wishlist_dir, name);
+        }
+
+        public static void ClearUnseenForTab(int tabId, Context c)
+        {
+            if (!SearchTabCollection.TryGetValue(tabId, out var tab))
+            {
+                return;
+            }
+            if (tab.SearchTarget != SearchTarget.Wishlist)
+            {
+                return;
+            }
+
+            bool changed;
+            lock (tab.SortHelperLockObject)
+            {
+                changed = tab.UnseenCount > 0 || tab.UnseenResults.Count > 0;
+                tab.UnseenResults.Clear();
+                tab.UnseenCount = 0;
+            }
+            if (!changed)
+            {
+                return;
+            }
+
+            SaveHeadersToSharedPrefs();
+
+            try
+            {
+                Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, KeyConsts.M_wishlist_directory);
+                if (wishlist_dir.Exists())
+                {
+                    DeleteUnseenSidecar(tabId, wishlist_dir);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Firebase("ClearUnseenForTab sidecar delete fail: " + ex.Message);
+            }
+        }
+
+        private static int[] RestoreUnseenIndicesFromDisk_Imp(int tabId, Context c)
+        {
+            Java.IO.File wishlist_dir = new Java.IO.File(c.FilesDir, KeyConsts.M_wishlist_directory);
+            string name = System.Math.Abs(tabId) + KeyConsts.M_wishlist_unseen;
+            Java.IO.File unseenFile = new Java.IO.File(wishlist_dir, name);
+            if (!unseenFile.Exists())
+            {
+                return null;
+            }
+
+            try
+            {
+                using (System.IO.Stream inputStream = c.ContentResolver.OpenInputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(unseenFile).Uri))
+                {
+                    return SerializationHelper.RestoreUnseenIndicesFromStream(inputStream);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Firebase("FAILED to restore unseen indices: " + ex.Message);
+                return null;
+            }
         }
 
         public static List<SearchResponse> RestoreSearchResultsFromDisk_Imp(int wishlistSearchResultsToRestore, Context c)
@@ -151,6 +264,51 @@ namespace Seeker.Helpers
             }
         }
 
+        public static Task EnsureLoadedAsync(int tabId, Context c)
+        {
+            var tab = SearchTabHelper.SearchTabCollection[tabId];
+            if (tab.IsLoaded())
+            {
+                return Task.CompletedTask;
+            }
+
+            lock (tab.DiskLoadLock)
+            {
+                if (tab.DiskLoadTask != null)
+                {
+                    return tab.DiskLoadTask;
+                }
+                if (tab.IsLoaded())
+                {
+                    return Task.CompletedTask;
+                }
+
+                var tcs = new TaskCompletionSource<bool>();
+                tab.DiskLoadTask = tcs.Task;
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        RestoreSearchResultsFromDisk(tabId, c);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Logger.Firebase("async restore fail " + ex.Message);
+                    }
+                    finally
+                    {
+                        var newTab = SearchTabHelper.SearchTabCollection[tabId];
+                        if (newTab != tab)
+                        {
+                            newTab.DiskLoadTask = tcs.Task;
+                        }
+                        tcs.SetResult(true);
+                    }
+                });
+                return tcs.Task;
+            }
+        }
+
         public static void RestoreSearchResultsFromDisk(int wishlistSearchResultsToRestore, Context c)
         {
             List<SearchResponse> restoredSearchResults = null;
@@ -167,6 +325,8 @@ namespace Seeker.Helpers
             //there are two cases.
             //  1) we imported the term.  In that case there are no results yet as it hasnt been ran.  Which is fine.  
             //  2) its a bug.
+            int[] unseenIndices = restoredSearchResults != null ? RestoreUnseenIndicesFromDisk_Imp(wishlistSearchResultsToRestore, c) : null;
+
             if (restoredSearchResults == null)
             {
                 if (SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastSearchResultsCount == 0 || SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore].LastRanTime == DateTime.MinValue)
@@ -195,7 +355,7 @@ namespace Seeker.Helpers
             }
             else
             {
-                SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SearchTabUtil.GetTabFromSavedState(restoredSearchResults, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore]);
+                SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore] = SearchTabUtil.GetTabFromSavedState(restoredSearchResults, SearchTabHelper.SearchTabCollection[wishlistSearchResultsToRestore], unseenIndices);
             }
         }
 
@@ -384,6 +544,8 @@ namespace Seeker.Helpers
             //*********************
 
         }
+
+        public static SearchTab CurrentSearchTab => SearchTabCollection[CurrentTab];
 
         public static int LastSearchResultsCount
         {

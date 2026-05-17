@@ -100,6 +100,7 @@
     <string name="no_searches">No searches</string>
     <string name="no_searches_subtitle">Enter a term to search the Soulseek network</string>
     <string name="searching_label">Searching</string>
+    <string name="loading_wishlist_label">Loading wishlist</string>
     <string name="no_results_title">No Results Found</string>
     <string name="no_results_subtitle">Nothing found for \"{0}\"</string>
     <string name="results_hidden_title">{0} results hidden by filters</string>
@@ -119,15 +120,13 @@
     <string name="filter_sheet_count">{0}</string>
     <string name="messages">Messages</string>
     <string name="browse_files">Browse Files</string>
-    <string name="chatroomListLoading">
-        Requesting list of available chatrooms.  Please Wait...
-    </string>
+    <string name="chatroomsLoading">Loading chatrooms...</string>
     <string name="privateRoomCreation">Requesting private room creation</string>
     <string name="requesting_room_list">Requesting Room List</string>
     <string name="requesting_user_info">Requesting User\'s Info</string>
     <string name="room_list_received">Room List Received</string>
 
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Wishlist</string>
     <string name="wishlist_bold">
@@ -196,13 +195,17 @@ Directory Count: {5}"
     <string name="chatroom_disconnected_at">We disconnected: {0}</string>
     <string name="chatroom_reconnected_at">We reconnected: {0}</string>
     <string name="chatroom_loading_ticker">Loading current ticker...</string>
+    <string name="room_join_pending">Joining \"{0}\"…</string>
+    <string name="room_join_failed">Failed to join</string>
+    <string name="room_join_forbidden">Forbidden</string>
+    <string name="room_statuses_empty_placeholder">User activity will appear here</string>
+    <string name="retry">Retry</string>
     <string name="chatroom_enter_message">Enter Message</string>
     <string name="send_message">Send</string>
     <string name="filter_chatrooms_here">Filter here</string>
 
     <string name="enter_listening_port">Enter Port to Listen On</string>
 
-    <string name="create_chatroom_name">Room Name to Create</string>
     <string name="create_chatroom_private">Make Private</string>
 
     <string name="search_here">Search Here</string>
@@ -287,7 +290,7 @@ Directory Count: {5}"
     <string name="filter_format_lossless">Lossless</string>
     <string name="filter_format_lossy">Lossy</string>
     <string name="filter_min_bitrate_label">Min Bitrate</string>
-    <string name="type_chatroom_ticker_message">Type Ticker Message</string>
+    <string name="type_chatroom_ticker_message">Ticker Message</string>
 
     <string name="section_downloads">Downloads</string>
     <string name="section_search">Search</string>
@@ -336,6 +339,7 @@ Directory Count: {5}"
 
     <string name="user_has_no_bio">User has no bio.</string>
     <string name="user_has_no_pic">User has no picture.</string>
+    <string name="user_picture_failed_to_load">Failed to load user picture.</string>
     <string name="no_pic_set">No picture is set</string>
     <string name="select_pic">Select Picture</string>
     <string name="success_set_pic">Successfully set picture</string>
@@ -412,7 +416,6 @@ Directory Count: {5}"
     <string name="room_data_still_loading">
         Too fast! Still retrieving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>
@@ -715,7 +718,7 @@ Directory Count: {5}"
 
     <!--Title-->
     <string name="user_">User:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Create Chatroom</string>
@@ -740,12 +743,12 @@ Directory Count: {5}"
     <string name="offline">Offline</string>
 
     <!--Menu Items-->
-    <string name="auto_join_on">Auto Join [On]</string>
-    <string name="auto_join_off">Auto Join [Off]</string>
-    <string name="notification_on">Notifications [On]</string>
-    <string name="notification_off">Notifications [Off]</string>
+    <string name="auto_join">Auto Join</string>
+    <string name="notification">Notifications</string>
     <string name="copy_text">Copy Text</string>
+    <string name="this_message">This Message</string>
     <string name="ignore_user">Ignore User</string>
+    <string name="ignore_users">Ignore Users</string>
     <string name="remove_user">Remove User</string>
     <string name="remove_mod_priv">Remove Moderator Privilege</string>
     <string name="add_mod_priv">Add Moderator Privilege</string>
@@ -754,6 +757,8 @@ Directory Count: {5}"
     <string name="search_user_files">Search User\'s Files</string>
     <string name="add_to_user_list">Add to User List</string>
     <string name="msg_user">Message User</string>
+    <string name="mark_all_as_read">Mark All as Read</string>
+    <string name="mark_as_read">Mark as Read</string>
     <string name="copy_image">Copy Image</string>
     <string name="save_image">Save Image</string>
 
@@ -831,6 +836,11 @@ Directory Count: {5}"
     <string name="view_users">View Users</string>
     <string name="view_self">View Self</string>
     <string name="view_all_tickers">View all Tickers</string>
+    <string name="all_tickers">All Tickers</string>
+    <string name="members">Members</string>
+    <string name="sort_users_by_desc">Sort users</string>
+    <string name="search_users_desc">Search users</string>
+    <string name="back_desc">Back</string>
 
     <string name="resume_all">Resume All</string>
     <string name="pause_all">Pause All</string>

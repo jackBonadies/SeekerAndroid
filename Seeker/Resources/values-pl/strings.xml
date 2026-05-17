@@ -54,9 +54,6 @@
     <string name="no_messages">Brak wiadomości. Naciśnij \"+\", aby rozpocząć.</string>
     <string name="messages">Wiadomości</string>
     <string name="browse_files">Przeglądanie plików</string>
-    <string name="chatroomListLoading">
-        Żądanie listy dostępnych czatów. Proszę czekać...
-    </string>
     <string name="privateRoomCreation">Prośba o utworzenie pokoju prywatnego</string>
     <string name="requesting_room_list">Wysyłanie żądania listy pokoi</string>
     <string name="requesting_user_info">Wysyłanie żądania informacji użytkownika</string>
@@ -99,7 +96,6 @@ Liczba katalogów: {5}\"
     <string name="clear">Czyść</string>
     <string name="get_user_info">Uzyskaj informacje o użytkowniku</string>
     <string name="quick_info">Szybkie Info</string>
-    <string name="filer_files">Filtruj pliki tutaj</string>
     <string name="enter_user_to_browse">Wpisz użytkownika żeby przeglądać</string>
     <string name="all_target">Wszyscy użytkownicy</string>
     <string name="target_user_list">Lista użytkowników</string>
@@ -124,7 +120,6 @@ Liczba katalogów: {5}\"
 
     <string name="enter_listening_port">Wprowadź Port do słuchania</string>
 
-    <string name="create_chatroom_name">Nazwa pokoju do stworzenia</string>
     <string name="create_chatroom_private">Zrób Prywatnym</string>
 
     <string name="search_here">Szukaj tutaj</string>
@@ -181,7 +176,7 @@ Liczba katalogów: {5}\"
     <string name="new_search_tab">Nowe wyszukiwanie</string>
     <string name="filter_search_results_here">Filtruj wyniki tutaj</string>
     <string name="persist_it">Przypięty</string>
-    <string name="type_chatroom_ticker_message">Wpisz wiadomość na pasku przewijania</string>
+    <string name="type_chatroom_ticker_message">Wiadomość na pasku przewijania</string>
 
     <string name="change_download_folder">Wybierz folder pobierania</string>
     <string name="max_search_results">Maksymalna liczba wyników wyszukiwania:</string>
@@ -290,7 +285,6 @@ Liczba katalogów: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>
@@ -574,7 +568,7 @@ Liczba katalogów: {5}\"
     <string name="mod">Mod</string>
 
     <string name="user_">User:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Create Chatroom</string>
@@ -597,10 +591,8 @@ Liczba katalogów: {5}\"
     <string name="online">Online</string>
     <string name="offline">Offline</string>
 
-    <string name="auto_join_on">Auto Join [On]</string>
-    <string name="auto_join_off">Auto Join [Off]</string>
-    <string name="notification_on">Notifications [On]</string>
-    <string name="notification_off">Notifications [Off]</string>
+    <string name="auto_join">Auto Join</string>
+    <string name="notification">Notifications</string>
     <string name="copy_text">Copy Text</string>
     <string name="ignore_user">Ignore User</string>
     <string name="remove_user">Remove User</string>

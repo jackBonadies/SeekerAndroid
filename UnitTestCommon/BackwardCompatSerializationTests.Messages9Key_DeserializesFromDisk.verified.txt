@@ -1,0 +1,48 @@
+﻿{
+  anon2: {
+    anon3: [
+      {
+        Username: anon3,
+        Id: 4975468,
+        Replayed: false,
+        UtcDateTime: 2025-12-03 04:48:56 Utc,
+        MessageText: Hi! Even though it's non-mandatory - please fill your User Info in your settings and write whatever you want, set your profile picture. I love to read other people's User Info pages! Also,  You're not sharing any music. Soulseek is a Peer 2 Peer app and if everybody here wasn't sharing anything like you, you wouldn't be able to download what you're currently downloading. Some people might even ban you from downloading from them when you have no shares (I usually don't). Here's a good guide how to share - https://www.wikihow.com/Avoid-Being-Banned-on-Soulseek . Be aware of users that demand money from you so you could download from them - try not to pay them, because SOULSEEK IS FREE - and first contact me, I'll help you find it for free! This message is automatic, Enjoy Slsk!,
+        FromMe: false,
+        SameAsLastUser: false
+      }
+    ]
+  },
+  testingclient123: {
+    anon1: [
+      {
+        Username: anon1,
+        Id: -1,
+        Replayed: false,
+        UtcDateTime: 2026-02-16 22:38:43.622594 Utc,
+        MessageText: hello,
+        FromMe: true,
+        SentMsgStatus: Success,
+        SameAsLastUser: false
+      },
+      {
+        Username: anon1,
+        Id: 457177,
+        Replayed: false,
+        UtcDateTime: 2026-02-16 22:39:05 Utc,
+        MessageText: hi,
+        FromMe: false,
+        SameAsLastUser: false
+      },
+      {
+        Username: anon1,
+        Id: -1,
+        Replayed: false,
+        UtcDateTime: 2026-02-16 22:39:54.7820325 Utc,
+        MessageText: test,
+        FromMe: true,
+        SentMsgStatus: Success,
+        SameAsLastUser: false
+      }
+    ]
+  }
+}

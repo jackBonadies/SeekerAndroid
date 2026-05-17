@@ -23,13 +23,13 @@
         app:showAsAction="never"
     />
     <item
-        android:id="@+id/action_delete_messages"
-        android:title="@string/delete_messages"
+        android:id="@+id/action_ignore"
+        android:title="@string/ignore_user"
         app:showAsAction="never"
     />
     <item
-        android:id="@+id/action_ignore"
-        android:title="@string/ignore_user"
+        android:id="@+id/action_delete_messages"
+        android:title="@string/delete_messages"
         app:showAsAction="never"
     />
 </menu>

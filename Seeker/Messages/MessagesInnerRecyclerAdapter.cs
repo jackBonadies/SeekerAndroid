@@ -86,16 +86,26 @@ namespace Seeker.Messages
 
         private void View_LongClick(object sender, View.LongClickEventArgs e)
         {
+            View anchor = sender as View;
+            Message msg = null;
+            GravityFlags gravity = GravityFlags.Start;
             if (sender is MessageInnerViewSent msgSent)
             {
-                //data item cannot be null as that would have caused a nullref eariler on binding view.
-                ChatroomInnerFragment.MessagesLongClickData = msgSent.DataItem;
+                msg = msgSent.DataItem;
+                gravity = GravityFlags.End;
             }
             else if (sender is MessageInnerViewReceived msgRecv)
             {
-                ChatroomInnerFragment.MessagesLongClickData = msgRecv.DataItem;
+                msg = msgRecv.DataItem;
+                gravity = GravityFlags.Start;
             }
-            (sender as View).ShowContextMenu();
+            if (anchor == null || msg == null)
+            {
+                return;
+            }
+
+            UiHelpers.ShowCopyMessageTextPopup(anchor, msg, gravity);
+            e.Handled = true;
         }
 
         public MessagesInnerRecyclerAdapter(List<Message> ti)
@@ -103,93 +113,40 @@ namespace Seeker.Messages
             localDataSet = ti;
         }
 
-        public static void HandleContextMenuAffairs(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-        {
-            Logger.Debug("ShowSlskLinkContextMenu " + SimpleHelpers.ShowSlskLinkContextMenu);
-
-            //if this is the slsk link menu then we are done, dont add anything extra. if failed to parse slsk link, then there will be no browse at location.
-            //in that case we still dont want to show anything.
-            if (menu.FindItem(SlskLinkMenuActivity.FromSlskLinkBrowseAtLocation) != null)
-            {
-                return;
-            }
-            else if (SimpleHelpers.ShowSlskLinkContextMenu)
-            {
-                //closing wont turn this off since its invalid parse, so turn it off here...
-                SimpleHelpers.ShowSlskLinkContextMenu = false;
-                return;
-            }
-
-            //this class is shared by both chatroom and messages......
-            if (v is MessageInnerViewSent msgSent)
-            {
-                ChatroomInnerFragment.MessagesLongClickData = (v as MessageInnerViewSent).DataItem;
-            }
-            else if (v is MessageInnerViewReceived msgReceived)
-            {
-                ChatroomInnerFragment.MessagesLongClickData = (v as MessageInnerViewReceived).DataItem;
-            }
-            menu.Add(0, 0, 0, SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.copy_text));
-        }
-
     }
 
 
-    public class MessageInnerViewSentHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
+    public class MessageInnerViewSentHolder : RecyclerView.ViewHolder
     {
         public MessageInnerViewSent messageInnerView;
 
 
         public MessageInnerViewSentHolder(View view) : base(view)
         {
-            //super(view);
-            // Define click listener for the ViewHolder's View
-
             messageInnerView = (MessageInnerViewSent)view;
             messageInnerView.ViewHolder = this;
-            (messageInnerView as MessageInnerViewSent).SetOnCreateContextMenuListener(this);
         }
 
         public MessageInnerViewSent getUnderlyingView()
         {
             return messageInnerView;
         }
-
-        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-        {
-
-            Logger.Debug("OnCreateContextMenu MessageInnerViewSentHolder");
-
-            MessagesInnerRecyclerAdapter.HandleContextMenuAffairs(menu, v, menuInfo);
-        }
     }
 
-    public class MessageInnerViewReceivedHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
+    public class MessageInnerViewReceivedHolder : RecyclerView.ViewHolder
     {
         public MessageInnerViewReceived messageInnerView;
 
 
         public MessageInnerViewReceivedHolder(View view) : base(view)
         {
-            //super(view);
-            // Define click listener for the ViewHolder's View
-
             messageInnerView = (MessageInnerViewReceived)view;
             messageInnerView.ViewHolder = this;
-            (messageInnerView as MessageInnerViewReceived).SetOnCreateContextMenuListener(this);
         }
 
         public MessageInnerViewReceived getUnderlyingView()
         {
             return messageInnerView;
-        }
-
-        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-        {
-
-            Logger.Debug("OnCreateContextMenu MessageInnerViewReceivedHolder");
-
-            MessagesInnerRecyclerAdapter.HandleContextMenuAffairs(menu, v, menuInfo);
         }
     }
 

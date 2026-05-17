@@ -456,8 +456,6 @@ namespace Seeker.Serialization
                 Resource.Layout.smart_filter_config_layout                        ,
                 Resource.Layout.tab_page_item                                     ,
                 Resource.Layout.tab_page_item_dummy                               ,
-                Resource.Layout.ticker_item                                       ,
-                Resource.Layout.ticker_item_dummy                                 ,
                 Resource.Layout.transfers                                         ,
                 Resource.Layout.transfer_item_detailed                            ,
                 Resource.Layout.transfer_item_detailed_sizeProgressBar            ,

@@ -21,6 +21,12 @@ namespace Seeker.Messages
         private List<string> internalList = null;
         private View noMessagesView = null;
         private bool created = false;
+        public override void OnViewCreated(View view, Bundle savedInstanceState)
+        {
+            base.OnViewCreated(view, savedInstanceState);
+            Activity?.AddMenuProvider(new OverviewMenuProvider(this), ViewLifecycleOwner, AndroidX.Lifecycle.Lifecycle.State.Resumed);
+        }
+
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             MessageController.MessageReceived += OnMessageReceived;
@@ -36,6 +42,7 @@ namespace Seeker.Messages
             }
             recyclerViewOverview = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewOverview);
             recyclerViewOverview.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
+            AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(recyclerViewOverview, new Seeker.Helpers.BottomOnlyInsetsListener());
 
             recycleLayoutManager = new LinearLayoutManager(Activity);
             if (MessageController.Messages == null)
@@ -54,6 +61,9 @@ namespace Seeker.Messages
             ItemTouchHelper itemTouchHelper = new ItemTouchHelper(itemTouchHelperMessageOverviewCallback);
             itemTouchHelper.AttachToRecyclerView(recyclerViewOverview);
 
+            var fabNewMessage = rootView.FindViewById<Google.Android.Material.FloatingActionButton.FloatingActionButton>(Resource.Id.fabNewMessage);
+            fabNewMessage.Click += (s, e) => (Activity as MessagesActivity)?.ShowEditTextMessageUserDialog();
+
             created = true;
             return rootView;
         }
@@ -63,7 +73,6 @@ namespace Seeker.Messages
         public override void OnResume()
         {
             base.OnResume();
-            SeekerState.ActiveActivityRef.InvalidateOptionsMenu();
             MessagesBroadcastReceiver.MarkAsReadFromNotification += UpdateMarkAsReadFromNotif;
             SeekerApplication.UserStatusChangedUIEvent += OnUserStatusChanged;
         }
@@ -77,6 +86,11 @@ namespace Seeker.Messages
 
         private void UpdateMarkAsReadFromNotif(object o, string uname)
         {
+            if (uname == null)
+            {
+                recyclerAdapter.NotifyDataSetChanged();
+                return;
+            }
             recyclerAdapter.NotifyNameChanged(uname);
         }
 
@@ -95,7 +109,6 @@ namespace Seeker.Messages
 
         public class MessageOverviewComparer : IComparer<KeyValuePair<string, List<Message>>>
         {
-            // Compares by UserCount then Name
             public int Compare(KeyValuePair<string, List<Message>> x, KeyValuePair<string, List<Message>> y)
             {
                 if (x.Value.Count == 0 && y.Value.Count == 0)
@@ -112,7 +125,7 @@ namespace Seeker.Messages
                 }
                 else
                 {
-                    return y.Value.Last().LocalDateTime.CompareTo(x.Value.Last().LocalDateTime);
+                    return y.Value.Last().UtcDateTime.CompareTo(x.Value.Last().UtcDateTime);
                 }
             }
         }
@@ -129,15 +142,7 @@ namespace Seeker.Messages
             var activity = this.Activity != null ? this.Activity : MessagesActivity.MessagesActivityRef;
             activity.RunOnUiThread(new Action(() =>
             {
-                //if(internalList!=null && internalList.Contains(msg.Username))
-                //{
-                //    //update this one...
-                //    recyclerAdapter.NotifyDataSetChanged();//NotifyItemChanged(internalList.IndexOf(msg.Username));
-                //}
-                //else
-                //{
                 this.RefreshAdapter();
-                //}
             }));
         }
 
@@ -187,6 +192,63 @@ namespace Seeker.Messages
         {
             MessageController.MessageReceived -= OnMessageReceived;
             base.OnDetach();
+        }
+
+        private sealed class OverviewMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
+        {
+            private readonly MessagesOverviewFragment fragment;
+
+            public OverviewMenuProvider(MessagesOverviewFragment fragment)
+            {
+                this.fragment = fragment;
+            }
+
+            public void OnCreateMenu(IMenu menu, MenuInflater menuInflater)
+            {
+                menuInflater.Inflate(Resource.Menu.messages_overview_list_menu, menu);
+            }
+
+            public void OnPrepareMenu(IMenu menu)
+            {
+                menu.FindItem(Resource.Id.action_delete_all_messages)?.SetVisible(!MessageController.Messages.IsEmpty);
+                menu.FindItem(Resource.Id.mark_all_as_read_action)?.SetVisible(MessageController.GetTotalUnreadCount() > 0);
+            }
+
+#pragma warning disable S1186 // Required override - omitting causes java.lang.AbstractMethodError at runtime
+            public void OnMenuClosed(IMenu menu)
+            {
+            }
+#pragma warning restore S1186
+
+            public bool OnMenuItemSelected(IMenuItem item)
+            {
+                var activity = fragment.Activity as MessagesActivity;
+                if (activity == null)
+                {
+                    return false;
+                }
+                switch (item.ItemId)
+                {
+                    case Resource.Id.mark_all_as_read_action:
+                        MessageController.MarkAllAsRead();
+                        fragment.recyclerAdapter.NotifyDataSetChanged();
+                        MessagesBroadcastReceiver.MarkAsReadFromNotification?.Invoke(null, null);
+                        return true;
+                    case Resource.Id.action_delete_all_messages:
+                        if (MessageController.Messages.IsEmpty)
+                        {
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.deleted_all_no_messages), ToastLength.Long);
+                            return true;
+                        }
+                        var (deletedAllMessages, deletedAllLastReadMessageCounts) = MessageController.DeleteAllMessagesWithUndo();
+                        fragment.RefreshAdapter();
+                        Snackbar sb = Snackbar.Make(fragment.View, SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong)
+                            .SetAction("Undo", (View v) => activity.GetUndoDeleteAllSnackBarAction(deletedAllMessages, deletedAllLastReadMessageCounts));
+                        sb.Show();
+                        return true;
+                }
+                return false;
+            }
         }
     }
 }

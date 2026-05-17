@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
         <!-- Customize your theme here. -->
@@ -203,5 +203,16 @@
         <item name="android:layout_gravity">center_vertical</item>
         <item name="srcCompat">@drawable/help_circle_outline</item>
         <item name="android:tint">?attr/mainTextColor</item>
+    </style>
+
+    <style name="AppPopupOverlay" parent="ThemeOverlay.Material3.Light">
+        <item name="popupMenuStyle">@style/AppPopupMenu</item>
+        <item name="android:popupMenuStyle">@style/AppPopupMenu</item>
+        <item name="android:textColorPrimary">?attr/cellTextColor</item>
+    </style>
+
+    <style name="AppPopupMenu" parent="Widget.Material3.PopupMenu">
+        <item name="android:popupBackground">@drawable/popup_menu_bg</item>
+        <item name="android:popupElevation" tools:targetApi="21">8dp</item>
     </style>
 </resources>

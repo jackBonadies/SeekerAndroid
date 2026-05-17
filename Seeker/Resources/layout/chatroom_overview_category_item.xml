@@ -20,6 +20,7 @@
         android:text="categoryDummy"
         android:background="?attr/slskAccent"
         android:textColor="@android:color/white"
+        android:letterSpacing="0.08"
         android:textSize="18sp"
     />
 </LinearLayout>

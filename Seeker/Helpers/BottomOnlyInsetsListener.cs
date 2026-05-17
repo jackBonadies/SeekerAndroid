@@ -15,7 +15,7 @@ namespace Seeker.Helpers
             var systemBars = insets.GetInsets(WindowInsetsCompat.Type.SystemBars());
             var ime = insets.GetInsets(WindowInsetsCompat.Type.Ime());
             int bottomPadding = System.Math.Max(systemBars.Bottom, ime.Bottom);
-            v.SetPadding(v.PaddingLeft, 0, v.PaddingRight, bottomPadding);
+            v.SetPadding(v.PaddingLeft, v.PaddingTop, v.PaddingRight, bottomPadding);
             return insets;
         }
     }

@@ -148,6 +148,7 @@ namespace Seeker
         public ImageView removeSearch;
         private TextView lastSearchTerm;
         private TextView numResults;
+        private TextView unseenBadge;
         private View pillIndicator;
         private View rowBackground;
         public SearchTabViewHolder ViewHolder;
@@ -171,6 +172,7 @@ namespace Seeker
         {
             lastSearchTerm = FindViewById<TextView>(Resource.Id.lastSearchTerm);
             numResults = FindViewById<TextView>(Resource.Id.resultsText);
+            unseenBadge = FindViewById<TextView>(Resource.Id.unseenBadge);
             removeSearch = FindViewById<ImageView>(Resource.Id.searchTabItemRemove);
             searchTabLayout = FindViewById<LinearLayout>(Resource.Id.searchTabItemMain);
             pillIndicator = FindViewById<View>(Resource.Id.tabPillIndicator);
@@ -186,17 +188,28 @@ namespace Seeker
                 if (searchTab.LastRanTime != DateTime.MinValue)
                 {
                     timeString = " · " + CommonHelpers.GetRecentTimeNiceFormated(searchTab.LastRanTime, SimpleHelpers.GetDateTimeNowSafe().Subtract(searchTab.LastRanTime));
-                } 
+                }
                 else
                 {
                     timeString = this.Context.GetString(Resource.String.wishlist_never_run);
                 }
                 var resultsString = string.Format(this.Context.GetString(Resource.String.wishlist_results_count), searchTab.LastSearchResultsCount);
                 numResults.Text = resultsString + timeString;
+                if (searchTab.UnseenCount > 0)
+                {
+                    int n = searchTab.UnseenCount;
+                    unseenBadge.Text = n > 99 ? "99+" : n.ToString();
+                    unseenBadge.Visibility = ViewStates.Visible;
+                }
+                else
+                {
+                    unseenBadge.Visibility = ViewStates.Gone;
+                }
             }
             else
             {
                 numResults.Text = string.Format(this.Context.GetString(Resource.String.wishlist_results_count), searchTab.LastSearchResultsCount);
+                unseenBadge.Visibility = ViewStates.Gone;
             }
             string lastTerm = searchTab.LastSearchTerm;
             if (lastTerm != string.Empty && lastTerm != null)

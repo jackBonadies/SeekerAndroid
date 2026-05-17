@@ -37,8 +37,6 @@ namespace Seeker
     /// </summary>
     public static class RequestedUserInfoHelper
     {
-        private static object picturesStoredUsersLock = new object();
-        private static List<string> picturesStoredUsers = new List<string>();
         public static volatile List<UserListItem> RequestedUserList = new List<UserListItem>();
 
         public static UserListItem GetInfoForUser(string uname)
@@ -161,7 +159,6 @@ namespace Seeker
             bool found = false;
             lock (RequestedUserList)
             {
-                bool removeOldestPic = false;
                 foreach (UserListItem item in RequestedUserList)
                 {
                     if (item.Username == uname)
@@ -181,41 +178,17 @@ namespace Seeker
                         if (userInfo != null)
                         {
                             Logger.Debug("Requested peer UserInfo received");
-                            item.UserInfo = userInfo;
-                            if (userInfo.HasPicture)
+                            bool hadPicture = userInfo.HasPicture && userInfo.Picture != null && userInfo.Picture.Length > 0;
+                            if (hadPicture)
                             {
                                 Logger.Debug("peer has pic");
-                                lock (picturesStoredUsersLock)
-                                {
-                                    picturesStoredUsers.Add(uname);
-                                    picturesStoredUsers = picturesStoredUsers.Distinct().ToList();
-                                    if (picturesStoredUsers.Count > int.MaxValue)
-                                    {
-                                        removeOldestPic = true;
-                                    }
-                                }
+                                _ = Services.UserInfoPictureCacheService.Instance.PutAsync(uname, userInfo.Picture);
                             }
+                            // TODO2026 - code to remove other users pics so we dont keep them unbounded in memory
+                            item.UserInfo = userInfo;
+                            item.HasPicture = hadPicture;
                         }
                         break;
-                    }
-                }
-                if (!found)
-                {
-                }
-                if (removeOldestPic)
-                {
-                    Logger.InfoFirebase("Remove oldest picture");
-                    lock (picturesStoredUsersLock)
-                    {
-                        string userToRemovePic = picturesStoredUsers[0];
-                        picturesStoredUsers.RemoveAt(0);
-                    }
-                    foreach (UserListItem item in RequestedUserList)
-                    {
-                        if (item.Username == uname)
-                        {
-                            item.UserInfo = null;
-                        }
                     }
                 }
             }

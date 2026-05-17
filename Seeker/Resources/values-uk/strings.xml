@@ -54,9 +54,6 @@
     <string name="no_messages">Немає повідомлень. Натисніть «+», щоб написати кому-небудь.</string>
     <string name="messages">Повідомлення</string>
     <string name="browse_files">Огляд файлів</string>
-    <string name="chatroomListLoading">
-        Запит списку доступних чатів. Будь ласка, зачекайте...
-    </string>
     <string name="privateRoomCreation">Запит на створення приватної кімнати</string>
     <string name="requesting_room_list">Запит на список кімнат</string>
     <string name="requesting_user_info">Запит інформації про користувача</string>
@@ -99,7 +96,6 @@
     <string name="clear">Очистити</string>
     <string name="get_user_info">Отримати інформацію про користувача</string>
     <string name="quick_info">Швидка інформація</string>
-    <string name="filer_files">Фільтрувати файли тут</string>
     <string name="enter_user_to_browse">Ввести ім\'я користувача</string>
     <string name="all_target">Усі користувачі</string>
     <string name="target_user_list">Список користувачів</string>
@@ -124,7 +120,6 @@
 
     <string name="enter_listening_port">Ввести порт для прослуховування</string>
 
-    <string name="create_chatroom_name">Назва кімнати</string>
     <string name="create_chatroom_private">Зробити приватною</string>
 
     <string name="search_here">Пошук</string>
@@ -181,7 +176,7 @@
     <string name="new_search_tab">Нова вкладка</string>
     <string name="filter_search_results_here">Фільтрувати результати тут</string>
     <string name="persist_it">Закріпити</string>
-    <string name="type_chatroom_ticker_message">Ввести тикер (закріплене повідомлення)</string>
+    <string name="type_chatroom_ticker_message">Тикер (закріплене повідомлення)</string>
 
     <string name="change_download_folder">Змінити папку завантаження</string>
     <string name="max_search_results">Макс. кількість результатів пошуку:</string>
@@ -290,7 +285,6 @@
     <string name="room_data_still_loading">
         Занадто швидко! Триває отримання даних кімнати...
     </string>
-    <string name="loading_current_ticker">Завантаження поточного тикера...</string>
     <string name="must_be_logged_to_browse">
         Для перегляду користувача необхідно увійти в систему
     </string>
@@ -574,7 +568,7 @@
     <string name="mod">Модератор</string>
 
     <string name="user_">Користувач:</string>
-    <string name="set_ticker">Встановити тикер:</string>
+    <string name="set_ticker">Встановити тикер</string>
     <string name="setticker">Встановити тикер</string>
     <string name="chatrooms">Чат кімнати</string>
     <string name="create_chatroom_">Створити чат кімнату</string>
@@ -597,10 +591,8 @@
     <string name="online">В мережі</string>
     <string name="offline">Не в мережі</string>
 
-    <string name="auto_join_on">Авто вхід [Увімк]</string>
-    <string name="auto_join_off">Авто вхід [Вимк]</string>
-    <string name="notification_on">Сповіщення [Увімк]</string>
-    <string name="notification_off">Сповіщення [Вимк]</string>
+    <string name="auto_join">Авто вхід</string>
+    <string name="notification">Сповіщення</string>
     <string name="copy_text">Копіювати текст</string>
     <string name="ignore_user">Ігнорувати користувача</string>
     <string name="remove_user">Вилучити користувача</string>

@@ -45,15 +45,12 @@
     <string name="no_messages">メッセージはありません。開始するには「+」をタップしてください。</string>
     <string name="messages">メッセージ</string>
     <string name="browse_files">ファイルを閲覧</string>
-    <string name="chatroomListLoading">
-        利用可能なチャットルームのリストをリクエスト中です。お待ちください…
-    </string>
     <string name="privateRoomCreation">プライベートルーム作成をリクエスト中</string>
     <string name="requesting_room_list">ルームリストをリクエスト中</string>
     <string name="requesting_user_info">ユーザー情報をリクエスト中</string>
     <string name="room_list_received">ルームリストを受信しました</string>
 
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">願望リスト</string>
     <string name="wishlist_bold">
@@ -90,7 +87,6 @@
     <string name="clear">クリア</string>
     <string name="get_user_info">ユーザー情報を取得</string>
     <string name="quick_info">クイック情報</string>
-    <string name="filer_files">ここでファイルをフィルター</string>
     <string name="enter_user_to_browse">閲覧するユーザーを入力</string>
     <string name="all_target">すべてのユーザー</string>
     <string name="target_user_list">ユーザーリスト</string>
@@ -115,7 +111,6 @@
 
     <string name="enter_listening_port">リスンポートを入力</string>
 
-    <string name="create_chatroom_name">作成するルーム名</string>
     <string name="create_chatroom_private">非公開にする</string>
 
     <string name="search_here">ここで検索</string>
@@ -172,7 +167,7 @@
     <string name="new_search_tab">New Search</string>
     <string name="filter_search_results_here">Filter Results</string>
     <string name="persist_it">Sticky</string>
-    <string name="type_chatroom_ticker_message">Type Ticker Message</string>
+    <string name="type_chatroom_ticker_message">Ticker Message</string>
 
     <string name="change_download_folder">Change Download Folder</string>
     <string name="max_search_results">Max Search Results:</string>
@@ -281,7 +276,6 @@
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>
@@ -565,7 +559,7 @@
     <string name="mod">Mod</string>
 
     <string name="user_">User:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Create Chatroom</string>
@@ -588,10 +582,8 @@
     <string name="online">Online</string>
     <string name="offline">Offline</string>
 
-    <string name="auto_join_on">Auto Join [On]</string>
-    <string name="auto_join_off">Auto Join [Off]</string>
-    <string name="notification_on">Notifications [On]</string>
-    <string name="notification_off">Notifications [Off]</string>
+    <string name="auto_join">Auto Join</string>
+    <string name="notification">Notifications</string>
     <string name="copy_text">Copy Text</string>
     <string name="ignore_user">Ignore User</string>
     <string name="remove_user">Remove User</string>

@@ -40,9 +40,6 @@ namespace Seeker
     [Activity(Label = "UserListActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
     public class UserListActivity : ThemeableActivity
     {
-        public static string PopUpMenuOwnerHack = string.Empty; //hack to get which listview item owns the popup menu (for on menu item click).
-
-        public static string IntentSearchRoom = "SearchRoom";
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
             MenuInflater.Inflate(Resource.Menu.user_list_menu, menu);
@@ -58,6 +55,10 @@ namespace Seeker
             }
             this.recyclerAdapter.NotifyItemChanged(i);
         }
+
+        public Action GetUpdateUserListItemActionExternal(string username) => GetUpdateUserListItemAction(username);
+
+        public void NotifyItemRemovedExternal(string username) => NotifyItemRemoved(username);
 
         private Action GetUpdateUserListItemAction(string username)
         {
@@ -79,60 +80,6 @@ namespace Seeker
             this.recyclerAdapter.NotifyItemRemoved(i);
         }
 
-
-        public override bool OnContextItemSelected(IMenuItem item)
-        {
-            if (item.ItemId != Resource.Id.removeUser && item.ItemId != Resource.Id.removeUserFromIgnored)
-            {
-                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), PopUpMenuOwnerHack, this, this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId), GetUpdateUserListItemAction(PopUpMenuOwnerHack), null, null, GetUpdateUserListItemAction(PopUpMenuOwnerHack)))
-                {
-                    Logger.Debug("handled by commons");
-                    return true;
-                }
-            }
-            //TODO: handle common is below because actions like remove user also do an additional call.  it would be good to move that to an event.. OnResume to subscribe etc...
-            switch (item.ItemId)
-            {
-                case Resource.Id.browseUsersFiles:
-                    //do browse thing...
-                    Action<View> action = new Action<View>((v) =>
-                    {
-                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(MainActivity.GoToBrowseExtra, true);
-                        this.StartActivity(intent);
-                    });
-                    View snackView = this.FindViewById<ViewGroup>(Resource.Id.userListMainLayoutId);
-                    BrowseService.RequestFilesApi(PopUpMenuOwnerHack, snackView, action, null);
-                    return true;
-                case Resource.Id.searchUserFiles:
-                    SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
-                    SearchTabHelper.SearchTargetChosenUser = PopUpMenuOwnerHack;
-                    //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                    Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(MainActivity.GoToSearchExtra, true);
-                    this.StartActivity(intent);
-                    return true;
-                case Resource.Id.removeUser:
-                    UserListService.Instance.RemoveUser(PopUpMenuOwnerHack);
-                    this.NotifyItemRemoved(PopUpMenuOwnerHack);
-                    return true;
-                case Resource.Id.removeUserFromIgnored:
-                    SeekerApplication.RemoveFromIgnoreList(PopUpMenuOwnerHack);
-                    this.NotifyItemRemoved(PopUpMenuOwnerHack);
-                    return true;
-                case Resource.Id.messageUser:
-                    Intent intentMsg = new Intent(SeekerState.ActiveActivityRef, typeof(MessagesActivity));
-                    intentMsg.AddFlags(ActivityFlags.SingleTop);
-                    intentMsg.PutExtra(MessageController.FromUserName, PopUpMenuOwnerHack); //so we can go to this user..
-                    intentMsg.PutExtra(MessageController.ComingFromMessageTapped, true); //so we can go to this user..
-                    this.StartActivity(intentMsg);
-                    return true;
-                case Resource.Id.getUserInfo:
-                    RequestedUserInfoHelper.RequestUserInfoApi(PopUpMenuOwnerHack);
-                    return true;
-            }
-            return true; //idk
-        }
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
@@ -393,56 +340,9 @@ namespace Seeker
                 (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
             });
 
-            System.EventHandler<TextView.EditorActionEventArgs> editorAction = (object sender, TextView.EditorActionEventArgs e) =>
-            {
-                if (e.ActionId == Android.Views.InputMethods.ImeAction.Done || //in this case it is Done (blue checkmark)
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Go ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
-                    e.ActionId == Android.Views.InputMethods.ImeAction.Search)
-                {
-                    Logger.Debug("IME ACTION: " + e.ActionId.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(Window.DecorView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Logger.Firebase(ex.Message + " error closing keyboard");
-                    }
-                    //Do the Browse Logic...
-                    eventHandler(sender, null);
-                }
-            };
+            var editorAction = UiHelpers.MakeDialogEditorAction(Window?.DecorView, eventHandler);
 
-            System.EventHandler<TextView.KeyEventArgs> keypressAction = (object sender, TextView.KeyEventArgs e) =>
-            {
-                if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
-                {
-                    Logger.Debug("keypress: " + e.Event.KeyCode.ToString());
-                    //rootView.FindViewById<EditText>(Resource.Id.filterText).ClearFocus();
-                    //rootView.FindViewById<View>(Resource.Id.focusableLayout).RequestFocus();
-                    //overriding this, the keyboard fails to go down by default for some reason.....
-                    try
-                    {
-                        Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SeekerState.ActiveActivityRef.GetSystemService(Context.InputMethodService);
-                        imm.HideSoftInputFromWindow(Window.DecorView.WindowToken, 0);
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Logger.Firebase(ex.Message + " error closing keyboard");
-                    }
-                    //Do the Browse Logic...
-                    eventHandler(sender, null);
-                }
-                else
-                {
-                    e.Handled = false;
-                }
-            };
+            var keypressAction = UiHelpers.MakeDialogKeyPressAction(Window?.DecorView, eventHandler);
 
             input.KeyPress += keypressAction;
 

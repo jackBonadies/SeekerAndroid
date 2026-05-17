@@ -6,10 +6,14 @@ using Android.Content;
 using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
+using Android.Text;
+using Android.Text.Style;
 using Android.Views;
+using Android.Views.InputMethods;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
 using Common;
+using Google.Android.Material.BottomSheet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,11 +22,8 @@ using Common.Messages;
 
 namespace Seeker.Chatroom
 {
-    public class RoomUserListDialog : AndroidX.Fragment.App.DialogFragment //, PopupMenu.IOnMenuItemClickListener doesnt work for dialogfragment
+    public class RoomUserListDialog : BottomSheetDialogFragment
     {
-
-        public static Soulseek.UserData longClickedUserData = null;
-
 
         public static string OurRoomName = string.Empty;
         public static bool IsPrivate = false;
@@ -50,8 +51,6 @@ namespace Seeker.Chatroom
             ChatroomController.RoomModeratorsChanged += OnRoomModeratorsChanged;
             ChatroomController.UserJoinedOrLeft += OnUserJoinedOrLeft;
             ChatroomController.UserRoomStatusChanged += OnUserRoomStatusChanged;
-
-            Dialog.SetSizeProportional(.9, -1);
         }
         public override void OnPause()
         {
@@ -186,6 +185,7 @@ namespace Seeker.Chatroom
                         UI_userDataList.RemoveAt(indexToRemove);
                         roomUserListAdapter.NotifyItemRemoved(indexToRemove);
                     }
+                    UpdateMembersHeader();
                 });
 
             }
@@ -197,25 +197,8 @@ namespace Seeker.Chatroom
 
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            return inflater.Inflate(Resource.Layout.room_users_dialog, container); //container is parent
+            return inflater.Inflate(Resource.Layout.room_users_dialog, container, false);
         }
-
-        public class ToolbarMenuItemClickListener : Java.Lang.Object, AndroidX.AppCompat.Widget.Toolbar.IOnMenuItemClickListener
-        {
-            public RoomUserListDialog RoomDialog;
-            public bool OnMenuItemClick(IMenuItem item)
-            {
-                switch (item.ItemId)
-                {
-                    case Resource.Id.sort_room_user_list_action:
-                        RoomDialogInstance = RoomDialog;
-                        ShowSortRoomUserListDialog();
-                        return true;
-                }
-                return true;
-            }
-        }
-
 
         private static AndroidX.AppCompat.App.AlertDialog dialogInstance = null;
         private static RoomUserListDialog RoomDialogInstance;
@@ -308,38 +291,147 @@ namespace Seeker.Chatroom
         /// </summary>
         /// <param name="view"></param>
         /// <param name="savedInstanceState"></param>
+        private View headerTitleRow;
+        private View headerSearchRow;
+        private TextView headerRoomName;
+        private TextView headerMembersLine;
+        private AndroidX.AppCompat.Widget.SearchView headerSearchView;
+        private ImageButton searchClearButton;
+
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
-            //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
             base.OnViewCreated(view, savedInstanceState);
-            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
 
-            this.SetStyle((int)DialogFragmentStyle.Normal, 0);
-            this.Dialog.SetTitle(OurRoomName);
+            var bottomSheet = ((BottomSheetDialog)Dialog).FindViewById<View>(Resource.Id.design_bottom_sheet);
+            if (bottomSheet != null)
+            {
+                var behavior = BottomSheetBehavior.From(bottomSheet);
+                behavior.State = BottomSheetBehavior.StateExpanded;
+                behavior.SkipCollapsed = true;
 
+                var lp = bottomSheet.LayoutParameters;
+                lp.Height = ViewGroup.LayoutParams.MatchParent;
+                bottomSheet.LayoutParameters = lp;
+            }
 
-            var toolbar = (AndroidX.AppCompat.Widget.Toolbar)view.FindViewById(Resource.Id.roomUsersDialogToolbar);
-            var tmicl = new ToolbarMenuItemClickListener();
-            tmicl.RoomDialog = this;
-            toolbar.SetOnMenuItemClickListener(tmicl);
-            toolbar.InflateMenu(Resource.Menu.room_user_dialog_menu);
-            toolbar.Title = OurRoomName;
-            var searchRoomMenuItem = toolbar.Menu.FindItem(Resource.Id.search_room_action);
-            var searchView = searchRoomMenuItem.ActionView as AndroidX.AppCompat.Widget.SearchView;
-            searchView.QueryHint = SeekerApplication.GetString(Resource.String.FilterUsers);
-            searchView.QueryTextChange += RoomUserListDialog_QueryTextChange;
-            searchView.QueryTextSubmit += RoomUserListDialog_QueryTextSubmit;
+            headerTitleRow = view.FindViewById<View>(Resource.Id.roomUsersHeaderTitleRow);
+            headerSearchRow = view.FindViewById<View>(Resource.Id.roomUsersHeaderSearchRow);
+            headerRoomName = view.FindViewById<TextView>(Resource.Id.roomUsersHeaderRoomName);
+            headerMembersLine = view.FindViewById<TextView>(Resource.Id.roomUsersHeaderMembersLine);
+            headerSearchView = view.FindViewById<AndroidX.AppCompat.Widget.SearchView>(Resource.Id.roomUsersHeaderSearchView);
 
+            headerRoomName.Text = OurRoomName;
+
+            headerSearchView.QueryHint = SeekerApplication.GetString(Resource.String.FilterUsers);
+            headerSearchView.QueryTextSubmit += RoomUserListDialog_QueryTextSubmit;
+
+            // Hide SearchView's built-in close button — we provide our own dual-state X.
+            // SearchView's updateCloseButton() flips this Gone back to Visible whenever
+            // text is non-empty, so we also clear its drawable so it renders as nothing
+            // (and re-force Gone on every text change in the QueryTextChange handler below).
+            var builtInClose = headerSearchView.FindViewById<ImageView>(Resource.Id.search_close_btn);
+            if (builtInClose != null)
+            {
+                builtInClose.SetImageDrawable(null);
+                builtInClose.Visibility = ViewStates.Gone;
+            }
+
+            searchClearButton = view.FindViewById<ImageButton>(Resource.Id.roomUsersHeaderSearchClose);
+            searchClearButton.Click += (s, e) =>
+            {
+                if (string.IsNullOrEmpty(headerSearchView.Query))
+                {
+                    HideSearchRow();
+                }
+                else
+                {
+                    headerSearchView.SetQuery(string.Empty, true);
+                }
+            };
+
+            // Wire after the clear button is captured so the handler can repaint it.
+            headerSearchView.QueryTextChange += (s, e) =>
+            {
+                if (builtInClose != null)
+                {
+                    builtInClose.Visibility = ViewStates.Gone;
+                }
+                UpdateClearButtonState(e.NewText);
+                RoomUserListDialog_QueryTextChange(s, e);
+            };
+            UpdateClearButtonState(string.Empty);
+
+            var searchButton = view.FindViewById<ImageButton>(Resource.Id.roomUsersHeaderSearch);
+            searchButton.Click += (s, e) => ShowSearchRow();
+
+            var sortButton = view.FindViewById<ImageButton>(Resource.Id.roomUsersHeaderSort);
+            sortButton.Click += (s, e) =>
+            {
+                RoomDialogInstance = this;
+                ShowSortRoomUserListDialog();
+            };
 
             recyclerViewUsers = view.FindViewById<RecyclerView>(Resource.Id.recyclerViewUsers);
             recyclerViewUsers.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
             recycleLayoutManager = new LinearLayoutManager(Activity);
             this.RefreshUserListFull();
-            //userViewDataList = ChatroomController.GetWrappedUserData(OurRoomName, IsPrivate, out this.cachedNewestTimeJoined);
-            //roomUserListAdapter = new RoomUserListRecyclerAdapter(userViewDataList);
-            //recyclerViewUsers.SetAdapter(roomUserListAdapter);
             recyclerViewUsers.SetLayoutManager(recycleLayoutManager);
-            this.RegisterForContextMenu(recyclerViewUsers);
+        }
+
+        private void ShowSearchRow()
+        {
+            headerTitleRow.Visibility = ViewStates.Invisible;
+            headerSearchRow.Visibility = ViewStates.Visible;
+            headerSearchView.Iconified = false;
+            headerSearchView.RequestFocus();
+        }
+
+        private void HideSearchRow()
+        {
+            var imm = (InputMethodManager)Activity?.GetSystemService(Context.InputMethodService);
+            imm?.HideSoftInputFromWindow(headerSearchView.WindowToken, 0);
+            headerSearchView.SetQuery(string.Empty, false);
+            headerSearchRow.Visibility = ViewStates.Gone;
+            headerTitleRow.Visibility = ViewStates.Visible;
+        }
+
+        private void UpdateClearButtonState(string queryText)
+        {
+            if (searchClearButton == null)
+            {
+                return;
+            }
+            float density = searchClearButton.Resources.DisplayMetrics.Density;
+            int basePad = (int)(10 * density);
+            int innerPad = (int)(13 * density);
+            if (string.IsNullOrEmpty(queryText))
+            {
+                var tv = new Android.Util.TypedValue();
+                searchClearButton.Context.Theme.ResolveAttribute(Resource.Attribute.selectableItemBackgroundBorderless, tv, true);
+                searchClearButton.SetBackgroundResource(tv.ResourceId);
+                searchClearButton.SetPadding(basePad, basePad, basePad, basePad);
+            }
+            else
+            {
+                searchClearButton.SetBackgroundResource(Resource.Drawable.room_users_clear_circle);
+                searchClearButton.SetPadding(innerPad, innerPad, innerPad, innerPad);
+            }
+        }
+
+        private void UpdateMembersHeader()
+        {
+            if (headerMembersLine == null)
+            {
+                return;
+            }
+            string label = SeekerApplication.GetString(Resource.String.members);
+            int count = ChatroomController.JoinedRoomData[OurRoomName].Users?.Count ?? 0;
+            string full = label + "  " + count;
+            var ss = new SpannableString(full);
+            ss.SetSpan(new StyleSpan(TypefaceStyle.Bold), 0, label.Length, SpanTypes.ExclusiveExclusive);
+            Color subdued = UiHelpers.GetColorFromAttribute(headerMembersLine.Context, Resource.Attribute.cellTextColorSubdued);
+            ss.SetSpan(new ForegroundColorSpan(subdued), label.Length, full.Length, SpanTypes.ExclusiveExclusive);
+            headerMembersLine.TextFormatted = ss;
         }
 
         public void RefreshUserListFull()
@@ -347,6 +439,7 @@ namespace Seeker.Chatroom
             UI_userDataList = ChatroomController.GetWrappedUserData(OurRoomName, IsPrivate, this.FilterText);
             roomUserListAdapter = new RoomUserListRecyclerAdapter(UI_userDataList);
             recyclerViewUsers.SetAdapter(roomUserListAdapter);
+            UpdateMembersHeader();
         }
 
         private void RoomUserListDialog_QueryTextSubmit(object sender, AndroidX.AppCompat.Widget.SearchView.QueryTextSubmitEventArgs e)
@@ -391,7 +484,7 @@ namespace Seeker.Chatroom
 
         private void NotifyItemChanged(Soulseek.UserData userData)
         {
-            int i = this.roomUserListAdapter.GetPositionForUserData(longClickedUserData);
+            int i = this.roomUserListAdapter.GetPositionForUserData(userData);
             if (i == -1)
             {
                 return;
@@ -399,7 +492,7 @@ namespace Seeker.Chatroom
             this.roomUserListAdapter.NotifyItemChanged(i);
         }
 
-        private Action GetUpdateUserListRoomAction(Soulseek.UserData longClickedUserData)
+        public Action GetUpdateUserListRoomAction(Soulseek.UserData longClickedUserData)
         {
             Action a = new Action(() =>
             {
@@ -408,7 +501,7 @@ namespace Seeker.Chatroom
             return a;
         }
 
-        private Action GetUpdateUserListRoomActionAddedRemoved(Soulseek.UserData longClickedUserData)
+        public Action GetUpdateUserListRoomActionAddedRemoved(Soulseek.UserData longClickedUserData)
         {
             Action a = null;
             if (PreferencesState.PutFriendsOnTop)
@@ -471,63 +564,6 @@ namespace Seeker.Chatroom
                 });
             }
             return a;
-        }
-
-        public override bool OnContextItemSelected(IMenuItem item)
-        {
-            var userdata = longClickedUserData;
-            if (item.ItemId != 0) //this is "Remove User" as in Remove User from Room!
-            {
-                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), userdata.Username, SeekerState.ActiveActivityRef, this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom), GetUpdateUserListRoomAction(userdata), GetUpdateUserListRoomActionAddedRemoved(userdata), GetUpdateUserListRoomAction(userdata)))
-                {
-                    Logger.Debug("Handled by commons");
-                    return base.OnContextItemSelected(item);
-                }
-            }
-            switch (item.ItemId)
-            {
-                case 0: //"Remove User"
-                    ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username, true, false, true);
-                    //                    SeekerState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
-                    return true;
-                case 1: //"Remove Moderator Privilege"
-                    ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username, true, true, true);
-                    SeekerState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
-                    return true;
-                case 2:
-                    ChatroomController.AddRemoveUserToPrivateRoomAPI(OurRoomName, userdata.Username, true, true, false);
-                    SeekerState.ActiveActivityRef.RunOnUiThread(GetUpdateUserListRoomAction(userdata));
-                    return true;
-                case 3: //browse user
-                    Action<View> action = new Action<View>((v) =>
-                    {
-                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(MainActivity.GoToBrowseExtra, true);
-                        this.StartActivity(intent);
-                    });
-                    View snackView = this.View.FindViewById<ViewGroup>(Resource.Id.userListRoom);
-                    BrowseService.RequestFilesApi(userdata.Username, snackView, action, null);
-                    return true;
-                case 4: //search users files
-                    SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
-                    SearchTabHelper.SearchTargetChosenUser = userdata.Username;
-                    //SearchFragment.SetSearchHintTarget(SearchTarget.ChosenUser); this will never work. custom view is null
-                    Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(MainActivity.GoToSearchExtra, true);
-                    this.StartActivity(intent);
-                    return true;
-                case 7: //message user
-                    Intent intentMsg = new Intent(SeekerState.ActiveActivityRef, typeof(MessagesActivity));
-                    intentMsg.AddFlags(ActivityFlags.SingleTop);
-                    intentMsg.PutExtra(MessageController.FromUserName, userdata.Username); //so we can go to this user..
-                    intentMsg.PutExtra(MessageController.ComingFromMessageTapped, true); //so we can go to this user..
-                    this.StartActivity(intentMsg);
-                    return true;
-                default:
-                    break;
-            }
-
-            return base.OnContextItemSelected(item);
         }
 
     }

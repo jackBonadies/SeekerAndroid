@@ -1,70 +1,87 @@
-using MessagePack;
 using System;
 
 namespace Seeker
 {
-    [MessagePackObject]
     [System.Serializable]
     public class Message
     {
-        [Key(0)]
-        public string Username;
-        [Key(1)]
-        public int Id;
-        [Key(2)]
-        public bool Replayed;
-        [Key(3)]
-        public DateTime LocalDateTime;
-        [Key(4)]
-        public DateTime UtcDateTime;
-        [Key(5)]
-        public string MessageText;
-        [Key(6)]
-        public bool FromMe = false;
-        [Key(7)]
+        public readonly string Username;
+        public readonly int Id;
+        public readonly bool Replayed;
+        public readonly DateTime UtcDateTime;
+        public readonly string MessageText;
+        public readonly bool FromMe = false;
         public SentStatus SentMsgStatus = SentStatus.None;
-        [Key(8)]
-        public SpecialMessageCode SpecialCode = SpecialMessageCode.None;
-        [Key(9)]
+        public readonly SpecialMessageCode SpecialCode = SpecialMessageCode.None;
         public bool SameAsLastUser = false;
 
-        public Message()
+        private DateTime _localDateTime;
+        private bool _localComputed;
+
+        public DateTime LocalDateTime
         {
+            get
+            {
+                if (!_localComputed)
+                {
+                    var utc = DateTime.SpecifyKind(UtcDateTime, DateTimeKind.Utc);
+                    try
+                    {
+                        _localDateTime = utc.ToLocalTime();
+                    }
+                    catch
+                    {
+                        _localDateTime = utc;
+                    }
+                    _localComputed = true;
+                }
+                return _localDateTime;
+            }
+            set
+            {
+                _localDateTime = value;
+                _localComputed = true;
+            }
         }
 
         public Message(string username, int id, bool replayed, DateTime localDateTime, DateTime utcDateTime, string messageText, bool fromMe)
+            : this(username, id, replayed, utcDateTime, messageText, fromMe, SentStatus.None, SpecialMessageCode.None, false)
         {
-            Username = username;
-            Id = id;
-            Replayed = replayed;
             LocalDateTime = localDateTime;
-            UtcDateTime = utcDateTime;
-            MessageText = messageText;
-            FromMe = fromMe;
         }
 
         public Message(string username, int id, bool replayed, DateTime localDateTime, DateTime utcDateTime, string messageText, bool fromMe, SentStatus sentStatus)
+            : this(username, id, replayed, utcDateTime, messageText, fromMe, sentStatus, SpecialMessageCode.None, false)
+        {
+            LocalDateTime = localDateTime;
+        }
+
+        public Message(DateTime localDateTime, DateTime utcDateTime, SpecialMessageCode connectOrDisconnect, string messageText)
+            : this(string.Empty, -2, false, utcDateTime, messageText, false, SentStatus.None, connectOrDisconnect, false)
+        {
+            LocalDateTime = localDateTime;
+        }
+
+        public Message(
+            string username,
+            int id,
+            bool replayed,
+            DateTime utcDateTime,
+            string messageText,
+            bool fromMe,
+            SentStatus sentMsgStatus,
+            SpecialMessageCode specialCode,
+            bool sameAsLastUser)
         {
             Username = username;
             Id = id;
             Replayed = replayed;
-            LocalDateTime = localDateTime;
             UtcDateTime = utcDateTime;
             MessageText = messageText;
             FromMe = fromMe;
-            SentMsgStatus = sentStatus;
-        }
-
-        public Message(DateTime localDateTime, DateTime utcDateTime, SpecialMessageCode connectOrDisconnect, string messageText)
-        {
-            Username = string.Empty;
-            Id = -2;
-            Replayed = false;
-            LocalDateTime = localDateTime;
-            UtcDateTime = utcDateTime;
-            MessageText = messageText;
-            SentMsgStatus = 0;
-            SpecialCode = connectOrDisconnect;
+            SentMsgStatus = sentMsgStatus;
+            SpecialCode = specialCode;
+            SameAsLastUser = sameAsLastUser;
         }
     }
 

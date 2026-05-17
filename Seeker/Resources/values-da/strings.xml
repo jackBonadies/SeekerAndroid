@@ -54,15 +54,12 @@
     <string name="no_messages">Ingen beskeder. Tryk på \"+\" for at komme i gang.</string>
     <string name="messages">Beskeder</string>
     <string name="browse_files">Gennemse Filer</string>
-    <string name="chatroomListLoading">
-        Henter listen med tilgængelige chat rum. Vent venligst...
-    </string>
     <string name="privateRoomCreation">Anmoder om oprettelse af privat rum</string>
     <string name="requesting_room_list">Anmoder Om Rumliste</string>
     <string name="requesting_user_info">Henter Brugerens Information</string>
     <string name="room_list_received">Rumliste Modtaget</string>
 
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Ønskeliste</string>
     <string name="wishlist_bold">
@@ -99,7 +96,6 @@ Directory Count: {5}\"
     <string name="clear">Ryd</string>
     <string name="get_user_info">Hent Brugerinformation</string>
     <string name="quick_info">Hurtig Info</string>
-    <string name="filer_files">Filtrer Filer Her</string>
     <string name="enter_user_to_browse">Indtast bruger for at gennemse</string>
     <string name="all_target">Alle Brugere</string>
     <string name="target_user_list">Brugerliste</string>
@@ -124,7 +120,6 @@ Directory Count: {5}\"
 
     <string name="enter_listening_port">Enter Port to Listen On</string>
 
-    <string name="create_chatroom_name">Room Name to Create</string>
     <string name="create_chatroom_private">Make Private</string>
 
     <string name="search_here">Search Here</string>
@@ -181,7 +176,7 @@ Directory Count: {5}\"
     <string name="new_search_tab">New Search</string>
     <string name="filter_search_results_here">Filter Results</string>
     <string name="persist_it">Sticky</string>
-    <string name="type_chatroom_ticker_message">Type Ticker Message</string>
+    <string name="type_chatroom_ticker_message">Ticker Message</string>
 
     <string name="change_download_folder">Change Download Folder</string>
     <string name="max_search_results">Max Search Results:</string>
@@ -290,7 +285,6 @@ Directory Count: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>
@@ -574,7 +568,7 @@ Directory Count: {5}\"
     <string name="mod">Mod</string>
 
     <string name="user_">User:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Create Chatroom</string>
@@ -597,10 +591,8 @@ Directory Count: {5}\"
     <string name="online">Online</string>
     <string name="offline">Offline</string>
 
-    <string name="auto_join_on">Auto Join [On]</string>
-    <string name="auto_join_off">Auto Join [Off]</string>
-    <string name="notification_on">Notifications [On]</string>
-    <string name="notification_off">Notifications [Off]</string>
+    <string name="auto_join">Auto Join</string>
+    <string name="notification">Notifications</string>
     <string name="copy_text">Copy Text</string>
     <string name="ignore_user">Ignore User</string>
     <string name="remove_user">Remove User</string>

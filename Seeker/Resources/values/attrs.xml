@@ -13,6 +13,7 @@
     <attr name="slightestContrastColor" format="color" />
     <attr name="slightContrastColor" format="color" />
     <attr name="dialog_background" format="color" />
+    <attr name="surface_variant1" format="color" />
     <attr name="normalTextColorNonTinted" format="color" />
     <attr name="mainPurple" format="color" />
     <attr name="swipeToRefreshProgress" format="color" />
@@ -25,11 +26,15 @@
     <attr name="mainTextColorHintedFlair" format="color" />
     <attr name="searchTabButtonColor" format="color" />
     <attr name="cellStroke" format="color" />
+    <attr name="chat_join" format="color" />
+    <attr name="chat_left" format="color" />
+    <attr name="cellStroke" format="color" />
     <attr name="checkBoxColor" format="color" />
     <attr name="expandIconColor" format="color" />
     <attr name="mainPurpleForNavBar" format="color" />
     <attr name="pseudo_window_background_color" format="color" />
     <attr name="searchBottomSheetBackground" format="color" />
+    <attr name="searchTabPillInactiveColor" format="color" />
     <attr name="user_info_chip_background" format="color" />
 
     <attr name="android_default_notification_blue_color" format="color" />
@@ -66,4 +71,6 @@
     <attr name="expandableModernSeparatorColor" format="color" />
 
     <attr name="searchHeaderBackground" format="color" />
+
+    <attr name="destructiveColor" format="color" />
 </resources>

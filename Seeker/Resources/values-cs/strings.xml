@@ -54,15 +54,12 @@
     <string name="no_messages">Žádné zprávy. Stiskněte \"+\" pro začnutí.</string>
     <string name="messages">Zprávy</string>
     <string name="browse_files">Procházet soubory</string>
-    <string name="chatroomListLoading">
-        Vyhledávám seznam dostupných místností. Počkejte prosím...
-    </string>
     <string name="privateRoomCreation">Požadování vytvoření soukromé místnosti</string>
     <string name="requesting_room_list">Požaduji seznam místností</string>
     <string name="requesting_user_info">Požaduji informace o uživateli</string>
     <string name="room_list_received">Seznam místností byl přijat</string>
 
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Seznam přání</string>
     <string name="wishlist_bold">
@@ -99,7 +96,6 @@ Počet adresářů: {5}\"
     <string name="clear">Vymazat</string>
     <string name="get_user_info">Získat informace o uživateli</string>
     <string name="quick_info">Rychlé info</string>
-    <string name="filer_files">Filtrovat soubory zde</string>
     <string name="enter_user_to_browse">Zadejte uživatele pro procházení</string>
     <string name="all_target">Všichni uživatelé</string>
     <string name="target_user_list">Seznam uživatelů</string>
@@ -124,7 +120,6 @@ Počet adresářů: {5}\"
 
     <string name="enter_listening_port">Enter Port to Listen On</string>
 
-    <string name="create_chatroom_name">Room Name to Create</string>
     <string name="create_chatroom_private">Nastavit jako soukromé</string>
 
     <string name="search_here">Hledat zde</string>
@@ -181,7 +176,7 @@ Počet adresářů: {5}\"
     <string name="new_search_tab">Nové hledání</string>
     <string name="filter_search_results_here">Filter Results</string>
     <string name="persist_it">Připnout</string>
-    <string name="type_chatroom_ticker_message">Type Ticker Message</string>
+    <string name="type_chatroom_ticker_message">Ticker Message</string>
 
     <string name="change_download_folder">Change Download Folder</string>
     <string name="max_search_results">Max Search Results:</string>
@@ -290,7 +285,6 @@ Počet adresářů: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>
@@ -574,7 +568,7 @@ Počet adresářů: {5}\"
     <string name="mod">Moderátor</string>
 
     <string name="user_">Uživatel:</string>
-    <string name="set_ticker">Set Ticker:</string>
+    <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatovací místnost</string>
     <string name="create_chatroom_">Vytvořit místnost</string>
@@ -597,10 +591,8 @@ Počet adresářů: {5}\"
     <string name="online">Online</string>
     <string name="offline">Offline</string>
 
-    <string name="auto_join_on">Automatické připojení [On]</string>
-    <string name="auto_join_off">Automatické připojení [Off]</string>
-    <string name="notification_on">Oznámení [On]</string>
-    <string name="notification_off">Oznámení [Off]</string>
+    <string name="auto_join">Automatické připojení</string>
+    <string name="notification">Oznámení</string>
     <string name="copy_text">Kopírovat Text</string>
     <string name="ignore_user">Ignorovat Uživatele</string>
     <string name="remove_user">Odebrat uživatele</string>

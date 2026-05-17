@@ -45,11 +45,11 @@ namespace Seeker.Messages
                 menu.FindItem(Resource.Id.action_browse_files)?.SetVisible(singleSelected);
                 menu.FindItem(Resource.Id.action_search_files)?.SetVisible(singleSelected);
                 menu.FindItem(Resource.Id.action_get_user_info)?.SetVisible(singleSelected);
-                menu.FindItem(Resource.Id.action_delete_messages)?.SetVisible(singleSelected);
 
                 // Single + multi items
                 menu.FindItem(Resource.Id.action_add_to_user_list)?.SetVisible(anySelected);
                 menu.FindItem(Resource.Id.action_ignore)?.SetVisible(anySelected);
+                menu.FindItem(Resource.Id.action_mark_as_read)?.SetVisible(anySelected && GetSelectedUsernames().Any(u => MessageController.GetUnreadCount(u) > 0));
 
                 if (singleSelected)
                 {
@@ -60,7 +60,7 @@ namespace Seeker.Messages
                 else if (anySelected)
                 {
                     menu.FindItem(Resource.Id.action_add_to_user_list)?.SetTitle(Resource.String.add_to_user_list);
-                    menu.FindItem(Resource.Id.action_ignore)?.SetTitle(Resource.String.ignore_user);
+                    menu.FindItem(Resource.Id.action_ignore)?.SetTitle(Resource.String.ignore_users);
                 }
 
                 return true;
@@ -83,14 +83,7 @@ namespace Seeker.Messages
                         string username = GetSelectedUsernames().FirstOrDefault();
                         if (username != null)
                         {
-                            Action<View> action = new Action<View>((v) =>
-                            {
-                                Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                                intent.PutExtra(MainActivity.GoToBrowseExtra, true);
-                                SeekerState.ActiveActivityRef.StartActivity(intent);
-                            });
-                            View snackView = SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId);
-                            BrowseService.RequestFilesApi(username, snackView, action, null);
+                            BrowseService.RequestFilesApi(username, null);
                         }
                         MessagesOverviewActionMode?.Finish();
                         return true;
@@ -171,6 +164,12 @@ namespace Seeker.Messages
                     case Resource.Id.action_delete_selected_batch:
                         Frag.DeleteBatchSelected();
                         return true;
+                    case Resource.Id.action_mark_as_read:
+                        MessageController.MarkAsRead(GetSelectedUsernames());
+                        Adapter.NotifyDataSetChanged();
+                        MessagesBroadcastReceiver.MarkAsReadFromNotification?.Invoke(null, null);
+                        MessagesOverviewActionMode?.Finish();
+                        return true;
                     case Resource.Id.select_all:
                         Adapter.SelectedPositions.Clear();
                         int cnt = Adapter.ItemCount;
@@ -237,14 +236,15 @@ namespace Seeker.Messages
             adapter.NotifyItemChanged(position);
 
             int cnt = adapter.SelectedPositions.Count;
+            var actionMode = MessagesOverviewActionMode;
             if (cnt == 0)
             {
-                MessagesOverviewActionMode?.Finish();
+                actionMode?.Finish();
             }
-            else
+            else if (actionMode != null)
             {
-                MessagesOverviewActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                MessagesOverviewActionMode.Invalidate();
+                actionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
+                actionMode.Invalidate();
             }
         }
 
@@ -300,8 +300,14 @@ namespace Seeker.Messages
                 return;
             }
 
+            var act = this.Activity as MessagesActivity ?? MessagesActivity.MessagesActivityRef;
+            if (act == null)
+            {
+                Logger.Firebase("On Long Click Messages Activity is Null");
+                return;
+            }
             MessagesOverviewActionModeCallbackInstance = new MessagesOverviewActionModeCallback() { Adapter = adapter, Frag = this };
-            MessagesOverviewActionMode = (SeekerState.ActiveActivityRef as MessagesActivity).StartSupportActionMode(MessagesOverviewActionModeCallbackInstance);
+            MessagesOverviewActionMode = act.StartSupportActionMode(MessagesOverviewActionModeCallbackInstance);
             adapter.IsInBatchSelectMode = true;
             ToggleBatchSelect(position);
             adapter.NotifyDataSetChanged();

@@ -18,7 +18,8 @@ namespace Seeker
             return SavedStateSearchTabHeader.GetSavedStateHeaderFromTab(
                 searchTab.LastSearchTerm,
                 searchTab.LastSearchResultsCount,
-                searchTab.LastRanTime.Ticks);
+                searchTab.LastRanTime.Ticks,
+                searchTab.UnseenCount);
         }
 
         /// <summary>
@@ -33,6 +34,7 @@ namespace Seeker
             searchTab.LastRanTime = new System.DateTime(savedStateHeader.LastRanTime);
             searchTab.SearchTarget = SearchTarget.Wishlist;
             searchTab.LastSearchResultsCount = responses != null ? responses.Count : savedStateHeader.LastSearchResultsCount;
+            searchTab.UnseenCount = savedStateHeader.UnseenCount;
             if (PreferencesState.FilterSticky)
             {
                 searchTab.FilterSticky = PreferencesState.FilterSticky;

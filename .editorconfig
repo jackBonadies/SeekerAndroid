@@ -2,3 +2,6 @@
 
 # Default severity for analyzer diagnostics with category 'StyleCop.CSharp.SpacingRules'
 dotnet_analyzer_diagnostic.category-StyleCop.CSharp.SpacingRules.severity = silent
+
+# S1104: Fields should not have public accessibility
+dotnet_diagnostic.S1104.severity = none

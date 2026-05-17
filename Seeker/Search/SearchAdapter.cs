@@ -24,9 +24,21 @@ namespace Seeker
 
             public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
             {
-
-
-                (holder as SearchViewHolder).getSearchItemView().setItem(localDataSet[position], position);
+                var item = localDataSet[position];
+                var view = (holder as SearchViewHolder).getSearchItemView();
+                view.setItem(item, position);
+                if (wishlistUnseenSet != null)
+                {
+                    if (view is SearchItemViewUnifiedBase wishlistView)
+                    {
+                        wishlistView.ApplyNewIndicator(wishlistUnseenSet.Contains(item));
+                    }
+                }
+                // if we reuse a view from a wishlist tab, then set it to unseen
+                else if (view is SearchItemViewUnifiedBase recycledView && recycledView.HasNewIndicator)
+                {
+                    recycledView.ApplyNewIndicator(false);
+                }
                 //(holder as TransferViewHolder).getTransferItemView().LongClick += TransferAdapterRecyclerVersion_LongClick; //I dont think we should be adding this here.  you get 3 after a short time...
             }
 
@@ -100,13 +112,18 @@ namespace Seeker
             }
 
             private SearchResultStyleEnum searchResultStyle;
+            private readonly HashSet<SearchResponse> wishlistUnseenSet;
 
-            public SearchAdapterRecyclerVersion(List<SearchResponse> ti)
+            public SearchAdapterRecyclerVersion(SearchTab tab, List<SearchResponse> ti)
             {
                 oldList = null; // no longer valid...
                 localDataSet = ti;
                 searchResultStyle = PreferencesState.SearchResultStyle;
                 oppositePositions = new List<int>();
+                if (tab != null && tab.SearchTarget == SearchTarget.Wishlist)
+                {
+                    wishlistUnseenSet = tab.UnseenResults;
+                }
             }
 
             // Chevron click: parent chain in unified XMLs is
