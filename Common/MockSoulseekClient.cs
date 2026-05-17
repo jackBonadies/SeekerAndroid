@@ -1337,6 +1337,7 @@ namespace Seeker
             bool isSlowSearch = joinedTerms.Contains("slowsearch");
             bool is0Results = joinedTerms.Contains("0results");
             bool is1Results = joinedTerms.Contains("1results");
+            bool isWishlist = joinedTerms.Contains("wishlist");
             bool isCurated = isBeethovenOverture || isChipTestOther;
 
             var allResponses = new List<SearchResponse>();
@@ -1424,7 +1425,7 @@ namespace Seeker
                     {
                         break;
                     }
-                    var response = GenerateMockSearchResponse(resolvedToken, search);
+                    var response = GenerateMockSearchResponse(resolvedToken, (isWishlist ? DateTime.Now.ToString("HH:mm:ss") : "") + search);
                     allResponses.Add(response);
                     var currentSearch = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.InProgress, i + 1, 0, 0);
                     options?.ResponseReceived?.Invoke((currentSearch, response));
