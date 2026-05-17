@@ -45,7 +45,6 @@ namespace Seeker.Messages
                 menu.FindItem(Resource.Id.action_browse_files)?.SetVisible(singleSelected);
                 menu.FindItem(Resource.Id.action_search_files)?.SetVisible(singleSelected);
                 menu.FindItem(Resource.Id.action_get_user_info)?.SetVisible(singleSelected);
-                menu.FindItem(Resource.Id.action_delete_messages)?.SetVisible(singleSelected);
 
                 // Single + multi items
                 menu.FindItem(Resource.Id.action_add_to_user_list)?.SetVisible(anySelected);

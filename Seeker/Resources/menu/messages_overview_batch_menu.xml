@@ -9,6 +9,13 @@
         app:showAsAction="always"
         android:iconifiedByDefault="true"
     />
+    <item
+        android:id="@+id/action_mark_as_read"
+        android:title="@string/mark_as_read"
+        android:icon="@drawable/mark_email_read_30dp"
+        app:showAsAction="always"
+        android:iconifiedByDefault="true"
+    />
 
     <item
         android:id="@+id/select_all"
@@ -46,16 +53,6 @@
     <item
         android:id="@id/action_get_user_info"
         android:title="@string/get_user_info"
-        app:showAsAction="never"
-    />
-    <item
-        android:id="@+id/action_delete_messages"
-        android:title="@string/delete_messages"
-        app:showAsAction="never"
-    />
-    <item
-        android:id="@+id/action_mark_as_read"
-        android:title="@string/mark_as_read"
         app:showAsAction="never"
     />
     <item
