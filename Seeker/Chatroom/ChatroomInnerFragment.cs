@@ -792,19 +792,6 @@ namespace Seeker.Chatroom
             statusesContainer.RequestLayout(); //relayout (for size changes)
         }
 
-        //happens too late...
-        //private void RecyclerViewStatusesView_LayoutChange(object sender, View.LayoutChangeEventArgs e)
-        //{
-        //    Logger.Debug("RecyclerViewStatusesView_LayoutChange" + e.OldTop + "   " + e.Top);
-        //    Logger.Debug("RecyclerViewStatusesView_LayoutChange" + e.OldBottom + "   " + e.Bottom);
-        //    Logger.Debug("RecyclerViewStatusesView_LayoutChange" + this.recycleLayoutManagerStatuses.FindLastCompletelyVisibleItemPosition());
-        //    Logger.Debug("RecyclerViewStatusesView_LayoutChange" + this.recycleLayoutManagerStatuses.FindFirstCompletelyVisibleItemPosition());
-        //    if(e.OldBottom > e.Bottom)
-        //    {
-        //        this.recycleLayoutManagerStatuses.ScrollToPosition(this.recycleLayoutManagerStatuses.ItemCount - 1);
-        //    }
-        //}
-
         private void CurrentTickerView_Click(object sender, EventArgs e)
         {
             TextView tickerView = (sender as TextView);
@@ -1261,7 +1248,7 @@ namespace Seeker.Chatroom
 
                 config.Rows.Add(new AnchoredMenuRow
                 {
-                    IconResId = Resource.Drawable.search_small_30dp,
+                    IconResId = Resource.Drawable.search_users_files,
                     Label = ctx.GetString(Resource.String.search_room),
                     OnClick = () =>
                     {
@@ -1309,6 +1296,7 @@ namespace Seeker.Chatroom
                 {
                     config.Rows.Add(new AnchoredMenuRow
                     {
+                        IconResId = Resource.Drawable.settings_outline_30dp,
                         Kind = AnchoredMenuRowKind.Submenu,
                         Label = ctx.GetString(Resource.String.Options),
                         SubMenuTitle = ctx.GetString(Resource.String.Options),
@@ -1324,6 +1312,7 @@ namespace Seeker.Chatroom
                 var sub = new AnchoredMenuConfig();
                 sub.Rows.Add(new AnchoredMenuRow
                 {
+                    IconResId = Resource.Drawable.pinboard_all_tickers_30dp,
                     Label = ChatroomActivity.ShowTickerView
                         ? ctx.GetString(Resource.String.HideTickerView)
                         : ctx.GetString(Resource.String.ShowTickerView),
@@ -1336,6 +1325,7 @@ namespace Seeker.Chatroom
                 });
                 sub.Rows.Add(new AnchoredMenuRow
                 {
+                    IconResId = Resource.Drawable.person_text_user_status_view_30dp,
                     Label = ChatroomActivity.ShowStatusesView
                         ? ctx.GetString(Resource.String.HideStatusView)
                         : ctx.GetString(Resource.String.ShowStatusView),

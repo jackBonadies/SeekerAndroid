@@ -34,7 +34,7 @@ namespace Seeker.Helpers.ActionSheet
             string ignoreLabel = ctx.GetString(ignored ? Resource.String.remove_from_ignored : Resource.String.ignore_user);
             section.Rows.Add(new ActionSheetRow
             {
-                IconResId = Resource.Drawable.account_cancel,
+                IconResId = Resource.Drawable.account_cancel_outline,
                 Label = ignoreLabel,
                 OnClick = () =>
                 {
@@ -67,8 +67,8 @@ namespace Seeker.Helpers.ActionSheet
             });
 
             section.Rows.Add(MakeCommonRow(Resource.Drawable.message_user, Resource.String.msg_user, username, ctx, snackView, options));
-            section.Rows.Add(MakeCommonRow(Resource.Drawable.folder_account_outline, Resource.String.browse_user, username, ctx, snackView, options));
-            section.Rows.Add(MakeCommonRow(Resource.Drawable.search, Resource.String.search_user_files, username, ctx, snackView, options));
+            section.Rows.Add(MakeCommonRow(Resource.Drawable.folder_shared_browse_outline_30dp, Resource.String.browse_user, username, ctx, snackView, options));
+            section.Rows.Add(MakeCommonRow(Resource.Drawable.search_users_files, Resource.String.search_user_files, username, ctx, snackView, options));
             section.Rows.Add(MakeCommonRow(Resource.Drawable.user_info, Resource.String.get_user_info, username, ctx, snackView, options));
 
             bool hasNote = SeekerState.UserNotes.ContainsKey(username);
