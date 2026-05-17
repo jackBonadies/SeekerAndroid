@@ -106,7 +106,7 @@ namespace Seeker
 
         public static void ClearSearchHistoryInvoke()
         {
-            ClearSearchHistory?.Invoke(null, null);
+            ClearSearchHistory?.Invoke(null, EventArgs.Empty);
         }
 
 

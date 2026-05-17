@@ -60,7 +60,7 @@ namespace Seeker.Messages
                 else if (anySelected)
                 {
                     menu.FindItem(Resource.Id.action_add_to_user_list)?.SetTitle(Resource.String.add_to_user_list);
-                    menu.FindItem(Resource.Id.action_ignore)?.SetTitle(singleSelected ? Resource.String.ignore_user : Resource.String.ignore_users);
+                    menu.FindItem(Resource.Id.action_ignore)?.SetTitle(Resource.String.ignore_users);
                 }
 
                 return true;

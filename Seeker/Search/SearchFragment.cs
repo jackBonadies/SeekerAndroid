@@ -1915,8 +1915,8 @@ namespace Seeker
                 SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
 
-                SearchFragment.Instance?.UpdateEmptyState();
-                SearchFragment.Instance?.NotifySearchHeaderChanged();
+                SearchFragment.Instance.UpdateEmptyState();
+                SearchFragment.Instance.NotifySearchHeaderChanged();
             }
         }
 

@@ -78,7 +78,7 @@ namespace Seeker
             {
                 builder.Append(ticker.Message);
                 var messageEnd = builder.Length();
-                builder.Append(" —⁠" + ticker.Username);
+                builder.Append(" —\u2060" + ticker.Username);
                 var mutedColor = UiHelpers.GetColorFromAttribute(context, Resource.Attribute.cellTextColorSubdued);
                 builder.SetSpan(new StyleSpan(TypefaceStyle.Italic), messageEnd, builder.Length(), SpanTypes.ExclusiveExclusive);
                 builder.SetSpan(new ForegroundColorSpan(mutedColor), messageEnd, builder.Length(), SpanTypes.ExclusiveExclusive);
