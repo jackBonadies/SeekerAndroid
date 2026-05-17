@@ -101,8 +101,7 @@ namespace Seeker.Chatroom
             var config = new ActionSheetConfig();
             config.Sections.Add(ActionSheetActions.BuildUserActionsSection(userdata.Username, activity, snackView, options));
 
-            ActionSheetDialog.PendingConfig = config;
-            new ActionSheetDialog().Show(activity.SupportFragmentManager, "actionSheet");
+            UiHelpers.ShowActionSheetDialogSafe(activity.SupportFragmentManager, config);
         }
 
         private static RoomAdminContext BuildRoomAdminContext(Soulseek.UserData userdata, RoomUserListDialog dialog)

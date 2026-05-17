@@ -275,8 +275,7 @@ namespace Seeker
 
             config.Sections.Add(ActionSheetActions.BuildUserActionsSection(message.Username, activity, view));
 
-            ActionSheetDialog.PendingConfig = config;
-            new ActionSheetDialog().Show(activity.SupportFragmentManager, "actionSheet");
+            UiHelpers.ShowActionSheetDialogSafe(activity.SupportFragmentManager, config);
             e.Handled = true;
         }
 

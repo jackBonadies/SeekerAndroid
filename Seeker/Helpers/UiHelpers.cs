@@ -215,6 +215,17 @@ namespace Seeker
             }
         }
 
+        public static void ShowActionSheetDialogSafe(AndroidX.Fragment.App.FragmentManager fm, Seeker.Helpers.ActionSheet.ActionSheetConfig config)
+        {
+            if (fm == null || fm.IsStateSaved || fm.IsDestroyed)
+            {
+                Logger.Firebase($"Not safe to show ActionSheetDialog - null {fm == null} {fm?.IsStateSaved} {fm?.IsDestroyed}");
+                return;
+            }
+            Seeker.Helpers.ActionSheet.ActionSheetDialog.PendingConfig = config;
+            new Seeker.Helpers.ActionSheet.ActionSheetDialog().Show(fm, "actionSheet");
+        }
+
         public static void ShowCopyMessageTextPopup(View anchor, Message msg, GravityFlags gravity)
         {
             anchor.PerformHapticFeedback(FeedbackConstants.LongPress);

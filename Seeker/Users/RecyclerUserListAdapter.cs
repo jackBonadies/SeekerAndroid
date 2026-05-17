@@ -260,8 +260,7 @@ namespace Seeker.Users
                 config.Sections.Add(ActionSheetActions.BuildUserActionsSection(username, activity, snackView, options));
             }
 
-            ActionSheetDialog.PendingConfig = config;
-            new ActionSheetDialog().Show(activity.SupportFragmentManager, "actionSheet");
+            UiHelpers.ShowActionSheetDialogSafe(activity.SupportFragmentManager, config);
         }
 
         public static UserRowView inflate(ViewGroup parent)
