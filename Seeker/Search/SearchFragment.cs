@@ -2056,45 +2056,50 @@ namespace Seeker
 
             if ((!fromWishlist || SearchFragment.Instance != null) && fromTab == SearchTabHelper.CurrentTab)
             {
-                Action a = new Action(() =>
-                {
-#if DEBUG
-                    Seeker.SearchFragment.StopWatch.Stop();
-                    Seeker.SearchFragment.StopWatch.Reset();
-                    Seeker.SearchFragment.StopWatch.Start();
-#endif
-                    if (fromTab != SearchTabHelper.CurrentTab)
-                    {
-                        return;
-                    }
-                    int total = tab.SearchResponses.Count;
-                    if (tab.LastSearchResponseCount == total)
-                    {
-                        return;
-                    }
-
-                    if (tab.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
-                    {
-                        SearchFragment.Instance.UpdateFilteredResponses(tab);
-                        ApplySearchResults(tab.UI_SearchResponses, tab.TextFilter.FilterString);
-                    }
-                    else
-                    {
-                        tab.UI_SearchResponses = tab.SearchResponses.ToList();
-                        ApplySearchResults(tab.UI_SearchResponses, null);
-                    }
-                    tab.LastSearchResponseCount = total;
-#if DEBUG
-                    Seeker.SearchFragment.StopWatch.Stop();
-                    Seeker.SearchFragment.StopWatch.Reset();
-                    Seeker.SearchFragment.StopWatch.Start();
-#endif
-                });
-
-                SeekerState.MainActivityRef?.RunOnUiThread(a);
-
+                ScheduleDebouncedRefresh(fromTab, tab);
             }
 
+        }
+
+        // Coalesces per-response UI refreshes during a burst. The first response in a quiet
+        // window schedules a refresh; subsequent responses arriving during the window are
+        // absorbed (their data is already in tab.SortHelper and tab.SearchResponses, which
+        // the scheduled refresh re-reads at fire time). The pending flag is cleared before
+        // the work runs, so any response arriving mid-render schedules the next refresh.
+        private static readonly Handler _refreshUiHandler = new Handler(Looper.MainLooper);
+        private static int _refreshPending; // 0 or 1
+        private const int RefreshDebounceMs = 100;
+
+        private static void ScheduleDebouncedRefresh(int fromTab, SearchTab tab)
+        {
+            if (Interlocked.CompareExchange(ref _refreshPending, 1, 0) != 0)
+            {
+                return;
+            }
+            _refreshUiHandler.PostDelayed(new Action(() =>
+            {
+                Interlocked.Exchange(ref _refreshPending, 0);
+                if (fromTab != SearchTabHelper.CurrentTab)
+                {
+                    return;
+                }
+                int total = tab.SearchResponses.Count;
+                if (tab.LastSearchResponseCount == total)
+                {
+                    return;
+                }
+                if (tab.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
+                {
+                    SearchFragment.Instance.UpdateFilteredResponses(tab);
+                    ApplySearchResults(tab.UI_SearchResponses, tab.TextFilter.FilterString);
+                }
+                else
+                {
+                    tab.UI_SearchResponses = tab.SearchResponses.ToList();
+                    ApplySearchResults(tab.UI_SearchResponses, null);
+                }
+                tab.LastSearchResponseCount = total;
+            }), RefreshDebounceMs);
         }
 
         public static System.Diagnostics.Stopwatch StopWatch = new System.Diagnostics.Stopwatch();
