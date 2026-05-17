@@ -54,9 +54,6 @@
     <string name="no_messages">没有消息。点击\"+\"开始操作。</string>
     <string name="messages">留言</string>
     <string name="browse_files">浏览文件</string>
-    <string name="chatroomListLoading">
-        正在请求可用聊天室列表。请稍候...
-    </string>
     <string name="privateRoomCreation">正在请求创建私人房间</string>
     <string name="requesting_room_list">正在申请房间列表</string>
     <string name="requesting_user_info">Requesting User\'s Info</string>
@@ -99,7 +96,6 @@ Directory Count: {5}\"
     <string name="clear">Clear</string>
     <string name="get_user_info">Get User Info</string>
     <string name="quick_info">Quick Info</string>
-    <string name="filer_files">Filter Files Here</string>
     <string name="enter_user_to_browse">Enter User to Browse</string>
     <string name="all_target">All Users</string>
     <string name="target_user_list">User List</string>
@@ -289,7 +285,6 @@ Directory Count: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>

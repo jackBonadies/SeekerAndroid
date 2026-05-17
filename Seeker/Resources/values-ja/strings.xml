@@ -45,9 +45,6 @@
     <string name="no_messages">メッセージはありません。開始するには「+」をタップしてください。</string>
     <string name="messages">メッセージ</string>
     <string name="browse_files">ファイルを閲覧</string>
-    <string name="chatroomListLoading">
-        利用可能なチャットルームのリストをリクエスト中です。お待ちください…
-    </string>
     <string name="privateRoomCreation">プライベートルーム作成をリクエスト中</string>
     <string name="requesting_room_list">ルームリストをリクエスト中</string>
     <string name="requesting_user_info">ユーザー情報をリクエスト中</string>
@@ -90,7 +87,6 @@
     <string name="clear">クリア</string>
     <string name="get_user_info">ユーザー情報を取得</string>
     <string name="quick_info">クイック情報</string>
-    <string name="filer_files">ここでファイルをフィルター</string>
     <string name="enter_user_to_browse">閲覧するユーザーを入力</string>
     <string name="all_target">すべてのユーザー</string>
     <string name="target_user_list">ユーザーリスト</string>
@@ -280,7 +276,6 @@
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>

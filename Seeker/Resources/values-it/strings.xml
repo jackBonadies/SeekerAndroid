@@ -54,9 +54,6 @@
     <string name="no_messages">Nessun messaggio. Clicca \"+\" per iniziare.</string>
     <string name="messages">Messaggi</string>
     <string name="browse_files">Sfoglia documenti</string>
-    <string name="chatroomListLoading">
-        Richiesta elenco delle chat disponibili. Attendere...
-    </string>
     <string name="privateRoomCreation">Richiesta creazione stanza privata</string>
     <string name="requesting_room_list">Richiesta Elenco Stanze</string>
     <string name="requesting_user_info">Richiesta Informazioni Utente</string>
@@ -99,7 +96,6 @@ Numero Cartelle: {5}\"
     <string name="clear">Cancella</string>
     <string name="get_user_info">Ottieni informazioni sull\'utente</string>
     <string name="quick_info">Info Rapide</string>
-    <string name="filer_files">Filtra i file qui</string>
     <string name="enter_user_to_browse">Inserisci l\'utente da esplorare</string>
     <string name="all_target">Tutti gli utenti</string>
     <string name="target_user_list">Lista utenti</string>
@@ -289,7 +285,6 @@ Numero Cartelle: {5}\"
     <string name="room_data_still_loading">
         Troppo veloce! Sto ancora ottenendo i dati della stanza...
     </string>
-    <string name="loading_current_ticker">Caricamento ticker corrente...</string>
     <string name="must_be_logged_to_browse">
         Devi essere loggato per sfogliare un utente
     </string>

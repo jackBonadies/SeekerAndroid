@@ -54,9 +54,6 @@
     <string name="no_messages">Žádné zprávy. Stiskněte \"+\" pro začnutí.</string>
     <string name="messages">Zprávy</string>
     <string name="browse_files">Procházet soubory</string>
-    <string name="chatroomListLoading">
-        Vyhledávám seznam dostupných místností. Počkejte prosím...
-    </string>
     <string name="privateRoomCreation">Požadování vytvoření soukromé místnosti</string>
     <string name="requesting_room_list">Požaduji seznam místností</string>
     <string name="requesting_user_info">Požaduji informace o uživateli</string>
@@ -99,7 +96,6 @@ Počet adresářů: {5}\"
     <string name="clear">Vymazat</string>
     <string name="get_user_info">Získat informace o uživateli</string>
     <string name="quick_info">Rychlé info</string>
-    <string name="filer_files">Filtrovat soubory zde</string>
     <string name="enter_user_to_browse">Zadejte uživatele pro procházení</string>
     <string name="all_target">Všichni uživatelé</string>
     <string name="target_user_list">Seznam uživatelů</string>
@@ -289,7 +285,6 @@ Počet adresářů: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>

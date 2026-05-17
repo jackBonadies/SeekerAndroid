@@ -47,9 +47,6 @@
     <string name="no_messages">Nincsenek üzenetek. A kezdéshez érintse meg a „+” jelet.</string>
     <string name="messages">Üzenetek</string>
     <string name="browse_files">Fájlok böngészése</string>
-    <string name="chatroomListLoading">
-        Az elérhető csevegőszobák listájának lekérése. Kérem várjon...
-    </string>
     <string name="privateRoomCreation">Privát szoba létrehozásának kérése</string>
     <string name="requesting_room_list">Szobalista lekérése</string>
     <string name="requesting_user_info">Felhasználói adatok lekérése</string>
@@ -92,7 +89,6 @@ Könyvtárak száma: {5}\"
     <string name="clear">Töröl</string>
     <string name="get_user_info">Felhasználói információ lekérése</string>
     <string name="quick_info">Gyors információ</string>
-    <string name="filer_files">Fájlok szűrése itt</string>
     <string name="enter_user_to_browse">Adja meg a felhasználó nevét a böngészéshez</string>
     <string name="all_target">Minden felhasználó</string>
     <string name="target_user_list">Felhasználó lista</string>
@@ -282,7 +278,6 @@ Könyvtárak száma: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>

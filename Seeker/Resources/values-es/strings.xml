@@ -54,9 +54,6 @@
     <string name="no_messages">No hay mensajes. Pulsa \"+\" para comenzar.</string>
     <string name="messages">Mensajes</string>
     <string name="browse_files">Explorar Archivos</string>
-    <string name="chatroomListLoading">
-        Solicitando lista de salas de chat disponibles. Por favor espere...
-    </string>
     <string name="privateRoomCreation">Solicitando creación de sala privada</string>
     <string name="requesting_room_list">Actualizar lista de salas</string>
     <string name="requesting_user_info">Solicitando información del usuario</string>
@@ -99,7 +96,6 @@ Directorio: {5}
     <string name="clear">Limpiar</string>
     <string name="get_user_info">Obtener información del usuario</string>
     <string name="quick_info">Información rápida</string>
-    <string name="filer_files">Filtrar Archivos Aquí</string>
     <string name="enter_user_to_browse">Introducir usuario para buscar</string>
     <string name="all_target">Todos los usuarios</string>
     <string name="target_user_list">Lista de usuarios</string>
@@ -289,7 +285,6 @@ Directorio: {5}
     <string name="room_data_still_loading">
         ¡Demasiado rápido! Todavía recuperando los datos de la sala...
     </string>
-    <string name="loading_current_ticker">Cargando solicitud actual...</string>
     <string name="must_be_logged_to_browse">
         Debe iniciar sesión para buscar un usuario
     </string>

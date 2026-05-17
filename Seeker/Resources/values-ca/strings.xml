@@ -54,9 +54,6 @@
     <string name="no_messages">Sense missatges. Premeu \"+\" per començar.</string>
     <string name="messages">Missatges</string>
     <string name="browse_files">Examinar fitxers</string>
-    <string name="chatroomListLoading">
-        Sol·licitud de llista de sales de xat disponibles. Si us plau, espereu...
-    </string>
     <string name="privateRoomCreation">Sol·licitant la creació d\'una sala privada</string>
     <string name="requesting_room_list">Sol·licitud de llista d\'habitacions</string>
     <string name="requesting_user_info">Sol·licitud d\'informació de l\'usuari</string>
@@ -99,7 +96,6 @@ Recompte de directoris: {5}\"
     <string name="clear">Buida</string>
     <string name="get_user_info">Obteniu informació de l\'usuari</string>
     <string name="quick_info">Informació ràpida</string>
-    <string name="filer_files">Filtreu els fitxers aquí</string>
     <string name="enter_user_to_browse">Introduïu l\'usuari per navegar</string>
     <string name="all_target">Tots els Usuaris</string>
     <string name="target_user_list">Llista d\'usuaris</string>
@@ -289,7 +285,6 @@ Recompte de directoris: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>

@@ -45,9 +45,6 @@
     <string name="no_messages">Нема порука.  Притисните „+“ да бисте започели.</string>
     <string name="messages">Поруке</string>
     <string name="browse_files">Прегледај датотеке</string>
-    <string name="chatroomListLoading">
-        Захтева се листа доступних соба за ћаскање.  Сачекајте...
-    </string>
     <string name="privateRoomCreation">Захтевам прављење приватне собе</string>
     <string name="requesting_room_list">Requesting Room List</string>
     <string name="requesting_user_info">Requesting User\'s Info</string>
@@ -90,7 +87,6 @@ Directory Count: {5}\"
     <string name="clear">Clear</string>
     <string name="get_user_info">Get User Info</string>
     <string name="quick_info">Quick Info</string>
-    <string name="filer_files">Filter Files Here</string>
     <string name="enter_user_to_browse">Enter User to Browse</string>
     <string name="all_target">All Users</string>
     <string name="target_user_list">User List</string>
@@ -280,7 +276,6 @@ Directory Count: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>

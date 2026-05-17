@@ -54,9 +54,6 @@
     <string name="no_messages">Ingen beskeder. Tryk på \"+\" for at komme i gang.</string>
     <string name="messages">Beskeder</string>
     <string name="browse_files">Gennemse Filer</string>
-    <string name="chatroomListLoading">
-        Henter listen med tilgængelige chat rum. Vent venligst...
-    </string>
     <string name="privateRoomCreation">Anmoder om oprettelse af privat rum</string>
     <string name="requesting_room_list">Anmoder Om Rumliste</string>
     <string name="requesting_user_info">Henter Brugerens Information</string>
@@ -99,7 +96,6 @@ Directory Count: {5}\"
     <string name="clear">Ryd</string>
     <string name="get_user_info">Hent Brugerinformation</string>
     <string name="quick_info">Hurtig Info</string>
-    <string name="filer_files">Filtrer Filer Her</string>
     <string name="enter_user_to_browse">Indtast bruger for at gennemse</string>
     <string name="all_target">Alle Brugere</string>
     <string name="target_user_list">Brugerliste</string>
@@ -289,7 +285,6 @@ Directory Count: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>

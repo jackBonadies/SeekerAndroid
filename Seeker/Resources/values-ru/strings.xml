@@ -54,9 +54,6 @@
     <string name="no_messages">Нет сообщений. Нажмите «+», чтобы начать.</string>
     <string name="messages">Сообщения</string>
     <string name="browse_files">Обзор файлов</string>
-    <string name="chatroomListLoading">
-        Запрашиваем список доступных чат комнат. Пожалуйста, подождите...
-    </string>
     <string name="privateRoomCreation">Создаем новую приватную комнату...</string>
     <string name="requesting_room_list">Обновить список комнат</string>
     <string name="requesting_user_info">Запрос информации о пользователе</string>
@@ -100,7 +97,6 @@
     <string name="clear">Очистить</string>
     <string name="get_user_info">Получить информацию о пользователе</string>
     <string name="quick_info">Краткая информация</string>
-    <string name="filer_files">Фильтр файлов</string>
     <string name="enter_user_to_browse">Введите имя пользователя</string>
     <string name="all_target">Все пользователи</string>
     <string name="target_user_list">Список пользователей</string>
@@ -290,7 +286,6 @@
     <string name="room_data_still_loading">
         Слишком быстро! Все еще загружаем данные комнаты...
     </string>
-    <string name="loading_current_ticker">Загрузка текущего тикера...</string>
     <string name="must_be_logged_to_browse">
         Необходимо войти для просмотра пользователя
     </string>

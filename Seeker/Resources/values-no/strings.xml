@@ -54,9 +54,6 @@
     <string name="no_messages">Ingen meldinger. Trykk på \"+\" for å komme i gang.</string>
     <string name="messages">Meldinger</string>
     <string name="browse_files">Bla gjennom filer</string>
-    <string name="chatroomListLoading">
-        Ber om liste over tilgjengelige chatrom. Vennligst vent...
-    </string>
     <string name="privateRoomCreation">Ber om opprettelse av privatrom</string>
     <string name="requesting_room_list">Ber om romliste</string>
     <string name="requesting_user_info">Ber om brukerinfo</string>
@@ -99,7 +96,6 @@ Mappeantall: {5}\"
     <string name="clear">Tøm</string>
     <string name="get_user_info">Få brukerinfo</string>
     <string name="quick_info">Rask info</string>
-    <string name="filer_files">Filter Files Here</string>
     <string name="enter_user_to_browse">Enter User to Browse</string>
     <string name="all_target">All Users</string>
     <string name="target_user_list">User List</string>
@@ -289,7 +285,6 @@ Mappeantall: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>

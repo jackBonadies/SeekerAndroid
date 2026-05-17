@@ -54,9 +54,6 @@
     <string name="no_messages">Geen berichten. Druk op \"+\" om te beginnen.</string>
     <string name="messages">Berichten</string>
     <string name="browse_files">Door bestanden bladeren</string>
-    <string name="chatroomListLoading">
-        Lijst met beschikbare chatrooms opgevraagd. Een ogenblik geduld...
-    </string>
     <string name="privateRoomCreation">Verzoek voor aanmaken van privéruimte</string>
     <string name="requesting_room_list">Kamerlijst aanvragen</string>
     <string name="requesting_user_info">Verzoek om gebruikersinfo</string>
@@ -99,7 +96,6 @@ Aantal mappen: {5}
     <string name="clear">Wissen</string>
     <string name="get_user_info">Gebruikerinfo ophalen</string>
     <string name="quick_info">Beknopte Info</string>
-    <string name="filer_files">Hier bestanden filteren</string>
     <string name="enter_user_to_browse">Voer gebruiker in om door te bladeren</string>
     <string name="all_target">Alle Gebruikers</string>
     <string name="target_user_list">Gebruiker Lijst</string>
@@ -289,7 +285,6 @@ Aantal mappen: {5}
     <string name="room_data_still_loading">
         Te snel! Nog bezig met het ophalen van kamer gegevens...
     </string>
-    <string name="loading_current_ticker">Huidige ticker wordt geladen...</string>
     <string name="must_be_logged_to_browse">
         Je moet ingelogd zijn om een gebruiker te bladeren
     </string>

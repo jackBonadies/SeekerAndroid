@@ -54,9 +54,6 @@
     <string name="no_messages">Sem mensagens. Toque em \"+\" para começar.</string>
     <string name="messages">Mensagens</string>
     <string name="browse_files">Navegar arquivos</string>
-    <string name="chatroomListLoading">
-        Solicitando lista de salas de bate-papo disponíveis. Por favor, aguarde...
-    </string>
     <string name="privateRoomCreation">Solicitando criação de sala privada</string>
     <string name="requesting_room_list">Solicitando lista de salas</string>
     <string name="requesting_user_info">Solicitando informações de usuário</string>
@@ -99,7 +96,6 @@ Directory Count: {5}\"
     <string name="clear">Limpar</string>
     <string name="get_user_info">Obter informações de usuário</string>
     <string name="quick_info">Informações rápidas</string>
-    <string name="filer_files">Filtrar arquivos aqui</string>
     <string name="enter_user_to_browse">Inserir usuário para navegar</string>
     <string name="all_target">Todos os usuários</string>
     <string name="target_user_list">Lista de usuários</string>
@@ -289,7 +285,6 @@ Directory Count: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>

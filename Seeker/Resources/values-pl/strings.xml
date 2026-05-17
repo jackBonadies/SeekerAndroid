@@ -54,9 +54,6 @@
     <string name="no_messages">Brak wiadomości. Naciśnij \"+\", aby rozpocząć.</string>
     <string name="messages">Wiadomości</string>
     <string name="browse_files">Przeglądanie plików</string>
-    <string name="chatroomListLoading">
-        Żądanie listy dostępnych czatów. Proszę czekać...
-    </string>
     <string name="privateRoomCreation">Prośba o utworzenie pokoju prywatnego</string>
     <string name="requesting_room_list">Wysyłanie żądania listy pokoi</string>
     <string name="requesting_user_info">Wysyłanie żądania informacji użytkownika</string>
@@ -99,7 +96,6 @@ Liczba katalogów: {5}\"
     <string name="clear">Czyść</string>
     <string name="get_user_info">Uzyskaj informacje o użytkowniku</string>
     <string name="quick_info">Szybkie Info</string>
-    <string name="filer_files">Filtruj pliki tutaj</string>
     <string name="enter_user_to_browse">Wpisz użytkownika żeby przeglądać</string>
     <string name="all_target">Wszyscy użytkownicy</string>
     <string name="target_user_list">Lista użytkowników</string>
@@ -289,7 +285,6 @@ Liczba katalogów: {5}\"
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
     </string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">
         Must be logged in to browse a user
     </string>

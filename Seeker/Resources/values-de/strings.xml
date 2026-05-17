@@ -56,9 +56,6 @@
     <string name="no_messages">Keine Nachrichten. Drücken Sie + um loszulegen.</string>
     <string name="messages">Nachrichten</string>
     <string name="browse_files">Dateien durchsuchen</string>
-    <string name="chatroomListLoading">
-        Liste der verfügbaren Chaträume wird angefordert. Bitte warten...
-    </string>
     <string name="privateRoomCreation">Anfrage für Privatraum</string>
     <string name="requesting_room_list">Raumliste wird angefordert</string>
     <string name="requesting_user_info">Benutzerinformationen anfordern</string>
@@ -101,7 +98,6 @@ Ordneranzahl: {5}\"
     <string name="clear">Leeren</string>
     <string name="get_user_info">Benutzerinformationen abrufen</string>
     <string name="quick_info">Kurzinfo</string>
-    <string name="filer_files">Hier Dateien filtern</string>
     <string name="enter_user_to_browse">Benutzer eingeben zum Durchsuchen</string>
     <string name="all_target">Alle Benutzer</string>
     <string name="target_user_list">Benutzerliste</string>
@@ -291,7 +287,6 @@ Ordneranzahl: {5}\"
     <string name="room_data_still_loading">
         Zu schnell! Raumdaten werden noch geladen...
     </string>
-    <string name="loading_current_ticker">Lade aktuellen Ticker...</string>
     <string name="must_be_logged_to_browse">
         Login erforderlich um nach User zu suchen
     </string>

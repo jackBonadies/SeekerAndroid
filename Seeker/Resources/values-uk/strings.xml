@@ -54,9 +54,6 @@
     <string name="no_messages">Немає повідомлень. Натисніть «+», щоб написати кому-небудь.</string>
     <string name="messages">Повідомлення</string>
     <string name="browse_files">Огляд файлів</string>
-    <string name="chatroomListLoading">
-        Запит списку доступних чатів. Будь ласка, зачекайте...
-    </string>
     <string name="privateRoomCreation">Запит на створення приватної кімнати</string>
     <string name="requesting_room_list">Запит на список кімнат</string>
     <string name="requesting_user_info">Запит інформації про користувача</string>
@@ -99,7 +96,6 @@
     <string name="clear">Очистити</string>
     <string name="get_user_info">Отримати інформацію про користувача</string>
     <string name="quick_info">Швидка інформація</string>
-    <string name="filer_files">Фільтрувати файли тут</string>
     <string name="enter_user_to_browse">Ввести ім\'я користувача</string>
     <string name="all_target">Усі користувачі</string>
     <string name="target_user_list">Список користувачів</string>
@@ -289,7 +285,6 @@
     <string name="room_data_still_loading">
         Занадто швидко! Триває отримання даних кімнати...
     </string>
-    <string name="loading_current_ticker">Завантаження поточного тикера...</string>
     <string name="must_be_logged_to_browse">
         Для перегляду користувача необхідно увійти в систему
     </string>
