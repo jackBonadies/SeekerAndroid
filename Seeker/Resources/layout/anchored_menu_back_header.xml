@@ -12,9 +12,9 @@
     android:focusable="true">
 
     <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@drawable/arrow_left"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/chevron_left"
         android:tint="?attr/normalTextColor" />
 
     <TextView
