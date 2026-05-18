@@ -321,12 +321,12 @@ namespace Seeker
                     Logger.Debug("filtering...");
                     UpdateFilteredResponses(searchTab);
                 }
-                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(searchTab, searchTab.UI_SearchResponses));
+                recyclerViewSearch.SetAdapter(CreateSearchAdapter(searchTab, searchTab.UI_SearchResponses));
             }
             else
             {
                 searchTab.UI_SearchResponses = responsesForRender.ToList();
-                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(searchTab, searchTab.UI_SearchResponses));
+                recyclerViewSearch.SetAdapter(CreateSearchAdapter(searchTab, searchTab.UI_SearchResponses));
             }
 
             SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(searchTab.ChipDataItems ?? new List<ChipDataItem>());
@@ -927,18 +927,18 @@ namespace Seeker
             v.FocusableInTouchMode = true;
             b.Click += B_Click;
 
-            recyclerViewTransferItems = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches);
+            recyclerViewSearch = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches);
             recycleLayoutManager = new LinearLayoutManager(Activity);
-            recyclerViewTransferItems.SetItemAnimator(null); //todo
-            recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
+            recyclerViewSearch.SetItemAnimator(null); //todo
+            recyclerViewSearch.SetLayoutManager(recycleLayoutManager);
             if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
             {
-                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
+                recyclerViewSearch.SetAdapter(CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
             }
             else
             {
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses.ToList();
-                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
+                recyclerViewSearch.SetAdapter(CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
             }
 
             searchResultsHeaderView = rootView.FindViewById<View>(Resource.Id.searchResultsHeader);
@@ -1903,7 +1903,7 @@ namespace Seeker
                 SearchFragment.Instance.ClearFilterStringAndCached();
 
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses?.ToList();
-                SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
+                SearchFragment.Instance.recyclerViewSearch.SetAdapter(SearchFragment.Instance.CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
 
                 SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
@@ -1926,7 +1926,7 @@ namespace Seeker
         }
 
         private RecyclerView.LayoutManager recycleLayoutManager;
-        private RecyclerView recyclerViewTransferItems;
+        private RecyclerView recyclerViewSearch;
         private SearchAdapterRecyclerVersion recyclerSearchAdapter;
         private View searchResultsHeaderView;
 
@@ -1969,7 +1969,7 @@ namespace Seeker
             var prevList = GetOldList(cacheKey);
             if (prevList == null)
             {
-                Instance.recyclerViewTransferItems.SetAdapter(Instance.CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, newResults));
+                Instance.recyclerViewSearch.SetAdapter(Instance.CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, newResults));
             }
             else
             {
