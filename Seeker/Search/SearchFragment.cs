@@ -2004,18 +2004,18 @@ namespace Seeker
         private static void AddIncomingSearchResponseImp(SearchResponse resp, int fromTab, bool fromWishlist)
         {
             var tab = SearchTabHelper.SearchTabCollection[fromTab];
+            Tuple<bool, List<SearchResponse>> splitResponses = new Tuple<bool, List<SearchResponse>>(false, null);
+            try
+            {
+                splitResponses = Common.SearchResponseUtil.SplitMultiDirResponse(PreferencesState.HideLockedResultsInSearch, resp);
+            }
+            catch (System.Exception e)
+            {
+                Logger.Firebase(e.Message + " splitmultidirresponse");
+            }
+
             lock (tab.SortHelperLockObject)
             {
-                Tuple<bool, List<SearchResponse>> splitResponses = new Tuple<bool, List<SearchResponse>>(false, null);
-                try
-                {
-                    splitResponses = Common.SearchResponseUtil.SplitMultiDirResponse(PreferencesState.HideLockedResultsInSearch, resp);
-                }
-                catch (System.Exception e)
-                {
-                    Logger.Firebase(e.Message + " splitmultidirresponse");
-                }
-
                 try
                 {
                     if (splitResponses.Item1)
