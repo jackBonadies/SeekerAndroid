@@ -2097,14 +2097,9 @@ namespace Seeker
 
         public static System.Diagnostics.Stopwatch StopWatch = new System.Diagnostics.Stopwatch();
 
-        private void Lv_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
-        {
-            showEditDialog(e.Position);
-        }
-
         public static bool dlDialogShown = false;
 
-        public void showEditDialog(int pos)
+        public void ShowDownloadDialog(int pos)
         {
             try
             {

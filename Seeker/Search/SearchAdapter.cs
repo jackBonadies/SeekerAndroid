@@ -108,7 +108,7 @@ namespace Seeker
             private void UnifiedRowClick(object sender, EventArgs e)
             {
                 var itemRoot = (sender as View).FindAncestor<ISearchItemViewBase>();
-                GetSearchFragment().showEditDialog(itemRoot.ViewHolder.BindingAdapterPosition);
+                GetSearchFragment().ShowDownloadDialog(itemRoot.ViewHolder.BindingAdapterPosition);
             }
 
             private SearchResultStyleEnum searchResultStyle;
