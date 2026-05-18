@@ -1038,9 +1038,7 @@ namespace Seeker
                 Resource.Drawable.link_variant
             };
 
-            var typedValue = new TypedValue();
-            Context.Theme.ResolveAttribute(Resource.Attribute.colorOnSurface, typedValue, true);
-            int tintColor = typedValue.Data;
+            var tintColor = UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.colorOnSurface, Context.Theme);
 
             var adapter = new IconMenuAdapter(this.Context, items, icons, tintColor);
 

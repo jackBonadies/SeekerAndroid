@@ -1003,9 +1003,6 @@ namespace Seeker
             }
         }
 
-
-
-
         public static Task<UserInfo> UserInfoResponseHandler(string uname, IPEndPoint ipEndPoint)
         {
             if (UserListService.Instance.IsUserInIgnoreList(uname))
@@ -1054,9 +1051,9 @@ namespace Seeker
             return picFile;
         }
 
-        private void SoulseekClient_PrivilegedUserListReceived(object sender, IReadOnlyCollection<string> e)
+        private void SoulseekClient_PrivilegedUserListReceived(object sender, IReadOnlyCollection<string> privilegedUsers)
         {
-            PrivilegesManager.Instance.SetPrivilegedList(e);
+            PrivilegesManager.Instance.SetPrivilegedList(privilegedUsers);
         }
 
         private void SoulseekClient_ServerInfoReceived(object sender, ServerInfo e)
@@ -1157,18 +1154,6 @@ namespace Seeker
             Logger.Debug("connected " + DateTime.UtcNow.ToString());
 
         }
-
-        //private void SoulseekClient_Disconnected(object sender, SoulseekClientDisconnectedEventArgs e)
-        //{
-        //    ChatroomController.ConnectionLapse.Add(new Tuple<bool,DateTime>(false,DateTime.UtcNow));
-        //    Logger.Debug("disconnected " + DateTime.UtcNow.ToString());
-        //    bool AUTO_CONNECT = true;
-        //    if(AUTO_CONNECT && PreferencesState.CurrentlyLoggedIn)
-        //    {
-        //        Thread reconnectRetrier = new Thread(ReconnectExponentialBackOffThreadTask);
-        //        reconnectRetrier.Start();
-        //    }
-        //}
 
         public static string GetString(int resId)
         {
@@ -1376,13 +1361,6 @@ namespace Seeker
             }
         }
 
-        public static Android.Graphics.Drawables.Drawable? GetDrawableFromAttribute(Context c, int attr)
-        {
-            var typedValue = new TypedValue();
-            c.Theme.ResolveAttribute(attr, typedValue, true);
-            int drawableRes = (typedValue.ResourceId != 0) ? typedValue.ResourceId : typedValue.Data;
-            return c.Resources.GetDrawable(drawableRes, SeekerState.ActiveActivityRef.Theme);
-        }
 
         /// <summary>
         /// UserStatusChanged will not get called until an actual change. hence this call..

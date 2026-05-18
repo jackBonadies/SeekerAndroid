@@ -44,6 +44,14 @@ namespace Seeker
             }
         }
 
+        public static Android.Graphics.Drawables.Drawable? GetDrawableFromAttribute(Context c, int attr)
+        {
+            var typedValue = new TypedValue();
+            c.Theme.ResolveAttribute(attr, typedValue, true);
+            int drawableRes = (typedValue.ResourceId != 0) ? typedValue.ResourceId : typedValue.Data;
+            return c.Resources.GetDrawable(drawableRes, SeekerState.ActiveActivityRef.Theme);
+        }
+
         public static Color GetColorFromInteger(int color)
         {
             return Color.Argb(Color.GetAlphaComponent(color), Color.GetRedComponent(color), Color.GetGreenComponent(color), Color.GetBlueComponent(color));
