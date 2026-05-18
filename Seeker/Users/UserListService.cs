@@ -35,23 +35,11 @@ namespace Seeker
 
         public static event EventHandler<UserListChangedEventArgs> UserListChanged;
         public static event EventHandler<UserListChangedEventArgs> IgnoreListChanged;
+        public static event EventHandler<string> UserRowChanged;
 
-        private static void RaiseUserListChanged(string username, UserListItem item, UserListChangeType changeType)
+        internal static void RaiseUserRowChanged(string username)
         {
-            var handler = UserListChanged;
-            if (handler != null)
-            {
-                handler.Invoke(null, new UserListChangedEventArgs(username, item, changeType));
-            }
-        }
-
-        private static void RaiseIgnoreListChanged(string username, UserListItem item, UserListChangeType changeType)
-        {
-            var handler = IgnoreListChanged;
-            if (handler != null)
-            {
-                handler.Invoke(null, new UserListChangedEventArgs(username, item, changeType));
-            }
+            UserRowChanged?.Invoke(null, username);
         }
 
         public bool ContainsUser(string username)
@@ -129,7 +117,7 @@ namespace Seeker
             }
             if (addedItem != null)
             {
-                RaiseUserListChanged(userData.Username, addedItem, UserListChangeType.Added);
+                UserListChanged?.Invoke(null, new UserListChangedEventArgs(userData.Username, addedItem, UserListChangeType.Added));
                 return false;
             }
             return true;
@@ -246,7 +234,7 @@ namespace Seeker
                 }
                 CommonState.UserList.Remove(removedItem);
             }
-            RaiseUserListChanged(username, removedItem, UserListChangeType.Removed);
+            UserListChanged?.Invoke(null, new UserListChangedEventArgs(username, removedItem, UserListChangeType.Removed));
             return true;
         }
 
@@ -268,7 +256,7 @@ namespace Seeker
                 addedItem = new UserListItem(username, UserRole.Ignored);
                 CommonState.IgnoreUserList.Add(addedItem);
             }
-            RaiseIgnoreListChanged(username, addedItem, UserListChangeType.Added);
+            IgnoreListChanged?.Invoke(null, new UserListChangedEventArgs(username, addedItem, UserListChangeType.Added));
             PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList));
             return true;
         }
@@ -285,7 +273,7 @@ namespace Seeker
                 }
                 CommonState.IgnoreUserList = CommonState.IgnoreUserList.Where(userListItem => { return userListItem.Username != username; }).ToList();
             }
-            RaiseIgnoreListChanged(username, removedItem, UserListChangeType.Removed);
+            IgnoreListChanged?.Invoke(null, new UserListChangedEventArgs(username, removedItem, UserListChangeType.Removed));
             PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList));
             return true;
         }

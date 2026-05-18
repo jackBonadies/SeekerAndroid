@@ -229,33 +229,14 @@ namespace Seeker.Users
             var config = new ActionSheetConfig();
             if (isIgnored)
             {
-                config.Sections.Add(ActionSheetActions.BuildIgnoredUserActionsSection(
-                    username,
-                    activity,
-                    snackView,
-                    () =>
-                    {
-                        UserListService.Instance.RemoveFromIgnoreList(username);
-                        activity?.NotifyItemRemovedExternal(username);
-                    },
-                    activity?.GetUpdateUserListItemActionExternal(username)));
+                config.Sections.Add(ActionSheetActions.BuildIgnoredUserActionsSection(username, activity, snackView));
             }
             else
             {
-                Action refresh = activity?.GetUpdateUserListItemActionExternal(username);
                 var options = new UserActionsOptions
                 {
                     IncludeOnlineAlert = true,
-                    IncludeGivePrivileges = true,
-                    OnAddRemoved = refresh,
-                    OnIgnoreChanged = refresh,
-                    OnNoteChanged = refresh,
-                    OnOnlineAlertChanged = refresh,
-                    OverrideRemoveFromFriends = () =>
-                    {
-                        UserListService.Instance.RemoveUser(username);
-                        activity?.NotifyItemRemovedExternal(username);
-                    }
+                    IncludeGivePrivileges = true
                 };
                 config.Sections.Add(ActionSheetActions.BuildUserActionsSection(username, activity, snackView, options));
             }

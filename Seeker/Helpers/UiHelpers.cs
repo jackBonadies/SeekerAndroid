@@ -566,7 +566,7 @@ namespace Seeker
         /// returns true if found and handled.  a time saver for the more generic context menu items..
         /// </summary>
         /// <returns></returns>
-        public static bool HandleCommonContextMenuActions(string contextMenuTitle, string usernameInQuestion, Context activity, View browseSnackView, Action uiUpdateActionNote = null, Action uiUpdateActionAdded_Removed = null, Action uiUpdateActionIgnored_Unignored = null, Action uiUpdateSetResetOnlineAlert = null)
+        public static bool HandleCommonContextMenuActions(string contextMenuTitle, string usernameInQuestion, Context activity, View browseSnackView, Action uiUpdateActionAdded_Removed = null, Action uiUpdateActionIgnored_Unignored = null, Action uiUpdateActionNote = null)
         {
             if (activity == null)
             {
@@ -575,13 +575,19 @@ namespace Seeker
             if (contextMenuTitle == activity.GetString(Resource.String.ignore_user))
             {
                 SeekerApplication.AddToIgnoreListFeedback(activity, usernameInQuestion);
-                SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
+                if (uiUpdateActionIgnored_Unignored != null)
+                {
+                    SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
+                }
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_ignored))
             {
                 SeekerApplication.RemoveFromIgnoreListFeedback(activity, usernameInQuestion);
-                SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
+                if (uiUpdateActionIgnored_Unignored != null)
+                {
+                    SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
+                }
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.msg_user))
@@ -604,7 +610,10 @@ namespace Seeker
             {
                 SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.removed_user), usernameInQuestion), ToastLength.Short);
                 UserListService.Instance.RemoveUser(usernameInQuestion);
-                SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
+                if (uiUpdateActionAdded_Removed != null)
+                {
+                    SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
+                }
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.search_user_files))
@@ -643,14 +652,13 @@ namespace Seeker
             {
                 SeekerState.UserOnlineAlerts[usernameInQuestion] = 0;
                 CommonHelpers.SaveOnlineAlerts();
-                uiUpdateSetResetOnlineAlert();
+                UserListService.RaiseUserRowChanged(usernameInQuestion);
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_online_alert))
             {
                 SeekerState.UserOnlineAlerts.TryRemove(usernameInQuestion, out _);
                 CommonHelpers.SaveOnlineAlerts();
-                uiUpdateSetResetOnlineAlert();
-
+                UserListService.RaiseUserRowChanged(usernameInQuestion);
             }
             return false;
         }
@@ -771,7 +779,6 @@ namespace Seeker
                         //we removed the note
                         SeekerState.UserNotes.TryRemove(username, out _);
                         CommonHelpers.SaveUserNotes();
-
                     }
                     else
                     {
@@ -779,11 +786,11 @@ namespace Seeker
                         SeekerState.UserNotes[username] = newText;
                         CommonHelpers.SaveUserNotes();
                     }
+                    UserListService.RaiseUserRowChanged(username);
                     if (uiUpdateAction != null)
                     {
                         SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateAction);
                     }
-
                 }
                 else if (isEmpty && wasEmpty)
                 {
@@ -801,6 +808,7 @@ namespace Seeker
                         //update note and save prefs..
                         SeekerState.UserNotes[username] = newText;
                         CommonHelpers.SaveUserNotes();
+                        UserListService.RaiseUserRowChanged(username);
                     }
                 }
 
