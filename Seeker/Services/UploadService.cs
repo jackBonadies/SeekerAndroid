@@ -14,6 +14,48 @@ using System.Threading.Tasks;
 using Common;
 namespace Seeker.Services
 {
+    public class NotifInfo
+    {
+        public NotifInfo(string firstDir)
+        {
+            NOTIF_ID_FOR_USER = UploadNotificationTracker.NextId();
+            FilesUploadedToUser = 1;
+            DirNames = new List<string> { firstDir };
+        }
+        public int NOTIF_ID_FOR_USER;
+        public int FilesUploadedToUser;
+        public List<string> DirNames = new List<string>();
+    }
+
+    internal static class UploadNotificationTracker
+    {
+        private static readonly Dictionary<string, NotifInfo> tracker = new Dictionary<string, NotifInfo>();
+        private static int nextId = 400;
+
+        internal static int NextId()
+        {
+            return nextId++;
+        }
+
+        public static NotifInfo GetOrCreate(string username, string directory)
+        {
+            if (tracker.TryGetValue(username, out var info))
+            {
+                if (!info.DirNames.Contains(directory))
+                {
+                    info.DirNames.Add(directory);
+                }
+                info.FilesUploadedToUser++;
+            }
+            else
+            {
+                info = new NotifInfo(directory);
+                tracker.Add(username, info);
+            }
+            return info;
+        }
+    }
+
     // Upload enqueue + notification
     public static class UploadService
     {

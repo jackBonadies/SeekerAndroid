@@ -1462,27 +1462,6 @@ namespace Seeker
         }
 
 
-        // TODOORG
-        public class NotifInfo
-        {
-            public NotifInfo(string firstDir)
-            {
-                NOTIF_ID_FOR_USER = NotifIdCounter;
-                NotifIdCounter++;
-                FilesUploadedToUser = 1;
-                DirNames = new List<string>
-                {
-                    firstDir
-                };
-            }
-            public int NOTIF_ID_FOR_USER;
-            public int FilesUploadedToUser;
-            public List<string> DirNames = new List<string>();
-        }
-
-        public static Dictionary<string, NotifInfo> NotificationUploadTracker = new Dictionary<string, NotifInfo>();
-        public static int NotifIdCounter = 400;
-
         /// <summary>
         /// this is for global uploading event handling only.  the tabpageadapter is the one for downloading... and for upload tranferpage specific events
         /// </summary>
@@ -1517,22 +1496,8 @@ namespace Seeker
                 try
                 {
                     CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, MainActivity.UPLOADS_CHANNEL_ID, MainActivity.UPLOADS_CHANNEL_NAME, NotificationImportance.High);
-                    NotifInfo notifInfo = null;
                     string directory = Common.Helpers.GetFolderNameFromFile(e.Transfer.Filename.Replace("/", @"\"));
-                    if (NotificationUploadTracker.ContainsKey(e.Transfer.Username))
-                    {
-                        notifInfo = NotificationUploadTracker[e.Transfer.Username];
-                        if (!notifInfo.DirNames.Contains(directory))
-                        {
-                            notifInfo.DirNames.Add(directory);
-                        }
-                        notifInfo.FilesUploadedToUser++;
-                    }
-                    else
-                    {
-                        notifInfo = new NotifInfo(directory);
-                        NotificationUploadTracker.Add(e.Transfer.Username, notifInfo);
-                    }
+                    var notifInfo = Seeker.Services.UploadNotificationTracker.GetOrCreate(e.Transfer.Username, directory);
 
                     Notification n = Seeker.Services.UploadService.CreateUploadNotification(SeekerState.ActiveActivityRef, e.Transfer.Username, notifInfo.DirNames, notifInfo.FilesUploadedToUser);
                     NotificationManagerCompat nmc = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
