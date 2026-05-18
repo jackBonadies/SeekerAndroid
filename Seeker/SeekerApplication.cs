@@ -1751,27 +1751,7 @@ namespace Seeker
         /// <returns></returns>
         public static bool AddToIgnoreList(string username)
         {
-            //typically its tough to add a user to ignore list from the UI if they are in the User List.
-            //but for example if you ignore a user based on their message.
-            //User List and Ignore List and mutually exclusive so if you ignore someone, they will be removed from user list.
-            if (UserListService.Instance.ContainsUser(username))
-            {
-                UserListService.Instance.RemoveUser(username);
-            }
-
-            lock (CommonState.IgnoreUserList)
-            {
-                if (CommonState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
-                {
-                    return false;
-                }
-                else
-                {
-                    CommonState.IgnoreUserList.Add(new UserListItem(username, UserRole.Ignored));
-                }
-            }
-            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList));
-            return true;
+            return UserListService.Instance.AddToIgnoreList(username);
         }
 
         public static void RemoveFromIgnoreListFeedback(Context c, string username)
@@ -1793,27 +1773,12 @@ namespace Seeker
         /// <returns></returns>
         public static bool RemoveFromIgnoreList(string username)
         {
-            lock (CommonState.IgnoreUserList)
-            {
-                if (!CommonState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; }))
-                {
-                    return false;
-                }
-                else
-                {
-                    CommonState.IgnoreUserList = CommonState.IgnoreUserList.Where(userListItem => { return userListItem.Username != username; }).ToList();
-                }
-            }
-            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList));
-            return true;
+            return UserListService.Instance.RemoveFromIgnoreList(username);
         }
 
         public static bool IsUserInIgnoreList(string username)
         {
-            lock (CommonState.IgnoreUserList)
-            {
-                return CommonState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; });
-            }
+            return UserListService.Instance.IsUserInIgnoreList(username);
         }
 
 
