@@ -491,7 +491,7 @@ namespace Seeker.Chatroom
             SeekerState.SoulseekClient.RoomTickerRemoved += SoulseekClient_RoomTickerRemoved;
             SeekerState.SoulseekClient.RoomTickerListReceived += SoulseekClient_RoomTickerListReceived;
 
-            SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
+            UserStatusDeduplicator.Instance.Deduplicated += SoulseekClient_UserStatusChanged;
 
             JoinedRoomTickers = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Soulseek.RoomTicker>>();
             JoinedRoomNames = new List<string>();

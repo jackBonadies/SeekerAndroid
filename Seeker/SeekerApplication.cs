@@ -272,8 +272,8 @@ namespace Seeker
             #endif
             SetDiagnosticState(PreferencesState.LogDiagnostics);
             SeekerState.SoulseekClient.UserStatisticsChanged += SoulseekClient_UserDataReceived;
-            SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusChanged_Deduplicator;
-            SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
+            SeekerState.SoulseekClient.UserStatusChanged += UserStatusDeduplicator.Instance.OnUserStatusChanged;
+            UserStatusDeduplicator.Instance.Deduplicated += SoulseekClient_UserStatusChanged;
             //SeekerState.SoulseekClient.TransferProgressUpdated += Upload_TransferProgressUpdated;
             SeekerState.SoulseekClient.TransferStateChanged += Upload_TransferStateChanged;
 
@@ -489,13 +489,6 @@ namespace Seeker
             Logger.Debug(e.Exception.Message);
             Logger.Debug(e.Exception.StackTrace);
         }
-
-        /// <summary>
-        /// This is the one we should be hooking up to.
-        /// This is due to the fact that the server sends us the same user update multiple times if they are of multiple interests.
-        /// i.e. if we have Added Them, we are in Chatroom A, B, and C with them, then we get 4 status updates.
-        /// </summary>
-        public static EventHandler<UserStatus> UserStatusChangedDeDuplicated;
 
         private void SoulseekClient_Disconnected(object sender, SoulseekClientDisconnectedEventArgs e)
         {
@@ -1757,25 +1750,6 @@ namespace Seeker
                 }
 
                 RequestedUserInfoHelper.AddIfRequestedUser(e.Username, userData, null, null);
-            }
-        }
-
-        private static string DeduplicateUsername = null;
-        private static Soulseek.UserPresence DeduplicateStatus = Soulseek.UserPresence.Offline;
-        private void SoulseekClient_UserStatusChanged_Deduplicator(object sender, UserStatus e)
-        {
-
-            if (DeduplicateUsername == e.Username && DeduplicateStatus == e.Presence)
-            {
-                Logger.Debug($"throwing away {e.Username} status changed");
-                return;
-            }
-            else
-            {
-                Logger.Debug($"handling {e.Username} status changed");
-                DeduplicateUsername = e.Username;
-                DeduplicateStatus = e.Presence;
-                SeekerApplication.UserStatusChangedDeDuplicated?.Invoke(sender, e);
             }
         }
 
