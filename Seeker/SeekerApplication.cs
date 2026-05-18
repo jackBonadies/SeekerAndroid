@@ -985,21 +985,6 @@ namespace Seeker
                 }
 
                 ProgressUpdated?.Invoke(null, new ProgressUpdatedUIEventArgs(relevantItem, wasFailed, fullRefresh, percentComplete, e.Transfer.AverageSpeed));
-
-            }
-        }
-
-        public static string GetVersionString()
-        {
-            try
-            {
-                PackageInfo pInfo = SeekerState.ActiveActivityRef.PackageManager.GetPackageInfo(SeekerState.ActiveActivityRef.PackageName, 0);
-                return pInfo.VersionName;
-            }
-            catch (Exception e)
-            {
-                Logger.Firebase("GetVersionString: " + e.Message);
-                return string.Empty;
             }
         }
 

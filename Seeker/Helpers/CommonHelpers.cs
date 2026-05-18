@@ -14,10 +14,26 @@ using System.Threading.Tasks;
 using AndroidX.Core.Util;
 
 using Common;
+using Android.Content.PM;
+
 namespace Seeker
 {
     public static class CommonHelpers
     {
+        public static string GetVersionString()
+        {
+            try
+            {
+                PackageInfo pInfo = SeekerState.ActiveActivityRef.PackageManager.GetPackageInfo(SeekerState.ActiveActivityRef.PackageName, 0);
+                return pInfo.VersionName;
+            }
+            catch (Exception e)
+            {
+                Logger.Firebase("GetVersionString: " + e.Message);
+                return string.Empty;
+            }
+        }
+
         public static bool CompleteIncompleteDifferentVolume()
         {
             if (SettingsActivity.UseIncompleteManualFolder() && SeekerState.RootIncompleteDocumentFile != null && SeekerState.RootDocumentFile != null)

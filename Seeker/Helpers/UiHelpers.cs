@@ -747,7 +747,6 @@ namespace Seeker
             }
 
             var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(c);
-            //var diag = builder.SetMessage(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             var diag = builder.SetMessage(messageResourceString).SetPositiveButton(actionResourceString, OnCloseClick).Create();
             diag.Show();
         }
