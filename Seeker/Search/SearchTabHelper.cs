@@ -608,7 +608,7 @@ namespace Seeker.Helpers
             }
         }
 
-        public static SortedDictionary<SearchResponse, object> SortHelper
+        public static SortedSet<SearchResponse> SortHelper
         {
             get
             {

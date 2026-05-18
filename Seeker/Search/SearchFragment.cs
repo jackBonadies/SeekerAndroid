@@ -1504,26 +1504,19 @@ namespace Seeker
                 lock (SearchTabHelper.SortHelperLockObject) //this is also always going to be on the UI thread. so we have that guaranteeing safety. 
                 {
                     SearchTabHelper.SortHelperSorting = searchResultSorting;
-                    SearchTabHelper.SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist(SearchTabHelper.SortHelperSorting));
+                    SearchTabHelper.SortHelper = new SortedSet<SearchResponse>(new SearchResultComparableWishlist(SearchTabHelper.SortHelperSorting));
 
                     //put all the search responses into the new sort helper
                     if (SearchTabHelper.SearchResponses != null)
                     {
                         foreach (var searchResponse in SearchTabHelper.SearchResponses)
                         {
-                            if (!SearchTabHelper.SortHelper.ContainsKey(searchResponse))
-                            {
-                                SearchTabHelper.SortHelper.Add(searchResponse, null);
-                            }
-                            else
-                            {
-
-                            }
+                            SearchTabHelper.SortHelper.Add(searchResponse);
                         }
                     }
 
                     //now that they are sorted, replace them.
-                    SearchTabHelper.SearchResponses = SearchTabHelper.SortHelper.Keys.ToList();
+                    SearchTabHelper.SearchResponses = SearchTabHelper.SortHelper.ToList();
 
                     if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
                     {
@@ -2026,7 +2019,7 @@ namespace Seeker
                             {
                                 continue;
                             }
-                            tab.SortHelper.Add(splitResponse, null);
+                            tab.SortHelper.Add(splitResponse);
                             if (fromWishlist)
                             {
                                 tab.UnseenResults.Add(splitResponse);
@@ -2037,7 +2030,7 @@ namespace Seeker
                     {
                         if (!fromWishlist || !WishlistController.OldResultsToCompare[fromTab].Contains(resp))
                         {
-                            tab.SortHelper.Add(resp, null);
+                            tab.SortHelper.Add(resp);
                             if (fromWishlist)
                             {
                                 tab.UnseenResults.Add(resp);
@@ -2050,7 +2043,7 @@ namespace Seeker
                     Logger.Debug(e.Message);
                 }
 
-                tab.SearchResponses = tab.SortHelper.Keys.ToList();
+                tab.SearchResponses = tab.SortHelper.ToList();
                 tab.LastSearchResultsCount = tab.SearchResponses.Count;
             }
 
