@@ -235,7 +235,7 @@ namespace Seeker.Users
                     snackView,
                     () =>
                     {
-                        SeekerApplication.RemoveFromIgnoreList(username);
+                        UserListService.Instance.RemoveFromIgnoreList(username);
                         activity?.NotifyItemRemovedExternal(username);
                     },
                     activity?.GetUpdateUserListItemActionExternal(username)));

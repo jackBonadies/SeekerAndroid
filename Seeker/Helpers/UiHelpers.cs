@@ -248,7 +248,7 @@ namespace Seeker
         {
             if (menuItem != null && !string.IsNullOrEmpty(username))
             {
-                if (SeekerApplication.IsUserInIgnoreList(username)) //if we already have added said user, change title add to remove..
+                if (UserListService.Instance.IsUserInIgnoreList(username)) //if we already have added said user, change title add to remove..
                 {
                     if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.ignore_user))
                     {
@@ -344,7 +344,7 @@ namespace Seeker
             // if we have this user in ignore, do not show the option to add as friend.
             if (!string.IsNullOrEmpty(username))
             {
-                bool isInIgnoreList = SeekerApplication.IsUserInIgnoreList(username);
+                bool isInIgnoreList = UserListService.Instance.IsUserInIgnoreList(username);
                 var menuItem = menu.FindItem(Resource.Id.action_add_to_user_list);
                 menuItem?.SetVisible(!isInIgnoreList);
                 menuItem = menu.FindItem(Resource.Id.action_add_user);

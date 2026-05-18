@@ -60,7 +60,7 @@ namespace Seeker.Services
         private static Task<BrowseResponse> BrowseResponseResolver(string username, IPEndPoint endpoint)
         {
             Logger.Debug("Browse Request Received");
-            if (SeekerApplication.IsUserInIgnoreList(username))
+            if (UserListService.Instance.IsUserInIgnoreList(username))
             {
                 return Task.FromResult(new BrowseResponse(Enumerable.Empty<Directory>()));
             }
@@ -84,7 +84,7 @@ namespace Seeker.Services
             {
                 return defaultResponse;
             }
-            if (SeekerApplication.IsUserInIgnoreList(username))
+            if (UserListService.Instance.IsUserInIgnoreList(username))
             {
                 return defaultResponse;
             }

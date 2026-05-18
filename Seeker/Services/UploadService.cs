@@ -89,7 +89,7 @@ namespace Seeker.Services
         public static Task EnqueueDownloadAction(string username, IPEndPoint endpoint, string filename)
         {
             Logger.Debug("Upload Request Received");
-            if (SeekerApplication.IsUserInIgnoreList(username))
+            if (UserListService.Instance.IsUserInIgnoreList(username))
             {
                 return Task.CompletedTask;
             }

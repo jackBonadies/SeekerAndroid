@@ -69,7 +69,7 @@ namespace Seeker.Helpers.ActionSheet
                 section.Rows.Add(MakeCommonRow(Resource.Drawable.star_wishlist, Resource.String.give_privileges, username, ctx, snackView, options));
             }
 
-            bool ignored = SeekerApplication.IsUserInIgnoreList(username);
+            bool ignored = UserListService.Instance.IsUserInIgnoreList(username);
             string ignoreLabel = ctx.GetString(ignored ? Resource.String.remove_from_ignored : Resource.String.ignore_user);
             section.Rows.Add(new ActionSheetRow
             {

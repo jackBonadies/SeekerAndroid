@@ -1281,7 +1281,7 @@ namespace Seeker
 
         public static Task<UserInfo> UserInfoResponseHandler(string uname, IPEndPoint ipEndPoint)
         {
-            if (IsUserInIgnoreList(uname))
+            if (UserListService.Instance.IsUserInIgnoreList(uname))
             {
                 return Task.FromResult(new UserInfo(string.Empty, 0, 0, false));
             }
@@ -1529,7 +1529,7 @@ namespace Seeker
 
         public static void AddToIgnoreListFeedback(Context c, string username)
         {
-            if (SeekerApplication.AddToIgnoreList(username))
+            if (UserListService.Instance.AddToIgnoreList(username))
             {
                 SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.added_to_ignore), username), ToastLength.Short);
             }
@@ -1744,19 +1744,9 @@ namespace Seeker
         }
 
 
-        /// <summary>
-        /// Add To User List and save user list to shared prefs.  false if already added
-        /// </summary>
-        /// <param name="username"></param>
-        /// <returns></returns>
-        public static bool AddToIgnoreList(string username)
-        {
-            return UserListService.Instance.AddToIgnoreList(username);
-        }
-
         public static void RemoveFromIgnoreListFeedback(Context c, string username)
         {
-            if (RemoveFromIgnoreList(username))
+            if (UserListService.Instance.RemoveFromIgnoreList(username))
             {
                 SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.removed_user_from_ignored_list), username), ToastLength.Short);
             }
@@ -1764,21 +1754,6 @@ namespace Seeker
             {
                 //Toast.MakeText(c, string.Format(c.GetString(Resource.String.already_added_to_ignore), username), ToastLength.Short).Show();
             }
-        }
-
-        /// <summary>
-        /// Remove From User List and save user list to shared prefs.  false if not found..
-        /// </summary>
-        /// <param name="username"></param>
-        /// <returns></returns>
-        public static bool RemoveFromIgnoreList(string username)
-        {
-            return UserListService.Instance.RemoveFromIgnoreList(username);
-        }
-
-        public static bool IsUserInIgnoreList(string username)
-        {
-            return UserListService.Instance.IsUserInIgnoreList(username);
         }
 
 

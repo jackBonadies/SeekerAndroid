@@ -153,7 +153,7 @@ namespace Seeker.Messages
         {
             try
             {
-                if (SeekerApplication.IsUserInIgnoreList(e.Username))
+                if (UserListService.Instance.IsUserInIgnoreList(e.Username))
                 {
                     Logger.Debug("IGNORED PM received: " + e.Username);
                     return;

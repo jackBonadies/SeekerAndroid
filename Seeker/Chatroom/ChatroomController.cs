@@ -701,7 +701,7 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_RoomMessageReceived(object sender, Soulseek.RoomMessageReceivedEventArgs e)
         {
-            if (SeekerApplication.IsUserInIgnoreList(e.Username))
+            if (UserListService.Instance.IsUserInIgnoreList(e.Username))
             {
                 Logger.Debug("IGNORED room msg received: r:" + e.RoomName + " u: " + e.Username);
                 return;
