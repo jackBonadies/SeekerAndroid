@@ -126,44 +126,6 @@ namespace Seeker
             }
         }
 
-        private void TryToReconnect()
-        {
-            try
-            {
-                Logger.Debug("! TryToReconnect (on app resume) !");
-
-                if (SeekerApplication.ReconnectSteppedBackOffThreadIsRunning)
-                {
-                    Logger.Debug("In progress, so .Set to let the next one run.");
-                    SeekerApplication.ReconnectAutoResetEvent.Set();
-                }
-                else
-                {
-                    System.Threading.ThreadPool.QueueUserWorkItem((object o) =>
-                    {
-                        Task t = SeekerApplication.ConnectAndPerformPostConnectTasks(PreferencesState.Username, PreferencesState.Password);
-#if DEBUG
-                        t.ContinueWith((Task t) =>
-                        {
-                            if (t.IsFaulted)
-                            {
-                                Logger.Debug("TryToReconnect FAILED");
-                            }
-                            else
-                            {
-                                Logger.Debug("TryToReconnect SUCCESSFUL");
-                            }
-                        });
-#endif
-                    });
-                }
-            }
-            catch (Exception e)
-            {
-                Logger.Firebase("TryToReconnect Failed " + e.Message + e.StackTrace);
-            }
-        }
-
         void Application.IActivityLifecycleCallbacks.OnActivityStopped(Activity activity)
         {
             DiagLastStopped = activity.GetType().Name.ToString();

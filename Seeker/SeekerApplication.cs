@@ -126,6 +126,7 @@ namespace Seeker
             ApplicationContext = this;
             Toaster = new AndroidToaster();
             Services.SessionService.Instance = new Services.SessionService();
+            Services.ReconnectService.Instance = new Services.ReconnectService();
             Services.FileSystemService.Instance = new Services.FileSystemService();
 
             var loggerBackend = new AndroidLoggerBackend();
@@ -1089,8 +1090,7 @@ namespace Seeker
                 }
                 else if (AUTO_CONNECT_ON && PreferencesState.CurrentlyLoggedIn)
                 {
-                    Thread reconnectRetrier = new Thread(ReconnectSteppedBackOffThreadTask);
-                    reconnectRetrier.Start();
+                    ReconnectService.Instance.Start();
                 }
             }
             else if (e.PreviousState.HasFlag(SoulseekClientStates.Disconnected))
@@ -1136,85 +1136,6 @@ namespace Seeker
         public static string GetString(int resId)
         {
             return SeekerApplication.ApplicationContext.GetString(resId);
-        }
-
-        public static bool ShouldWeTryToConnect()
-        {
-            if (!PreferencesState.CurrentlyLoggedIn)
-            {
-                //we logged out on purpose
-                return false;
-            }
-
-            if (SeekerState.SoulseekClient == null)
-            {
-                //too early
-                return false;
-            }
-
-            if (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) && SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
-            {
-                //already connected
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// This is the number of seconds after the last try.
-        /// </summary>
-        private static readonly int[] retrySeconds = new int[MAX_TRIES] { 1, 2, 4, 10, 20 };
-        private const int MAX_TRIES = 5;
-        // if the reconnect stepped backoff thread is in progress but a change ocurred that makes us
-        // want to trigger it immediately, then we can just set this event.
-        public static AutoResetEvent ReconnectAutoResetEvent = new AutoResetEvent(false);
-        public static volatile bool ReconnectSteppedBackOffThreadIsRunning = false;
-        public static void ReconnectSteppedBackOffThreadTask()
-        {
-            try
-            {
-                ReconnectSteppedBackOffThreadIsRunning = true;
-                for (int i = 0; i < MAX_TRIES; i++)
-                {
-                    if (!ShouldWeTryToConnect())
-                    {
-                        return; //our work here is done
-                    }
-
-                    bool isDueToAutoReset = ReconnectAutoResetEvent.WaitOne(retrySeconds[i] * 1000);
-                    if (isDueToAutoReset)
-                    {
-                        Logger.Debug("is woken due to auto reset");
-                    }
-                    //System.Threading.Thread.Sleep(retrySeconds[i] * 1000); //todo AutoResetEvent or WaitOne(ms) etc.
-
-                    try
-                    {
-                        //a general note for connecting:
-                        //whenever you reconnect if you want the server to tell you the status of users on your user list
-                        //you have to re-AddUser them.  This is what SoulSeekQt does (wireshark message code 5 for each user in list).
-                        //and what Nicotine does (userlist.server_login()).
-                        //and reconnecting means every single time, including toggling from wifi to data / vice versa.
-                        Task t = ConnectAndPerformPostConnectTasks(PreferencesState.Username, PreferencesState.Password);
-                        t.Wait();
-                        if (t.IsCompletedSuccessfully)
-                        {
-                            Logger.Debug("RETRY " + i + "SUCCEEDED");
-                            return; //our work here is done
-                        }
-                    }
-                    catch (Exception)
-                    {
-
-                    }
-                    //if we got here we failed.. so try again shortly...
-                    Logger.Debug("RETRY " + i + "FAILED");
-                }
-            }
-            finally
-            {
-                ReconnectSteppedBackOffThreadIsRunning = false;
-            }
         }
 
         public static void AddToIgnoreListFeedback(Context c, string username)
