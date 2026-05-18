@@ -703,7 +703,7 @@ namespace Seeker
         private void LanguageSpinner_ItemSelected(object sender, AdapterView.ItemClickEventArgs e)
         {
             string selection = GetLanguageStringFromPosition(e.Position);
-            if (SeekerApplication.GetLegacyLanguageString() == selection)
+            if (LocaleHelper.GetLegacyLanguageString() == selection)
             {
                 return;
             }
@@ -711,7 +711,7 @@ namespace Seeker
             PreferencesState.Language = selection;
             PreferencesManager.SaveLanguage();
 
-            (SeekerApplication.ApplicationContext as SeekerApplication).SetLanguage(PreferencesState.Language);
+            LocaleHelper.SetLanguage(PreferencesState.Language);
         }
 
         private void UpdateLayoutParametersForScreenSize()
@@ -2322,7 +2322,7 @@ namespace Seeker
         private void SetSpinnerPositionLangauge(AutoCompleteTextView s, String[] options)
         {
             int pos = 0;
-            switch (SeekerApplication.GetLegacyLanguageString())
+            switch (LocaleHelper.GetLegacyLanguageString())
             {
                 case PreferencesState.FieldLangAuto:
                     pos = 0;
