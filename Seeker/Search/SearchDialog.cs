@@ -183,7 +183,7 @@ namespace Seeker
     {
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            SeekerApplication.SetActivityTheme(this);
+            UiHelpers.SetActivityTheme(this);
             if (Intent != null && SearchSendIntentHelper.IsFromActionSend(Intent))
             {
                 Intent intent = new Intent(this, typeof(MainActivity));

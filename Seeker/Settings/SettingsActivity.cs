@@ -2190,7 +2190,7 @@ namespace Seeker
             if (oldVariant != PreferencesState.DayModeVariant)
             {
                 PreferencesManager.SaveDayModeVariant();
-                SeekerApplication.SetActivityTheme(this);
+                UiHelpers.SetActivityTheme(this);
                 //if we are in day mode and the day varient is truly changed we need to recreate all activities
                 if (!this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
                 {
@@ -2217,7 +2217,7 @@ namespace Seeker
             if (oldVariant != PreferencesState.NightModeVariant)
             {
                 PreferencesManager.SaveNightModeVariant();
-                SeekerApplication.SetActivityTheme(this);
+                UiHelpers.SetActivityTheme(this);
                 //if we are in day mode and the day varient is truly changed we need to recreate all activities
                 if (this.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
                 {

@@ -1549,7 +1549,7 @@ namespace Seeker
             View viewInflated = LayoutInflater.From(toUse).Inflate(Resource.Layout.changeusertarget, this.rootView as ViewGroup, false);
             chooseUserInput = viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserInput);
             chooseUserInputLayout = viewInflated.FindViewById<View>(Resource.Id.chosenUserInputLayout);
-            SeekerApplication.SetupRecentUserAutoCompleteTextView(chooseUserInput);
+            UiHelpers.SetupRecentUserAutoCompleteTextView(chooseUserInput);
             targetRoomInput = viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.targetRoomInput);
             targetRoomInputLayout = viewInflated.FindViewById<View>(Resource.Id.targetRoomInputLayout);
             List<string> joinedRooms = ChatroomController.JoinedRoomNames?.ToList() ?? new List<string>();

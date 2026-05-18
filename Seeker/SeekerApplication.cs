@@ -1228,6 +1228,7 @@ namespace Seeker
                 SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.already_added_to_ignore), username), ToastLength.Short);
             }
         }
+
         public static void SetUpLoginContinueWith(Task t)
         {
             if (t == null)
@@ -1412,21 +1413,6 @@ namespace Seeker
             }
         }
 
-        public static void SetActivityTheme(Activity a)
-        {
-            //useless returns the same thing every time
-            //int curTheme = a.PackageManager.GetActivityInfo(a.ComponentName, 0).ThemeResource;
-            if (a.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
-            {
-                a.SetTheme(ThemeHelper.ToNightThemeProper(PreferencesState.NightModeVariant));
-            }
-            else
-            {
-                a.SetTheme(ThemeHelper.ToDayThemeProper(PreferencesState.DayModeVariant));
-            }
-        }
-
-
         public static void RemoveFromIgnoreListFeedback(Context c, string username)
         {
             if (UserListService.Instance.RemoveFromIgnoreList(username))
@@ -1540,27 +1526,6 @@ namespace Seeker
             return found;
         }
 
-        public static View GetViewForSnackbar()
-        {
-            bool useDownloadDialogFragment = false;
-            View v = null;
-            if (SeekerState.ActiveActivityRef is MainActivity mar)
-            {
-                var f = mar.SupportFragmentManager.FindFragmentByTag(DownloadDialog.DOWNLOAD_DIALOG_FRAGMENT);
-                //this is the only one we have..  tho obv a more generic way would be to see if s/t is a dialog fragmnet.  but arent a lot of just simple alert dialogs etc dialog fragment?? maybe explicitly checking is the best way.
-                if (f != null && f.IsVisible)
-                {
-                    useDownloadDialogFragment = true;
-                    v = f.View;
-                }
-            }
-            if (!useDownloadDialogFragment)
-            {
-                v = SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content);
-            }
-            return v;
-        }
-
         public const string CHANNEL_ID_USER_ONLINE = "User Online Alerts ID";
         public const string CHANNEL_NAME_USER_ONLINE = "User Online Alerts";
         public const string FromUserOnlineAlert = "FromUserOnlineAlert";
@@ -1644,30 +1609,6 @@ namespace Seeker
                     TransferPersistenceWrapper.RestoreDownloadTransferItems(sharedPreferences);
                     TransferPersistenceWrapper.RestoreUploadTransferItems(sharedPreferences);
                     TransferItems.TransferItemManagerWrapped = new TransferItemManagerWrapper(TransferItems.TransferItemManagerUploads, TransferItems.TransferItemManagerDL, TransferCleanup.PerformCleanupItem);
-                }
-            }
-        }
-
-        public static void SetupRecentUserAutoCompleteTextView(AutoCompleteTextView actv, bool forAddingUser = false)
-        {
-            if (PreferencesState.ShowRecentUsers)
-            {
-                if (forAddingUser)
-                {
-                    //dont show people that we have already added...
-                    var recents = SeekerState.RecentUsersManager.GetRecentUserList();
-                    lock (CommonState.UserList)
-                    {
-                        foreach (var uli in CommonState.UserList)
-                        {
-                            recents.Remove(uli.Username);
-                        }
-                    }
-                    actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Android.Resource.Layout.SimpleDropDownItem1Line, recents);
-                }
-                else
-                {
-                    actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Android.Resource.Layout.SimpleDropDownItem1Line, SeekerState.RecentUsersManager.GetRecentUserList());
                 }
             }
         }

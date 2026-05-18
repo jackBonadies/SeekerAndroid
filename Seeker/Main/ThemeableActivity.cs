@@ -30,7 +30,7 @@ namespace Seeker
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            SeekerApplication.SetActivityTheme(this);
+            UiHelpers.SetActivityTheme(this);
             ourWeakRef = new WeakReference<ThemeableActivity>(this, false);
 
             SeekerApplication.Activities.Add(ourWeakRef);

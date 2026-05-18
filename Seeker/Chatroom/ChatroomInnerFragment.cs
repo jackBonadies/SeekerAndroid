@@ -1051,7 +1051,7 @@ namespace Seeker.Chatroom
             View viewInflated = LayoutInflater.From(RequireContext()).Inflate(Resource.Layout.autocomplete_user_dialog_content, (ViewGroup)Activity.FindViewById(Android.Resource.Id.Content).RootView, false);
 
             AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
-            SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
+            UiHelpers.SetupRecentUserAutoCompleteTextView(input);
 
             builder.SetView(viewInflated);
 

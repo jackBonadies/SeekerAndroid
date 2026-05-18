@@ -348,7 +348,7 @@ namespace Seeker
             var rootView = (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView;
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.autocomplete_user_dialog_content, rootView, false);
             AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
-            SeekerApplication.SetupRecentUserAutoCompleteTextView(input, true);
+            UiHelpers.SetupRecentUserAutoCompleteTextView(input, true);
             // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
             builder.SetView(viewInflated);
 

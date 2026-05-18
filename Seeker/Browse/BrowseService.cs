@@ -64,7 +64,7 @@ namespace Seeker.Browse
         {
             try
             {
-                Snackbar.Make(SeekerApplication.GetViewForSnackbar(), SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user_contacting), Snackbar.LengthShort).Show();
+                Snackbar.Make(UiHelpers.GetViewForSnackbar(), SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user_contacting), Snackbar.LengthShort).Show();
             }
             catch (Exception e)
             {
@@ -159,7 +159,7 @@ namespace Seeker.Browse
 
                     try
                     {
-                        Snackbar sb = Snackbar.Make(SeekerApplication.GetViewForSnackbar(), SeekerState.ActiveActivityRef.GetString(Resource.String.browse_response_received), Snackbar.LengthLong).SetAction(SeekerState.ActiveActivityRef.GetString(Resource.String.go), action);
+                        Snackbar sb = Snackbar.Make(UiHelpers.GetViewForSnackbar(), SeekerState.ActiveActivityRef.GetString(Resource.String.browse_response_received), Snackbar.LengthLong).SetAction(SeekerState.ActiveActivityRef.GetString(Resource.String.go), action);
                         sb.Show();
                     }
                     catch

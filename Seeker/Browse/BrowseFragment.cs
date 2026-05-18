@@ -1207,7 +1207,7 @@ namespace Seeker
             View viewInflated = LayoutInflater.From(c).Inflate(Resource.Layout.autocomplete_user_dialog_content, (ViewGroup)this.View, false);
 
             AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
-            SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
+            UiHelpers.SetupRecentUserAutoCompleteTextView(input);
 
             builder.SetView(viewInflated);
 
