@@ -392,7 +392,7 @@ namespace Seeker
 
 
             CheckBox enableDiagnostics = FindViewById<CheckBox>(Resource.Id.enableDiagnostics);
-            enableDiagnostics.Checked = SeekerApplication.LOG_DIAGNOSTICS;
+            enableDiagnostics.Checked = PreferencesState.LogDiagnostics;
             enableDiagnostics.CheckedChange += EnableDiagnostics_CheckedChange;
 
 
@@ -1028,11 +1028,11 @@ namespace Seeker
 
         private void EnableDiagnostics_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
-            if (SeekerApplication.LOG_DIAGNOSTICS != e.IsChecked)
+            if (PreferencesState.LogDiagnostics != e.IsChecked)
             {
-                SeekerApplication.LOG_DIAGNOSTICS = e.IsChecked;
-                //if you do this without restarting, you have everything other than the diagnostics of slskclient set to Info+ rather than Debug+ 
-                SeekerApplication.SetDiagnosticState(SeekerApplication.LOG_DIAGNOSTICS);
+                PreferencesState.LogDiagnostics = e.IsChecked;
+                //if you do this without restarting, you have everything other than the diagnostics of slskclient set to Info+ rather than Debug+
+                SeekerApplication.SetDiagnosticState(PreferencesState.LogDiagnostics);
                 PreferencesManager.SaveLogDiagnostics();
             }
         }

@@ -176,9 +176,6 @@ namespace Seeker
         //    DownloadAdded(null,new DownloadAddedEventArgs(dlInfo));
         //}
 
-        public static AndroidX.DocumentFile.Provider.DocumentFile DiagnosticTextFile = null;
-        public static System.IO.StreamWriter DiagnosticStreamWriter = null;
-
         public static event EventHandler<BrowseResponseEvent> BrowseResponseReceived;
         public static AndroidX.DocumentFile.Provider.DocumentFile RootDocumentFile = null;
         public static AndroidX.DocumentFile.Provider.DocumentFile RootIncompleteDocumentFile = null; //only gets set if can write the dir...

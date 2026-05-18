@@ -28,10 +28,7 @@ namespace Seeker.Helpers
 
         public void Debug(string msg)
         {
-            if (SeekerApplication.LOG_DIAGNOSTICS)
-            {
-                SeekerApplication.AppendMessageToDiagFile(msg);
-            }
+            DiagnosticFileWriter.AppendIfEnabled(msg);
 #if ADB_LOGCAT
             log.Debug(LogCatTag, msg);
 #endif
@@ -44,10 +41,7 @@ namespace Seeker.Helpers
 
         public void Firebase(string msg)
         {
-            if (SeekerApplication.LOG_DIAGNOSTICS)
-            {
-                SeekerApplication.AppendMessageToDiagFile(msg);
-            }
+            DiagnosticFileWriter.AppendIfEnabled(msg);
 #if !IzzySoft
             if (CrashlyticsEnabled)
             {
@@ -61,10 +55,7 @@ namespace Seeker.Helpers
 
         public void InfoFirebase(string msg)
         {
-            if (SeekerApplication.LOG_DIAGNOSTICS)
-            {
-                SeekerApplication.AppendMessageToDiagFile(msg);
-            }
+            DiagnosticFileWriter.AppendIfEnabled(msg);
 #if !IzzySoft
             if (CrashlyticsEnabled)
             {
