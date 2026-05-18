@@ -706,7 +706,6 @@ Počet adresářů: {5}\"
     </string>
     <string name="sending__">Odesílání...</string>
     <string name="give_hint"># dní</string>
-    <string name="type_notes_here">napsat poznámky o uživateli</string>
     <string name="edit_note">Upravit poznámku</string>
     <string name="add_note">Přidat poznámku</string>
     <string name="note_title">Poznámka {0}</string>

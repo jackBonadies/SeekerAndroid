@@ -707,7 +707,6 @@
     </string>
     <string name="sending__">Отправка...</string>
     <string name="give_hint"># количество дней</string>
-    <string name="type_notes_here">Введите здесь заметки о пользователе</string>
     <string name="edit_note">Редактировать комментарий</string>
     <string name="add_note">Добавить комментарий</string>
     <string name="note_title">{0} Примечание</string>

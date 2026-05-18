@@ -706,7 +706,6 @@ Numero Cartelle: {5}\"
     </string>
     <string name="sending__">Inviando...</string>
     <string name="give_hint"># of days</string>
-    <string name="type_notes_here">Scrivi note sull\'utente qui</string>
     <string name="edit_note">Modifica nota</string>
     <string name="add_note">Aggiungi nota</string>
     <string name="note_title">{0}\'s Note</string>

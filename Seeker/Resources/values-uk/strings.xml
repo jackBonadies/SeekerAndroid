@@ -706,7 +706,6 @@
     </string>
     <string name="sending__">Надсилання...</string>
     <string name="give_hint"># кількість днів</string>
-    <string name="type_notes_here">ввести примітки про користувача тут</string>
     <string name="edit_note">Редагувати примітку</string>
     <string name="add_note">Додати примітку</string>
     <string name="note_title">Примітка {0}</string>
