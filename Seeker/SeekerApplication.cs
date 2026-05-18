@@ -1516,7 +1516,7 @@ namespace Seeker
                 SeekerState.SoulseekClient.SendUploadSpeedAsync((int)(e.Transfer.AverageSpeed));
                 try
                 {
-                    CommonHelpers.CreateNotificationChannel(SeekerState.MainActivityRef, MainActivity.UPLOADS_CHANNEL_ID, MainActivity.UPLOADS_CHANNEL_NAME, NotificationImportance.High);
+                    CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, MainActivity.UPLOADS_CHANNEL_ID, MainActivity.UPLOADS_CHANNEL_NAME, NotificationImportance.High);
                     NotifInfo notifInfo = null;
                     string directory = Common.Helpers.GetFolderNameFromFile(e.Transfer.Filename.Replace("/", @"\"));
                     if (NotificationUploadTracker.ContainsKey(e.Transfer.Username))
@@ -1534,8 +1534,8 @@ namespace Seeker
                         NotificationUploadTracker.Add(e.Transfer.Username, notifInfo);
                     }
 
-                    Notification n = Seeker.Services.UploadService.CreateUploadNotification(SeekerState.MainActivityRef, e.Transfer.Username, notifInfo.DirNames, notifInfo.FilesUploadedToUser);
-                    NotificationManagerCompat nmc = NotificationManagerCompat.From(SeekerState.MainActivityRef);
+                    Notification n = Seeker.Services.UploadService.CreateUploadNotification(SeekerState.ActiveActivityRef, e.Transfer.Username, notifInfo.DirNames, notifInfo.FilesUploadedToUser);
+                    NotificationManagerCompat nmc = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
                     nmc.Notify(e.Transfer.Username.GetHashCode(), n);
                 }
                 catch (Exception err)
