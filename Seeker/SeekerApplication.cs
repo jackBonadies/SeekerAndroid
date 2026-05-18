@@ -888,8 +888,7 @@ namespace Seeker
                     }
                     else
                     {
-
-                        newStream = SeekerState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri, "wt");
+                        newStream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(incompleteUri, "wt");
                     }
 
                     relevantItem.Progress = 0;
