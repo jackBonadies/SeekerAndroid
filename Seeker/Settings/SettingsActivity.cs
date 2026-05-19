@@ -2289,7 +2289,7 @@ namespace Seeker
 
         private void ClearHistory_Click(object sender, EventArgs e)
         {
-            SearchTabHelper.ClearSearchHistoryInvoke();
+            SearchFragment.RaiseSearchHistoryCleared();
         }
 
         private void AutoClearCompleteUploads_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)

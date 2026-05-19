@@ -30,6 +30,28 @@ namespace Seeker
 {
     public partial class SearchFragment : Fragment
     {
+        public static event EventHandler<EventArgs> SearchHistoryCleared;
+
+        public static void RaiseSearchHistoryCleared()
+        {
+            SearchHistoryCleared?.Invoke(null, EventArgs.Empty);
+        }
+
+        public static void UnsubscribeSearchHistoryClearedByTargetType(object target)
+        {
+            if (SearchHistoryCleared == null)
+            {
+                return;
+            }
+            foreach (Delegate d in SearchHistoryCleared.GetInvocationList())
+            {
+                if (d.Target.GetType() == target.GetType())
+                {
+                    SearchHistoryCleared -= (EventHandler<EventArgs>)d;
+                }
+            }
+        }
+
         public View rootView = null;
         private ViewFlipper searchEmptyStateFlipper = null;
         private TextView noResultsSubtitle = null;
@@ -955,8 +977,8 @@ namespace Seeker
             UpdateEmptyState();
             RefreshWishlistBanner();
 
-            SearchTabHelper.ClearSearchHistoryEventsFromTarget(this);
-            SearchTabHelper.ClearSearchHistory += OnClearSearchHistory;
+            UnsubscribeSearchHistoryClearedByTargetType(this);
+            SearchHistoryCleared += OnSearchHistoryCleared;
             SeekerState.SoulseekClient.ClearSearchResponseReceivedFromTarget(this);
             int x = SeekerState.SoulseekClient.GetInvocationListOfSearchResponseReceived();
             Logger.Debug("NUMBER OF DELEGATES AFTER WE REMOVED OURSELF: (before doing the deep clear this would increase every rotation orientation)" + x);
@@ -1783,7 +1805,7 @@ namespace Seeker
             NotifySearchHeaderChanged();
         }
 
-        private void OnClearSearchHistory(object sender, EventArgs e)
+        private void OnSearchHistoryCleared(object sender, EventArgs e)
         {
             PreferencesState.SearchHistory = new List<string>();
             PreferencesManager.ClearSearchHistory();

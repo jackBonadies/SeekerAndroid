@@ -15,28 +15,6 @@ namespace Seeker.Helpers
 {
     public class SearchTabHelper
     {
-        public static event EventHandler<EventArgs> ClearSearchHistory;
-
-        public static void ClearSearchHistoryInvoke()
-        {
-            ClearSearchHistory?.Invoke(null, EventArgs.Empty);
-        }
-
-        public static void ClearSearchHistoryEventsFromTarget(object target)
-        {
-            if (ClearSearchHistory == null)
-            {
-                return;
-            }
-            foreach (Delegate d in ClearSearchHistory.GetInvocationList())
-            {
-                if (d.Target.GetType() == target.GetType())
-                {
-                    ClearSearchHistory -= (EventHandler<EventArgs>)d;
-                }
-            }
-        }
-
         public static void RemoveTabFromSharedPrefs(int wishlistSearchResultsToRemove, Context c, bool legacy = false)
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
