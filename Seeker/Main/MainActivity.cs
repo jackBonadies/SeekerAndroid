@@ -351,12 +351,12 @@ namespace Seeker
                     ActivityCompat.RequestPermissions(this, new string[] { Manifest.Permission.WriteExternalStorage }, WRITE_EXTERNAL);
                 }
             }
-            else if (SeekerState.RootDocumentFile == null)
+            else if (StorageState.RootDocumentFile == null)
             {
                 // SeekerApplication.InitializeDocumentFiles could not write the download directory —
                 // permission was revoked. Ask the user to re-select one.
                 Android.Net.Uri res = string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri)
-                    ? Android.Net.Uri.Parse(SeekerState.DefaultMusicUri)
+                    ? Android.Net.Uri.Parse(StorageState.DefaultMusicUri)
                     : Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
                 var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
                 b.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
@@ -864,14 +864,14 @@ namespace Seeker
                     if (NEW_WRITE_EXTERNAL == requestCode)
                     {
                         var x = data.Data;
-                        SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
+                        StorageState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
                         PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
                         PreferencesState.SaveDataDirectoryUriIsFromTree = true;
                         this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     }
                     else if (NEW_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
                     {
-                        SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
+                        StorageState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
                         PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
                         PreferencesState.SaveDataDirectoryUriIsFromTree = false;
                     }
@@ -935,13 +935,13 @@ namespace Seeker
                 {
                     if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
                     {
-                        SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
+                        StorageState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
                         PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
                         PreferencesState.SaveDataDirectoryUriIsFromTree = false;
                     }
                     else if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode)
                     {
-                        SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
+                        StorageState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
                         PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
                         PreferencesState.SaveDataDirectoryUriIsFromTree = true;
                         this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
@@ -1006,9 +1006,9 @@ namespace Seeker
                 //}
                 //catch
                 //{
-                //    res = Android.Net.Uri.Parse(SeekerState.DefaultMusicUri);//TryCreate("content://com.android.externalstorage.documents/tree/primary%3AMusic", UriKind.Absolute,out res);
+                //    res = Android.Net.Uri.Parse(StorageState.DefaultMusicUri);//TryCreate("content://com.android.externalstorage.documents/tree/primary%3AMusic", UriKind.Absolute,out res);
                 //}
-                res = Android.Net.Uri.Parse(SeekerState.DefaultMusicUri);
+                res = Android.Net.Uri.Parse(StorageState.DefaultMusicUri);
             }
             else
             {

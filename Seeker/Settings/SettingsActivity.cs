@@ -111,7 +111,7 @@ namespace Seeker
             //when you open up the directory selection with OpenDocumentTree the SettingsActivity is paused
             this.UpdateDirectoryViews();
 
-            SeekerState.DirectoryUpdatedEvent += DirectoryUpdated;
+            StorageState.DirectoryUpdatedEvent += DirectoryUpdated;
             SharedFileService.SharingStatusChangedEvent += SharingStatusUpdated;
 
             // moved to OnResume from OnCreate
@@ -223,7 +223,7 @@ namespace Seeker
             UPnpManager.Instance.SearchStarted -= UpnpSearchStarted;
             UPnpManager.Instance.DeviceSuccessfullyMapped -= UpnpDeviceMapped;
             PrivilegesManager.Instance.PrivilegesChecked -= PrivilegesChecked;
-            SeekerState.DirectoryUpdatedEvent -= DirectoryUpdated;
+            StorageState.DirectoryUpdatedEvent -= DirectoryUpdated;
             SettingsActivity.UploadDirectoryChanged -= DirectoryViewsChanged;
             SharedFileService.SharingStatusChangedEvent -= SharingStatusUpdated;
             SettingsActivity.SaveAdditionalDirectorySettingsToSharedPreferences();
@@ -1052,7 +1052,7 @@ namespace Seeker
 
         private static string GetFriendlyDownloadDirectoryName()
         {
-            if (SeekerState.RootDocumentFile == null)            
+            if (StorageState.RootDocumentFile == null)            
             {
                 if (PlatformInfo.UseLegacyStorage())
                 {
@@ -1068,13 +1068,13 @@ namespace Seeker
             }
             else
             {
-                return SeekerState.RootDocumentFile.Uri.LastPathSegment;
+                return StorageState.RootDocumentFile.Uri.LastPathSegment;
             }
         }
 
         public static bool UseIncompleteManualFolder()
         {
-            return (PreferencesState.OverrideDefaultIncompleteLocations && SeekerState.RootIncompleteDocumentFile != null);
+            return (PreferencesState.OverrideDefaultIncompleteLocations && StorageState.RootIncompleteDocumentFile != null);
         }
 
         private static string GetFriendlyIncompleteDirectoryName()
@@ -1083,9 +1083,9 @@ namespace Seeker
             {
                 return SeekerApplication.GetString(Resource.String.NotInUse);
             }
-            if (PreferencesState.OverrideDefaultIncompleteLocations && SeekerState.RootIncompleteDocumentFile != null) //if doc file is null that means we could not write to it.
+            if (PreferencesState.OverrideDefaultIncompleteLocations && StorageState.RootIncompleteDocumentFile != null) //if doc file is null that means we could not write to it.
             {
-                return SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment;
+                return StorageState.RootIncompleteDocumentFile.Uri.LastPathSegment;
             }
             else
             {
@@ -1094,7 +1094,7 @@ namespace Seeker
                     return SeekerApplication.GetString(Resource.String.AppLocalStorage);
                 }
                 //if not override then its whatever the download directory is...
-                if (SeekerState.RootDocumentFile == null)                
+                if (StorageState.RootDocumentFile == null)                
                 {
                     if (PlatformInfo.UseLegacyStorage())
                     {
@@ -1110,7 +1110,7 @@ namespace Seeker
                 }
                 else
                 {
-                    return SeekerState.RootDocumentFile.Uri.LastPathSegment;
+                    return StorageState.RootDocumentFile.Uri.LastPathSegment;
                 }
             }
         }
@@ -1364,17 +1364,17 @@ namespace Seeker
 
             bool folderExists = false;
             int folderCount = 0;
-            if (PlatformInfo.UseLegacyStorage() && (SeekerState.RootDocumentFile == null && useDownloadDir))
+            if (PlatformInfo.UseLegacyStorage() && (StorageState.RootDocumentFile == null && useDownloadDir))
             {
                 string rootdir = string.Empty;
-                //if (SeekerState.RootDocumentFile==null)
+                //if (StorageState.RootDocumentFile==null)
                 //{
                 rootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
                 //}
                 //else
                 //{
                 //    rootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                //    rootdir = SeekerState.RootDocumentFile.Uri.Path; //returns junk...
+                //    rootdir = StorageState.RootDocumentFile.Uri.Path; //returns junk...
                 //}
 
                 if (!(new Java.IO.File(rootdir)).Exists())
@@ -1391,12 +1391,12 @@ namespace Seeker
                 DocumentFile rootdir = null;
                 if (useDownloadDir)
                 {
-                    if (SeekerState.RootDocumentFile == null)
+                    if (StorageState.RootDocumentFile == null)
                     {
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.ErrorDownloadDirNotProperlySet), ToastLength.Long);
                         return;
                     }
-                    rootdir = SeekerState.RootDocumentFile;
+                    rootdir = StorageState.RootDocumentFile;
                     Logger.Debug("using download dir" + rootdir.Uri.LastPathSegment);
                 }
                 else if (useTempDir)
@@ -1407,7 +1407,7 @@ namespace Seeker
                 }
                 else if (useCustomDir)
                 {
-                    rootdir = SeekerState.RootIncompleteDocumentFile;
+                    rootdir = StorageState.RootIncompleteDocumentFile;
                     Logger.Debug("using custom incomplete dir" + rootdir.Uri.LastPathSegment);
                 }
 
@@ -2776,7 +2776,7 @@ namespace Seeker
         private void SuccessfulWriteExternalLegacyCallback(Android.Net.Uri uri, bool fromLegacyPicker = false)
         {
             var x = uri;
-            //SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
+            //StorageState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
             PreferencesState.SaveDataDirectoryUri = uri.ToString();
             PreferencesState.SaveDataDirectoryUriIsFromTree = !fromLegacyPicker;
             //this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission);
@@ -2789,10 +2789,10 @@ namespace Seeker
             {
                 docFile = DocumentFile.FromTreeUri(this, uri);
             }
-            SeekerState.RootDocumentFile = docFile;
+            StorageState.RootDocumentFile = docFile;
             this.RunOnUiThread(new Action(() =>
             {
-                SeekerState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
+                StorageState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
                 SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), uri.Path), ToastLength.Long);
             }));
         }
@@ -2805,7 +2805,7 @@ namespace Seeker
         private void SuccessfulIncompleteExternalLegacyCallback(Android.Net.Uri uri, bool fromLegacyPicker = false)
         {
             var x = uri;
-            //SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
+            //StorageState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
             PreferencesState.ManualIncompleteDataDirectoryUri = uri.ToString();
             PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree = !fromLegacyPicker;
             //this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission);
@@ -2818,10 +2818,10 @@ namespace Seeker
             {
                 docFile = DocumentFile.FromTreeUri(this, uri);
             }
-            SeekerState.RootIncompleteDocumentFile = docFile;
+            StorageState.RootIncompleteDocumentFile = docFile;
             this.RunOnUiThread(new Action(() =>
             {
-                SeekerState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
+                StorageState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
                 SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), uri.Path), ToastLength.Long);
             }));
         }
@@ -3212,13 +3212,13 @@ namespace Seeker
                 if (resultCode == Result.Ok)
                 {
                     var x = data.Data;
-                    SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
+                    StorageState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
                     PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
                     PreferencesState.SaveDataDirectoryUriIsFromTree = true;
                     this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     this.RunOnUiThread(new Action(() =>
                     {
-                        SeekerState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
+                        StorageState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
                         SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), data.Data), ToastLength.Long);
                     }));
                 }
@@ -3238,13 +3238,13 @@ namespace Seeker
                 if (resultCode == Result.Ok)
                 {
                     var x = data.Data;
-                    SeekerState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
+                    StorageState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
                     PreferencesState.ManualIncompleteDataDirectoryUri = data.Data.ToString();
                     PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree = true;
                     this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     this.RunOnUiThread(new Action(() =>
                     {
-                        SeekerState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
+                        StorageState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
                         SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), data.Data), ToastLength.Long);
                     }));
                 }

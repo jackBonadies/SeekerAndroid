@@ -339,7 +339,7 @@ namespace Seeker
             return canWrite;
         }
 
-        // Runs once per process in OnCreate. Sets SeekerState.RootDocumentFile and
+        // Runs once per process in OnCreate. Sets StorageState.RootDocumentFile and
         // RootIncompleteDocumentFile. For non-legacy, leaves RootDocumentFile null if the
         // download directory permission has been revoked; MainActivity checks for null and
         // shows the re-selection dialog.
@@ -352,7 +352,7 @@ namespace Seeker
                     var chosenUri = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
                     if (CheckDirectoryForWritePermission(context, chosenUri, PreferencesState.SaveDataDirectoryUriIsFromTree, "legacy download"))
                     {
-                        SeekerState.RootDocumentFile = SeekerState.OpenRootFile(context, chosenUri);
+                        StorageState.RootDocumentFile = StorageState.OpenRootFile(context, chosenUri);
                     }
                 }
                 if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
@@ -360,19 +360,19 @@ namespace Seeker
                     var chosenUri = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
                     if (CheckDirectoryForWritePermission(context, chosenUri, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "legacy incomplete"))
                     {
-                        SeekerState.RootIncompleteDocumentFile = SeekerState.OpenRootFile(context, chosenUri);
+                        StorageState.RootIncompleteDocumentFile = StorageState.OpenRootFile(context, chosenUri);
                     }
                 }
             }
             else
             {
                 Android.Net.Uri res = string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri)
-                    ? Android.Net.Uri.Parse(SeekerState.DefaultMusicUri)
+                    ? Android.Net.Uri.Parse(StorageState.DefaultMusicUri)
                     : Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
 
                 if (CheckDirectoryForWritePermission(context, res, PreferencesState.SaveDataDirectoryUriIsFromTree, "download"))
                 {
-                    SeekerState.RootDocumentFile = PreferencesState.SaveDataDirectoryUriIsFromTree
+                    StorageState.RootDocumentFile = PreferencesState.SaveDataDirectoryUriIsFromTree
                         ? DocumentFile.FromTreeUri(context, res)
                         : DocumentFile.FromFile(new Java.IO.File(res.Path));
                 }
@@ -383,7 +383,7 @@ namespace Seeker
                     var incompleteRes = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
                     if (CheckDirectoryForWritePermission(context, incompleteRes, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "incomplete"))
                     {
-                        SeekerState.RootIncompleteDocumentFile = (!PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
+                        StorageState.RootIncompleteDocumentFile = (!PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
                             ? DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path))
                             : DocumentFile.FromTreeUri(context, incompleteRes);
                     }
@@ -650,7 +650,7 @@ namespace Seeker
                     var incompleteUri = Android.Net.Uri.Parse(incompleteUriString);
 
                     // this is the only time we do legacy.
-                    bool isLegacyCase = PlatformInfo.UseLegacyStorage() && (SeekerState.RootDocumentFile == null && useDownloadDir);
+                    bool isLegacyCase = PlatformInfo.UseLegacyStorage() && (StorageState.RootDocumentFile == null && useDownloadDir);
                     if (isLegacyCase)
                     {
                         newStream = new System.IO.FileStream(incompleteUri.Path, System.IO.FileMode.Truncate, System.IO.FileAccess.Write, System.IO.FileShare.None);

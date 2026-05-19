@@ -2347,7 +2347,7 @@ namespace Seeker
 #if DEBUG
                             try
                             {
-                                var df = SeekerState.RootDocumentFile.CreateFile("text/plain", SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm.Replace(' ', '_'));
+                                var df = StorageState.RootDocumentFile.CreateFile("text/plain", SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm.Replace(' ', '_'));
                                 var outputStream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(df.Uri);
                                 foreach (var sr in SearchTabHelper.SearchTabCollection[fromTab].SearchResponses)
                                 {

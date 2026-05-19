@@ -19,6 +19,7 @@
 using Android.Widget;
 using AndroidX.DocumentFile.Provider;
 using Common;
+using Seeker.Services;
 using System;
 
 namespace Seeker.Helpers
@@ -85,12 +86,12 @@ namespace Seeker.Helpers
             {
                 if (DiagnosticTextFile == null)
                 {
-                    if (SeekerState.RootDocumentFile != null) //i.e. if api > 21 and they set it.
+                    if (StorageState.RootDocumentFile != null) //i.e. if api > 21 and they set it.
                     {
-                        DiagnosticTextFile = SeekerState.RootDocumentFile.FindFile("seeker_diagnostics.txt");
+                        DiagnosticTextFile = StorageState.RootDocumentFile.FindFile("seeker_diagnostics.txt");
                         if (DiagnosticTextFile == null)
                         {
-                            DiagnosticTextFile = SeekerState.RootDocumentFile.CreateFile("text/plain", "seeker_diagnostics");
+                            DiagnosticTextFile = StorageState.RootDocumentFile.CreateFile("text/plain", "seeker_diagnostics");
                             if (DiagnosticTextFile == null)
                             {
                                 return;

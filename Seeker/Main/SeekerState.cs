@@ -17,8 +17,6 @@ namespace Seeker
 {
     public static class SeekerState
     {
-        public const string DefaultMusicUri = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
-
         // Misc (non-persisted)
         public static bool InDarkModeCache = false;
         public static volatile LoginFragment LoginFragmentRef = null;
@@ -46,7 +44,6 @@ namespace Seeker
         }
         public static PendingStatusChange PendingStatusChangeToAwayOnline = PendingStatusChange.NothingPending;
 
-        public static EventHandler<EventArgs> DirectoryUpdatedEvent;
 
 
         /// <summary>
@@ -95,8 +92,6 @@ namespace Seeker
                                                                                        //it would get recreated every time so there were lost instances with threads waiting forever....
 
         public static event EventHandler<BrowseResponseEvent> BrowseResponseReceived;
-        public static AndroidX.DocumentFile.Provider.DocumentFile RootDocumentFile = null;
-        public static AndroidX.DocumentFile.Provider.DocumentFile RootIncompleteDocumentFile = null; //only gets set if can write the dir...
         public static void OnBrowseResponseReceived(BrowseResponse origBR, TreeNode<Directory> rootTree, string fromUsername, string startingLocation)
         {
             BrowseResponseReceived(null, new BrowseResponseEvent(origBR, rootTree, fromUsername, startingLocation));
@@ -117,11 +112,6 @@ namespace Seeker
                     }
                 }
             }
-        }
-
-        public static DocumentFile OpenRootFile(Context context, Android.Net.Uri chosenUri)
-        {
-            return DocumentFile.FromTreeUri(context, chosenUri);
         }
     }
 
