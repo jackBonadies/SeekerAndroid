@@ -1,4 +1,4 @@
-using Android.App;
+﻿using Android.App;
 using Android.Content;
 using AndroidX.Core.App;
 using AndroidX.DocumentFile.Provider;
@@ -139,7 +139,7 @@ namespace Seeker.Services
             //the filename is basically "the key"
             _ = endpoint;
             string errorMsg = null;
-            Tuple<long, string, Tuple<int, int, int, int>, bool, bool> ourFileInfo = SeekerState.SharedFileCache.GetFullInfoFromSearchableName(filename, out errorMsg);
+            Tuple<long, string, Tuple<int, int, int, int>, bool, bool> ourFileInfo = SharedFileService.SharedFileCache.GetFullInfoFromSearchableName(filename, out errorMsg);
             if (ourFileInfo == null)
             {
                 Logger.Firebase("ourFileInfo is null: " + ourFileInfo + " " + errorMsg);

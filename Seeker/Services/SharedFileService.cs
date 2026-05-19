@@ -1,4 +1,4 @@
-using Android.Content;
+﻿using Android.Content;
 using Android.Provider;
 using AndroidX.DocumentFile.Provider;
 using Common;
@@ -17,6 +17,27 @@ namespace Seeker.Services
 {
     public static class SharedFileService
     {
+        public static SharedFileCache SharedFileCache = null;
+        public static bool FailedShareParse = false;
+        private static volatile bool isParsing = false;
+        public static int NumberParsed = 0;
+        public static bool NumberOfSharedDirectoriesIsStale = true;
+        public static bool AttemptedToSetUpSharing = false;
+        public static EventHandler<EventArgs> SharingStatusChangedEvent;
+
+        public static bool IsParsing
+        {
+            get
+            {
+                return isParsing;
+            }
+            set
+            {
+                isParsing = value;
+                NumberParsed = 0; //reset
+            }
+        }
+
         public class FullFileInfosResult
         {
             public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> PresentableNameToFullFileInfo { get; set; }
@@ -717,7 +738,7 @@ namespace Seeker.Services
                         if (presentableNameToFullFileInfos.Count % 50 == 0)
                         {
                             //update public status variable every so often
-                            SeekerState.NumberParsed = presentableNameToFullFileInfos.Count;
+                            SharedFileService.NumberParsed = presentableNameToFullFileInfos.Count;
                         }
                         //                        pairs.Add(new Tuple<string, string, long, string>(searchableName, childUri.ToString(), size, presentableName));
 
@@ -793,7 +814,7 @@ namespace Seeker.Services
                     if (pairs.Count % 50 == 0)
                     {
                         //update public status variable every so often
-                        SeekerState.NumberParsed = pairs.Count;
+                        SharedFileService.NumberParsed = pairs.Count;
                     }
                     string fname = SimpleHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
                                                                                                           //for the brose response should only be the filename!!! 
@@ -883,11 +904,11 @@ namespace Seeker.Services
                     FullFileInfosResult result;
                     if (UploadDirectoryManager.AreAnyFromLegacy())
                     {
-                        result = GetFullFileInfoFromSharedDirectoryLegacy(SeekerState.SharedFileCache?.PresentableNameToFullFileInfo);
+                        result = GetFullFileInfoFromSharedDirectoryLegacy(SharedFileService.SharedFileCache?.PresentableNameToFullFileInfo);
                     }
                     else
                     {
-                        result = GetFullFileInfoFromSharedDirectory(SeekerState.SharedFileCache?.PresentableNameToFullFileInfo);
+                        result = GetFullFileInfoFromSharedDirectory(SharedFileService.SharedFileCache?.PresentableNameToFullFileInfo);
                     }
 
                     var presentableNameToFullFileInfo = result.PresentableNameToFullFileInfo;
@@ -899,7 +920,7 @@ namespace Seeker.Services
                     int nonHiddenCountForServer = presentableNameToFullFileInfo.Count(pair1 => !pair1.Value.Item5);
                     Logger.Debug($"Non Hidden Count for Server: {nonHiddenCountForServer}");
 
-                    SeekerState.NumberParsed = int.MaxValue; //our signal that we are finishing up...
+                    SharedFileService.NumberParsed = int.MaxValue; //our signal that we are finishing up...
 
                     Dictionary<int, string> fileKeyToPresentableName = GenerateFileKeyToPresentableNameIndex(presentableNameToFullFileInfo);
                     Dictionary<string, List<int>> searchTermTokenToListOfFileKeys = GenerateSearchTermTokenToFileKeysIndex(presentableNameToFullFileInfo, fileKeyToPresentableName);
@@ -922,7 +943,7 @@ namespace Seeker.Services
 
                     SharedFileCache sharedFileCache = new SharedFileCache(presentableNameToFullFileInfo, directoryCount, browseResponse, presentableDirectoryNameToDirectoryUriMappings, searchTermTokenToListOfFileKeys, fileKeyToPresentableName, hiddenDirectories, nonHiddenCountForServer);//.Select(_=>_.Item1).ToList());
                     SharedFileCache_Refreshed(null, (sharedFileCache.DirectoryCount, nonHiddenCountForServer));
-                    SeekerState.SharedFileCache = sharedFileCache;
+                    SharedFileService.SharedFileCache = sharedFileCache;
                 }
                 else
                 {
@@ -940,12 +961,12 @@ namespace Seeker.Services
                             cachedParseResults.NonHiddenFileCount);
 
                         SharedFileCache_Refreshed(null, (sharedFileCache.DirectoryCount, sharedFileCache.GetNonHiddenFileCountForServer() != -1 ? sharedFileCache.GetNonHiddenFileCountForServer() : sharedFileCache.FileCount));
-                        SeekerState.SharedFileCache = sharedFileCache;
+                        SharedFileService.SharedFileCache = sharedFileCache;
                     }
                 }
                 success = true;
-                SeekerState.FailedShareParse = false;
-                SeekerState.SharedFileCache.SuccessfullyInitialized = true;
+                SharedFileService.FailedShareParse = false;
+                SharedFileService.SharedFileCache.SuccessfullyInitialized = true;
             }
             catch (Exception e)
             {
@@ -997,11 +1018,11 @@ namespace Seeker.Services
                     //}
                     //SeekerState.UploadDataDirectoryUri = null;
                     //SeekerState.UploadDataDirectoryUriIsFromTree = true;
-                    SeekerState.FailedShareParse = true;
-                    //if success if false then SeekerState.SharedFileCache might be null still causing a crash!
-                    if (SeekerState.SharedFileCache != null)
+                    SharedFileService.FailedShareParse = true;
+                    //if success if false then SharedFileService.SharedFileCache might be null still causing a crash!
+                    if (SharedFileService.SharedFileCache != null)
                     {
-                        SeekerState.SharedFileCache.SuccessfullyInitialized = false;
+                        SharedFileService.SharedFileCache.SuccessfullyInitialized = false;
                     }
                 }
             }
@@ -1099,11 +1120,11 @@ namespace Seeker.Services
             if (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
             {
                 SeekerState.SoulseekClient.SetSharedCountsAsync(e.Directories, e.Files);
-                SeekerState.NumberOfSharedDirectoriesIsStale = false;
+                SharedFileService.NumberOfSharedDirectoriesIsStale = false;
             }
             else
             {
-                SeekerState.NumberOfSharedDirectoriesIsStale = true;
+                SharedFileService.NumberOfSharedDirectoriesIsStale = true;
             }
         }
 
@@ -1119,11 +1140,11 @@ namespace Seeker.Services
                 {
                     if (MeetsCurrentSharingConditions())
                     {
-                        if (SeekerState.SharedFileCache != null)
+                        if (SharedFileService.SharedFileCache != null)
                         {
-                            Logger.Debug("Tell server we are sharing " + SeekerState.SharedFileCache.DirectoryCount + " dirs and " + SeekerState.SharedFileCache.GetNonHiddenFileCountForServer() + " files");
-                            SeekerState.SoulseekClient.SetSharedCountsAsync(SeekerState.SharedFileCache.DirectoryCount,
-                                SeekerState.SharedFileCache.GetNonHiddenFileCountForServer() != -1 ? SeekerState.SharedFileCache.GetNonHiddenFileCountForServer() : SeekerState.SharedFileCache.FileCount);
+                            Logger.Debug("Tell server we are sharing " + SharedFileService.SharedFileCache.DirectoryCount + " dirs and " + SharedFileService.SharedFileCache.GetNonHiddenFileCountForServer() + " files");
+                            SeekerState.SoulseekClient.SetSharedCountsAsync(SharedFileService.SharedFileCache.DirectoryCount,
+                                SharedFileService.SharedFileCache.GetNonHiddenFileCountForServer() != -1 ? SharedFileService.SharedFileCache.GetNonHiddenFileCountForServer() : SharedFileService.SharedFileCache.FileCount);
                         }
                         else
                         {
@@ -1135,15 +1156,15 @@ namespace Seeker.Services
                         Logger.Debug("Tell server we are sharing 0 dirs and 0 files");
                         SeekerState.SoulseekClient.SetSharedCountsAsync(0, 0);
                     }
-                    SeekerState.NumberOfSharedDirectoriesIsStale = false;
+                    SharedFileService.NumberOfSharedDirectoriesIsStale = false;
                 }
                 else
                 {
                     if (MeetsCurrentSharingConditions())
                     {
-                        if (SeekerState.SharedFileCache != null)
+                        if (SharedFileService.SharedFileCache != null)
                         {
-                            Logger.Debug("We need to Tell server we are sharing " + SeekerState.SharedFileCache.DirectoryCount + " dirs and " + SeekerState.SharedFileCache.GetNonHiddenFileCountForServer() + " files on next log in");
+                            Logger.Debug("We need to Tell server we are sharing " + SharedFileService.SharedFileCache.DirectoryCount + " dirs and " + SharedFileService.SharedFileCache.GetNonHiddenFileCountForServer() + " files on next log in");
                         }
                         else
                         {
@@ -1154,7 +1175,7 @@ namespace Seeker.Services
                     {
                         Logger.Debug("We need to Tell server we are sharing 0 dirs and 0 files on next log in");
                     }
-                    SeekerState.NumberOfSharedDirectoriesIsStale = true;
+                    SharedFileService.NumberOfSharedDirectoriesIsStale = true;
                 }
             }
             catch (Exception e)
@@ -1170,7 +1191,7 @@ namespace Seeker.Services
         /// <returns></returns>
         public static bool MeetsSharingConditions()
         {
-            return PreferencesState.SharingOn && UploadDirectoryManager.UploadDirectories.Count != 0 && !SeekerState.IsParsing && !UploadDirectoryManager.AreAllFailed();
+            return PreferencesState.SharingOn && UploadDirectoryManager.UploadDirectories.Count != 0 && !SharedFileService.IsParsing && !UploadDirectoryManager.AreAllFailed();
         }
 
         /// <summary>
@@ -1184,7 +1205,7 @@ namespace Seeker.Services
 
         public static bool IsSharingSetUpSuccessfully()
         {
-            return SeekerState.SharedFileCache != null && SeekerState.SharedFileCache.SuccessfullyInitialized;
+            return SharedFileService.SharedFileCache != null && SharedFileService.SharedFileCache.SuccessfullyInitialized;
         }
     }
 

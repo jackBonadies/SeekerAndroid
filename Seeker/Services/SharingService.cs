@@ -1,4 +1,4 @@
-using Android.Widget;
+﻿using Android.Widget;
 using AndroidX.DocumentFile.Provider;
 using Seeker.Helpers;
 using Seeker.Transfers;
@@ -64,7 +64,7 @@ namespace Seeker.Services
             {
                 return Task.FromResult(new BrowseResponse(Enumerable.Empty<Directory>()));
             }
-            return Task.FromResult(SeekerState.SharedFileCache.GetBrowseResponseForUser(username));
+            return Task.FromResult(SharedFileService.SharedFileCache.GetBrowseResponseForUser(username));
         }
 
         /// <summary>
@@ -94,12 +94,12 @@ namespace Seeker.Services
                 return defaultResponse;
             }
 
-            if (PreferencesState.Username == null || PreferencesState.Username == string.Empty || SeekerState.SharedFileCache == null)
+            if (PreferencesState.Username == null || PreferencesState.Username == string.Empty || SharedFileService.SharedFileCache == null)
             {
                 return defaultResponse;
             }
 
-            var results = SeekerState.SharedFileCache.Search(query, username, out IEnumerable<Soulseek.File> lockedResults);
+            var results = SharedFileService.SharedFileCache.Search(query, username, out IEnumerable<Soulseek.File> lockedResults);
 
             if (results.Any() || lockedResults.Any())
             {
@@ -137,12 +137,12 @@ namespace Seeker.Services
             Logger.Debug("Directory Request Received");
             //the directory is the presentable name.
             //the old EndsWith(dir) fails if the directory is not unique i.e. document structure of Soulseek Complete > some dirs and files, Soulseek Complete > more dirs and files..
-            Tuple<string, string> fullDirUri = SeekerState.SharedFileCache.FriendlyDirNameToUriMapping.Where((Tuple<string, string> t) => { return t.Item1 == directory; }).FirstOrDefault(); //TODO DICTIONARY>>>>>
+            Tuple<string, string> fullDirUri = SharedFileService.SharedFileCache.FriendlyDirNameToUriMapping.Where((Tuple<string, string> t) => { return t.Item1 == directory; }).FirstOrDefault(); //TODO DICTIONARY>>>>>
 
             if (fullDirUri == null)
             {
                 //as fallback safety.  I dont think this will ever happen.....
-                fullDirUri = SeekerState.SharedFileCache.FriendlyDirNameToUriMapping.Where((Tuple<string, string> t) => { return t.Item1.EndsWith(directory); }).FirstOrDefault();
+                fullDirUri = SharedFileService.SharedFileCache.FriendlyDirNameToUriMapping.Where((Tuple<string, string> t) => { return t.Item1.EndsWith(directory); }).FirstOrDefault();
             }
             if (fullDirUri == null)
             {
@@ -188,7 +188,7 @@ namespace Seeker.Services
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_sharing), ToastLength.Long);
                 }
 
-                if (success && SeekerState.SharedFileCache != null && SeekerState.SharedFileCache.SuccessfullyInitialized)
+                if (success && SharedFileService.SharedFileCache != null && SharedFileService.SharedFileCache.SuccessfullyInitialized)
                 {
                     Logger.Debug("database full initialized.");
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.success_sharing), ToastLength.Short);
@@ -218,7 +218,7 @@ namespace Seeker.Services
                 {
                     SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateAction);
                 }
-                SeekerState.AttemptedToSetUpSharing = true;
+                SharedFileService.AttemptedToSetUpSharing = true;
             });
             System.Threading.ThreadPool.QueueUserWorkItem((object o) => { setUpSharedFileCache(); });
         }
@@ -266,7 +266,7 @@ namespace Seeker.Services
             }
             else if (SharedFileService.MeetsSharingConditions() && !SharedFileService.IsSharingSetUpSuccessfully())
             {
-                if (SeekerState.SharedFileCache == null)
+                if (SharedFileService.SharedFileCache == null)
                 {
                     return new Tuple<SharingIcons, string>(SharingIcons.Off, "Not yet initialized.");
                 }
@@ -279,12 +279,12 @@ namespace Seeker.Services
             {
                 return new Tuple<SharingIcons, string>(SharingIcons.Off, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_off));
             }
-            else if (SeekerState.IsParsing)
+            else if (SharedFileService.IsParsing)
             {
                 isParsing = true;
                 return new Tuple<SharingIcons, string>(SharingIcons.CurrentlyParsing, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_currently_parsing));
             }
-            else if (SeekerState.FailedShareParse)
+            else if (SharedFileService.FailedShareParse)
             {
                 return new Tuple<SharingIcons, string>(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_failure_parsing));
             }

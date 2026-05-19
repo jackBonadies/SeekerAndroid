@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2021 Seeker
  *
  * This file is part of Seeker
@@ -42,7 +42,7 @@ namespace Seeker
                 {
                     Logger.Debug("metered state changed.. lets set up our handlers and inform server..");
                     SharingService.SetUnsetSharingBasedOnConditions(true);
-                    SeekerState.SharingStatusChangedEvent?.Invoke(null, new EventArgs());
+                    SharedFileService.SharingStatusChangedEvent?.Invoke(null, new EventArgs());
                 }
 
 #if DEBUG

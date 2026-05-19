@@ -112,7 +112,7 @@ namespace Seeker
             this.UpdateDirectoryViews();
 
             SeekerState.DirectoryUpdatedEvent += DirectoryUpdated;
-            SeekerState.SharingStatusChangedEvent += SharingStatusUpdated;
+            SharedFileService.SharingStatusChangedEvent += SharingStatusUpdated;
 
             // moved to OnResume from OnCreate
             // this fixes an issue where, when the settings activity is up but one 
@@ -225,7 +225,7 @@ namespace Seeker
             PrivilegesManager.Instance.PrivilegesChecked -= PrivilegesChecked;
             SeekerState.DirectoryUpdatedEvent -= DirectoryUpdated;
             SettingsActivity.UploadDirectoryChanged -= DirectoryViewsChanged;
-            SeekerState.SharingStatusChangedEvent -= SharingStatusUpdated;
+            SharedFileService.SharingStatusChangedEvent -= SharingStatusUpdated;
             SettingsActivity.SaveAdditionalDirectorySettingsToSharedPreferences();
             base.OnPause();
         }
@@ -777,7 +777,7 @@ namespace Seeker
             UploadDirectoryManager.SaveToSharedPreferences(SeekerState.SharedPreferences);
             this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
             SetSharedFolderView();
-            SeekerState.SharedFileCache = SharedFileCache.GetEmptySharedFileCache();
+            SharedFileService.SharedFileCache = SharedFileCache.GetEmptySharedFileCache();
             SharedFileService.SharedFileCache_Refreshed(null, (0, 0));
             this.UpdateShareImageView();
         }
@@ -1791,17 +1791,17 @@ namespace Seeker
 
         private void BrowseSelf(bool forcePublic, bool forceFriend)
         {
-            if (!PreferencesState.SharingOn || SeekerState.SharedFileCache == null || UploadDirectoryManager.UploadDirectories.Count == 0)
+            if (!PreferencesState.SharingOn || SharedFileService.SharedFileCache == null || UploadDirectoryManager.UploadDirectories.Count == 0)
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.not_sharing), ToastLength.Short);
                 return;
             }
-            if (SeekerState.IsParsing)
+            if (SharedFileService.IsParsing)
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.WaitForParsing), ToastLength.Short);
                 return;
             }
-            if (!SeekerState.SharedFileCache.SuccessfullyInitialized || SeekerState.SharedFileCache.GetBrowseResponseForUser(PreferencesState.Username) == null)
+            if (!SharedFileService.SharedFileCache.SuccessfullyInitialized || SharedFileService.SharedFileCache.GetBrowseResponseForUser(PreferencesState.Username) == null)
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_parse_shares_post), ToastLength.Short);
                 return;
@@ -1811,15 +1811,15 @@ namespace Seeker
             Soulseek.BrowseResponse browseResponseToShow = null;
             if (forcePublic)
             {
-                browseResponseToShow = SeekerState.SharedFileCache.GetBrowseResponseForUser(null);
+                browseResponseToShow = SharedFileService.SharedFileCache.GetBrowseResponseForUser(null);
             }
             else if (forceFriend)
             {
-                browseResponseToShow = SeekerState.SharedFileCache.GetBrowseResponseForUser(null, true);
+                browseResponseToShow = SharedFileService.SharedFileCache.GetBrowseResponseForUser(null, true);
             }
             else
             {
-                browseResponseToShow = SeekerState.SharedFileCache.GetBrowseResponseForUser(PreferencesState.Username);
+                browseResponseToShow = SharedFileService.SharedFileCache.GetBrowseResponseForUser(PreferencesState.Username);
             }
 
             TreeNode<Soulseek.Directory> tree = BrowseService.CreateTree(browseResponseToShow, false, null, null, PreferencesState.Username, out errorMsgToToast);
@@ -1830,7 +1830,7 @@ namespace Seeker
             }
             if (tree != null)
             {
-                SeekerState.OnBrowseResponseReceived(SeekerState.SharedFileCache.GetBrowseResponseForUser(PreferencesState.Username), tree, PreferencesState.Username, null);
+                SeekerState.OnBrowseResponseReceived(SharedFileService.SharedFileCache.GetBrowseResponseForUser(PreferencesState.Username), tree, PreferencesState.Username, null);
             }
 
             Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
@@ -1956,7 +1956,7 @@ namespace Seeker
             ProgressBar progressBar = this.FindViewById<ProgressBar>(Resource.Id.progressBarSharedStatus);
             if (imageView == null || progressBar == null) return;
             string toolTip = info.Item2;
-            int numParsed = SeekerState.NumberParsed;
+            int numParsed = SharedFileService.NumberParsed;
             if (isParsing && numParsed != 0)
             {
                 if (numParsed == int.MaxValue) //our signal we are finishing up (i.e. creating token index)
@@ -2044,7 +2044,7 @@ namespace Seeker
         {
             PreferencesState.SharingOn = e.IsChecked;
             SharingService.SetUnsetSharingBasedOnConditions(true);
-            if (SharedFileService.MeetsSharingConditions() && !SeekerState.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
+            if (SharedFileService.MeetsSharingConditions() && !SharedFileService.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
             {
                 //try to set up sharing...
                 SharingService.SetUpSharing(UpdateShareImageView);
@@ -2967,7 +2967,7 @@ namespace Seeker
 
             if (rescanClicked)
             {
-                if (SeekerState.IsParsing)
+                if (SharedFileService.IsParsing)
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.AlreadyParsing), ToastLength.Long);
                     return;
@@ -3032,7 +3032,7 @@ namespace Seeker
             }
 
 
-            if (SeekerState.IsParsing)
+            if (SharedFileService.IsParsing)
             {
                 Logger.Debug("We are already parsing!!! so after this parse, lets parse again with our cached results to pick up our new changes");
                 MoreChangesHaveBeenMadeSoRescanWhenDone = true;
@@ -3043,12 +3043,12 @@ namespace Seeker
             {
                 Logger.Debug("Parsing now......");
 
-                SeekerState.IsParsing = true;
+                SharedFileService.IsParsing = true;
                 int prevFiles = -1;
                 bool success = false;
-                if (rescanClicked && SeekerState.SharedFileCache != null)
+                if (rescanClicked && SharedFileService.SharedFileCache != null)
                 {
-                    prevFiles = SeekerState.SharedFileCache.FileCount;
+                    prevFiles = SharedFileService.SharedFileCache.FileCount;
                 }
                 this.RunOnUiThread(new Action(() =>
                 {
@@ -3063,11 +3063,11 @@ namespace Seeker
                     {
                         throw new Exception("Failed to parse shared files: " + errorMessage);
                     }
-                    SeekerState.IsParsing = false;
+                    SharedFileService.IsParsing = false;
                 }
                 catch (Exception e)
                 {
-                    SeekerState.IsParsing = false;
+                    SharedFileService.IsParsing = false;
                     //SeekerState.UploadDataDirectoryUri = null;
                     //SeekerState.UploadDataDirectoryUriIsFromTree = true;
                     SharedFileService.ClearLegacyParsedCacheResults();
@@ -3106,8 +3106,8 @@ namespace Seeker
                 {
                     UpdateShareImageView();
                     SetSharedFolderView();
-                    int dirs = SeekerState.SharedFileCache.DirectoryCount; //TODO: nullref here... U318AA, LG G7 ThinQ, both android 10
-                    int files = SeekerState.SharedFileCache.FileCount;
+                    int dirs = SharedFileService.SharedFileCache.DirectoryCount; //TODO: nullref here... U318AA, LG G7 ThinQ, both android 10
+                    int files = SharedFileService.SharedFileCache.FileCount;
                     string msg = string.Format(this.GetString(Resource.String.success_setting_shared_dir_fnum_dnum), dirs, files);
                     if (rescanClicked) //tack on additional message if applicable..
                     {
@@ -3129,7 +3129,7 @@ namespace Seeker
             }
             finally
             {
-                SeekerState.IsParsing = false;
+                SharedFileService.IsParsing = false;
                 if (MoreChangesHaveBeenMadeSoRescanWhenDone)
                 {
                     Logger.Debug("okay now lets pick up our new changes");

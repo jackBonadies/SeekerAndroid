@@ -329,14 +329,14 @@ namespace Seeker
 
             //TODO2026 - need to think about this
             //if we have all the conditions to share, then set sharing up.
-            if (SharedFileService.MeetsSharingConditions() && !SeekerState.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
+            if (SharedFileService.MeetsSharingConditions() && !SharedFileService.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
             {
                 Seeker.Services.SharingService.SetUpSharing();
             }
-            else if (SeekerState.NumberOfSharedDirectoriesIsStale)
+            else if (SharedFileService.NumberOfSharedDirectoriesIsStale)
             {
                 SharedFileService.InformServerOfSharedFiles();
-                SeekerState.AttemptedToSetUpSharing = true;
+                SharedFileService.AttemptedToSetUpSharing = true;
             }
 
             SeekerState.SharedPreferences = sharedPreferences;
@@ -1324,7 +1324,7 @@ namespace Seeker
 
         private void TestEnqueueSharedFolder()
         {
-            var cache = SeekerState.SharedFileCache;
+            var cache = SharedFileService.SharedFileCache;
             if (cache?.PresentableNameToFullFileInfo == null || cache.PresentableNameToFullFileInfo.Count == 0)
             {
                 Logger.Debug("TestEnqueue: no shared files");

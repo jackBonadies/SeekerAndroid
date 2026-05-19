@@ -20,6 +20,7 @@
 using Seeker.Browse;
 using Seeker.Helpers;
 using Seeker.Messages;
+using Seeker.Services;
 using Android.Animation;
 using Android.App;
 using Android.Content;
@@ -206,7 +207,7 @@ namespace Seeker
             {
                 // viewing self
                 //for UserData we only care about Online Status, upload speed, file count, and dir count
-                userData = new Soulseek.UserData(UserToView, Soulseek.UserPresence.Online, PreferencesState.UploadSpeed, 0, SeekerState.SharedFileCache?.FileCount ?? 0, SeekerState.SharedFileCache?.DirectoryCount ?? 0, "");
+                userData = new Soulseek.UserData(UserToView, Soulseek.UserPresence.Online, PreferencesState.UploadSpeed, 0, SharedFileService.SharedFileCache?.FileCount ?? 0, SharedFileService.SharedFileCache?.DirectoryCount ?? 0, "");
                 userInfo = UserInfoResponder.HandleRequest(UserToView, null).Result; //the task is already completed.  (task.fromresult).
                 hasPicture = userInfo != null && userInfo.HasPicture && userInfo.Picture != null && userInfo.Picture.Length > 0;
             }

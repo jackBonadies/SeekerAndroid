@@ -878,7 +878,7 @@ namespace Seeker
                     //then tell the server here.
                     //this makes it so that we tell the server once when Seeker first launches, and when things change, but not every time
                     //we log in.
-                    if (SeekerState.NumberOfSharedDirectoriesIsStale && SeekerState.AttemptedToSetUpSharing)
+                    if (SharedFileService.NumberOfSharedDirectoriesIsStale && SharedFileService.AttemptedToSetUpSharing)
                     {
                         Logger.Debug("stale and we already attempted to set up sharing, so lets do it here in post log in.");
                         SharedFileService.InformServerOfSharedFiles();

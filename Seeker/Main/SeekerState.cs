@@ -37,13 +37,6 @@ namespace Seeker
 
         public static TimeSpan OffsetFromUtcCached = TimeSpan.Zero;
 
-        public static SharedFileCache SharedFileCache = null;
-        public static bool FailedShareParse = false;
-        private static volatile bool isParsing = false;
-
-        public static bool NumberOfSharedDirectoriesIsStale = true;
-        public static bool AttemptedToSetUpSharing = false;
-
         public static bool OurCurrentStatusIsAway = false;
         public enum PendingStatusChange
         {
@@ -61,7 +54,6 @@ namespace Seeker
         public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> UserOnlineAlerts = null;
 
         public static EventHandler<EventArgs> DirectoryUpdatedEvent;
-        public static EventHandler<EventArgs> SharingStatusChangedEvent;
 
 
         /// <summary>
@@ -104,22 +96,6 @@ namespace Seeker
         public static volatile FragmentActivity ActiveActivityRef = null;
         public static ISharedPreferences SharedPreferences;
         public static volatile MainActivity MainActivityRef;
-
-        public static bool IsParsing
-        {
-            get
-            {
-                return isParsing;
-            }
-            set
-            {
-                isParsing = value;
-                NumberParsed = 0; //reset
-            }
-        }
-
-
-        public static int NumberParsed = 0;
 
         // TODO hack?
         public static ManualResetEvent ManualResetEvent = new ManualResetEvent(false); //previously this was on the loginfragment but
