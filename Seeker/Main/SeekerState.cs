@@ -11,20 +11,12 @@ using Common;
 using Common.Share;
 using Soulseek;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace Seeker
 {
     public static class SeekerState
     {
-        static SeekerState()
-        {
-            downloadInfoList = new List<DownloadInfo>();
-        }
-
         public const string DefaultMusicUri = "content://com.android.externalstorage.documents/tree/primary%3AMusic";
 
         // Misc (non-persisted)
@@ -64,7 +56,7 @@ namespace Seeker
         public static RecentUserManager RecentUsersManager = null;
         public static System.Collections.Concurrent.ConcurrentDictionary<string, string> UserNotes = null;
         /// <summary>
-        /// There is no concurrent hashset so concurrent dictionary is used. the value is pointless so its only 1 byte.
+        /// There is no concurrent hashset so concurrent dictionary is used
         /// </summary>
         public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> UserOnlineAlerts = null;
 
@@ -105,13 +97,7 @@ namespace Seeker
 
 
 
-        //public static event EventHandler<DownloadAddedEventArgs> DownloadAdded;
-        /// <summary>
-        /// Occurs after we set up the DownloadAdded transfer item.
-        /// </summary>
-
         public static event EventHandler<EventArgs> ClearSearchHistory;
-        public static List<DownloadInfo> downloadInfoList;
         /// <summary>
         /// Context of last created activity
         /// </summary>
@@ -164,11 +150,6 @@ namespace Seeker
         // TODO hack?
         public static ManualResetEvent ManualResetEvent = new ManualResetEvent(false); //previously this was on the loginfragment but
                                                                                        //it would get recreated every time so there were lost instances with threads waiting forever....
-
-        //public static void OnDownloadAdded(DownloadInfo dlInfo)
-        //{
-        //    DownloadAdded(null,new DownloadAddedEventArgs(dlInfo));
-        //}
 
         public static event EventHandler<BrowseResponseEvent> BrowseResponseReceived;
         public static AndroidX.DocumentFile.Provider.DocumentFile RootDocumentFile = null;
