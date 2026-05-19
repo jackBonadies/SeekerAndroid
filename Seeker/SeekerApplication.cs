@@ -473,7 +473,7 @@ namespace Seeker
         public static void ReleaseTransferLocksIfServicesComplete()
         {
             //if all transfers are done..
-            if (!SeekerState.UploadKeepAliveServiceRunning && !SeekerState.DownloadKeepAliveServiceRunning)
+            if (!ServiceLifecycle.UploadKeepAliveServiceRunning && !ServiceLifecycle.DownloadKeepAliveServiceRunning)
             {
                 if (CpuKeepAlive_Transfer != null)
                 {
@@ -550,9 +550,9 @@ namespace Seeker
                 Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
                 Logger.Debug("Stop Service");
                 this.StopService(uploadServiceIntent);
-                SeekerState.UploadKeepAliveServiceRunning = false;
+                ServiceLifecycle.UploadKeepAliveServiceRunning = false;
             }
-            else if (!SeekerState.UploadKeepAliveServiceRunning)
+            else if (!ServiceLifecycle.UploadKeepAliveServiceRunning)
             {
                 Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
                 if (OperatingSystem.IsAndroidVersionAtLeast(26))
@@ -567,7 +567,7 @@ namespace Seeker
                 {
                     this.StartService(uploadServiceIntent);
                 }
-                SeekerState.UploadKeepAliveServiceRunning = true;
+                ServiceLifecycle.UploadKeepAliveServiceRunning = true;
             }
             else
             {
@@ -588,9 +588,9 @@ namespace Seeker
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
                 Logger.Debug("Stop Service");
                 this.StopService(downloadServiceIntent);
-                SeekerState.DownloadKeepAliveServiceRunning = false;
+                ServiceLifecycle.DownloadKeepAliveServiceRunning = false;
             }
-            else if (!SeekerState.DownloadKeepAliveServiceRunning)
+            else if (!ServiceLifecycle.DownloadKeepAliveServiceRunning)
             {
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
                 if (OperatingSystem.IsAndroidVersionAtLeast(26))
@@ -605,7 +605,7 @@ namespace Seeker
                 {
                     this.StartService(downloadServiceIntent);
                 }
-                SeekerState.DownloadKeepAliveServiceRunning = true;
+                ServiceLifecycle.DownloadKeepAliveServiceRunning = true;
             }
             else
             {

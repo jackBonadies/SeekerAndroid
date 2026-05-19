@@ -7,6 +7,7 @@ using Android.Widget;
 using AndroidX.AppCompat.App;
 using AndroidX.Lifecycle;
 using Seeker.Helpers;
+using Seeker.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,7 +56,7 @@ namespace Seeker
                 return StartCommandResult.NotSticky;
             }
             Logger.InfoFirebase("keep alive service started...");
-            SeekerState.IsStartUpServiceCurrentlyRunning = true;
+            ServiceLifecycle.IsStartUpServiceCurrentlyRunning = true;
 
             CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = CreateNotification(this);
@@ -73,7 +74,7 @@ namespace Seeker
             {
                 // this exception is in fact catchable.. though "startForegroundService() did not then call Service.startForeground()" is supposed to cause issues
                 //   in my case it did not.
-                SeekerState.IsStartUpServiceCurrentlyRunning = false;
+                ServiceLifecycle.IsStartUpServiceCurrentlyRunning = false;
                 bool? foreground = SeekerState.ActiveActivityRef?.IsResumed();
                 Logger.Firebase($"StartForeground issue: is foreground: {foreground} {e.Message} {e.StackTrace}");
 #if DEBUG
@@ -107,7 +108,7 @@ namespace Seeker
 
         public override void OnDestroy()
         {
-            SeekerState.IsStartUpServiceCurrentlyRunning = false;
+            ServiceLifecycle.IsStartUpServiceCurrentlyRunning = false;
             if (CpuKeepAlive_FullService != null && CpuKeepAlive_FullService.IsHeld)
             {
                 CpuKeepAlive_FullService.Release();

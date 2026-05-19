@@ -1841,7 +1841,7 @@ namespace Seeker
 
         private void SetButtonText(Button btn)
         {
-            if (SeekerState.IsStartUpServiceCurrentlyRunning)
+            if (ServiceLifecycle.IsStartUpServiceCurrentlyRunning)
             {
                 btn.Text = this.GetString(Resource.String.stop);
             }
@@ -1853,17 +1853,17 @@ namespace Seeker
 
         private void StartupServiceButton_Click(object sender, EventArgs e)
         {
-            if (SeekerState.IsStartUpServiceCurrentlyRunning)
+            if (ServiceLifecycle.IsStartUpServiceCurrentlyRunning)
             {
                 Intent seekerKeepAliveService = new Intent(this, typeof(SeekerKeepAliveService));
                 this.StopService(seekerKeepAliveService);
-                SeekerState.IsStartUpServiceCurrentlyRunning = false;
+                ServiceLifecycle.IsStartUpServiceCurrentlyRunning = false;
             }
             else
             {
                 Intent seekerKeepAliveService = new Intent(this, typeof(SeekerKeepAliveService));
                 this.StartService(seekerKeepAliveService);
-                SeekerState.IsStartUpServiceCurrentlyRunning = true;
+                ServiceLifecycle.IsStartUpServiceCurrentlyRunning = true;
             }
             SetButtonText(FindViewById<Button>(Resource.Id.startServiceOnStartupButton));
         }

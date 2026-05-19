@@ -22,16 +22,9 @@ namespace Seeker
         public static volatile LoginFragment LoginFragmentRef = null;
 
 
-        public static bool AutoRequeueDownloadsAtStartup = true;
-
         public static ISoulseekClient SoulseekClient = null;
 
-        public static bool IsStartUpServiceCurrentlyRunning = false;
-
         public static string SystemLanguage;
-
-        public static volatile bool DownloadKeepAliveServiceRunning = false;
-        public static volatile bool UploadKeepAliveServiceRunning = false;
 
         public static TimeSpan OffsetFromUtcCached = TimeSpan.Zero;
 

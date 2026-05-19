@@ -34,7 +34,7 @@ namespace Seeker.Transfers
                 return;
             }
 
-            if (SeekerState.AutoRequeueDownloadsAtStartup)
+            if (ServiceLifecycle.AutoRequeueDownloadsAtStartup)
             {
                 var queuedTransfers = TransferItems.TransferItemManagerDL.GetListOfCondition(TransferStates.Queued);
                 if (queuedTransfers.Count > 0)

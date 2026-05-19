@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Seeker.Helpers;
+using Seeker.Services;
 using static Seeker.Helpers.ServiceExtensions;
 
 namespace Seeker
@@ -67,7 +68,7 @@ namespace Seeker
                 this.StopSelf();
                 return StartCommandResult.NotSticky;
             }
-            SeekerState.DownloadKeepAliveServiceRunning = true;
+            ServiceLifecycle.DownloadKeepAliveServiceRunning = true;
 
             CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = null;
@@ -125,7 +126,7 @@ namespace Seeker
 
         public override void OnDestroy()
         {
-            SeekerState.DownloadKeepAliveServiceRunning = false;
+            ServiceLifecycle.DownloadKeepAliveServiceRunning = false;
             SeekerApplication.ReleaseTransferLocksIfServicesComplete();
             //save once complete
             TransferPersistenceWrapper.SaveTransferItems();
