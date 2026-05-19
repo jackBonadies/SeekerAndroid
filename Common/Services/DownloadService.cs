@@ -939,6 +939,44 @@ namespace Seeker.Services
             DownloadRetryAll(TransferItems.TransferItemManagerDL.GetListOfFailed().Select(tup => tup.Item1));
         }
 
+        /// <summary>
+        /// When a user transitions from offline, retries any downloads that previously failed
+        /// because they were offline. Tracked via <see cref="TransferState.UsersWhereDownloadFailedDueToOffline"/>.
+        /// </summary>
+        public void RetryDownloadsIfUserBackOnline(string username, UserPresence status)
+        {
+            if (status == UserPresence.Offline)
+            {
+                return;
+            }
+            if (!PreferencesState.AutoRetryBackOnline)
+            {
+                return;
+            }
+            if (!TransferState.UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
+            {
+                return;
+            }
+            logger.Debug("the user came back who we previously dl from " + username);
+            List<TransferItem> items = TransferItems.TransferItemManagerDL.GetTransferItemsFromUser(username, true, true);
+            if (items.Count == 0)
+            {
+                lock (TransferState.UsersWhereDownloadFailedDueToOffline)
+                {
+                    TransferState.UsersWhereDownloadFailedDueToOffline.Remove(username);
+                }
+                return;
+            }
+            try
+            {
+                DownloadRetryAll(items);
+            }
+            catch (Exception e)
+            {
+                logger.Debug("RetryDownloadsIfUserBackOnline" + e.Message);
+            }
+        }
+
         public void ResumeAllPaused()
         {
             DownloadRetryAll(TransferItems.TransferItemManagerDL.GetListOfPaused().Select(tup => tup.Item1));

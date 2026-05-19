@@ -582,7 +582,7 @@ namespace Seeker
             }
             if (contextMenuTitle == activity.GetString(Resource.String.ignore_user))
             {
-                SeekerApplication.AddToIgnoreListFeedback(activity, usernameInQuestion);
+                UserListService.AddToIgnoreListFeedback(activity, usernameInQuestion);
                 if (uiUpdateActionIgnored_Unignored != null)
                 {
                     SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
@@ -591,7 +591,7 @@ namespace Seeker
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_ignored))
             {
-                SeekerApplication.RemoveFromIgnoreListFeedback(activity, usernameInQuestion);
+                UserListService.RemoveFromIgnoreListFeedback(activity, usernameInQuestion);
                 if (uiUpdateActionIgnored_Unignored != null)
                 {
                     SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);

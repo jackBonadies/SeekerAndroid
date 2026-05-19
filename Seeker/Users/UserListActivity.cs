@@ -362,7 +362,7 @@ namespace Seeker
                         return;
                     }
 
-                    SeekerApplication.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, input.Text.ToString());
+                    UserListService.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, input.Text.ToString());
                 }
                 else
                 {

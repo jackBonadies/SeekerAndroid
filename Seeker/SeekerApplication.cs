@@ -1138,18 +1138,6 @@ namespace Seeker
             return SeekerApplication.ApplicationContext.GetString(resId);
         }
 
-        public static void AddToIgnoreListFeedback(Context c, string username)
-        {
-            if (UserListService.Instance.AddToIgnoreList(username))
-            {
-                SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.added_to_ignore), username), ToastLength.Short);
-            }
-            else
-            {
-                SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.already_added_to_ignore), username), ToastLength.Short);
-            }
-        }
-
         public static void SetUpLoginContinueWith(Task t)
         {
             if (t == null)
@@ -1270,7 +1258,7 @@ namespace Seeker
         {
             if (t.IsCompletedSuccessfully)
             {
-                ProcessPotentialUserOfflineChangedEvent(t.Result.Username, t.Result.Status);
+                Seeker.Services.DownloadService.Instance.RetryDownloadsIfUserBackOnline(t.Result.Username, t.Result.Status);
             }
         }
 
@@ -1334,19 +1322,6 @@ namespace Seeker
             }
         }
 
-        public static void RemoveFromIgnoreListFeedback(Context c, string username)
-        {
-            if (UserListService.Instance.RemoveFromIgnoreList(username))
-            {
-                SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.removed_user_from_ignored_list), username), ToastLength.Short);
-            }
-            else
-            {
-                //Toast.MakeText(c, string.Format(c.GetString(Resource.String.already_added_to_ignore), username), ToastLength.Short).Show();
-            }
-        }
-
-
         /// <summary>
         /// this is for global uploading event handling only.  the tabpageadapter is the one for downloading... and for upload tranferpage specific events
         /// </summary>
@@ -1396,56 +1371,6 @@ namespace Seeker
         }
 
 
-
-        /// <summary>
-        /// this is for getting additional information (status updates) from already added users 
-        /// </summary>
-        /// <param name="username"></param>
-        /// <param name="userData"></param>
-        /// <param name="userStatus"></param>
-        private static bool UserListAddIfContainsUser(string username, UserData userData, UserStatus userStatus)
-        {
-            UserPresence? prevStatus = UserPresence.Offline;
-            bool found = false;
-            lock (CommonState.UserList)
-            {
-
-                foreach (UserListItem item in CommonState.UserList)
-                {
-                    if (item.Username == username)
-                    {
-                        found = true;
-                        if (userData != null)
-                        {
-                            item.UserData = userData;
-                        }
-                        if (userStatus != null)
-                        {
-                            prevStatus = item.UserStatus?.Presence ?? UserPresence.Offline;
-                            item.UserStatus = userStatus;
-                        }
-                        break;
-                    }
-                }
-            }
-            //if user was previously offline and now they are not offline, then do the notification.
-            //note - this method does not get called when first adding users. which I think is ideal for notifications.
-            //if not in our user list, then this is likely a result of GetUserInfo!, so dont do any of this..
-            if (found && (!prevStatus.HasValue || prevStatus.Value == UserPresence.Offline && (userStatus != null && userStatus.Presence != UserPresence.Offline)))
-            {
-                Logger.Debug("from offline to online " + username);
-                if (SeekerState.UserOnlineAlerts != null && SeekerState.UserOnlineAlerts.ContainsKey(username))
-                {
-                    //show notification.
-                    ShowNotificationForUserOnlineAlert(username);
-                }
-            }
-            else
-            {
-                Logger.Debug("NOT from offline to online (or not in user list)" + username);
-            }
-            return found;
-        }
 
         public const string CHANNEL_ID_USER_ONLINE = "User Online Alerts ID";
         public const string CHANNEL_NAME_USER_ONLINE = "User Online Alerts";
@@ -1608,49 +1533,12 @@ namespace Seeker
                 }
                 else
                 {
-                    UserListAddIfContainsUser(e.Username, userData, null);
+                    UserListService.Instance.UpdateExistingUser(e.Username, userData, null, out _);
                 }
 
                 RequestedUserInfoHelper.AddIfRequestedUser(e.Username, userData, null, null);
             }
         }
-
-        public static void ProcessPotentialUserOfflineChangedEvent(string username, UserPresence status)
-        {
-            if (status != UserPresence.Offline)
-            {
-                if (PreferencesState.AutoRetryBackOnline)
-                {
-                    if (TransferState.UsersWhereDownloadFailedDueToOffline.ContainsKey(username))
-                    {
-                        Logger.Debug("the user came back who we previously dl from " + username);
-                        //retry all failed downloads from them..
-                        List<TransferItem> items = TransferItems.TransferItemManagerDL.GetTransferItemsFromUser(username, true, true);
-                        if (items.Count == 0)
-                        {
-                            //no offline, then remove this user.
-                            lock (TransferState.UsersWhereDownloadFailedDueToOffline)
-                            {
-                                TransferState.UsersWhereDownloadFailedDueToOffline.Remove(username);
-                            }
-                        }
-                        else
-                        {
-                            try
-                            {
-                                Seeker.Services.DownloadService.Instance.DownloadRetryAll(items);
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.Debug("ProcessPotentialUserOfflineChangedEvent" + e.Message);
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
-
 
         public static EventHandler<string> UserStatusChangedUIEvent;
         private void SoulseekClient_UserStatusChanged(object sender, UserStatus e)
@@ -1658,23 +1546,25 @@ namespace Seeker
             if (e.Username == PreferencesState.Username)
             {
                 //not sure this will ever happen
+                return;
             }
-            else
+            //we get user status changed for those we are in the same room as us
+            if (CommonState.UserList != null)
             {
-                //we get user status changed for those we are in the same room as us
-                if (CommonState.UserList != null)
+                var status = new UserStatus(e.Username, e.Presence, e.IsPrivileged);
+                bool found = UserListService.Instance.UpdateExistingUser(e.Username, null, status, out bool cameOnline);
+                if (found)
                 {
-                    bool found = UserListAddIfContainsUser(e.Username, null, new UserStatus(e.Username, e.Presence, e.IsPrivileged));
-                    if (found)
+                    Logger.Debug("friend status changed " + e.Username);
+                    SeekerApplication.UserStatusChangedUIEvent?.Invoke(null, e.Username);
+                    if (cameOnline && SeekerState.UserOnlineAlerts != null && SeekerState.UserOnlineAlerts.ContainsKey(e.Username))
                     {
-                        Logger.Debug("friend status changed " + e.Username);
-                        SeekerApplication.UserStatusChangedUIEvent?.Invoke(null, e.Username);
+                        ShowNotificationForUserOnlineAlert(e.Username);
                     }
                 }
-
-                ProcessPotentialUserOfflineChangedEvent(e.Username, e.Presence);
             }
 
+            Seeker.Services.DownloadService.Instance.RetryDownloadsIfUserBackOnline(e.Username, e.Presence);
         }
     }
 }

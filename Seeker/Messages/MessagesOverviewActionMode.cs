@@ -154,7 +154,7 @@ namespace Seeker.Messages
                             {
                                 if (!UserListService.Instance.IsUserInIgnoreList(username))
                                 {
-                                    SeekerApplication.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, username);
+                                    UserListService.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, username);
                                 }
                             }
                         }

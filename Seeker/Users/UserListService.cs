@@ -54,6 +54,41 @@ namespace Seeker
             }
         }
 
+        /// <summary>
+        /// Updates an existing UserList item's UserData and/or UserStatus.
+        /// Used when status/data updates arrive for users already in the list (status changes,
+        /// statistics pushed from server). Does not add new users — first-add goes through
+        /// <see cref="AddUser"/>.
+        /// </summary>
+        /// <returns>true if the user was found in the list.</returns>
+        public bool UpdateExistingUser(string username, UserData userData, UserStatus userStatus, out bool transitionedOfflineToOnline)
+        {
+            UserPresence? prevStatus = UserPresence.Offline;
+            bool found = false;
+            lock (CommonState.UserList)
+            {
+                foreach (UserListItem item in CommonState.UserList)
+                {
+                    if (item.Username == username)
+                    {
+                        found = true;
+                        if (userData != null)
+                        {
+                            item.UserData = userData;
+                        }
+                        if (userStatus != null)
+                        {
+                            prevStatus = item.UserStatus?.Presence ?? UserPresence.Offline;
+                            item.UserStatus = userStatus;
+                        }
+                        break;
+                    }
+                }
+            }
+            transitionedOfflineToOnline = found && (!prevStatus.HasValue || prevStatus.Value == UserPresence.Offline && (userStatus != null && userStatus.Presence != UserPresence.Offline));
+            return found;
+        }
+
         public bool SetDoesNotExist(string username)
         {
             bool found = false;
@@ -283,6 +318,26 @@ namespace Seeker
             lock (CommonState.IgnoreUserList)
             {
                 return CommonState.IgnoreUserList.Exists(userListItem => { return userListItem.Username == username; });
+            }
+        }
+
+        public static void AddToIgnoreListFeedback(Context c, string username)
+        {
+            if (Instance.AddToIgnoreList(username))
+            {
+                SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.added_to_ignore), username), ToastLength.Short);
+            }
+            else
+            {
+                SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.already_added_to_ignore), username), ToastLength.Short);
+            }
+        }
+
+        public static void RemoveFromIgnoreListFeedback(Context c, string username)
+        {
+            if (Instance.RemoveFromIgnoreList(username))
+            {
+                SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.removed_user_from_ignored_list), username), ToastLength.Short);
             }
         }
     }
