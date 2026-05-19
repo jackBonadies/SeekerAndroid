@@ -777,8 +777,7 @@ namespace Seeker
             UploadDirectoryManager.SaveToSharedPreferences(SeekerState.SharedPreferences);
             this.recyclerViewFoldersAdapter.NotifyDataSetChanged();
             SetSharedFolderView();
-            SharedFileService.SharedFileCache = SharedFileCache.GetEmptySharedFileCache();
-            SharedFileService.SharedFileCache_Refreshed(null, (0, 0));
+            SharedFileService.ClearFileCache();
             this.UpdateShareImageView();
         }
 

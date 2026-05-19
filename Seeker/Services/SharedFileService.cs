@@ -17,15 +17,15 @@ namespace Seeker.Services
 {
     public static class SharedFileService
     {
-        public static SharedFileCache SharedFileCache = null;
-        public static bool FailedShareParse = false;
+        public static SharedFileCache SharedFileCache { get; private set; } = null;
+        public static bool FailedShareParse { get; private set; } = false;
         private static volatile bool isParsing = false;
-        public static int NumberParsed = 0;
-        public static bool NumberOfSharedDirectoriesIsStale = true;
-        public static bool AttemptedToSetUpSharing = false;
+        public static int NumberParsed { get; private set; } = 0;
+        public static bool NumberOfSharedDirectoriesIsStale { get; private set; } = true;
+        public static bool AttemptedToSetUpSharing = false; // TODO make setter private
         public static EventHandler<EventArgs> SharingStatusChangedEvent;
 
-        public static bool IsParsing
+        public static bool IsParsing // TODO make setter private
         {
             get
             {
@@ -47,7 +47,7 @@ namespace Seeker.Services
             public List<Soulseek.Directory> HiddenDirectories { get; set; }
         }
 
-        public static FullFileInfosResult GetFullFileInfoFromSharedDirectory(
+        private static FullFileInfosResult GetFullFileInfoFromSharedDirectory(
             Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
@@ -154,7 +154,7 @@ namespace Seeker.Services
             }
         }
 
-        public static void PopulateAllMediaStoreInfo(Dictionary<string, List<Tuple<string, int, int>>> allMediaStoreInfo, HashSet<string> volumeNamesOfInterest)
+        private static void PopulateAllMediaStoreInfo(Dictionary<string, List<Tuple<string, int, int>>> allMediaStoreInfo, HashSet<string> volumeNamesOfInterest)
         {
 
             bool hasAnyInfo = HasMediaStoreDurationColumn();
@@ -231,7 +231,7 @@ namespace Seeker.Services
             }
         }
 
-        public static FullFileInfosResult GetFullFileInfoFromSharedDirectoryLegacy(
+        private static FullFileInfosResult GetFullFileInfoFromSharedDirectoryLegacy(
             Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
@@ -408,12 +408,12 @@ namespace Seeker.Services
 
 
 
-        public static bool HasMediaStoreDurationColumn()
+        private static bool HasMediaStoreDurationColumn()
         {
             return OperatingSystem.IsAndroidVersionAtLeast(29);
         }
 
-        public static bool HasMediaStoreBitRateColumn()
+        private static bool HasMediaStoreBitRateColumn()
         {
             return OperatingSystem.IsAndroidVersionAtLeast(30);
         }
@@ -429,7 +429,7 @@ namespace Seeker.Services
         //    return (int)Android.OS.Build.VERSION.SdkInt >= 31;
         //}
 
-        public static bool IsUncompressed(string name)
+        private static bool IsUncompressed(string name)
         {
             string ext = System.IO.Path.GetExtension(name);
             switch (ext)
@@ -441,7 +441,7 @@ namespace Seeker.Services
             }
         }
 
-        public static bool IsLossless(string name)
+        private static bool IsLossless(string name)
         {
             string ext = System.IO.Path.GetExtension(name);
             switch (ext)
@@ -457,7 +457,7 @@ namespace Seeker.Services
             }
         }
 
-        public static bool IsSupportedAudio(string name)
+        private static bool IsSupportedAudio(string name)
         {
             string ext = System.IO.Path.GetExtension(name);
             switch (ext)
@@ -491,7 +491,7 @@ namespace Seeker.Services
         /// <param name="allMediaInfoDict"></param>
         /// <param name="prevInfoToUse"></param>
         /// <returns></returns>
-        public static Tuple<int, int, int, int> GetAudioAttributes(ContentResolver contentResolver, string displayName, long size, string presentableName, Android.Net.Uri childUri, Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> prevInfoToUse)
+        private static Tuple<int, int, int, int> GetAudioAttributes(ContentResolver contentResolver, string displayName, long size, string presentableName, Android.Net.Uri childUri, Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> prevInfoToUse)
         {
             try
             {
@@ -679,7 +679,7 @@ namespace Seeker.Services
             }
         }
 
-        public static void traverseDirectoriesGatherFullFileInfos(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri,
+        private static void traverseDirectoriesGatherFullFileInfos(ContentResolver contentResolver, Android.Net.Uri rootUri, string parentDoc, Android.Net.Uri parentUri,
             Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfos, List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs,
             List<Tuple<string, string>> dirMappingFriendlyNameToUri,
             Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
@@ -783,7 +783,7 @@ namespace Seeker.Services
             }
         }
 
-        public static void traverseDirectoryEntriesLegacy(DocumentFile parentDocFile, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs,
+        private static void traverseDirectoryEntriesLegacy(DocumentFile parentDocFile, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> pairs,
             List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri,
             Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
             string parentDisplayName,
@@ -853,13 +853,13 @@ namespace Seeker.Services
         }
 
         // Util method to check if the mime type is a directory
-        public static bool isDirectory(String mimeType)
+        private static bool isDirectory(String mimeType)
         {
             return DocumentsContract.Document.MimeTypeDir.Equals(mimeType);
         }
 
         // Util method to close a closeable
-        public static void closeQuietly(Android.Database.ICursor closeable)
+        private static void closeQuietly(Android.Database.ICursor closeable)
         {
             if (closeable != null)
             {
@@ -1115,7 +1115,13 @@ namespace Seeker.Services
             return codePointString;
         }
 
-        public static void SharedFileCache_Refreshed(object sender, (int Directories, int Files) e)
+        public static void ClearFileCache()
+        {
+            SharedFileService.SharedFileCache = SharedFileCache.GetEmptySharedFileCache();
+            SharedFileService.SharedFileCache_Refreshed(null, (0, 0));
+        }
+
+        private static void SharedFileCache_Refreshed(object sender, (int Directories, int Files) e)
         {
             if (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
             {
