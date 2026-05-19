@@ -17,7 +17,6 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Seeker.Browse;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -37,6 +36,8 @@ using AndroidX.RecyclerView.Widget;
 using Common;
 using Common.Share;
 using Google.Android.Material.Divider;
+using Google.Android.Material.TextField;
+using Seeker.Browse;
 using Seeker.Helpers;
 using Seeker.Managers;
 using Seeker.Services;
@@ -1526,20 +1527,21 @@ namespace Seeker
             {
                 builder.SetTitle(Resource.String.MaxConcurrentIs);
             }
-            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.choose_port, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
+            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.choose_setting, (ViewGroup)this.FindViewById(Android.Resource.Id.Content), false);
             // Set up the input
-            EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.chosePortEditText);
+            TextInputLayout textInputLayout = (TextInputLayout)viewInflated.FindViewById<TextInputLayout>(Resource.Id.chooseSettingInputLayout);
+            TextInputEditText textInputEditText = (TextInputEditText)viewInflated.FindViewById<TextInputEditText>(Resource.Id.chooseSettingTextEdit);
             if (changeDialogType == ChangeDialogType.ChangeDL)
             {
-                input.Hint = SeekerApplication.GetString(Resource.String.EnterSpeed);
+                textInputLayout.Hint = SeekerApplication.GetString(Resource.String.EnterSpeed);
             }
             else if (changeDialogType == ChangeDialogType.ChangeUL)
             {
-                input.Hint = SeekerApplication.GetString(Resource.String.EnterSpeed);
+                textInputLayout.Hint = SeekerApplication.GetString(Resource.String.EnterSpeed);
             }
             else if (changeDialogType == ChangeDialogType.ConcurrentDL)
             {
-                input.Hint = SeekerApplication.GetString(Resource.String.EnterMaxDownloadSimultaneously);
+                textInputLayout.Hint = SeekerApplication.GetString(Resource.String.EnterMaxDownloadSimultaneously);
             }
             builder.SetView(viewInflated);
 
@@ -1548,7 +1550,7 @@ namespace Seeker
                 if (changeDialogType == ChangeDialogType.ChangePort)
                 {
                     int portNum = -1;
-                    if (!int.TryParse(input.Text, out portNum))
+                    if (!int.TryParse(textInputEditText.Text, out portNum))
                     {
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.port_failed_parse), ToastLength.Long);
                         return;
@@ -1569,7 +1571,7 @@ namespace Seeker
                 else if (changeDialogType == ChangeDialogType.ChangeUL || changeDialogType == ChangeDialogType.ChangeDL)
                 {
                     int dlSpeedKbs = -1;
-                    if (!int.TryParse(input.Text, out dlSpeedKbs))
+                    if (!int.TryParse(textInputEditText.Text, out dlSpeedKbs))
                     {
                         SeekerApplication.Toaster.ShowToast("Speed failed to parse", ToastLength.Long);
                         return;
@@ -1596,7 +1598,7 @@ namespace Seeker
                 else if (changeDialogType == ChangeDialogType.ConcurrentDL)
                 {
                     int concurrentDL = -1;
-                    if (!int.TryParse(input.Text, out concurrentDL))
+                    if (!int.TryParse(textInputEditText.Text, out concurrentDL))
                     {
                         SeekerApplication.Toaster.ShowToast("Failed to Parse Number", ToastLength.Long);
                         return;
@@ -1634,8 +1636,8 @@ namespace Seeker
 
             var editorAction = UiHelpers.MakeDialogEditorAction(this.FindViewById<ViewGroup>(Android.Resource.Id.Content), eventHandler);
 
-            input.EditorAction += editorAction;
-            input.FocusChange += UiHelpers.OnFocusAdjustNothing;
+            textInputEditText.EditorAction += editorAction;
+            textInputEditText.FocusChange += UiHelpers.OnFocusAdjustNothing;
 
             builder.SetPositiveButton(Resource.String.okay, eventHandler);
             builder.SetNegativeButton(Resource.String.cancel, cancelHandler);
