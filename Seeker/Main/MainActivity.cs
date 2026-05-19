@@ -344,7 +344,7 @@ namespace Seeker
 
             // Document files are initialized once per process in SeekerApplication.OnCreate.
             // Here we only handle the things that require an Activity context.
-            if (SeekerState.UseLegacyStorage())
+            if (PlatformInfo.UseLegacyStorage())
             {
                 if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.WriteExternalStorage) == Android.Content.PM.Permission.Denied)
                 {
@@ -770,7 +770,7 @@ namespace Seeker
 
         private void UpdateForScreenSize()
         {
-            if (!SeekerState.IsLowDpi()) return;
+            if (!PlatformInfo.IsLowDpi()) return;
             try
             {
                 TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
@@ -1045,7 +1045,7 @@ namespace Seeker
             hasManageAllFilesManisfestPermission = true;
 #endif
 
-            if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && hasManageAllFilesManisfestPermission && !Android.OS.Environment.IsExternalStorageManager) //this is "step 1"
+            if (PlatformInfo.RequiresEitherOpenDocumentTreeOrManageAllFiles() && hasManageAllFilesManisfestPermission && !Android.OS.Environment.IsExternalStorageManager) //this is "step 1"
             {
                 Intent allFilesPermission = new Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission);
                 Android.Net.Uri packageUri = Android.Net.Uri.FromParts("package", this.PackageName, null);
@@ -1060,7 +1060,7 @@ namespace Seeker
             {
 
 
-                if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && !hasManageAllFilesManisfestPermission)
+                if (PlatformInfo.RequiresEitherOpenDocumentTreeOrManageAllFiles() && !hasManageAllFilesManisfestPermission)
                 {
                     UiHelpers.ShowSimpleAlertDialog(this, Resource.String.error_no_file_manager_dir_manage_storage, Resource.String.okay);
                 }

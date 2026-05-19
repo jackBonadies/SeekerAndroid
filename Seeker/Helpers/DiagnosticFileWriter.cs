@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2021 Seeker
  *
  * This file is part of Seeker
@@ -97,7 +97,7 @@ namespace Seeker.Helpers
                             }
                         }
                     }
-                    else if (SeekerState.UseLegacyStorage() || !PreferencesState.SaveDataDirectoryUriIsFromTree) //if api < 30 and they did not set it. OR api <= 21 and they did set it.
+                    else if (PlatformInfo.UseLegacyStorage() || !PreferencesState.SaveDataDirectoryUriIsFromTree) //if api < 30 and they did not set it. OR api <= 21 and they did set it.
                     {
                         //when the directory is unset.
                         string fullPath = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;

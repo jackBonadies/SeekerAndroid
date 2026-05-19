@@ -345,7 +345,7 @@ namespace Seeker
         // shows the re-selection dialog.
         private static void InitializeDocumentFiles(Context context)
         {
-            if (SeekerState.UseLegacyStorage())
+            if (PlatformInfo.UseLegacyStorage())
             {
                 if (!string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
                 {
@@ -650,7 +650,7 @@ namespace Seeker
                     var incompleteUri = Android.Net.Uri.Parse(incompleteUriString);
 
                     // this is the only time we do legacy.
-                    bool isLegacyCase = SeekerState.UseLegacyStorage() && (SeekerState.RootDocumentFile == null && useDownloadDir);
+                    bool isLegacyCase = PlatformInfo.UseLegacyStorage() && (SeekerState.RootDocumentFile == null && useDownloadDir);
                     if (isLegacyCase)
                     {
                         newStream = new System.IO.FileStream(incompleteUri.Path, System.IO.FileMode.Truncate, System.IO.FileAccess.Write, System.IO.FileShare.None);

@@ -1,4 +1,4 @@
-using Seeker.Services;
+﻿using Seeker.Services;
 using Seeker.Helpers;
 using Seeker.Managers;
 using Android.App;
@@ -38,7 +38,7 @@ namespace Seeker
         {
             if (SettingsActivity.UseIncompleteManualFolder() && SeekerState.RootIncompleteDocumentFile != null && SeekerState.RootDocumentFile != null)
             {
-                //if(!SeekerState.UseLegacyStorage())
+                //if(!PlatformInfo.UseLegacyStorage())
                 //{
                 //    //this method is only for API29+
                 //    //var sm = (SeekerState.ActiveActivityRef.GetSystemService(Context.StorageService) as Android.OS.Storage.StorageManager);

@@ -1054,7 +1054,7 @@ namespace Seeker
         {
             if (SeekerState.RootDocumentFile == null)            
             {
-                if (SeekerState.UseLegacyStorage())
+                if (PlatformInfo.UseLegacyStorage())
                 {
                     //if not set and legacy storage, then the directory is simple the default music
                     string path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
@@ -1096,7 +1096,7 @@ namespace Seeker
                 //if not override then its whatever the download directory is...
                 if (SeekerState.RootDocumentFile == null)                
                 {
-                    if (SeekerState.UseLegacyStorage())
+                    if (PlatformInfo.UseLegacyStorage())
                     {
                         //if not set and legacy storage, then the directory is simple the default music
                         string path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
@@ -1364,7 +1364,7 @@ namespace Seeker
 
             bool folderExists = false;
             int folderCount = 0;
-            if (SeekerState.UseLegacyStorage() && (SeekerState.RootDocumentFile == null && useDownloadDir))
+            if (PlatformInfo.UseLegacyStorage() && (SeekerState.RootDocumentFile == null && useDownloadDir))
             {
                 string rootdir = string.Empty;
                 //if (SeekerState.RootDocumentFile==null)
@@ -2614,7 +2614,7 @@ namespace Seeker
         private void ShowDirSettings(string startingDirectory, DirectoryType directoryType, bool errorReselectCase = false)
         {
             int requestCode = -1;
-            if (SeekerState.UseLegacyStorage())
+            if (PlatformInfo.UseLegacyStorage())
             {
                 var legacyIntent = new Intent(Intent.ActionOpenDocumentTree);
                 if (!string.IsNullOrEmpty(startingDirectory))
@@ -2726,7 +2726,7 @@ namespace Seeker
 
         public static bool DoWeHaveProperPermissionsForInternalFilePicker()
         {
-            if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles())
+            if (PlatformInfo.RequiresEitherOpenDocumentTreeOrManageAllFiles())
             {
                 return Android.OS.Environment.IsExternalStorageManager;
             }
@@ -2746,7 +2746,7 @@ namespace Seeker
             hasManageAllFilesManisfestPermission = true;
 #endif
 
-            if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && hasManageAllFilesManisfestPermission && !Android.OS.Environment.IsExternalStorageManager) //this is "step 1"
+            if (PlatformInfo.RequiresEitherOpenDocumentTreeOrManageAllFiles() && hasManageAllFilesManisfestPermission && !Android.OS.Environment.IsExternalStorageManager) //this is "step 1"
             {
                 Intent allFilesPermission = new Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission);
                 Android.Net.Uri packageUri = Android.Net.Uri.FromParts("package", this.PackageName, null);
@@ -2760,7 +2760,7 @@ namespace Seeker
             else
             {
                 //show error message...
-                if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && !hasManageAllFilesManisfestPermission)
+                if (PlatformInfo.RequiresEitherOpenDocumentTreeOrManageAllFiles() && !hasManageAllFilesManisfestPermission)
                 {
                     UiHelpers.ShowSimpleAlertDialog(this, Resource.String.error_no_file_manager_dir_manage_storage, Resource.String.okay);
                 }
