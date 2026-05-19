@@ -1830,7 +1830,7 @@ namespace Seeker
             }
             if (tree != null)
             {
-                SeekerState.OnBrowseResponseReceived(SharedFileService.SharedFileCache.GetBrowseResponseForUser(PreferencesState.Username), tree, PreferencesState.Username, null);
+                BrowseService.OnBrowseResponseReceived(SharedFileService.SharedFileCache.GetBrowseResponseForUser(PreferencesState.Username), tree, PreferencesState.Username, null);
             }
 
             Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
@@ -2290,7 +2290,7 @@ namespace Seeker
 
         private void ClearHistory_Click(object sender, EventArgs e)
         {
-            SeekerState.ClearSearchHistoryInvoke();
+            SearchTabHelper.ClearSearchHistoryInvoke();
         }
 
         private void AutoClearCompleteUploads_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)

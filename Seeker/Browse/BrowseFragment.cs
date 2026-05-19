@@ -1156,7 +1156,7 @@ namespace Seeker
             }
         }
 
-        public static void SeekerState_BrowseResponseReceived(object sender, BrowseResponseEvent e)
+        public static void OnBrowseResponseReceived(object sender, BrowseResponseEvent e)
         {
             ClearFilterUIString();
             ScrollPositionRestore?.Clear();
@@ -1164,7 +1164,7 @@ namespace Seeker
             var errorCode = state.SetBrowseResponse(e.Username, e.BrowseResponseTree, e.OriginalBrowseResponse, e.StartingLocation);
             if (errorCode == BrowseStateError.CannotFindStartDirectory)
             {
-                Logger.Firebase("SeekerState_BrowseResponseReceived: startingPoint is null " + e.StartingLocation);
+                Logger.Firebase("OnBrowseResponseReceived: startingPoint is null " + e.StartingLocation);
                 SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long);
             }
             BrowseResponseReceivedUI?.Invoke(null, new EventArgs());

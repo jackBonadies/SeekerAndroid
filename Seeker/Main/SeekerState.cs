@@ -47,32 +47,6 @@ namespace Seeker
         public static long AbortAllWasPressedDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
 
 
-        public static void ClearSearchHistoryEventsFromTarget(object target)
-        {
-            if (ClearSearchHistory == null)
-            {
-                return;
-            }
-            else
-            {
-                foreach (Delegate d in ClearSearchHistory.GetInvocationList())
-                {
-                    if (d.Target.GetType() == target.GetType())
-                    {
-                        ClearSearchHistory -= (EventHandler<EventArgs>)d;
-                    }
-                }
-            }
-        }
-
-        public static void ClearSearchHistoryInvoke()
-        {
-            ClearSearchHistory?.Invoke(null, EventArgs.Empty);
-        }
-
-
-
-        public static event EventHandler<EventArgs> ClearSearchHistory;
         /// <summary>
         /// Context of last created activity
         /// </summary>
@@ -84,28 +58,6 @@ namespace Seeker
         public static ManualResetEvent ManualResetEvent = new ManualResetEvent(false); //previously this was on the loginfragment but
                                                                                        //it would get recreated every time so there were lost instances with threads waiting forever....
 
-        public static event EventHandler<BrowseResponseEvent> BrowseResponseReceived;
-        public static void OnBrowseResponseReceived(BrowseResponse origBR, TreeNode<Directory> rootTree, string fromUsername, string startingLocation)
-        {
-            BrowseResponseReceived(null, new BrowseResponseEvent(origBR, rootTree, fromUsername, startingLocation));
-        }
-        public static void ClearOnBrowseResponseReceivedEventsFromTarget(object target)
-        {
-            if (BrowseResponseReceived == null)
-            {
-                return;
-            }
-            else
-            {
-                foreach (Delegate d in BrowseResponseReceived.GetInvocationList())
-                {
-                    if (d.Target.GetType() == target.GetType())
-                    {
-                        BrowseResponseReceived -= (EventHandler<BrowseResponseEvent>)d;
-                    }
-                }
-            }
-        }
     }
 
 }

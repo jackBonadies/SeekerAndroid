@@ -955,8 +955,8 @@ namespace Seeker
             UpdateEmptyState();
             RefreshWishlistBanner();
 
-            SeekerState.ClearSearchHistoryEventsFromTarget(this);
-            SeekerState.ClearSearchHistory += SeekerState_ClearSearchHistory;
+            SearchTabHelper.ClearSearchHistoryEventsFromTarget(this);
+            SearchTabHelper.ClearSearchHistory += OnClearSearchHistory;
             SeekerState.SoulseekClient.ClearSearchResponseReceivedFromTarget(this);
             int x = SeekerState.SoulseekClient.GetInvocationListOfSearchResponseReceived();
             Logger.Debug("NUMBER OF DELEGATES AFTER WE REMOVED OURSELF: (before doing the deep clear this would increase every rotation orientation)" + x);
@@ -1783,7 +1783,7 @@ namespace Seeker
             NotifySearchHeaderChanged();
         }
 
-        private void SeekerState_ClearSearchHistory(object sender, EventArgs e)
+        private void OnClearSearchHistory(object sender, EventArgs e)
         {
             PreferencesState.SearchHistory = new List<string>();
             PreferencesManager.ClearSearchHistory();

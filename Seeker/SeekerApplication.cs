@@ -30,6 +30,7 @@ using AndroidX.Core.App;
 using AndroidX.DocumentFile.Provider;
 using Common;
 using Common.Share;
+using Seeker.Browse;
 using Seeker.Chatroom;
 using Seeker.Helpers;
 using Seeker.Managers;
@@ -283,7 +284,7 @@ namespace Seeker
             SeekerState.SoulseekClient.LoggedIn += SoulseekClient_LoggedIn;
             SeekerState.SoulseekClient.Disconnected += SoulseekClient_Disconnected;
             SeekerState.SoulseekClient.ServerInfoReceived += SoulseekClient_ServerInfoReceived;
-            SeekerState.BrowseResponseReceived += BrowseFragment.SeekerState_BrowseResponseReceived;
+            BrowseService.BrowseResponseReceived += BrowseFragment.OnBrowseResponseReceived;
 
             SeekerState.SoulseekClient.PrivilegedUserListReceived += SoulseekClient_PrivilegedUserListReceived;
             SeekerState.SoulseekClient.ExcludedSearchPhrasesReceived += SoulseekClient_ExcludedSearchPhrasesReceived;
