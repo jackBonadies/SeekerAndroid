@@ -1,14 +1,5 @@
-using Android.App;
 using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
-using AndroidX.AppCompat.App;
-using AndroidX.DocumentFile.Provider;
 using AndroidX.Fragment.App;
-using Common;
-using Common.Share;
 using Soulseek;
 using System;
 using System.Threading;
