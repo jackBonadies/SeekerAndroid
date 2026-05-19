@@ -72,7 +72,7 @@ namespace Seeker.Services
                     var chosenUri = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
                     if (CheckDirectoryForWritePermission(context, chosenUri, PreferencesState.SaveDataDirectoryUriIsFromTree, "legacy download"))
                     {
-                        RootDocumentFile = DocumentFile.FromTreeUri(context, chosenUri);
+                        RootDocumentFile = BuildDocumentFile(context, chosenUri, PreferencesState.SaveDataDirectoryUriIsFromTree);
                     }
                 }
                 if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
@@ -80,7 +80,7 @@ namespace Seeker.Services
                     var chosenUri = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
                     if (CheckDirectoryForWritePermission(context, chosenUri, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "legacy incomplete"))
                     {
-                        RootIncompleteDocumentFile = DocumentFile.FromTreeUri(context, chosenUri);
+                        RootIncompleteDocumentFile = BuildDocumentFile(context, chosenUri, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree);
                     }
                 }
             }
