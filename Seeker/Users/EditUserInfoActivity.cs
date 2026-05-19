@@ -35,7 +35,6 @@ namespace Seeker
     [Activity(Label = "EditUserInfoActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, Exported = false)]
     public class EditUserInfoActivity : ThemeableActivity
     {
-        public const string USER_INFO_PIC_DIR = "user_info_picture";
         private const int PICTURE_SELECTED = 2001;
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
@@ -157,7 +156,7 @@ namespace Seeker
 
         private void DeleteImage(string image)
         {
-            Java.IO.File user_info_dir = new Java.IO.File(this.FilesDir, USER_INFO_PIC_DIR);
+            Java.IO.File user_info_dir = new Java.IO.File(this.FilesDir, UserInfoResponder.USER_INFO_PIC_DIR);
             Java.IO.File imageFile = new Java.IO.File(user_info_dir, image);
             imageFile.Delete();
         }
@@ -228,7 +227,7 @@ namespace Seeker
 
                     //copy the file to our internal storage
 
-                    Java.IO.File user_info_dir = new Java.IO.File(this.FilesDir, USER_INFO_PIC_DIR);
+                    Java.IO.File user_info_dir = new Java.IO.File(this.FilesDir, UserInfoResponder.USER_INFO_PIC_DIR);
                     if (!user_info_dir.Exists())
                     {
                         user_info_dir.Mkdir();
