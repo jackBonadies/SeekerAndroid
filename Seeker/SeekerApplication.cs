@@ -647,24 +647,6 @@ namespace Seeker
 
 
 
-        // TODOORG move to EventArgs?
-        public class ProgressUpdatedUIEventArgs : EventArgs
-        {
-            public ProgressUpdatedUIEventArgs(TransferItem _ti, bool _wasFailed, bool _fullRefresh, double _percentComplete, double _avgspeedBytes)
-            {
-                ti = _ti;
-                wasFailed = _wasFailed;
-                fullRefresh = _fullRefresh;
-                percentComplete = _percentComplete;
-                avgspeedBytes = _avgspeedBytes;
-            }
-            public TransferItem ti;
-            public bool wasFailed;
-            public bool fullRefresh;
-            public double percentComplete;
-            public double avgspeedBytes;
-        }
-
         public static EventHandler<TransferItem> StateChangedForItem;
         public static EventHandler<int> StateChangedAtIndex;
         public static EventHandler<ProgressUpdatedUIEventArgs> ProgressUpdated;
@@ -1508,9 +1490,6 @@ namespace Seeker
             }
             PreferencesManager.SaveRecentUsers(recentUsersStr);
         }
-
-
-
 
         /// <summary>
         /// This is from the server after sending it a UserData request.

@@ -1151,7 +1151,7 @@ namespace Seeker
             }
         }
 
-        private void TransferProgressUpdated(object sender, SeekerApplication.ProgressUpdatedUIEventArgs e)
+        private void TransferProgressUpdated(object sender, ProgressUpdatedUIEventArgs e)
         {
             if (e.ti.IsUpload() != ViewState.InUploadsMode)
             {
