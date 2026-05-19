@@ -1065,7 +1065,7 @@ namespace Seeker.Chatroom
                     (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
                     return;
                 }
-                SeekerState.RecentUsersManager.AddUserToTop(userToAdd, true);
+                UserMetadataService.RecentUsersManager.AddUserToTop(userToAdd, true);
                 ChatroomController.AddRemoveUserToPrivateRoomAPI(roomToInvite, userToAdd, true, false);
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {

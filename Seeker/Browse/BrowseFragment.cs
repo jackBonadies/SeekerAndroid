@@ -1233,7 +1233,7 @@ namespace Seeker
                     }
                     return;
                 }
-                SeekerState.RecentUsersManager.AddUserToTop(usernameToBrowse, true);
+                UserMetadataService.RecentUsersManager.AddUserToTop(usernameToBrowse, true);
                 BrowseService.RequestFilesApi(usernameToBrowse, null);
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {

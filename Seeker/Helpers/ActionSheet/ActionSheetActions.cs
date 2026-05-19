@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Android.Content;
 using Android.Views;
 using Seeker.Chatroom;
@@ -43,13 +43,13 @@ namespace Seeker.Helpers.ActionSheet
             section.Rows.Add(MakeCommonRow(Resource.Drawable.search_users_files, Resource.String.search_user_files, username, ctx, snackView, options));
             section.Rows.Add(MakeCommonRow(Resource.Drawable.user_info, Resource.String.get_user_info, username, ctx, snackView, options));
 
-            bool hasNote = SeekerState.UserNotes.ContainsKey(username);
+            bool hasNote = UserMetadataService.UserNotes.ContainsKey(username);
             int noteStringId = hasNote ? Resource.String.edit_note : Resource.String.add_note;
             section.Rows.Add(MakeCommonRow(Resource.Drawable.user_note, noteStringId, username, ctx, snackView, options));
 
             if (options.IncludeOnlineAlert)
             {
-                bool alertSet = SeekerState.UserOnlineAlerts.ContainsKey(username);
+                bool alertSet = UserMetadataService.UserOnlineAlerts.ContainsKey(username);
                 int alertStringId = alertSet ? Resource.String.remove_online_alert : Resource.String.set_online_alert;
                 section.Rows.Add(MakeCommonRow(Resource.Drawable.notifications_outline_30dp, alertStringId, username, ctx, snackView, options));
             }
@@ -91,7 +91,7 @@ namespace Seeker.Helpers.ActionSheet
                 OnClick = () => UserListService.Instance.RemoveFromIgnoreList(username)
             });
 
-            bool hasNote = SeekerState.UserNotes.ContainsKey(username);
+            bool hasNote = UserMetadataService.UserNotes.ContainsKey(username);
             int noteStringId = hasNote ? Resource.String.edit_note : Resource.String.add_note;
             string noteLabel = ctx.GetString(noteStringId);
             section.Rows.Add(new ActionSheetRow

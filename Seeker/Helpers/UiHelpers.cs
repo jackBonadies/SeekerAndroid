@@ -205,7 +205,7 @@ namespace Seeker
         public static void AddUserNoteMenuItem(IMenu menu, int i, int j, int k, string username)
         {
             string title = null;
-            if (SeekerState.UserNotes.ContainsKey(username))
+            if (UserMetadataService.UserNotes.ContainsKey(username))
             {
                 title = SeekerState.ActiveActivityRef.GetString(Resource.String.edit_note);
             }
@@ -306,7 +306,7 @@ namespace Seeker
         {
             if (menuItem != null && !string.IsNullOrEmpty(username))
             {
-                if (SeekerState.UserNotes.ContainsKey(username)) //if we already have added said user, change title add to remove..
+                if (UserMetadataService.UserNotes.ContainsKey(username)) //if we already have added said user, change title add to remove..
                 {
                     if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.add_note))
                     {
@@ -658,13 +658,13 @@ namespace Seeker
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.set_online_alert))
             {
-                SeekerState.UserOnlineAlerts[usernameInQuestion] = 0;
+                UserMetadataService.UserOnlineAlerts[usernameInQuestion] = 0;
                 CommonHelpers.SaveOnlineAlerts();
                 UserListService.RaiseUserRowChanged(usernameInQuestion);
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_online_alert))
             {
-                SeekerState.UserOnlineAlerts.TryRemove(usernameInQuestion, out _);
+                UserMetadataService.UserOnlineAlerts.TryRemove(usernameInQuestion, out _);
                 CommonHelpers.SaveOnlineAlerts();
                 UserListService.RaiseUserRowChanged(usernameInQuestion);
             }
@@ -760,7 +760,7 @@ namespace Seeker
             EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.editUserNote);
 
             string existingNote = null;
-            SeekerState.UserNotes.TryGetValue(username, out existingNote);
+            UserMetadataService.UserNotes.TryGetValue(username, out existingNote);
             if (existingNote != null)
             {
                 input.Text = existingNote;
@@ -784,13 +784,13 @@ namespace Seeker
                     if (!wasEmpty && isEmpty)
                     {
                         //we removed the note
-                        SeekerState.UserNotes.TryRemove(username, out _);
+                        UserMetadataService.UserNotes.TryRemove(username, out _);
                         CommonHelpers.SaveUserNotes();
                     }
                     else
                     {
                         //we added a note
-                        SeekerState.UserNotes[username] = newText;
+                        UserMetadataService.UserNotes[username] = newText;
                         CommonHelpers.SaveUserNotes();
                     }
                     UserListService.RaiseUserRowChanged(username);
@@ -813,7 +813,7 @@ namespace Seeker
                     else
                     {
                         //update note and save prefs..
-                        SeekerState.UserNotes[username] = newText;
+                        UserMetadataService.UserNotes[username] = newText;
                         CommonHelpers.SaveUserNotes();
                         UserListService.RaiseUserRowChanged(username);
                     }
@@ -907,7 +907,7 @@ namespace Seeker
                 if (forAddingUser)
                 {
                     //dont show people that we have already added...
-                    var recents = SeekerState.RecentUsersManager.GetRecentUserList();
+                    var recents = UserMetadataService.RecentUsersManager.GetRecentUserList();
                     lock (CommonState.UserList)
                     {
                         foreach (var uli in CommonState.UserList)
@@ -919,7 +919,7 @@ namespace Seeker
                 }
                 else
                 {
-                    actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Android.Resource.Layout.SimpleDropDownItem1Line, SeekerState.RecentUsersManager.GetRecentUserList());
+                    actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Android.Resource.Layout.SimpleDropDownItem1Line, UserMetadataService.RecentUsersManager.GetRecentUserList());
                 }
             }
         }

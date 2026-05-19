@@ -46,13 +46,6 @@ namespace Seeker
         }
         public static PendingStatusChange PendingStatusChangeToAwayOnline = PendingStatusChange.NothingPending;
 
-        public static RecentUserManager RecentUsersManager = null;
-        public static System.Collections.Concurrent.ConcurrentDictionary<string, string> UserNotes = null;
-        /// <summary>
-        /// There is no concurrent hashset so concurrent dictionary is used
-        /// </summary>
-        public static System.Collections.Concurrent.ConcurrentDictionary<string, byte> UserOnlineAlerts = null;
-
         public static EventHandler<EventArgs> DirectoryUpdatedEvent;
 
 

@@ -502,13 +502,13 @@ namespace Seeker
 
         public static void SaveUserNotes()
         {
-            PreferencesManager.SaveUserNotes(SerializationHelper.SaveUserNotesToString(SeekerState.UserNotes));
+            PreferencesManager.SaveUserNotes(SerializationHelper.SaveUserNotesToString(UserMetadataService.UserNotes));
         }
 
 
         public static void SaveOnlineAlerts()
         {
-            PreferencesManager.SaveUserOnlineAlerts(SerializationHelper.SaveUserOnlineAlertsToString(SeekerState.UserOnlineAlerts));
+            PreferencesManager.SaveUserOnlineAlerts(SerializationHelper.SaveUserOnlineAlertsToString(UserMetadataService.UserOnlineAlerts));
         }
 
 

@@ -368,7 +368,7 @@ namespace Seeker
                 {
                     if (input.Text != String.Empty)
                     {
-                        SeekerState.RecentUsersManager.AddUserToTop(input.Text, true);
+                        UserMetadataService.RecentUsersManager.AddUserToTop(input.Text, true);
                     }
                     UserListService.AddUserAPI(SeekerState.ActiveActivityRef, input.Text, null);
                 }

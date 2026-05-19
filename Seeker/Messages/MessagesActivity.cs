@@ -167,7 +167,7 @@ namespace Seeker
                     return;
                 }
 
-                SeekerState.RecentUsersManager.AddUserToTop(userToMessage, true);
+                UserMetadataService.RecentUsersManager.AddUserToTop(userToMessage, true);
 
                 //Do Logic of going to Username View
                 this.ChangeToInnerFragment(userToMessage);

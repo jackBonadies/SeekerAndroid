@@ -240,7 +240,7 @@ namespace Seeker.Chatroom
             {
                 viewOperatorStatus.Visibility = ViewStates.Gone;
             }
-            if (SeekerState.UserNotes.ContainsKey(userData.Username))
+            if (UserMetadataService.UserNotes.ContainsKey(userData.Username))
             {
                 imageNoted.Visibility = ViewStates.Visible;
             }

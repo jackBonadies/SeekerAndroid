@@ -292,11 +292,11 @@ namespace Seeker.Users
                     viewStatsLayout.Visibility = ViewStates.Visible;
                 }
 
-                if (SeekerState.UserNotes.ContainsKey(item.Username))
+                if (UserMetadataService.UserNotes.ContainsKey(item.Username))
                 {
                     viewNoteLayout.Visibility = ViewStates.Visible;
                     string note = null;
-                    SeekerState.UserNotes.TryGetValue(item.Username, out note);
+                    UserMetadataService.UserNotes.TryGetValue(item.Username, out note);
                     viewNote.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.note) + ": " + note;
                 }
                 else
@@ -304,7 +304,7 @@ namespace Seeker.Users
                     viewNoteLayout.Visibility = ViewStates.Gone;
                 }
 
-                if (SeekerState.UserOnlineAlerts.ContainsKey(item.Username))
+                if (UserMetadataService.UserOnlineAlerts.ContainsKey(item.Username))
                 {
                     viewOnlineAlerts.Visibility = ViewStates.Visible;
                 }

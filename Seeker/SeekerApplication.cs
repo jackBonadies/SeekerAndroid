@@ -1038,8 +1038,8 @@ namespace Seeker
                 RestoreRecentUsersManagerFromString(sharedPreferences.GetString(KeyConsts.M_RecentUsersList, string.Empty));
                 CommonState.IgnoreUserList = SerializationHelper.RestoreUserListFromString(sharedPreferences.GetString(KeyConsts.M_IgnoreUserList, string.Empty));
 
-                SeekerState.UserNotes = SerializationHelper.RestoreUserNotesFromString(sharedPreferences.GetString(KeyConsts.M_UserNotes, string.Empty));
-                SeekerState.UserOnlineAlerts = SerializationHelper.RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(KeyConsts.M_UserOnlineAlerts, string.Empty));
+                UserMetadataService.UserNotes = SerializationHelper.RestoreUserNotesFromString(sharedPreferences.GetString(KeyConsts.M_UserNotes, string.Empty));
+                UserMetadataService.UserOnlineAlerts = SerializationHelper.RestoreUserOnlineAlertsFromString(sharedPreferences.GetString(KeyConsts.M_UserOnlineAlerts, string.Empty));
 
                 SearchTabHelper.RestoreHeadersFromSharedPreferences();
                 SettingsActivity.RestoreAdditionalDirectorySettingsFromSharedPreferences();
@@ -1066,17 +1066,17 @@ namespace Seeker
         public static void RestoreRecentUsersManagerFromString(string xmlRecentUsersList)
         {
             //if empty then this is the first time creating it.  initialize it with our list of added users.
-            SeekerState.RecentUsersManager = new RecentUserManager();
+            UserMetadataService.RecentUsersManager = new RecentUserManager();
             if (xmlRecentUsersList == string.Empty)
             {
                 int count = CommonState.UserList?.Count ?? 0;
                 if (count > 0)
                 {
-                    SeekerState.RecentUsersManager.SetRecentUserList(CommonState.UserList.Select(uli => uli.Username).ToList());
+                    UserMetadataService.RecentUsersManager.SetRecentUserList(CommonState.UserList.Select(uli => uli.Username).ToList());
                 }
                 else
                 {
-                    SeekerState.RecentUsersManager.SetRecentUserList(new List<string>());
+                    UserMetadataService.RecentUsersManager.SetRecentUserList(new List<string>());
                 }
             }
             else
@@ -1085,7 +1085,7 @@ namespace Seeker
                 using (var stream = new System.IO.StringReader(xmlRecentUsersList))
                 {
                     var serializer = new System.Xml.Serialization.XmlSerializer(recentUsers.GetType()); //this happens too often not allowing new things to be properly stored..
-                    SeekerState.RecentUsersManager.SetRecentUserList(serializer.Deserialize(stream) as List<string>);
+                    UserMetadataService.RecentUsersManager.SetRecentUserList(serializer.Deserialize(stream) as List<string>);
                 }
             }
         }
@@ -1093,7 +1093,7 @@ namespace Seeker
         public static void SaveRecentUsers()
         {
             string recentUsersStr;
-            List<string> recentUsers = SeekerState.RecentUsersManager.GetRecentUserList();
+            List<string> recentUsers = UserMetadataService.RecentUsersManager.GetRecentUserList();
             using (var writer = new System.IO.StringWriter())
             {
                 var serializer = new System.Xml.Serialization.XmlSerializer(recentUsers.GetType());
@@ -1148,7 +1148,7 @@ namespace Seeker
                 {
                     Logger.Debug("friend status changed " + e.Username);
                     SeekerApplication.UserStatusChangedUIEvent?.Invoke(null, e.Username);
-                    if (cameOnline && SeekerState.UserOnlineAlerts != null && SeekerState.UserOnlineAlerts.ContainsKey(e.Username))
+                    if (cameOnline && UserMetadataService.UserOnlineAlerts != null && UserMetadataService.UserOnlineAlerts.ContainsKey(e.Username))
                     {
                         ShowNotificationForUserOnlineAlert(e.Username);
                     }

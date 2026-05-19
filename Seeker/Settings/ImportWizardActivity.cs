@@ -276,7 +276,7 @@ namespace Seeker
             }
             foreach (var unote in selectedData.UserNotes)
             {
-                SeekerState.UserNotes[unote.Item1] = unote.Item2;
+                UserMetadataService.UserNotes[unote.Item1] = unote.Item2;
             }
             foreach (var wish in selectedData.Wishlist)
             {
@@ -801,7 +801,7 @@ namespace Seeker
                     }
                     //todo already present
                     //maybe do asterick
-                    var currentlyHaveNoted = SeekerState.UserNotes.Select(item => item.Key).ToList();
+                    var currentlyHaveNoted = UserMetadataService.UserNotes.Select(item => item.Key).ToList();
                     var notYetNoted = data.UserNotes.Select(item => item.Item1).Except(currentlyHaveNoted).ToList();
                     var alreadyNotedList = data.UserNotes.Select(item => item.Item1).Except(notYetNoted).ToList();
                     if (alreadyNotedList.Count == 0)

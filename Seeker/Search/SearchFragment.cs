@@ -1601,7 +1601,7 @@ namespace Seeker
                 SetSearchHintTarget(SearchTabHelper.SearchTarget, (this.Activity as AndroidX.AppCompat.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere)); //in case of hitting choose user, you still have to update the name (since that gets input after clicking radio button)...
                 if (SearchTabHelper.SearchTarget == SearchTarget.ChosenUser && !string.IsNullOrEmpty(SearchTabHelper.SearchTargetChosenUser))
                 {
-                    SeekerState.RecentUsersManager.AddUserToTop(SearchTabHelper.SearchTargetChosenUser, true);
+                    UserMetadataService.RecentUsersManager.AddUserToTop(SearchTabHelper.SearchTargetChosenUser, true);
                 }
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {

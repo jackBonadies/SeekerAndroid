@@ -1016,12 +1016,12 @@ namespace Seeker
             {
                 lock (CommonState.UserList)
                 {
-                    SeekerState.RecentUsersManager.SetRecentUserList(CommonState.UserList.Select(uli => uli.Username).ToList());
+                    UserMetadataService.RecentUsersManager.SetRecentUserList(CommonState.UserList.Select(uli => uli.Username).ToList());
                 }
             }
             else
             {
-                SeekerState.RecentUsersManager.SetRecentUserList(new List<string>());
+                UserMetadataService.RecentUsersManager.SetRecentUserList(new List<string>());
             }
             SeekerApplication.SaveRecentUsers();
         }
@@ -3319,7 +3319,7 @@ namespace Seeker
             seekerImportExportData.BanIgnoreList = CommonState.IgnoreUserList.Select(uli => uli.Username).ToList();
             seekerImportExportData.Wishlist = SearchTabHelper.SearchTabCollection.Where((pair1) => pair1.Value.SearchTarget == SearchTarget.Wishlist).Select((pair1) => pair1.Value.LastSearchTerm).ToList();
             List<KeyValueEl> userNotes = new List<KeyValueEl>();
-            foreach (KeyValuePair<string, string> pair in SeekerState.UserNotes)
+            foreach (KeyValuePair<string, string> pair in UserMetadataService.UserNotes)
             {
                 userNotes.Add(new KeyValueEl() { Key = pair.Key, Value = pair.Value });
             }
