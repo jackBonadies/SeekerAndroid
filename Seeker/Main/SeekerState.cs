@@ -38,12 +38,6 @@ namespace Seeker
 
         public static bool IsStartUpServiceCurrentlyRunning = false;
 
-        public static bool CurrentConnectionIsUnmetered = true;
-        public static bool IsNetworkPermitting()
-        {
-            return PreferencesState.AllowUploadsOnMetered || CurrentConnectionIsUnmetered;
-        }
-
         public static string SystemLanguage;
 
         public static volatile bool DownloadKeepAliveServiceRunning = false;

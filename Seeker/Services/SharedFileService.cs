@@ -1179,7 +1179,7 @@ namespace Seeker.Services
         /// <returns></returns>
         public static bool MeetsCurrentSharingConditions()
         {
-            return MeetsSharingConditions() && SeekerState.IsNetworkPermitting();
+            return MeetsSharingConditions() && NetworkStateService.IsNetworkPermitting();
         }
 
         public static bool IsSharingSetUpSuccessfully()

@@ -37,7 +37,7 @@ namespace Seeker
             string action = intent?.Action;
             if (action != null && action == ConnectivityManager.ConnectivityAction)
             {
-                bool changed = SeekerApplication.SetNetworkState(context);
+                bool changed = NetworkStateService.SetNetworkState(context);
                 if (changed)
                 {
                     Logger.Debug("metered state changed.. lets set up our handlers and inform server..");

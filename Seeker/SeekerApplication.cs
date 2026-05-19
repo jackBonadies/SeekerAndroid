@@ -239,7 +239,7 @@ namespace Seeker
                 KeepAliveInactivityKillTimer.AutoReset = false;
             }
 
-            SeekerApplication.SetNetworkState(this);
+            NetworkStateService.SetNetworkState(this);
 
             //need search response and enqueue download action...
             //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:PreferencesState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
@@ -396,58 +396,6 @@ namespace Seeker
             SearchUtil.ExcludedSearchPhrases = exludedPhrasesList;
         }
 
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="context"></param>
-        /// <returns>true if changed</returns>
-        public static bool SetNetworkState(Context context)
-        {
-            try
-            {
-                ConnectivityManager cm = (ConnectivityManager)context.GetSystemService(Context.ConnectivityService);
-
-                if (cm == null) //null if class is not a supported system service.
-                {
-                    return false;
-                }
-
-                if (cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
-                {
-                    bool oldState = SeekerState.CurrentConnectionIsUnmetered;
-                    SeekerState.CurrentConnectionIsUnmetered = IsUnmetered(context, cm);
-                    Logger.Debug("SetNetworkState is metered " + !SeekerState.CurrentConnectionIsUnmetered);
-                    return oldState != SeekerState.CurrentConnectionIsUnmetered;
-                }
-                return false;
-            }
-            catch (Exception e)
-            {
-                Logger.Firebase("SetNetworkState" + e.Message + e.StackTrace);
-                return false;
-            }
-        }
-
-        private static bool IsUnmetered(Context context, ConnectivityManager cm)
-        {
-
-            if (!AndroidX.Core.Net.ConnectivityManagerCompat.IsActiveNetworkMetered(cm)) //api 16
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-
-            //the below can fail if on VPN
-            //var capabilities = cm.GetNetworkCapabilities(cm.ActiveNetwork);
-            //cm.GetNetworkCapabilities(cm.ActiveNetwork).HasCapability(NetCapability.NotMetered);
-            //AndroidX.Core.Net.ConnectivityManagerCompat.IsActiveNetworkMetered(cm);
-            //bool isUnmetered = (capabilities != null && capabilities.HasCapability(NetCapability.NotMetered)) ||
-
-        }
 
         public static void SetDiagnosticState(bool log_diagnostics)
         {
