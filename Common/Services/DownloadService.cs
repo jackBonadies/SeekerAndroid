@@ -41,29 +41,6 @@ namespace Seeker.Services
 
         public event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
 
-
-        public void ClearDownloadAddedEventsFromTarget(object target)
-        {
-            if (DownloadAddedUINotify == null)
-            {
-                return;
-            }
-            else
-            {
-                foreach (Delegate d in DownloadAddedUINotify.GetInvocationList())
-                {
-                    if (d.Target == null) //i.e. static
-                    {
-                        continue;
-                    }
-                    if (d.Target.GetType() == target.GetType())
-                    {
-                        DownloadAddedUINotify -= (EventHandler<DownloadAddedEventArgs>)d;
-                    }
-                }
-            }
-        }
-
         public Task CreateDownloadAllTask(FullFileInfo[] files, bool queuePaused, string username)
         {
             if (username == PreferencesState.Username)

@@ -552,6 +552,7 @@ namespace Seeker
             StaticHacks.TransfersFrag = this;
             DownloadService.Instance.TransferItemChanged += OnTransferItemChanged;
             DownloadService.Instance.TransferListRefreshRequested += OnTransferListRefreshRequested;
+            DownloadService.Instance.DownloadAddedUINotify += SeekerState_DownloadAddedUINotify;
             if (MainActivity.fromNotificationMoveToUploads)
             {
                 MainActivity.fromNotificationMoveToUploads = false;
@@ -573,6 +574,7 @@ namespace Seeker
         {
             DownloadService.Instance.TransferItemChanged -= OnTransferItemChanged;
             DownloadService.Instance.TransferListRefreshRequested -= OnTransferListRefreshRequested;
+            DownloadService.Instance.DownloadAddedUINotify -= SeekerState_DownloadAddedUINotify;
             base.OnPause();
             Logger.Debug("TransferFragment OnPause");
         }
@@ -1282,23 +1284,6 @@ namespace Seeker
             UploadService.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
             base.OnStop();
         }
-
-        //NOTE: there can be several TransfersFragment at a time.
-        //this can be done by having many MainActivitys in the back stack
-        //i.e. go to UserList > press browse files > go to UserList > press browse files --> 3 TransferFragments, 2 of which are stopped but not Destroyed.
-        public override void OnCreate(Bundle savedInstanceState)
-        {
-
-            DownloadService.Instance.ClearDownloadAddedEventsFromTarget(this);
-            DownloadService.Instance.DownloadAddedUINotify += SeekerState_DownloadAddedUINotify;
-            //todo I dont think this should be here.  I think the only reason its not causing a problem is because the user cannot add a download from the transfer page.
-            //if they could then the download might not show because this is OnCreate!! so it will only update the last one you created.  
-            //so you can create a second one, back out of it, and the first one will not get recreated and so it will not have an event. 
-
-
-            base.OnCreate(savedInstanceState);
-        }
-
 
         private void SeekerState_DownloadAddedUINotify(object sender, DownloadAddedEventArgs e)
         {
