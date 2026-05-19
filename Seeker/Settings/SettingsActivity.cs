@@ -2289,6 +2289,7 @@ namespace Seeker
 
         private void ClearHistory_Click(object sender, EventArgs e)
         {
+            PreferencesManager.ClearSearchHistory();
             SearchFragment.RaiseSearchHistoryCleared();
         }
 

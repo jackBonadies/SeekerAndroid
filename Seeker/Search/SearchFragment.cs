@@ -37,21 +37,6 @@ namespace Seeker
             SearchHistoryCleared?.Invoke(null, EventArgs.Empty);
         }
 
-        public static void UnsubscribeSearchHistoryClearedByTargetType(object target)
-        {
-            if (SearchHistoryCleared == null)
-            {
-                return;
-            }
-            foreach (Delegate d in SearchHistoryCleared.GetInvocationList())
-            {
-                if (d.Target.GetType() == target.GetType())
-                {
-                    SearchHistoryCleared -= (EventHandler<EventArgs>)d;
-                }
-            }
-        }
-
         public View rootView = null;
         private ViewFlipper searchEmptyStateFlipper = null;
         private TextView noResultsSubtitle = null;
@@ -91,6 +76,8 @@ namespace Seeker
                 MainActivity.goToSearchTab = int.MaxValue;
             }
             RefreshWishlistBanner();
+            SearchHistoryCleared += OnSearchHistoryCleared;
+            RefreshSearchHistoryDropdown();
         }
 
         private void ClearFilterStringAndCached(bool force = false)
@@ -977,8 +964,6 @@ namespace Seeker
             UpdateEmptyState();
             RefreshWishlistBanner();
 
-            UnsubscribeSearchHistoryClearedByTargetType(this);
-            SearchHistoryCleared += OnSearchHistoryCleared;
             SeekerState.SoulseekClient.ClearSearchResponseReceivedFromTarget(this);
             int x = SeekerState.SoulseekClient.GetInvocationListOfSearchResponseReceived();
             Logger.Debug("NUMBER OF DELEGATES AFTER WE REMOVED OURSELF: (before doing the deep clear this would increase every rotation orientation)" + x);
@@ -1805,15 +1790,16 @@ namespace Seeker
             NotifySearchHeaderChanged();
         }
 
+        private void RefreshSearchHistoryDropdown()
+        {
+            if (SeekerState.MainActivityRef?.SupportActionBar?.CustomView == null) return;
+            AutoCompleteTextView actv = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
+            actv.Adapter = new ArrayAdapter<string>(context, Resource.Layout.search_dropdown_item, PreferencesState.SearchHistory);
+        }
+
         private void OnSearchHistoryCleared(object sender, EventArgs e)
         {
-            PreferencesState.SearchHistory = new List<string>();
-            PreferencesManager.ClearSearchHistory();
-            if (SeekerState.MainActivityRef?.SupportActionBar?.CustomView != null)
-            {
-                AutoCompleteTextView actv = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
-                actv.Adapter = new ArrayAdapter<string>(context, Resource.Layout.search_dropdown_item, PreferencesState.SearchHistory);
-            }
+            RefreshSearchHistoryDropdown();
         }
 
         public override void OnPause()
@@ -1823,6 +1809,7 @@ namespace Seeker
             PreferencesManager.SaveSearchFragmentFilterState(PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)PreferencesState.SearchResultStyle, ExpandAllResults);
             StopWishlistBannerTicker();
             StopSpinnerTimer();
+            SearchHistoryCleared -= OnSearchHistoryCleared;
         }
 
         private static void Actv_KeyPressHELPER(object sender, View.KeyEventArgs e)
