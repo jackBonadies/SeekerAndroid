@@ -1230,9 +1230,8 @@ namespace Seeker
 
         public override void OnStart()
         {
-            SeekerApplication.StateChangedAtIndex += TransferStateChanged;
-            SeekerApplication.StateChangedForItem += TransferStateChangedItem;
-            SeekerApplication.ProgressUpdated += TransferProgressUpdated;
+            Seeker.Transfers.TransferEventRouter.StateChangedForItem += TransferStateChangedItem;
+            Seeker.Transfers.TransferEventRouter.ProgressUpdated += TransferProgressUpdated;
             UploadService.TransferAddedUINotify += MainActivity_TransferAddedUINotify; //todo this should eventually be for downloads too.
             DownloadService.Instance.TransferItemQueueUpdated += TransferQueueStateChanged;
 
@@ -1277,9 +1276,8 @@ namespace Seeker
 
         public override void OnStop()
         {
-            SeekerApplication.StateChangedAtIndex -= TransferStateChanged;
-            SeekerApplication.ProgressUpdated -= TransferProgressUpdated;
-            SeekerApplication.StateChangedForItem -= TransferStateChangedItem;
+            Seeker.Transfers.TransferEventRouter.ProgressUpdated -= TransferProgressUpdated;
+            Seeker.Transfers.TransferEventRouter.StateChangedForItem -= TransferStateChangedItem;
             DownloadService.Instance.TransferItemQueueUpdated -= TransferQueueStateChanged;
             UploadService.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
             base.OnStop();
