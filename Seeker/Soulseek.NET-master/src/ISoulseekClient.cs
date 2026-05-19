@@ -1399,16 +1399,6 @@ namespace Soulseek
         bool IsTransferInDownloads(string username, string filename);
 
         /// <summary>
-        /// Clear SearchResponseReceived event handlers from the specified target.
-        /// </summary>
-        void ClearSearchResponseReceivedFromTarget(object target);
-
-        /// <summary>
-        /// Get the number of SearchResponseReceived event handlers.
-        /// </summary>
-        int GetInvocationListOfSearchResponseReceived();
-
-        /// <summary>
         /// If we are successfully listening.
         /// </summary>
         bool GetListeningState();

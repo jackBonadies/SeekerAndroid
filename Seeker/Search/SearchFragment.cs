@@ -964,9 +964,6 @@ namespace Seeker
             UpdateEmptyState();
             RefreshWishlistBanner();
 
-            SeekerState.SoulseekClient.ClearSearchResponseReceivedFromTarget(this);
-            int x = SeekerState.SoulseekClient.GetInvocationListOfSearchResponseReceived();
-            Logger.Debug("NUMBER OF DELEGATES AFTER WE REMOVED OURSELF: (before doing the deep clear this would increase every rotation orientation)" + x);
             Logger.Debug("SearchFragmentOnCreateViewEnd - SearchResponses.Count=" + SearchTabHelper.SearchResponses.Count);
 
             EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);

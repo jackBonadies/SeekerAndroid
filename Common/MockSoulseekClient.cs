@@ -2009,19 +2009,6 @@ namespace Seeker
         public bool IsTransferInDownloads(string username, string filename)
             => Downloads.Any(d => d.Username == username && d.Filename == filename);
 
-        private readonly List<Delegate> _searchResponseReceivedHandlers = new List<Delegate>();
-
-        public void ClearSearchResponseReceivedFromTarget(object target)
-        {
-            // No-op for mock; real client removes handlers from a specific target
-        }
-
-        public int GetInvocationListOfSearchResponseReceived()
-        {
-            var handler = SearchResponseReceived;
-            return handler?.GetInvocationList().Length ?? 0;
-        }
-
         public bool GetListeningState() => true;
 
         // --- Methods NOT used by Seeker (throw NotImplementedException) ---
