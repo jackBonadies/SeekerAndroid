@@ -251,7 +251,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_cancel_and_clear_all: //cancel and clear all
                     Logger.InfoFirebase("action_cancel_and_clear_all Pressed");
-                    SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    TransferDebouncer.CancelAndClearAll.Trigger();
                     // TODO: move to helper (either TranferItemManager or Wrapper)
                     if (ViewState.CurrentlySelectedDLFolder == null)
                     {
@@ -269,7 +269,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_abort_all: //abort all
                     Logger.InfoFirebase("action_abort_all_pressed");
-                    SeekerState.AbortAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    TransferDebouncer.AbortAll.Trigger();
                     // TODO: move to helper (either TranferItemManager or Wrapper)
                     if (ViewState.CurrentlySelectedUploadFolder == null)
                     {
@@ -283,7 +283,7 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_pause_all:
                     Logger.InfoFirebase("pause all Pressed");
-                    SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    TransferDebouncer.CancelAndClearAll.Trigger();
                     // TODO: move to helper (either TranferItemManager or Wrapper)
                     if (ViewState.CurrentlySelectedDLFolder == null)
                     {

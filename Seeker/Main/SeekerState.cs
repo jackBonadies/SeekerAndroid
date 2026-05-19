@@ -40,14 +40,6 @@ namespace Seeker
 
 
         /// <summary>
-        /// This is for when the cancelAndClear button was last pressed.  It is because of the massive amount of cancellation
-        /// events all occuring on different threads that all go to affect the service.
-        /// </summary>
-        public static long CancelAndClearAllWasPressedDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
-        public static long AbortAllWasPressedDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
-
-
-        /// <summary>
         /// Context of last created activity
         /// </summary>
         public static volatile FragmentActivity ActiveActivityRef = null;

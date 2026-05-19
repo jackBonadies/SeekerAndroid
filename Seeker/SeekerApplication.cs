@@ -545,7 +545,7 @@ namespace Seeker
 
         private void OnUploadCountChanged(int count)
         {
-            bool abortAll = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.AbortAllWasPressedDebouncer) < 750;
+            bool abortAll = TransferDebouncer.AbortAll.IsActive();
             if (count <= 0 || abortAll)
             {
                 Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
@@ -583,7 +583,7 @@ namespace Seeker
 
         private void OnDownloadCountChanged(int count)
         {
-            bool cancelAndClear = (DateTimeOffset.Now.ToUnixTimeMilliseconds() - SeekerState.CancelAndClearAllWasPressedDebouncer) < 750;
+            bool cancelAndClear = TransferDebouncer.CancelAndClearAll.IsActive();
             if (count <= 0 || cancelAndClear)
             {
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));

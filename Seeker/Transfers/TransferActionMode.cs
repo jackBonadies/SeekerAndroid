@@ -1,5 +1,6 @@
 using Android.Views;
 using Seeker.Helpers;
+using Seeker.Transfers;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -94,7 +95,7 @@ namespace Seeker
                     //this is the only option that uploads gets
                     case Resource.Id.action_cancel_and_clear_all_batch:
                         Logger.InfoFirebase("action_cancel_and_clear_batch Pressed");
-                        SeekerState.CancelAndClearAllWasPressedDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                        TransferDebouncer.CancelAndClearAll.Trigger();
                         TransferItems.TransferItemManagerWrapped.CancelSelectedItems(true);
                         TransferItems.TransferItemManagerWrapped.ClearSelectedItemsAndClean();
                         var selected = ViewState.BatchSelectedItems.ToArray();
