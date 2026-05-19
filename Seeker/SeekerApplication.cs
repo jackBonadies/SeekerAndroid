@@ -173,7 +173,7 @@ namespace Seeker
             //SerializationTests.PopulateSharedPreferencesFromFile(this, sharedPrefs);
 
             RestoreSeekerState(sharedPrefs, this);
-            InitializeDocumentFiles(this);
+            StorageState.LoadFromPreferences(this);
             PreferencesManager.RestoreListeningStateLocked();
             UPnpManager.RestoreUpnpState();
 
@@ -306,90 +306,6 @@ namespace Seeker
             SimpleHelpers.STRINGS_KHZ = this.Resources.GetString(Resource.String.kilohertz);
 
             SimpleHelpers.UserListService = UserListService.Instance;
-        }
-
-        private static bool CheckDirectoryForWritePermission(Context context, Android.Net.Uri chosenUri, bool directoryUriFromTree, string logContext)
-        {
-            bool canWrite = false;
-            try
-            {
-                if (!directoryUriFromTree)
-                {
-                    canWrite = DocumentFile.FromFile(new Java.IO.File(chosenUri.Path)).CanWrite();
-                }
-                else
-                {
-                    canWrite = DocumentFile.FromTreeUri(context, chosenUri).CanWrite();
-                }
-            }
-            catch (Exception e)
-            {
-                if (chosenUri != null)
-                {
-                    Logger.Firebase($"{logContext} DocumentFile.FromTreeUri failed with URI: " + chosenUri.ToString() + " " + e.Message + " scheme " + chosenUri.Scheme);
-                }
-                else
-                {
-                    Logger.Firebase($"{logContext} DocumentFile.FromTreeUri failed with null URI");
-                }
-            }
-            if (!canWrite)
-            {
-                Logger.Firebase($"canWrite = false for {logContext} Uri: " + chosenUri.ToString());
-            }
-            return canWrite;
-        }
-
-        // Runs once per process in OnCreate. Sets StorageState.RootDocumentFile and
-        // RootIncompleteDocumentFile. For non-legacy, leaves RootDocumentFile null if the
-        // download directory permission has been revoked; MainActivity checks for null and
-        // shows the re-selection dialog.
-        private static void InitializeDocumentFiles(Context context)
-        {
-            if (PlatformInfo.UseLegacyStorage())
-            {
-                if (!string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
-                {
-                    var chosenUri = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
-                    if (CheckDirectoryForWritePermission(context, chosenUri, PreferencesState.SaveDataDirectoryUriIsFromTree, "legacy download"))
-                    {
-                        StorageState.RootDocumentFile = StorageState.OpenRootFile(context, chosenUri);
-                    }
-                }
-                if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
-                {
-                    var chosenUri = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
-                    if (CheckDirectoryForWritePermission(context, chosenUri, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "legacy incomplete"))
-                    {
-                        StorageState.RootIncompleteDocumentFile = StorageState.OpenRootFile(context, chosenUri);
-                    }
-                }
-            }
-            else
-            {
-                Android.Net.Uri res = string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri)
-                    ? Android.Net.Uri.Parse(StorageState.DefaultMusicUri)
-                    : Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
-
-                if (CheckDirectoryForWritePermission(context, res, PreferencesState.SaveDataDirectoryUriIsFromTree, "download"))
-                {
-                    StorageState.RootDocumentFile = PreferencesState.SaveDataDirectoryUriIsFromTree
-                        ? DocumentFile.FromTreeUri(context, res)
-                        : DocumentFile.FromFile(new Java.IO.File(res.Path));
-                }
-                // else: RootDocumentFile stays null — MainActivity will detect this and show the re-selection dialog
-
-                if (!string.IsNullOrEmpty(PreferencesState.ManualIncompleteDataDirectoryUri))
-                {
-                    var incompleteRes = Android.Net.Uri.Parse(PreferencesState.ManualIncompleteDataDirectoryUri);
-                    if (CheckDirectoryForWritePermission(context, incompleteRes, PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree, "incomplete"))
-                    {
-                        StorageState.RootIncompleteDocumentFile = (!PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree)
-                            ? DocumentFile.FromFile(new Java.IO.File(incompleteRes.Path))
-                            : DocumentFile.FromTreeUri(context, incompleteRes);
-                    }
-                }
-            }
         }
 
         private void SoulseekClient_ExcludedSearchPhrasesReceived(object sender, IReadOnlyCollection<string> exludedPhrasesList)
@@ -967,62 +883,7 @@ namespace Seeker
             }
         }
 
-        public const string CHANNEL_ID_USER_ONLINE = "User Online Alerts ID";
-        public const string CHANNEL_NAME_USER_ONLINE = "User Online Alerts";
         public const string FromUserOnlineAlert = "FromUserOnlineAlert";
-        public static void ShowNotificationForUserOnlineAlert(string username)
-        {
-            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-            {
-                try
-                {
-                    CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, CHANNEL_ID_USER_ONLINE, CHANNEL_NAME_USER_ONLINE, NotificationImportance.High); //only high will "peek"
-                    Intent notifIntent = new Intent(SeekerState.ActiveActivityRef, typeof(UserListActivity));
-                    notifIntent.AddFlags(ActivityFlags.SingleTop);
-                    notifIntent.PutExtra(FromUserOnlineAlert, true);
-                    PendingIntent pendingIntent =
-                        PendingIntent.GetActivity(SeekerState.ActiveActivityRef, username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                    Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, CHANNEL_ID_USER_ONLINE, "User Online", string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.user_X_is_now_online), username), false);
-                    NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
-                    // notificationId is a unique int for each notification that you must define
-                    notificationManager.Notify(username.GetHashCode(), n);
-                }
-                catch (System.Exception e)
-                {
-                    Logger.Firebase("ShowNotificationForUserOnlineAlert failed: " + e.Message + e.StackTrace);
-                }
-            });
-        }
-
-
-        public const string CHANNEL_ID_FOLDER_ALERT = "Folder Finished Downloading Alerts ID";
-        public const string CHANNEL_NAME_FOLDER_ALERT = "Folder Finished Downloading Alerts";
-
-        public static void ShowNotificationForCompletedFolder(string foldername, string username)
-        {
-            SeekerState.ActiveActivityRef.RunOnUiThread(() =>
-            {
-                try
-                {
-                    CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, CHANNEL_ID_FOLDER_ALERT, CHANNEL_NAME_FOLDER_ALERT, NotificationImportance.High); //only high will "peek"
-                    Intent notifIntent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
-                    notifIntent.PutExtra(MainActivity.FolderAlertExtra, true);
-                    notifIntent.PutExtra(MainActivity.FolderAlertUsernameExtra, username);
-                    notifIntent.PutExtra(MainActivity.FolderAlertFoldernameExtra, foldername);
-                    PendingIntent pendingIntent =
-                        PendingIntent.GetActivity(SeekerState.ActiveActivityRef, (foldername + username).GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                    Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, CHANNEL_ID_FOLDER_ALERT, SeekerApplication.GetString(Resource.String.FolderFinishedDownloading), string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.folder_X_from_user_Y_finished), foldername, username), false);
-                    NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
-                    // notificationId is a unique int for each notification that you must define
-                    notificationManager.Notify((foldername + username).GetHashCode(), n);
-                }
-                catch (System.Exception e)
-                {
-                    Logger.Firebase("ShowNotificationForCompletedFolder failed: " + e.Message + e.StackTrace);
-                }
-            });
-        }
 
         public static void RestoreSeekerState(ISharedPreferences sharedPreferences, Context c)
         {
@@ -1151,7 +1012,7 @@ namespace Seeker
                     SeekerApplication.UserStatusChangedUIEvent?.Invoke(null, e.Username);
                     if (cameOnline && UserMetadataService.UserOnlineAlerts != null && UserMetadataService.UserOnlineAlerts.ContainsKey(e.Username))
                     {
-                        ShowNotificationForUserOnlineAlert(e.Username);
+                        AppNotifications.ShowNotificationForUserOnlineAlert(e.Username);
                     }
                 }
             }

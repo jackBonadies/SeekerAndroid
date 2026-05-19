@@ -164,7 +164,7 @@ namespace Seeker.Transfers
                         {
                             //relevantItem.TransferItemExtra // if single then change the notif text.
                             // RetryDL is on completed Succeeded dl?
-                            SeekerApplication.ShowNotificationForCompletedFolder(relevantItem.FolderName, relevantItem.Username);
+                            AppNotifications.ShowNotificationForCompletedFolder(relevantItem.FolderName, relevantItem.Username);
                         }
                     }
                 }
@@ -286,7 +286,7 @@ namespace Seeker.Transfers
                 SeekerState.SoulseekClient.SendUploadSpeedAsync((int)(e.Transfer.AverageSpeed));
                 try
                 {
-                    CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, MainActivity.UPLOADS_CHANNEL_ID, MainActivity.UPLOADS_CHANNEL_NAME, NotificationImportance.High);
+                    CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, AppNotifications.CHANNEL_ID_UPLOAD_COMPLETED, AppNotifications.CHANNEL_NAME_UPLOAD_COMPLETED, NotificationImportance.High);
                     string directory = Common.Helpers.GetFolderNameFromFile(e.Transfer.Filename.Replace("/", @"\"));
                     var notifInfo = Seeker.Services.UploadNotificationTracker.GetOrCreate(e.Transfer.Username, directory);
 

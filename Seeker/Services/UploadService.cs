@@ -94,7 +94,7 @@ namespace Seeker.Services
             if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 notification =
-                      new Notification.Builder(context, MainActivity.UPLOADS_CHANNEL_ID)
+                      new Notification.Builder(context, AppNotifications.CHANNEL_ID_UPLOAD_COMPLETED)
                       .SetContentTitle(titleText)
                       .SetContentText(contextText)
                       .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)

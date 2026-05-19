@@ -353,7 +353,7 @@ namespace Seeker
             }
             else if (StorageState.RootDocumentFile == null)
             {
-                // SeekerApplication.InitializeDocumentFiles could not write the download directory —
+                // StorageState.LoadFromPreferences could not write the download directory —
                 // permission was revoked. Ask the user to re-select one.
                 Android.Net.Uri res = string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri)
                     ? Android.Net.Uri.Parse(StorageState.DefaultMusicUri)
@@ -691,9 +691,6 @@ namespace Seeker
             return base.OnOptionsItemSelected(item);
         }
 
-        public const string UPLOADS_CHANNEL_ID = "upload channel ID";
-        public const string UPLOADS_CHANNEL_NAME = "Upload Notifications";
-
         // Intent extra keys — all intent extras targeting MainActivity are defined here.
         public const string GoToBrowseExtra = "GoToBrowse";
         public const string GoToSearchExtra = "GoToSearch";
@@ -863,17 +860,11 @@ namespace Seeker
                 {
                     if (NEW_WRITE_EXTERNAL == requestCode)
                     {
-                        var x = data.Data;
-                        StorageState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-                        PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
-                        PreferencesState.SaveDataDirectoryUriIsFromTree = true;
-                        this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                        StorageState.SetRootDownloadDirectory(this, data.Data, isFromTree: true);
                     }
                     else if (NEW_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
                     {
-                        StorageState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
-                        PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
-                        PreferencesState.SaveDataDirectoryUriIsFromTree = false;
+                        StorageState.SetRootDownloadDirectory(this, data.Data, isFromTree: false);
                     }
                 }
                 else
@@ -935,16 +926,11 @@ namespace Seeker
                 {
                     if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
                     {
-                        StorageState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
-                        PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
-                        PreferencesState.SaveDataDirectoryUriIsFromTree = false;
+                        StorageState.SetRootDownloadDirectory(this, data.Data, isFromTree: false);
                     }
                     else if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode)
                     {
-                        StorageState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-                        PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
-                        PreferencesState.SaveDataDirectoryUriIsFromTree = true;
-                        this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                        StorageState.SetRootDownloadDirectory(this, data.Data, isFromTree: true);
                     }
 
                     //hide the button

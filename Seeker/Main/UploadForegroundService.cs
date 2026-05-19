@@ -20,8 +20,6 @@ namespace Seeker
     {
         public const int NOTIF_ID = 1112;
         public const int NonZeroRequestCode = 7671;
-        public const string CHANNEL_ID = "my channel id - upload";
-        public const string CHANNEL_NAME = "Foreground Upload Service";
 
         public override IBinder OnBind(Intent intent)
         {
@@ -41,7 +39,7 @@ namespace Seeker
                 PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, CommonHelpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            return CommonHelpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.uploads_in_progress), contentText, true, true);
+            return CommonHelpers.CreateNotification(context, pendingIntent, AppNotifications.CHANNEL_ID_UPLOAD_FOREGROUND, context.GetString(Resource.String.uploads_in_progress), contentText, true, true);
         }
 
 
@@ -73,7 +71,7 @@ namespace Seeker
 
             ServiceLifecycle.UploadKeepAliveServiceRunning = true;
 
-            CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
+            CommonHelpers.CreateNotificationChannel(this, AppNotifications.CHANNEL_ID_UPLOAD_FOREGROUND, AppNotifications.CHANNEL_NAME_UPLOAD_FOREGROUND);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = null;
             int cnt = SeekerApplication.ActiveUploadCount;
             if (cnt <= 0)

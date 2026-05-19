@@ -2775,24 +2775,9 @@ namespace Seeker
 
         private void SuccessfulWriteExternalLegacyCallback(Android.Net.Uri uri, bool fromLegacyPicker = false)
         {
-            var x = uri;
-            //StorageState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-            PreferencesState.SaveDataDirectoryUri = uri.ToString();
-            PreferencesState.SaveDataDirectoryUriIsFromTree = !fromLegacyPicker;
-            //this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission);
-            DocumentFile docFile = null;
-            if (fromLegacyPicker)
-            {
-                docFile = DocumentFile.FromFile(new Java.IO.File(uri.Path));
-            }
-            else
-            {
-                docFile = DocumentFile.FromTreeUri(this, uri);
-            }
-            StorageState.RootDocumentFile = docFile;
             this.RunOnUiThread(new Action(() =>
             {
-                StorageState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
+                StorageState.SetRootDownloadDirectory(this, uri, isFromTree: !fromLegacyPicker, raiseUpdatedEvent: true);
                 SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), uri.Path), ToastLength.Long);
             }));
         }
@@ -2804,24 +2789,9 @@ namespace Seeker
 
         private void SuccessfulIncompleteExternalLegacyCallback(Android.Net.Uri uri, bool fromLegacyPicker = false)
         {
-            var x = uri;
-            //StorageState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-            PreferencesState.ManualIncompleteDataDirectoryUri = uri.ToString();
-            PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree = !fromLegacyPicker;
-            //this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission);
-            DocumentFile docFile = null;
-            if (fromLegacyPicker)
-            {
-                docFile = DocumentFile.FromFile(new Java.IO.File(uri.Path));
-            }
-            else
-            {
-                docFile = DocumentFile.FromTreeUri(this, uri);
-            }
-            StorageState.RootIncompleteDocumentFile = docFile;
             this.RunOnUiThread(new Action(() =>
             {
-                StorageState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
+                StorageState.SetRootIncompleteDirectory(this, uri, isFromTree: !fromLegacyPicker, raiseUpdatedEvent: true);
                 SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), uri.Path), ToastLength.Long);
             }));
         }
@@ -3211,14 +3181,9 @@ namespace Seeker
             {
                 if (resultCode == Result.Ok)
                 {
-                    var x = data.Data;
-                    StorageState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-                    PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
-                    PreferencesState.SaveDataDirectoryUriIsFromTree = true;
-                    this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     this.RunOnUiThread(new Action(() =>
                     {
-                        StorageState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
+                        StorageState.SetRootDownloadDirectory(this, data.Data, isFromTree: true, raiseUpdatedEvent: true);
                         SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), data.Data), ToastLength.Long);
                     }));
                 }
@@ -3227,7 +3192,6 @@ namespace Seeker
             {
                 if (resultCode == Result.Ok)
                 {
-                    this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     SuccessfulWriteExternalLegacyCallback(data.Data);
                 }
             }
@@ -3237,14 +3201,9 @@ namespace Seeker
             {
                 if (resultCode == Result.Ok)
                 {
-                    var x = data.Data;
-                    StorageState.RootIncompleteDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-                    PreferencesState.ManualIncompleteDataDirectoryUri = data.Data.ToString();
-                    PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree = true;
-                    this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     this.RunOnUiThread(new Action(() =>
                     {
-                        StorageState.DirectoryUpdatedEvent?.Invoke(null, new EventArgs());
+                        StorageState.SetRootIncompleteDirectory(this, data.Data, isFromTree: true, raiseUpdatedEvent: true);
                         SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), data.Data), ToastLength.Long);
                     }));
                 }
@@ -3253,7 +3212,6 @@ namespace Seeker
             {
                 if (resultCode == Result.Ok)
                 {
-                    this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
                     SuccessfulIncompleteExternalLegacyCallback(data.Data);
                 }
             }

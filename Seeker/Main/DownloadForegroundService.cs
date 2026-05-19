@@ -21,8 +21,6 @@ namespace Seeker
     public class DownloadForegroundService : Service
     {
         public const int NOTIF_ID = 111;
-        public const string CHANNEL_ID = "my channel id";
-        public const string CHANNEL_NAME = "Foreground Download Service";
         public const string FromTransferString = "FromTransfer";
         public const int NonZeroRequestCode = 7672;
 
@@ -40,7 +38,7 @@ namespace Seeker
                 PendingIntent.GetActivity(context, NonZeroRequestCode, notifIntent, CommonHelpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            return CommonHelpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.download_in_progress), contentText, true, true);
+            return CommonHelpers.CreateNotification(context, pendingIntent, AppNotifications.CHANNEL_ID_DOWNLOAD_FOREGROUND, context.GetString(Resource.String.download_in_progress), contentText, true, true);
         }
 
         public static string PluralDownloadsRemaining
@@ -70,7 +68,7 @@ namespace Seeker
             }
             ServiceLifecycle.DownloadKeepAliveServiceRunning = true;
 
-            CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
+            CommonHelpers.CreateNotificationChannel(this, AppNotifications.CHANNEL_ID_DOWNLOAD_FOREGROUND, AppNotifications.CHANNEL_NAME_DOWNLOAD_FOREGROUND);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = null;
             int cnt = SeekerApplication.ActiveDownloadCount;
             if (cnt <= 0)

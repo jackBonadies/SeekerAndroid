@@ -21,8 +21,6 @@ namespace Seeker
     public class SeekerKeepAliveService : Service
     {
         public const int NOTIF_ID = 121;
-        public const string CHANNEL_ID = "seeker keep alive id";
-        public const string CHANNEL_NAME = "Seeker Keep Alive Service";
 
         public static Android.Net.Wifi.WifiManager.WifiLock WifiKeepAlive_FullService = null;
         public static PowerManager.WakeLock CpuKeepAlive_FullService = null;
@@ -43,7 +41,7 @@ namespace Seeker
                 PendingIntent.GetActivity(context, 0, notifIntent, CommonHelpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            return CommonHelpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.seeker_running), context.GetString(Resource.String.seeker_running_content), true, true, true);
+            return CommonHelpers.CreateNotification(context, pendingIntent, AppNotifications.CHANNEL_ID_KEEP_ALIVE, context.GetString(Resource.String.seeker_running), context.GetString(Resource.String.seeker_running_content), true, true, true);
         }
 
 
@@ -58,7 +56,7 @@ namespace Seeker
             Logger.InfoFirebase("keep alive service started...");
             ServiceLifecycle.IsStartUpServiceCurrentlyRunning = true;
 
-            CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
+            CommonHelpers.CreateNotificationChannel(this, AppNotifications.CHANNEL_ID_KEEP_ALIVE, AppNotifications.CHANNEL_NAME_KEEP_ALIVE);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = CreateNotification(this);
 
 
