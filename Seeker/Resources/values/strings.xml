@@ -579,6 +579,7 @@ Directory Count: {5}"
     <string name="wishlist_next_run_hours_minutes">next run in {0} hr {1} min</string>
     <string name="wishlist_next_run_minutes">next run in {0} min</string>
     <string name="wishlist_next_run_imminent">next run any moment</string>
+    <string name="wishlist_max_results_reached">max results reached</string>
     <string name="perform_search_first">
         Must perform a search first to add to wishlist
     </string>

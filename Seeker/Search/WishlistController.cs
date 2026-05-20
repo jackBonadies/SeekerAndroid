@@ -128,7 +128,7 @@ namespace Seeker.Search
             LastWishlistTimerRun = DateTime.UtcNow;
             if (SearchTabHelper.SearchTabCollection != null)
             {
-                var wishlistPairs = SearchTabHelper.SearchTabCollection.Where(pair => pair.Value.SearchTarget == SearchTarget.Wishlist);
+                var wishlistPairs = SearchTabHelper.SearchTabCollection.Where(pair => pair.Value.SearchTarget == SearchTarget.Wishlist && !Common.Search.WishlistUtil.IsFull(pair.Value));
                 if (wishlistPairs.Count() == 0)
                 {
                     return;

@@ -595,6 +595,10 @@ namespace Seeker
 
         private string FormatWishlistNextRunText(SearchTab tab)
         {
+            if (WishlistUtil.IsFull(tab))
+            {
+                return SeekerApplication.GetString(Resource.String.wishlist_max_results_reached);
+            }
             int intervalMs = WishlistController.SearchIntervalMilliseconds;
             if (intervalMs <= 0 || tab.LastRanTime == DateTime.MinValue)
             {
@@ -2025,6 +2029,10 @@ namespace Seeker
                             {
                                 continue;
                             }
+                            if (fromWishlist && tab.SortHelper.Count >= WishlistUtil.MaxResultsPerWishlist)
+                            {
+                                break;
+                            }
                             tab.SortHelper.Add(splitResponse);
                             if (fromWishlist)
                             {
@@ -2034,7 +2042,9 @@ namespace Seeker
                     }
                     else
                     {
-                        if (!fromWishlist || !WishlistController.OldResultsToCompare[fromTab].Contains(resp))
+                        bool isWishlistDuplicate = fromWishlist && WishlistController.OldResultsToCompare[fromTab].Contains(resp);
+                        bool wishlistFull = fromWishlist && tab.SortHelper.Count >= WishlistUtil.MaxResultsPerWishlist;
+                        if (!isWishlistDuplicate && !wishlistFull)
                         {
                             tab.SortHelper.Add(resp);
                             if (fromWishlist)
