@@ -240,6 +240,11 @@ namespace Seeker.Messages
         }
 
 
+        private static Android.Content.Res.Resources.Theme GetThemeWithFallback(Context contextToUse)
+        {
+            return SeekerState.ActiveActivityRef?.Theme ?? contextToUse.Theme;
+        }
+
         private static Color GetYouTextColor(bool useNightColors, Context contextToUse)
         {
             //for api 31+ use secondary color
@@ -247,11 +252,11 @@ namespace Seeker.Messages
             {
                 if (useNightColors)
                 {
-                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent2200, SeekerState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent2200, GetThemeWithFallback(contextToUse));
                 }
                 else
                 {
-                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent2600, SeekerState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent2600, GetThemeWithFallback(contextToUse));
                 }
             }
             else
@@ -281,11 +286,11 @@ namespace Seeker.Messages
             {
                 if (useNightColors)
                 {
-                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1200, SeekerState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1200, GetThemeWithFallback(contextToUse));
                 }
                 else
                 {
-                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1600, SeekerState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1600, GetThemeWithFallback(contextToUse));
                 }
             }
             else
@@ -294,27 +299,6 @@ namespace Seeker.Messages
                 var newTheme = contextToUse.Resources.NewTheme();
                 newTheme.ApplyStyle(ThemeHelper.GetThemeInChosenDayNightMode(useNightColors, contextToUse), true);
                 return UiHelpers.GetColorFromAttribute(contextToUse, Resource.Attribute.android_default_notification_complementary_color, newTheme);
-            }
-        }
-
-        private static Color GetActionTextColor(bool useNightColors, Context contextToUse)
-        {
-            //for api 31+ use primary color
-            if (OperatingSystem.IsAndroidVersionAtLeast(31))
-            {
-                return GetOtherTextColor(useNightColors, contextToUse);
-            }
-            else
-            {
-                //todo
-                if (useNightColors)
-                {
-                    return Color.White;
-                }
-                else
-                {
-                    return Color.Black;
-                }
             }
         }
 
