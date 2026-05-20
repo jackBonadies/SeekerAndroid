@@ -7,7 +7,12 @@
 
 [CmdletBinding()]
 param(
-    [string]$Version
+    [string]$Version,
+    [string]$KeystorePath,
+    [string]$KeyAlias,
+    [string]$KeyPass,
+    [string]$StorePass,
+    [switch]$NoGitMetadata
 )
 
 $ErrorActionPreference = "Stop"
@@ -33,10 +38,48 @@ $abiMap = @{
     "android-x86"   = "x86"
 }
 
+# --- Signing overrides (param > env var > csproj default) -----------------
+if (-not $KeystorePath) { $KeystorePath = $env:ANDROID_KEYSTORE_PATH }
+if (-not $KeyAlias)     { $KeyAlias     = $env:ANDROID_KEY_ALIAS }
+if (-not $KeyPass)      { $KeyPass      = $env:ANDROID_KEY_PASSWORD }
+if (-not $StorePass)    { $StorePass    = $env:ANDROID_KEYSTORE_PASSWORD }
+
+# --- Git-derived metadata for deterministic builds ------------------------
+$gitSha          = ""
+$sourceDateEpoch = ""
+if (-not $NoGitMetadata) {
+    try {
+        $gitSha = (& git rev-parse HEAD 2>$null).Trim()
+        $sourceDateEpoch = (& git log -1 --pretty=%ct 2>$null).Trim()
+    } catch {
+        Write-Warning "git metadata unavailable — proceeding without SourceRevisionId / SOURCE_DATE_EPOCH"
+    }
+}
+if ($sourceDateEpoch) {
+    $env:SOURCE_DATE_EPOCH = $sourceDateEpoch
+    Write-Host "SOURCE_DATE_EPOCH=$sourceDateEpoch (HEAD commit time)"
+}
+if ($gitSha) {
+    Write-Host "SourceRevisionId=$gitSha"
+}
+
+# --- Build the shared MSBuild argument list -------------------------------
+$commonArgs = @(
+    "-p:ContinuousIntegrationBuild=true",
+    "-p:Deterministic=true"
+)
+if ($gitSha) {
+    $commonArgs += "-p:SourceRevisionId=$gitSha"
+}
+if ($KeystorePath) { $commonArgs += "-p:AndroidSigningKeyStore=$KeystorePath" }
+if ($KeyAlias)     { $commonArgs += "-p:AndroidSigningKeyAlias=$KeyAlias" }
+if ($KeyPass)      { $commonArgs += "-p:AndroidSigningKeyPass=$KeyPass" }
+if ($StorePass)    { $commonArgs += "-p:AndroidSigningStorePass=$StorePass" }
+
 New-Item -ItemType Directory -Force $out | Out-Null
 
 Write-Host "==> Publishing universal APK" -ForegroundColor Cyan
-dotnet publish -c $config -f net9.0-android $csproj
+dotnet publish -c $config -f net9.0-android @commonArgs $csproj
 if ($LASTEXITCODE -ne 0) { throw "Universal publish failed." }
 
 foreach ($rid in $rids) {
@@ -50,7 +93,7 @@ foreach ($rid in $rids) {
     # -p:RuntimeIdentifiers= clears the plural value set in Seeker.csproj so
     # -r actually narrows the build to a single ABI; otherwise every per-ABI
     # APK ends up containing native libs for all four ABIs.
-    dotnet publish -c $config -f net9.0-android -r $rid -p:RuntimeIdentifiers= $csproj
+    dotnet publish -c $config -f net9.0-android -r $rid -p:RuntimeIdentifiers= @commonArgs $csproj
     if ($LASTEXITCODE -ne 0) { throw "Publish failed for $rid." }
 }
 

@@ -150,7 +150,8 @@
   </ItemGroup>
   <PropertyGroup />
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-	<Exec Command="powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File $(ProjectDir)PreBuild.ps1 &quot;$(ProjectDir)Properties\AndroidManifest.xml&quot; &quot;$(ConfigurationName)&quot;" />
+	<Exec Condition=" '$(OS)' == 'Windows_NT' " Command="powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File &quot;$(ProjectDir)PreBuild.ps1&quot; &quot;$(ProjectDir)Properties\AndroidManifest.xml&quot; &quot;$(ConfigurationName)&quot;" />
+	<Exec Condition=" '$(OS)' != 'Windows_NT' " Command="pwsh -ExecutionPolicy Bypass -NoProfile -NonInteractive -File &quot;$(ProjectDir)PreBuild.ps1&quot; &quot;$(ProjectDir)Properties/AndroidManifest.xml&quot; &quot;$(ConfigurationName)&quot;" />
   </Target>
   <Target Name="GenerateDebugSecrets" BeforeTargets="CoreCompile"
           Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug Mock'">
