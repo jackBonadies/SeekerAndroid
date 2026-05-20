@@ -3,12 +3,16 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
-    <Configurations>Debug;Release;Debug Mock</Configurations>
+    <Configurations>Debug;Release;Debug Mock;Release Mock</Configurations>
   </PropertyGroup>
 
 <PropertyGroup>
 	<LangVersion>10.0</LangVersion>
 </PropertyGroup>
+
+  <PropertyGroup Condition="$(Configuration.Contains('Mock'))">
+    <DefineConstants>$(DefineConstants);MOCK</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="MessagePack" Version="2.5.198" />
@@ -23,7 +27,7 @@
     <ProjectReference Include="..\Seeker\Soulseek.NET-master\src\Soulseek_Source.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+  <ItemGroup Condition="$(Configuration.Contains('Mock'))">
     <EmbeddedResource Include="DebugAssets\githublogo.png" />
   </ItemGroup>
 

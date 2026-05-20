@@ -1,4 +1,4 @@
-#if DEBUG
+#if MOCK
 namespace Seeker
 {
     using Soulseek;
