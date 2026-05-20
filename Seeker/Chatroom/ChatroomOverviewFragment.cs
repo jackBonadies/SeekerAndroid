@@ -22,7 +22,6 @@ namespace Seeker.Chatroom
         private static string FilterString = string.Empty;
         private View chatroomsListLoadingView = null;
         private ProgressBar refreshProgressBar = null;
-        private bool created = false;
 
         private static List<Soulseek.RoomInfo> CurrentParsedList =>
             ChatroomController.RoomListParsed ?? new List<Soulseek.RoomInfo>();
@@ -36,8 +35,6 @@ namespace Seeker.Chatroom
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             Logger.Debug("create chatroom overview view");
-            ChatroomController.RoomListReceived += OnChatListReceived;
-            ChatroomController.RoomListFailed += OnRoomListFailed;
             View rootView = inflater.Inflate(Resource.Layout.chatroom_overview, container, false);
             chatroomsListLoadingView = rootView.FindViewById<View>(Resource.Id.chatroomListLoading);
             refreshProgressBar = rootView.FindViewById<ProgressBar>(Resource.Id.chatroomListRefreshProgress);
@@ -48,6 +45,7 @@ namespace Seeker.Chatroom
             recyclerViewOverview.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
             AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(recyclerViewOverview, new BottomOnlyInsetsListener());
             recycleLayoutManager = new LinearLayoutManager(Activity);
+            HookUpOverviewEventHandlers(true);
             if (ChatroomController.RoomList == null)
             {
                 chatroomsListLoadingView.Visibility = ViewStates.Visible;
@@ -64,9 +62,6 @@ namespace Seeker.Chatroom
             recyclerViewOverview.SetAdapter(recyclerAdapter);
             recyclerViewOverview.SetLayoutManager(recycleLayoutManager);
 
-            HookUpOverviewEventHandlers(true);
-
-            created = true;
             return rootView;
         }
 
@@ -76,12 +71,16 @@ namespace Seeker.Chatroom
             ChatroomController.CurrentlyJoinedRoomHasUpdated -= OnCurrentConnectedChanged;
             ChatroomController.CurrentlyJoinedRoomsCleared -= OnCurrentConnectedCleared;
             ChatroomController.JoinedRoomsHaveUpdated -= OnJoinedRoomsHaveUpdated;
+            ChatroomController.RoomListReceived -= OnChatListReceived;
+            ChatroomController.RoomListFailed -= OnRoomListFailed;
             if (binding)
             {
                 ChatroomController.RoomNowHasUnreadMessages += OnRoomNowHasUnreadMessages;
                 ChatroomController.CurrentlyJoinedRoomHasUpdated += OnCurrentConnectedChanged;
                 ChatroomController.CurrentlyJoinedRoomsCleared += OnCurrentConnectedCleared;
                 ChatroomController.JoinedRoomsHaveUpdated += OnJoinedRoomsHaveUpdated;
+                ChatroomController.RoomListReceived += OnChatListReceived;
+                ChatroomController.RoomListFailed += OnRoomListFailed;
             }
         }
 
@@ -126,7 +125,10 @@ namespace Seeker.Chatroom
             Logger.Debug("overview on resume");
             Logger.Debug("hook up chat overview event handlers ");
             HookUpOverviewEventHandlers(true);
+            ChatroomController.RefreshParsedList();
+            UpdateChatroomList();
             recyclerAdapter?.NotifyDataSetChanged();
+            SetRefreshProgressVisible(ChatroomController.IsRoomListLoading);
             base.OnResume();
         }
 
@@ -192,21 +194,6 @@ namespace Seeker.Chatroom
         }
 
 
-
-        public override void OnAttach(Context activity)
-        {
-            if (created) //attach can happen before we created our view...
-            {
-                ChatroomController.RefreshParsedList();
-                UpdateChatroomList();
-                Logger.Debug("on chatroom overview attach");
-                ChatroomController.RoomListReceived -= OnChatListReceived;
-                ChatroomController.RoomListReceived += OnChatListReceived;
-                ChatroomController.RoomListFailed -= OnRoomListFailed;
-                ChatroomController.RoomListFailed += OnRoomListFailed;
-            }
-            base.OnAttach(activity);
-        }
 
         private sealed class OverviewMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
         {
