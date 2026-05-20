@@ -231,7 +231,7 @@ namespace Seeker.Browse
                 errorMsgToToast = String.Empty;
                 #if DEBUG
                 var data = MessagePackSerializer.Serialize(b, options: SerializationHelper.BrowseResponseOptions);
-                FileSystemService.Instance.SaveToFile(username + ".mpk", username, data, null, null, true, 0, true, out string _);
+                FileSystemService.Instance.SaveToFile(username + ".mpk", username, new ArraySegment<byte>(data), null, null, true, 0, true, out string _);
                 #endif
                 rootNode = BrowseUtils.CreateTreeFromFlatList(b, filter, wordsToAvoid, wordsToInclude, username, hideLocked);
             }

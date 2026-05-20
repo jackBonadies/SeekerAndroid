@@ -858,16 +858,16 @@ namespace Seeker.Services
                     bool noSubfolder = e.dlInfo.TransferItemReference.TransferItemExtra.HasFlag(Transfers.TransferItemExtras.NoSubfolder);
                     if (e.dlInfo.OutputMemoryStream != null)
                     {
-                        byte[] bytes = e.dlInfo.OutputMemoryStream.ToArray();
+                        e.dlInfo.OutputMemoryStream.TryGetBuffer(out ArraySegment<byte> bytes);
+                        string path = fileSystemService.SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, bytes, null, null, true, e.dlInfo.Depth, noSubfolder, out finalUri);
                         e.dlInfo.OutputMemoryStream.Dispose();
                         e.dlInfo.OutputMemoryStream = null;
-                        string path = fileSystemService.SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, bytes, null, null, true, e.dlInfo.Depth, noSubfolder, out finalUri);
                         fileSystemService.SaveFileToMediaStore(path);
                     }
                     else if (e.dlInfo.TransferItemReference?.IncompleteUri != null)
                     {
                         //move file from incomplete to final location...
-                        string path = fileSystemService.SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, null, e.dlInfo.TransferItemReference.IncompleteUri, e.dlInfo.TransferItemReference.IncompleteParentUri, false, e.dlInfo.Depth, noSubfolder, out finalUri);
+                        string path = fileSystemService.SaveToFile(e.dlInfo.fullFilename, e.dlInfo.username, default, e.dlInfo.TransferItemReference.IncompleteUri, e.dlInfo.TransferItemReference.IncompleteParentUri, false, e.dlInfo.Depth, noSubfolder, out finalUri);
                         fileSystemService.SaveFileToMediaStore(path);
                     }
                     else
