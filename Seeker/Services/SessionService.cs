@@ -109,6 +109,7 @@ namespace Seeker.Services
         /// <summary>
         /// Extended reconnect-then-act pattern. Handles disconnected, mid-login, and connected states.
         /// The caller provides a continuation that handles both fault propagation and the real action.
+        /// The continutationAction will always get called
         /// </summary>
         public void RunWithReconnect(Action<Task> continuationAction, string loggingInMsg = null, Context contextForMsg = null)
         {
@@ -116,7 +117,10 @@ namespace Seeker.Services
             {
                 Task t;
                 if (!ShowMessageAndCreateReconnectTask(false, out t))
+                {
+                    Task.FromException(new Exception("could not start reconnect")).ContinueWith(continuationAction);
                     return;
+                }
                 SeekerApplication.OurCurrentLoginTask = t.ContinueWith(continuationAction);
             }
             else if (IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(continuationAction, loggingInMsg, contextForMsg))
