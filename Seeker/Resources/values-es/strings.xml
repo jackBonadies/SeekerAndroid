@@ -706,7 +706,6 @@ Directorio: {5}
     </string>
     <string name="sending__">Enviando...</string>
     <string name="give_hint"># de días</string>
-    <string name="type_notes_here">escriba las notas sobre el usuario aquí</string>
     <string name="edit_note">Editar Nota</string>
     <string name="add_note">Agregar Nota</string>
     <string name="note_title">Nota de {0}</string>

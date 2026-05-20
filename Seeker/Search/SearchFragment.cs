@@ -30,6 +30,13 @@ namespace Seeker
 {
     public partial class SearchFragment : Fragment
     {
+        public static event EventHandler<EventArgs> SearchHistoryCleared;
+
+        public static void RaiseSearchHistoryCleared()
+        {
+            SearchHistoryCleared?.Invoke(null, EventArgs.Empty);
+        }
+
         public View rootView = null;
         private ViewFlipper searchEmptyStateFlipper = null;
         private TextView noResultsSubtitle = null;
@@ -69,6 +76,8 @@ namespace Seeker
                 MainActivity.goToSearchTab = int.MaxValue;
             }
             RefreshWishlistBanner();
+            SearchHistoryCleared += OnSearchHistoryCleared;
+            RefreshSearchHistoryDropdown();
         }
 
         private void ClearFilterStringAndCached(bool force = false)
@@ -321,12 +330,12 @@ namespace Seeker
                     Logger.Debug("filtering...");
                     UpdateFilteredResponses(searchTab);
                 }
-                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(searchTab, searchTab.UI_SearchResponses));
+                recyclerViewSearch.SetAdapter(CreateSearchAdapter(searchTab, searchTab.UI_SearchResponses));
             }
             else
             {
                 searchTab.UI_SearchResponses = responsesForRender.ToList();
-                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(searchTab, searchTab.UI_SearchResponses));
+                recyclerViewSearch.SetAdapter(CreateSearchAdapter(searchTab, searchTab.UI_SearchResponses));
             }
 
             SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(searchTab.ChipDataItems ?? new List<ChipDataItem>());
@@ -927,18 +936,18 @@ namespace Seeker
             v.FocusableInTouchMode = true;
             b.Click += B_Click;
 
-            recyclerViewTransferItems = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches);
+            recyclerViewSearch = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewSearches);
             recycleLayoutManager = new LinearLayoutManager(Activity);
-            recyclerViewTransferItems.SetItemAnimator(null); //todo
-            recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
+            recyclerViewSearch.SetItemAnimator(null); //todo
+            recyclerViewSearch.SetLayoutManager(recycleLayoutManager);
             if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
             {
-                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
+                recyclerViewSearch.SetAdapter(CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
             }
             else
             {
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses.ToList();
-                recyclerViewTransferItems.SetAdapter(CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
+                recyclerViewSearch.SetAdapter(CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
             }
 
             searchResultsHeaderView = rootView.FindViewById<View>(Resource.Id.searchResultsHeader);
@@ -955,11 +964,6 @@ namespace Seeker
             UpdateEmptyState();
             RefreshWishlistBanner();
 
-            SeekerState.ClearSearchHistoryEventsFromTarget(this);
-            SeekerState.ClearSearchHistory += SeekerState_ClearSearchHistory;
-            SeekerState.SoulseekClient.ClearSearchResponseReceivedFromTarget(this);
-            int x = SeekerState.SoulseekClient.GetInvocationListOfSearchResponseReceived();
-            Logger.Debug("NUMBER OF DELEGATES AFTER WE REMOVED OURSELF: (before doing the deep clear this would increase every rotation orientation)" + x);
             Logger.Debug("SearchFragmentOnCreateViewEnd - SearchResponses.Count=" + SearchTabHelper.SearchResponses.Count);
 
             EditText filterText = rootView.FindViewById<EditText>(Resource.Id.filterText);
@@ -1504,26 +1508,19 @@ namespace Seeker
                 lock (SearchTabHelper.SortHelperLockObject) //this is also always going to be on the UI thread. so we have that guaranteeing safety. 
                 {
                     SearchTabHelper.SortHelperSorting = searchResultSorting;
-                    SearchTabHelper.SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist(SearchTabHelper.SortHelperSorting));
+                    SearchTabHelper.SortHelper = new SortedSet<SearchResponse>(new SearchResultComparableWishlist(SearchTabHelper.SortHelperSorting));
 
                     //put all the search responses into the new sort helper
                     if (SearchTabHelper.SearchResponses != null)
                     {
                         foreach (var searchResponse in SearchTabHelper.SearchResponses)
                         {
-                            if (!SearchTabHelper.SortHelper.ContainsKey(searchResponse))
-                            {
-                                SearchTabHelper.SortHelper.Add(searchResponse, null);
-                            }
-                            else
-                            {
-
-                            }
+                            SearchTabHelper.SortHelper.Add(searchResponse);
                         }
                     }
 
                     //now that they are sorted, replace them.
-                    SearchTabHelper.SearchResponses = SearchTabHelper.SortHelper.Keys.ToList();
+                    SearchTabHelper.SearchResponses = SearchTabHelper.SortHelper.ToList();
 
                     if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
                     {
@@ -1556,7 +1553,7 @@ namespace Seeker
             View viewInflated = LayoutInflater.From(toUse).Inflate(Resource.Layout.changeusertarget, this.rootView as ViewGroup, false);
             chooseUserInput = viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserInput);
             chooseUserInputLayout = viewInflated.FindViewById<View>(Resource.Id.chosenUserInputLayout);
-            SeekerApplication.SetupRecentUserAutoCompleteTextView(chooseUserInput);
+            UiHelpers.SetupRecentUserAutoCompleteTextView(chooseUserInput);
             targetRoomInput = viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.targetRoomInput);
             targetRoomInputLayout = viewInflated.FindViewById<View>(Resource.Id.targetRoomInputLayout);
             List<string> joinedRooms = ChatroomController.JoinedRoomNames?.ToList() ?? new List<string>();
@@ -1608,7 +1605,7 @@ namespace Seeker
                 SetSearchHintTarget(SearchTabHelper.SearchTarget, (this.Activity as AndroidX.AppCompat.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere)); //in case of hitting choose user, you still have to update the name (since that gets input after clicking radio button)...
                 if (SearchTabHelper.SearchTarget == SearchTarget.ChosenUser && !string.IsNullOrEmpty(SearchTabHelper.SearchTargetChosenUser))
                 {
-                    SeekerState.RecentUsersManager.AddUserToTop(SearchTabHelper.SearchTargetChosenUser, true);
+                    UserMetadataService.RecentUsersManager.AddUserToTop(SearchTabHelper.SearchTargetChosenUser, true);
                 }
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {
@@ -1790,15 +1787,16 @@ namespace Seeker
             NotifySearchHeaderChanged();
         }
 
-        private void SeekerState_ClearSearchHistory(object sender, EventArgs e)
+        private void RefreshSearchHistoryDropdown()
         {
-            PreferencesState.SearchHistory = new List<string>();
-            PreferencesManager.ClearSearchHistory();
-            if (SeekerState.MainActivityRef?.SupportActionBar?.CustomView != null)
-            {
-                AutoCompleteTextView actv = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
-                actv.Adapter = new ArrayAdapter<string>(context, Resource.Layout.search_dropdown_item, PreferencesState.SearchHistory);
-            }
+            if (SeekerState.MainActivityRef?.SupportActionBar?.CustomView == null) return;
+            AutoCompleteTextView actv = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
+            actv.Adapter = new ArrayAdapter<string>(context, Resource.Layout.search_dropdown_item, PreferencesState.SearchHistory);
+        }
+
+        private void OnSearchHistoryCleared(object sender, EventArgs e)
+        {
+            RefreshSearchHistoryDropdown();
         }
 
         public override void OnPause()
@@ -1808,6 +1806,7 @@ namespace Seeker
             PreferencesManager.SaveSearchFragmentFilterState(PreferencesState.FilterSticky, SearchTabHelper.TextFilter.FilterString, (int)PreferencesState.SearchResultStyle, ExpandAllResults);
             StopWishlistBannerTicker();
             StopSpinnerTimer();
+            SearchHistoryCleared -= OnSearchHistoryCleared;
         }
 
         private static void Actv_KeyPressHELPER(object sender, View.KeyEventArgs e)
@@ -1910,7 +1909,7 @@ namespace Seeker
                 SearchFragment.Instance.ClearFilterStringAndCached();
 
                 SearchTabHelper.UI_SearchResponses = SearchTabHelper.SearchResponses?.ToList();
-                SearchFragment.Instance.recyclerViewTransferItems.SetAdapter(SearchFragment.Instance.CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
+                SearchFragment.Instance.recyclerViewSearch.SetAdapter(SearchFragment.Instance.CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
 
                 SearchFragment.Instance.recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
                 SearchFragment.Instance.recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
@@ -1933,7 +1932,7 @@ namespace Seeker
         }
 
         private RecyclerView.LayoutManager recycleLayoutManager;
-        private RecyclerView recyclerViewTransferItems;
+        private RecyclerView recyclerViewSearch;
         private SearchAdapterRecyclerVersion recyclerSearchAdapter;
         private View searchResultsHeaderView;
 
@@ -1976,7 +1975,7 @@ namespace Seeker
             var prevList = GetOldList(cacheKey);
             if (prevList == null)
             {
-                Instance.recyclerViewTransferItems.SetAdapter(Instance.CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, newResults));
+                Instance.recyclerViewSearch.SetAdapter(Instance.CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, newResults));
             }
             else
             {
@@ -2004,18 +2003,18 @@ namespace Seeker
         private static void AddIncomingSearchResponseImp(SearchResponse resp, int fromTab, bool fromWishlist)
         {
             var tab = SearchTabHelper.SearchTabCollection[fromTab];
+            Tuple<bool, List<SearchResponse>> splitResponses = new Tuple<bool, List<SearchResponse>>(false, null);
+            try
+            {
+                splitResponses = Common.SearchResponseUtil.SplitMultiDirResponse(PreferencesState.HideLockedResultsInSearch, resp);
+            }
+            catch (System.Exception e)
+            {
+                Logger.Firebase(e.Message + " splitmultidirresponse");
+            }
+
             lock (tab.SortHelperLockObject)
             {
-                Tuple<bool, List<SearchResponse>> splitResponses = new Tuple<bool, List<SearchResponse>>(false, null);
-                try
-                {
-                    splitResponses = Common.SearchResponseUtil.SplitMultiDirResponse(PreferencesState.HideLockedResultsInSearch, resp);
-                }
-                catch (System.Exception e)
-                {
-                    Logger.Firebase(e.Message + " splitmultidirresponse");
-                }
-
                 try
                 {
                     if (splitResponses.Item1)
@@ -2026,7 +2025,7 @@ namespace Seeker
                             {
                                 continue;
                             }
-                            tab.SortHelper.Add(splitResponse, null);
+                            tab.SortHelper.Add(splitResponse);
                             if (fromWishlist)
                             {
                                 tab.UnseenResults.Add(splitResponse);
@@ -2037,7 +2036,7 @@ namespace Seeker
                     {
                         if (!fromWishlist || !WishlistController.OldResultsToCompare[fromTab].Contains(resp))
                         {
-                            tab.SortHelper.Add(resp, null);
+                            tab.SortHelper.Add(resp);
                             if (fromWishlist)
                             {
                                 tab.UnseenResults.Add(resp);
@@ -2050,63 +2049,63 @@ namespace Seeker
                     Logger.Debug(e.Message);
                 }
 
-                tab.SearchResponses = tab.SortHelper.Keys.ToList();
+                tab.SearchResponses = tab.SortHelper.ToList();
                 tab.LastSearchResultsCount = tab.SearchResponses.Count;
             }
 
             if ((!fromWishlist || SearchFragment.Instance != null) && fromTab == SearchTabHelper.CurrentTab)
             {
-                Action a = new Action(() =>
-                {
-#if DEBUG
-                    Seeker.SearchFragment.StopWatch.Stop();
-                    Seeker.SearchFragment.StopWatch.Reset();
-                    Seeker.SearchFragment.StopWatch.Start();
-#endif
-                    if (fromTab != SearchTabHelper.CurrentTab)
-                    {
-                        return;
-                    }
-                    int total = tab.SearchResponses.Count;
-                    if (tab.LastSearchResponseCount == total)
-                    {
-                        return;
-                    }
-
-                    if (tab.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
-                    {
-                        SearchFragment.Instance.UpdateFilteredResponses(tab);
-                        ApplySearchResults(tab.UI_SearchResponses, tab.TextFilter.FilterString);
-                    }
-                    else
-                    {
-                        tab.UI_SearchResponses = tab.SearchResponses.ToList();
-                        ApplySearchResults(tab.UI_SearchResponses, null);
-                    }
-                    tab.LastSearchResponseCount = total;
-#if DEBUG
-                    Seeker.SearchFragment.StopWatch.Stop();
-                    Seeker.SearchFragment.StopWatch.Reset();
-                    Seeker.SearchFragment.StopWatch.Start();
-#endif
-                });
-
-                SeekerState.MainActivityRef?.RunOnUiThread(a);
-
+                ScheduleDebouncedRefresh(fromTab, tab);
             }
 
         }
 
-        public static System.Diagnostics.Stopwatch StopWatch = new System.Diagnostics.Stopwatch();
+        // Coalesces per-response UI refreshes during a burst. The first response in a quiet
+        // window schedules a refresh; subsequent responses arriving during the window are
+        // absorbed (their data is already in tab.SortHelper and tab.SearchResponses, which
+        // the scheduled refresh re-reads at fire time). The pending flag is cleared before
+        // the work runs, so any response arriving mid-render schedules the next refresh.
+        private static readonly Handler _refreshUiHandler = new Handler(Looper.MainLooper);
+        private static int _refreshPending; // 0 or 1
+        private const int RefreshDebounceMs = 100;
 
-        private void Lv_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
+        private static void ScheduleDebouncedRefresh(int fromTab, SearchTab tab)
         {
-            showEditDialog(e.Position);
+            if (Interlocked.CompareExchange(ref _refreshPending, 1, 0) != 0)
+            {
+                return;
+            }
+            _refreshUiHandler.PostDelayed(new Action(() =>
+            {
+                Interlocked.Exchange(ref _refreshPending, 0);
+                if (fromTab != SearchTabHelper.CurrentTab)
+                {
+                    return;
+                }
+                int total = tab.SearchResponses.Count;
+                if (tab.LastSearchResponseCount == total)
+                {
+                    return;
+                }
+                if (tab.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
+                {
+                    SearchFragment.Instance.UpdateFilteredResponses(tab);
+                    ApplySearchResults(tab.UI_SearchResponses, tab.TextFilter.FilterString);
+                }
+                else
+                {
+                    tab.UI_SearchResponses = tab.SearchResponses.ToList();
+                    ApplySearchResults(tab.UI_SearchResponses, null);
+                }
+                tab.LastSearchResponseCount = total;
+            }), RefreshDebounceMs);
         }
+
+        public static System.Diagnostics.Stopwatch StopWatch = new System.Diagnostics.Stopwatch();
 
         public static bool dlDialogShown = false;
 
-        public void showEditDialog(int pos)
+        public void ShowDownloadDialog(int pos)
         {
             try
             {
@@ -2354,7 +2353,7 @@ namespace Seeker
 #if DEBUG
                             try
                             {
-                                var df = SeekerState.RootDocumentFile.CreateFile("text/plain", SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm.Replace(' ', '_'));
+                                var df = StorageState.RootDocumentFile.CreateFile("text/plain", SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm.Replace(' ', '_'));
                                 var outputStream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(df.Uri);
                                 foreach (var sr in SearchTabHelper.SearchTabCollection[fromTab].SearchResponses)
                                 {

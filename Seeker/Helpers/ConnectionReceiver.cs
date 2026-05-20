@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2021 Seeker
  *
  * This file is part of Seeker
@@ -37,12 +37,12 @@ namespace Seeker
             string action = intent?.Action;
             if (action != null && action == ConnectivityManager.ConnectivityAction)
             {
-                bool changed = SeekerApplication.SetNetworkState(context);
+                bool changed = NetworkStateService.SetNetworkState(context);
                 if (changed)
                 {
                     Logger.Debug("metered state changed.. lets set up our handlers and inform server..");
                     SharingService.SetUnsetSharingBasedOnConditions(true);
-                    SeekerState.SharingStatusChangedEvent?.Invoke(null, new EventArgs());
+                    SharedFileService.SharingStatusChangedEvent?.Invoke(null, new EventArgs());
                 }
 
 #if DEBUG

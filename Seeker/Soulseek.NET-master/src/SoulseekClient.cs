@@ -528,43 +528,6 @@ namespace Soulseek
 
 
         /// <summary>
-        /// a
-        /// </summary>
-        /// <returns></returns>
-        public int GetInvocationListOfSearchResponseReceived()
-        {
-            if(SearchResponseReceived!=null)
-            {
-                return SearchResponseReceived.GetInvocationList().Length;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
-        /// <summary>
-        /// a
-        /// </summary>
-        public void ClearSearchResponseReceivedFromTarget(object target)
-        {
-            if (SearchResponseReceived == null)
-            {
-                return;
-            }
-            else
-            {
-                foreach (Delegate d in SearchResponseReceived.GetInvocationList())
-                {
-                    if (d.Target.GetType() == target.GetType())
-                    {
-                        SearchResponseReceived -= (EventHandler<SearchResponseReceivedEventArgs>)d;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Is Transfer In Downloads.  If so we need to cancel it before retrying it.
         /// </summary>
         /// <param name="username"></param>

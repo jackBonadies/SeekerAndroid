@@ -1,4 +1,4 @@
-using Android.Content;
+﻿using Android.Content;
 using Android.Provider;
 using Java.IO;
 using AndroidX.DocumentFile.Provider;
@@ -46,21 +46,21 @@ namespace Seeker.Services
             }
 
             bool fileExists = false;
-            if (SeekerState.UseLegacyStorage() && (SeekerState.RootDocumentFile == null && useDownloadDir))
+            if (PlatformInfo.UseLegacyStorage() && (StorageState.RootDocumentFile == null && useDownloadDir))
             {
                 Java.IO.File incompleteDir = null;
                 Java.IO.File musicDir = null;
                 try
                 {
                     string rootdir = string.Empty;
-                    //if (SeekerState.RootDocumentFile==null)
+                    //if (StorageState.RootDocumentFile==null)
                     //{
                     rootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
                     //}
                     //else
                     //{
                     //    rootdir = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                    //    rootdir = SeekerState.RootDocumentFile.Uri.Path; //returns junk...
+                    //    rootdir = StorageState.RootDocumentFile.Uri.Path; //returns junk...
                     //}
 
                     if (!(new Java.IO.File(rootdir)).Exists())
@@ -118,7 +118,7 @@ namespace Seeker.Services
                 bool diagRootDirExistsAndCanWrite = false;
                 bool diagDidWeCreateSoulSeekDir = false;
                 bool diagSlskDirExistsAfterCreation = false;
-                bool rootDocumentFileIsNull = SeekerState.RootDocumentFile == null;
+                bool rootDocumentFileIsNull = StorageState.RootDocumentFile == null;
 
                 if (rootDocumentFileIsNull)
                 {
@@ -130,7 +130,7 @@ namespace Seeker.Services
                 {
                     if (useDownloadDir)
                     {
-                        rootdir = SeekerState.RootDocumentFile;
+                        rootdir = StorageState.RootDocumentFile;
                         Logger.Debug("using download dir" + rootdir.Uri.LastPathSegment);
                     }
                     else if (useTempDir)
@@ -141,7 +141,7 @@ namespace Seeker.Services
                     }
                     else if (useCustomDir)
                     {
-                        rootdir = SeekerState.RootIncompleteDocumentFile;
+                        rootdir = StorageState.RootIncompleteDocumentFile;
                         Logger.Debug("using custom incomplete dir" + rootdir.Uri.LastPathSegment);
                     }
                     else
@@ -220,9 +220,9 @@ namespace Seeker.Services
                             if (folderDir1 == null)
                             {
                                 string rootUri = string.Empty;
-                                if (SeekerState.RootDocumentFile != null)
+                                if (StorageState.RootDocumentFile != null)
                                 {
-                                    rootUri = SeekerState.RootDocumentFile.Uri.ToString();
+                                    rootUri = StorageState.RootDocumentFile.Uri.ToString();
                                 }
                                 bool slskDirExistsWriteable = false;
                                 if (slskDir1 != null)
@@ -254,11 +254,11 @@ namespace Seeker.Services
                 }
                 catch (Exception e)
                 {
-                    string rootDirUri = SeekerState.RootDocumentFile?.Uri == null ? "null" : SeekerState.RootDocumentFile.Uri.ToString();
+                    string rootDirUri = StorageState.RootDocumentFile?.Uri == null ? "null" : StorageState.RootDocumentFile.Uri.ToString();
                     Logger.Firebase("Filesystem Issue: " + rootDirUri + " " + e.Message + diagSlskDirExistsAfterCreation + diagRootDirExistsAndCanWrite + diagDidWeCreateSoulSeekDir + rootDocumentFileIsNull + e.StackTrace);
                 }
 
-                if (rootdir == null && !SeekerState.UseLegacyStorage())
+                if (rootdir == null && !PlatformInfo.UseLegacyStorage())
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.seeker_cannot_access_files), Android.Widget.ToastLength.Long);
                 }
@@ -299,7 +299,7 @@ namespace Seeker.Services
 
         private System.IO.Stream OpenIncompleteStreamInternal(Android.Net.Uri incompleteUri, long partialLength)
         {
-            if (SeekerState.UseLegacyStorage() && incompleteUri.Scheme == "file")
+            if (PlatformInfo.UseLegacyStorage() && incompleteUri.Scheme == "file")
             {
                 string filePath = incompleteUri.Path;
                 if (partialLength > 0)
@@ -408,8 +408,8 @@ namespace Seeker.Services
                 Logger.Firebase("no URI in file mode");
             }
             finalUri = string.Empty;
-            if (SeekerState.UseLegacyStorage() &&
-                (SeekerState.RootDocumentFile == null && !SettingsActivity.UseIncompleteManualFolder())) //if the user didnt select a complete OR incomplete directory. i.e. pure java files.
+            if (PlatformInfo.UseLegacyStorage() &&
+                (StorageState.RootDocumentFile == null && !SettingsActivity.UseIncompleteManualFolder())) //if the user didnt select a complete OR incomplete directory. i.e. pure java files.
             {
 
                 //this method works just fine if coming from a temp dir.  just not a open doc tree dir.
@@ -460,7 +460,7 @@ namespace Seeker.Services
             {
                 bool useLegacyDocFileToJavaFileOverride = false;
                 DocumentFile legacyRootDir = null;
-                if (SeekerState.UseLegacyStorage() && SeekerState.RootDocumentFile == null && SettingsActivity.UseIncompleteManualFolder())
+                if (PlatformInfo.UseLegacyStorage() && StorageState.RootDocumentFile == null && SettingsActivity.UseIncompleteManualFolder())
                 {
                     //this means that even though rootfile is null, manual folder is set and is a docfile.
                     //so we must wrap the default root doc file.
@@ -491,10 +491,10 @@ namespace Seeker.Services
                 bool diagRootDirExists = true;
                 bool diagDidWeCreateSoulSeekDir = false;
                 bool diagSlskDirExistsAfterCreation = true;
-                bool rootDocumentFileIsNull = SeekerState.RootDocumentFile == null;
+                bool rootDocumentFileIsNull = StorageState.RootDocumentFile == null;
                 try
                 {
-                    rootdir = SeekerState.RootDocumentFile;
+                    rootdir = StorageState.RootDocumentFile;
 
                     if (useLegacyDocFileToJavaFileOverride)
                     {
@@ -606,7 +606,7 @@ namespace Seeker.Services
                     Logger.Firebase("Filesystem Issue: " + e.Message + diagSlskDirExistsAfterCreation + diagRootDirExists + diagDidWeCreateSoulSeekDir + rootDocumentFileIsNull + PreferencesState.CreateUsernameSubfolders);
                 }
 
-                if (rootdir == null && !SeekerState.UseLegacyStorage())
+                if (rootdir == null && !PlatformInfo.UseLegacyStorage())
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.seeker_cannot_access_files), Android.Widget.ToastLength.Long);
                 }
@@ -634,9 +634,9 @@ namespace Seeker.Services
 
                     //106ms for 32mb
                     Android.Net.Uri uri = null;
-                    if (SeekerState.PreMoveDocument() ||
+                    if (PlatformInfo.PreMoveDocument() ||
                         SettingsActivity.UseTempDirectory() || //i.e. if use temp dir which is file: // rather than content: //
-                        (SeekerState.UseLegacyStorage() && SettingsActivity.UseIncompleteManualFolder() && SeekerState.RootDocumentFile == null) || //i.e. if use complete dir is file: // rather than content: // but Incomplete is content: //
+                        (PlatformInfo.UseLegacyStorage() && SettingsActivity.UseIncompleteManualFolder() && StorageState.RootDocumentFile == null) || //i.e. if use complete dir is file: // rather than content: // but Incomplete is content: //
                         CommonHelpers.CompleteIncompleteDifferentVolume() || !PreferencesState.ManualIncompleteDataDirectoryUriIsFromTree || !PreferencesState.SaveDataDirectoryUriIsFromTree)
                     {
                         try

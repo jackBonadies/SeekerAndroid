@@ -1,20 +1,29 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="@dimen/abc_control_padding_material"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="0dp"
 >
-    <EditText
-        android:minLines="1"
-        android:lines="4"
-        android:maxLines="4"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/type_notes_here"
-        android:inputType="textMultiLine"
-        android:id="@+id/editUserNote"
-    />
+        android:hint="@string/user_note"
+    >
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editUserNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minLines="2"
+            android:maxLines="4"
+            android:gravity="top|start"
+            android:scrollbars="vertical"
+            android:inputType="textMultiLine|textCapSentences"
+        />
+    </com.google.android.material.textfield.TextInputLayout>
 </FrameLayout>

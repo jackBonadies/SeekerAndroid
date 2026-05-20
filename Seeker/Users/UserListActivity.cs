@@ -56,19 +56,6 @@ namespace Seeker
             this.recyclerAdapter.NotifyItemChanged(i);
         }
 
-        public Action GetUpdateUserListItemActionExternal(string username) => GetUpdateUserListItemAction(username);
-
-        public void NotifyItemRemovedExternal(string username) => NotifyItemRemoved(username);
-
-        private Action GetUpdateUserListItemAction(string username)
-        {
-            Action a = new Action(() =>
-            {
-                NotifyItemChanged(username);
-            });
-            return a;
-        }
-
         private void NotifyItemRemoved(string username)
         {
             int i = this.recyclerAdapter.GetPositionForUsername(username);
@@ -189,6 +176,9 @@ namespace Seeker
         protected override void OnPause()
         {
             SeekerApplication.UserStatusChangedUIEvent -= OnUserStatusChanged;
+            UserListService.UserListChanged -= OnUserListChanged;
+            UserListService.IgnoreListChanged -= OnIgnoreListChanged;
+            UserListService.UserRowChanged -= OnUserRowChanged;
             base.OnPause();
         }
 
@@ -196,7 +186,56 @@ namespace Seeker
         {
             RefreshUserList();
             SeekerApplication.UserStatusChangedUIEvent += OnUserStatusChanged;
+            UserListService.UserListChanged += OnUserListChanged;
+            UserListService.IgnoreListChanged += OnIgnoreListChanged;
+            UserListService.UserRowChanged += OnUserRowChanged;
             base.OnResume();
+        }
+
+        private void OnUserListChanged(object sender, UserListChangedEventArgs e)
+        {
+            HandleListChange(e, friendList: true);
+        }
+
+        private void OnIgnoreListChanged(object sender, UserListChangedEventArgs e)
+        {
+            HandleListChange(e, friendList: false);
+        }
+
+        private void HandleListChange(UserListChangedEventArgs e, bool friendList)
+        {
+            if (!MainActivity.OnUIthread())
+            {
+                SeekerState.ActiveActivityRef.RunOnUiThread(() => HandleListChange(e, friendList));
+                return;
+            }
+            if (e.ChangeType == UserListChangeType.Removed)
+            {
+                int sectionCount = friendList ? CommonState.UserList.Count : CommonState.IgnoreUserList.Count;
+                if (sectionCount == 0)
+                {
+                    // last item in the section — rebuild so the category header is removed too
+                    RefreshUserList();
+                }
+                else
+                {
+                    NotifyItemRemoved(e.Username);
+                }
+            }
+            else
+            {
+                RefreshUserList();
+            }
+        }
+
+        private void OnUserRowChanged(object sender, string username)
+        {
+            if (!MainActivity.OnUIthread())
+            {
+                SeekerState.ActiveActivityRef.RunOnUiThread(() => OnUserRowChanged(null, username));
+                return;
+            }
+            NotifyItemChanged(username);
         }
 
         public override bool OnNavigateUp()
@@ -309,7 +348,7 @@ namespace Seeker
             var rootView = (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView;
             View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.autocomplete_user_dialog_content, rootView, false);
             AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
-            SeekerApplication.SetupRecentUserAutoCompleteTextView(input, true);
+            UiHelpers.SetupRecentUserAutoCompleteTextView(input, true);
             // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
             builder.SetView(viewInflated);
 
@@ -323,16 +362,15 @@ namespace Seeker
                         return;
                     }
 
-                    SeekerApplication.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, input.Text.ToString());
-                    SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() => { RefreshUserList(); }));
+                    UserListService.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, input.Text.ToString());
                 }
                 else
                 {
                     if (input.Text != String.Empty)
                     {
-                        SeekerState.RecentUsersManager.AddUserToTop(input.Text, true);
+                        UserMetadataService.RecentUsersManager.AddUserToTop(input.Text, true);
                     }
-                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, input.Text, new Action(() => { RefreshUserList(); }));
+                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, input.Text, null);
                 }
             });
             EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>

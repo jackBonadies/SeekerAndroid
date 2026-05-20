@@ -14,7 +14,7 @@
     <AssemblyVersion>1.1.0.0</AssemblyVersion>
     <FileVersion>1.1.0.0</FileVersion>
 	<NoWarn>$(NoWarn);SYSLIB0011</NoWarn>
-	<Configurations>Debug;Debug Mock;Release;Release IzzySoft</Configurations>
+	<Configurations>Debug;Debug Mock;Release;Release Mock;Release IzzySoft</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
@@ -48,6 +48,18 @@
     <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
     <MonoSymbolArchive>True</MonoSymbolArchive>
     <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Mock|AnyCPU' ">
+    <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
+    <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
+    <RunAOTCompilation>false</RunAOTCompilation>
+    <EnableLLVM>false</EnableLLVM>
+    <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+    <AndroidUseAapt2>true</AndroidUseAapt2>
+    <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
+    <MonoSymbolArchive>True</MonoSymbolArchive>
+    <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
+    <DefineConstants>MOCK</DefineConstants>
   </PropertyGroup>
 	<PropertyGroup>
 		<AndroidKeyStore>true</AndroidKeyStore>
@@ -138,7 +150,8 @@
   </ItemGroup>
   <PropertyGroup />
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-	<Exec Command="powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File $(ProjectDir)PreBuild.ps1 &quot;$(ProjectDir)Properties\AndroidManifest.xml&quot; &quot;$(ConfigurationName)&quot;" />
+	<Exec Condition=" '$(OS)' == 'Windows_NT' " Command="powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File &quot;$(ProjectDir)PreBuild.ps1&quot; &quot;$(ProjectDir)Properties\AndroidManifest.xml&quot; &quot;$(ConfigurationName)&quot;" />
+	<Exec Condition=" '$(OS)' != 'Windows_NT' " Command="pwsh -ExecutionPolicy Bypass -NoProfile -NonInteractive -File &quot;$(ProjectDir)PreBuild.ps1&quot; &quot;$(ProjectDir)Properties/AndroidManifest.xml&quot; &quot;$(ConfigurationName)&quot;" />
   </Target>
   <Target Name="GenerateDebugSecrets" BeforeTargets="CoreCompile"
           Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug Mock'">

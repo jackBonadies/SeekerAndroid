@@ -1,4 +1,4 @@
-using Android.App;
+﻿using Android.App;
 using Android.Content;
 using AndroidX.Core.App;
 using AndroidX.DocumentFile.Provider;
@@ -14,6 +14,48 @@ using System.Threading.Tasks;
 using Common;
 namespace Seeker.Services
 {
+    public class NotifInfo
+    {
+        public NotifInfo(string firstDir)
+        {
+            NOTIF_ID_FOR_USER = UploadNotificationTracker.NextId();
+            FilesUploadedToUser = 1;
+            DirNames = new List<string> { firstDir };
+        }
+        public int NOTIF_ID_FOR_USER;
+        public int FilesUploadedToUser;
+        public List<string> DirNames = new List<string>();
+    }
+
+    internal static class UploadNotificationTracker
+    {
+        private static readonly Dictionary<string, NotifInfo> tracker = new Dictionary<string, NotifInfo>();
+        private static int nextId = 400;
+
+        internal static int NextId()
+        {
+            return nextId++;
+        }
+
+        public static NotifInfo GetOrCreate(string username, string directory)
+        {
+            if (tracker.TryGetValue(username, out var info))
+            {
+                if (!info.DirNames.Contains(directory))
+                {
+                    info.DirNames.Add(directory);
+                }
+                info.FilesUploadedToUser++;
+            }
+            else
+            {
+                info = new NotifInfo(directory);
+                tracker.Add(username, info);
+            }
+            return info;
+        }
+    }
+
     // Upload enqueue + notification
     public static class UploadService
     {
@@ -52,7 +94,7 @@ namespace Seeker.Services
             if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
                 notification =
-                      new Notification.Builder(context, MainActivity.UPLOADS_CHANNEL_ID)
+                      new Notification.Builder(context, AppNotifications.CHANNEL_ID_UPLOAD_COMPLETED)
                       .SetContentTitle(titleText)
                       .SetContentText(contextText)
                       .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
@@ -89,7 +131,7 @@ namespace Seeker.Services
         public static Task EnqueueDownloadAction(string username, IPEndPoint endpoint, string filename)
         {
             Logger.Debug("Upload Request Received");
-            if (SeekerApplication.IsUserInIgnoreList(username))
+            if (UserListService.Instance.IsUserInIgnoreList(username))
             {
                 return Task.CompletedTask;
             }
@@ -97,7 +139,7 @@ namespace Seeker.Services
             //the filename is basically "the key"
             _ = endpoint;
             string errorMsg = null;
-            Tuple<long, string, Tuple<int, int, int, int>, bool, bool> ourFileInfo = SeekerState.SharedFileCache.GetFullInfoFromSearchableName(filename, out errorMsg);
+            Tuple<long, string, Tuple<int, int, int, int>, bool, bool> ourFileInfo = SharedFileService.SharedFileCache.GetFullInfoFromSearchableName(filename, out errorMsg);
             if (ourFileInfo == null)
             {
                 Logger.Firebase("ourFileInfo is null: " + ourFileInfo + " " + errorMsg);

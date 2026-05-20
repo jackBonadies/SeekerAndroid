@@ -1038,9 +1038,7 @@ namespace Seeker
                 Resource.Drawable.link_variant
             };
 
-            var typedValue = new TypedValue();
-            Context.Theme.ResolveAttribute(Resource.Attribute.colorOnSurface, typedValue, true);
-            int tintColor = typedValue.Data;
+            var tintColor = UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.colorOnSurface, Context.Theme);
 
             var adapter = new IconMenuAdapter(this.Context, items, icons, tintColor);
 
@@ -1158,7 +1156,7 @@ namespace Seeker
             }
         }
 
-        public static void SeekerState_BrowseResponseReceived(object sender, BrowseResponseEvent e)
+        public static void OnBrowseResponseReceived(object sender, BrowseResponseEvent e)
         {
             ClearFilterUIString();
             ScrollPositionRestore?.Clear();
@@ -1166,7 +1164,7 @@ namespace Seeker
             var errorCode = state.SetBrowseResponse(e.Username, e.BrowseResponseTree, e.OriginalBrowseResponse, e.StartingLocation);
             if (errorCode == BrowseStateError.CannotFindStartDirectory)
             {
-                Logger.Firebase("SeekerState_BrowseResponseReceived: startingPoint is null " + e.StartingLocation);
+                Logger.Firebase("OnBrowseResponseReceived: startingPoint is null " + e.StartingLocation);
                 SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.error_browse_at_location), ToastLength.Long);
             }
             BrowseResponseReceivedUI?.Invoke(null, new EventArgs());
@@ -1209,7 +1207,7 @@ namespace Seeker
             View viewInflated = LayoutInflater.From(c).Inflate(Resource.Layout.autocomplete_user_dialog_content, (ViewGroup)this.View, false);
 
             AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
-            SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
+            UiHelpers.SetupRecentUserAutoCompleteTextView(input);
 
             builder.SetView(viewInflated);
 
@@ -1235,7 +1233,7 @@ namespace Seeker
                     }
                     return;
                 }
-                SeekerState.RecentUsersManager.AddUserToTop(usernameToBrowse, true);
+                UserMetadataService.RecentUsersManager.AddUserToTop(usernameToBrowse, true);
                 BrowseService.RequestFilesApi(usernameToBrowse, null);
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {

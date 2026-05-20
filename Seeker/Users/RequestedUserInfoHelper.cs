@@ -109,7 +109,7 @@ namespace Seeker
 
                             SeekerState.ActiveActivityRef.RunOnUiThread(() =>
                             {
-                                Snackbar sb = Snackbar.Make(SeekerApplication.GetViewForSnackbar(), string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.user_info_received), uname), Snackbar.LengthLong).SetAction(Resource.String.view, action);
+                                Snackbar sb = Snackbar.Make(UiHelpers.GetViewForSnackbar(), string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.user_info_received), uname), Snackbar.LengthLong).SetAction(Resource.String.view, action);
                                 sb.Show();
                             });
                         }

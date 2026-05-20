@@ -229,33 +229,14 @@ namespace Seeker.Users
             var config = new ActionSheetConfig();
             if (isIgnored)
             {
-                config.Sections.Add(ActionSheetActions.BuildIgnoredUserActionsSection(
-                    username,
-                    activity,
-                    snackView,
-                    () =>
-                    {
-                        SeekerApplication.RemoveFromIgnoreList(username);
-                        activity?.NotifyItemRemovedExternal(username);
-                    },
-                    activity?.GetUpdateUserListItemActionExternal(username)));
+                config.Sections.Add(ActionSheetActions.BuildIgnoredUserActionsSection(username, activity, snackView));
             }
             else
             {
-                Action refresh = activity?.GetUpdateUserListItemActionExternal(username);
                 var options = new UserActionsOptions
                 {
                     IncludeOnlineAlert = true,
-                    IncludeGivePrivileges = true,
-                    OnAddRemoved = refresh,
-                    OnIgnoreChanged = refresh,
-                    OnNoteChanged = refresh,
-                    OnOnlineAlertChanged = refresh,
-                    OverrideRemoveFromFriends = () =>
-                    {
-                        UserListService.Instance.RemoveUser(username);
-                        activity?.NotifyItemRemovedExternal(username);
-                    }
+                    IncludeGivePrivileges = true
                 };
                 config.Sections.Add(ActionSheetActions.BuildUserActionsSection(username, activity, snackView, options));
             }
@@ -311,11 +292,11 @@ namespace Seeker.Users
                     viewStatsLayout.Visibility = ViewStates.Visible;
                 }
 
-                if (SeekerState.UserNotes.ContainsKey(item.Username))
+                if (UserMetadataService.UserNotes.ContainsKey(item.Username))
                 {
                     viewNoteLayout.Visibility = ViewStates.Visible;
                     string note = null;
-                    SeekerState.UserNotes.TryGetValue(item.Username, out note);
+                    UserMetadataService.UserNotes.TryGetValue(item.Username, out note);
                     viewNote.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.note) + ": " + note;
                 }
                 else
@@ -323,7 +304,7 @@ namespace Seeker.Users
                     viewNoteLayout.Visibility = ViewStates.Gone;
                 }
 
-                if (SeekerState.UserOnlineAlerts.ContainsKey(item.Username))
+                if (UserMetadataService.UserOnlineAlerts.ContainsKey(item.Username))
                 {
                     viewOnlineAlerts.Visibility = ViewStates.Visible;
                 }

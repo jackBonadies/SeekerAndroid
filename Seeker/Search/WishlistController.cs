@@ -72,8 +72,6 @@ namespace Seeker.Search
             WishlistTimer.Start();
             IsInitialized = true;
         }
-        public const string CHANNEL_ID = "Wishlist Controller ID";
-        public const string CHANNEL_NAME = "Wishlists";
         public const string FromWishlistString = "FromWishlistTabID";
         public const string FromWishlistStringID = "FromWishlistTabIDToGoTo";
         public static void SearchCompleted(int id)
@@ -103,14 +101,14 @@ namespace Seeker.Search
                         }
                         string lastTerm = SearchTabHelper.SearchTabCollection[id].LastSearchTerm;
 
-                        CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
+                        CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, AppNotifications.CHANNEL_ID_WISHLIST, AppNotifications.CHANNEL_NAME_WISHLIST, NotificationImportance.High); //only high will "peek"
                         Intent notifIntent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                         notifIntent.AddFlags(ActivityFlags.SingleTop | ActivityFlags.ReorderToFront); //otherwise if another activity is in front then this intent will do nothing...
                         notifIntent.PutExtra(FromWishlistString, 1); //the tab to go to
                         notifIntent.PutExtra(FromWishlistStringID, id); //the tab to go to
                         PendingIntent pendingIntent =
                             PendingIntent.GetActivity(SeekerState.ActiveActivityRef, lastTerm.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                        Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, CHANNEL_ID, SeekerState.ActiveActivityRef.GetString(Resource.String.wishlist) + ": " + lastTerm, description, false);
+                        Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, AppNotifications.CHANNEL_ID_WISHLIST, SeekerState.ActiveActivityRef.GetString(Resource.String.wishlist) + ": " + lastTerm, description, false);
                         NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
                         // notificationId is a unique int for each notification that you must define
                         notificationManager.Notify(lastTerm.GetHashCode(), n);

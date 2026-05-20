@@ -1,4 +1,4 @@
-#if DEBUG
+#if MOCK
 namespace Seeker
 {
     using Soulseek;
@@ -631,6 +631,7 @@ namespace Seeker
         }
 
         private static readonly Random _random = new Random();
+        private static readonly object _randomLock = new object();
         private static readonly string[] _mockUsernames = { "musiclover42", "vinyl_rips", "flac_hoarder", "mp3collector", "audiophile99", "shareking", "basshead", "djmix", "recorddigger", "soundwave", "testUser", "test_user2_long_username_12345" };
         private static readonly string[] _mockCountryCodes = { "US", "GB", "DE", "FR", "JP", "BR", "CA", "AU", "SE", "NL", "IT", "ES", "PL", "RU", "MX", "KR", "IN", "AR", "NO", "FI" };
 
@@ -705,6 +706,22 @@ namespace Seeker
         private static readonly string[] _lossy = { "mp3", "ogg", "m4a" };
         private static readonly string[] _lossless = { "flac", "wav" };
 
+        // Mimics real-world search cadence: short bursts of many responses
+        private static IEnumerable<(int burstStart, int burstSize, int gapMsBefore)> BurstySchedule(int total)
+        {
+            if (total <= 0) yield break;
+            int i = 0;
+            bool first = true;
+            while (i < total)
+            {
+                int gap = first ? _random.Next(300, 700) : _random.Next(80, 350);
+                int size = Math.Min(total - i, _random.Next(30, 151));
+                yield return (i, size, gap);
+                i += size;
+                first = false;
+            }
+        }
+
         private static (int count, int totalTimeMs, string search) ParseMockSearchParams(SearchQuery query)
         {
             int count = 30;
@@ -725,53 +742,56 @@ namespace Seeker
 
         private static SearchResponse GenerateMockSearchResponse(int token, string term = "")
         {
-            var username = _mockUsernames[_random.Next(_mockUsernames.Length)];
-            var artist = _mockArtists[_random.Next(_mockArtists.Length)];
-            var album = _mockAlbums[_random.Next(_mockAlbums.Length)];
-            var ext = _extensions[_random.Next(_extensions.Length)];
-            int minUploadSpeed = (int)(100_000 * Math.Pow(10, _random.Next(2)));
-            var uploadSpeed = _random.Next(minUploadSpeed, minUploadSpeed * 10);
-            var queueLength = _random.Next(0, 50);
-            var hasFreeSlot = _random.Next(2) == 0;
-            var isLocked = _random.Next(5) == 0; // ~20% chance locked
-
-            int trackCount = _random.Next(1, 30);
-            var files = new List<Soulseek.File>();
-            int bitRate = ext == "flac" ? 1411 : new[] { 128, 192, 256, 320 }[_random.Next(4)];
-            for (int i = 0; i < trackCount; i++)
+            lock (_randomLock)
             {
-                int trackNum = i + 1;
-                long size = _random.Next(2_000_000, 60_000_000);
-                int length = _random.Next(120, 480);
-                string filename = $"@@{username}\\Music\\{artist}\\{term} - AlbumName {album}\\{trackNum:D2} Track {trackNum}.{ext}";
-                var fileAttributes = new[] { new FileAttribute(FileAttributeType.BitRate, bitRate), new FileAttribute(FileAttributeType.Length, length) };
-                if (ext == "flac" && _random.Next(2) == 0)
+                var username = _mockUsernames[_random.Next(_mockUsernames.Length)] + _random.Next(0,1_000_000);
+                var artist = _mockArtists[_random.Next(_mockArtists.Length)];
+                var album = _mockAlbums[_random.Next(_mockAlbums.Length)];
+                var ext = _extensions[_random.Next(_extensions.Length)];
+                int minUploadSpeed = (int)(100_000 * Math.Pow(10, _random.Next(2)));
+                var uploadSpeed = _random.Next(minUploadSpeed, minUploadSpeed * 10);
+                var queueLength = _random.Next(0, 50);
+                var hasFreeSlot = _random.Next(2) == 0;
+                var isLocked = _random.Next(5) == 0; // ~20% chance locked
+
+                int trackCount = _random.Next(1, 30);
+                var files = new List<Soulseek.File>();
+                int bitRate = ext == "flac" ? 1411 : new[] { 128, 192, 256, 320 }[_random.Next(4)];
+                for (int i = 0; i < trackCount; i++)
                 {
-                    fileAttributes = fileAttributes.Concat(new[] { new FileAttribute(FileAttributeType.SampleRate, 44100), new FileAttribute(FileAttributeType.BitDepth, 16) }).ToArray();
-                }
-                else if (_lossy.Contains(ext))
-                {
-                    switch(_random.Next(3))
+                    int trackNum = i + 1;
+                    long size = _random.Next(2_000_000, 60_000_000);
+                    int length = _random.Next(120, 480);
+                    string filename = $"@@{username}\\Music\\{artist}\\{term} - AlbumName {album}\\{trackNum:D2} Track {trackNum}.{ext}";
+                    var fileAttributes = new[] { new FileAttribute(FileAttributeType.BitRate, bitRate), new FileAttribute(FileAttributeType.Length, length) };
+                    if (ext == "flac" && _random.Next(2) == 0)
                     {
-                        case 0:
-                            fileAttributes = fileAttributes.Concat(new[] { new FileAttribute(FileAttributeType.VariableBitRate, 0) }).ToArray();
-                            break;
-                        case 1:
-                            fileAttributes = fileAttributes.Concat(new[] { new FileAttribute(FileAttributeType.VariableBitRate, 1) }).ToArray();
-                            break;
-                        default:
-                            break;
+                        fileAttributes = fileAttributes.Concat(new[] { new FileAttribute(FileAttributeType.SampleRate, 44100), new FileAttribute(FileAttributeType.BitDepth, 16) }).ToArray();
                     }
+                    else if (_lossy.Contains(ext))
+                    {
+                        switch(_random.Next(3))
+                        {
+                            case 0:
+                                fileAttributes = fileAttributes.Concat(new[] { new FileAttribute(FileAttributeType.VariableBitRate, 0) }).ToArray();
+                                break;
+                            case 1:
+                                fileAttributes = fileAttributes.Concat(new[] { new FileAttribute(FileAttributeType.VariableBitRate, 1) }).ToArray();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    files.Add(new Soulseek.File(1, filename, size, ext, fileAttributes));
                 }
-                files.Add(new Soulseek.File(1, filename, size, ext, fileAttributes));
-            }
 
-            if (isLocked)
-            {
-                return new SearchResponse(username, token, hasFreeSlot, uploadSpeed, queueLength,
-                    Array.Empty<Soulseek.File>(), files);
+                if (isLocked)
+                {
+                    return new SearchResponse(username, token, hasFreeSlot, uploadSpeed, queueLength,
+                        Array.Empty<Soulseek.File>(), files);
+                }
+                return new SearchResponse(username, token, hasFreeSlot, uploadSpeed, queueLength, files);
             }
-            return new SearchResponse(username, token, hasFreeSlot, uploadSpeed, queueLength, files);
         }
 
         private static Soulseek.File MakeSearchFile(string username, string folder, string filename, string ext, long sizeBytes, int lengthSeconds, int bitRate, bool isVbr = false, int sampleRate = 0, int bitDepth = 0)
@@ -1308,6 +1328,7 @@ namespace Seeker
 
             string joinedTerms = string.Join(" ", query.Terms).ToLowerInvariant();
 
+
             if (Seeker.Debug.SearchCaptureStore.IsConfigured &&
                 Seeker.Debug.SearchCaptureStore.TryLoad(joinedTerms, out var capturedResponses, out _))
             {
@@ -1339,6 +1360,7 @@ namespace Seeker
             bool is1Results = joinedTerms.Contains("1results");
             bool isWishlist = joinedTerms.Contains("wishlist");
             bool isCurated = isBeethovenOverture || isChipTestOther;
+            bool isSteady = query.Terms.Any(t => string.Equals(t, "steady", StringComparison.OrdinalIgnoreCase));
 
             var allResponses = new List<SearchResponse>();
             if (isCurated)
@@ -1419,19 +1441,66 @@ namespace Seeker
                 {
                     await Task.Delay(3000).ConfigureAwait(false);
                 }
-                for (int i = 0; i < count; i++)
+                if (isSteady)
                 {
-                    if (cancellationToken?.IsCancellationRequested == true)
+                    for (int i = 0; i < count; i++)
                     {
-                        break;
+                        if (cancellationToken?.IsCancellationRequested == true)
+                        {
+                            break;
+                        }
+                        var response = GenerateMockSearchResponse(resolvedToken, (isWishlist ? DateTime.Now.ToString("HH:mm:ss") : "") + search);
+                        allResponses.Add(response);
+                        var currentSearch = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.InProgress, i + 1, 0, 0);
+                        options?.ResponseReceived?.Invoke((currentSearch, response));
+                        if (delayPerResponse > 0)
+                        {
+                            await Task.Delay(delayPerResponse).ConfigureAwait(false);
+                        }
                     }
-                    var response = GenerateMockSearchResponse(resolvedToken, (isWishlist ? DateTime.Now.ToString("HH:mm:ss") : "") + search);
-                    allResponses.Add(response);
-                    var currentSearch = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.InProgress, i + 1, 0, 0);
-                    options?.ResponseReceived?.Invoke((currentSearch, response));
-                    if (delayPerResponse > 0)
+                }
+                else
+                {
+                    bool hasExplicitN = query.Terms.Any(t => t.StartsWith("n:", StringComparison.OrdinalIgnoreCase));
+                    int burstCount;
+                    lock (_randomLock)
                     {
-                        await Task.Delay(delayPerResponse).ConfigureAwait(false);
+                        burstCount = hasExplicitN ? count : _random.Next(1500, 3001);
+                    }
+                    int monotonic = 0;
+                    foreach (var (start, size, gap) in BurstySchedule(burstCount))
+                    {
+                        if (cancellationToken?.IsCancellationRequested == true) break;
+                        await Task.Delay(gap).ConfigureAwait(false);
+
+                        var burstTasks = new Task[size];
+                        for (int k = 0; k < size; k++)
+                        {
+                            burstTasks[k] = Task.Run(async () =>
+                            {
+                                if (cancellationToken?.IsCancellationRequested == true) return;
+                                int jitter;
+                                lock (_randomLock)
+                                {
+                                    jitter = _random.Next(0, 30);
+                                }
+                                if (jitter > 0)
+                                {
+                                    await Task.Delay(jitter).ConfigureAwait(false);
+                                }
+                                if (cancellationToken?.IsCancellationRequested == true) return;
+
+                                var response = GenerateMockSearchResponse(resolvedToken, (isWishlist ? DateTime.Now.ToString("HH:mm:ss") : "") + search);
+                                lock (allResponses)
+                                {
+                                    allResponses.Add(response);
+                                }
+                                int idx = Interlocked.Increment(ref monotonic);
+                                var currentSearch = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.InProgress, idx, 0, 0);
+                                options?.ResponseReceived?.Invoke((currentSearch, response));
+                            });
+                        }
+                        await Task.WhenAll(burstTasks).ConfigureAwait(false);
                     }
                 }
             }
@@ -1939,19 +2008,6 @@ namespace Seeker
 
         public bool IsTransferInDownloads(string username, string filename)
             => Downloads.Any(d => d.Username == username && d.Filename == filename);
-
-        private readonly List<Delegate> _searchResponseReceivedHandlers = new List<Delegate>();
-
-        public void ClearSearchResponseReceivedFromTarget(object target)
-        {
-            // No-op for mock; real client removes handlers from a specific target
-        }
-
-        public int GetInvocationListOfSearchResponseReceived()
-        {
-            var handler = SearchResponseReceived;
-            return handler?.GetInvocationList().Length ?? 0;
-        }
 
         public bool GetListeningState() => true;
 

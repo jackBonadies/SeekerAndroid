@@ -46,7 +46,7 @@ namespace Seeker
             //after opening up my soulseek app on my phone, 6 hours after I last used it, I got a nullref somewhere in here....
             base.OnViewCreated(view, savedInstanceState);
             //Dialog.SetTitle("File Info"); //is this needed in any way??
-            this.Dialog.Window.SetBackgroundDrawable(SeekerApplication.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
+            this.Dialog.Window.SetBackgroundDrawable(UiHelpers.GetDrawableFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.the_rounded_corner_dialog_background_drawable));
             this.SetStyle((int)Android.App.DialogFragmentStyle.NoTitle, 0);
             //this.Dialog.SetTitle("Search Tab");
             recyclerViewSearches = view.FindViewById<RecyclerView>(Resource.Id.searchesRecyclerView);

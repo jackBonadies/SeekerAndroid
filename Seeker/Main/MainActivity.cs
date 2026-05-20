@@ -329,14 +329,14 @@ namespace Seeker
 
             //TODO2026 - need to think about this
             //if we have all the conditions to share, then set sharing up.
-            if (SharedFileService.MeetsSharingConditions() && !SeekerState.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
+            if (SharedFileService.MeetsSharingConditions() && !SharedFileService.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
             {
                 Seeker.Services.SharingService.SetUpSharing();
             }
-            else if (SeekerState.NumberOfSharedDirectoriesIsStale)
+            else if (SharedFileService.NumberOfSharedDirectoriesIsStale)
             {
                 SharedFileService.InformServerOfSharedFiles();
-                SeekerState.AttemptedToSetUpSharing = true;
+                SharedFileService.AttemptedToSetUpSharing = true;
             }
 
             SeekerState.SharedPreferences = sharedPreferences;
@@ -344,19 +344,19 @@ namespace Seeker
 
             // Document files are initialized once per process in SeekerApplication.OnCreate.
             // Here we only handle the things that require an Activity context.
-            if (SeekerState.UseLegacyStorage())
+            if (PlatformInfo.UseLegacyStorage())
             {
                 if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.WriteExternalStorage) == Android.Content.PM.Permission.Denied)
                 {
                     ActivityCompat.RequestPermissions(this, new string[] { Manifest.Permission.WriteExternalStorage }, WRITE_EXTERNAL);
                 }
             }
-            else if (SeekerState.RootDocumentFile == null)
+            else if (StorageState.RootDocumentFile == null)
             {
-                // SeekerApplication.InitializeDocumentFiles could not write the download directory —
+                // StorageState.LoadFromPreferences could not write the download directory —
                 // permission was revoked. Ask the user to re-select one.
                 Android.Net.Uri res = string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri)
-                    ? Android.Net.Uri.Parse(SeekerState.DefaultMusicUri)
+                    ? Android.Net.Uri.Parse(StorageState.DefaultMusicUri)
                     : Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
                 var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
                 b.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
@@ -675,7 +675,7 @@ namespace Seeker
                     //var diag = builder.SetMessage(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     var diag = builder.SetMessage(Resource.String.about_body).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
                     diag.Show();
-                    var origString = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body), SeekerApplication.GetVersionString()); //this is a literal CDATA string.
+                    var origString = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body), CommonHelpers.GetVersionString()); //this is a literal CDATA string.
                     if (OperatingSystem.IsAndroidVersionAtLeast(24))
                     {
                         ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(origString, Android.Text.FromHtmlOptions.ModeLegacy); //this can be slow so do NOT do it in loops...
@@ -690,9 +690,6 @@ namespace Seeker
 
             return base.OnOptionsItemSelected(item);
         }
-
-        public const string UPLOADS_CHANNEL_ID = "upload channel ID";
-        public const string UPLOADS_CHANNEL_NAME = "Upload Notifications";
 
         // Intent extra keys — all intent extras targeting MainActivity are defined here.
         public const string GoToBrowseExtra = "GoToBrowse";
@@ -770,7 +767,7 @@ namespace Seeker
 
         private void UpdateForScreenSize()
         {
-            if (!SeekerState.IsLowDpi()) return;
+            if (!PlatformInfo.IsLowDpi()) return;
             try
             {
                 TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
@@ -863,17 +860,11 @@ namespace Seeker
                 {
                     if (NEW_WRITE_EXTERNAL == requestCode)
                     {
-                        var x = data.Data;
-                        SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-                        PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
-                        PreferencesState.SaveDataDirectoryUriIsFromTree = true;
-                        this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                        StorageState.SetRootDownloadDirectory(this, data.Data, isFromTree: true);
                     }
                     else if (NEW_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
                     {
-                        SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
-                        PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
-                        PreferencesState.SaveDataDirectoryUriIsFromTree = false;
+                        StorageState.SetRootDownloadDirectory(this, data.Data, isFromTree: false);
                     }
                 }
                 else
@@ -935,16 +926,11 @@ namespace Seeker
                 {
                     if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
                     {
-                        SeekerState.RootDocumentFile = DocumentFile.FromFile(new Java.IO.File(data.Data.Path));
-                        PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
-                        PreferencesState.SaveDataDirectoryUriIsFromTree = false;
+                        StorageState.SetRootDownloadDirectory(this, data.Data, isFromTree: false);
                     }
                     else if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL == requestCode)
                     {
-                        SeekerState.RootDocumentFile = DocumentFile.FromTreeUri(this, data.Data);
-                        PreferencesState.SaveDataDirectoryUri = data.Data.ToString();
-                        PreferencesState.SaveDataDirectoryUriIsFromTree = true;
-                        this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                        StorageState.SetRootDownloadDirectory(this, data.Data, isFromTree: true);
                     }
 
                     //hide the button
@@ -1006,9 +992,9 @@ namespace Seeker
                 //}
                 //catch
                 //{
-                //    res = Android.Net.Uri.Parse(SeekerState.DefaultMusicUri);//TryCreate("content://com.android.externalstorage.documents/tree/primary%3AMusic", UriKind.Absolute,out res);
+                //    res = Android.Net.Uri.Parse(StorageState.DefaultMusicUri);//TryCreate("content://com.android.externalstorage.documents/tree/primary%3AMusic", UriKind.Absolute,out res);
                 //}
-                res = Android.Net.Uri.Parse(SeekerState.DefaultMusicUri);
+                res = Android.Net.Uri.Parse(StorageState.DefaultMusicUri);
             }
             else
             {
@@ -1045,7 +1031,7 @@ namespace Seeker
             hasManageAllFilesManisfestPermission = true;
 #endif
 
-            if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && hasManageAllFilesManisfestPermission && !Android.OS.Environment.IsExternalStorageManager) //this is "step 1"
+            if (PlatformInfo.RequiresEitherOpenDocumentTreeOrManageAllFiles() && hasManageAllFilesManisfestPermission && !Android.OS.Environment.IsExternalStorageManager) //this is "step 1"
             {
                 Intent allFilesPermission = new Intent(Android.Provider.Settings.ActionManageAppAllFilesAccessPermission);
                 Android.Net.Uri packageUri = Android.Net.Uri.FromParts("package", this.PackageName, null);
@@ -1060,7 +1046,7 @@ namespace Seeker
             {
 
 
-                if (SeekerState.RequiresEitherOpenDocumentTreeOrManageAllFiles() && !hasManageAllFilesManisfestPermission)
+                if (PlatformInfo.RequiresEitherOpenDocumentTreeOrManageAllFiles() && !hasManageAllFilesManisfestPermission)
                 {
                     UiHelpers.ShowSimpleAlertDialog(this, Resource.String.error_no_file_manager_dir_manage_storage, Resource.String.okay);
                 }
@@ -1324,7 +1310,7 @@ namespace Seeker
 
         private void TestEnqueueSharedFolder()
         {
-            var cache = SeekerState.SharedFileCache;
+            var cache = SharedFileService.SharedFileCache;
             if (cache?.PresentableNameToFullFileInfo == null || cache.PresentableNameToFullFileInfo.Count == 0)
             {
                 Logger.Debug("TestEnqueue: no shared files");

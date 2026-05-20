@@ -153,7 +153,7 @@ namespace Seeker.Messages
         {
             try
             {
-                if (SeekerApplication.IsUserInIgnoreList(e.Username))
+                if (UserListService.Instance.IsUserInIgnoreList(e.Username))
                 {
                     Logger.Debug("IGNORED PM received: " + e.Username);
                     return;
@@ -240,6 +240,11 @@ namespace Seeker.Messages
         }
 
 
+        private static Android.Content.Res.Resources.Theme GetThemeWithFallback(Context contextToUse)
+        {
+            return SeekerState.ActiveActivityRef?.Theme ?? contextToUse.Theme;
+        }
+
         private static Color GetYouTextColor(bool useNightColors, Context contextToUse)
         {
             //for api 31+ use secondary color
@@ -247,11 +252,11 @@ namespace Seeker.Messages
             {
                 if (useNightColors)
                 {
-                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent2200, SeekerState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent2200, GetThemeWithFallback(contextToUse));
                 }
                 else
                 {
-                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent2600, SeekerState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent2600, GetThemeWithFallback(contextToUse));
                 }
             }
             else
@@ -281,11 +286,11 @@ namespace Seeker.Messages
             {
                 if (useNightColors)
                 {
-                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1200, SeekerState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1200, GetThemeWithFallback(contextToUse));
                 }
                 else
                 {
-                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1600, SeekerState.ActiveActivityRef.Theme);
+                    return contextToUse.Resources.GetColor(Android.Resource.Color.SystemAccent1600, GetThemeWithFallback(contextToUse));
                 }
             }
             else
@@ -294,27 +299,6 @@ namespace Seeker.Messages
                 var newTheme = contextToUse.Resources.NewTheme();
                 newTheme.ApplyStyle(ThemeHelper.GetThemeInChosenDayNightMode(useNightColors, contextToUse), true);
                 return UiHelpers.GetColorFromAttribute(contextToUse, Resource.Attribute.android_default_notification_complementary_color, newTheme);
-            }
-        }
-
-        private static Color GetActionTextColor(bool useNightColors, Context contextToUse)
-        {
-            //for api 31+ use primary color
-            if (OperatingSystem.IsAndroidVersionAtLeast(31))
-            {
-                return GetOtherTextColor(useNightColors, contextToUse);
-            }
-            else
-            {
-                //todo
-                if (useNightColors)
-                {
-                    return Color.White;
-                }
-                else
-                {
-                    return Color.Black;
-                }
             }
         }
 
@@ -468,8 +452,6 @@ namespace Seeker.Messages
             }
         }
 
-        public const string CHANNEL_ID = "Private Messages ID";
-        public const string CHANNEL_NAME = "Private Messages";
         public const string FromUserName = "FromThisUser";
         public const string ComingFromMessageTapped = "FromAMessage";
 
@@ -482,7 +464,7 @@ namespace Seeker.Messages
                 {
                     contextToUse = SeekerApplication.ApplicationContext;
                 }
-                CommonHelpers.CreateNotificationChannel(contextToUse, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
+                CommonHelpers.CreateNotificationChannel(contextToUse, AppNotifications.CHANNEL_ID_PRIVATE_MESSAGE, AppNotifications.CHANNEL_NAME_PRIVATE_MESSAGE, NotificationImportance.High); //only high will "peek"
 
 
                 Intent notifIntent = new Intent(contextToUse, typeof(MessagesActivity));
@@ -564,7 +546,7 @@ namespace Seeker.Messages
                     //}
 
                     //setColor ?? todo
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(contextToUse, CHANNEL_ID)
+                    NotificationCompat.Builder builder = new NotificationCompat.Builder(contextToUse, AppNotifications.CHANNEL_ID_PRIVATE_MESSAGE)
                         .AddAction(Resource.Drawable.baseline_chat_bubble_white_24, markAsRead, markAsReadPendingIntent)
                         .AddAction(replyAction)
                         .SetStyle(new NotificationCompat.DecoratedCustomViewStyle())
@@ -591,7 +573,7 @@ namespace Seeker.Messages
                 }
                 else
                 {
-                    Notification n = CommonHelpers.CreateNotification(contextToUse, pendingIntent, CHANNEL_ID, $"Message from {msg.Username}", msg.MessageText, false); //TODO
+                    Notification n = CommonHelpers.CreateNotification(contextToUse, pendingIntent, AppNotifications.CHANNEL_ID_PRIVATE_MESSAGE, $"Message from {msg.Username}", msg.MessageText, false); //TODO
                     notificationManager.Notify(msg.Username.GetHashCode(), n);
                 }
             }

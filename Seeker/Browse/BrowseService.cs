@@ -1,4 +1,4 @@
-using Android.Content;
+﻿using Android.Content;
 using Android.Views;
 using Android.Widget;
 using Common;
@@ -18,6 +18,13 @@ namespace Seeker.Browse
 {
     public static class BrowseService
     {
+        public static event EventHandler<BrowseResponseEvent> BrowseResponseReceived;
+
+        public static void OnBrowseResponseReceived(BrowseResponse origBR, TreeNode<Directory> rootTree, string fromUsername, string startingLocation)
+        {
+            BrowseResponseReceived?.Invoke(null, new BrowseResponseEvent(origBR, rootTree, fromUsername, startingLocation));
+        }
+
         public static void GetFolderContentsAPI(string username, string dirname, bool isLegacy, Action<Task<IReadOnlyCollection<Directory>>> continueWithAction)
         {
             if (!PreferencesState.CurrentlyLoggedIn)
@@ -64,7 +71,7 @@ namespace Seeker.Browse
         {
             try
             {
-                Snackbar.Make(SeekerApplication.GetViewForSnackbar(), SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user_contacting), Snackbar.LengthShort).Show();
+                Snackbar.Make(UiHelpers.GetViewForSnackbar(), SeekerState.ActiveActivityRef.GetString(Resource.String.browse_user_contacting), Snackbar.LengthShort).Show();
             }
             catch (Exception e)
             {
@@ -123,7 +130,7 @@ namespace Seeker.Browse
                 var tree = CreateTree(br.Result, false, null, null, username, out errorString);
                 if (tree != null)
                 {
-                    SeekerState.OnBrowseResponseReceived(br.Result, tree, username, atLocation);
+                    BrowseService.OnBrowseResponseReceived(br.Result, tree, username, atLocation);
                 }
 
                 SeekerState.ActiveActivityRef.RunOnUiThread(() =>
@@ -159,7 +166,7 @@ namespace Seeker.Browse
 
                     try
                     {
-                        Snackbar sb = Snackbar.Make(SeekerApplication.GetViewForSnackbar(), SeekerState.ActiveActivityRef.GetString(Resource.String.browse_response_received), Snackbar.LengthLong).SetAction(SeekerState.ActiveActivityRef.GetString(Resource.String.go), action);
+                        Snackbar sb = Snackbar.Make(UiHelpers.GetViewForSnackbar(), SeekerState.ActiveActivityRef.GetString(Resource.String.browse_response_received), Snackbar.LengthLong).SetAction(SeekerState.ActiveActivityRef.GetString(Resource.String.go), action);
                         sb.Show();
                     }
                     catch

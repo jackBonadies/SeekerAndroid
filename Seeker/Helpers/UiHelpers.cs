@@ -44,6 +44,14 @@ namespace Seeker
             }
         }
 
+        public static Android.Graphics.Drawables.Drawable? GetDrawableFromAttribute(Context c, int attr)
+        {
+            var typedValue = new TypedValue();
+            c.Theme.ResolveAttribute(attr, typedValue, true);
+            int drawableRes = (typedValue.ResourceId != 0) ? typedValue.ResourceId : typedValue.Data;
+            return c.Resources.GetDrawable(drawableRes, SeekerState.ActiveActivityRef.Theme);
+        }
+
         public static Color GetColorFromInteger(int color)
         {
             return Color.Argb(Color.GetAlphaComponent(color), Color.GetRedComponent(color), Color.GetGreenComponent(color), Color.GetBlueComponent(color));
@@ -197,7 +205,7 @@ namespace Seeker
         public static void AddUserNoteMenuItem(IMenu menu, int i, int j, int k, string username)
         {
             string title = null;
-            if (SeekerState.UserNotes.ContainsKey(username))
+            if (UserMetadataService.UserNotes.ContainsKey(username))
             {
                 title = SeekerState.ActiveActivityRef.GetString(Resource.String.edit_note);
             }
@@ -248,7 +256,7 @@ namespace Seeker
         {
             if (menuItem != null && !string.IsNullOrEmpty(username))
             {
-                if (SeekerApplication.IsUserInIgnoreList(username)) //if we already have added said user, change title add to remove..
+                if (UserListService.Instance.IsUserInIgnoreList(username)) //if we already have added said user, change title add to remove..
                 {
                     if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.ignore_user))
                     {
@@ -298,7 +306,7 @@ namespace Seeker
         {
             if (menuItem != null && !string.IsNullOrEmpty(username))
             {
-                if (SeekerState.UserNotes.ContainsKey(username)) //if we already have added said user, change title add to remove..
+                if (UserMetadataService.UserNotes.ContainsKey(username)) //if we already have added said user, change title add to remove..
                 {
                     if (menuItem.TitleFormatted.ToString() == SeekerState.ActiveActivityRef.GetString(Resource.String.add_note))
                     {
@@ -344,7 +352,7 @@ namespace Seeker
             // if we have this user in ignore, do not show the option to add as friend.
             if (!string.IsNullOrEmpty(username))
             {
-                bool isInIgnoreList = SeekerApplication.IsUserInIgnoreList(username);
+                bool isInIgnoreList = UserListService.Instance.IsUserInIgnoreList(username);
                 var menuItem = menu.FindItem(Resource.Id.action_add_to_user_list);
                 menuItem?.SetVisible(!isInIgnoreList);
                 menuItem = menu.FindItem(Resource.Id.action_add_user);
@@ -566,7 +574,7 @@ namespace Seeker
         /// returns true if found and handled.  a time saver for the more generic context menu items..
         /// </summary>
         /// <returns></returns>
-        public static bool HandleCommonContextMenuActions(string contextMenuTitle, string usernameInQuestion, Context activity, View browseSnackView, Action uiUpdateActionNote = null, Action uiUpdateActionAdded_Removed = null, Action uiUpdateActionIgnored_Unignored = null, Action uiUpdateSetResetOnlineAlert = null)
+        public static bool HandleCommonContextMenuActions(string contextMenuTitle, string usernameInQuestion, Context activity, View browseSnackView, Action uiUpdateActionAdded_Removed = null, Action uiUpdateActionIgnored_Unignored = null, Action uiUpdateActionNote = null)
         {
             if (activity == null)
             {
@@ -574,14 +582,20 @@ namespace Seeker
             }
             if (contextMenuTitle == activity.GetString(Resource.String.ignore_user))
             {
-                SeekerApplication.AddToIgnoreListFeedback(activity, usernameInQuestion);
-                SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
+                UserListService.AddToIgnoreListFeedback(activity, usernameInQuestion);
+                if (uiUpdateActionIgnored_Unignored != null)
+                {
+                    SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
+                }
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_from_ignored))
             {
-                SeekerApplication.RemoveFromIgnoreListFeedback(activity, usernameInQuestion);
-                SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
+                UserListService.RemoveFromIgnoreListFeedback(activity, usernameInQuestion);
+                if (uiUpdateActionIgnored_Unignored != null)
+                {
+                    SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionIgnored_Unignored);
+                }
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.msg_user))
@@ -604,7 +618,10 @@ namespace Seeker
             {
                 SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.removed_user), usernameInQuestion), ToastLength.Short);
                 UserListService.Instance.RemoveUser(usernameInQuestion);
-                SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
+                if (uiUpdateActionAdded_Removed != null)
+                {
+                    SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateActionAdded_Removed);
+                }
                 return true;
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.search_user_files))
@@ -641,16 +658,15 @@ namespace Seeker
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.set_online_alert))
             {
-                SeekerState.UserOnlineAlerts[usernameInQuestion] = 0;
+                UserMetadataService.UserOnlineAlerts[usernameInQuestion] = 0;
                 CommonHelpers.SaveOnlineAlerts();
-                uiUpdateSetResetOnlineAlert();
+                UserListService.RaiseUserRowChanged(usernameInQuestion);
             }
             else if (contextMenuTitle == activity.GetString(Resource.String.remove_online_alert))
             {
-                SeekerState.UserOnlineAlerts.TryRemove(usernameInQuestion, out _);
+                UserMetadataService.UserOnlineAlerts.TryRemove(usernameInQuestion, out _);
                 CommonHelpers.SaveOnlineAlerts();
-                uiUpdateSetResetOnlineAlert();
-
+                UserListService.RaiseUserRowChanged(usernameInQuestion);
             }
             return false;
         }
@@ -731,7 +747,6 @@ namespace Seeker
             }
 
             var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(c);
-            //var diag = builder.SetMessage(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
             var diag = builder.SetMessage(messageResourceString).SetPositiveButton(actionResourceString, OnCloseClick).Create();
             diag.Show();
         }
@@ -745,7 +760,7 @@ namespace Seeker
             EditText input = (EditText)viewInflated.FindViewById<EditText>(Resource.Id.editUserNote);
 
             string existingNote = null;
-            SeekerState.UserNotes.TryGetValue(username, out existingNote);
+            UserMetadataService.UserNotes.TryGetValue(username, out existingNote);
             if (existingNote != null)
             {
                 input.Text = existingNote;
@@ -769,21 +784,20 @@ namespace Seeker
                     if (!wasEmpty && isEmpty)
                     {
                         //we removed the note
-                        SeekerState.UserNotes.TryRemove(username, out _);
+                        UserMetadataService.UserNotes.TryRemove(username, out _);
                         CommonHelpers.SaveUserNotes();
-
                     }
                     else
                     {
                         //we added a note
-                        SeekerState.UserNotes[username] = newText;
+                        UserMetadataService.UserNotes[username] = newText;
                         CommonHelpers.SaveUserNotes();
                     }
+                    UserListService.RaiseUserRowChanged(username);
                     if (uiUpdateAction != null)
                     {
                         SeekerState.ActiveActivityRef.RunOnUiThread(uiUpdateAction);
                     }
-
                 }
                 else if (isEmpty && wasEmpty)
                 {
@@ -799,8 +813,9 @@ namespace Seeker
                     else
                     {
                         //update note and save prefs..
-                        SeekerState.UserNotes[username] = newText;
+                        UserMetadataService.UserNotes[username] = newText;
                         CommonHelpers.SaveUserNotes();
+                        UserListService.RaiseUserRowChanged(username);
                     }
                 }
 
@@ -848,6 +863,65 @@ namespace Seeker
             // Set up the buttons
 
             builder.Show();
+        }
+
+        public static void SetActivityTheme(Activity a)
+        {
+            //useless returns the same thing every time
+            //int curTheme = a.PackageManager.GetActivityInfo(a.ComponentName, 0).ThemeResource;
+            if (a.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
+            {
+                a.SetTheme(ThemeHelper.ToNightThemeProper(PreferencesState.NightModeVariant));
+            }
+            else
+            {
+                a.SetTheme(ThemeHelper.ToDayThemeProper(PreferencesState.DayModeVariant));
+            }
+        }
+
+        public static View GetViewForSnackbar()
+        {
+            bool useDownloadDialogFragment = false;
+            View v = null;
+            if (SeekerState.ActiveActivityRef is MainActivity mar)
+            {
+                var f = mar.SupportFragmentManager.FindFragmentByTag(DownloadDialog.DOWNLOAD_DIALOG_FRAGMENT);
+                //this is the only one we have..  tho obv a more generic way would be to see if s/t is a dialog fragmnet.  but arent a lot of just simple alert dialogs etc dialog fragment?? maybe explicitly checking is the best way.
+                if (f != null && f.IsVisible)
+                {
+                    useDownloadDialogFragment = true;
+                    v = f.View;
+                }
+            }
+            if (!useDownloadDialogFragment)
+            {
+                v = SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content);
+            }
+            return v;
+        }
+
+        public static void SetupRecentUserAutoCompleteTextView(AutoCompleteTextView actv, bool forAddingUser = false)
+        {
+            if (PreferencesState.ShowRecentUsers)
+            {
+                if (forAddingUser)
+                {
+                    //dont show people that we have already added...
+                    var recents = UserMetadataService.RecentUsersManager.GetRecentUserList();
+                    lock (CommonState.UserList)
+                    {
+                        foreach (var uli in CommonState.UserList)
+                        {
+                            recents.Remove(uli.Username);
+                        }
+                    }
+                    actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Android.Resource.Layout.SimpleDropDownItem1Line, recents);
+                }
+                else
+                {
+                    actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Android.Resource.Layout.SimpleDropDownItem1Line, UserMetadataService.RecentUsersManager.GetRecentUserList());
+                }
+            }
         }
     }
 }

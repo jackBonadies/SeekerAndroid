@@ -40,19 +40,12 @@ namespace Seeker
                 searchTab.FilterSticky = PreferencesState.FilterSticky;
                 searchTab.TextFilter.Set(PreferencesState.FilterStickyString);
             }
-            searchTab.SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist(searchTab.SortHelperSorting));
+            searchTab.SortHelper = new SortedSet<SearchResponse>(new SearchResultComparableWishlist(searchTab.SortHelperSorting));
             if (responses != null)
             {
                 foreach (SearchResponse resp in searchTab.SearchResponses)
                 {
-                    if (!searchTab.SortHelper.ContainsKey(resp))
-                    {
-                        searchTab.SortHelper.Add(resp, null);
-                    }
-                    else
-                    {
-
-                    }
+                    searchTab.SortHelper.Add(resp);
                 }
             }
             return searchTab;

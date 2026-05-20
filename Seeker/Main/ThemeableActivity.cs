@@ -30,7 +30,7 @@ namespace Seeker
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            SeekerApplication.SetActivityTheme(this);
+            UiHelpers.SetActivityTheme(this);
             ourWeakRef = new WeakReference<ThemeableActivity>(this, false);
 
             SeekerApplication.Activities.Add(ourWeakRef);
@@ -44,10 +44,10 @@ namespace Seeker
 
         protected override void AttachBaseContext(Context @base)
         {
-            if (!SeekerApplication.HasProperPerAppLanguageSupport() && PreferencesState.Language != PreferencesState.FieldLangAuto)
+            if (!LocaleHelper.HasProperPerAppLanguageSupport() && PreferencesState.Language != PreferencesState.FieldLangAuto)
             {
                 var config = new Android.Content.Res.Configuration();
-                config.Locale = SeekerApplication.LocaleFromString(PreferencesState.Language);
+                config.Locale = LocaleHelper.LocaleFromString(PreferencesState.Language);
                 var baseContext = @base.CreateConfigurationContext(config);
                 base.AttachBaseContext(baseContext);
             }

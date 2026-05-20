@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Android.Content;
 using Android.Views;
 using Seeker.Chatroom;
@@ -9,10 +9,8 @@ namespace Seeker.Helpers.ActionSheet
 {
     /// <summary>
     /// Builds reusable per-user action sections for the bottom-sheet menu.
-    /// Standard actions route through <see cref="UiHelpers.HandleCommonContextMenuActions"/>
-    /// so behavior stays identical to the legacy context menu. Refresh callbacks supplied
-    /// via <see cref="UserActionsOptions"/> are forwarded to that helper so rows can update
-    /// after toggles (add/remove friend, ignore/unignore, note add/edit, online alert).
+    /// Standard actions route through <see cref="UiHelpers.HandleCommonContextMenuActions"/>.
+    /// Row refreshes are driven by UserListService events (UserListChanged, IgnoreListChanged, UserRowChanged).
     /// </summary>
     public static class ActionSheetActions
     {
@@ -36,16 +34,8 @@ namespace Seeker.Helpers.ActionSheet
             {
                 IconResId = added ? Resource.Drawable.user_remove : Resource.Drawable.user_add,
                 Label = friendLabel,
-                OnClick = () =>
-                {
-                    if (added && options.OverrideRemoveFromFriends != null)
-                    {
-                        options.OverrideRemoveFromFriends();
-                        return;
-                    }
-                    UiHelpers.HandleCommonContextMenuActions(friendLabel, username, ctx, snackView,
-                        options.OnNoteChanged, options.OnAddRemoved, options.OnIgnoreChanged, options.OnOnlineAlertChanged);
-                }
+                OnClick = () => UiHelpers.HandleCommonContextMenuActions(friendLabel, username, ctx, snackView,
+                    options.OnAddRemoved, options.OnIgnoreChanged, options.OnNoteChanged)
             });
 
             section.Rows.Add(MakeCommonRow(Resource.Drawable.message_user, Resource.String.msg_user, username, ctx, snackView, options));
@@ -53,13 +43,13 @@ namespace Seeker.Helpers.ActionSheet
             section.Rows.Add(MakeCommonRow(Resource.Drawable.search_users_files, Resource.String.search_user_files, username, ctx, snackView, options));
             section.Rows.Add(MakeCommonRow(Resource.Drawable.user_info, Resource.String.get_user_info, username, ctx, snackView, options));
 
-            bool hasNote = SeekerState.UserNotes.ContainsKey(username);
+            bool hasNote = UserMetadataService.UserNotes.ContainsKey(username);
             int noteStringId = hasNote ? Resource.String.edit_note : Resource.String.add_note;
             section.Rows.Add(MakeCommonRow(Resource.Drawable.user_note, noteStringId, username, ctx, snackView, options));
 
             if (options.IncludeOnlineAlert)
             {
-                bool alertSet = SeekerState.UserOnlineAlerts.ContainsKey(username);
+                bool alertSet = UserMetadataService.UserOnlineAlerts.ContainsKey(username);
                 int alertStringId = alertSet ? Resource.String.remove_online_alert : Resource.String.set_online_alert;
                 section.Rows.Add(MakeCommonRow(Resource.Drawable.notifications_outline_30dp, alertStringId, username, ctx, snackView, options));
             }
@@ -69,23 +59,15 @@ namespace Seeker.Helpers.ActionSheet
                 section.Rows.Add(MakeCommonRow(Resource.Drawable.star_wishlist, Resource.String.give_privileges, username, ctx, snackView, options));
             }
 
-            bool ignored = SeekerApplication.IsUserInIgnoreList(username);
+            bool ignored = UserListService.Instance.IsUserInIgnoreList(username);
             string ignoreLabel = ctx.GetString(ignored ? Resource.String.remove_from_ignored : Resource.String.ignore_user);
             section.Rows.Add(new ActionSheetRow
             {
                 Destructive = !ignored,
                 IconResId = Resource.Drawable.account_cancel_outline,
                 Label = ignoreLabel,
-                OnClick = () =>
-                {
-                    if (ignored && options.OverrideRemoveFromIgnored != null)
-                    {
-                        options.OverrideRemoveFromIgnored();
-                        return;
-                    }
-                    UiHelpers.HandleCommonContextMenuActions(ignoreLabel, username, ctx, snackView,
-                        options.OnNoteChanged, options.OnAddRemoved, options.OnIgnoreChanged, options.OnOnlineAlertChanged);
-                }
+                OnClick = () => UiHelpers.HandleCommonContextMenuActions(ignoreLabel, username, ctx, snackView,
+                    options.OnAddRemoved, options.OnIgnoreChanged, options.OnNoteChanged)
             });
 
             return section;
@@ -95,7 +77,7 @@ namespace Seeker.Helpers.ActionSheet
         /// The compact section shown for an ignored user in the user list:
         /// Remove from Ignored (silent, removes the row) + Edit/Add Note.
         /// </summary>
-        public static ActionSheetSection BuildIgnoredUserActionsSection(string username, Context ctx, View snackView, Action onRemovedFromIgnored, Action onNoteChanged)
+        public static ActionSheetSection BuildIgnoredUserActionsSection(string username, Context ctx, View snackView)
         {
             var section = new ActionSheetSection
             {
@@ -106,17 +88,17 @@ namespace Seeker.Helpers.ActionSheet
             {
                 IconResId = Resource.Drawable.account_cancel,
                 Label = ctx.GetString(Resource.String.remove_from_ignored),
-                OnClick = onRemovedFromIgnored
+                OnClick = () => UserListService.Instance.RemoveFromIgnoreList(username)
             });
 
-            bool hasNote = SeekerState.UserNotes.ContainsKey(username);
+            bool hasNote = UserMetadataService.UserNotes.ContainsKey(username);
             int noteStringId = hasNote ? Resource.String.edit_note : Resource.String.add_note;
             string noteLabel = ctx.GetString(noteStringId);
             section.Rows.Add(new ActionSheetRow
             {
                 IconResId = Resource.Drawable.user_note,
                 Label = noteLabel,
-                OnClick = () => UiHelpers.HandleCommonContextMenuActions(noteLabel, username, ctx, snackView, onNoteChanged)
+                OnClick = () => UiHelpers.HandleCommonContextMenuActions(noteLabel, username, ctx, snackView)
             });
 
             return section;
@@ -130,7 +112,7 @@ namespace Seeker.Helpers.ActionSheet
                 IconResId = iconResId,
                 Label = label,
                 OnClick = () => UiHelpers.HandleCommonContextMenuActions(label, username, ctx, snackView,
-                    options.OnNoteChanged, options.OnAddRemoved, options.OnIgnoreChanged, options.OnOnlineAlertChanged)
+                    options.OnAddRemoved, options.OnIgnoreChanged, options.OnNoteChanged)
             };
         }
 
@@ -187,13 +169,13 @@ namespace Seeker.Helpers.ActionSheet
     {
         public bool IncludeOnlineAlert;
         public bool IncludeGivePrivileges;
+        public RoomAdminContext RoomAdmin;
+
+        // Callbacks used only by RoomUserListDialog (chatroom user list) for its own row updates.
+        // UserListActivity drives row updates through UserListService events instead, so it leaves these null.
         public Action OnAddRemoved;
         public Action OnIgnoreChanged;
         public Action OnNoteChanged;
-        public Action OnOnlineAlertChanged;
-        public Action OverrideRemoveFromFriends;
-        public Action OverrideRemoveFromIgnored;
-        public RoomAdminContext RoomAdmin;
     }
 
     public class RoomAdminContext

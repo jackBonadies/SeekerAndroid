@@ -1,4 +1,4 @@
-using Seeker.Services;
+﻿using Seeker.Services;
 using Seeker.Helpers;
 using Seeker.Managers;
 using Android.App;
@@ -14,26 +14,42 @@ using System.Threading.Tasks;
 using AndroidX.Core.Util;
 
 using Common;
+using Android.Content.PM;
+
 namespace Seeker
 {
     public static class CommonHelpers
     {
+        public static string GetVersionString()
+        {
+            try
+            {
+                PackageInfo pInfo = SeekerState.ActiveActivityRef.PackageManager.GetPackageInfo(SeekerState.ActiveActivityRef.PackageName, 0);
+                return pInfo.VersionName;
+            }
+            catch (Exception e)
+            {
+                Logger.Firebase("GetVersionString: " + e.Message);
+                return string.Empty;
+            }
+        }
+
         public static bool CompleteIncompleteDifferentVolume()
         {
-            if (SettingsActivity.UseIncompleteManualFolder() && SeekerState.RootIncompleteDocumentFile != null && SeekerState.RootDocumentFile != null)
+            if (SettingsActivity.UseIncompleteManualFolder() && StorageState.RootIncompleteDocumentFile != null && StorageState.RootDocumentFile != null)
             {
-                //if(!SeekerState.UseLegacyStorage())
+                //if(!PlatformInfo.UseLegacyStorage())
                 //{
                 //    //this method is only for API29+
                 //    //var sm = (SeekerState.ActiveActivityRef.GetSystemService(Context.StorageService) as Android.OS.Storage.StorageManager);
-                //    //Android.OS.Storage.StorageVolume sv1 = sm.GetStorageVolume(SeekerState.RootDocumentFile.Uri); //fails if not media store uri
+                //    //Android.OS.Storage.StorageVolume sv1 = sm.GetStorageVolume(StorageState.RootDocumentFile.Uri); //fails if not media store uri
                 //    //string uuid1 = sv1.Uuid;
-                //    //Android.OS.Storage.StorageVolume sv2 = sm.GetStorageVolume(SeekerState.RootIncompleteDocumentFile.Uri);
+                //    //Android.OS.Storage.StorageVolume sv2 = sm.GetStorageVolume(StorageState.RootIncompleteDocumentFile.Uri);
                 //    //string uuid2 = sv2.Uuid;
 
 
-                //    string volume1 = FileFilterHelper.GetVolumeName(SeekerState.RootDocumentFile.Uri.LastPathSegment, out _);
-                //    string volume2 = FileFilterHelper.GetVolumeName(SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment, out _);
+                //    string volume1 = FileFilterHelper.GetVolumeName(StorageState.RootDocumentFile.Uri.LastPathSegment, out _);
+                //    string volume2 = FileFilterHelper.GetVolumeName(StorageState.RootIncompleteDocumentFile.Uri.LastPathSegment, out _);
 
                 //    return uuid1 != uuid2;
                 //}
@@ -41,21 +57,21 @@ namespace Seeker
                 //{
                 try
                 {
-                    string volume1 = FileFilterHelper.GetVolumeName(SeekerState.RootDocumentFile.Uri.LastPathSegment, false, out bool everything);
+                    string volume1 = FileFilterHelper.GetVolumeName(StorageState.RootDocumentFile.Uri.LastPathSegment, false, out bool everything);
                     if (everything)
                     {
-                        volume1 = SeekerState.RootDocumentFile.Uri.LastPathSegment;
+                        volume1 = StorageState.RootDocumentFile.Uri.LastPathSegment;
                     }
-                    string volume2 = FileFilterHelper.GetVolumeName(SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment, false, out everything);
+                    string volume2 = FileFilterHelper.GetVolumeName(StorageState.RootIncompleteDocumentFile.Uri.LastPathSegment, false, out everything);
                     if (everything)
                     {
-                        volume2 = SeekerState.RootIncompleteDocumentFile.Uri.LastPathSegment;
+                        volume2 = StorageState.RootIncompleteDocumentFile.Uri.LastPathSegment;
                     }
                     return volume1 != volume2;
                 }
                 catch (Exception e)
                 {
-                    Logger.Firebase("CompleteIncompleteDifferentVolume failed: " + e.Message + SeekerState.RootDocumentFile?.Uri?.LastPathSegment + " incomplete: " + SeekerState.RootIncompleteDocumentFile?.Uri?.LastPathSegment);
+                    Logger.Firebase("CompleteIncompleteDifferentVolume failed: " + e.Message + StorageState.RootDocumentFile?.Uri?.LastPathSegment + " incomplete: " + StorageState.RootIncompleteDocumentFile?.Uri?.LastPathSegment);
                     return false;
                 }
                 //}
@@ -486,13 +502,13 @@ namespace Seeker
 
         public static void SaveUserNotes()
         {
-            PreferencesManager.SaveUserNotes(SerializationHelper.SaveUserNotesToString(SeekerState.UserNotes));
+            PreferencesManager.SaveUserNotes(SerializationHelper.SaveUserNotesToString(UserMetadataService.UserNotes));
         }
 
 
         public static void SaveOnlineAlerts()
         {
-            PreferencesManager.SaveUserOnlineAlerts(SerializationHelper.SaveUserOnlineAlertsToString(SeekerState.UserOnlineAlerts));
+            PreferencesManager.SaveUserOnlineAlerts(SerializationHelper.SaveUserOnlineAlertsToString(UserMetadataService.UserOnlineAlerts));
         }
 
 

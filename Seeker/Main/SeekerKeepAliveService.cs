@@ -7,6 +7,7 @@ using Android.Widget;
 using AndroidX.AppCompat.App;
 using AndroidX.Lifecycle;
 using Seeker.Helpers;
+using Seeker.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,8 +21,6 @@ namespace Seeker
     public class SeekerKeepAliveService : Service
     {
         public const int NOTIF_ID = 121;
-        public const string CHANNEL_ID = "seeker keep alive id";
-        public const string CHANNEL_NAME = "Seeker Keep Alive Service";
 
         public static Android.Net.Wifi.WifiManager.WifiLock WifiKeepAlive_FullService = null;
         public static PowerManager.WakeLock CpuKeepAlive_FullService = null;
@@ -42,7 +41,7 @@ namespace Seeker
                 PendingIntent.GetActivity(context, 0, notifIntent, CommonHelpers.AppendMutabilityIfApplicable((PendingIntentFlags)0, true));
             //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
             //a "channel" is a category in the UI to the end user.
-            return CommonHelpers.CreateNotification(context, pendingIntent, CHANNEL_ID, context.GetString(Resource.String.seeker_running), context.GetString(Resource.String.seeker_running_content), true, true, true);
+            return CommonHelpers.CreateNotification(context, pendingIntent, AppNotifications.CHANNEL_ID_KEEP_ALIVE, context.GetString(Resource.String.seeker_running), context.GetString(Resource.String.seeker_running_content), true, true, true);
         }
 
 
@@ -55,9 +54,9 @@ namespace Seeker
                 return StartCommandResult.NotSticky;
             }
             Logger.InfoFirebase("keep alive service started...");
-            SeekerState.IsStartUpServiceCurrentlyRunning = true;
+            ServiceLifecycle.IsStartUpServiceCurrentlyRunning = true;
 
-            CommonHelpers.CreateNotificationChannel(this, CHANNEL_ID, CHANNEL_NAME);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
+            CommonHelpers.CreateNotificationChannel(this, AppNotifications.CHANNEL_ID_KEEP_ALIVE, AppNotifications.CHANNEL_NAME_KEEP_ALIVE);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
             Notification notification = CreateNotification(this);
 
 
@@ -73,7 +72,7 @@ namespace Seeker
             {
                 // this exception is in fact catchable.. though "startForegroundService() did not then call Service.startForeground()" is supposed to cause issues
                 //   in my case it did not.
-                SeekerState.IsStartUpServiceCurrentlyRunning = false;
+                ServiceLifecycle.IsStartUpServiceCurrentlyRunning = false;
                 bool? foreground = SeekerState.ActiveActivityRef?.IsResumed();
                 Logger.Firebase($"StartForeground issue: is foreground: {foreground} {e.Message} {e.StackTrace}");
 #if DEBUG
@@ -107,7 +106,7 @@ namespace Seeker
 
         public override void OnDestroy()
         {
-            SeekerState.IsStartUpServiceCurrentlyRunning = false;
+            ServiceLifecycle.IsStartUpServiceCurrentlyRunning = false;
             if (CpuKeepAlive_FullService != null && CpuKeepAlive_FullService.IsHeld)
             {
                 CpuKeepAlive_FullService.Release();

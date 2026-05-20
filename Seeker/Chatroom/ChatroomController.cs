@@ -491,7 +491,7 @@ namespace Seeker.Chatroom
             SeekerState.SoulseekClient.RoomTickerRemoved += SoulseekClient_RoomTickerRemoved;
             SeekerState.SoulseekClient.RoomTickerListReceived += SoulseekClient_RoomTickerListReceived;
 
-            SeekerApplication.UserStatusChangedDeDuplicated += SoulseekClient_UserStatusChanged;
+            UserStatusDeduplicator.Instance.Deduplicated += SoulseekClient_UserStatusChanged;
 
             JoinedRoomTickers = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Soulseek.RoomTicker>>();
             JoinedRoomNames = new List<string>();
@@ -701,7 +701,7 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_RoomMessageReceived(object sender, Soulseek.RoomMessageReceivedEventArgs e)
         {
-            if (SeekerApplication.IsUserInIgnoreList(e.Username))
+            if (UserListService.Instance.IsUserInIgnoreList(e.Username))
             {
                 Logger.Debug("IGNORED room msg received: r:" + e.RoomName + " u: " + e.Username);
                 return;
@@ -848,8 +848,6 @@ namespace Seeker.Chatroom
 
 
 
-        public const string CHANNEL_ID = "Chatroom Messages ID";
-        public const string CHANNEL_NAME = "Chatroom Messages";
         public const string FromRoomName = "FromThisRoom";
         public const string ComingFromMessageTapped = "FromAMessage";
         public static string currentlyInsideRoomName = string.Empty;
@@ -869,14 +867,14 @@ namespace Seeker.Chatroom
             {
                 try
                 {
-                    CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, CHANNEL_ID, CHANNEL_NAME, NotificationImportance.High); //only high will "peek"
+                    CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, AppNotifications.CHANNEL_ID_CHATROOM, AppNotifications.CHANNEL_NAME_CHATROOM, NotificationImportance.High); //only high will "peek"
                     Intent notifIntent = new Intent(SeekerState.ActiveActivityRef, typeof(ChatroomActivity));
                     notifIntent.AddFlags(ActivityFlags.SingleTop);
                     notifIntent.PutExtra(FromRoomName, roomName); //so we can go to this user..
                     notifIntent.PutExtra(ComingFromMessageTapped, true); //so we can go to this user..
                     PendingIntent pendingIntent =
                         PendingIntent.GetActivity(SeekerState.ActiveActivityRef, msg.Username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                    Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, CHANNEL_ID, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.new_room_message_received), roomName), msg.Username + ": " + msg.MessageText, false);
+                    Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, AppNotifications.CHANNEL_ID_CHATROOM, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.new_room_message_received), roomName), msg.Username + ": " + msg.MessageText, false);
                     NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
                     // notificationId is a unique int for each notification that you must define
                     notificationManager.Notify(roomName.GetHashCode(), n);

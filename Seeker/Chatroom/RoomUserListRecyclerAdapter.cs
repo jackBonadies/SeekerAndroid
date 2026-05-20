@@ -240,7 +240,7 @@ namespace Seeker.Chatroom
             {
                 viewOperatorStatus.Visibility = ViewStates.Gone;
             }
-            if (SeekerState.UserNotes.ContainsKey(userData.Username))
+            if (UserMetadataService.UserNotes.ContainsKey(userData.Username))
             {
                 imageNoted.Visibility = ViewStates.Visible;
             }
@@ -248,7 +248,7 @@ namespace Seeker.Chatroom
             {
                 imageNoted.Visibility = ViewStates.Invisible;
             }
-            if (SeekerApplication.IsUserInIgnoreList(userData.Username))
+            if (UserListService.Instance.IsUserInIgnoreList(userData.Username))
             {
                 imageFriendIgnored.SetImageResource(Resource.Drawable.account_cancel);
                 imageFriendIgnored.Visibility = ViewStates.Visible;

@@ -706,7 +706,6 @@ Contador de diretórios: {5}
     </string>
     <string name="sending__">Enviando...</string>
     <string name="give_hint"># de dias</string>
-    <string name="type_notes_here">digite notas sobre o usuário aqui</string>
     <string name="edit_note">Editar nota</string>
     <string name="add_note">Adicionar nota</string>
     <string name="note_title">Nota de {0}</string>

@@ -666,6 +666,7 @@ namespace Seeker
 
         public static void ClearSearchHistory()
         {
+            PreferencesState.SearchHistory = new List<string>();
             lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();

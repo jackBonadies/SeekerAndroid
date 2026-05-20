@@ -1051,7 +1051,7 @@ namespace Seeker.Chatroom
             View viewInflated = LayoutInflater.From(RequireContext()).Inflate(Resource.Layout.autocomplete_user_dialog_content, (ViewGroup)Activity.FindViewById(Android.Resource.Id.Content).RootView, false);
 
             AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
-            SeekerApplication.SetupRecentUserAutoCompleteTextView(input);
+            UiHelpers.SetupRecentUserAutoCompleteTextView(input);
 
             builder.SetView(viewInflated);
 
@@ -1065,7 +1065,7 @@ namespace Seeker.Chatroom
                     (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
                     return;
                 }
-                SeekerState.RecentUsersManager.AddUserToTop(userToAdd, true);
+                UserMetadataService.RecentUsersManager.AddUserToTop(userToAdd, true);
                 ChatroomController.AddRemoveUserToPrivateRoomAPI(roomToInvite, userToAdd, true, false);
                 if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
                 {

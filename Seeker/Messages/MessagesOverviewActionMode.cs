@@ -152,9 +152,9 @@ namespace Seeker.Messages
                         {
                             foreach (string username in selectedUsernames)
                             {
-                                if (!SeekerApplication.IsUserInIgnoreList(username))
+                                if (!UserListService.Instance.IsUserInIgnoreList(username))
                                 {
-                                    SeekerApplication.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, username);
+                                    UserListService.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, username);
                                 }
                             }
                         }

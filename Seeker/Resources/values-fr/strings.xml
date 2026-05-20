@@ -706,7 +706,6 @@ Nombre de dossiers : {5}
     </string>
     <string name="sending__">Envoi en cours...</string>
     <string name="give_hint">nombre de jours</string>
-    <string name="type_notes_here">écrivez un commentaire sur l\'utilisateur ici</string>
     <string name="edit_note">Modifier le commentaire</string>
     <string name="add_note">Ajouter un commentaire</string>
     <string name="note_title">Commentaire sur {0}</string>

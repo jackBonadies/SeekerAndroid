@@ -17,7 +17,7 @@ namespace Seeker
         public Task DiskLoadTask = null;
         public bool DiskLoadInProgress => DiskLoadTask != null && !DiskLoadTask.IsCompleted;
         public readonly object DiskLoadLock = new object();
-        public SortedDictionary<SearchResponse, object> SortHelper = new SortedDictionary<SearchResponse, object>(new SearchResultComparable(PreferencesState.DefaultSearchResultSortAlgorithm));
+        public SortedSet<SearchResponse> SortHelper = new SortedSet<SearchResponse>(new SearchResultComparable(PreferencesState.DefaultSearchResultSortAlgorithm));
         public SearchResultSorting SortHelperSorting = PreferencesState.DefaultSearchResultSortAlgorithm;
         public object SortHelperLockObject = new object();
         public TextFilter TextFilter = new TextFilter(supportsSpecialFlags: true);
@@ -52,16 +52,13 @@ namespace Seeker
         {
             SearchTab clone = new SearchTab();
             clone.SearchResponses = this.SearchResponses.ToList();
-            SortedDictionary<SearchResponse, object> cloned = new SortedDictionary<SearchResponse, object>(new SearchResultComparableWishlist(clone.SortHelperSorting));
+            SortedSet<SearchResponse> cloned = new SortedSet<SearchResponse>(new SearchResultComparableWishlist(clone.SortHelperSorting));
             //without lock, extremely easy to reproduce "collection was modified" exception if creating wishlist tab while searching.
             lock (this.SortHelperLockObject) //lock the sort helper we are copying from
             {
                 foreach (var entry in SortHelper)
                 {
-                    if (!cloned.ContainsKey(entry.Key))
-                    {
-                        cloned.Add(entry.Key, entry.Value);
-                    }
+                    cloned.Add(entry);
                 }
             }
             clone.SortHelper = cloned;

@@ -706,7 +706,6 @@ Directory Count: {5}\"
     </string>
     <string name="sending__">Sending...</string>
     <string name="give_hint"># of days</string>
-    <string name="type_notes_here">type notes about user here</string>
     <string name="edit_note">Edit Note</string>
     <string name="add_note">Add Note</string>
     <string name="note_title">{0}\'s Note</string>
