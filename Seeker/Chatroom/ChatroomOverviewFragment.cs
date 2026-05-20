@@ -21,6 +21,7 @@ namespace Seeker.Chatroom
         private SearchView filterChatroomView;
         private static string FilterString = string.Empty;
         private View chatroomsListLoadingView = null;
+        private ProgressBar refreshProgressBar = null;
         private bool created = false;
 
         private static List<Soulseek.RoomInfo> CurrentParsedList =>
@@ -36,8 +37,11 @@ namespace Seeker.Chatroom
         {
             Logger.Debug("create chatroom overview view");
             ChatroomController.RoomListReceived += OnChatListReceived;
+            ChatroomController.RoomListFailed += OnRoomListFailed;
             View rootView = inflater.Inflate(Resource.Layout.chatroom_overview, container, false);
             chatroomsListLoadingView = rootView.FindViewById<View>(Resource.Id.chatroomListLoading);
+            refreshProgressBar = rootView.FindViewById<ProgressBar>(Resource.Id.chatroomListRefreshProgress);
+            refreshProgressBar.Visibility = ChatroomController.IsRoomListLoading ? ViewStates.Visible : ViewStates.Gone;
             filterChatroomView = rootView.FindViewById<SearchView>(Resource.Id.filterChatroom);
             filterChatroomView.QueryTextChange += FilterChatroomView_QueryTextChange;
             recyclerViewOverview = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewOverview);
@@ -154,6 +158,23 @@ namespace Seeker.Chatroom
         public void OnChatListReceived(object sender, EventArgs eventArgs)
         {
             this.UpdateChatroomList();
+            SetRefreshProgressVisible(false);
+        }
+
+        public void OnRoomListFailed(object sender, EventArgs eventArgs)
+        {
+            SetRefreshProgressVisible(false);
+        }
+
+        private void SetRefreshProgressVisible(bool visible)
+        {
+            SeekerState.ActiveActivityRef?.RunOnUiThread(() =>
+            {
+                if (refreshProgressBar != null)
+                {
+                    refreshProgressBar.Visibility = visible ? ViewStates.Visible : ViewStates.Gone;
+                }
+            });
         }
 
         private void UpdateChatroomList()
@@ -181,6 +202,8 @@ namespace Seeker.Chatroom
                 Logger.Debug("on chatroom overview attach");
                 ChatroomController.RoomListReceived -= OnChatListReceived;
                 ChatroomController.RoomListReceived += OnChatListReceived;
+                ChatroomController.RoomListFailed -= OnRoomListFailed;
+                ChatroomController.RoomListFailed += OnRoomListFailed;
             }
             base.OnAttach(activity);
         }
@@ -223,6 +246,7 @@ namespace Seeker.Chatroom
                         return true;
                     case Resource.Id.refresh_room_list_action:
                         ChatroomController.GetRoomListApi(true);
+                        fragment.SetRefreshProgressVisible(ChatroomController.IsRoomListLoading);
                         return true;
                 }
                 return false;

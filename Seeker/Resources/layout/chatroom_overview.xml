@@ -9,9 +9,19 @@
     android:focusableInTouchMode="true"
     android:id="@+id/chatroomOverviewLayout"
 >
+   <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/chatroomListRefreshProgress"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:visibility="gone"
+        app:trackCornerRadius="0dp"
+        app:trackInnerCornerRadius="2dp"
+        app:indicatorColor="?attr/mainPurple"
+        android:indeterminateOnly="true" />
     <SearchView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/chatroomListRefreshProgress"
         android:id="@+id/filterChatroom"
         android:queryHint="@string/filter_chatrooms_here"
         android:iconifiedByDefault="false"

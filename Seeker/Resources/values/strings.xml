@@ -125,6 +125,7 @@
     <string name="requesting_room_list">Requesting Room List</string>
     <string name="requesting_user_info">Requesting User\'s Info</string>
     <string name="room_list_received">Room List Received</string>
+    <string name="room_list_request_failed">Failed to fetch chat room list</string>
 
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
