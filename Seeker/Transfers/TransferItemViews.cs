@@ -80,8 +80,9 @@ namespace Seeker
 
         private Drawable cachedDownloadArrow;
         private Drawable cachedUploadArrow;
+        private ImageSpan cachedDownloadArrowSpan;
+        private ImageSpan cachedUploadArrowSpan;
         private int cachedDlColor;
-        private int cachedDrawablePadding;
 
         public TextView GetAdditionalStatusInfoView()
         {
@@ -175,13 +176,20 @@ namespace Seeker
             var theme = Context.Theme;
             cachedDlColor = resources.GetColor(Resource.Color.transferChipDownloadingText, theme);
             int iconSize = (int)(10 * resources.DisplayMetrics.Density);
+            int arrowOffsetUp = (int)(1.6 * resources.DisplayMetrics.Density);
             cachedDownloadArrow = resources.GetDrawable(Resource.Drawable.arrow_down, theme);
-            cachedDownloadArrow.SetBounds(0, 0, iconSize, iconSize);
             cachedDownloadArrow.SetTint(cachedDlColor);
             cachedUploadArrow = resources.GetDrawable(Resource.Drawable.arrow_up, theme);
-            cachedUploadArrow.SetBounds(0, 0, iconSize, iconSize);
             cachedUploadArrow.SetTint(cachedDlColor);
-            cachedDrawablePadding = (int)(2 * resources.DisplayMetrics.Density);
+
+            // InsetDrawable shifts the arrow up by arrowOffset: ImageSpan anchors on the
+            // inset wrapper's bounds (iconSize tall), the inset moves the arrow within it.
+            var downloadInset = new InsetDrawable(cachedDownloadArrow, 0, -arrowOffsetUp, 0, arrowOffsetUp);
+            downloadInset.SetBounds(0, 0, iconSize, iconSize);
+            var uploadInset = new InsetDrawable(cachedUploadArrow, 0, -arrowOffsetUp, 0, arrowOffsetUp);
+            uploadInset.SetBounds(0, 0, iconSize, iconSize);
+            cachedDownloadArrowSpan = new ImageSpan(downloadInset, SpanAlign.Bottom);
+            cachedUploadArrowSpan = new ImageSpan(uploadInset, SpanAlign.Bottom);
         }
 
         public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
@@ -197,8 +205,8 @@ namespace Seeker
             var state = folderItem.GetState(out bool isFailed, out _);
 
             TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSizeSeparator, viewSize, viewSpeed, item, state, this.showSize, this.showSpeed, isFolder: true);
-            var arrow = folderItem.IsUpload() ? cachedUploadArrow : cachedDownloadArrow;
-            TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state, arrow, cachedDlColor, cachedDrawablePadding);
+            var arrowSpan = folderItem.IsUpload() ? cachedUploadArrowSpan : cachedDownloadArrowSpan;
+            TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state, arrowSpan, cachedDlColor);
             TransferViewHelper.UpdateSegmentedProgressBar(segmentedProgressBar, folderItem);
 
             viewUsername.Text = folderItem.Username;
@@ -270,7 +278,7 @@ namespace Seeker
         }
 
 
-        public static void SetAdditionalFolderInfoState(TextView filesLongStatus, TextView currentFile, FolderItem fi, TransferStates folderState, Drawable cachedArrow, int dlColor, int drawablePadding)
+        public static void SetAdditionalFolderInfoState(TextView filesLongStatus, TextView currentFile, FolderItem fi, TransferStates folderState, ImageSpan cachedArrowSpan, int dlColor)
         {
             SetFolderStatusSpannable(filesLongStatus, fi);
 
@@ -292,17 +300,16 @@ namespace Seeker
                     }
                 }
 
-                currentFile.Visibility = ViewStates.Visible;
-                currentFile.Text = currentFilename;
+                var spannable = new SpannableString("  " + currentFilename);
+                spannable.SetSpan(cachedArrowSpan, 0, 1, SpanTypes.ExclusiveExclusive);
 
+                currentFile.Visibility = ViewStates.Visible;
                 currentFile.SetTextColor(new Color(dlColor));
-                currentFile.SetCompoundDrawables(cachedArrow, null, null, null);
-                currentFile.CompoundDrawablePadding = drawablePadding;
+                currentFile.SetText(spannable, TextView.BufferType.Spannable);
             }
             else
             {
                 currentFile.Visibility = ViewStates.Gone;
-                currentFile.SetCompoundDrawables(null, null, null, null);
             }
         }
 
