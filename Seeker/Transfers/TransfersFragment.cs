@@ -434,6 +434,12 @@ namespace Seeker
             recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
             recyclerViewTransferItems.AddItemDecoration(new AndroidX.RecyclerView.Widget.DividerItemDecoration(Activity, AndroidX.RecyclerView.Widget.DividerItemDecoration.Vertical));
 
+            // default cross fade animation looks glitchy (i.e. when updating status of item). this doesnt affect item add/remove animations.
+            if (recyclerViewTransferItems.GetItemAnimator() is SimpleItemAnimator itemAnimator)
+            {
+                itemAnimator.SupportsChangeAnimations = false;
+            }
+
             Logger.InfoFirebase("AutoClear: " + PreferencesState.AutoClearCompleteDownloads);
             Logger.InfoFirebase("AutoRetry: " + PreferencesState.AutoRetryDownload);
 
