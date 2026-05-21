@@ -578,6 +578,7 @@ namespace Seeker
                     }
 
                     relevantItem.Progress = 0;
+                    relevantItem.BytesTransferred = 0;
                     Logger.Debug("truncated the file and updated the size");
                 }
 

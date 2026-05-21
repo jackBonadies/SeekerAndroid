@@ -144,12 +144,17 @@ namespace Seeker
         }
 
         /// <summary>
-        /// Progress as an integer percent (0-100) for use in the UI. Derived from
-        ///   GetBytesTransferred() and Size so it stays consistent with the byte-based
-        ///   source of truth (including the backwards-compat fallback in GetBytesTransferred).
+        /// Progress as an integer percent (0-100) for the progress bar. This owns the
+        ///   bar's UI policy and is deliberately divorced from GetBytesTransferred(): a
+        ///   failed transfer shows a full (red) bar and a succeeded transfer shows 100%
+        ///   even if byte bookkeeping rounds low. Everything else is byte-derived.
         /// </summary>
         public int GetProgressForPresentation()
         {
+            if (Failed || State.HasFlag(TransferStates.Succeeded))
+            {
+                return 100;
+            }
             if (Size > 0)
             {
                 return (int)Math.Clamp(GetBytesTransferred() * 100 / Size, 0, 100);
