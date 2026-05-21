@@ -762,7 +762,12 @@ namespace Seeker
                     int trackNum = i + 1;
                     long size = _random.Next(2_000_000, 60_000_000);
                     int length = _random.Next(120, 480);
-                    string filename = $"@@{username}\\Music\\{artist}\\{term} - AlbumName {album}\\{trackNum:D2} Track {trackNum}.{ext}";
+                    string reallyLongTitle = "";
+                    if (_random.Next(0,5) == 0) {
+                        reallyLongTitle = " this is a really really really really long title";
+                    }
+
+                    string filename = $"@@{username}\\Music\\{artist}\\{term} - AlbumName {album}\\{trackNum:D2} Track {trackNum}{reallyLongTitle}.{ext}";
                     var fileAttributes = new[] { new FileAttribute(FileAttributeType.BitRate, bitRate), new FileAttribute(FileAttributeType.Length, length) };
                     if (ext == "flac" && _random.Next(2) == 0)
                     {
