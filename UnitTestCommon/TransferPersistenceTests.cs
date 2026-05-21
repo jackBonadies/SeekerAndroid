@@ -4,7 +4,9 @@ using Soulseek;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
+using VerifyNUnit;
 
 namespace UnitTestCommon
 {
@@ -401,6 +403,47 @@ namespace UnitTestCommon
             var restored = TransferItems.TransferItemManagerDL.AllTransferItems[0];
             // XmlIgnore fields should be default values after deserialization
             Assert.IsFalse(restored.InProcessing);
+        }
+
+        [Test]
+        public async Task Roundtrip_PreservesBytesTransferred()
+        {
+            TransferItems.TransferItemManagerDL = new TransferItemManager();
+            TransferItems.TransferItemManagerUploads = new TransferItemManager(true);
+
+            // Mid-transfer item: BytesTransferred set explicitly.
+            var ti1 = CreateTransferItem("alice", "\\music\\jazz\\blue.mp3", "jazz", 100000);
+            ti1.BytesTransferred = 64000;
+            ti1.Progress = 64;
+
+            // Completed item.
+            var ti2 = CreateTransferItem("bob", "\\music\\rock\\loud.mp3", "rock", 200000);
+            ti2.BytesTransferred = 200000;
+            ti2.Progress = 100;
+
+            // Legacy item saved before BytesTransferred was a field: it stays 0 and
+            // GetBytesTransferred() falls back to a Progress-based estimate.
+            var ti3 = CreateTransferItem("carol", "\\music\\folk\\quiet.mp3", "folk", 50000);
+            ti3.Progress = 25;
+
+            TransferItems.TransferItemManagerDL.Add(ti1);
+            TransferItems.TransferItemManagerDL.Add(ti2);
+            TransferItems.TransferItemManagerDL.Add(ti3);
+
+            var saved = TransferPersistence.SaveTransferItems(force: true);
+            Assert.IsNotNull(saved);
+
+            TransferItems.TransferItemManagerDL = null;
+            TransferPersistence.RestoreDownloadTransferItems(saved.Value.downloads, string.Empty);
+
+            await Verifier.Verify(TransferItems.TransferItemManagerDL.AllTransferItems.Select(t => new
+            {
+                t.Filename,
+                t.Progress,
+                t.Size,
+                t.BytesTransferred,
+                GetBytesTransferred = t.GetBytesTransferred(),
+            }));
         }
 
         // --- Legacy restore edge cases ---

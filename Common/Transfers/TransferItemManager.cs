@@ -632,7 +632,7 @@ namespace Seeker
         {
             lock (AllTransferItems)
             {
-                AllTransferItems.RemoveAll((TransferItem i) => { return i.Progress > 99; });
+                AllTransferItems.RemoveAll((TransferItem i) => { return i.State.HasFlag(TransferStates.Succeeded); });
                 if (isUploads)
                 {
                     AllTransferItems.RemoveAll((TransferItem i) => { return SimpleHelpers.IsUploadCompleteOrAborted(i.State); });
@@ -653,7 +653,7 @@ namespace Seeker
         {
             lock (AllTransferItems)
             {
-                AllTransferItems.RemoveAll((TransferItem i) => { return i.Progress > 99 && fi.Username == i.Username && GetFolderNameFromTransferItem(i) == fi.FolderName; });
+                AllTransferItems.RemoveAll((TransferItem i) => { return i.State.HasFlag(TransferStates.Succeeded) && fi.Username == i.Username && GetFolderNameFromTransferItem(i) == fi.FolderName; });
             }
             fi.ClearAllComplete();
             if (fi.IsEmpty())

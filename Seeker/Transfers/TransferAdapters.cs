@@ -329,7 +329,7 @@ namespace Seeker
                     }
                     else
                     {
-                        if (tvh != null && fi != null && folderItemState.HasFlag(TransferStates.Cancelled)  /*&& fi.GetFolderProgress() > 0*/)
+                        if (tvh != null && fi != null && folderItemState.HasFlag(TransferStates.Cancelled))
                         {
                             menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ResumeFolder, 0, Resource.String.ResumeFolder);
                         }

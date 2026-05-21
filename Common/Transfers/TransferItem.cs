@@ -13,7 +13,9 @@ namespace Seeker
         public string Username;
         public string FolderName;
         public string FullFilename;
+        // OBSOLETE - TODO - after enough release cycles remove
         public int Progress;
+        public long BytesTransferred;
         public bool Failed;
         public TransferStates State;
         public long Size;
@@ -124,9 +126,41 @@ namespace Seeker
             return Username + " : " + FullFilename;
         }
 
+        /// <summary>
+        /// Estimate of bytes transferred thus far (falls back to Progress for backwards compat - i.e. users 
+        ///   with saved transfers before BytesTransferred was a field)
+        /// </summary>
+        public long GetBytesTransferred()
+        {
+            if (BytesTransferred > 0)
+            {
+                return BytesTransferred;
+            }
+            if (Size > 0)
+            {
+                return (long)((Progress / 100.0) * Size);
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// Progress as an integer percent (0-100) for use in the UI. Derived from
+        ///   GetBytesTransferred() and Size so it stays consistent with the byte-based
+        ///   source of truth (including the backwards-compat fallback in GetBytesTransferred).
+        /// </summary>
+        public int GetProgressForPresentation()
+        {
+            if (Size > 0)
+            {
+                return (int)Math.Clamp(GetBytesTransferred() * 100 / Size, 0, 100);
+            }
+            return 0;
+        }
+
         public void ClearStateForRetry()
         {
             Progress = 0; //no longer red... some good user feedback
+            BytesTransferred = 0;
             QueueLength = int.MaxValue; //let the State Changed update this for us...
             Failed = false;
             TransferItemExtra &= ~TransferItemExtras.DirNotSet;

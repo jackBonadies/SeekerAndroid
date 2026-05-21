@@ -361,16 +361,15 @@ namespace Seeker
 
 
 
-        public static void SetSizeText(TextView size, int progress, long sizeBytes)
+        public static void SetSizeText(TextView size, long bytesTransferred, long sizeBytes)
         {
-            if (progress == 100)
+            if (sizeBytes > 0 && bytesTransferred >= sizeBytes)
             {
                 size.Text = SimpleHelpers.GetHumanReadableSize(sizeBytes);
             }
             else
             {
-                long bytesTransferred = progress * sizeBytes;
-                size.Text = SimpleHelpers.GetHumanReadableProgressSize(bytesTransferred / 100, sizeBytes);
+                size.Text = SimpleHelpers.GetHumanReadableProgressSize(bytesTransferred, sizeBytes);
             }
         }
 
@@ -642,7 +641,7 @@ namespace Seeker
                     }
                     else if (ti.State.HasFlag(TransferStates.InProgress) || ti.State.HasFlag(TransferStates.Initializing) || ti.State.HasFlag(TransferStates.Requested) || ti.State.HasFlag(TransferStates.Aborted))
                     {
-                        long completedBytes = (long)((ti.Progress / 100.0) * size);
+                        long completedBytes = System.Math.Min(ti.GetBytesTransferred(), size);
                         bytesInProgress += completedBytes;
                         bytesNotYet += size - completedBytes;
                     }
@@ -652,7 +651,7 @@ namespace Seeker
                     }
                     else if (ti.State.HasFlag(TransferStates.Cancelled))
                     {
-                        long completedBytes = (long)((ti.Progress / 100.0) * size);
+                        long completedBytes = System.Math.Min(ti.GetBytesTransferred(), size);
                         bytesPaused += completedBytes;
                         bytesNotYet += size - completedBytes;
                     }
@@ -793,12 +792,12 @@ namespace Seeker
                 }
                 if (item is TransferItem ti)
                 {
-                    SetSizeText(sizeView, ti.Progress, ti.Size);
+                    SetSizeText(sizeView, ti.GetBytesTransferred(), ti.Size);
                 }
                 else if (item is FolderItem fi)
                 {
-                    int prog = fi.GetFolderProgress(out long totalBytes, out _);
-                    SetSizeText(sizeView, prog, totalBytes);
+                    var (totalBytes, completedBytes) = fi.GetFolderProgress();
+                    SetSizeText(sizeView, completedBytes, totalBytes);
                 }
             }
             else
@@ -932,7 +931,7 @@ namespace Seeker
             InnerTransferItem = item;
             TransferItem ti = item as TransferItem;
             viewFilename.Text = ti.Filename;
-            progressBar.Progress = ti.Progress;
+            progressBar.Progress = ti.GetProgressForPresentation();
             TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSizeSeparator, viewSize, viewSpeed, ti, ti.State, this.showSizes, this.showSpeed);
             viewUsername.Text = ti.Username;
             bool isFailedOrAborted = ti.Failed;

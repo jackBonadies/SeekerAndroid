@@ -1,0 +1,22 @@
+﻿[
+  {
+    Filename: blue.mp3,
+    Progress: 64,
+    Size: 100000,
+    BytesTransferred: 64000,
+    GetBytesTransferred: 64000
+  },
+  {
+    Filename: loud.mp3,
+    Progress: 100,
+    Size: 200000,
+    BytesTransferred: 200000,
+    GetBytesTransferred: 200000
+  },
+  {
+    Filename: quiet.mp3,
+    Progress: 25,
+    Size: 50000,
+    GetBytesTransferred: 12500
+  }
+]

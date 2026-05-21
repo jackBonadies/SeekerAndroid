@@ -209,7 +209,7 @@ namespace UnitTestCommon
         // --- GetFolderProgress ---
 
         [Test]
-        public void GetFolderProgress_AllComplete_Returns100()
+        public void GetFolderProgress_AllComplete_ReturnsFullBytes()
         {
             var ti1 = CreateTransferItem("alice", "\\music\\jazz\\song1.mp3", "jazz", size: 1000);
             ti1.Progress = 100;
@@ -218,15 +218,14 @@ namespace UnitTestCommon
             var folder = new FolderItem("jazz", "alice", ti1);
             folder.Add(ti2);
 
-            int progress = folder.GetFolderProgress(out long totalBytes, out long bytesCompleted);
+            var (totalBytes, bytesCompleted) = folder.GetFolderProgress();
 
-            Assert.AreEqual(100, progress);
             Assert.AreEqual(3000, totalBytes);
             Assert.AreEqual(3000, bytesCompleted);
         }
 
         [Test]
-        public void GetFolderProgress_HalfComplete_Returns50()
+        public void GetFolderProgress_HalfComplete_ReturnsHalfBytes()
         {
             var ti1 = CreateTransferItem("alice", "\\music\\jazz\\song1.mp3", "jazz", size: 1000);
             ti1.Progress = 100;
@@ -235,23 +234,23 @@ namespace UnitTestCommon
             var folder = new FolderItem("jazz", "alice", ti1);
             folder.Add(ti2);
 
-            int progress = folder.GetFolderProgress(out long totalBytes, out long bytesCompleted);
+            var (totalBytes, bytesCompleted) = folder.GetFolderProgress();
 
-            Assert.AreEqual(50, progress);
             Assert.AreEqual(2000, totalBytes);
             Assert.AreEqual(1000, bytesCompleted);
         }
 
         [Test]
-        public void GetFolderProgress_ZeroTotalBytes_Returns100()
+        public void GetFolderProgress_ZeroTotalBytes_ReturnsZero()
         {
             var ti = CreateTransferItem("alice", "\\music\\jazz\\song.mp3", "jazz", size: 0);
             ti.Progress = 0;
             var folder = new FolderItem("jazz", "alice", ti);
 
-            int progress = folder.GetFolderProgress(out _, out _);
+            var (totalBytes, bytesCompleted) = folder.GetFolderProgress();
 
-            Assert.AreEqual(100, progress);
+            Assert.AreEqual(0, totalBytes);
+            Assert.AreEqual(0, bytesCompleted);
         }
 
         [Test]
@@ -264,12 +263,10 @@ namespace UnitTestCommon
             var folder = new FolderItem("jazz", "alice", ti1);
             folder.Add(ti2);
 
-            int progress = folder.GetFolderProgress(out long totalBytes, out long bytesCompleted);
+            var (totalBytes, bytesCompleted) = folder.GetFolderProgress();
 
-            // total = 4000, completed = 1250, percent = 31.25 -> 31
             Assert.AreEqual(4000, totalBytes);
             Assert.AreEqual(1250, bytesCompleted);
-            Assert.AreEqual(31, progress);
         }
 
         // --- GetQueueLength ---
@@ -543,12 +540,12 @@ namespace UnitTestCommon
         // --- ClearAllComplete ---
 
         [Test]
-        public void ClearAllComplete_Download_RemovesItemsWithProgressOver99()
+        public void ClearAllComplete_Download_RemovesSucceededItems()
         {
             var ti1 = CreateTransferItem("alice", "\\music\\jazz\\song1.mp3", "jazz");
-            ti1.Progress = 100;
+            ti1.State = TransferStates.Completed | TransferStates.Succeeded;
             var ti2 = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz");
-            ti2.Progress = 50;
+            ti2.State = TransferStates.InProgress;
             var folder = new FolderItem("jazz", "alice", ti1);
             folder.Add(ti2);
 
