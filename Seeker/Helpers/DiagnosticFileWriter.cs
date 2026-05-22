@@ -26,9 +26,13 @@ namespace Seeker.Helpers
 {
     public static class DiagnosticFileWriter
     {
+        private const string DiagnosticFileName = "seeker_diagnostics.txt";
+        private const string DiagnosticDisplayName = "seeker_diagnostics";
+
         private static DocumentFile DiagnosticTextFile = null;
         private static System.IO.StreamWriter DiagnosticStreamWriter = null;
         private static bool diagnosticFilesystemErrorShown = false;
+        private static readonly object writeLock = new object();
 
         public static void Subscribe()
         {
@@ -84,79 +88,29 @@ namespace Seeker.Helpers
         {
             try
             {
-                if (DiagnosticTextFile == null)
+                lock (writeLock)
                 {
-                    if (StorageState.RootDocumentFile != null) //i.e. if api > 21 and they set it.
+                    if (DiagnosticTextFile == null)
                     {
-                        DiagnosticTextFile = StorageState.RootDocumentFile.FindFile("seeker_diagnostics.txt");
+                        DiagnosticTextFile = ResolveDiagnosticFile();
                         if (DiagnosticTextFile == null)
                         {
-                            DiagnosticTextFile = StorageState.RootDocumentFile.CreateFile("text/plain", "seeker_diagnostics");
-                            if (DiagnosticTextFile == null)
-                            {
-                                return;
-                            }
+                            return;
                         }
                     }
-                    else if (PlatformInfo.UseLegacyStorage() || !PreferencesState.SaveDataDirectoryUriIsFromTree) //if api < 30 and they did not set it. OR api <= 21 and they did set it.
-                    {
-                        //when the directory is unset.
-                        string fullPath = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                        if (!string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
-                        {
-                            fullPath = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri).Path;
-                        }
 
-                        var containingDir = new Java.IO.File(fullPath);
-
-                        var javaDiagFile = new Java.IO.File(fullPath + @"/" + "seeker_diagnostics.txt");
-                        DocumentFile rootDir = DocumentFile.FromFile(new Java.IO.File(fullPath + @"/" + "seeker_diagnostics.txt"));
-                        if (!javaDiagFile.Exists())
-                        {
-                            if (containingDir.CanWrite())
-                            {
-                                bool success = javaDiagFile.CreateNewFile();
-                                if (success)
-                                {
-                                    DiagnosticTextFile = rootDir;
-                                }
-                                else
-                                {
-                                    return;
-                                }
-                            }
-                            else
-                            {
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            DiagnosticTextFile = rootDir;
-                        }
-                    }
-                    else //if api >29 and they did not set it. nothing we can do.
-                    {
-                        return;
-                    }
-                }
-
-                if (DiagnosticStreamWriter == null)
-                {
-                    System.IO.Stream outputStream = SeekerApplication.ApplicationContext.ContentResolver.OpenOutputStream(DiagnosticTextFile.Uri, "wa");
-                    if (outputStream == null)
-                    {
-                        return;
-                    }
-                    DiagnosticStreamWriter = new System.IO.StreamWriter(outputStream);
                     if (DiagnosticStreamWriter == null)
                     {
-                        return;
+                        DiagnosticStreamWriter = CreateStreamWriter(DiagnosticTextFile);
+                        if (DiagnosticStreamWriter == null)
+                        {
+                            return;
+                        }
                     }
-                }
 
-                DiagnosticStreamWriter.WriteLine(line);
-                DiagnosticStreamWriter.Flush();
+                    DiagnosticStreamWriter.WriteLine(line);
+                    DiagnosticStreamWriter.Flush();
+                }
             }
             catch (Exception ex)
             {
@@ -167,6 +121,56 @@ namespace Seeker.Helpers
                     diagnosticFilesystemErrorShown = true;
                 }
             }
+        }
+
+        private static DocumentFile ResolveDiagnosticFile()
+        {
+            if (StorageState.RootDocumentFile != null) //i.e. if api > 21 and they set it.
+            {
+                DocumentFile file = StorageState.RootDocumentFile.FindFile(DiagnosticFileName);
+                if (file == null)
+                {
+                    file = StorageState.RootDocumentFile.CreateFile("text/plain", DiagnosticDisplayName);
+                }
+                return file;
+            }
+
+            if (PlatformInfo.UseLegacyStorage() || !PreferencesState.SaveDataDirectoryUriIsFromTree) //if api < 30 and they did not set it. OR api <= 21 and they did set it.
+            {
+                //when the directory is unset.
+                string fullPath = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+                if (!string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri))
+                {
+                    fullPath = Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri).Path;
+                }
+
+                var containingDir = new Java.IO.File(fullPath);
+                var javaDiagFile = new Java.IO.File(fullPath + @"/" + DiagnosticFileName);
+
+                if (javaDiagFile.Exists())
+                {
+                    return DocumentFile.FromFile(javaDiagFile);
+                }
+
+                if (containingDir.CanWrite() && javaDiagFile.CreateNewFile())
+                {
+                    return DocumentFile.FromFile(javaDiagFile);
+                }
+
+                return null;
+            }
+
+            return null; //if api >29 and they did not set it. nothing we can do.
+        }
+
+        private static System.IO.StreamWriter CreateStreamWriter(DocumentFile file)
+        {
+            System.IO.Stream outputStream = SeekerApplication.ApplicationContext.ContentResolver.OpenOutputStream(file.Uri, "wa");
+            if (outputStream == null)
+            {
+                return null;
+            }
+            return new System.IO.StreamWriter(outputStream);
         }
     }
 }
