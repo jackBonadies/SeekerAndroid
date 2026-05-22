@@ -1636,13 +1636,13 @@ namespace Seeker
                 UpdateState(TransferStates.InProgress);
                 UpdateProgress(startOffset);
 
-                int steps = 10;
+                int steps = 500;
                 long chunkSize = (size - startOffset) / steps;
                 for (int i = 1; i <= steps; i++)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    await Task.Delay(500, cancellationToken).ConfigureAwait(false);
-                    if (_random.Next(100) == 0)
+                    await Task.Delay(10, cancellationToken).ConfigureAwait(false);
+                    if (_random.Next(5000) == 0)
                     {
                         throw new Exception("Simulated Exception");
                     }
