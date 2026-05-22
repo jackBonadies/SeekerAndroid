@@ -764,7 +764,7 @@ namespace Seeker
                     int length = _random.Next(120, 480);
                     string reallyLongTitle = "";
                     if (_random.Next(0,5) == 0) {
-                        reallyLongTitle = " this is a really really really really long title";
+                        reallyLongTitle = " this is a really really really really really really long title";
                     }
 
                     string filename = $"@@{username}\\Music\\{artist}\\{term} - AlbumName {album}\\{trackNum:D2} Track {trackNum}{reallyLongTitle}.{ext}";
@@ -1646,6 +1646,8 @@ namespace Seeker
             bool stall = HasToken(filename, "stall");
             var stallSeconds = ParseIntToken(filename, "stall");
             var queueSeconds = ParseIntToken(filename, "queue");
+            bool mismatch = HasToken(filename, "mismatch");
+            var mismatchPercent = ParseIntToken(filename, "mismatch");
 
             try
             {
@@ -1664,6 +1666,15 @@ namespace Seeker
 
                 UpdateState(TransferStates.Requested);
                 await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+
+                long newSize = 10_000_000 * (long)Math.Pow(10, _random.Next(0, 4)); // 1 mb - 1gb
+                if (mismatch)
+                {
+                    if (mismatchPercent == null || _random.Next(0,100) < mismatchPercent.Value)
+                    {
+                        throw new TransferSizeMismatchException($"Transfer aborted: the remote size of {newSize} does not match expected size {download.Size}", download.Size.Value, newSize);
+                    }
+                }
 
                 UpdateState(TransferStates.Queued | TransferStates.Remotely);
                 await Task.Delay(queueSeconds != null ? queueSeconds.Value * 1000 : SimulatedDelayMs, cancellationToken).ConfigureAwait(false);

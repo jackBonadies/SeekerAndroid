@@ -21,6 +21,9 @@ using AndroidX.DocumentFile.Provider;
 using Common;
 using Seeker.Services;
 using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Seeker.Helpers
 {
@@ -28,11 +31,17 @@ namespace Seeker.Helpers
     {
         private const string DiagnosticFileName = "seeker_diagnostics.txt";
         private const string DiagnosticDisplayName = "seeker_diagnostics";
+        private const int MaxQueuedLines = 10000;
 
         private static DocumentFile DiagnosticTextFile = null;
         private static System.IO.StreamWriter DiagnosticStreamWriter = null;
         private static bool diagnosticFilesystemErrorShown = false;
         private static readonly object writeLock = new object();
+
+        private static readonly ConcurrentQueue<string> pendingLines = new ConcurrentQueue<string>();
+        private static readonly AutoResetEvent wakeEvent = new AutoResetEvent(false);
+        private static readonly object startLock = new object();
+        private static volatile bool writerStarted = false;
 
         public static void Subscribe()
         {
@@ -55,12 +64,12 @@ namespace Seeker.Helpers
 
         public static void Append(string msg)
         {
-            AppendLine(CreateMessage(msg));
+            EnqueueLine(CreateMessage(msg));
         }
 
         private static void SoulseekClient_DiagnosticGenerated(object sender, Soulseek.Diagnostics.DiagnosticEventArgs e)
         {
-            AppendLine(CreateMessage(e));
+            EnqueueLine(CreateMessage(e));
         }
 
         private static string CreateMessage(Soulseek.Diagnostics.DiagnosticEventArgs e)
@@ -84,17 +93,71 @@ namespace Seeker.Helpers
             return timestamp + line;
         }
 
-        private static void AppendLine(string line)
+        private static void EnqueueLine(string line)
+        {
+            //bounded: if file resolution permanently fails the consumer never drains,
+            //so cap the queue to avoid unbounded growth.
+            if (pendingLines.Count >= MaxQueuedLines)
+            {
+                return;
+            }
+            pendingLines.Enqueue(line);
+            EnsureWriterStarted();
+            wakeEvent.Set();
+        }
+
+        private static void EnsureWriterStarted()
+        {
+            if (writerStarted)
+            {
+                return;
+            }
+            lock (startLock)
+            {
+                if (writerStarted)
+                {
+                    return;
+                }
+                writerStarted = true;
+                _ = Task.Run(WriterLoop);
+            }
+        }
+
+        private static void WriterLoop()
+        {
+            while (true)
+            {
+                wakeEvent.WaitOne();
+                DrainAndWrite();
+            }
+        }
+
+        /// <summary>
+        /// Synchronously drains any queued lines to disk. Safe to call from any thread;
+        /// serialized against the background consumer by <see cref="writeLock"/>.
+        /// </summary>
+        public static void FlushBlocking()
+        {
+            DrainAndWrite();
+        }
+
+        private static void DrainAndWrite()
         {
             try
             {
                 lock (writeLock)
                 {
+                    if (pendingLines.IsEmpty)
+                    {
+                        return;
+                    }
+
                     if (DiagnosticTextFile == null)
                     {
                         DiagnosticTextFile = ResolveDiagnosticFile();
                         if (DiagnosticTextFile == null)
                         {
+                            //leave lines queued; the next enqueue retries resolution.
                             return;
                         }
                     }
@@ -108,7 +171,10 @@ namespace Seeker.Helpers
                         }
                     }
 
-                    DiagnosticStreamWriter.WriteLine(line);
+                    while (pendingLines.TryDequeue(out string line))
+                    {
+                        DiagnosticStreamWriter.WriteLine(line);
+                    }
                     DiagnosticStreamWriter.Flush();
                 }
             }
@@ -116,7 +182,7 @@ namespace Seeker.Helpers
             {
                 if (!diagnosticFilesystemErrorShown)
                 {
-                    Logger.Firebase("failed to write to diagnostic file " + ex.Message + line + ex.StackTrace);
+                    Logger.Firebase("failed to write to diagnostic file " + ex.Message + ex.StackTrace);
                     SeekerApplication.Toaster.ShowToast("Failed to write to diagnostic file.", ToastLength.Long);
                     diagnosticFilesystemErrorShown = true;
                 }
