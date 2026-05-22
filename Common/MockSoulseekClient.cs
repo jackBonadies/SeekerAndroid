@@ -1564,6 +1564,35 @@ namespace Seeker
         ConcurrentDictionary<int, TransferInternal> UploadDictionary = new ConcurrentDictionary<int, TransferInternal>();
         ConcurrentDictionary<string, bool> UniqueKeyDictionary = new ConcurrentDictionary<string, bool>();
 
+        private static bool HasToken(string name, string token)
+        {
+            return name.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        // Parses "key:N" out of a filename (case-insensitive); returns null if absent.
+        private static int? ParseIntToken(string name, string key)
+        {
+            int idx = name.IndexOf(key + ":", StringComparison.OrdinalIgnoreCase);
+            if (idx < 0)
+            {
+                return null;
+            }
+
+            int start = idx + key.Length + 1;
+            int end = start;
+            while (end < name.Length && char.IsDigit(name[end]))
+            {
+                end++;
+            }
+
+            if (end == start)
+            {
+                return null;
+            }
+
+            return int.Parse(name.Substring(start, end - start));
+        }
+
         private async Task<Transfer> DownloadInternalAsync(string username, string filename, long size, long startOffset, int token, TransferOptions options, CancellationToken cancellationToken)
         {
             options ??= new TransferOptions();
@@ -1609,6 +1638,15 @@ namespace Seeker
 
             bool globalSemaphoreAcquired = false;
 
+            bool noFail = HasToken(filename, "no_fail");
+            var updateCount = ParseIntToken(filename, "update");
+            var speedKbps = ParseIntToken(filename, "speed");
+            var timeSeconds = ParseIntToken(filename, "time");
+            var failAtPercent = ParseIntToken(filename, "failat");
+            bool stall = HasToken(filename, "stall");
+            var stallSeconds = ParseIntToken(filename, "stall");
+            var queueSeconds = ParseIntToken(filename, "queue");
+
             try
             {
                 if (filename.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -1628,7 +1666,7 @@ namespace Seeker
                 await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
 
                 UpdateState(TransferStates.Queued | TransferStates.Remotely);
-                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+                await Task.Delay(queueSeconds != null ? queueSeconds.Value * 1000 : SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
 
                 UpdateState(TransferStates.Initializing);
                 await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
@@ -1636,17 +1674,40 @@ namespace Seeker
                 UpdateState(TransferStates.InProgress);
                 UpdateProgress(startOffset);
 
-                int steps = 500;
+                int steps = Math.Max(1, updateCount ?? 500);
+                double totalMs =
+                    timeSeconds != null ? timeSeconds.Value * 1000.0 :
+                    speedKbps != null ? (size - startOffset) / (speedKbps.Value * 1024.0) * 1000.0 :
+                    5000.0;
+                int delayMsPerStep = (int)Math.Round(totalMs / steps);
+
                 long chunkSize = (size - startOffset) / steps;
+                int failStep = failAtPercent != null ? Math.Max(1, (int)(steps * failAtPercent.Value / 100.0)) : -1;
+                int stallStep = (stall || stallSeconds != null) ? steps / 2 : -1;
+
                 for (int i = 1; i <= steps; i++)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    await Task.Delay(10, cancellationToken).ConfigureAwait(false);
-                    if (_random.Next(5000) == 0)
+                    await Task.Delay(delayMsPerStep, cancellationToken).ConfigureAwait(false);
+
+                    if (!noFail && _random.Next(5000) == 0)
                     {
                         throw new Exception("Simulated Exception");
                     }
+
                     UpdateProgress(startOffset + chunkSize * i);
+
+                    if (i == failStep)
+                    {
+                        throw new Exception($"Simulated failure at {failAtPercent}%");
+                    }
+
+                    if (i == stallStep)
+                    {
+                        await Task.Delay(
+                            stallSeconds != null ? stallSeconds.Value * 1000 : System.Threading.Timeout.Infinite,
+                            cancellationToken).ConfigureAwait(false);
+                    }
                 }
 
                 UpdateProgress(size);
