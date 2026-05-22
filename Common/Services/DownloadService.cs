@@ -594,8 +594,6 @@ namespace Seeker.Services
                         }
                         else if (task.Exception.InnerException is TransferSizeMismatchException sizeException)
                         {
-                            // THIS SHOULD NEVER HAPPEN. WE FIX THE TRANSFER SIZE MISMATCH INLINE.
-
                             // update the size and rerequest.
                             // if we have partially downloaded the file already we need to delete it to prevent corruption.
                             logger.Debug($"OLD SIZE {transferItem.Size} NEW SIZE {sizeException.RemoteSize}");
