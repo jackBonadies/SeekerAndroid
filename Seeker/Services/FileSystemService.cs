@@ -368,7 +368,7 @@ namespace Seeker.Services
         public string SaveToFile(
             string fullfilename,
             string username,
-            byte[] bytes,
+            ArraySegment<byte> bytes,
             string uriOfIncomplete,
             string parentUriOfIncomplete,
             bool memoryMode,
@@ -386,7 +386,7 @@ namespace Seeker.Services
         private string SaveToFileInternal(
             string fullfilename,
             string username,
-            byte[] bytes,
+            ArraySegment<byte> bytes,
             Android.Net.Uri uriOfIncomplete,
             Android.Net.Uri parentUriOfIncomplete,
             bool memoryMode,
@@ -398,7 +398,7 @@ namespace Seeker.Services
             string dir = Common.Helpers.GetFolderNameFromFile(fullfilename, depth);
             string filePath = string.Empty;
 
-            if (memoryMode && (bytes == null || bytes.Length == 0))
+            if (memoryMode && bytes.Count == 0)
             {
                 Logger.Firebase("EMPTY or NULL BYTE ARRAY in mem mode");
             }
@@ -446,7 +446,7 @@ namespace Seeker.Services
                 finalUri = musicFile.ToURI().ToString();
                 if (memoryMode)
                 {
-                    stream.Write(bytes);
+                    stream.Write(bytes.Array, bytes.Offset, bytes.Count);
                     stream.Close();
                 }
                 else
@@ -626,7 +626,7 @@ namespace Seeker.Services
                     DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
                     finalUri = mFile.Uri.ToString();
                     System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
-                    stream.Write(bytes);
+                    stream.Write(bytes.Array, bytes.Offset, bytes.Count);
                     stream.Close();
                 }
                 else

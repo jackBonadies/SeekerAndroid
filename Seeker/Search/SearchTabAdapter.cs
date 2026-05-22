@@ -6,6 +6,7 @@ using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
+using Common.Search;
 using Seeker.Helpers;
 using System;
 using System.Collections.Generic;
@@ -185,7 +186,11 @@ namespace Seeker
             if (searchTab.SearchTarget == SearchTarget.Wishlist)
             {
                 string timeString = string.Empty;
-                if (searchTab.LastRanTime != DateTime.MinValue)
+                if (WishlistUtil.IsFull(searchTab))
+                {
+                    timeString = " · " + this.Context.GetString(Resource.String.wishlist_max_results_reached);
+                }
+                else if (searchTab.LastRanTime != DateTime.MinValue)
                 {
                     timeString = " · " + CommonHelpers.GetRecentTimeNiceFormated(searchTab.LastRanTime, SimpleHelpers.GetDateTimeNowSafe().Subtract(searchTab.LastRanTime));
                 }

@@ -38,6 +38,8 @@ namespace Seeker.Chatroom
         public static List<Soulseek.RoomInfo> RoomListParsed = null;
         public static List<Tuple<bool, DateTime>> ConnectionLapse = new List<Tuple<bool, DateTime>>(); //true = connected
         public static EventHandler<EventArgs> RoomListReceived;
+        public static EventHandler<EventArgs> RoomListFailed;
+        public static bool IsRoomListLoading { get; private set; }
         /// <summary>
         /// Invoked whenever moderators are added or removed
         /// </summary>
@@ -896,14 +898,26 @@ namespace Seeker.Chatroom
                 }
                 return;
             }
-            if (feedback)
+            // let the loading bar take care of this instead of excessive toasts
+            //if (feedback)
+            //{
+                //if (SeekerState.ActiveActivityRef != null)
+                //{
+                //    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.requesting_room_list), ToastLength.Short);
+                //}
+            //}
+            IsRoomListLoading = true;
+            SessionService.Instance.RunWithReconnect((Task t) =>
             {
-                if (SeekerState.ActiveActivityRef != null)
+                if (t.IsFaulted)
                 {
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.requesting_room_list), ToastLength.Short);
+                    RoomListRequestFailed(false);
                 }
-            }
-            SessionService.Instance.RunWithReconnect(() => GetRoomListLogic(feedback));
+                else
+                {
+                    GetRoomListLogic(feedback);
+                }
+            });
         }
 
         public static void GetRoomListLogic(bool feedback)
@@ -915,18 +929,20 @@ namespace Seeker.Chatroom
             }
             catch (Exception)
             {
+                RoomListRequestFailed(feedback);
                 return;
             }
             task.ContinueWith((Task<Soulseek.RoomList> task) =>
             {
                 if (task.IsFaulted)
                 {
-
+                    RoomListRequestFailed(feedback);
                 }
                 else
                 {
                     RoomList = task.Result;
                     RoomListParsed = ParseRoomListForPresentation(RoomList);
+                    IsRoomListLoading = false;
                     if (feedback)
                     {
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.room_list_received), ToastLength.Short);
@@ -934,6 +950,16 @@ namespace Seeker.Chatroom
                     RoomListReceived?.Invoke(null, new EventArgs());
                 }
             });
+        }
+
+        private static void RoomListRequestFailed(bool feedback)
+        {
+            IsRoomListLoading = false;
+            if (feedback)
+            {
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.room_list_request_failed), ToastLength.Short);
+            }
+            RoomListFailed?.Invoke(null, new EventArgs());
         }
 
         public static void UpdateJoinedRooms()

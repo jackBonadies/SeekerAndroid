@@ -102,5 +102,19 @@ namespace UnitTestCommon
 
             Assert.AreEqual(lastRun.AddSeconds(600), next);
         }
+
+        [Test]
+        public void FullTabs_DoNotShiftNextRun()
+        {
+            DateTime lastRun = new DateTime(2026, 1, 1, 12, 0, 0);
+            SearchTab self = new SearchTab { LastRanTime = lastRun };
+            var tabs = Build(self, (2, lastRun.AddSeconds(-30)));
+            // tab 2 is older but full, so the scheduler will not run it ahead of self.
+            tabs[2].LastSearchResultsCount = WishlistUtil.MaxResultsPerWishlist;
+
+            DateTime next = WishlistUtil.GetNextRunTime(lastRun, 60_000, tabs, self);
+
+            Assert.AreEqual(lastRun.AddSeconds(60), next);
+        }
     }
 }

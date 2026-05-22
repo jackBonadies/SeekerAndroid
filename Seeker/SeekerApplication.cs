@@ -293,7 +293,6 @@ namespace Seeker
             ChatroomController.Initialize();
 
 
-            SoulseekClient.OnTransferSizeMismatchFunc = OnTransferSizeMismatchFunc;
             #if DEBUG
             SoulseekClient.ErrorLogHandler += SoulseekClient_ErrorLogHandler;
             SoulseekClient.DebugLogHandler += DebugLogHandler;
@@ -533,61 +532,6 @@ namespace Seeker
                 NotificationManager manager = GetSystemService(Context.NotificationService) as NotificationManager;
                 manager.Notify(DownloadForegroundService.NOTIF_ID, notif);
             }
-        }
-
-
-
-
-        public static bool OnTransferSizeMismatchFunc(System.IO.Stream fileStream, string fullFilename, string username, long startOffset, long oldSize, long newSize, string incompleteUriString, out System.IO.Stream newStream)
-        {
-            newStream = null;
-            try
-            {
-                var relevantItem = TransferItems.TransferItemManagerWrapped.GetTransferItemWithIndexFromAll(fullFilename, username, false, out _);
-                if (startOffset == 0)
-                {
-                    // all we need to do is update the size.
-                    relevantItem.Size = newSize;
-                    Logger.Debug("updated the size");
-                }
-                else
-                {
-                    // we need to truncate the incomplete file and set our progress back to 0.
-                    relevantItem.Size = newSize;
-                    //fileStream.SetLength(0); //this is not supported. we cannot do seek.
-                    //fileStream.Flush();
-
-                    fileStream.Close();
-                    bool useDownloadDir = false;
-                    if (PreferencesState.CreateCompleteAndIncompleteFolders && !SettingsActivity.UseIncompleteManualFolder())
-                    {
-                        useDownloadDir = true;
-                    }
-
-                    var incompleteUri = Android.Net.Uri.Parse(incompleteUriString);
-
-                    // this is the only time we do legacy.
-                    bool isLegacyCase = PlatformInfo.UseLegacyStorage() && (StorageState.RootDocumentFile == null && useDownloadDir);
-                    if (isLegacyCase)
-                    {
-                        newStream = new System.IO.FileStream(incompleteUri.Path, System.IO.FileMode.Truncate, System.IO.FileAccess.Write, System.IO.FileShare.None);
-                    }
-                    else
-                    {
-                        newStream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(incompleteUri, "wt");
-                    }
-
-                    relevantItem.Progress = 0;
-                    Logger.Debug("truncated the file and updated the size");
-                }
-
-            }
-            catch (Exception e)
-            {
-                Logger.Debug("OnTransferSizeMismatchFunc: " + e.ToString());
-                return false;
-            }
-            return true;
         }
 
 

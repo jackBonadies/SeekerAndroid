@@ -218,6 +218,26 @@ namespace UnitTestCommon
         }
 
         [Test]
+        public async Task TransferListDownloads_DeserializesFromDisk_BackwardsCompatBytesTransferred()
+        {
+            var raw = GetPreferenceString("Momento_List");
+            var serializer = new XmlSerializer(typeof(List<TransferItem>));
+            List<TransferItem> result;
+            using (var reader = new StringReader(raw))
+            {
+                result = (List<TransferItem>)serializer.Deserialize(reader);
+            }
+
+            await Verifier.Verify(result.Select(t => new
+            {
+                t.Filename,
+                t.Progress,
+                BytesTransferred = t.GetBytesTransferred().ToString(),
+                t.Size,
+            }));
+        }
+
+        [Test]
         public async Task TransferListUploads_DeserializesFromDisk()
         {
             var raw = GetPreferenceString("Momento_Upload_List");

@@ -132,6 +132,12 @@ namespace Seeker
             Logger.Debug("OnActivityStopped " + DiagLastStopped);
 
             NumberOfActiveActivities--;
+            if (NumberOfActiveActivities == 0)
+            {
+                //app going to background — drain buffered diagnostics before Android can kill us.
+                DiagnosticFileWriter.FlushBlocking();
+            }
+
             if (NumberOfActiveActivities == 0 && PreferencesState.AutoAwayOnInactivity)
             {
                 Logger.Debug("We are away!");

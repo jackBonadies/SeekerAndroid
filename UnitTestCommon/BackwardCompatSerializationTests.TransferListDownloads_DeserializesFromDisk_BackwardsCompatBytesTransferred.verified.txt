@@ -1,0 +1,134 @@
+﻿[
+  {
+    Filename: ArtistA - AlbumA - 01 Track01.flac,
+    Progress: 100,
+    BytesTransferred: 113447035,
+    Size: 113447035
+  },
+  {
+    Filename: ArtistA - AlbumA - 02 Track02.flac,
+    Progress: 100,
+    BytesTransferred: 47733515,
+    Size: 47733515
+  },
+  {
+    Filename: ArtistA - AlbumA - 03 Track03.flac,
+    Progress: 100,
+    BytesTransferred: 49337610,
+    Size: 49337610
+  },
+  {
+    Filename: ArtistA - AlbumA - 04 Track04.flac,
+    Progress: 100,
+    BytesTransferred: 16041868,
+    Size: 16041868
+  },
+  {
+    Filename: ArtistA - AlbumA - 05 Track05.flac,
+    Progress: 100,
+    BytesTransferred: 125368627,
+    Size: 125368627
+  },
+  {
+    Filename: ArtistA - AlbumA - 06 Track06.flac,
+    Progress: 100,
+    BytesTransferred: 143776406,
+    Size: 143776406
+  },
+  {
+    Filename: ArtistA - AlbumA - 07 Track07.flac,
+    Progress: 100,
+    BytesTransferred: 110015437,
+    Size: 110015437
+  },
+  {
+    Filename: ArtistA - AlbumA - AlbumA_cover_1.png,
+    Progress: 100,
+    BytesTransferred: 10655934,
+    Size: 10655934
+  },
+  {
+    Filename: ArtistA - AlbumA - AlbumA_cover_2.png,
+    Progress: 100,
+    BytesTransferred: 8839205,
+    Size: 8839205
+  },
+  {
+    Filename: cover.png,
+    Progress: 100,
+    BytesTransferred: 10378265,
+    Size: 10378265
+  },
+  {
+    Filename: 01 - Track01.flac,
+    Progress: 100,
+    BytesTransferred: 34302992,
+    Size: 34302992
+  },
+  {
+    Filename: 02 - Track02.flac,
+    Progress: 100,
+    BytesTransferred: 21697356,
+    Size: 21697356
+  },
+  {
+    Filename: 03 - Track03.flac,
+    Progress: 100,
+    BytesTransferred: 19390309,
+    Size: 19390309
+  },
+  {
+    Filename: 04 - Track04.flac,
+    Progress: 100,
+    BytesTransferred: 36322064,
+    Size: 36322064
+  },
+  {
+    Filename: 05 - Track05.flac,
+    Progress: 100,
+    BytesTransferred: 25513034,
+    Size: 25513034
+  },
+  {
+    Filename: 06 - Track06.flac,
+    Progress: 100,
+    BytesTransferred: 17373403,
+    Size: 17373403
+  },
+  {
+    Filename: 07 - Track07.flac,
+    Progress: 100,
+    BytesTransferred: 37348193,
+    Size: 37348193
+  },
+  {
+    Filename: 08 - Track08.flac,
+    Progress: 100,
+    BytesTransferred: 50065218,
+    Size: 50065218
+  },
+  {
+    Filename: 09 - Track09.flac,
+    Progress: 100,
+    BytesTransferred: 34147038,
+    Size: 34147038
+  },
+  {
+    Filename: 10 - Track10.flac,
+    Progress: 100,
+    BytesTransferred: 32894083,
+    Size: 32894083
+  },
+  {
+    Filename: 11 - Track11.flac,
+    Progress: 100,
+    BytesTransferred: 36779605,
+    Size: 36779605
+  },
+  {
+    Filename: cover.jpg,
+    Progress: 100,
+    BytesTransferred: 195903,
+    Size: 195903
+  }
+]

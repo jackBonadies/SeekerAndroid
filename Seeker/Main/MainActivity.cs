@@ -1239,7 +1239,7 @@ namespace Seeker
         private static Android.Text.SpannableString GetFolderSubtitle(FolderItem folder)
         {
             int numFiles = folder.TransferItems.Count;
-            folder.GetFolderProgress(out long totalBytes, out _);
+            long totalBytes = folder.GetFolderProgress().totalBytes;
             string sizeStr = SimpleHelpers.GetHumanReadableSize(totalBytes);
             string subtitle = string.Format("{0} \u00b7 {1} files \u00b7 {2}", folder.Username, numFiles, sizeStr);
             var s = new Android.Text.SpannableString(subtitle);

@@ -434,6 +434,12 @@ namespace Seeker
             recyclerViewTransferItems.SetLayoutManager(recycleLayoutManager);
             recyclerViewTransferItems.AddItemDecoration(new AndroidX.RecyclerView.Widget.DividerItemDecoration(Activity, AndroidX.RecyclerView.Widget.DividerItemDecoration.Vertical));
 
+            // default cross fade animation looks glitchy (i.e. when updating status of item). this doesnt affect item add/remove animations.
+            if (recyclerViewTransferItems.GetItemAnimator() is SimpleItemAnimator itemAnimator)
+            {
+                itemAnimator.SupportsChangeAnimations = false;
+            }
+
             Logger.InfoFirebase("AutoClear: " + PreferencesState.AutoClearCompleteDownloads);
             Logger.InfoFirebase("AutoRetry: " + PreferencesState.AutoRetryDownload);
 
@@ -1083,7 +1089,7 @@ namespace Seeker
                 if (v is TransferItemViewFolder folderView)
                 {
                     var fi = v.InnerTransferItem as FolderItem;
-                    int prog = fi.GetFolderProgress(out long totalBytes, out long completedBytes);
+                    var (totalBytes, completedBytes) = fi.GetFolderProgress();
 
                     TimeSpan? timeRemaining = null;
                     long bytesRemaining = totalBytes - completedBytes;
@@ -1193,7 +1199,7 @@ namespace Seeker
                         Logger.Debug("Index is -1 TransferProgressUpdated");
                         return;
                     }
-                    refreshItemProgress(index, e.ti.Progress, e.ti, e.wasFailed, e.avgspeedBytes);
+                    refreshItemProgress(index, e.ti.GetProgressForPresentation(), e.ti, e.wasFailed, e.avgspeedBytes);
                 });
             }
             catch (System.Exception error)

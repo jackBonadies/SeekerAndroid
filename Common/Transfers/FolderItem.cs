@@ -102,10 +102,9 @@ namespace Seeker
         }
 
         /// <summary>
-        /// int - percent.
+        /// Total size of the folder and how many of those bytes have transferred so far.
         /// </summary>
-        /// <returns></returns>
-        public int GetFolderProgress(out long totalBytes, out long bytesCompleted)
+        public (long totalBytes, long bytesCompleted) GetFolderProgress()
         {
             lock (TransferItems)
             {
@@ -113,21 +112,10 @@ namespace Seeker
                 long totalFolderBytes = 0;
                 foreach (TransferItem ti in TransferItems)
                 {
-                    folderBytesComplete += (long)((ti.Progress / 100.0) * ti.Size);
+                    folderBytesComplete += ti.GetBytesTransferred();
                     totalFolderBytes += ti.Size;
                 }
-                totalBytes = totalFolderBytes;
-                bytesCompleted = folderBytesComplete;
-                //error "System.OverflowException: Value was either too large or too small for an Int32." can occur for example when totalFolderBytes is 0
-                if (totalFolderBytes == 0)
-                {
-                    Logger.InfoFirebase("total folder bytes == 0");
-                    return 100;
-                }
-                else
-                {
-                    return Convert.ToInt32((folderBytesComplete * 100.0 / totalFolderBytes));
-                }
+                return (totalFolderBytes, folderBytesComplete);
             }
         }
 
@@ -242,7 +230,7 @@ namespace Seeker
         {
             lock (TransferItems)
             {
-                TransferItems.RemoveAll((TransferItem ti) => { return ti.Progress > 99; });
+                TransferItems.RemoveAll((TransferItem ti) => { return ti.State.HasFlag(TransferStates.Succeeded); });
                 if (IsUpload())
                 {
                     TransferItems.RemoveAll((TransferItem i) => { return SimpleHelpers.IsUploadCompleteOrAborted(i.State); });

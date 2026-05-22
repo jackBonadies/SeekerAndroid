@@ -186,9 +186,9 @@ namespace UnitTestCommon
         public void ClearAllComplete_RemovesCompletedItems()
         {
             var ti1 = CreateTransferItem("user1", "\\dir\\folder1\\file1.mp3");
-            ti1.Progress = 100;
+            ti1.State = TransferStates.Completed | TransferStates.Succeeded;
             var ti2 = CreateTransferItem("user1", "\\dir\\folder1\\file2.mp3");
-            ti2.Progress = 50;
+            ti2.State = TransferStates.InProgress;
             manager.Add(ti1);
             manager.Add(ti2);
 
@@ -644,9 +644,9 @@ namespace UnitTestCommon
         public void ClearAllCompleteFromFolder_RemovesOnlyCompletedInFolder()
         {
             var ti1 = CreateTransferItem("user1", "\\dir\\folder1\\file1.mp3", "folder1");
-            ti1.Progress = 100;
+            ti1.State = TransferStates.Completed | TransferStates.Succeeded;
             var ti2 = CreateTransferItem("user1", "\\dir\\folder1\\file2.mp3", "folder1");
-            ti2.Progress = 50;
+            ti2.State = TransferStates.InProgress;
             manager.Add(ti1);
             manager.Add(ti2);
 

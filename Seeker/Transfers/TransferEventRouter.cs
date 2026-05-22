@@ -146,6 +146,7 @@ namespace Seeker.Transfers
                 {
                     //clear queued flag...
                     relevantItem.Progress = 100;
+                    relevantItem.BytesTransferred = relevantItem.Size;
                     StateChangedForItem?.Invoke(null, relevantItem);
                 }
                 else //if it does have state cancelled we still want to update UI! (assuming we arent also clearing it)
@@ -218,6 +219,7 @@ namespace Seeker.Transfers
                 bool fullRefresh = false;
                 double percentComplete = e.Transfer.PercentComplete;
                 relevantItem.Progress = (int)percentComplete;
+                relevantItem.BytesTransferred = e.Transfer.BytesTransferred;
                 relevantItem.RemainingTime = e.Transfer.RemainingTime;
                 relevantItem.AvgSpeed = e.Transfer.AverageSpeed;
 

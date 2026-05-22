@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace Seeker.Services
@@ -9,7 +10,7 @@ namespace Seeker.Services
 
         Stream OpenIncompleteStream(string incompleteUri, long partialLength);
 
-        string SaveToFile(string fullfilename, string username, byte[] bytes,
+        string SaveToFile(string fullfilename, string username, ArraySegment<byte> bytes,
             string uriOfIncomplete, string parentUriOfIncomplete,
             bool memoryMode, int depth, bool noSubFolder, out string finalUri);
 

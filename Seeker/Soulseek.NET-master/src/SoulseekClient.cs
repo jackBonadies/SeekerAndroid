@@ -519,15 +519,6 @@ namespace Soulseek
         }
 
         /// <summary>
-        /// Solves the transfer size mismatch problem in line.
-        /// </summary>
-        /// 
-
-        public delegate bool TransferSizeMismatchDelegate(Stream stream, string b, string c, long d, long e, long f, string g, out Stream h);
-        public static TransferSizeMismatchDelegate OnTransferSizeMismatchFunc;
-
-
-        /// <summary>
         /// Is Transfer In Downloads.  If so we need to cancel it before retrying it.
         /// </summary>
         /// <param name="username"></param>
@@ -3410,7 +3401,7 @@ namespace Soulseek
                 if (transferRequestAcknowledgement.IsAllowed)
                 {
                     // the size of the remote file may have changed since it was sent in a search or browse response
-                    if (download.Size.HasValue && download.Size.Value != transferRequestAcknowledgement.FileSize)
+                    if (download.Size.HasValue && download.Size.Value != transferRequestAcknowledgement.FileSize && transferRequestAcknowledgement.FileSize > 0)
                     {
                         throw new TransferSizeMismatchException($"Transfer aborted: the remote size of {transferRequestAcknowledgement.FileSize} does not match expected size {download.Size}", download.Size.Value, transferRequestAcknowledgement.FileSize);
                     }

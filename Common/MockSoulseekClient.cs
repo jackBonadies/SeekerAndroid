@@ -8,6 +8,7 @@ namespace Seeker
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Data;
+    using System.IO;
     using System.Linq;
     using System.Net;
     using System.Threading;
@@ -762,7 +763,12 @@ namespace Seeker
                     int trackNum = i + 1;
                     long size = _random.Next(2_000_000, 60_000_000);
                     int length = _random.Next(120, 480);
-                    string filename = $"@@{username}\\Music\\{artist}\\{term} - AlbumName {album}\\{trackNum:D2} Track {trackNum}.{ext}";
+                    string reallyLongTitle = "";
+                    if (_random.Next(0,5) == 0) {
+                        reallyLongTitle = " this is a really really really really really really long title";
+                    }
+
+                    string filename = $"@@{username}\\Music\\{artist}\\{term} - AlbumName {album}\\{trackNum:D2} Track {trackNum}{reallyLongTitle}.{ext}";
                     var fileAttributes = new[] { new FileAttribute(FileAttributeType.BitRate, bitRate), new FileAttribute(FileAttributeType.Length, length) };
                     if (ext == "flac" && _random.Next(2) == 0)
                     {
@@ -1532,13 +1538,15 @@ namespace Seeker
         public async Task<Transfer> DownloadAsync(string username, string remoteFilename, string localFilename, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
         {
             if (DownloadToFileAsyncHandler != null) return await DownloadToFileAsyncHandler(username, remoteFilename, localFilename, size, startOffset, token, options, cancellationToken);
-            return await DownloadInternalAsync(username, remoteFilename, size ?? 1024, startOffset, token ?? GetNextToken(), options, cancellationToken ?? CancellationToken.None);
+            var fileMode = startOffset > 0 ? FileMode.Append : FileMode.Create;
+            Func<Task<Stream>> outputStreamFactory = () => Task.FromResult((Stream)new FileStream(localFilename, fileMode, FileAccess.Write, FileShare.None));
+            return await DownloadInternalAsync(username, remoteFilename, size ?? 1024, startOffset, token ?? GetNextToken(), outputStreamFactory, options, cancellationToken ?? CancellationToken.None);
         }
 
         public async Task<Transfer> DownloadAsync(string username, string remoteFilename, Func<Task<System.IO.Stream>> outputStreamFactory, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
         {
             if (DownloadToStreamAsyncHandler != null) return await DownloadToStreamAsyncHandler(username, remoteFilename, outputStreamFactory, size, startOffset, token, options, cancellationToken);
-            return await DownloadInternalAsync(username, remoteFilename, size ?? 1024, startOffset, token ?? GetNextToken(), options, cancellationToken ?? CancellationToken.None);
+            return await DownloadInternalAsync(username, remoteFilename, size ?? 1024, startOffset, token ?? GetNextToken(), outputStreamFactory, options, cancellationToken ?? CancellationToken.None);
         }
 
         public async Task<Transfer> UploadAsync(string username, string remoteFilename, string localFilename, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
@@ -1559,7 +1567,49 @@ namespace Seeker
         ConcurrentDictionary<int, TransferInternal> UploadDictionary = new ConcurrentDictionary<int, TransferInternal>();
         ConcurrentDictionary<string, bool> UniqueKeyDictionary = new ConcurrentDictionary<string, bool>();
 
-        private async Task<Transfer> DownloadInternalAsync(string username, string filename, long size, long startOffset, int token, TransferOptions options, CancellationToken cancellationToken)
+        private static bool HasToken(string name, string token)
+        {
+            return name.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        // Parses "key:N" out of a filename (case-insensitive); returns null if absent.
+        private static int? ParseIntToken(string name, string key)
+        {
+            int idx = name.IndexOf(key + ":", StringComparison.OrdinalIgnoreCase);
+            if (idx < 0)
+            {
+                return null;
+            }
+
+            int start = idx + key.Length + 1;
+            int end = start;
+            while (end < name.Length && char.IsDigit(name[end]))
+            {
+                end++;
+            }
+
+            if (end == start)
+            {
+                return null;
+            }
+
+            return int.Parse(name.Substring(start, end - start));
+        }
+
+        // Reusable zero-filled buffer for writing mock "realFile" downloads to disk.
+        private static readonly byte[] MockDownloadBuffer = new byte[81920];
+
+        private static async Task WriteMockBytesAsync(Stream stream, long count, CancellationToken cancellationToken)
+        {
+            while (count > 0)
+            {
+                int n = (int)Math.Min(count, MockDownloadBuffer.Length);
+                await stream.WriteAsync(MockDownloadBuffer, 0, n, cancellationToken).ConfigureAwait(false);
+                count -= n;
+            }
+        }
+
+        private async Task<Transfer> DownloadInternalAsync(string username, string filename, long size, long startOffset, int token, Func<Task<Stream>> outputStreamFactory, TransferOptions options, CancellationToken cancellationToken)
         {
             options ??= new TransferOptions();
 
@@ -1604,6 +1654,20 @@ namespace Seeker
 
             bool globalSemaphoreAcquired = false;
 
+            bool noFail = HasToken(filename, "no_fail");
+            var updateCount = ParseIntToken(filename, "update");
+            var speedKbps = ParseIntToken(filename, "speed");
+            var timeSeconds = ParseIntToken(filename, "time");
+            var failAtPercent = ParseIntToken(filename, "failat");
+            bool stall = HasToken(filename, "stall");
+            var stallSeconds = ParseIntToken(filename, "stall");
+            var queueSeconds = ParseIntToken(filename, "queue");
+            bool mismatch = HasToken(filename, "mismatch");
+            bool realFile = HasToken(filename, "realfile");
+            var mismatchPercent = ParseIntToken(filename, "mismatch");
+
+            Stream outputStream = null;
+
             try
             {
                 if (filename.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0)
@@ -1622,26 +1686,78 @@ namespace Seeker
                 UpdateState(TransferStates.Requested);
                 await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
 
+                long newSize = 100_000_000;
+                if (mismatch)
+                {
+                    if (mismatchPercent == null || _random.Next(0,100) < mismatchPercent.Value)
+                    {
+                        // if we dont include this we get an infinite loop
+                        if (download.Size !=  newSize) 
+                        {
+                            throw new TransferSizeMismatchException($"Transfer aborted: the remote size of {newSize} does not match expected size {download.Size}", download.Size.Value, newSize);
+                        }
+                    }
+                }
+
                 UpdateState(TransferStates.Queued | TransferStates.Remotely);
-                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+                await Task.Delay(queueSeconds != null ? queueSeconds.Value * 1000 : SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
 
                 UpdateState(TransferStates.Initializing);
                 await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
 
+                if (realFile)
+                {
+                    outputStream = await outputStreamFactory().ConfigureAwait(false);
+                }
+
                 UpdateState(TransferStates.InProgress);
                 UpdateProgress(startOffset);
 
-                int steps = 10;
+                int steps = Math.Max(1, updateCount ?? 500);
+                double totalMs =
+                    timeSeconds != null ? timeSeconds.Value * 1000.0 :
+                    speedKbps != null ? (size - startOffset) / (speedKbps.Value * 1024.0) * 1000.0 :
+                    5000.0;
+                int delayMsPerStep = (int)Math.Round(totalMs / steps);
+
                 long chunkSize = (size - startOffset) / steps;
+                int failStep = failAtPercent != null ? Math.Max(1, (int)(steps * failAtPercent.Value / 100.0)) : -1;
+                int stallStep = (stall || stallSeconds != null) ? steps / 2 : -1;
+
                 for (int i = 1; i <= steps; i++)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    await Task.Delay(500, cancellationToken).ConfigureAwait(false);
-                    if (_random.Next(100) == 0)
+                    await Task.Delay(delayMsPerStep, cancellationToken).ConfigureAwait(false);
+
+                    if (!noFail && _random.Next(5000) == 0)
                     {
                         throw new Exception("Simulated Exception");
                     }
+
+                    if (realFile)
+                    {
+                        await WriteMockBytesAsync(outputStream!, chunkSize, cancellationToken).ConfigureAwait(false);
+                    }
+
                     UpdateProgress(startOffset + chunkSize * i);
+
+                    if (i == failStep)
+                    {
+                        throw new Exception($"Simulated failure at {failAtPercent}%");
+                    }
+
+                    if (i == stallStep)
+                    {
+                        await Task.Delay(
+                            stallSeconds != null ? stallSeconds.Value * 1000 : System.Threading.Timeout.Infinite,
+                            cancellationToken).ConfigureAwait(false);
+                    }
+                }
+
+                if (realFile)
+                {
+                    await WriteMockBytesAsync(outputStream!, (size - startOffset) - chunkSize * steps, cancellationToken).ConfigureAwait(false);
+                    await outputStream!.FlushAsync(cancellationToken).ConfigureAwait(false);
                 }
 
                 UpdateProgress(size);
@@ -1661,6 +1777,25 @@ namespace Seeker
             }
             finally
             {
+                if (options.DisposeOutputStreamOnCompletion && outputStream != null)
+                {
+                    try
+                    {
+                        try
+                        {
+                            await outputStream.FlushAsync(CancellationToken.None).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            await outputStream.DisposeAsync().ConfigureAwait(false);
+                        }
+                    }
+                    catch
+                    {
+                        // swallow finalize errors, matching the real client (which logs a warning)
+                    }
+                }
+
                 if (globalSemaphoreAcquired)
                 {
                     GlobalDownloadSemaphore.Release();
