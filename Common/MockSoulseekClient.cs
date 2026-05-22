@@ -8,6 +8,7 @@ namespace Seeker
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Data;
+    using System.IO;
     using System.Linq;
     using System.Net;
     using System.Threading;
@@ -1537,13 +1538,15 @@ namespace Seeker
         public async Task<Transfer> DownloadAsync(string username, string remoteFilename, string localFilename, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
         {
             if (DownloadToFileAsyncHandler != null) return await DownloadToFileAsyncHandler(username, remoteFilename, localFilename, size, startOffset, token, options, cancellationToken);
-            return await DownloadInternalAsync(username, remoteFilename, size ?? 1024, startOffset, token ?? GetNextToken(), options, cancellationToken ?? CancellationToken.None);
+            var fileMode = startOffset > 0 ? FileMode.Append : FileMode.Create;
+            Func<Task<Stream>> outputStreamFactory = () => Task.FromResult((Stream)new FileStream(localFilename, fileMode, FileAccess.Write, FileShare.None));
+            return await DownloadInternalAsync(username, remoteFilename, size ?? 1024, startOffset, token ?? GetNextToken(), outputStreamFactory, options, cancellationToken ?? CancellationToken.None);
         }
 
         public async Task<Transfer> DownloadAsync(string username, string remoteFilename, Func<Task<System.IO.Stream>> outputStreamFactory, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
         {
             if (DownloadToStreamAsyncHandler != null) return await DownloadToStreamAsyncHandler(username, remoteFilename, outputStreamFactory, size, startOffset, token, options, cancellationToken);
-            return await DownloadInternalAsync(username, remoteFilename, size ?? 1024, startOffset, token ?? GetNextToken(), options, cancellationToken ?? CancellationToken.None);
+            return await DownloadInternalAsync(username, remoteFilename, size ?? 1024, startOffset, token ?? GetNextToken(), outputStreamFactory, options, cancellationToken ?? CancellationToken.None);
         }
 
         public async Task<Transfer> UploadAsync(string username, string remoteFilename, string localFilename, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
@@ -1593,7 +1596,20 @@ namespace Seeker
             return int.Parse(name.Substring(start, end - start));
         }
 
-        private async Task<Transfer> DownloadInternalAsync(string username, string filename, long size, long startOffset, int token, TransferOptions options, CancellationToken cancellationToken)
+        // Reusable zero-filled buffer for writing mock "realFile" downloads to disk.
+        private static readonly byte[] MockDownloadBuffer = new byte[81920];
+
+        private static async Task WriteMockBytesAsync(Stream stream, long count, CancellationToken cancellationToken)
+        {
+            while (count > 0)
+            {
+                int n = (int)Math.Min(count, MockDownloadBuffer.Length);
+                await stream.WriteAsync(MockDownloadBuffer, 0, n, cancellationToken).ConfigureAwait(false);
+                count -= n;
+            }
+        }
+
+        private async Task<Transfer> DownloadInternalAsync(string username, string filename, long size, long startOffset, int token, Func<Task<Stream>> outputStreamFactory, TransferOptions options, CancellationToken cancellationToken)
         {
             options ??= new TransferOptions();
 
@@ -1647,7 +1663,10 @@ namespace Seeker
             var stallSeconds = ParseIntToken(filename, "stall");
             var queueSeconds = ParseIntToken(filename, "queue");
             bool mismatch = HasToken(filename, "mismatch");
+            bool realFile = HasToken(filename, "realfile");
             var mismatchPercent = ParseIntToken(filename, "mismatch");
+
+            Stream outputStream = null;
 
             try
             {
@@ -1667,12 +1686,16 @@ namespace Seeker
                 UpdateState(TransferStates.Requested);
                 await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
 
-                long newSize = 10_000_000 * (long)Math.Pow(10, _random.Next(0, 4)); // 1 mb - 1gb
+                long newSize = 100_000_000;
                 if (mismatch)
                 {
                     if (mismatchPercent == null || _random.Next(0,100) < mismatchPercent.Value)
                     {
-                        throw new TransferSizeMismatchException($"Transfer aborted: the remote size of {newSize} does not match expected size {download.Size}", download.Size.Value, newSize);
+                        // if we dont include this we get an infinite loop
+                        if (download.Size !=  newSize) 
+                        {
+                            throw new TransferSizeMismatchException($"Transfer aborted: the remote size of {newSize} does not match expected size {download.Size}", download.Size.Value, newSize);
+                        }
                     }
                 }
 
@@ -1681,6 +1704,11 @@ namespace Seeker
 
                 UpdateState(TransferStates.Initializing);
                 await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+
+                if (realFile)
+                {
+                    outputStream = await outputStreamFactory().ConfigureAwait(false);
+                }
 
                 UpdateState(TransferStates.InProgress);
                 UpdateProgress(startOffset);
@@ -1706,6 +1734,11 @@ namespace Seeker
                         throw new Exception("Simulated Exception");
                     }
 
+                    if (realFile)
+                    {
+                        await WriteMockBytesAsync(outputStream!, chunkSize, cancellationToken).ConfigureAwait(false);
+                    }
+
                     UpdateProgress(startOffset + chunkSize * i);
 
                     if (i == failStep)
@@ -1719,6 +1752,12 @@ namespace Seeker
                             stallSeconds != null ? stallSeconds.Value * 1000 : System.Threading.Timeout.Infinite,
                             cancellationToken).ConfigureAwait(false);
                     }
+                }
+
+                if (realFile)
+                {
+                    await WriteMockBytesAsync(outputStream!, (size - startOffset) - chunkSize * steps, cancellationToken).ConfigureAwait(false);
+                    await outputStream!.FlushAsync(cancellationToken).ConfigureAwait(false);
                 }
 
                 UpdateProgress(size);
@@ -1738,6 +1777,25 @@ namespace Seeker
             }
             finally
             {
+                if (options.DisposeOutputStreamOnCompletion && outputStream != null)
+                {
+                    try
+                    {
+                        try
+                        {
+                            await outputStream.FlushAsync(CancellationToken.None).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            await outputStream.DisposeAsync().ConfigureAwait(false);
+                        }
+                    }
+                    catch
+                    {
+                        // swallow finalize errors, matching the real client (which logs a warning)
+                    }
+                }
+
                 if (globalSemaphoreAcquired)
                 {
                     GlobalDownloadSemaphore.Release();
