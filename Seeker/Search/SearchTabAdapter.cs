@@ -19,7 +19,6 @@ namespace Seeker
     {
         private List<int> localDataSet; //tab id's
         public override int ItemCount => localDataSet.Count;
-        private int position = -1;
         public bool ForWishlist = false;
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {
@@ -41,8 +40,8 @@ namespace Seeker
 
         private void RemoveSearch_Click(object sender, EventArgs e)
         {
-            position = (sender as View).FindAncestor<SearchTabView>().ViewHolder.BindingAdapterPosition;
-            if (position == -1) //in my case this happens if you delete too fast...
+            int position = (sender as View).FindAncestor<SearchTabView>().ViewHolder.BindingAdapterPosition;
+            if (position < 0 || position >= localDataSet.Count) //in my case this happens if you delete too fast...
             {
                 return;
             }
@@ -109,7 +108,11 @@ namespace Seeker
 
         private void SearchTabLayout_Click(object sender, EventArgs e)
         {
-            position = (sender as View).FindAncestor<SearchTabView>().ViewHolder.BindingAdapterPosition;
+            int position = (sender as View).FindAncestor<SearchTabView>().ViewHolder.BindingAdapterPosition;
+            if (position < 0 || position >= localDataSet.Count)
+            {
+                return;
+            }
             int tabToGoTo = localDataSet[position];
             SearchFragment.Instance.GoToTab(tabToGoTo, false);
             SearchTabDialog.Instance.Dismiss();
