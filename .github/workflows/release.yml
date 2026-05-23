@@ -62,48 +62,33 @@ jobs:
       - name: Restore
         run: dotnet restore Seeker/Seeker.csproj
 
-      - name: Publish APK (Release IzzySoft)
+      - name: Derive VERSION from tag
+        run: |
+          RAW="${{ github.event_name == 'workflow_dispatch' && inputs.attach_to_release || github.ref_name }}"
+          echo "VERSION=${RAW#v}" >> "$GITHUB_ENV"
+
+      - name: Build all-ABI release APKs
+        shell: pwsh
         env:
-          AndroidSigningKeyStore: ${{ env.KEYSTORE_PATH }}
-          AndroidSigningKeyAlias: ${{ secrets.ANDROID_KEY_ALIAS }}
-          AndroidSigningKeyPass: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          AndroidSigningStorePass: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-        run: |
-          dotnet publish Seeker/Seeker.csproj \
-            -c "$CONFIGURATION" \
-            -f net9.0-android \
-            -p:AndroidPackageFormat=apk \
-            -p:AndroidSigningKeyStore="$KEYSTORE_PATH" \
-            -p:AndroidSigningKeyAlias="$AndroidSigningKeyAlias" \
-            -p:AndroidSigningKeyPass="$AndroidSigningKeyPass" \
-            -p:AndroidSigningStorePass="$AndroidSigningStorePass" \
-            -p:ContinuousIntegrationBuild=true \
-            -p:Deterministic=true \
-            -p:SourceRevisionId=${{ github.sha }}
+          ANDROID_KEYSTORE_PATH: ${{ env.KEYSTORE_PATH }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: ./Misc/package-release.ps1 -Version "$env:VERSION"
 
-      - name: Locate APK
-        id: find_apk
-        run: |
-          APK=$(find Seeker/bin -type f -name "*-Signed.apk" -o -name "*.apk" 2>/dev/null \
-                  | grep -i "Release IzzySoft" | grep -iv unsigned | head -n1)
-          if [ -z "$APK" ]; then
-            echo "::error::No APK found under Seeker/bin"
-            find Seeker/bin -type f -name "*.apk" || true
-            exit 1
-          fi
-          echo "Found APK: $APK"
-          echo "apk_path=$APK" >> "$GITHUB_OUTPUT"
+      - name: List release APKs
+        run: ls -lh release-apks/
 
-      - name: Upload APK artifact
+      - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: seeker-izzysoft-apk
-          path: ${{ steps.find_apk.outputs.apk_path }}
+          name: seeker-izzysoft-apks
+          path: release-apks/seeker*.apk
 
-      - name: Attach APK to GitHub Release
+      - name: Attach APKs to GitHub Release
         if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.attach_to_release != '')
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.attach_to_release || github.ref_name }}
-          files: ${{ steps.find_apk.outputs.apk_path }}
+          files: release-apks/seeker*.apk
           fail_on_unmatched_files: true

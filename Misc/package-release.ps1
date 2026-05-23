@@ -25,10 +25,10 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
 }
 
 $pkg     = "com.companyname.andriodapp1"
-$csproj  = ".\Seeker\Seeker.csproj"
+$csproj  = "./Seeker/Seeker.csproj"
 $config  = "Release IzzySoft"
-$base    = ".\Seeker\bin\$config\net9.0-android"
-$out     = ".\release-apks"
+$base    = "./Seeker/bin/$config/net9.0-android"
+$out     = "./release-apks"
 
 $rids = @("android-arm64", "android-arm", "android-x64", "android-x86")
 $abiMap = @{
@@ -107,7 +107,7 @@ if (Test-Path $uni) {
 }
 
 foreach ($rid in $rids) {
-    $src = Join-Path $base "$rid\publish\$pkg-Signed.apk"
+    $src = Join-Path $base "$rid/publish/$pkg-Signed.apk"
     if (Test-Path $src) {
         Copy-Item $src (Join-Path $out "seeker$Version-$($abiMap[$rid]).apk") -Force
     } else {
