@@ -1163,7 +1163,7 @@ namespace Seeker
             }
             if (e.fullRefresh)
             {
-                Activity?.RunOnUiThread(refreshListViewSafe); //in case of rotation it is the ACTIVITY which will be null!!!!
+                Activity?.RunOnUiThread(refreshListViewSafe);
                 return;
             }
             try
@@ -1232,6 +1232,7 @@ namespace Seeker
         {
             Seeker.Transfers.TransferEventRouter.StateChangedForItem += TransferStateChangedItem;
             Seeker.Transfers.TransferEventRouter.ProgressUpdated += TransferProgressUpdated;
+            Seeker.Transfers.TransferEventRouter.ItemRemoved += OnRouterItemRemoved;
             UploadService.TransferAddedUINotify += MainActivity_TransferAddedUINotify; //todo this should eventually be for downloads too.
             DownloadService.Instance.TransferItemQueueUpdated += TransferQueueStateChanged;
 
@@ -1278,9 +1279,35 @@ namespace Seeker
         {
             Seeker.Transfers.TransferEventRouter.ProgressUpdated -= TransferProgressUpdated;
             Seeker.Transfers.TransferEventRouter.StateChangedForItem -= TransferStateChangedItem;
+            Seeker.Transfers.TransferEventRouter.ItemRemoved -= OnRouterItemRemoved;
             DownloadService.Instance.TransferItemQueueUpdated -= TransferQueueStateChanged;
             UploadService.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
             base.OnStop();
+        }
+
+        private void OnRouterItemRemoved(object sender, Seeker.Transfers.ItemRemovedEventArgs e)
+        {
+            if (e.UserIndex < 0)
+            {
+                // Item lived on the other tab (downloads vs uploads) — nothing visible to update here.
+                return;
+            }
+            if (recyclerTransferAdapter == null)
+            {
+                return;
+            }
+            bool inFolderGroupedRoot = ViewState.GroupByFolder && !ViewState.CurrentlyInFolder();
+            if (inFolderGroupedRoot)
+            {
+                // GetUserIndexForTransferItem returns the parent folder's index in this mode.
+                // The folder may have collapsed (last item) or just lost one of N items —
+                // NotifyItemChanged is the safe baseline that triggers a rebind either way.
+                recyclerTransferAdapter.NotifyItemChanged(e.UserIndex);
+            }
+            else
+            {
+                recyclerTransferAdapter.NotifyItemRemoved(e.UserIndex);
+            }
         }
 
         private void SeekerState_DownloadAddedUINotify(object sender, DownloadAddedEventArgs e)
