@@ -558,7 +558,7 @@ namespace UnitTestCommon
             var uiState = new TransferUIState
             {
                 GroupByFolder = false,
-                BatchSelectedItems = new List<int> { 0, 2 },
+                BatchSelectedItems = new HashSet<ITransferItem> { ti1, ti3 },
             };
 
             manager.CancelSelectedItems(uiState);

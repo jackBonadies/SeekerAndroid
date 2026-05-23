@@ -185,13 +185,11 @@ namespace Seeker
 
         public List<TransferItem> GetBatchSelectedForRetryCondition(TransferUIState uiState, bool selectFailed)
         {
-            bool folderItems = uiState.GroupByFolder && uiState.CurrentlySelectedFolder == null;
             List<TransferItem> tis = new List<TransferItem>();
-            foreach (int pos in uiState.BatchSelectedItems)
+            foreach (ITransferItem iti in uiState.BatchSelectedItems)
             {
-                if (folderItems)
+                if (iti is FolderItem fi)
                 {
-                    var fi = GetItemAtUserIndex(pos, uiState) as FolderItem;
                     foreach (TransferItem ti in fi.TransferItems)
                     {
                         if (selectFailed && ti.Failed)
@@ -204,9 +202,8 @@ namespace Seeker
                         }
                     }
                 }
-                else
+                else if (iti is TransferItem ti)
                 {
-                    var ti = GetItemAtUserIndex(pos, uiState) as TransferItem;
                     if (selectFailed && ti.Failed)
                     {
                         tis.Add(ti);
@@ -705,31 +702,21 @@ namespace Seeker
             List<TransferItem> toCleanUp = new List<TransferItem>();
             lock (AllTransferItems)
             {
-                bool isFolderItems = uiState.GroupByFolder && uiState.CurrentlySelectedFolder == null;
-
-                if (isFolderItems)
+                // Snapshot — we mutate the underlying lists below.
+                var selectedSnapshot = uiState.BatchSelectedItems.ToList();
+                foreach (ITransferItem iti in selectedSnapshot)
                 {
-                    List<FolderItem> toClear = new List<FolderItem>();
-                    foreach (int pos in uiState.BatchSelectedItems)
+                    if (iti is FolderItem fi)
                     {
-                        toClear.Add(GetItemAtUserIndex(pos, uiState) as FolderItem);
+                        toCleanUp.AddRange(ClearAllFromFolderReturnCleanupItems(fi));
                     }
-                    foreach (FolderItem item in toClear)
+                    else if (iti is TransferItem ti)
                     {
-                        toCleanUp.AddRange(ClearAllFromFolderReturnCleanupItems(item));
-                    }
-                }
-                else
-                {
-                    uiState.BatchSelectedItems.Sort();
-                    uiState.BatchSelectedItems.Reverse();
-                    foreach (int pos in uiState.BatchSelectedItems)
-                    {
-                        if (NeedsCleanUp(GetItemAtUserIndex(pos, uiState) as TransferItem))
+                        if (NeedsCleanUp(ti))
                         {
-                            toCleanUp.Add(GetItemAtUserIndex(pos, uiState) as TransferItem);
+                            toCleanUp.Add(ti);
                         }
-                        this.RemoveAtUserIndex(pos, uiState);
+                        Remove(ti);
                     }
                 }
             }
@@ -808,22 +795,14 @@ namespace Seeker
         {
             lock (AllTransferItems)
             {
-                bool isFolderItems = false;
-                if (uiState.GroupByFolder && uiState.CurrentlySelectedFolder == null)
+                foreach (ITransferItem iti in uiState.BatchSelectedItems)
                 {
-                    isFolderItems = true;
-                }
-
-                for (int i = 0; i < uiState.BatchSelectedItems.Count; i++)
-                {
-                    if (isFolderItems)
+                    if (iti is FolderItem fi)
                     {
-                        FolderItem fi = this.GetItemAtUserIndex(uiState.BatchSelectedItems[i], uiState) as FolderItem;
                         CancelFolder(fi, prepareForClear);
                     }
-                    else
+                    else if (iti is TransferItem ti)
                     {
-                        TransferItem ti = this.GetItemAtUserIndex(uiState.BatchSelectedItems[i], uiState) as TransferItem;
                         if (prepareForClear)
                         {
                             if (ti.InProcessing) //let continuation action clear this guy

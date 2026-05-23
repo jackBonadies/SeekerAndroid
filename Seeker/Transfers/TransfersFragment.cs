@@ -941,13 +941,15 @@ namespace Seeker
         public static bool ForceOutIfZeroSelected = true;
         public static void ToggleItemBatchSelect(TransferAdapterRecyclerVersion recyclerTransferAdapter, int pos)
         {
-            if (ViewState.BatchSelectedItems.Contains(pos))
+            var item = TransferItems.TransferItemManagerWrapped.GetItemAtUserIndex(pos);
+            if (item == null)
             {
-                ViewState.BatchSelectedItems.Remove(pos);
+                return;
             }
-            else
+            if (!ViewState.BatchSelectedItems.Add(item))
             {
-                ViewState.BatchSelectedItems.Add(pos);
+                // already present → toggle off
+                ViewState.BatchSelectedItems.Remove(item);
             }
             recyclerTransferAdapter.NotifyItemChanged(pos);
             int cnt = ViewState.BatchSelectedItems.Count;
@@ -968,38 +970,28 @@ namespace Seeker
             {
                 return;
             }
-            int userPositionBeingRemoved = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(ti);
-            if (userPositionBeingRemoved == -1)
+            int prevCount = ViewState.BatchSelectedItems.Count;
+
+            // Direct case (flat or in-folder view): ti itself was selected.
+            ViewState.BatchSelectedItems.Remove(ti);
+
+            // Folder-grouped view: ti's parent folder may have been selected and may now be
+            // empty/removed. Drop any FolderItem that no longer exists in the manager.
+            ViewState.BatchSelectedItems.RemoveWhere(item =>
+                item is FolderItem fi && TransferItems.TransferItemManagerWrapped.GetIndexForFolderItem(fi) == -1);
+
+            if (ViewState.BatchSelectedItems.Count == prevCount)
             {
                 //it is not currently on our screen, perhaps it is in uploads (and we are in downloads) or we are inside a folder (and it is outside)
                 Logger.Debug("batch on, different screen item removed");
                 return;
             }
-            Logger.Debug("batch on, updating: " + userPositionBeingRemoved);
-            //adjust numbers
-            int cnt = ViewState.BatchSelectedItems.Count;
-            for (int i = cnt - 1; i >= 0; i--)
-            {
-                int position = ViewState.BatchSelectedItems[i];
-                if (position < userPositionBeingRemoved)
-                {
-                    continue;
-                }
-                else if (position == userPositionBeingRemoved)
-                {
-                    ViewState.BatchSelectedItems.RemoveAt(i);
-                }
-                else
-                {
-                    ViewState.BatchSelectedItems[i] = position - 1;
-                }
-            }
-            //if there was only 1 and its the one that just finished then take us out of batchSelectedItems
+            Logger.Debug("batch on, updating selection");
             if (ViewState.BatchSelectedItems.Count == 0)
             {
                 TransfersActionMode.Finish();
             }
-            else if (ViewState.BatchSelectedItems.Count != cnt) //if we have 1 less now.
+            else
             {
                 TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), ViewState.BatchSelectedItems.Count.ToString());
                 TransfersActionMode.Invalidate();

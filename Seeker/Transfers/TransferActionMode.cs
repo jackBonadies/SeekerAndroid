@@ -55,14 +55,13 @@ namespace Seeker
                     menu.FindItem(Resource.Id.retry_all_failed_batch).SetVisible(false);
 
                     List<TransferItem> transfersSelected = new List<TransferItem>();
-                    foreach (int position in ViewState.BatchSelectedItems)
+                    foreach (ITransferItem iti in ViewState.BatchSelectedItems)
                     {
-                        var ti = TransferItems.TransferItemManagerWrapped.GetItemAtUserIndex(position);
-                        if (ti is TransferItem singleTi)
+                        if (iti is TransferItem singleTi)
                         {
                             transfersSelected.Add(singleTi);
                         }
-                        else if (ti is FolderItem folderTi)
+                        else if (iti is FolderItem folderTi)
                         {
                             transfersSelected.AddRange(folderTi.TransferItems);
                         }
@@ -96,11 +95,17 @@ namespace Seeker
                     case Resource.Id.action_cancel_and_clear_all_batch:
                         Logger.InfoFirebase("action_cancel_and_clear_batch Pressed");
                         TransferDebouncer.CancelAndClearAll.Trigger();
+                        // Capture positions BEFORE removal, descending so NotifyItemRemoved
+                        // calls don't reference indices that have already shifted.
+                        var removedPositions = ViewState.BatchSelectedItems
+                            .Select(it => TransferItems.TransferItemManagerWrapped.GetUserIndexForITransferItem(it))
+                            .Where(p => p >= 0)
+                            .OrderByDescending(p => p)
+                            .ToList();
                         TransferItems.TransferItemManagerWrapped.CancelSelectedItems(true);
                         TransferItems.TransferItemManagerWrapped.ClearSelectedItemsAndClean();
-                        var selected = ViewState.BatchSelectedItems.ToArray();
                         ViewState.BatchSelectedItems.Clear();
-                        foreach (int pos in selected)
+                        foreach (int pos in removedPositions)
                         {
                             Adapter.NotifyItemRemoved(pos);
                         }
@@ -109,33 +114,18 @@ namespace Seeker
                         break;
                     case Resource.Id.pause_selected_batch:
                         TransferItems.TransferItemManagerWrapped.CancelSelectedItems(false);
-                        selected = ViewState.BatchSelectedItems.ToArray();
-                        ViewState.BatchSelectedItems.Clear();
-                        foreach (int pos in selected)
-                        {
-                            Adapter.NotifyItemChanged(pos);
-                        }
+                        NotifyChangedAndClear(Adapter);
                         //since all selected stuff is going away. its what Gmail action mode does.
                         TransfersActionMode.Finish();
                         break;
                     case Resource.Id.resume_selected_batch:
                         Frag.RetryAllConditionEntry(false, true);
-                        selected = ViewState.BatchSelectedItems.ToArray();
-                        ViewState.BatchSelectedItems.Clear();
-                        foreach (int pos in selected)
-                        {
-                            Adapter.NotifyItemChanged(pos);
-                        }
+                        NotifyChangedAndClear(Adapter);
                         TransfersActionMode.Finish();
                         break;
                     case Resource.Id.retry_all_failed_batch:
                         Frag.RetryAllConditionEntry(true, true);
-                        selected = ViewState.BatchSelectedItems.ToArray();
-                        ViewState.BatchSelectedItems.Clear();
-                        foreach (int pos in selected)
-                        {
-                            Adapter.NotifyItemChanged(pos);
-                        }
+                        NotifyChangedAndClear(Adapter);
                         TransfersActionMode.Finish();
                         break;
                     case Resource.Id.select_all:
@@ -143,7 +133,11 @@ namespace Seeker
                         int cnt = TransfersActionModeCallback.Adapter.ItemCount;
                         for (int i = 0; i < cnt; i++)
                         {
-                            ViewState.BatchSelectedItems.Add(i);
+                            var iti = TransferItems.TransferItemManagerWrapped.GetItemAtUserIndex(i);
+                            if (iti != null)
+                            {
+                                ViewState.BatchSelectedItems.Add(iti);
+                            }
                         }
 
                         TransfersActionModeCallback.Adapter.NotifyDataSetChanged();
@@ -153,15 +147,21 @@ namespace Seeker
                         return true;
                     case Resource.Id.invert_selection:
                         ForceOutIfZeroSelected = false;
-                        List<int> oldOnes = ViewState.BatchSelectedItems.ToList();
-                        ViewState.BatchSelectedItems.Clear();
-                        List<int> all = new List<int>();
                         int cnt1 = TransfersActionModeCallback.Adapter.ItemCount;
+                        var inverted = new HashSet<ITransferItem>();
                         for (int i = 0; i < cnt1; i++)
                         {
-                            all.Add(i);
+                            var iti = TransferItems.TransferItemManagerWrapped.GetItemAtUserIndex(i);
+                            if (iti != null && !ViewState.BatchSelectedItems.Contains(iti))
+                            {
+                                inverted.Add(iti);
+                            }
                         }
-                        ViewState.BatchSelectedItems = all.Except(oldOnes).ToList();
+                        ViewState.BatchSelectedItems.Clear();
+                        foreach (var iti in inverted)
+                        {
+                            ViewState.BatchSelectedItems.Add(iti);
+                        }
 
                         TransfersActionModeCallback.Adapter.NotifyDataSetChanged();
 
@@ -172,17 +172,31 @@ namespace Seeker
                 return true;
             }
 
+            /// <summary>
+            /// For actions (pause/resume/retry) that mutate items in place: derive each
+            /// selected item's current position, clear the selection, and notify those rows.
+            /// </summary>
+            private static void NotifyChangedAndClear(TransferAdapterRecyclerVersion adapter)
+            {
+                var positions = ViewState.BatchSelectedItems
+                    .Select(it => TransferItems.TransferItemManagerWrapped.GetUserIndexForITransferItem(it))
+                    .Where(p => p >= 0)
+                    .ToList();
+                ViewState.BatchSelectedItems.Clear();
+                foreach (int pos in positions)
+                {
+                    adapter.NotifyItemChanged(pos);
+                }
+            }
+
             public void OnDestroyActionMode(ActionMode mode)
             {
                 SeekerState.ActiveActivityRef?.Window?.SetStatusBarColor(Android.Graphics.Color.Transparent);
 
-                int[] prevSelectedItems = new int[ViewState.BatchSelectedItems.Count];
-                ViewState.BatchSelectedItems.CopyTo(prevSelectedItems);
                 TransfersActionMode = null;
                 ViewState.BatchSelectedItems.Clear();
                 this.Adapter.IsInBatchSelectMode = false;
                 this.Adapter.NotifyDataSetChanged();
-
             }
 
         }
