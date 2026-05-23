@@ -625,9 +625,8 @@ namespace Seeker.Services
                 {
                     DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
                     finalUri = mFile.Uri.ToString();
-                    System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
+                    using System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
                     stream.Write(bytes.Array, bytes.Offset, bytes.Count);
-                    stream.Close();
                 }
                 else
                 {
@@ -644,8 +643,9 @@ namespace Seeker.Services
                             DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
                             uri = mFile.Uri;
                             finalUri = mFile.Uri.ToString();
-                            System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
-                            MoveFile(SeekerState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete), stream, uriOfIncomplete, parentUriOfIncomplete);
+                            using System.IO.Stream inStream = SeekerState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete);
+                            using System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
+                            MoveFile(inStream, stream, uriOfIncomplete, parentUriOfIncomplete);
                         }
                         catch (Exception e)
                         {
@@ -725,8 +725,9 @@ namespace Seeker.Services
                                         finalUri = mFile.Uri.ToString();
                                         Logger.InfoFirebase("retrying: incomplete: " + uriOfIncomplete + " complete: " + finalUri + " parent: " + parentUriOfIncomplete);
                                         //                                        Logger.InfoFirebase("using temp: " +
-                                        System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
-                                        MoveFile(SeekerState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete), stream, uriOfIncomplete, parentUriOfIncomplete);
+                                        using System.IO.Stream inStream = SeekerState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete);
+                                        using System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
+                                        MoveFile(inStream, stream, uriOfIncomplete, parentUriOfIncomplete);
                                     }
                                     catch (Exception secondTryErr)
                                     {
@@ -771,15 +772,21 @@ namespace Seeker.Services
 
         public void MoveFile(System.IO.Stream from, System.IO.Stream to, Android.Net.Uri toDelete, Android.Net.Uri parentToDelete)
         {
-            byte[] buffer = new byte[4096];
-            int read;
-            while ((read = from.Read(buffer)) != 0) //C# does 0 for you've reached the end!
+            try
             {
-                to.Write(buffer, 0, read);
+                byte[] buffer = new byte[4096];
+                int read;
+                while ((read = from.Read(buffer)) != 0)
+                {
+                    to.Write(buffer, 0, read);
+                }
+                to.Flush();
             }
-            from.Close();
-            to.Flush();
-            to.Close();
+            finally
+            {
+                from.Close();
+                to.Close();
+            }
 
             if (SettingsActivity.UseTempDirectory() || toDelete.Scheme == "file")
             {
@@ -877,15 +884,21 @@ namespace Seeker.Services
 
         public void MoveFile(Java.IO.FileInputStream from, Java.IO.FileOutputStream to, Java.IO.File toDelete, Java.IO.File parent)
         {
-            byte[] buffer = new byte[4096];
-            int read;
-            while ((read = from.Read(buffer)) != -1) //unlike C# this method does -1 for no more bytes left..
+            try
             {
-                to.Write(buffer, 0, read);
+                byte[] buffer = new byte[4096];
+                int read;
+                while ((read = from.Read(buffer)) != -1) // unlike C# this method does -1 for no more bytes left
+                {
+                    to.Write(buffer, 0, read);
+                }
+                to.Flush();
             }
-            from.Close();
-            to.Flush();
-            to.Close();
+            finally
+            {
+                from.Close();
+                to.Close();
+            }
             if (!toDelete.Delete())
             {
                 Logger.Firebase("LEGACY df.Delete() failed to delete ()");

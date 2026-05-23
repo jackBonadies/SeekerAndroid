@@ -71,7 +71,7 @@ namespace Seeker
                 return null;
             }
             DocumentFile documentFile = DocumentFile.FromFile(userInfoPic);
-            System.IO.Stream imageStream = SeekerApplication.ApplicationContext.ContentResolver.OpenInputStream(documentFile.Uri);
+            using System.IO.Stream imageStream = SeekerApplication.ApplicationContext.ContentResolver.OpenInputStream(documentFile.Uri);
             byte[] picFile = new byte[imageStream.Length];
             imageStream.Read(picFile, 0, (int)imageStream.Length);
             return picFile;

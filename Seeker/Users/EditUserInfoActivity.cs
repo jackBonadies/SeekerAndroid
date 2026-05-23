@@ -223,7 +223,7 @@ namespace Seeker
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_image_too_large), ToastLength.Long);
                         return;
                     }
-                    System.IO.Stream inputStream = this.ContentResolver.OpenInputStream(data.Data);
+                    using System.IO.Stream inputStream = this.ContentResolver.OpenInputStream(data.Data);
 
                     //copy the file to our internal storage
 
@@ -242,20 +242,18 @@ namespace Seeker
                     PreferencesState.UserInfoPictureName = name;
                     PreferencesManager.SaveUserInfoPictureName();
                     Java.IO.File fileForOurInternalStorage = new Java.IO.File(user_info_dir, name);
-                    System.IO.Stream outputStream = this.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w");
+                    using System.IO.Stream outputStream = this.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(fileForOurInternalStorage).Uri, "w");
 
                     //this doesnt work btw due to the interal uri not being a SAF uri.
                     //Android.Provider.DocumentsContract.CopyDocument(this.ContentResolver, data.Data, AndroidX.DocumentFile.Provider.DocumentFile.FromFile(f).Uri);
 
                     byte[] buffer = new byte[4096];
                     int read;
-                    while ((read = inputStream.Read(buffer)) != 0) //C# does 0 for you've reached the end!
+                    while ((read = inputStream.Read(buffer)) != 0)
                     {
                         outputStream.Write(buffer, 0, read);
                     }
-                    inputStream.Close();
                     outputStream.Flush();
-                    outputStream.Close();
 
                     //get name of this one and delete the last one...
 
