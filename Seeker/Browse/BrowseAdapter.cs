@@ -24,13 +24,23 @@ namespace Seeker
         public BrowseAdapter(List<DataItem> items, BrowseFragment owner)
         {
             Owner = owner;
-            localDataSet = items;
+            // Snapshot: the source list is mutated in-place by BrowseState from
+            // non-UI threads (filter debounce, browse-response handler). Holding
+            // a reference would let RecyclerView's layout pass see the list mid-mutation
+            // and crash in OnBindViewHolder with ArgumentOutOfRangeException.
+            lock (items)
+            {
+                localDataSet = new List<DataItem>(items);
+            }
         }
 
         public BrowseAdapter(List<DataItem> items, BrowseFragment owner, int[]? selectedPos)
         {
             Owner = owner;
-            localDataSet = items;
+            lock (items)
+            {
+                localDataSet = new List<DataItem>(items);
+            }
             if (selectedPos != null && selectedPos.Length != 0)
             {
                 SelectedPositions = selectedPos.ToList();
