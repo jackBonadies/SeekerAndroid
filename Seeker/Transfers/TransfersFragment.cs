@@ -1161,11 +1161,6 @@ namespace Seeker
             {
                 return;
             }
-            if (e.fullRefresh)
-            {
-                Activity?.RunOnUiThread(refreshListViewSafe);
-                return;
-            }
             try
             {
                 DateTime now = DateTime.UtcNow;

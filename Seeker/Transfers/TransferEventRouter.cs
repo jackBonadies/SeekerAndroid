@@ -249,18 +249,11 @@ namespace Seeker.Transfers
             else
             {
                 TransferItemManager.MarkTransfersDirty();
-                bool fullRefresh = false;
                 double percentComplete = e.Transfer.PercentComplete;
                 relevantItem.Progress = (int)percentComplete;
                 relevantItem.BytesTransferred = e.Transfer.BytesTransferred;
                 relevantItem.RemainingTime = e.Transfer.RemainingTime;
                 relevantItem.AvgSpeed = e.Transfer.AverageSpeed;
-
-                // final-tick UI redraw.
-                if (System.Math.Abs(percentComplete - 100) < .001)
-                {
-                    fullRefresh = true;
-                }
 
                 bool wasFailed = false;
                 if (percentComplete != 0)
@@ -274,7 +267,7 @@ namespace Seeker.Transfers
 
                 }
 
-                ProgressUpdated?.Invoke(null, new ProgressUpdatedUIEventArgs(relevantItem, wasFailed, fullRefresh, percentComplete, e.Transfer.AverageSpeed));
+                ProgressUpdated?.Invoke(null, new ProgressUpdatedUIEventArgs(relevantItem, wasFailed, percentComplete, e.Transfer.AverageSpeed));
             }
         }
 
