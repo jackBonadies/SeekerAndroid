@@ -51,7 +51,7 @@ using System.Xml.Serialization;
 
 namespace Seeker
 {
-    [Activity(Label = "SettingsActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
+    [Activity(Label = "SettingsActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false, ParentActivity = typeof(MainActivity))]
     public partial class SettingsActivity : ThemeableActivity //AppCompatActivity is needed to support chaning light / dark mode programmatically...
     {
         private const int CHANGE_WRITE_EXTERNAL = 0x909;
