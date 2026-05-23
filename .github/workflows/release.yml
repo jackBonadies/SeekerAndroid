@@ -93,3 +93,5 @@ jobs:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.attach_to_release || github.ref_name }}
           files: release-apks/seeker*.apk
           fail_on_unmatched_files: true
+          generate_release_notes: true
+          make_latest: "true"
