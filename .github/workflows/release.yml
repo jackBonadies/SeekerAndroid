@@ -15,6 +15,7 @@ jobs:
   build:
     name: Build Release IzzySoft on Ubuntu
     runs-on: ubuntu-latest
+    environment: release-signing
 
     permissions:
       contents: write
