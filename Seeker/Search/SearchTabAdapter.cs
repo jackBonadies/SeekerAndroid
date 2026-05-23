@@ -40,12 +40,16 @@ namespace Seeker
 
         private void RemoveSearch_Click(object sender, EventArgs e)
         {
-            int position = (sender as View).FindAncestor<SearchTabView>().ViewHolder.BindingAdapterPosition;
-            if (position < 0 || position >= localDataSet.Count) //in my case this happens if you delete too fast...
+            int tabToRemove = (sender as View).FindAncestor<SearchTabView>().SearchTabId;
+            int position = localDataSet.IndexOf(tabToRemove);
+            if (position < 0) //stale click — item already removed
             {
                 return;
             }
-            int tabToRemove = localDataSet[position];
+            if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabToRemove))
+            {
+                return;
+            }
             bool isWishlist = (SearchTabHelper.SearchTabCollection[tabToRemove].SearchTarget == SearchTarget.Wishlist);
             SearchTabHelper.SearchTabCollection[tabToRemove].CancellationTokenSource?.Cancel();
             if (isWishlist)
@@ -108,12 +112,11 @@ namespace Seeker
 
         private void SearchTabLayout_Click(object sender, EventArgs e)
         {
-            int position = (sender as View).FindAncestor<SearchTabView>().ViewHolder.BindingAdapterPosition;
-            if (position < 0 || position >= localDataSet.Count)
+            int tabToGoTo = (sender as View).FindAncestor<SearchTabView>().SearchTabId;
+            if (!SearchTabHelper.SearchTabCollection.ContainsKey(tabToGoTo))
             {
                 return;
             }
-            int tabToGoTo = localDataSet[position];
             SearchFragment.Instance.GoToTab(tabToGoTo, false);
             SearchTabDialog.Instance.Dismiss();
         }
@@ -156,7 +159,7 @@ namespace Seeker
         private View pillIndicator;
         private View rowBackground;
         public SearchTabViewHolder ViewHolder;
-        public int SearchId = int.MaxValue;
+        public int SearchTabId = int.MaxValue;
         public SearchTabView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.tab_page_item, this, true);
@@ -183,9 +186,10 @@ namespace Seeker
             rowBackground = FindViewById<View>(Resource.Id.searchTabRowBg);
         }
 
-        public void setItem(int i)
+        public void setItem(int searchTabId)
         {
-            SearchTab searchTab = SearchTabHelper.SearchTabCollection[i];
+            SearchTabId = searchTabId;
+            SearchTab searchTab = SearchTabHelper.SearchTabCollection[searchTabId];
             if (searchTab.SearchTarget == SearchTarget.Wishlist)
             {
                 string timeString = string.Empty;
@@ -231,7 +235,7 @@ namespace Seeker
                 lastSearchTerm.SetTypeface(lastSearchTerm.Typeface, Android.Graphics.TypefaceStyle.Italic);
             }
 
-            bool isActive = (i == SearchTabHelper.CurrentTab);
+            bool isActive = (searchTabId == SearchTabHelper.CurrentTab);
             pillIndicator.SetBackgroundResource(isActive
                 ? Resource.Drawable.search_tab_pill_active
                 : Resource.Drawable.search_tab_pill_inactive);
