@@ -1153,22 +1153,22 @@ namespace Seeker
 
         private void TransferProgressUpdated(object sender, ProgressUpdatedUIEventArgs e)
         {
-            if (e.ti.IsUpload() != ViewState.InUploadsMode)
+            if (e.TransferItem.IsUpload() != ViewState.InUploadsMode)
             {
                 return;
             }
-            if (e.percentComplete == 0)
+            if (e.PercentComplete == 0)
             {
                 return;
             }
             try
             {
                 DateTime now = DateTime.UtcNow;
-                string throttleKey = e.ti.GetThrottleKey();
+                string throttleKey = e.TransferItem.GetThrottleKey();
                 DateTime lastUpdated = ProgressUpdatedThrottler.GetOrAdd(throttleKey, now);
                 bool isNew = lastUpdated == now;
                 bool shouldUpdate = isNew
-                    || e.wasFailed
+                    || e.WasFailed
                     || now.Subtract(lastUpdated).TotalMilliseconds > THROTTLE_PROGRESS_UPDATED_RATE;
 
                 if (!shouldUpdate)
@@ -1180,13 +1180,13 @@ namespace Seeker
 
                 Activity?.RunOnUiThread(() =>
                 {
-                    int index = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(e.ti);
+                    int index = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(e.TransferItem);
                     if (index == -1)
                     {
                         Logger.Debug("Index is -1 TransferProgressUpdated");
                         return;
                     }
-                    refreshItemProgress(index, e.ti.GetProgressForPresentation(), e.ti, e.wasFailed, e.avgspeedBytes);
+                    refreshItemProgress(index, e.TransferItem.GetProgressForPresentation(), e.TransferItem, e.WasFailed, e.AverageSpeedBytes);
                 });
             }
             catch (System.Exception error)

@@ -4,16 +4,17 @@ namespace Seeker
 {
     public class ProgressUpdatedUIEventArgs : EventArgs
     {
-        public ProgressUpdatedUIEventArgs(TransferItem _ti, bool _wasFailed, double _percentComplete, double _avgspeedBytes)
+        public TransferItem TransferItem;
+        public bool WasFailed;
+        public double PercentComplete;
+        public double AverageSpeedBytes;
+
+        public ProgressUpdatedUIEventArgs(TransferItem transferItem, bool wasFailed, double percentComplete, double averageSpeedBytes)
         {
-            ti = _ti;
-            wasFailed = _wasFailed;
-            percentComplete = _percentComplete;
-            avgspeedBytes = _avgspeedBytes;
+            TransferItem = transferItem;
+            WasFailed = wasFailed;
+            PercentComplete = percentComplete;
+            AverageSpeedBytes = averageSpeedBytes;
         }
-        public TransferItem ti;
-        public bool wasFailed;
-        public double percentComplete;
-        public double avgspeedBytes;
     }
 }
