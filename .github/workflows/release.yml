@@ -16,6 +16,9 @@ jobs:
     name: Build Release IzzySoft on Ubuntu
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     env:
       CONFIGURATION: 'Release IzzySoft'
       # Deterministic build helpers (best-effort — full byte-for-byte reproducibility
@@ -99,7 +102,7 @@ jobs:
 
       - name: Attach APK to GitHub Release
         if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.attach_to_release != '')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.attach_to_release || github.ref_name }}
           files: ${{ steps.find_apk.outputs.apk_path }}
