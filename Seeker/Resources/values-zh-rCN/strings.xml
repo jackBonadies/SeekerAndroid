@@ -72,7 +72,7 @@ Directory Count: {5}\"</string>
     <string name="target_room_name">房间名</string>
     <string name="target_choose_user">选择用户</string>
     <string name="username">用户名</string>
-    <string name="search_target_">Search Target:</string>
+    <string name="search_target_">Search Target</string>
     <string name="custom_">Custom:</string>
     <string name="friends">Friends</string>
     <string name="ignored">已忽略</string>
@@ -131,7 +131,7 @@ Directory Count: {5}\"</string>
     <string name="search_result_style_medium">中</string>
     <string name="search_result_style_minimal">小</string>
     <string name="new_search_tab">New Search</string>
-    <string name="filter_search_results_here">Filter Results Here</string>
+    <string name="filter_search_results_here">Filter Results</string>
     <string name="persist_it">Sticky</string>
     <string name="type_chatroom_ticker_message">Type Ticker Message</string>
     <string name="change_download_folder">Change Download Folder</string>
@@ -144,7 +144,7 @@ Directory Count: {5}\"</string>
     <string name="remember_search_history">Remember Search History</string>
     <string name="clear_search_history">Clear Search History</string>
     <string name="file_backed_downloads">File Backed Downloads</string>
-    <string name="night_mode_options">Night Mode Option: </string>
+    <string name="night_mode_options">Night Mode Option</string>
     <string name="enable_sharing">启用共享</string>
     <string name="set_shared_folder">设置共享文件夹</string>
     <string name="browse_yourself">Browse Self</string>

@@ -71,7 +71,7 @@ Numero Cartelle: {5}\"</string>
     <string name="target_room_name">Nome stanza</string>
     <string name="target_choose_user">Seleziona utente</string>
     <string name="username">Nome utente</string>
-    <string name="search_target_">Obiettivo Ricerca:</string>
+    <string name="search_target_">Obiettivo Ricerca</string>
     <string name="custom_">Personalizzato:</string>
     <string name="friends">Amici</string>
     <string name="ignored">Ignorato</string>
@@ -111,7 +111,7 @@ Numero Cartelle: {5}\"</string>
     <string name="no_image_chosen">Nessuna</string>
     <string name="enter_user_to_invite_to_room">Inserisci l\'utente da invitare</string>
     <string name="inviteuser">Invita utente</string>
-    <string name="invite_user">Invita utente:</string>
+    <string name="invite_user">Invita utente</string>
     <string name="give_up_room">Abbandona la stanza</string>
     <string name="give_up_membership">Disiscriviti</string>
     <string name="logout">Esci</string>
@@ -120,7 +120,7 @@ Numero Cartelle: {5}\"</string>
     <string name="submit">Invia</string>
     <string name="ConnectingToServer">Connessione al server</string>
     <string name="PleaseWait_">Attendere prego...</string>
-    <string name="choose_a_download_foldkilobytes_per_second:er">Seleziona cartella di download</string>
+    <string name="choose_a_download_folder">Seleziona cartella di download</string>
     <string name="settings">Impostazioni</string>
     <string name="enter_user_to_message">Inserisci utente a cui inviare un messaggio</string>
     <!--Search Result Styles-->
@@ -143,7 +143,7 @@ Numero Cartelle: {5}\"</string>
     <string name="remember_search_history">Memorizza cronologia ricerca</string>
     <string name="clear_search_history">Svuota cronologia</string>
     <string name="file_backed_downloads">File Backed Downloads</string>
-    <string name="night_mode_options">Modalità notte: </string>
+    <string name="night_mode_options">Modalità notte</string>
     <string name="enable_sharing">Abilita Condivisione</string>
     <string name="set_shared_folder">Imposta cartella condivisa</string>
     <string name="browse_yourself">Sfoglia te stesso</string>
@@ -223,8 +223,8 @@ Numero Cartelle: {5}\"</string>
     <string name="failed_to_undo">Annullamento non riuscito</string>
     <string name="enabling_listener">Attivazione Ascoltatore</string>
     <string name="disabling_listener">Disabilitare Ascoltatore</string>
-    <string name="add_user_title">Aggiungi utente(i):</string>
-    <string name="ignore_user_title">Ignora utente(i):</string>
+    <string name="add_user_title">Aggiungi utente(i)</string>
+    <string name="ignore_user_title">Ignora utente(i)</string>
     <string name="success_setting_shared_dir_fnum_dnum">Cartella Condivisa impostata con successo con {0} elenchi e {1} file.</string>
     <string name="parsing_files_wait">Analisi dei file... potrebbe richiedere diversi secondi...</string>
     <string name="port_out_of_range">Numero porta fuori scala. Accertati sia fra 1024 e 65535.</string>
@@ -239,8 +239,8 @@ Numero Cartelle: {5}\"</string>
     <string name="always_light">Sempre chiaro</string>
     <string name="always_dark">Sempre scuro</string>
     <!-- info -->
-    <string name="queue_length_">Lunghezza coda: </string>
-    <string name="upload_slots_">Posti di caricamento disponibili: </string>
+    <string name="queue_length_">Lunghezza coda</string>
+    <string name="upload_slots_">Posti di caricamento disponibili</string>
     <string name="today">Oggi</string>
     <string name="pending_">In sospeso...</string>
     <string name="failed">Fallito</string>
@@ -351,12 +351,12 @@ Numero Cartelle: {5}\"</string>
     <string name="owner">Proprietario</string>
     <string name="mod">Moderatore</string>
     <!--Title-->
-    <string name="user_">Utente:</string>
-    <string name="browse_user_files">Scorrere utenti:</string>
-    <string name="set_ticker">Imposta Ticker:</string>
+    <string name="user_">Utente</string>
+    <string name="browse_user_files">Scorrere utenti</string>
+    <string name="set_ticker">Imposta Ticker</string>
     <string name="setticker">Imposta Ticker</string>
     <string name="chatrooms">Stanze</string>
-    <string name="create_chatroom_">Crea stanza:</string>
+    <string name="create_chatroom_">Crea stanza</string>
     <string name="edit_info">Modifica informazioni</string>
     <!--Dialog Action-->
     <string name="okay">Ok</string>
@@ -489,8 +489,12 @@ Numero Cartelle: {5}\"</string>
 <br><br>Please help translate Seeker <a href="https://crwd.in/seeker">here</a>.
 <br><br>Source code is <a href="https://github.com/jackBonadies/SeekerAndroid">here</a>.
 <br><br>Version: {0}.]]></string>
-    <string name="force_filesystem_message"><![CDATA[Il modo standard di richiedere l'accesso alle cartelle non sempre persiste autorizzazioni. Se trovi la richiesta di Seeker per la cartella di download o l'accesso alla cartella condivisa, questo pulsante richiederà i permessi a stile vecchio che persisteranno sempre.
-<br><br>Questa funzione richiede la versione di Fdroid IzzyDroid di Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Scarica Qui</a>). Google Play Store non consente alle applicazioni di richiedere questo permesso.]]></string>
+    <string name="force_filesystem_message">
+<![CDATA[
+Il modo standard di richiedere l\'accesso alle cartelle non sempre persiste autorizzazioni. Se trovi la richiesta di Seeker per la cartella di download o l\'accesso alla cartella condivisa, questo pulsante richiederà i permessi a stile vecchio che persisteranno sempre.
+<br><br>Questa funzione richiede la versione di Fdroid IzzyDroid di Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Scarica Qui</a>). Google Play Store non consente alle applicazioni di richiedere questo permesso.
+]]>
+	</string>
     <string name="must_be_logged_in_to_get_dir_contents">Must be logged in to get directory contents</string>
     <string name="note">Nota</string>
     <string name="removed_user_from_ignored_list">Removed user \"{0}\" from Ignore List</string>
@@ -521,7 +525,6 @@ Numero Cartelle: {5}\"</string>
 		\n\nThis can be useful to send to the dev for the purposes of troubleshooting issues.  If the issues are of a networking nature, one may have to restart the app after turning this option on for full results.</string>
     <string name="folder_X_from_user_Y_finished">{0} from {1} successfully completed.</string>
     <string name="sort_results_by">Sort By</string>
-    <string name="sort_results_by_">Sort By:</string>
     <string name="next">Prossimo</string>
     <string name="prev">Precedente</string>
     <string name="finish">Fine</string>
@@ -616,8 +619,6 @@ Numero Cartelle: {5}\"</string>
     <string name="ClearRecentUsers">Clear Recent Users</string>
     <string name="AutoRetryFailedOfflineOnline">Auto-Retry Failed Downloads When User Goes Back Online</string>
     <string name="AwayOnInactivity">Automatically Set Status to Away on Inactivity</string>
-    <string name="DayVarient_">Day Varient: </string>
-    <string name="NightVarient_">Night Varient: </string>
     <string name="NoSharedAdd">No Shared Folders. Tap \'Add\' to get started.</string>
     <string name="RescanShares">Rescan Shares</string>
     <string name="PauseSharingIfMetered">Pause Sharing if on Metered (Mobile) Connection</string>
