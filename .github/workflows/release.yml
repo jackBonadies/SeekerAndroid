@@ -95,3 +95,40 @@ jobs:
           fail_on_unmatched_files: true
           generate_release_notes: true
           make_latest: "true"
+
+      - name: Build Play Store AAB (Release)
+        env:
+          AndroidSigningKeyStore: ${{ env.KEYSTORE_PATH }}
+          AndroidSigningKeyAlias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          AndroidSigningKeyPass: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          AndroidSigningStorePass: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          dotnet publish Seeker/Seeker.csproj \
+            -c Release \
+            -f net9.0-android \
+            -p:AndroidSigningKeyStore="$KEYSTORE_PATH" \
+            -p:AndroidSigningKeyAlias="$AndroidSigningKeyAlias" \
+            -p:AndroidSigningKeyPass="$AndroidSigningKeyPass" \
+            -p:AndroidSigningStorePass="$AndroidSigningStorePass" \
+            -p:ContinuousIntegrationBuild=true \
+            -p:Deterministic=true \
+            -p:SourceRevisionId=${{ github.sha }}
+
+      - name: Stage AAB for upload
+        run: |
+          AAB=$(find Seeker/bin/Release/net9.0-android -name "*-Signed.aab" -type f 2>/dev/null | head -n1)
+          if [ -z "$AAB" ]; then
+            echo "::error::No signed AAB found under Seeker/bin/Release/net9.0-android"
+            find Seeker/bin/Release -name "*.aab" -type f || true
+            exit 1
+          fi
+          mkdir -p release-aab
+          cp "$AAB" "release-aab/seeker${VERSION}.aab"
+          ls -lh release-aab/
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: seeker-playstore-aab
+          path: release-aab/seeker*.aab
+          if-no-files-found: error
