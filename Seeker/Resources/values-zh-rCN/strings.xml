@@ -1,1089 +1,685 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Seeker</string>
     <string name="com.google.firebase.crashlytics.mapping_file_id">1.0</string>
-
-    <string name="home_tab">传输</string>
+    <string name="home_tab">首页</string>
     <string name="transfer_tab">传输</string>
     <string name="browse_tab">浏览</string>
     <string name="account_tab">账号</string>
     <string name="searches_tab">搜索结果</string>
     <string name="searches_tab2">搜索​​​​</string>
-
     <string name="new_result">新结果</string>
     <string name="new_results">新结果</string>
-
     <string name="stop">停止</string>
     <string name="start">启动</string>
-
     <string name="saerch_user_list">搜索用户列表</string>
     <string name="search_room">搜索聊天室</string>
     <string name="search_room_">搜索房间 {0}</string>
     <string name="search_user_">搜索用户 {0}</string>
-    <string name="wishlist_search">愿望单搜索</string>
-
-    <string name="no_account">
-        没有帐户？只需输入一个唯一的用户名就可以为您创建一个帐号。
-    </string>
-    <string name="memory_file_backed">
-        注意：文件支持的下载将会将部分下载结果保存到名为“Soulsek Incomplete”的文件夹中，并在下载完成后将其移动至完成。
+    <string name="wishlist_search">心愿单搜索</string>
+    <string name="no_account">没有帐户？只需输入一个唯一的用户名就可以为您创建一个帐号。</string>
+    <string name="memory_file_backed">注意：文件支持的下载将会将部分下载结果保存到名为“Soulsek Incomplete”的文件夹中，并在下载完成后将其移动至完成。
 \n\n这允许(1) 在你离开时暂停并恢复下载的能力 (2) 可以下载大型文件而不会出现内存错误(以及较少的 RAM 密度)。
-\n\n正在关闭此功能 部分下载结果存储在内存中，直到完成，然后保存到磁盘。
-    </string>
-    <string name="keep_alive_service">
-        此服务允许寻找者在后台运行。
+\n\n正在关闭此功能 部分下载结果存储在内存中，直到完成，然后保存到磁盘。</string>
+    <string name="keep_alive_service">此服务允许寻找者在后台运行。
 \n\n这是响应搜索请求所必需的(如果共享的话)， 在后台接收聊天消息和接收愿望单结果。
 \n\n后台下载或上传不需要它(已经有一个服务将永远运行)。
-\n\n唯一的下方是它可以使用更多的电池。 在这种情况下，人们可以默认关闭它，只能在需要时运行。
-    </string>
-    <string name="listening">
-        此设置允许Seeker接受传入连接，这样我们就可以在没有开启端口的情况下连接到客户端。
+\n\n唯一的下方是它可以使用更多的电池。 在这种情况下，人们可以默认关闭它，只能在需要时运行。</string>
+    <string name="listening">此设置允许Seeker接受传入连接，这样我们就可以在没有开启端口的情况下连接到客户端。
 \n\n这实际上意味着只要我们成功地收听(通过“检查状态”表示)，我们就会收到更多的搜索结果。 能够从更多人下载，上传到更多人等。
-\n\n寻找者会尝试通过 UPnP 自动转发端口(这是官方桌面客户端的做法)。 如果你没有在 Wifi 上，它将不起作用。 如果您在 VPN 上，请搜索如何为您的指定VPN端口转发， 如果你的路由器未启用 UPnP，你必须手动转发端口。
-    </string>
-
-    <string name="sharing_dialog">
-        关于共享文件的几点值得注意。 当上传目录首次设置时 应用程序必须阅读文件并解析它们，以便于随后的搜索和浏览请求。 这可能需要几分钟。 请确保您正在分享的文件中没有任何私密或敏感的信息(基本上是使用您对官方灵魂客户的相同判断)。
-    </string>
-
-    <string name="privileges_more_info">
-        Privileges allow one to support the Soulseek creator (Nir) and the central server which this app depends on.
+\n\n寻找者会尝试通过 UPnP 自动转发端口(这是官方桌面客户端的做法)。 如果你没有在 Wifi 上，它将不起作用。 如果您在 VPN 上，请搜索如何为您的指定VPN端口转发， 如果你的路由器未启用 UPnP，你必须手动转发端口。</string>
+    <string name="sharing_dialog">关于共享文件的几点值得注意。 当上传目录首次设置时 应用程序必须阅读文件并解析它们，以便于随后的搜索和浏览请求。 这可能需要几分钟。 请确保您正在分享的文件中没有任何私密或敏感的信息(基本上是使用您对官方灵魂客户的相同判断)。</string>
+    <string name="privileges_more_info">Privileges allow one to support the Soulseek creator (Nir) and the central server which this app depends on.
 \n\nIt also allows one to get queued ahead of non privileged users in the download queue.
-\n\nNote: any donations do not go to the creator of this unofficial android client, Seeker. I do not currently accept donations.
-    </string>
-
+\n\nNote: any donations do not go to the creator of this unofficial android client, Seeker. I do not currently accept donations.</string>
     <string name="no_messages">没有消息。点击\"+\"开始操作。</string>
     <string name="messages">留言</string>
     <string name="browse_files">浏览文件</string>
+    <string name="chatroomListLoading">正在请求可用聊天室列表。请稍候...</string>
     <string name="privateRoomCreation">正在请求创建私人房间</string>
     <string name="requesting_room_list">正在申请房间列表</string>
-    <string name="requesting_user_info">Requesting User\'s Info</string>
-    <string name="room_list_received">Room List Received</string>
-
+    <string name="requesting_user_info">正在请求用户信息</string>
+    <string name="room_list_received">已收到房间列表</string>
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
-    <string name="wishlist">Wishlist</string>
-    <string name="wishlist_bold">
-        <b>Wishlist</b>
-    </string>
-    <string name="wishlist_empty_bold">
-        <b>Wishlist (Empty)</b>
-    </string>
-    <string name="user_info_bio">
-        <b>User Bio</b>
-    </string>
-    <string name="user_info_picture">
-        <b>Picture</b>
-    </string>
-    <string name="user_info_stats_header">
-        <b>Info</b>
-    </string>
-    <string name="unsaved_changes_title">Discard unsaved changes?</string>
-    <string name="unsaved_changes_body">
-        You have unsaved changes, are you sure you want to discard them?
-    </string>
-    <string name="user_status_string">
-        \"Upload Slots: {0}
+    <string name="wishlist">心愿单</string>
+    <string name="wishlist_bold"><b>心愿单</b></string>
+    <string name="wishlist_empty_bold"><b>心愿单(空)</b></string>
+    <string name="user_info_bio"><b>User Bio</b></string>
+    <string name="user_info_picture"><b>图片</b></string>
+    <string name="user_info_stats_header"><b>Info</b></string>
+    <string name="unsaved_changes_title">放弃未保存的更改？</string>
+    <string name="unsaved_changes_body">您有未保存的更改，您确定要放弃它们吗？</string>
+    <string name="user_status_string">\"Upload Slots: {0}
 Free to Upload: {1}
 Uploads Queued: {2}
 Upload Speed: {3}
 File Count: {4}
-Directory Count: {5}\"
-    </string>
-    <string name="add_user">Add User</string>
-    <string name="empty_browse_directory">
-        This tab is used to browse a user\'s directory tree.\n\nTo get started perform a search in the search tab or tap the \'+\'.
-    </string>
-    <string name="clear">Clear</string>
+Directory Count: {5}\"</string>
+    <string name="add_user">新增用户</string>
+    <string name="empty_browse_directory">This tab is used to browse a user\'s directory tree.\n\nTo get started perform a search in the search tab or tap the \'+\'.</string>
+    <string name="clear">清除</string>
     <string name="get_user_info">Get User Info</string>
     <string name="quick_info">Quick Info</string>
     <string name="enter_user_to_browse">Enter User to Browse</string>
+    <!--
+  These are search targets
+  -->
     <string name="all_target">All Users</string>
-    <string name="target_user_list">User List</string>
-    <string name="target_room">Room</string>
-    <string name="target_room_joined">Joined:</string>
-    <string name="target_room_name">Room Name</string>
-    <string name="target_choose_user">Choose User</string>
-    <string name="username">Username</string>
-    <string name="search_target_">Search Target</string>
+    <string name="target_user_list">用户列表</string>
+    <string name="target_room">房间</string>
+    <string name="target_room_joined">已加入：</string>
+    <string name="target_room_name">房间名</string>
+    <string name="target_choose_user">选择用户</string>
+    <string name="username">用户名</string>
+    <string name="search_target_">Search Target:</string>
     <string name="custom_">Custom:</string>
-
     <string name="friends">Friends</string>
-    <string name="ignored">Ignored</string>
-
-    <string name="chatroom_disconnected">We disconnected...</string>
-    <string name="chatroom_disconnected_at">We disconnected: {0}</string>
-    <string name="chatroom_reconnected_at">We reconnected: {0}</string>
+    <string name="ignored">已忽略</string>
+    <string name="chatroom_disconnected">已断开连接……</string>
+    <!--Where placeholder {0} is time -->
+    <string name="chatroom_disconnected_at">已断开连接：{0}</string>
+    <string name="chatroom_reconnected_at">已重新连接：{0}</string>
     <string name="chatroom_loading_ticker">Loading current ticker...</string>
-    <string name="chatroom_enter_message">Enter Message</string>
-    <string name="send_message">Send</string>
+    <string name="chatroom_enter_message">输入消息</string>
+    <string name="send_message">发送</string>
     <string name="filter_chatrooms_here">Filter here</string>
-
     <string name="enter_listening_port">Enter Port to Listen On</string>
-
-    <string name="create_chatroom_private">Make Private</string>
-
-    <string name="search_here">Search Here</string>
-
-    <string name="seeker_needs_dl_dir">
-        Seeker needs Access to a Directory to Save Downloaded Files
-    </string>
-    <string name="seeker_needs_dl_dir_content">
-        Please Choose a Download Directory (Default is the Music Folder)
-    </string>
-    <string name="seeker_needs_dl_dir_error">
-        Must select a directory to place downloaded files
-    </string>
-    <string name="seeker_needs_dl_dir_choose_settings">
-        Please set a download directory in Settings.
-    </string>
-    <string name="seeker_cannot_access_files">
-        Cannot access filesystem.  You must select a download directory, either in the login page or in settings.
-    </string>
-
-    <string name="file_column">File</string>
-    <string name="size_column">Size</string>
-    <string name="attribute_column">Attribute</string>
-
-    <string name="download_folder">Download Folder</string>
-    <string name="download_selected">Download Selected</string>
-    <string name="request_directories">Request Directories</string>
-    <string name="close_download_diag">Close</string>
-
-    <string name="add_about_me">Tap to add an about me</string>
-    <string name="select_image">Select Image</string>
-    <string name="clear_image">Clear Image</string>
+    <string name="create_chatroom_name">要创建的房间名称</string>
+    <string name="create_chatroom_private">设为私密</string>
+    <string name="search_here">点击搜索</string>
+    <string name="seeker_needs_dl_dir">Seeker需要访问目录来保存下载的文件</string>
+    <string name="seeker_needs_dl_dir_content">请选择下载目录(默认为Music文件夹)</string>
+    <string name="seeker_needs_dl_dir_error">必须选择一个目录来保存下载的文件</string>
+    <string name="seeker_needs_dl_dir_choose_settings">请在设置中设置下载目录。</string>
+    <string name="seeker_cannot_access_files">无法访问文件系统。您必须在登录页面或在设置中选择下载目录。</string>
+    <!--
+  Download Dialog Columns
+  -->
+    <string name="file_column">文件</string>
+    <string name="size_column">大小</string>
+    <string name="attribute_column">属性</string>
+    <!--
+  Download Dialog Buttons
+  -->
+    <string name="download_folder">下载文件夹</string>
+    <string name="download_selected">下载选中的文件</string>
+    <string name="request_directories">请求目录</string>
+    <string name="close_download_diag">关闭</string>
+    <string name="add_about_me">点击以添加我的信息</string>
+    <string name="select_image">选择图片</string>
+    <string name="clear_image">清除图片</string>
     <string name="no_image_chosen">None</string>
-
-    <string name="enter_user_to_invite_to_room">Enter User to Invite</string>
-    <string name="inviteuser">Invite User</string>
-
-    <string name="give_up_room">Give up Room</string>
+    <string name="enter_user_to_invite_to_room">输入要邀请的用户</string>
+    <string name="inviteuser">邀请成员</string>
+    <string name="invite_user">邀请成员：</string>
+    <string name="give_up_room">放弃房间</string>
     <string name="give_up_membership">Give up Membership</string>
-
-    <string name="logout">Logout</string>
-    <string name="login">Login</string>
-    <string name="password">Password</string>
-    <string name="submit">Submit</string>
-    <string name="ConnectingToServer">Connecting to Server</string>
-    <string name="PleaseWait_">Please Wait...</string>
-    <string name="choose_a_download_folder">Select Download Folder</string>
-    <string name="settings">Settings</string>
-
+    <string name="logout">退出登录</string>
+    <string name="login">登录</string>
+    <string name="password">密码</string>
+    <string name="submit">提交</string>
+    <string name="ConnectingToServer">正在连接服务器</string>
+    <string name="PleaseWait_">请稍候……</string>
+    <string name="choose_a_download_folder">选择下载文件夹</string>
+    <string name="settings">设置</string>
     <string name="enter_user_to_message">Enter User to Message</string>
-
-    <string name="search_result_style">Result Style</string>
-
+    <!--Search Result Styles-->
+    <string name="search_result_style">Result Style:</string>
+    <string name="search_result_style_expanded">Expandable: Expanded</string>
+    <string name="search_result_style_collapsed">展开：已折叠</string>
+    <string name="search_result_style_medium">中</string>
+    <string name="search_result_style_minimal">小</string>
     <string name="new_search_tab">New Search</string>
-    <string name="filter_search_results_here">Filter Results</string>
+    <string name="filter_search_results_here">Filter Results Here</string>
     <string name="persist_it">Sticky</string>
-    <string name="type_chatroom_ticker_message">Ticker Message</string>
-
+    <string name="type_chatroom_ticker_message">Type Ticker Message</string>
     <string name="change_download_folder">Change Download Folder</string>
-    <string name="max_search_results">Max Search Results:</string>
-    <string name="only_show_free_slots">
-        Only Show Results of Users with Free Slots
-    </string>
-    <string name="start_service_on_startup">Start Service on Startup</string>
-    <string name="allow_private_room_invitations">
-        Allow Private Room Invitations
-    </string>
-
-    <string name="show_bottom_notifs_complete">
-        Show Notifications for File Completed
-    </string>
-    <string name="show_notifs_on_folder_complete">
-        Show Notifications for Folder Completed
-    </string>
+    <string name="max_search_results">最大搜索结果： </string>
+    <string name="only_show_free_slots">Only Show Results of Users with Free Slots</string>
+    <string name="start_service_on_startup">启动时启动服务</string>
+    <string name="allow_private_room_invitations">Allow Private Room Invitations</string>
+    <string name="show_bottom_notifs_complete">Show Notifications for File Completed</string>
+    <string name="show_notifs_on_folder_complete">Show Notifications for Folder Completed</string>
     <string name="remember_search_history">Remember Search History</string>
     <string name="clear_search_history">Clear Search History</string>
     <string name="file_backed_downloads">File Backed Downloads</string>
-    <string name="night_mode_options">Night Mode Option</string>
-    <string name="enable_sharing">Enable Sharing</string>
-    <string name="set_shared_folder">Set Shared Folder</string>
+    <string name="night_mode_options">Night Mode Option: </string>
+    <string name="enable_sharing">启用共享</string>
+    <string name="set_shared_folder">设置共享文件夹</string>
     <string name="browse_yourself">Browse Self</string>
     <string name="enable_listening">Enable Listening</string>
-    <string name="change_port">Change Port</string>
-    <string name="port">Port</string>
+    <string name="change_port">更改端口</string>
+    <string name="port">端口</string>
     <string name="check_your_port_status">Check Status</string>
-    <string name="use_pnp_for_port_forwarding">
-        Use UPnP for Port Forwarding
-    </string>
-    <string name="edit_your_user_info">Edit User Info</string>
-    <string name="restore_default_settings">Restore Defaults</string>
-
-    <string name="no_transfers_yet">
-        No downloads currently, as you download content it will appear here
-    </string>
-
+    <string name="use_pnp_for_port_forwarding">使用 UPnP 转发端口</string>
+    <string name="edit_your_user_info">编辑用户信息</string>
+    <string name="restore_default_settings">恢复默认设置</string>
+    <string name="no_transfers_yet">No downloads currently, as you download content it will appear here</string>
     <string name="user_has_no_bio">User has no bio.</string>
     <string name="user_has_no_pic">User has no picture.</string>
-    <string name="no_pic_set">No picture is set</string>
-    <string name="select_pic">Select Picture</string>
+    <string name="no_pic_set">未设置图片</string>
+    <string name="select_pic">选择图片</string>
     <string name="success_set_pic">Successfully set picture</string>
-    <string name="error_no_file_manager_image">
-        ERROR - No file manager installed that is capable of choosing an image. Please install one.
-    </string>
-    <string name="error_no_file_manager_dir">
-        ERROR - No file manager installed that is capable of choosing a directory. Please install one.
-    </string>
-    <string name="error_no_file_manager_dir_manage_storage">
-        ERROR - No file manager installed that is capable of choosing a directory. Please install one. If your device does not implement OPEN_DOCUMENT_TREE intent, please install Seeker from Fdroid (IzzyOnDroid Repo) which has the Manage External Storage permission.
-    </string>
-    <string name="error_image_doesnt_exist">Image does not exist</string>
-    <string name="error_image_too_large">
-        Image is too large. Please choose a smaller image. (&lt;5MB).
-    </string>
-
+    <string name="error_no_file_manager_image">错误 - 没有安装能够选择图像的文件管理器。请安装一个。</string>
+    <string name="error_no_file_manager_dir">错误 - 未安装能够选择目录的文件管理器。请安装一个。</string>
+    <string name="error_no_file_manager_dir_manage_storage">错误 - 没有安装能够选择目录的文件管理器。请安装一个。 如果您的设备没有实现 OPEN_DOCUMENT_TREE 意图，请从拥有管理外部存储权限的 Fdroid (IzzyOnDroid 仓库) 安装Seeker。</string>
+    <string name="error_image_doesnt_exist">图像不存在</string>
+    <string name="error_image_too_large">图片过大。请选择一个较小的图片。(&lt;5MB)。</string>
     <string name="no_room_tickers">No Room Tickers Yet...</string>
-    <string name="user_list_empty">
-        User List is empty. Please add a user to User List.
-    </string>
-    <string name="no_user">No User is selected</string>
+    <string name="user_list_empty">用户列表为空。请添加用户到用户列表。</string>
+    <string name="no_user">没有选中用户</string>
     <string name="no_room">No Room is selected</string>
-    <string name="no_search_results">No results found</string>
-    <string name="no_search_text">Must type text to search</string>
-    <string name="no_wish_text">Must type text for wishlist search</string>
-    <string name="search_error_unspecified">Search Error.</string>
-
+    <string name="no_search_results">未找到结果</string>
+    <string name="no_search_text">必须输入要搜索的文本</string>
+    <string name="no_wish_text">必须输入文本进行心愿单搜索</string>
+    <string name="search_error_unspecified">搜索错误</string>
+    <!--Toasts-->
     <string name="we_are_already_logging_in">We are already logging in</string>
-    <string name="nothing_to_download">Nothing to download</string>
-    <string name="download_is_starting">Download Starting...</string>
-    <string name="directory_is_empty">This directory is empty</string>
-    <string name="nothing_selected">Nothing selected</string>
-    <string name="nothing_selected_extra">
-        "Nothing Selected - Tap to select"
-    </string>
-    <string name="failed_to_connect">Failed to connect</string>
-    <string name="not_recursive_dirs_avaialbe_to_download">
-        Currently only downloading files are implemented, not directories
-    </string>
-    <string name="cannot_download_from_self">
-        Cannot download from yourself
-    </string>
-    <string name="must_type_a_username_to_browse">
-        Must type User to Browse
-    </string>
-    <string name="must_type_a_username_to_message">
-        Must type User to Message
-    </string>
-    <string name="must_type_a_username_to_invite">
-        Must type User to Invite
-    </string>
+    <string name="nothing_to_download">无可下载内容</string>
+    <string name="download_is_starting">开始下载……</string>
+    <string name="directory_is_empty">此目录为空</string>
+    <string name="nothing_selected">未选中任何内容</string>
+    <string name="nothing_selected_extra">"未选择 - 点击进行选择"</string>
+    <string name="failed_to_connect">连接失败</string>
+    <string name="not_recursive_dirs_avaialbe_to_download">Currently only downloading files are implemented, not directories</string>
+    <string name="cannot_download_from_self">Cannot download from yourself</string>
+    <string name="must_type_a_username_to_browse">Must type User to Browse</string>
+    <string name="must_type_a_username_to_message">Must type User to Message</string>
+    <string name="must_type_a_username_to_invite">Must type User to Invite</string>
     <string name="must_type_a_username_to_add">Must type User to Add</string>
     <string name="must_type_ticker_text">Must type ticker text</string>
     <string name="must_type_chatroom_name">Must type a chatroom name</string>
     <string name="must_type_text_to_send">Must type text to send</string>
-    <string name="error">Error</string>
-    <string name="error_">Error:</string>
-    <string name="error_duplicate">Error: Duplicate request detected</string>
-    <string name="error_browse_at_location">
-        Error getting user directories at specified location
-    </string>
-    <string name="error_duplicates">
-        Error: Duplicate Transfers.  If you want to retry a download, hold tap on it in transfers.
-    </string>
-    <string name="room_data_still_loading">
-        Too fast! Still retreiving room data...
-    </string>
-    <string name="must_be_logged_to_browse">
-        Must be logged in to browse a user
-    </string>
-    <string name="must_be_logged_to_get_room_list">
-        Must be logged in to get chatroom list
-    </string>
-    <string name="must_be_logged_to_request_user_info">
-        Must be logged in to request user info
-    </string>
-    <string name="must_be_logged_to_create_room">
-        Must be logged in to create chatroom
-    </string>
-    <string name="must_be_logged_to_add_or_remove_user">
-        Must be logged in to add or remove user
-    </string>
-    <string name="must_be_logged_to_set_ticker">
-        Must be logged in to set ticker
-    </string>
-    <string name="must_be_logged_to_send_message">
-        Must be logged in to send message
-    </string>
-    <string name="must_be_logged_to_toggle_priv_invites">
-        Must be logged in to toggle allow private invites
-    </string>
-    <string name="must_be_logged_in_to_check_privileges">
-        Must be logged in to check privileges
-    </string>
-    <string name="must_be_logged_in_to_get_privileges">
-        Must be logged in to get privileges
-    </string>
+    <string name="error">错误</string>
+    <string name="error_">错误：</string>
+    <string name="error_duplicate">错误：检测到重复请求</string>
+    <string name="error_browse_at_location">Error getting user directories at specified location</string>
+    <string name="error_duplicates">Error: Duplicate Transfers.  If you want to retry a download, hold tap on it in transfers.</string>
+    <string name="room_data_still_loading">Too fast! Still retreiving room data...</string>
+    <string name="must_be_logged_to_browse">Must be logged in to browse a user</string>
+    <string name="must_be_logged_to_get_room_list">Must be logged in to get chatroom list</string>
+    <string name="must_be_logged_to_request_user_info">Must be logged in to request user info</string>
+    <string name="must_be_logged_to_create_room">Must be logged in to create chatroom</string>
+    <string name="must_be_logged_to_add_or_remove_user">Must be logged in to add or remove user</string>
+    <string name="must_be_logged_to_set_ticker">Must be logged in to set ticker</string>
+    <string name="must_be_logged_to_send_message">Must be logged in to send message</string>
+    <string name="must_be_logged_to_toggle_priv_invites">Must be logged in to toggle allow private invites</string>
+    <string name="must_be_logged_in_to_check_privileges">Must be logged in to check privileges</string>
+    <string name="must_be_logged_in_to_get_privileges">Must be logged in to get privileges</string>
     <string name="checking_priv_">Checking privileges...</string>
     <string name="already_added_user_">Already added user: {0}</string>
-    <string name="must_be_logged_to_search">
-        Must log in before searching
-    </string>
-    <string name="create_and_refresh">
-        Created room, now refreshing room list
-    </string>
+    <string name="must_be_logged_to_search">Must log in before searching</string>
+    <string name="create_and_refresh">Created room, now refreshing room list</string>
     <string name="setting_ticker">Setting ticker...</string>
     <string name="failed_to_set_ticker">Failed to set ticker</string>
     <string name="successfully_set_ticker">Successfully set ticker</string>
     <string name="folder_request_timed_out">Folder Request Timed Out</string>
     <string name="folder_request_failed">Folder Request Failed</string>
-    <string name="folder_request_already_have">
-        We already have the complete folder
-    </string>
-    <string name="saved">Saved</string>
-    <string name="no_changes_to_save">No changes to save</string>
-    <string name="request_user_error_empty">Username cannot be empty</string>
-    <string name="temporary_disconnected">
-        We got temporarily disconnected.. reconnecting now
-    </string>
-    <string name="failed_to_undo">Failure to Undo</string>
-    <string name="enabling_listener">Enabling Listener</string>
-    <string name="disabling_listener">Disabling Listener</string>
-    <string name="add_user_title">Add User(s)</string>
-    <string name="ignore_user_title">Ignore User(s)</string>
-
-    <string name="success_setting_shared_dir_fnum_dnum">
-        Successfully set Shared Directory with {0} directories and {1} files.
-    </string>
-    <string name="parsing_files_wait">
-        Parsing Files... this may take several seconds...
-    </string>
-
-    <string name="port_out_of_range">
-        Port number is out of range. Make sure it is between 1024 and 65535.
-    </string>
-    <string name="port_failed_parse">
-        Failed to parse port number. Make sure it is numeric without any special characters.
-    </string>
-
-    <string name="not_sharing">You are not sharing any files</string>
-    <string name="failed_to_parse_shares_post">
-        Your shares were not successfully parsed
-    </string>
-
-    <string name="error_reading_dir">Error reading directory</string>
-    <string name="error_not_a_dir">Error: Not a Directory</string>
-    <string name="successfully_changed_dl_dir">
-        Successfully changed Download Directory to \"{0}\"
-    </string>
-    <string name="error_parsing_files_shared_dir">
-        Error Parsing Files, could not set Shared Directory
-    </string>
-
-    <string name="follow_system">Follow System</string>
-    <string name="always_light">Always Light</string>
-    <string name="always_dark">Always Dark</string>
-
-    <string name="queue_length_">Queue Length</string>
-    <string name="upload_slots_">Free Upload Slots</string>
-    <string name="today">Today</string>
-
-    <string name="pending_">Pending...</string>
-    <string name="failed">Failed</string>
-
-    <string name="must_be_logged_to_drop_private">
-        Must be logged in to drop {0} of private room
-    </string>
-    <string name="failed_to_remove">Failed to remove {0}</string>
-    <string name="successfully_removed">Successfully removed {0}</string>
+    <string name="folder_request_already_have">We already have the complete folder</string>
+    <string name="saved">保存成功</string>
+    <string name="no_changes_to_save">没有更改需要保存</string>
+    <string name="request_user_error_empty">用户名不能为空</string>
+    <string name="temporary_disconnected">我们暂时断开了连接... 立即重新连接</string>
+    <string name="failed_to_undo">撤销失败</string>
+    <string name="enabling_listener">正在启用监听器</string>
+    <string name="disabling_listener">正在禁用监听器</string>
+    <string name="add_user_title">添加用户：</string>
+    <string name="ignore_user_title">忽略用户：</string>
+    <string name="success_setting_shared_dir_fnum_dnum">Successfully set Shared Directory with {0} directories and {1} files.</string>
+    <string name="parsing_files_wait">Parsing Files... this may take several seconds...</string>
+    <string name="port_out_of_range">端口号超出范围。请确保它介于 1024 和 65535 之间。</string>
+    <string name="port_failed_parse">解析端口号失败。请确保它是数字，没有任何特殊字符。</string>
+    <string name="not_sharing">您没有共享任何文件</string>
+    <string name="failed_to_parse_shares_post">Your shares were not successfully parsed</string>
+    <string name="error_reading_dir">读取目录时出错</string>
+    <string name="error_not_a_dir">错误：不是一个目录</string>
+    <string name="successfully_changed_dl_dir">成功将下载目录更改为\"{0}\"</string>
+    <string name="error_parsing_files_shared_dir">Error Parsing Files, could not set Shared Directory</string>
+    <string name="follow_system">跟随系统</string>
+    <string name="always_light">浅色</string>
+    <string name="always_dark">深色</string>
+    <!-- info -->
+    <string name="queue_length_">队列长度： </string>
+    <string name="upload_slots_">Free Upload Slots: </string>
+    <string name="today">今天</string>
+    <string name="pending_">等待中……</string>
+    <string name="failed">失败</string>
+    <!--For someone translating, position {0} to where the words membership or ownership will occur -->
+    <string name="must_be_logged_to_drop_private">Must be logged in to drop {0} of private room</string>
+    <string name="failed_to_remove">无法删除 {0}</string>
+    <string name="successfully_removed">已成功删除 {0}</string>
+    <!--For someone translating, position {0} to where the words membership or ownership will occur and {1} is where the roomanme will occur -->
     <string name="dropping_MEMBERSHIP_of_ROOMNAME">Dropping {0} of {1}</string>
-    <string name="ownership">ownership</string>
+    <string name="ownership">所有权</string>
     <string name="membership">membership</string>
-
-    <string name="startup_room_off">
-        {0} is no longer set to join on startup
-    </string>
+    <!--For someone translating, position {0} is a placeholder for the roomname-->
+    <string name="startup_room_off">{0} is no longer set to join on startup</string>
     <string name="startup_room_on">{0} is now set to join on startup</string>
     <string name="notif_room_off">Notifications turned off for: {0}</string>
     <string name="notif_room_on">Notifications turned on for: {0}</string>
-    <string name="new_room_message_received">New message in room {0}</string>
+    <string name="new_room_message_received">房间 {0} 中有新消息</string>
     <string name="removing_mod">Removing User as Moderator in {0}</string>
     <string name="adding_mod">Adding User as Moderator in {0}</string>
-    <string name="inviting_user_to">Inviting User to {0}</string>
+    <string name="inviting_user_to">邀请用户到 {0}</string>
     <string name="removing_user_from">Removing User from {0}</string>
     <string name="leaving_room">Leaving room: {0}</string>
     <string name="adding_user_">Adding User: {0}</string>
     <string name="error_adding_user_timeout">Error adding user: timeout</string>
-    <string name="error_adding_user_not_found">
-        Error adding user: user not found
-    </string>
-
+    <string name="error_adding_user_not_found">Error adding user: user not found</string>
+    <!--For someone translating, position {0} is a placeholder for the allowed/denied-->
     <string name="setting_priv_invites">Setting Private Invites to: {0}</string>
-    <string name="failed_setting_priv_invites">
-        Failed to set Allow Private Invites to: {0}
-    </string>
-    <string name="network_error_setting_listener">
-        Network error setting listener to {0}
-    </string>
-    <string name="network_error_setting_listener_port">
-        Network error changing listener to {0}
-    </string>
-    <string name="allowed">Allowed</string>
-    <string name="denied">Denied</string>
-
-    <string name="get_folder">Get Folder</string>
-
-    <string name="success_added_user">Successfully Added User</string>
-
+    <string name="failed_setting_priv_invites">Failed to set Allow Private Invites to: {0}</string>
+    <string name="network_error_setting_listener">Network error setting listener to {0}</string>
+    <string name="network_error_setting_listener_port">Network error changing listener to {0}</string>
+    <string name="allowed">已允许</string>
+    <string name="denied">已拒绝</string>
+    <string name="get_folder">获取目录</string>
+    <string name="success_added_user">成功添加用户</string>
     <string name="success_added_mod">Successfully Added Moderator</string>
     <string name="failed_added_mod">Failed to Add Moderator</string>
-    <string name="success_invite_user">Successfully Invited User</string>
-    <string name="failed_invite_user">Failed to Invite User</string>
+    <string name="success_invite_user">已成功邀请用户</string>
+    <string name="failed_invite_user">邀请用户失败</string>
     <string name="success_remove_mod">Successfully Removed Moderator</string>
     <string name="failed_remove_mod">Failed to Remove Moderator</string>
-    <string name="success_removed_user">Successfully Removed User</string>
-    <string name="failed_removed_user">Failed to Remove User</string>
-
-    <string name="wishlist_tab_error">
-        Desired Wishlist tab no longer exists
-    </string>
-    <string name="perform_search_first">
-        Must perform a search first to add to wishlist
-    </string>
-    <string name="added_to_wishlist">
-        Added search query \"{0}\" to wishlist
-    </string>
-    <string name="wishlist_tab_target">
-        Cannot change target for wishlist search
-    </string>
+    <string name="success_removed_user">成功移除用户</string>
+    <string name="failed_removed_user">删除用户失败</string>
+    <string name="wishlist_tab_error">Desired Wishlist tab no longer exists</string>
+    <string name="perform_search_first">Must perform a search first to add to wishlist</string>
+    <string name="added_to_wishlist">Added search query \"{0}\" to wishlist</string>
+    <string name="wishlist_tab_target">Cannot change target for wishlist search</string>
     <string name="search_tab_error">Desired Search tab no longer exists</string>
-    <string name="error_sharing">
-        Error Parsing Files, could not set Shared Directory
-    </string>
-    <string name="success_sharing">Sharing successfully set up</string>
-    <string name="sharing_off">Sharing is off</string>
+    <string name="error_sharing">Error Parsing Files, could not set Shared Directory</string>
+    <string name="success_sharing">共享设置成功</string>
+    <string name="sharing_off">共享已关闭</string>
     <string name="sharing_currently_parsing">Currently parsing files...</string>
-    <string name="sharing_disabled_failure_parsing">
-        Sharing disabled. Failed to parse shares.
-    </string>
-    <string name="sharing_disabled_share_not_set">
-        Sharing disabled. Share Directory is not set.
-    </string>
-    <string name="sharing_disabled_error">Error: Sharing disabled.</string>
-
+    <string name="sharing_disabled_failure_parsing">Sharing disabled. Failed to parse shares.</string>
+    <string name="sharing_disabled_share_not_set">共享已禁用。共享目录未设置。</string>
+    <string name="sharing_disabled_error">错误：共享已禁用。</string>
     <string name="change_target">Change Target</string>
     <string name="change_result_style">Change Result Style</string>
-    <string name="add_to_wish">Add to Wishlist</string>
-    <string name="remove_from_ignored">Remove from Ignored</string>
-
-    <string name="failed_to_send_message">Failed to send message</string>
-    <string name="empty_message_error">Cannot send an empty message</string>
-
-    <string name="browse_user_contacting">
-        Contacting user for directory list. Will appear in browse tab when complete.
-    </string>
-    <string name="browse_user_timeout">User directory request timed out</string>
-    <string name="browse_user_nodirectconnection">
-        User directory request failed - Cannot establish direct connection to peer
-    </string>
-    <string name="browse_user_wefailedtoparse">
-        Failed to parse the browse response
-    </string>
+    <string name="add_to_wish">添加到心愿单</string>
+    <string name="remove_from_ignored">从忽略中删除</string>
+    <string name="failed_to_send_message">消息发送失败</string>
+    <string name="empty_message_error">发送消息不能为空</string>
+    <string name="browse_user_contacting">Contacting user for directory list. Will appear in browse tab when complete.</string>
+    <string name="browse_user_timeout">用户目录请求超时</string>
+    <string name="browse_user_nodirectconnection">用户目录请求失败 - 无法与对等点建立直接连接</string>
+    <string name="browse_user_wefailedtoparse">无法解析浏览响应</string>
     <string name="browse_response_received">Browse response received</string>
-    <string name="browse_none">User is not sharing any directories</string>
-    <string name="browse_onlylocked">
-        User is only sharing locked directories
-    </string>
-    <string name="kicked_due_to_other_client">
-        Disconnecting... is another client using this username?
-    </string>
-    <string name="port_already_in_use">
-        Failed to set up listener. Port likely already in use.
-    </string>
-    <string name="dns_failed">
-        DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.
-    </string>
-    <string name="bad_user_pass">Bad username or password</string>
-    <string name="invalid_username">Invalid Username</string>
-    <string name="invalid_password">Invalid Password</string>
-    <string name="user_too_long">Username must be under 30 characters</string>
-    <string name="user_invalid_char">
-        Username cannot contain special characters
-    </string>
-    <string name="network_unreachable">Network is unreachable</string>
-    <string name="cannot_login">Cannot Login</string>
-    <string name="no_empty_user_pass">
-        Username and Password cannot be empty
-    </string>
-    <string name="dns_failed_2">
-        Failed to resolve soulseek server ip address.
-    </string>
-
+    <string name="browse_none">用户未共享任何目录</string>
+    <string name="browse_onlylocked">User is only sharing locked directories</string>
+    <string name="kicked_due_to_other_client">Disconnecting... is another client using this username?</string>
+    <string name="port_already_in_use">无法设置监听器。端口可能已在使用。</string>
+    <string name="dns_failed">DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.</string>
+    <string name="bad_user_pass">用户名或密码错误</string>
+    <string name="invalid_username">无效的用户名</string>
+    <string name="invalid_password">无效的密码</string>
+    <string name="user_too_long">用户名必须小于30个字符</string>
+    <string name="user_invalid_char">用户名不能包含特殊字符</string>
+    <string name="network_unreachable">网络无法访问</string>
+    <string name="cannot_login">无法登录</string>
+    <string name="no_empty_user_pass">用户名和密码不能为空</string>
+    <string name="dns_failed_2">Failed to resolve soulseek server ip address.</string>
+    <!--In this case the placeholder {0} is for the username-->
     <string name="added_to_ignore">Added user \"{0}\" to Ignore List</string>
-    <string name="already_added_to_ignore">
-        User \"{0}\" already added to Ignore List
-    </string>
-    <string name="failed_to_establish_connection_to_peer">
-        Failed to establish connection to {0}
-    </string>
+    <string name="already_added_to_ignore">用户 \"{0}\" 已经在忽略列表中了</string>
+    <string name="failed_to_establish_connection_to_peer">Failed to establish connection to {0}</string>
     <string name="user_info_received">User Info from {0} received</string>
-    <string name="user_info_failed_conn">
-        Failed to get info for user: {0}.  Could not establish connection.
-    </string>
-    <string name="user_info_failed_offline">
-        Failed to get info for user: {0}.  User is offline.
-    </string>
-    <string name="user_info_failed_timeout">
-        Failed to get info for user: {0}.  Connection timed out.
-    </string>
-    <string name="deleted_message_history_with">
-        Deleted Message History with {0}
-    </string>
-    <string name="welcome">Welcome, {0}</string>
-
-    <string name="failed_to_establish_direct_or_indirect">
-        Failed to establish a direct or indirect message connection to user
-    </string>
-    <string name="remote_conn_closed">
-        Read Error: Remote Connection Closed
-    </string>
-    <string name="network_down">Network Subsystem is Down</string>
-    <string name="reported_as_failed">
-        Error: Transfer reported as failed by the uploader
-    </string>
-
-    <string name="error_no_space">Error: No space left on device.</string>
-    <string name="error_unspecified">
-        The task did not complete due to unhandled exception
-    </string>
-
+    <string name="user_info_failed_conn">Failed to get info for user: {0}.  Could not establish connection.</string>
+    <string name="user_info_failed_offline">Failed to get info for user: {0}.  User is offline.</string>
+    <string name="user_info_failed_timeout">Failed to get info for user: {0}.  Connection timed out.</string>
+    <string name="deleted_message_history_with">Deleted Message History with {0}</string>
+    <string name="welcome">{0}，欢迎你</string>
+    <string name="failed_to_establish_direct_or_indirect">Failed to establish a direct or indirect message connection to user</string>
+    <string name="remote_conn_closed">Read Error: Remote Connection Closed</string>
+    <string name="network_down">网络子系统已经关闭</string>
+    <string name="reported_as_failed">Error: Transfer reported as failed by the uploader</string>
+    <string name="error_no_space">错误：设备上没有剩余空间。</string>
+    <string name="error_unspecified">The task did not complete due to unhandled exception</string>
     <string name="timeout_peer">Timout talking to peer</string>
     <string name="transfer_rejected">Transfer Request Rejected</string>
-    <string name="transfer_rejected_file_not_shared">
-        Transfer Request Rejected. Reason: File Not Shared
-    </string>
-
-    <string name="delete_messages">Delete Messages</string>
-    <string name="delete_all_messages">Delete All Messages</string>
-    <string name="deleted_all_messages">Deleted all message history</string>
-    <string name="deleted_all_no_messages">No messages to delete!</string>
-
-    <string name="public_room">Public</string>
-    <string name="private_room">Private</string>
+    <string name="transfer_rejected_file_not_shared">Transfer Request Rejected. Reason: File Not Shared</string>
+    <string name="delete_messages">删除消息</string>
+    <string name="delete_all_messages">删除所有消息</string>
+    <string name="deleted_all_messages">删除所有消息历史记录</string>
+    <string name="deleted_all_no_messages">没有要删除的消息！</string>
+    <!--Room Categories-->
+    <string name="public_room">公开</string>
+    <string name="private_room">私有的</string>
     <string name="owned">Owned</string>
-    <string name="joined">Joined</string>
-
-    <string name="owner">Owner</string>
+    <string name="joined">已加入</string>
+    <string name="owner">所有者</string>
     <string name="mod">Mod</string>
-
-    <string name="user_">User:</string>
-    <string name="set_ticker">Set Ticker</string>
+    <!--Title-->
+    <string name="user_">用户：</string>
+    <string name="browse_user_files">浏览用户：</string>
+    <string name="set_ticker">Set Ticker:</string>
     <string name="setticker">Set Ticker</string>
-    <string name="chatrooms">Chatrooms</string>
-    <string name="create_chatroom_">Create Chatroom</string>
+    <string name="chatrooms">聊天室</string>
+    <string name="create_chatroom_">Create Chatroom:</string>
     <string name="edit_info">Edit Info</string>
-
+    <!--Dialog Action-->
     <string name="okay">OK</string>
-    <string name="undo">Undo</string>
+    <string name="undo">撤销</string>
     <string name="go">Go</string>
-    <string name="add">Add</string>
-    <string name="view">View</string>
-    <string name="send">Send</string>
-    <string name="invite">Invite</string>
-    <string name="cancel">Cancel</string>
-    <string name="close">Close</string>
+    <string name="add">添加</string>
+    <string name="view">查看</string>
+    <string name="send">发送</string>
+    <string name="invite">邀请</string>
+    <string name="cancel">取消</string>
+    <string name="close">关闭</string>
     <string name="report">Report</string>
-    <string name="create_chatroom">Create Room</string>
+    <string name="create_chatroom">创建房间</string>
     <string name="refresh_room_list">Refresh Room List</string>
-
-    <string name="away">Away</string>
-    <string name="online">Online</string>
-    <string name="offline">Offline</string>
-
-    <string name="auto_join">Auto Join</string>
-    <string name="notification">Notifications</string>
-    <string name="copy_text">Copy Text</string>
-    <string name="ignore_user">Ignore User</string>
-    <string name="remove_user">Remove User</string>
+    <string name="away">离开</string>
+    <string name="online">在线</string>
+    <string name="offline">离线</string>
+    <!--Menu Items-->
+    <string name="auto_join_on">自动加入 [开]</string>
+    <string name="auto_join_off">自动加入 [关]</string>
+    <string name="notification_on">通知 [开]</string>
+    <string name="notification_off">通知 [关]</string>
+    <string name="copy_text">复制文本</string>
+    <string name="ignore_user">屏蔽用户</string>
+    <string name="remove_user">移除用户</string>
     <string name="remove_mod_priv">Remove Moderator Privilege</string>
     <string name="add_mod_priv">Add Moderator Privilege</string>
     <string name="browse_user">Browse User</string>
     <string name="browse_at_location">Browse At Location</string>
     <string name="search_user_files">Search User\'s Files</string>
     <string name="add_to_user_list">Add to User List</string>
-    <string name="msg_user">Message User</string>
-    <string name="copy_image">Copy Image</string>
-    <string name="save_image">Save Image</string>
-
-    <string name="success_save">User picture successfully saved.</string>
-
-    <string name="select_folder">Select folder</string>
-    <string name="current_location_">Current location:</string>
-
+    <string name="msg_user">向用户发送消息</string>
+    <string name="copy_image">复制图像</string>
+    <string name="save_image">保存图像</string>
+    <string name="success_save">用户图片保存成功。</string>
+    <!--Internal File Selector-->
+    <string name="select_folder">选择文件夹</string>
+    <string name="current_location_">当前位置：</string>
+    <!--Upnp-->
     <string name="upnp_off">UPnP is off</string>
     <string name="listener_off">Listener is off</string>
-    <string name="upnp_not_ran">UPnP has not been ran</string>
-    <string name="upnp_currently_running">UPnP is currently running</string>
-    <string name="no_upnp_devices_found">
-        No UPnP compatible devices found
-    </string>
-    <string name="upnp_wifi_only">UPnP is for wifi only</string>
-    <string name="upnp_no_wifi_conn">No wifi connection</string>
+    <string name="upnp_not_ran">UPnP 未运行</string>
+    <string name="upnp_currently_running">UPnP 正在运行</string>
+    <string name="no_upnp_devices_found">未找到兼容的 UPnP 设备</string>
+    <string name="upnp_wifi_only">UPnP 仅适用于 WiFi 网络</string>
+    <string name="upnp_no_wifi_conn">没有 WiFi 连接</string>
     <string name="failed_to_set">Failed to set mapping on UPnP device</string>
     <string name="upnp_success">UPnP successfully forwarded port</string>
     <string name="upnp_last_success">UPnP was last ran successfully</string>
-    <string name="attempting_to_find_and_open">
-        Attempting to find and open port via UPnP
-    </string>
+    <string name="attempting_to_find_and_open">Attempting to find and open port via UPnP</string>
     <string name="upnp_search_finished">UPnP search finished</string>
-
-
-    <string name="completed">Completed</string>
-    <string name="in_progress">In Progress</string>
-    <string name="not_started">Not Started</string>
-    <string name="paused">Paused</string>
-    <string name="in_queue">In Queue</string>
-    <string name="unknown">Unknown</string>
+    <!--Sharing-->
+    <!--Transfer States-->
+    <string name="completed">已完成</string>
+    <string name="in_progress">进行中</string>
+    <string name="not_started">未开始</string>
+    <string name="paused">已暂停</string>
+    <string name="in_queue">队列中</string>
+    <string name="unknown">未知</string>
     <string name="position_">Position: {0}</string>
-
-    <string name="retry_dl">Retry Download</string>
-    <string name="clear_from_list">Clear from List</string>
-    <string name="cancel_and_clear">Cancel Download and Clear</string>
-    <string name="resume_dl">Resume Download</string>
-    <string name="refresh_queue_pos">Refresh Queue Position</string>
-    <string name="play_file">Open File</string>
-    <string name="chosen_transfer_doesnt_exist">
-        Chosen Transfer Item does not exist anymore.
-    </string>
+    <string name="retry_dl">重试下载</string>
+    <string name="clear_from_list">从列表中删除</string>
+    <string name="cancel_and_clear">取消下载并删除</string>
+    <string name="resume_dl">继续下载</string>
+    <string name="refresh_queue_pos">刷新队列位置</string>
+    <string name="play_file">打开文件</string>
+    <string name="chosen_transfer_doesnt_exist">所选的传输项不存在。</string>
     <string name="position_is_still_">Position in Queue is still: {0}</string>
-    <string name="failed_to_play">Failed to play file in default player</string>
-
-    <string name="download_in_progress">Downloads in Progress</string>
-    <string name="transfers_in_progress">Transfers in progress...</string>
-    <string name="seeker_running">Seeker is Running</string>
-    <string name="seeker_running_content">
-        Seeker is currently running in background
-    </string>
-
+    <string name="failed_to_play">默认播放器播放文件失败</string>
+    <!--Notification-->
+    <string name="download_in_progress">正在下载</string>
+    <string name="transfers_in_progress">正在传输……</string>
+    <string name="seeker_running">Seeker正在运行中</string>
+    <string name="seeker_running_content">Seeker正在后台运行</string>
+    <!--Privileges-->
     <string name="privileges">Privileges</string>
-    <string name="yes">Yes</string>
-    <string name="seconds_left">{0} seconds</string>
-    <string name="second_left">{0} second</string>
-    <string name="minutes_left">{0} minutes</string>
-    <string name="minute_left">{0} minute</string>
-    <string name="hours_left">{0} hours</string>
-    <string name="hour_left">{0} hour</string>
-    <string name="days_left">{0} days</string>
-    <string name="day_left">{0} day</string>
+    <string name="yes">是</string>
+    <string name="seconds_left">{0} 秒</string>
+    <string name="second_left">{0} 秒</string>
+    <string name="minutes_left">{0} 分钟</string>
+    <string name="minute_left">{0} 分钟</string>
+    <string name="hours_left">{0} 小时</string>
+    <string name="hour_left">{0} 小时</string>
+    <string name="days_left">{0} 天</string>
+    <string name="day_left">{0} 天</string>
     <string name="priv_failed">Failed to get privileges</string>
-    <string name="timeout">Timout</string>
-    <string name="priv_success">Successfully updated privileges</string>
-    <string name="status">Status</string>
-
-    <string name="view_users">View Users</string>
+    <string name="timeout">已超时</string>
+    <string name="priv_success">权限更新成功</string>
+    <string name="status">状态</string>
+    <string name="view_users">查看用户</string>
     <string name="view_self">View Self</string>
     <string name="view_all_tickers">View all Tickers</string>
-
-    <string name="resume_all">Resume All</string>
-    <string name="pause_all">Pause All</string>
-    <string name="retry_all_failed">Retry All Failed</string>
-    <string name="cancel_and_clear_all">Cancel and Clear All</string>
-    <string name="clear_all_complete">Clear All Complete</string>
-
-    <string name="file">file</string>
-    <string name="files">files</string>
+    <string name="resume_all">全部开始</string>
+    <string name="pause_all">暂停所有</string>
+    <string name="retry_all_failed">重试所有失败</string>
+    <string name="cancel_and_clear_all">取消并清除所有</string>
+    <string name="clear_all_complete">清除已完成的下载</string>
+    <string name="file">文件</string>
+    <string name="files">文件</string>
     <string name="from_directory">From directory</string>
     <string name="from_directories">From directories</string>
-    <string name="upload_f_string">Uploaded {0} {1} to user: {2}</string>
-
-    <string name="about_title">About</string>
-
-    <string name="give_privileges">Give Privileges</string>
-    <string name="error_days_entered_no_parse">
-        Days entered must be a whole number.
-    </string>
-    <string name="error_days_entered_not_positive">
-        Days entered must be a positive number.
-    </string>
-    <string name="error_insufficient_days">
-        You do not have {0} days to give.
-    </string>
+    <string name="upload_f_string">已向用户 {2} 上传 {0} {1}</string>
+    <string name="about_title">关于</string>
+    <string name="give_privileges">授予权限</string>
+    <string name="error_days_entered_no_parse">输入的天数必须是整数。</string>
+    <string name="error_days_entered_not_positive">输入的天数必须是正数。</string>
+    <string name="error_insufficient_days">You do not have {0} days to give.</string>
     <string name="give_to_">Give to {0}</string>
     <string name="error_give_priv">Give Privileges Failed</string>
-    <string name="give_priv_success">
-        Successly gave {0} days of privileges to {1}.
-    </string>
-    <string name="sending__">Sending...</string>
+    <string name="give_priv_success">Successly gave {0} days of privileges to {1}.</string>
+    <string name="sending__">发送中……</string>
     <string name="give_hint"># of days</string>
+    <string name="type_notes_here">type notes about user here</string>
     <string name="edit_note">Edit Note</string>
     <string name="add_note">Add Note</string>
     <string name="note_title">{0}\'s Note</string>
     <string name="more_options">More Options</string>
     <string name="remove_from_user_list">Remove from User List</string>
-
     <string name="filter_is_on">Filter is on</string>
-    <string name="filter_is_on_body">
-        Would you like to download the full folder or just filtered items?
-    </string>
+    <string name="filter_is_on_body">Would you like to download the full folder or just filtered items?</string>
     <string name="all">All</string>
     <string name="just_filtered">Just Filtered</string>
-
     <string name="item_total_singular">{0} item total</string>
     <string name="item_total_plural">{0} items total</string>
-
-    <string name="subfolders_warning">
-        This folder contains subfolders, would you like to download all files in those subfolders as well ({0}) or only the files in the current folder ({1})?
-    </string>
-
-    <string name="subfolders_warning_queue_paused">
-        This folder contains subfolders, would you like to queue all files in those subfolders as well ({0}) or only the files in the current folder ({1})?
-    </string>
-
+    <string name="subfolders_warning">This folder contains subfolders, would you like to download all files in those subfolders as well ({0}) or only the files in the current folder ({1})?</string>
+    <string name="subfolders_warning_queue_paused">This folder contains subfolders, would you like to queue all files in those subfolders as well ({0}) or only the files in the current folder ({1})?</string>
     <string name="current_folder_only">Current Folder Only</string>
-    <string name="must_be_logged_in_to_give_privileges">
-        Must be logged in to give privileges
-    </string>
-
-    <string name="about_body">
-        <![CDATA[Seeker is a free and open source Soulseek client for Android.  It will never have ads or paid features.
+    <string name="must_be_logged_in_to_give_privileges">Must be logged in to give privileges</string>
+    <string name="about_body"><![CDATA[Seeker is a free and open source Soulseek client for Android.  It will never have ads or paid features.
 <br><br>Please help translate Seeker <a href="https://crwd.in/seeker">here</a>.
 <br><br>Source code is <a href="https://github.com/jackBonadies/SeekerAndroid">here</a>.
-<br><br>Version: {0}.]]>
-    </string>
-    <string name="force_filesystem_message">
-        <![CDATA[The standard way of requesting folder access does not always persist permissions.  If you find Seeker reprompting for Download Folder or Shared Folder access, this button will request the old style permissions which will always persist.
-<br><br>This function requires the Fdroid IzzyDroid version of Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Download Here</a>). The Google Play Store does not allow applications to request this permission.]]>
-    </string>
-    <string name="must_be_logged_in_to_get_dir_contents">
-        Must be logged in to get directory contents
-    </string>
+<br><br>Version: {0}.]]></string>
+    <string name="force_filesystem_message"><![CDATA[The standard way of requesting folder access does not always persist permissions.  If you find Seeker reprompting for Download Folder or Shared Folder access, this button will request the old style permissions which will always persist.
+<br><br>This function requires the Fdroid IzzyDroid version of Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Download Here</a>). The Google Play Store does not allow applications to request this permission.]]></string>
+    <string name="must_be_logged_in_to_get_dir_contents">Must be logged in to get directory contents</string>
     <string name="note">Note</string>
-    <string name="removed_user_from_ignored_list">
-        Removed user \"{0}\" from Ignore List
-    </string>
-
+    <string name="removed_user_from_ignored_list">Removed user \"{0}\" from Ignore List</string>
     <string name="removed_user">Removed user: \"{0}\"</string>
-
-    <string name="successfully_changed_incomplete_dir">
-        Successfully changed Incomplete Directory to \"{0}\"
-    </string>
-    <string name="no_uploads_yet">
-        No uploads currently, as you upload files they will appear here
-    </string>
-    <string name="no_uploads_yet_not_sharing">
-        No uploads currently, you are not sharing any files
-    </string>
-    <string name="no_uploads_yet_failed_to_set_up_shared_files">
-        No uploads currently, failed to set up shares
-    </string>
-
+    <string name="successfully_changed_incomplete_dir">Successfully changed Incomplete Directory to \"{0}\"</string>
+    <string name="no_uploads_yet">No uploads currently, as you upload files they will appear here</string>
+    <string name="no_uploads_yet_not_sharing">No uploads currently, you are not sharing any files</string>
+    <string name="no_uploads_yet_failed_to_set_up_shared_files">No uploads currently, failed to set up shares</string>
     <string name="auto_clear_complete">Auto Clear Complete Downloads</string>
-    <string name="auto_clear_complete_uploads">
-        Auto Clear Complete Uploads
-    </string>
-
+    <string name="auto_clear_complete_uploads">Auto Clear Complete Uploads</string>
     <string name="download_remaining">{0} download remaining</string>
     <string name="downloads_remaining">{0} downloads remaining</string>
-
     <string name="upload_remaining">{0} upload remaining</string>
     <string name="uploads_remaining">{0} uploads remaining</string>
     <string name="uploads_in_progress">Uploads in Progress</string>
-    <string name="search_tabs_bold">
-        <b>Search Tabs</b>
-    </string>
-    <string name="shutdown">Shutdown</string>
-
+    <string name="search_tabs_bold"><b>Search Tabs</b></string>
+    <string name="shutdown">关闭</string>
     <string name="set_online_alert">Set Online Alert</string>
-    <string name="remove_online_alert">Remove Online Alert</string>
-    <string name="user_X_is_now_online">User {0} is now online</string>
-
+    <string name="remove_online_alert">删除在线提醒</string>
+    <string name="user_X_is_now_online">用户 {0} 已上线</string>
     <string name="publicRoomCreation">Requesting public room creation</string>
-
-    <string name="failed_user_offline">Failed - User Offline</string>
-    <string name="failed_denied">Failed - Denied</string>
-    <string name="re_requesting">Re-Requesting</string>
-
-    <string name="concurrent_dialog">
-        Limit number of concurrent downloads.  ex. if max concurrent is 1 and you download 2 folders from different users, the second folder will begin once the first is complete.  This can be useful for those with low bandwidth, to not tie up the upload queues of other users and to completed more recent downloads faster.
-    </string>
-
-    <string name="clear_incomplete_dialog">
-        This will clear the no longer needed files in the incomplete folder.  Seeker tries to do this by default, but sometimes it will fail and so this button can be used to free up files / space.
-    </string>
-
-    <string name="diagnostics_more_info">
-        This will save diagnostic information to a text file named \"seeker_diagnostics.txt\" which will be located in the root of the selected download folder.
-		\n\nThis can be useful to send to the dev for the purposes of troubleshooting issues.  If the issues are of a networking nature, one may have to restart the app after turning this option on for full results.
-    </string>
-
-    <string name="folder_X_from_user_Y_finished">
-        {0} from {1} successfully completed.
-    </string>
-
-    <string name="sort_results_by">Sort By</string>
-
+    <string name="failed_user_offline">失败 - 用户已离线</string>
+    <string name="failed_denied">失败 - 被拒绝</string>
+    <string name="re_requesting">正在重新请求</string>
+    <string name="concurrent_dialog">Limit number of concurrent downloads.  ex. if max concurrent is 1 and you download 2 folders from different users, the second folder will begin once the first is complete.  This can be useful for those with low bandwidth, to not tie up the upload queues of other users and to completed more recent downloads faster.</string>
+    <string name="clear_incomplete_dialog">This will clear the no longer needed files in the incomplete folder.  Seeker tries to do this by default, but sometimes it will fail and so this button can be used to free up files / space.</string>
+    <string name="diagnostics_more_info">This will save diagnostic information to a text file named \"seeker_diagnostics.txt\" which will be located in the root of the selected download folder.
+		\n\nThis can be useful to send to the dev for the purposes of troubleshooting issues.  If the issues are of a networking nature, one may have to restart the app after turning this option on for full results.</string>
+    <string name="folder_X_from_user_Y_finished">{0} from {1} successfully completed.</string>
+    <string name="sort_results_by">排序</string>
+    <string name="sort_results_by_">排序方式：</string>
     <string name="next">Next</string>
     <string name="prev">Prev</string>
-    <string name="finish">Finish</string>
-
-    <string name="Uploads">Uploads</string>
-    <string name="Downloads">Downloads</string>
+    <string name="finish">完成</string>
+    <string name="Uploads">上传</string>
+    <string name="Downloads">下载</string>
     <string name="You">You</string>
-
-    <string name="sendmessage_">Send Message...</string>
-
-    <string name="Availability">Availability</string>
-    <string name="Speed">Speed</string>
-    <string name="FolderName">Folder Name</string>
-    <string name="SetAsDefault">Set as Default</string>
+    <string name="sendmessage_">发送消息……</string>
+    <string name="Availability">可用性</string>
+    <string name="Speed">速度</string>
+    <string name="FolderName">目录名</string>
+    <string name="SetAsDefault">设为默认</string>
     <string name="Change">Change</string>
     <string name="Get">Get</string>
-    <string name="Check">Check</string>
-    <string name="Keywords">Keywords</string>
+    <string name="Check">检查</string>
+    <string name="Keywords">关键词</string>
     <string name="Configure">Configure</string>
-
     <string name="ViewErrorOptions">View Error Options</string>
     <string name="ViewFolderOptions">View Folder Options</string>
-    <string name="Remove">Remove</string>
-    <string name="Reselect">Reselect</string>
-    <string name="RemoveFolder">Remove Folder</string>
-    <string name="FolderError">Folder Error</string>
-    <string name="ErrorForFolder">Error for folder:</string>
-
-    <string name="AreYouSureClearAllDirectories">
-        Are you sure you want to clear all {0} directories from list?
-    </string>
-    <string name="ErrorDownloadDirNotProperlySet">
-        Error: The Download Directory is not properly set.
-    </string>
-
-    <string name="CopySelectedURLs">Copy Selected URLs</string>
-    <string name="CopySelectedURL">Copy Selected URL</string>
-    <string name="CopyURL">Copy URL</string>
-    <string name="CopyFolderURL">Copy Folder URL</string>
-    <string name="LinkCopied">Link Copied</string>
-    <string name="LinksCopied">Links Copied</string>
+    <string name="Remove">删除</string>
+    <string name="Reselect">重新选择</string>
+    <string name="RemoveFolder">删除文件夹</string>
+    <string name="FolderError">文件夹错误</string>
+    <string name="ErrorForFolder">文件夹错误： </string>
+    <string name="AreYouSureClearAllDirectories">Are you sure you want to clear all {0} directories from list?</string>
+    <string name="ErrorDownloadDirNotProperlySet">Error: The Download Directory is not properly set.</string>
+    <string name="CopySelectedURLs">复制选中的链接</string>
+    <string name="CopySelectedURL">复制选中的链接</string>
+    <string name="CopyURL">复制链接</string>
+    <string name="CopyFolderURL">复制文件夹地址</string>
+    <string name="LinkCopied">链接复制成功</string>
+    <string name="LinksCopied">复制链接成功</string>
     <string name="ShowFolderInfo">Show Folder Info</string>
-
     <string name="NothingToCopy">Nothing to Copy</string>
-    <string name="ThisFolderContainsSubfolders">
-        This Folder contains Subfolders
-    </string>
-    <string name="QueuedForDownload">Queued for Download</string>
+    <string name="ThisFolderContainsSubfolders">此文件夹包含子文件夹</string>
+    <string name="QueuedForDownload">等待下载</string>
     <string name="QueueFolderAsPaused">Queued Folder as Paused</string>
-
-    <string name="Length">Length</string>
-
+    <!--meaning duration of song / songs-->
+    <string name="Length">长度</string>
     <string name="NumFiles">Num Files</string>
     <string name="NumSubfolders">Num Subfolders</string>
-
     <string name="HideTickerView">Hide Ticker View</string>
     <string name="ShowTickerView">Show Ticker View</string>
     <string name="HideStatusView">Hide Status View</string>
     <string name="ShowStatusView">Show Status View</string>
-
-    <string name="theUserJoined">joined</string>
+    <string name="theUserJoined">已加入</string>
     <string name="theUserLeft">left</string>
     <string name="theUserWentAway">went away</string>
     <string name="theUserCameBack">came back</string>
-
-    <string name="messageWillSendOnReConnect">
-        Message will send on connection re-establishment
-    </string>
-
-    <string name="SortUsersBy">Sort Users By</string>
-    <string name="FilterUsers">Filter Users...</string>
-
-    <string name="Total_">Total:</string>
-
-    <string name="CannotBrowseUsernameOffline">
-        Cannot browse {0}, user is offline.
-    </string>
-    <string name="FailedToBrowseUsernameUnspecifiedError">
-        Failed to browse {0} due to unspecified error.
-    </string>
-    <string name="BrowseOnlyEmptyDir">
-        User, {0}, is sharing only an empty directory.
-    </string>
-
-    <string name="DownloadIsQueued">Download is Queued</string>
-
-    <string name="GetFolderDoesntWorkForLockedShares">
-        Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.
-    </string>
-    <string name="ImportWizard">Import Wizard</string>
-    <string name="Import">Import</string>
-    <string name="SuccessfullyParsed">
-        Successfully Parsed! Tap Next to Proceed
-    </string>
-    <string name="FailedToParseContactDev">
-        Failed to Parse File. Please ensure file is valid. Contact developer for more help.
-    </string>
-    <string name="FailedToParseReasonContactDev">
-        Failed to Parse File. {0}. Contact developer for more help.
-    </string>
-
+    <string name="messageWillSendOnReConnect">Message will send on connection re-establishment</string>
+    <string name="SortUsersBy">排序用户</string>
+    <string name="FilterUsers">筛选用户……</string>
+    <string name="Total_">总计：</string>
+    <string name="CannotBrowseUsernameOffline">Cannot browse {0}, user is offline.</string>
+    <string name="FailedToBrowseUsernameUnspecifiedError">Failed to browse {0} due to unspecified error.</string>
+    <string name="BrowseOnlyEmptyDir">User, {0}, is sharing only an empty directory.</string>
+    <string name="DownloadIsQueued">已排队下载</string>
+    <string name="GetFolderDoesntWorkForLockedShares">Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.</string>
+    <string name="ImportWizard">导入向导</string>
+    <string name="Import">导入</string>
+    <string name="SuccessfullyParsed">Successfully Parsed! Tap Next to Proceed</string>
+    <string name="FailedToParseContactDev">Failed to Parse File. Please ensure file is valid. Contact developer for more help.</string>
+    <string name="FailedToParseReasonContactDev">Failed to Parse File. {0}. Contact developer for more help.</string>
     <string name="NoSuitableFileManager">No suitable file manager found</string>
-    <string name="SuccessfullyImported">
-        Successfully imported client data
-    </string>
-
-    <string name="SelectUserNotes">
-        Select the following user notes to add
-    </string>
-    <string name="FolderFinishedDownloading">
-        Folder Finished Downloading
-    </string>
-    <string name="FinishedDownloading">finished downloading</string>
-    <string name="PermissionsIssueShared">
-        Permissions Issue opening Shared Folder.  Please go into settings and reselect Shared Folder.
-    </string>
-    <string name="SharedFolderIssuesAllFailed">
-        Issue accessing shared folders. Tap folders for more info.
-    </string>
-
-    <string name="UserXIsOffline">User {0} is offline</string>
-    <string name="CannotConnectUserX">Cannot connect to user {0}</string>
-    <string name="TimeoutQueueUserX">
-        Timeout getting queue position from {0}
-    </string>
-
-    <string name="PermissionErrorShared">
-        Permission Error, cannot write (Please reselect).
-    </string>
-    <string name="FolderNoExistShared">Folder does not exist.</string>
-    <string name="FolderNotAccessible">
-        Folder is not accessible (Please reselect).
-    </string>
-    <string name="UnknownErrorShared">Unknown Error. See dev.</string>
+    <string name="SuccessfullyImported">Successfully imported client data</string>
+    <string name="SelectUserNotes">Select the following user notes to add</string>
+    <string name="FolderFinishedDownloading">文件夹已下载完成</string>
+    <string name="FinishedDownloading">下载完成</string>
+    <string name="PermissionsIssueShared">Permissions Issue opening Shared Folder.  Please go into settings and reselect Shared Folder.</string>
+    <string name="SharedFolderIssuesAllFailed">Issue accessing shared folders. Tap folders for more info.</string>
+    <string name="UserXIsOffline">用户 {0} 已离线</string>
+    <string name="CannotConnectUserX">无法连接到用户 {0}</string>
+    <string name="TimeoutQueueUserX">Timeout getting queue position from {0}</string>
+    <string name="PermissionErrorShared">Permission Error, cannot write (Please reselect).</string>
+    <string name="FolderNoExistShared">文件夹不存在。</string>
+    <string name="FolderNotAccessible">Folder is not accessible (Please reselect).</string>
+    <string name="UnknownErrorShared">未知错误。请参阅dev。</string>
     <string name="MessagesWithUser">Messages with {0}</string>
-
     <string name="DateAddedAsc">Date Added (Asc)</string>
     <string name="DateAddedDesc">Date Added (Desc)</string>
-    <string name="Name">Name</string>
-    <string name="OnlineStatus">Online Status</string>
-
-    <string name="NoUsersFound">No Users Found</string>
-    <string name="UsingThisWizardLong">
-        Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options &gt; Extras &gt; \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences &gt; Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.
-    </string>
-    <string name="CurrentDownloadFolder_">Current Download Folder:</string>
-    <string name="CreateCompleteAndIncomplete">
-        Create Soulseek Complete and Soulseek Incomplete Directories
-    </string>
+    <string name="Name">名称</string>
+    <string name="OnlineStatus">在线状态</string>
+    <string name="NoUsersFound">未找到用户</string>
+    <string name="UsingThisWizardLong">Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options &gt; Extras &gt; \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences &gt; Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.</string>
+    <string name="CurrentDownloadFolder_">当前下载文件夹： </string>
+    <string name="CreateCompleteAndIncomplete">Create Soulseek Complete and Soulseek Incomplete Directories</string>
     <string name="CreateUsernameSubfolders">Create Username Subfolders</string>
-    <string name="DoNotCreateSubfoldersForSingleDownloads">
-        Do not create Subfolders for Single Downloads
-    </string>
+    <string name="DoNotCreateSubfoldersForSingleDownloads">Do not create Subfolders for Single Downloads</string>
     <string name="ShowSmartFilters">Show Smart Filters</string>
-    <string name="ShowPrivateLockedSearch">
-        Show Private (Locked) Files in Search Results
-    </string>
-    <string name="ShowPrivateLockedBrowse">
-        Show Private (Locked) Files in Browse Response
-    </string>
+    <string name="ShowPrivateLockedSearch">Show Private (Locked) Files in Search Results</string>
+    <string name="ShowPrivateLockedBrowse">Show Private (Locked) Files in Browse Response</string>
     <string name="RememberRecent">Remember Recent Users</string>
-    <string name="ClearRecentUsers">Clear Recent Users</string>
-    <string name="AutoRetryFailedOfflineOnline">
-        Auto-Retry Failed Downloads When User Goes Back Online
-    </string>
-    <string name="AwayOnInactivity">
-        Automatically Set Status to Away on Inactivity
-    </string>
-    <string name="DayVarient_">Day Variant</string>
-    <string name="NightVarient_">Night Variant</string>
-    <string name="NoSharedAdd">
-        No Shared Folders. Tap \'Add\' to get started.
-    </string>
+    <string name="ClearRecentUsers">清除最近的用户</string>
+    <string name="AutoRetryFailedOfflineOnline">Auto-Retry Failed Downloads When User Goes Back Online</string>
+    <string name="AwayOnInactivity">Automatically Set Status to Away on Inactivity</string>
+    <string name="DayVarient_">Day Varient: </string>
+    <string name="NightVarient_">Night Varient: </string>
+    <string name="NoSharedAdd">No Shared Folders. Tap \'Add\' to get started.</string>
     <string name="RescanShares">Rescan Shares</string>
-    <string name="PauseSharingIfMetered">
-        Pause Sharing if on Metered (Mobile) Connection
-    </string>
-    <string name="LimitDownloadSpeed">Limit Download Speed</string>
-    <string name="LimitUploadSpeed">Limit Upload Speed</string>
-    <string name="LimitConcurrentDownloads">Limit Concurrent Downloads</string>
+    <string name="PauseSharingIfMetered">Pause Sharing if on Metered (Mobile) Connection</string>
+    <string name="LimitDownloadSpeed">限制下载速度</string>
+    <string name="LimitUploadSpeed">限制上传速度</string>
+    <string name="LimitConcurrentDownloads">限制同时下载数量</string>
     <string name="EnableDiagnostics">Enable Diagnostics</string>
     <string name="ImportExternalClientData">Import external client data</string>
-    <string name="LockedUserListOnly">
-        Locked (Only User List can Download)
-    </string>
+    <string name="LockedUserListOnly">Locked (Only User List can Download)</string>
     <string name="HiddenUserListOnly">Hidden (Only User List can View)</string>
     <string name="OverrideFolderName">Override Folder Name</string>
     <string name="CustomFolderName">Custom Folder Name</string>
     <string name="QueueSelectedAsPaused">Queue Selected as Paused</string>
-
     <string name="UserOptions">User Options</string>
     <string name="Options">Options</string>
-    <string name="Save">Save</string>
-    <string name="SortOrder">Sort Order</string>
-    <string name="AddUserToIgnored">Add User To Ignored</string>
-
-    <string name="ClearAllCompleteAndAborted">
-        Clear all Complete and Aborted
-    </string>
-    <string name="AbortAll">Abort All</string>
-
-    <string name="BatchSelect">Batch Select</string>
-    <string name="ShowSize">Show Size</string>
-    <string name="ShowSpeed">Show Speed</string>
-
-    <string name="ResumeSelected">Resume Selected</string>
-    <string name="PauseSelected">Pause Selected</string>
-    <string name="RetryFailed">Retry Failed</string>
-    <string name="InvertSelection">Invert Selection</string>
-    <string name="SelectAll">Select All</string>
-    <string name="MaxConcurrentIs">Max # of Concurrent Downloads:</string>
-
+    <string name="Save">保存</string>
+    <string name="SortOrder">排序顺序</string>
+    <string name="AddUserToIgnored">忽略用户</string>
+    <string name="ClearAllCompleteAndAborted">Clear all Complete and Aborted</string>
+    <string name="AbortAll">终止所有</string>
+    <string name="BatchSelect">批量选择</string>
+    <string name="ShowSize">显示大小</string>
+    <string name="ShowSpeed">显示速度</string>
+    <string name="ResumeSelected">恢复所选内容</string>
+    <string name="PauseSelected">暂停所选内容</string>
+    <string name="RetryFailed">重试失败项</string>
+    <string name="InvertSelection">反选</string>
+    <string name="SelectAll">全选</string>
+    <string name="MaxConcurrentIs">同时下载的最大数量</string>
     <string name="PerTransfer">Per Transfer</string>
     <string name="Global">Global</string>
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
     <string name="NotSet">Not Set</string>
-    <string name="AppLocalStorage">App Local Storage</string>
-    <string name="NotInUse">Not in Use</string>
-
+    <string name="AppLocalStorage">应用本地存储</string>
+    <string name="NotInUse">未使用</string>
     <string name="IncompleteFolderEmpty">Incomplete Folder is empty</string>
     <string name="NoEligibleToClear">No eligible items to clear</string>
     <string name="ChangeDownloadSpeed">Change Download Speed (kb/s):</string>
     <string name="ChangeUploadSpeed">Change Upload Speed (kb/s):</string>
     <string name="EnterSpeed">Enter Speed in Kb/s</string>
-    <string name="EnterMaxDownloadSimultaneously">
-        Enter Max to Download Simultaneously
-    </string>
-
-    <string name="BrowseWhich">
-        Browse Public Shares or User List shares?
-    </string>
+    <string name="EnterMaxDownloadSimultaneously">Enter Max to Download Simultaneously</string>
+    <string name="BrowseWhich">Browse Public Shares or User List shares?</string>
     <string name="WaitForParsing">Wait for parsing to complete.</string>
-
     <string name="finishingUp">finishing up</string>
     <string name="XFilesParsed">{0} files parsed</string>
     <string name="ErrorAlreadyAdded">Error: Directory Already Added.</string>
     <string name="UploadFolderOptions">Upload Folder Options</string>
-    <string name="CannotChangeNameNotUnique">
-        Cannot change name. Not unique.
-    </string>
+    <string name="CannotChangeNameNotUnique">Cannot change name. Not unique.</string>
     <string name="AlreadyParsing">Already parsing</string>
     <string name="DirectoryNotSet">Directory not set</string>
-    <string name="FailedGettingAccess">
-        Failed getting access to directory
-    </string>
-    <string name="AdditionalFiles">
-        {0} additional files since last scan.
-    </string>
+    <string name="FailedGettingAccess">Failed getting access to directory</string>
+    <string name="AdditionalFiles">{0} additional files since last scan.</string>
     <string name="OneAdditionalFile">1 additional file since last scan.</string>
-    <string name="NoMediaStore">
-        No access to media store. Parsing will be unoptimized.
-    </string>
-    <string name="NoPermissionsForDir">
-        Cannot set directory without proper permissions
-    </string>
+    <string name="NoMediaStore">No access to media store. Parsing will be unoptimized.</string>
+    <string name="NoPermissionsForDir">Cannot set directory without proper permissions</string>
     <string name="No">No</string>
-
-    <string name="MustBeLoggedInToImport">
-        Must be logged in and connected to import data.
-    </string>
-    <string name="MustBeLoggedInToRetryDL">
-        Must be logged in and connected to retry download.
-    </string>
-
-    <string name="FailedDownloadDirectoryNotSet">
-        Failed: Download directory not properly set.
-    </string>
-
+    <string name="MustBeLoggedInToImport">Must be logged in and connected to import data.</string>
+    <string name="MustBeLoggedInToRetryDL">Must be logged in and connected to retry download.</string>
+    <string name="FailedDownloadDirectoryNotSet">Failed: Download directory not properly set.</string>
     <string name="CopyLink">Copy Link</string>
     <string name="DownloadFile">Download File</string>
-
     <string name="IgnoreUnshareUser">Ignore (Unshare) User</string>
     <string name="RetryFailedFiles">Retry Failed Files</string>
     <string name="ResumeFolder">Resume Folder</string>
@@ -1093,77 +689,37 @@ Directory Count: {5}\"
     <string name="AbortandClearUpload">Abort and Clear Upload</string>
     <string name="AbortandClearUploads">Abort and Clear Uploads</string>
     <string name="HideSmartFilters">Hide Smart Filters</string>
-
     <string name="UserIsOffline">User is Offline</string>
     <string name="Cancelled">Cancelled</string>
     <string name="TimedOut">Timed Out</string>
     <string name="CannotConnect">Cannot Connect</string>
-
     <string name="Succeeded">Succeeded</string>
     <string name="Aborted">Aborted</string>
     <string name="Num_FilesRemaining">{0} files remaining</string>
     <string name="X_of_Y_Remaining">{0} of {1} remaining</string>
-    <string name="SetLanguage">Language</string>
+    <string name="SetLanguage">Language:</string>
     <string name="Automatic">Automatic</string>
-
-    <string name="ManuallySetIncompleteFolder">
-        Override Incomplete Folder Location
-    </string>
+    <string name="ManuallySetIncompleteFolder">Manually Set Incomplete Folder</string>
     <string name="CurrentIncompleteFolder">Current Incomplete Folder:</string>
     <string name="ClearFolder">Clear Folder</string>
-
     <string name="HideSize">Hide Size</string>
     <string name="HideSpeed">Hide Speed</string>
-
     <string name="Num_Selected">{0} Selected</string>
-
     <string name="ExportClientData">Export Client Data</string>
-    <string name="export_more_info">
-        Export User List, Ignore/Block List, User Notes, and Wishlist to xml. Useful for backing up or migrating data to new phone.
-    </string>
-    <string name="successfully_exported">
-        Successfully exported Seeker client data.
-    </string>
-
-    <string name="ForceFilesystemPermission">
-        Force Filesystem Permissions
-    </string>
-    <string name="permission_already_successfully_granted">
-        Permission has already been succesfully granted
-    </string>
-    <string name="permission_successfully_granted">
-        Permission succesfully granted
-    </string>
+    <string name="export_more_info">导出用户列表、忽略/阻止列表、用户笔记和心愿单到xml。用于备份或将数据迁移到新手机。</string>
+    <string name="successfully_exported">Successfully exported Seeker client data.</string>
+    <string name="ForceFilesystemPermission">Force Filesystem Permissions</string>
+    <string name="permission_already_successfully_granted">Permission has already been succesfully granted</string>
+    <string name="permission_successfully_granted">Permission succesfully granted</string>
     <string name="permission_failed">Failed to grant permission</string>
-
     <string name="bitrate">Bitrate</string>
-
     <string name="setUpSharing">Set up Sharing</string>
-
     <string name="change_password">Change Password</string>
     <string name="new_password">New Password</string>
     <string name="cannot_be_empty">Cannot be empty</string>
-
-    <string name="must_be_logged_in_generic">
-        Must be logged in to perform this action
-    </string>
-    <string name="must_be_logged_in_to_change_password">
-        Must be logged in to change password
-    </string>
-
+    <string name="must_be_logged_in_generic">Must be logged in to perform this action</string>
+    <string name="must_be_logged_in_to_change_password">Must be logged in to change password</string>
     <string name="failed_to_change_password">Failed to change password</string>
-    <string name="password_successfully_updated">
-        Password successfully updated
-    </string>
-    <string name="error_dialog_content">
-        Seeker has encountered an issue.  \n\nPlease consider sending a report to the developer.  \n\nAny information about the steps / conditions leading up to the issue is much appreciated.
-    </string>
-    <string name="section_downloads">Downloads</string>
-    <string name="section_search">Search</string>
-    <string name="section_general">General</string>
-    <string name="section_appearance">Appearance</string>
-    <string name="section_sharing">Sharing</string>
-    <string name="section_network">Network</string>
-    <string name="section_account">Account</string>
+    <string name="password_successfully_updated">Password successfully updated</string>
+    <string name="error_dialog_content">Seeker has encountered an issue.  \n\nPlease consider sending a report to the developer.  \n\nAny information about the steps / conditions leading up to the issue is much appreciated.</string>
 </resources>
-
