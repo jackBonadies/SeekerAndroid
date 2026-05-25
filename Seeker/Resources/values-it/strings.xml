@@ -120,7 +120,7 @@ Numero Cartelle: {5}\"</string>
     <string name="submit">Invia</string>
     <string name="ConnectingToServer">Connessione al server</string>
     <string name="PleaseWait_">Attendere prego...</string>
-    <string name="choose_a_download_foldkilobytes_per_second:er">Seleziona cartella di download</string>
+    <string name="choose_a_download_folder">Seleziona cartella di download</string>
     <string name="settings">Impostazioni</string>
     <string name="enter_user_to_message">Inserisci utente a cui inviare un messaggio</string>
     <!--Search Result Styles-->
@@ -489,8 +489,12 @@ Numero Cartelle: {5}\"</string>
 <br><br>Please help translate Seeker <a href="https://crwd.in/seeker">here</a>.
 <br><br>Source code is <a href="https://github.com/jackBonadies/SeekerAndroid">here</a>.
 <br><br>Version: {0}.]]></string>
-    <string name="force_filesystem_message"><![CDATA[Il modo standard di richiedere l'accesso alle cartelle non sempre persiste autorizzazioni. Se trovi la richiesta di Seeker per la cartella di download o l'accesso alla cartella condivisa, questo pulsante richiederà i permessi a stile vecchio che persisteranno sempre.
-<br><br>Questa funzione richiede la versione di Fdroid IzzyDroid di Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Scarica Qui</a>). Google Play Store non consente alle applicazioni di richiedere questo permesso.]]></string>
+    <string name="force_filesystem_message">
+<![CDATA[
+Il modo standard di richiedere l\'accesso alle cartelle non sempre persiste autorizzazioni. Se trovi la richiesta di Seeker per la cartella di download o l\'accesso alla cartella condivisa, questo pulsante richiederà i permessi a stile vecchio che persisteranno sempre.
+<br><br>Questa funzione richiede la versione di Fdroid IzzyDroid di Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Scarica Qui</a>). Google Play Store non consente alle applicazioni di richiedere questo permesso.
+]]>
+	</string>
     <string name="must_be_logged_in_to_get_dir_contents">Must be logged in to get directory contents</string>
     <string name="note">Nota</string>
     <string name="removed_user_from_ignored_list">Removed user \"{0}\" from Ignore List</string>
