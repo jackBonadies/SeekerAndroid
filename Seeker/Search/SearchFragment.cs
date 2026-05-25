@@ -145,7 +145,7 @@ namespace Seeker
 
             if (SearchTabHelper.CurrentlySearching)
             {
-                GetTransitionDrawable().StartTransition(0);
+                GetTransitionDrawable()?.StartTransition(0);
             }
             base.OnCreateOptionsMenu(menu, inflater);
         }
@@ -246,15 +246,15 @@ namespace Seeker
             if (SearchTabHelper.CurrentlySearching)
             {
                 Logger.Debug("CURRENT SEARCHING SET TRANSITION DRAWABLE");
-                GetTransitionDrawable().StartTransition(0);
+                GetTransitionDrawable()?.StartTransition(0);
             }
             else
             {
-                GetTransitionDrawable().ResetTransition();
+                GetTransitionDrawable()?.ResetTransition();
             }
             //forces refresh.
-            ActionBarMenu.FindItem(Resource.Id.action_search).SetVisible(false);
-            ActionBarMenu.FindItem(Resource.Id.action_search).SetVisible(true);
+            ActionBarMenu?.FindItem(Resource.Id.action_search)?.SetVisible(false);
+            ActionBarMenu?.FindItem(Resource.Id.action_search)?.SetVisible(true);
         }
 
         public void GoToTab(int tabToGoTo, bool force, bool fromIntent = false)
@@ -344,7 +344,7 @@ namespace Seeker
 
             if (!fromIntent)
             {
-                GetTransitionDrawable().InvalidateSelf();
+                GetTransitionDrawable()?.InvalidateSelf();
             }
             this.SetCustomViewTabNumberImageViewState();
             this.Activity?.InvalidateOptionsMenu();
@@ -1298,14 +1298,14 @@ namespace Seeker
                 if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
                 {
                     Logger.Debug("transitionDrawable: reverse transition");
-                    transitionDrawable.ReverseTransition(SearchToCloseDuration); //you cannot hit reverse twice, it will put it back to the original state...
+                    transitionDrawable?.ReverseTransition(SearchToCloseDuration); //you cannot hit reverse twice, it will put it back to the original state...
                     SearchTabHelper.CancellationTokenSource.Cancel();
                     SearchTabHelper.CurrentlySearching = false;
                 }
                 else
                 {
                     Logger.Debug("transitionDrawable: start transition");
-                    transitionDrawable.StartTransition(SearchToCloseDuration);
+                    transitionDrawable?.StartTransition(SearchToCloseDuration);
                     PerformBackUpRefresh();
                     SearchTabHelper.CurrentlySearching = true;
                 }
@@ -1403,8 +1403,8 @@ namespace Seeker
                     }
                 }
                 //when coming from an intent its actually (toolbar.Menu.FindItem(Resource.Id.action_search)) that is null.  so the menu is there, just no action_search menu item.
-                AndroidX.AppCompat.Widget.Toolbar toolbar = (this.Activity as AndroidX.AppCompat.App.AppCompatActivity).FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);
-                return toolbar.Menu.FindItem(Resource.Id.action_search).Icon as Android.Graphics.Drawables.TransitionDrawable; //nullref
+                AndroidX.AppCompat.Widget.Toolbar toolbar = (this.Activity as AndroidX.AppCompat.App.AppCompatActivity)?.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);
+                return toolbar?.Menu?.FindItem(Resource.Id.action_search)?.Icon as Android.Graphics.Drawables.TransitionDrawable;
             }
             else
             {
@@ -1831,13 +1831,13 @@ namespace Seeker
             if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
             {
                 Logger.Debug("transitionDrawable: RESET transition");
-                transitionDrawable.ReverseTransition(SearchToCloseDuration); //you cannot hit reverse twice, it will put it back to the original state...
+                transitionDrawable?.ReverseTransition(SearchToCloseDuration); //you cannot hit reverse twice, it will put it back to the original state...
                 SearchTabHelper.CancellationTokenSource.Cancel();
                 SearchTabHelper.CurrentlySearching = false;
             }
             else
             {
-                transitionDrawable.StartTransition(SearchToCloseDuration);
+                transitionDrawable?.StartTransition(SearchToCloseDuration);
                 PerformBackUpRefresh();
                 Logger.Debug("START TRANSITION");
                 SearchTabHelper.CurrentlySearching = true;
@@ -2405,7 +2405,7 @@ namespace Seeker
                     Logger.Debug("transitionDrawable: RESET transition");
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
                     {
-                        transitionDrawable.ResetTransition();
+                        transitionDrawable?.ResetTransition();
                     }
                     SearchFragment.Instance?.UpdateEmptyState();
                     SearchFragment.Instance?.NotifySearchHeaderChanged();
@@ -2428,7 +2428,7 @@ namespace Seeker
                     SeekerApplication.Toaster.ShowToast(errorMsg, ToastLength.Short);
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
                     {
-                        transitionDrawable.ResetTransition();
+                        transitionDrawable?.ResetTransition();
                     }
                     SearchFragment.Instance?.UpdateEmptyState();
                     SearchFragment.Instance?.NotifySearchHeaderChanged();
@@ -2448,7 +2448,7 @@ namespace Seeker
 
                     if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
                     {
-                        transitionDrawable.ResetTransition();
+                        transitionDrawable?.ResetTransition();
                     }
                     SearchFragment.Instance?.UpdateEmptyState();
                     SearchFragment.Instance?.NotifySearchHeaderChanged();
@@ -2497,7 +2497,7 @@ namespace Seeker
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_search), ToastLength.Long);
                     Logger.Debug("transitionDrawable: RESET transition");
-                    transitionDrawable.ResetTransition();
+                    transitionDrawable?.ResetTransition();
 
                 }
 
