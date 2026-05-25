@@ -60,7 +60,6 @@ Numero Cartelle: {5}\"</string>
     <string name="clear">Cancella</string>
     <string name="get_user_info">Ottieni informazioni sull\'utente</string>
     <string name="quick_info">Info Rapide</string>
-    <string name="filer_files">Filtra i file qui</string>
     <string name="enter_user_to_browse">Inserisci l\'utente da esplorare</string>
     <!--
   These are search targets
@@ -197,7 +196,6 @@ Numero Cartelle: {5}\"</string>
     <string name="error_browse_at_location">Errore nell\'ottenere le cartelle utente alla posizione indicata</string>
     <string name="error_duplicates">Errore: Trasferimenti duplicati. Se vuoi riprovare un download, tieni premuto su di esso nella lista trasferimenti.</string>
     <string name="room_data_still_loading">Troppo veloce! Sto ancora ottenendo i dati della stanza...</string>
-    <string name="loading_current_ticker">Caricamento ticker corrente...</string>
     <string name="must_be_logged_to_browse">Devi essere loggato per sfogliare un utente</string>
     <string name="must_be_logged_to_get_room_list">Devi essere loggato per ottenere l\'elenco delle chat</string>
     <string name="must_be_logged_to_request_user_info">Devi accedere per poter richiedere informazioni sugli utenti</string>
@@ -327,7 +325,7 @@ Numero Cartelle: {5}\"</string>
     <string name="already_added_to_ignore">L\'Utente \"{0}\" è già nella Lista Ignora</string>
     <string name="failed_to_establish_connection_to_peer">Fallita la connessione a {0}</string>
     <string name="user_info_received">Informazioni Utente da {0} ricevute</string>
-    <string name="user_info_failed_conn">Impossibile stabilire la connessione.</string>
+    <string name="user_info_failed_conn">Impossibile ottenere informazioni per l\'utente: {0}. Impossibile stabilire la connessione.</string>
     <string name="user_info_failed_offline">Recupero delle informazioni per l\'utente non riuscito: {0}. L\'utente è offline.</string>
     <string name="user_info_failed_timeout">Impossibile ottenere informazioni per l\'utente:{0}. Connessione scaduta.</string>
     <string name="deleted_message_history_with">Cronologia messaggi eliminati con {0}</string>
@@ -508,8 +506,7 @@ Numero Cartelle: {5}\"</string>
     <string name="upload_remaining">{0} upload remaining</string>
     <string name="uploads_remaining">{0} uploads remaining</string>
     <string name="uploads_in_progress">Caricamenti in corso</string>
-    <string name="search_tabs_bold">    <b>Search Tabs</b>
-  </string>
+    <string name="search_tabs_bold"><b>Search Tabs</b></string>
     <string name="shutdown">Arresto</string>
     <string name="set_online_alert">Set Online Alert</string>
     <string name="remove_online_alert">Remove Online Alert</string>

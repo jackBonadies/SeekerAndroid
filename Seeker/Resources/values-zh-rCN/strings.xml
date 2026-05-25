@@ -40,7 +40,7 @@
     <string name="requesting_room_list">正在申请房间列表</string>
     <string name="requesting_user_info">正在请求用户信息</string>
     <string name="room_list_received">已收到房间列表</string>
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">心愿单</string>
     <string name="wishlist_bold"><b>心愿单</b></string>
@@ -61,7 +61,6 @@ Directory Count: {5}\"</string>
     <string name="clear">清除</string>
     <string name="get_user_info">Get User Info</string>
     <string name="quick_info">Quick Info</string>
-    <string name="filer_files">筛选文件</string>
     <string name="enter_user_to_browse">Enter User to Browse</string>
     <!--
   These are search targets
@@ -79,8 +78,8 @@ Directory Count: {5}\"</string>
     <string name="ignored">已忽略</string>
     <string name="chatroom_disconnected">已断开连接……</string>
     <!--Where placeholder {0} is time -->
-    <string name="chatroom_disconnected_at">已断开连接: {0}</string>
-    <string name="chatroom_reconnected_at">已重新连接: {0}</string>
+    <string name="chatroom_disconnected_at">已断开连接：{0}</string>
+    <string name="chatroom_reconnected_at">已重新连接：{0}</string>
     <string name="chatroom_loading_ticker">Loading current ticker...</string>
     <string name="chatroom_enter_message">输入消息</string>
     <string name="send_message">发送</string>
@@ -193,12 +192,11 @@ Directory Count: {5}\"</string>
     <string name="must_type_chatroom_name">Must type a chatroom name</string>
     <string name="must_type_text_to_send">Must type text to send</string>
     <string name="error">错误</string>
-    <string name="error_">错误: </string>
+    <string name="error_">错误：</string>
     <string name="error_duplicate">错误：检测到重复请求</string>
     <string name="error_browse_at_location">Error getting user directories at specified location</string>
     <string name="error_duplicates">Error: Duplicate Transfers.  If you want to retry a download, hold tap on it in transfers.</string>
     <string name="room_data_still_loading">Too fast! Still retreiving room data...</string>
-    <string name="loading_current_ticker">Loading current ticker...</string>
     <string name="must_be_logged_to_browse">Must be logged in to browse a user</string>
     <string name="must_be_logged_to_get_room_list">Must be logged in to get chatroom list</string>
     <string name="must_be_logged_to_request_user_info">Must be logged in to request user info</string>
@@ -378,10 +376,10 @@ Directory Count: {5}\"</string>
     <string name="online">在线</string>
     <string name="offline">离线</string>
     <!--Menu Items-->
-    <string name="auto_join_on">自动加入 [On]</string>
-    <string name="auto_join_off">自动加入 [Off]</string>
-    <string name="notification_on">通知 [On]</string>
-    <string name="notification_off">通知 [Off]</string>
+    <string name="auto_join_on">自动加入 [开]</string>
+    <string name="auto_join_off">自动加入 [关]</string>
+    <string name="notification_on">通知 [开]</string>
+    <string name="notification_off">通知 [关]</string>
     <string name="copy_text">复制文本</string>
     <string name="ignore_user">屏蔽用户</string>
     <string name="remove_user">移除用户</string>
@@ -461,7 +459,7 @@ Directory Count: {5}\"</string>
     <string name="files">文件</string>
     <string name="from_directory">From directory</string>
     <string name="from_directories">From directories</string>
-    <string name="upload_f_string">已向用户上传 {0} {1}: {2}</string>
+    <string name="upload_f_string">已向用户 {2} 上传 {0} {1}</string>
     <string name="about_title">关于</string>
     <string name="give_privileges">授予权限</string>
     <string name="error_days_entered_no_parse">输入的天数必须是整数。</string>
@@ -509,8 +507,7 @@ Directory Count: {5}\"</string>
     <string name="upload_remaining">{0} upload remaining</string>
     <string name="uploads_remaining">{0} uploads remaining</string>
     <string name="uploads_in_progress">Uploads in Progress</string>
-    <string name="search_tabs_bold">    <b>Search Tabs</b>
-  </string>
+    <string name="search_tabs_bold"><b>Search Tabs</b></string>
     <string name="shutdown">关闭</string>
     <string name="set_online_alert">Set Online Alert</string>
     <string name="remove_online_alert">删除在线提醒</string>
