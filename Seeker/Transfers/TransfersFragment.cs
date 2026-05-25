@@ -941,13 +941,15 @@ namespace Seeker
         public static bool ForceOutIfZeroSelected = true;
         public static void ToggleItemBatchSelect(TransferAdapterRecyclerVersion recyclerTransferAdapter, int pos)
         {
-            if (ViewState.BatchSelectedItems.Contains(pos))
+            var item = TransferItems.TransferItemManagerWrapped.GetItemAtUserIndex(pos);
+            if (item == null)
             {
-                ViewState.BatchSelectedItems.Remove(pos);
+                return;
             }
-            else
+            if (!ViewState.BatchSelectedItems.Add(item))
             {
-                ViewState.BatchSelectedItems.Add(pos);
+                // already present → toggle off
+                ViewState.BatchSelectedItems.Remove(item);
             }
             recyclerTransferAdapter.NotifyItemChanged(pos);
             int cnt = ViewState.BatchSelectedItems.Count;
@@ -968,38 +970,28 @@ namespace Seeker
             {
                 return;
             }
-            int userPositionBeingRemoved = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(ti);
-            if (userPositionBeingRemoved == -1)
+            int prevCount = ViewState.BatchSelectedItems.Count;
+
+            // Direct case (flat or in-folder view): ti itself was selected.
+            ViewState.BatchSelectedItems.Remove(ti);
+
+            // Folder-grouped view: ti's parent folder may have been selected and may now be
+            // empty/removed. Drop any FolderItem that no longer exists in the manager.
+            ViewState.BatchSelectedItems.RemoveWhere(item =>
+                item is FolderItem fi && TransferItems.TransferItemManagerWrapped.GetIndexForFolderItem(fi) == -1);
+
+            if (ViewState.BatchSelectedItems.Count == prevCount)
             {
                 //it is not currently on our screen, perhaps it is in uploads (and we are in downloads) or we are inside a folder (and it is outside)
                 Logger.Debug("batch on, different screen item removed");
                 return;
             }
-            Logger.Debug("batch on, updating: " + userPositionBeingRemoved);
-            //adjust numbers
-            int cnt = ViewState.BatchSelectedItems.Count;
-            for (int i = cnt - 1; i >= 0; i--)
-            {
-                int position = ViewState.BatchSelectedItems[i];
-                if (position < userPositionBeingRemoved)
-                {
-                    continue;
-                }
-                else if (position == userPositionBeingRemoved)
-                {
-                    ViewState.BatchSelectedItems.RemoveAt(i);
-                }
-                else
-                {
-                    ViewState.BatchSelectedItems[i] = position - 1;
-                }
-            }
-            //if there was only 1 and its the one that just finished then take us out of batchSelectedItems
+            Logger.Debug("batch on, updating selection");
             if (ViewState.BatchSelectedItems.Count == 0)
             {
                 TransfersActionMode.Finish();
             }
-            else if (ViewState.BatchSelectedItems.Count != cnt) //if we have 1 less now.
+            else
             {
                 TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), ViewState.BatchSelectedItems.Count.ToString());
                 TransfersActionMode.Invalidate();
@@ -1161,27 +1153,22 @@ namespace Seeker
 
         private void TransferProgressUpdated(object sender, ProgressUpdatedUIEventArgs e)
         {
-            if (e.ti.IsUpload() != ViewState.InUploadsMode)
+            if (e.TransferItem.IsUpload() != ViewState.InUploadsMode)
             {
                 return;
             }
-            if (e.percentComplete == 0)
+            if (e.PercentComplete == 0)
             {
-                return;
-            }
-            if (e.fullRefresh)
-            {
-                Activity?.RunOnUiThread(refreshListViewSafe); //in case of rotation it is the ACTIVITY which will be null!!!!
                 return;
             }
             try
             {
                 DateTime now = DateTime.UtcNow;
-                string throttleKey = e.ti.GetThrottleKey();
+                string throttleKey = e.TransferItem.GetThrottleKey();
                 DateTime lastUpdated = ProgressUpdatedThrottler.GetOrAdd(throttleKey, now);
                 bool isNew = lastUpdated == now;
                 bool shouldUpdate = isNew
-                    || e.wasFailed
+                    || e.WasFailed
                     || now.Subtract(lastUpdated).TotalMilliseconds > THROTTLE_PROGRESS_UPDATED_RATE;
 
                 if (!shouldUpdate)
@@ -1193,13 +1180,13 @@ namespace Seeker
 
                 Activity?.RunOnUiThread(() =>
                 {
-                    int index = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(e.ti);
+                    int index = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(e.TransferItem);
                     if (index == -1)
                     {
                         Logger.Debug("Index is -1 TransferProgressUpdated");
                         return;
                     }
-                    refreshItemProgress(index, e.ti.GetProgressForPresentation(), e.ti, e.wasFailed, e.avgspeedBytes);
+                    refreshItemProgress(index, e.TransferItem.GetProgressForPresentation(), e.TransferItem, e.WasFailed, e.AverageSpeedBytes);
                 });
             }
             catch (System.Exception error)
@@ -1240,6 +1227,7 @@ namespace Seeker
         {
             Seeker.Transfers.TransferEventRouter.StateChangedForItem += TransferStateChangedItem;
             Seeker.Transfers.TransferEventRouter.ProgressUpdated += TransferProgressUpdated;
+            Seeker.Transfers.TransferEventRouter.ItemRemoved += OnRouterItemRemoved;
             UploadService.TransferAddedUINotify += MainActivity_TransferAddedUINotify; //todo this should eventually be for downloads too.
             DownloadService.Instance.TransferItemQueueUpdated += TransferQueueStateChanged;
 
@@ -1286,9 +1274,35 @@ namespace Seeker
         {
             Seeker.Transfers.TransferEventRouter.ProgressUpdated -= TransferProgressUpdated;
             Seeker.Transfers.TransferEventRouter.StateChangedForItem -= TransferStateChangedItem;
+            Seeker.Transfers.TransferEventRouter.ItemRemoved -= OnRouterItemRemoved;
             DownloadService.Instance.TransferItemQueueUpdated -= TransferQueueStateChanged;
             UploadService.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
             base.OnStop();
+        }
+
+        private void OnRouterItemRemoved(object sender, Seeker.Transfers.ItemRemovedEventArgs e)
+        {
+            if (e.UserIndex < 0)
+            {
+                // Item lived on the other tab (downloads vs uploads) — nothing visible to update here.
+                return;
+            }
+            if (recyclerTransferAdapter == null)
+            {
+                return;
+            }
+            bool inFolderGroupedRoot = ViewState.GroupByFolder && !ViewState.CurrentlyInFolder();
+            if (inFolderGroupedRoot)
+            {
+                // GetUserIndexForTransferItem returns the parent folder's index in this mode.
+                // The folder may have collapsed (last item) or just lost one of N items —
+                // NotifyItemChanged is the safe baseline that triggers a rebind either way.
+                recyclerTransferAdapter.NotifyItemChanged(e.UserIndex);
+            }
+            else
+            {
+                recyclerTransferAdapter.NotifyItemRemoved(e.UserIndex);
+            }
         }
 
         private void SeekerState_DownloadAddedUINotify(object sender, DownloadAddedEventArgs e)

@@ -6,6 +6,6 @@ namespace Seeker
     {
         public bool GroupByFolder;
         public FolderItem? CurrentlySelectedFolder;
-        public List<int>? BatchSelectedItems;
+        public HashSet<ITransferItem>? BatchSelectedItems;
     }
 }

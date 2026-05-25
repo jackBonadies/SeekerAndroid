@@ -37,7 +37,7 @@ using System.Threading.Tasks;
 using Common;
 namespace Seeker
 {
-    [Activity(Label = "UserListActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
+    [Activity(Label = "UserListActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false, ParentActivity = typeof(MainActivity))]
     public class UserListActivity : ThemeableActivity
     {
         public override bool OnCreateOptionsMenu(IMenu menu)

@@ -8,11 +8,20 @@ using System;
 
 namespace Seeker.Transfers
 {
+    public class ItemRemovedEventArgs : EventArgs
+    {
+        public TransferItem Item;
+        // Pre-computed via GetUserIndexForTransferItem on the active tab. -1 if the item
+        // belongs to the other tab (downloads vs uploads) or otherwise isn't visible.
+        public int UserIndex;
+    }
+
     // Perform UI Agnostic Actions before routing to UI specific event handlers.
     internal static class TransferEventRouter
     {
         public static EventHandler<TransferItem> StateChangedForItem;
         public static EventHandler<ProgressUpdatedUIEventArgs> ProgressUpdated;
+        public static EventHandler<ItemRemovedEventArgs> ItemRemoved;
 
         public static void Wire(ISoulseekClient client)
         {
@@ -168,6 +177,30 @@ namespace Seeker.Transfers
                             AppNotifications.ShowNotificationForCompletedFolder(relevantItem.FolderName, relevantItem.Username);
                         }
                     }
+
+                    bool shouldAutoClear =
+                        (!isUpload && PreferencesState.AutoClearCompleteDownloads) ||
+                        (isUpload && PreferencesState.AutoClearCompleteUploads);
+                    if (shouldAutoClear)
+                    {
+                        // Pre-compute the on-screen position BEFORE removal; after Remove,
+                        // GetUserIndexForTransferItem can't find it.
+                        int idx = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(relevantItem);
+                        Action action = () =>
+                        {
+                            TransferItems.TransferItemManagerWrapped.Remove(relevantItem);
+                            TransfersFragment.UpdateBatchSelectedItemsIfApplicable(relevantItem);
+                            ItemRemoved?.Invoke(null, new ItemRemovedEventArgs { Item = relevantItem, UserIndex = idx });
+                        };
+                        if (SeekerState.ActiveActivityRef != null)
+                        {
+                            SeekerState.ActiveActivityRef.RunOnUiThread(action);
+                        }
+                        else
+                        {
+                            action();
+                        }
+                    }
                 }
             }
             else
@@ -186,7 +219,7 @@ namespace Seeker.Transfers
             }
         }
 
-        // Saves periodically. Autoclear if set. Call another ProgressUpdated Event
+        // Saves periodically. Republishes a UI-friendly ProgressUpdated event.
         private static void OnTransferProgressUpdated(object sender, TransferProgressUpdatedEventArgs e)
         {
             //Its possible to get a nullref here IF the system orientation changes..
@@ -216,32 +249,11 @@ namespace Seeker.Transfers
             else
             {
                 TransferItemManager.MarkTransfersDirty();
-                bool fullRefresh = false;
                 double percentComplete = e.Transfer.PercentComplete;
                 relevantItem.Progress = (int)percentComplete;
                 relevantItem.BytesTransferred = e.Transfer.BytesTransferred;
                 relevantItem.RemainingTime = e.Transfer.RemainingTime;
                 relevantItem.AvgSpeed = e.Transfer.AverageSpeed;
-
-                if (((PreferencesState.AutoClearCompleteDownloads && !isUpload) || (PreferencesState.AutoClearCompleteUploads && isUpload)) && System.Math.Abs(percentComplete - 100) < .001) //if 100% complete and autoclear //todo: autoclear on upload
-                {
-
-                    Action action = new Action(() =>
-                    {
-                        TransfersFragment.UpdateBatchSelectedItemsIfApplicable(relevantItem);
-                        TransferItems.TransferItemManagerWrapped.Remove(relevantItem);//TODO: shouldnt we do the corresponding Adapter.NotifyRemoveAt. //this one doesnt need cleaning up, its successful..
-                    });
-                    if (SeekerState.ActiveActivityRef != null)
-                    {
-                        SeekerState.ActiveActivityRef?.RunOnUiThread(action);
-                    }
-
-                    fullRefresh = true;
-                }
-                else if (System.Math.Abs(percentComplete - 100) < .001)
-                {
-                    fullRefresh = true;
-                }
 
                 bool wasFailed = false;
                 if (percentComplete != 0)
@@ -255,7 +267,7 @@ namespace Seeker.Transfers
 
                 }
 
-                ProgressUpdated?.Invoke(null, new ProgressUpdatedUIEventArgs(relevantItem, wasFailed, fullRefresh, percentComplete, e.Transfer.AverageSpeed));
+                ProgressUpdated?.Invoke(null, new ProgressUpdatedUIEventArgs(relevantItem, wasFailed, percentComplete, e.Transfer.AverageSpeed));
             }
         }
 

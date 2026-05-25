@@ -215,7 +215,7 @@ namespace Seeker
             {
                 actionContainer.Visibility = ViewStates.Visible;
                 selectionCheckbox.Visibility = ViewStates.Visible;
-                bool isSelected = TransfersViewState.Instance.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition);
+                bool isSelected = TransfersViewState.Instance.BatchSelectedItems.Contains(item);
                 selectionCheckbox.SetImageResource(isSelected ? Resource.Drawable.check_circle : Resource.Drawable.check_circle_outline);
                 this.Background = isSelected ? Resources.GetDrawable(Resource.Color.batchSelectHighlight, null) : null;
             }
@@ -949,7 +949,7 @@ namespace Seeker
             {
                 actionContainer.Visibility = ViewStates.Visible;
                 selectionCheckbox.Visibility = ViewStates.Visible;
-                bool isSelected = TransfersViewState.Instance.BatchSelectedItems.Contains(this.ViewHolder.AbsoluteAdapterPosition);
+                bool isSelected = TransfersViewState.Instance.BatchSelectedItems.Contains(item);
                 selectionCheckbox.SetImageResource(isSelected ? Resource.Drawable.check_circle : Resource.Drawable.check_circle_outline);
                 this.Background = isSelected ? Resources.GetDrawable(Resource.Color.batchSelectHighlight, null) : null;
             }

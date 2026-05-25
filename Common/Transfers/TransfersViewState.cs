@@ -20,7 +20,7 @@ namespace Seeker
         }
         public FolderItem? CurrentlySelectedDLFolder;
         public FolderItem? CurrentlySelectedUploadFolder;
-        public List<int> BatchSelectedItems = new List<int>();
+        public HashSet<ITransferItem> BatchSelectedItems = new HashSet<ITransferItem>();
         public int ScrollPositionBeforeMovingIntoFolder = int.MinValue;
         public int ScrollOffsetBeforeMovingIntoFolder = int.MinValue;
 

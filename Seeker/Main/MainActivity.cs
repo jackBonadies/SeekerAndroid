@@ -68,7 +68,7 @@ using ActivityFlags = Android.Content.ActivityFlags;
 //\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 namespace Seeker
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, MainLauncher = true, Exported = true/*, WindowSoftInputMode = SoftInput.AdjustNothing*/)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, MainLauncher = true, Exported = true, WindowSoftInputMode = Android.Views.SoftInput.AdjustPan)]
     public partial class MainActivity :
         ThemeableActivity, 
         ActivityCompat.IOnRequestPermissionsResultCallback, 
