@@ -96,6 +96,24 @@ jobs:
           generate_release_notes: true
           make_latest: "true"
 
+      - name: Decode google-services.json
+        env:
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON_BASE64" ]; then
+            echo "::error::GOOGLE_SERVICES_JSON_BASE64 secret is not set — Play Store build requires Firebase config"
+            exit 1
+          fi
+          echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > Seeker/google-services.json
+          if [ ! -s Seeker/google-services.json ]; then
+            echo "::error::Seeker/google-services.json is missing or empty after decode"
+            exit 1
+          fi
+          if ! grep -q '"project_info"' Seeker/google-services.json; then
+            echo "::error::Seeker/google-services.json does not look like a valid Firebase config (missing project_info)"
+            exit 1
+          fi
+
       - name: Build Play Store AAB (Release)
         env:
           AndroidSigningKeyStore: ${{ env.KEYSTORE_PATH }}
