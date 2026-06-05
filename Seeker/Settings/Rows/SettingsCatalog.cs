@@ -661,8 +661,27 @@ namespace Seeker.Settings.Rows
                 TitleRes = Resource.String.Privileges,
                 KeywordsRes = Resource.String.keywords_privileges,
                 IconRes = Resource.Drawable.account_star,
-                ValueProvider = ctx => SettingValueFormat.PrivilegesSummary(ctx),
                 OnClick = (h, r) => PrivilegesBottomSheet.Show(h),
+                StatusProvider = () =>
+                {
+                    var statusKind = SettingStatusKind.HideDot;
+                    if (Seeker.Managers.PrivilegesManager.Instance.IsCheckInProgress)
+                    {
+                        statusKind = SettingStatusKind.Running;
+                    }
+                    else if (Seeker.Managers.PrivilegesManager.Instance.IsPrivileged)
+                    {
+                        statusKind = SettingStatusKind.Success;
+                    }
+                    return new SettingStatus
+                    {
+                        Kind = statusKind,
+                        Text = Seeker.Managers.PrivilegesManager.Instance.IsCheckInProgress ? 
+                            host.Activity.GetString(Resource.String.checking_priv_) : SettingValueFormat.PrivilegesSummary(host.Activity)
+                    };
+                },
+                AddStatusListener = h2 => Seeker.Managers.PrivilegesManager.Instance.CheckStateChanged += h2,
+                RemoveStatusListener = h2 => Seeker.Managers.PrivilegesManager.Instance.CheckStateChanged -= h2,
             });
 
             rows.Add(new ToggleRow

@@ -60,7 +60,7 @@ namespace Seeker.Settings.Rows
         public override SettingRowType Type => SettingRowType.Header;
     }
 
-    public enum SettingStatusKind { None, Running, Success, Failure }
+    public enum SettingStatusKind { None, Running, Success, Failure, HideDot }
 
     /// <summary>
     /// Optional inline status shown below a toggle's title: a spinner (Running) or a colored
@@ -95,6 +95,12 @@ namespace Seeker.Settings.Rows
         public Action<ISettingsHost, ValueRow> OnClick { get; init; }
         /// <summary>Override the default chevron drawable. Null = use the standard right chevron.</summary>
         public int? TrailingIconRes { get; init; }
+
+        /// <summary>When non-null, an inline status line (spinner / colored dot + text) is shown
+        /// below the subtitle and refreshed whenever a subscribed listener fires.</summary>
+        public Func<SettingStatus> StatusProvider { get; init; }
+        public Action<EventHandler<EventArgs>> AddStatusListener { get; init; }
+        public Action<EventHandler<EventArgs>> RemoveStatusListener { get; init; }
     }
 
     public sealed class ActionRow : SettingRow

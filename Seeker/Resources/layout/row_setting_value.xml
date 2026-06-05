@@ -45,6 +45,40 @@
             android:alpha="0.6"
             android:textColor="?attr/normalTextColor"
             android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/rowStatusLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:id="@+id/rowStatusSpinner"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginEnd="8dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <View
+                android:id="@+id/rowStatusDot"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/setting_status_dot"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/rowStatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="?attr/normalTextColor" />
+        </LinearLayout>
     </LinearLayout>
 
     <ImageView

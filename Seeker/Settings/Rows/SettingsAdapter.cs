@@ -63,6 +63,7 @@ namespace Seeker.Settings.Rows
         public override void OnViewRecycled(Java.Lang.Object holder)
         {
             if (holder is ToggleViewHolder t) t.Detach();
+            else if (holder is ValueViewHolder v) v.Detach();
             base.OnViewRecycled(holder);
         }
 
@@ -338,6 +339,41 @@ namespace Seeker.Settings.Rows
             }
             MoreInfoBottomSheet.Show(_adapter.Host, row);
         }
+
+        protected void RenderStatus(Func<SettingStatus> statusProvider, View statusLine, TextView statusText, View statusSpinner, View statusDot)
+        {
+            var status = statusProvider?.Invoke() ?? default;
+            if (statusProvider == null || status.Kind == SettingStatusKind.None)
+            {
+                statusLine.Visibility = ViewStates.Gone;
+                return;
+            }
+
+            statusLine.Visibility = ViewStates.Visible;
+            statusText.Text = status.Text ?? string.Empty;
+
+            if (status.Kind == SettingStatusKind.Running)
+            {
+                statusSpinner.Visibility = ViewStates.Visible;
+                statusDot.Visibility = ViewStates.Gone;
+            }
+            else
+            {
+                statusSpinner.Visibility = ViewStates.Gone;
+                if (status.Kind == SettingStatusKind.HideDot)
+                {
+                    statusDot.Visibility = ViewStates.Gone;
+                }
+                else
+                {
+                    statusDot.Visibility = ViewStates.Visible;
+                    var color = status.Kind == SettingStatusKind.Success
+                        ? SuccessColor
+                        : new Android.Graphics.Color(ResolveThemeColor(statusDot.Context, Resource.Attribute.destructiveColor));
+                    statusDot.Background?.SetColorFilter(color, Android.Graphics.PorterDuff.Mode.SrcIn);
+                }
+            }
+        }
     }
 
     internal sealed class HeaderViewHolder : RecyclerView.ViewHolder
@@ -417,30 +453,7 @@ namespace Seeker.Settings.Rows
 
         private void RenderStatus()
         {
-            var status = _row?.StatusProvider?.Invoke() ?? default;
-            if (_row?.StatusProvider == null || status.Kind == SettingStatusKind.None)
-            {
-                _statusLine.Visibility = ViewStates.Gone;
-                return;
-            }
-
-            _statusLine.Visibility = ViewStates.Visible;
-            _statusText.Text = status.Text ?? string.Empty;
-
-            if (status.Kind == SettingStatusKind.Running)
-            {
-                _statusSpinner.Visibility = ViewStates.Visible;
-                _statusDot.Visibility = ViewStates.Gone;
-            }
-            else
-            {
-                _statusSpinner.Visibility = ViewStates.Gone;
-                _statusDot.Visibility = ViewStates.Visible;
-                var color = status.Kind == SettingStatusKind.Success
-                    ? SuccessColor
-                    : new Android.Graphics.Color(ResolveThemeColor(_statusDot.Context, Resource.Attribute.destructiveColor));
-                _statusDot.Background?.SetColorFilter(color, Android.Graphics.PorterDuff.Mode.SrcIn);
-            }
+            RenderStatus(_row?.StatusProvider, _statusLine, _statusText, _statusSpinner, _statusDot);
         }
     }
 
@@ -449,8 +462,12 @@ namespace Seeker.Settings.Rows
         private readonly View _root;
         private readonly ImageView _icon, _info, _chevron;
         private readonly TextView _title, _subtitle;
+        private readonly View _statusLine, _statusDot;
+        private readonly ProgressBar _statusSpinner;
+        private readonly TextView _statusText;
         private readonly SettingsAdapter _adapter;
         private ValueRow _row;
+        private EventHandler<EventArgs> _statusListener;
 
         public ValueViewHolder(View v, SettingsAdapter adapter) : base(v, adapter)
         {
@@ -461,6 +478,10 @@ namespace Seeker.Settings.Rows
             _subtitle = v.FindViewById<TextView>(Resource.Id.rowSubtitle);
             _info = v.FindViewById<ImageView>(Resource.Id.rowInfo);
             _chevron = v.FindViewById<ImageView>(Resource.Id.rowChevron);
+            _statusLine = v.FindViewById<View>(Resource.Id.rowStatusLine);
+            _statusSpinner = v.FindViewById<ProgressBar>(Resource.Id.rowStatusSpinner);
+            _statusDot = v.FindViewById<View>(Resource.Id.rowStatusDot);
+            _statusText = v.FindViewById<TextView>(Resource.Id.rowStatusText);
 
             _root.Click += (s, e) =>
             {
@@ -471,6 +492,7 @@ namespace Seeker.Settings.Rows
 
         public void Bind(Context ctx, ValueRow row, ToggleRow parent)
         {
+            Detach();
             _row = row;
             RememberRowForInfo(row);
 
@@ -493,6 +515,25 @@ namespace Seeker.Settings.Rows
             {
                 ApplyCommon(ctx, row, _root, _icon, _title, _subtitle, _info, parent);
             }
+
+            RenderStatus();
+            if (row.StatusProvider != null && row.AddStatusListener != null)
+            {
+                _statusListener = (s, e) => _root.Post(RenderStatus);
+                row.AddStatusListener(_statusListener);
+            }
+        }
+
+        public void Detach()
+        {
+            if (_statusListener != null && _row?.RemoveStatusListener != null)
+                _row.RemoveStatusListener(_statusListener);
+            _statusListener = null;
+        }
+
+        private void RenderStatus()
+        {
+            RenderStatus(_row?.StatusProvider, _statusLine, _statusText, _statusSpinner, _statusDot);
         }
     }
 

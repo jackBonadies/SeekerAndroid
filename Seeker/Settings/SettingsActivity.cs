@@ -105,6 +105,7 @@ namespace Seeker
             base.OnResume();
 
             UPnpManager.Instance.SearchFinished += UpnpSearchFinished;
+            PrivilegesManager.Instance.PrivilegesChecked += OnPrivilegesChecked;
 
             //when you open up the directory selection with OpenDocumentTree the SettingsActivity is paused
             this.UpdateDirectoryViews();
@@ -113,6 +114,12 @@ namespace Seeker
             SharedFileService.SharingStatusChangedEvent += SharingStatusUpdated;
             EnsureParsingTicker(); // resume the live count if a parse is still running
 
+        }
+
+        private void OnPrivilegesChecked(object sender, EventArgs e)
+        {
+            SeekerState.ActiveActivityRef?.RunOnUiThread(() =>
+                _settingsAdapter?.NotifyRowChanged("account.privileges"));
         }
 
         private void SharingStatusUpdated(object sender, EventArgs e)
@@ -151,6 +158,7 @@ namespace Seeker
         {
 
             UPnpManager.Instance.SearchFinished -= UpnpSearchFinished;
+            PrivilegesManager.Instance.PrivilegesChecked -= OnPrivilegesChecked;
             StorageState.DirectoryUpdatedEvent -= DirectoryUpdated;
             SharedFileService.SharingStatusChangedEvent -= SharingStatusUpdated;
             StopParsingTicker();
@@ -345,7 +353,6 @@ namespace Seeker
 
         private void CheckPriv()
         {
-            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.checking_priv_), ToastLength.Short);
             PrivilegesManager.Instance.GetPrivilegesAPI(true);
         }
 
