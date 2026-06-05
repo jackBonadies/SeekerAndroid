@@ -460,6 +460,19 @@ namespace Seeker
             Address = Address ?? "mock.server";
             ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn, "Logged in");
             ServerInfoReceived?.Invoke(this, new ServerInfo(parentMinSpeed: 1, parentSpeedRatio: 1, wishlistInterval: 120));
+            RaisePrivilegedUserList();
+        }
+
+        private void RaisePrivilegedUserList()
+        {
+            if (_random.Next(0, 3) == 0)
+            {
+                RaisePrivilegedUserListReceived(new[] { Username, "test" });
+            } 
+            else
+            {
+                RaisePrivilegedUserListReceived(new[] { "test" });
+            }
         }
 
         public async Task ConnectAsync(string address, int port, string username, string password, CancellationToken? cancellationToken = null)
@@ -2091,18 +2104,45 @@ namespace Seeker
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public Task<int> GetPrivilegesAsync(CancellationToken? cancellationToken = null)
+        public async Task<int> GetPrivilegesAsync(CancellationToken? cancellationToken = null)
         {
-            if (GetPrivilegesAsyncHandler != null) return GetPrivilegesAsyncHandler(cancellationToken);
-            return Task.FromResult(0);
+            if (GetPrivilegesAsyncHandler != null) return await GetPrivilegesAsyncHandler(cancellationToken);
+            int wait = getBimodalDelay(100, 10000);
+            await Task.Delay(wait);
+            triggerFailure(4);
+            int seconds = 0;
+            int roll = _random.Next(0, 3);
+            if (roll == 0)
+            {
+                seconds = 3600 * _random.Next(2, 24);
+            } 
+            else if (roll == 1)
+            {
+                seconds = 3600 * 24 * _random.Next(2, 100);
+            }
+            return await Task.FromResult(seconds);
+        }
+
+        private int getBimodalDelay(int fast = 100, int slow = 10_000)
+        {
+            bool isfast = _random.Next(0,2) == 0;
+            int wait = isfast ? fast : slow;
+            return wait;
+        }
+
+        private void triggerFailure(int chance = 4)
+        {
+            if (_random.Next(0,chance) == 0)
+            {
+                throw new Exception("failure");
+            }
         }
 
         public async Task<UserStatistics> GetUserStatisticsAsync(string username, CancellationToken? cancellationToken = null)
         {
             if (GetUserStatisticsAsyncHandler != null) return await GetUserStatisticsAsyncHandler(username, cancellationToken);
             // this will either be very slow or very fast to test it coming in before or after UserInfo
-            bool fast = _random.Next(0,2) == 0;
-            int wait = fast ? 100 : 10_000;
+            int wait = getBimodalDelay();
             await Task.Delay(wait);
             var userStats = new UserStatistics(username, _random.Next(100_000, 10_000_000), _random.Next(0, 100), _random.Next(0, 100_000), _random.Next(0, 10_000));
             this.UserStatisticsChanged?.Invoke(this, userStats);
