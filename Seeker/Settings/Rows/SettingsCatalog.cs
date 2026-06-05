@@ -660,7 +660,7 @@ namespace Seeker.Settings.Rows
                 Id = "account.privileges",
                 TitleRes = Resource.String.Privileges,
                 KeywordsRes = Resource.String.keywords_privileges,
-                IconRes = Resource.Drawable.account_star,
+                IconRes = Resource.Drawable.account_star_outline,
                 OnClick = (h, r) => PrivilegesBottomSheet.Show(h),
                 StatusProvider = () =>
                 {

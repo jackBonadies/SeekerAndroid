@@ -1384,7 +1384,7 @@ The standard way of requesting folder access does not always persist permissions
     <string name="search_settings">Search settings</string>
     <string name="no_matching_settings">No matching settings</string>
     <string name="invalid_number">Enter a valid number</string>
-    <string name="value_must_be_between">Value must be between %1$d and %2$d</string>
+    <string name="value_must_be_between">Value must be between {0} and {1}</string>
     <string name="speed_limit_enable">Enable limit</string>
     <string name="speed_limit_per_transfer">Per transfer</string>
     <string name="speed_limit_off">Off</string>
