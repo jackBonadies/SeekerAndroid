@@ -172,37 +172,37 @@ Könyvtárak száma: {5}\"
     <string name="type_chatroom_ticker_message">Ticker Message</string>
 
     <string name="change_download_folder">Change Download Folder</string>
-    <string name="max_search_results">Max Search Results:</string>
+    <string name="max_search_results">Max search results</string>
     <string name="only_show_free_slots">
-        Only Show Results of Users with Free Slots
+        Only show results of users with free slots
     </string>
-    <string name="start_service_on_startup">Start Service on Startup</string>
+    <string name="start_service_on_startup">Start service on startup</string>
     <string name="allow_private_room_invitations">
-        Allow Private Room Invitations
+        Allow private room invitations
     </string>
 
     <string name="show_bottom_notifs_complete">
-        Show Notifications for File Completed
+        Notify on file complete
     </string>
     <string name="show_notifs_on_folder_complete">
-        Show Notifications for Folder Completed
+        Notify on folder complete
     </string>
-    <string name="remember_search_history">Remember Search History</string>
-    <string name="clear_search_history">Clear Search History</string>
-    <string name="file_backed_downloads">File Backed Downloads</string>
-    <string name="night_mode_options">Night Mode Option</string>
-    <string name="enable_sharing">Enable Sharing</string>
+    <string name="remember_search_history">Remember search history</string>
+    <string name="clear_search_history">Clear search history</string>
+    <string name="file_backed_downloads">File backed downloads</string>
+    <string name="night_mode_options">Night mode option</string>
+    <string name="enable_sharing">Enable sharing</string>
     <string name="set_shared_folder">Set Shared Folder</string>
     <string name="browse_yourself">Browse Self</string>
-    <string name="enable_listening">Enable Listening</string>
-    <string name="change_port">Change Port</string>
+    <string name="enable_listening">Enable listening</string>
+    <string name="change_port">Change port</string>
     <string name="port">Port</string>
-    <string name="check_your_port_status">Check Status</string>
+    <string name="check_your_port_status">Check status</string>
     <string name="use_pnp_for_port_forwarding">
-        Use UPnP for Port Forwarding
+        UPnP port forwarding
     </string>
-    <string name="edit_your_user_info">Edit User Info</string>
-    <string name="restore_default_settings">Restore Defaults</string>
+    <string name="edit_your_user_info">Edit user info</string>
+    <string name="restore_default_settings">Restore default settings</string>
 
     <string name="no_transfers_yet">
         No downloads currently, as you download content it will appear here
@@ -761,9 +761,9 @@ Könyvtárak száma: {5}\"
         No uploads currently, failed to set up shares
     </string>
 
-    <string name="auto_clear_complete">Auto Clear Complete Downloads</string>
+    <string name="auto_clear_complete">Auto-clear complete downloads</string>
     <string name="auto_clear_complete_uploads">
-        Auto Clear Complete Uploads
+        Auto-clear complete uploads
     </string>
 
     <string name="download_remaining">{0} download remaining</string>
@@ -951,42 +951,40 @@ Könyvtárak száma: {5}\"
     <string name="UsingThisWizardLong">
         Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options &gt; Extras &gt; \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences &gt; Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.
     </string>
-    <string name="CurrentDownloadFolder_">Current Download Folder:</string>
+    <string name="CurrentDownloadFolder_">Download folder</string>
     <string name="CreateCompleteAndIncomplete">
-        Create Soulseek Complete and Soulseek Incomplete Directories
+        Create Soulseek Complete and Soulseek Incomplete directories
     </string>
-    <string name="CreateUsernameSubfolders">Create Username Subfolders</string>
+    <string name="CreateUsernameSubfolders">Create username subfolders</string>
     <string name="DoNotCreateSubfoldersForSingleDownloads">
-        Do not create Subfolders for Single Downloads
+        Skip subfolders for single files
     </string>
-    <string name="ShowSmartFilters">Show Smart Filters</string>
+    <string name="ShowSmartFilters">Show smart filters</string>
     <string name="ShowPrivateLockedSearch">
-        Show Private (Locked) Files in Search Results
+        Show private (locked) files in search results
     </string>
     <string name="ShowPrivateLockedBrowse">
-        Show Private (Locked) Files in Browse Response
+        Show private (locked) files in browse response
     </string>
-    <string name="RememberRecent">Remember Recent Users</string>
-    <string name="ClearRecentUsers">Clear Recent Users</string>
+    <string name="RememberRecent">Remember recent users</string>
+    <string name="ClearRecentUsers">Clear recent users</string>
     <string name="AutoRetryFailedOfflineOnline">
-        Auto-Retry Failed Downloads When User Goes Back Online
+        Auto-retry failed downloads when user goes back online
     </string>
     <string name="AwayOnInactivity">
-        Automatically Set Status to Away on Inactivity
+        Set status to away when inactive
     </string>
-    <string name="DayVarient_">Day Variant</string>
-    <string name="NightVarient_">Night Variant</string>
-    <string name="NoSharedAdd">
-        No Shared Folders. Tap \'Add\' to get started.
-    </string>
+    <string name="DayVarient_">Day theme</string>
+    <string name="NightVarient_">Night theme</string>
+    <string name="NoSharedAdd">No shared folders</string>
     <string name="RescanShares">Rescan Shares</string>
     <string name="PauseSharingIfMetered">
-        Pause Sharing if on Metered (Mobile) Connection
+        Pause sharing on metered (mobile) connection
     </string>
-    <string name="LimitDownloadSpeed">Limit Download Speed</string>
-    <string name="LimitUploadSpeed">Limit Upload Speed</string>
-    <string name="LimitConcurrentDownloads">Limit Concurrent Downloads</string>
-    <string name="EnableDiagnostics">Enable Diagnostics</string>
+    <string name="LimitDownloadSpeed">Limit download speed</string>
+    <string name="LimitUploadSpeed">Limit upload speed</string>
+    <string name="LimitConcurrentDownloads">Limit concurrent downloads</string>
+    <string name="EnableDiagnostics">Enable diagnostics</string>
     <string name="ImportExternalClientData">Import external client data</string>
     <string name="LockedUserListOnly">
         Locked (Only User List can Download)
@@ -1100,9 +1098,9 @@ Könyvtárak száma: {5}\"
     <string name="Automatic">Automatic</string>
 
     <string name="ManuallySetIncompleteFolder">
-        Override Incomplete Folder Location
+        Override incomplete folder location
     </string>
-    <string name="CurrentIncompleteFolder">Current Incomplete Folder:</string>
+    <string name="CurrentIncompleteFolder">Incomplete folder</string>
     <string name="ClearFolder">Clear Folder</string>
 
     <string name="HideSize">Hide Size</string>
@@ -1110,7 +1108,7 @@ Könyvtárak száma: {5}\"
 
     <string name="Num_Selected">{0} Selected</string>
 
-    <string name="ExportClientData">Export Client Data</string>
+    <string name="ExportClientData">Export client data</string>
     <string name="export_more_info">
         Export User List, Ignore/Block List, User Notes, and Wishlist to xml. Useful for backing up or migrating data to new phone.
     </string>
@@ -1119,7 +1117,7 @@ Könyvtárak száma: {5}\"
     </string>
 
     <string name="ForceFilesystemPermission">
-        Force Filesystem Permissions
+        Force filesystem permissions
     </string>
     <string name="permission_already_successfully_granted">
         Permission has already been succesfully granted
@@ -1133,7 +1131,7 @@ Könyvtárak száma: {5}\"
 
     <string name="setUpSharing">Set up Sharing</string>
 
-    <string name="change_password">Change Password</string>
+    <string name="change_password">Change password</string>
     <string name="new_password">New Password</string>
     <string name="cannot_be_empty">Cannot be empty</string>
 

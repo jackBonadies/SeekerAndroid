@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Two outlined MaterialButtons, one aligned left and one aligned right, separated by a
+     weighted Space. No title/subtitle/icon. Text/stroke colors are assigned in code
+     (ButtonPairViewHolder) to follow the primary theme color, matching the action-row button. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rowRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonPairLeft"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:strokeWidth="2dp"
+        android:minHeight="36dp"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:textAllCaps="false"
+        android:textSize="13sp" />
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonPairRight"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:strokeWidth="2dp"
+        android:minHeight="36dp"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:textAllCaps="false"
+        android:textSize="13sp" />
+</LinearLayout>

@@ -329,7 +329,7 @@ namespace Seeker
 
             //TODO2026 - need to think about this
             //if we have all the conditions to share, then set sharing up.
-            if (SharedFileService.MeetsSharingConditions() && !SharedFileService.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
+            if (SharedFileService.MeetsSharingConditions() && !SharedFileService.ParseStatus.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
             {
                 Seeker.Services.SharingService.SetUpSharing();
             }

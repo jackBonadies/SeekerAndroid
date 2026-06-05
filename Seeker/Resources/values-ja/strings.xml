@@ -170,7 +170,7 @@
     <string name="type_chatroom_ticker_message">Ticker Message</string>
 
     <string name="change_download_folder">Change Download Folder</string>
-    <string name="max_search_results">Max Search Results:</string>
+    <string name="max_search_results">Max Search Results</string>
     <string name="only_show_free_slots">
         Only Show Results of Users with Free Slots
     </string>
@@ -180,10 +180,10 @@
     </string>
 
     <string name="show_bottom_notifs_complete">
-        Show Notifications for File Completed
+        Notify on file complete
     </string>
     <string name="show_notifs_on_folder_complete">
-        Show Notifications for Folder Completed
+        Notify on folder complete
     </string>
     <string name="remember_search_history">Remember Search History</string>
     <string name="clear_search_history">Clear Search History</string>
@@ -759,9 +759,9 @@
         No uploads currently, failed to set up shares
     </string>
 
-    <string name="auto_clear_complete">Auto Clear Complete Downloads</string>
+    <string name="auto_clear_complete">Auto-Clear Complete Downloads</string>
     <string name="auto_clear_complete_uploads">
-        Auto Clear Complete Uploads
+        Auto-Clear Complete Uploads
     </string>
 
     <string name="download_remaining">{0} download remaining</string>
@@ -949,13 +949,13 @@
     <string name="UsingThisWizardLong">
         Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options &gt; Extras &gt; \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences &gt; Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.
     </string>
-    <string name="CurrentDownloadFolder_">Current Download Folder:</string>
+    <string name="CurrentDownloadFolder_">Download folder</string>
     <string name="CreateCompleteAndIncomplete">
         Create Soulseek Complete and Soulseek Incomplete Directories
     </string>
     <string name="CreateUsernameSubfolders">Create Username Subfolders</string>
     <string name="DoNotCreateSubfoldersForSingleDownloads">
-        Do not create Subfolders for Single Downloads
+        Skip Subfolders for Single Files
     </string>
     <string name="ShowSmartFilters">Show Smart Filters</string>
     <string name="ShowPrivateLockedSearch">
@@ -970,16 +970,14 @@
         Auto-Retry Failed Downloads When User Goes Back Online
     </string>
     <string name="AwayOnInactivity">
-        Automatically Set Status to Away on Inactivity
+        Set status to away when inactive
     </string>
-    <string name="DayVarient_">Day Variant</string>
-    <string name="NightVarient_">Night Variant</string>
-    <string name="NoSharedAdd">
-        No Shared Folders. Tap \'Add\' to get started.
-    </string>
+    <string name="DayVarient_">Day theme</string>
+    <string name="NightVarient_">Night theme</string>
+    <string name="NoSharedAdd">No shared folders</string>
     <string name="RescanShares">Rescan Shares</string>
     <string name="PauseSharingIfMetered">
-        Pause Sharing if on Metered (Mobile) Connection
+        Pause Sharing on Metered (Mobile) Connection
     </string>
     <string name="LimitDownloadSpeed">Limit Download Speed</string>
     <string name="LimitUploadSpeed">Limit Upload Speed</string>
@@ -1100,7 +1098,7 @@
     <string name="ManuallySetIncompleteFolder">
         Override Incomplete Folder Location
     </string>
-    <string name="CurrentIncompleteFolder">Current Incomplete Folder:</string>
+    <string name="CurrentIncompleteFolder">Incomplete folder</string>
     <string name="ClearFolder">Clear Folder</string>
 
     <string name="HideSize">Hide Size</string>

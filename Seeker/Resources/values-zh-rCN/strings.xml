@@ -29,9 +29,8 @@
 \n\n这实际上意味着只要我们成功地收听(通过“检查状态”表示)，我们就会收到更多的搜索结果。 能够从更多人下载，上传到更多人等。
 \n\n寻找者会尝试通过 UPnP 自动转发端口(这是官方桌面客户端的做法)。 如果你没有在 Wifi 上，它将不起作用。 如果您在 VPN 上，请搜索如何为您的指定VPN端口转发， 如果你的路由器未启用 UPnP，你必须手动转发端口。</string>
     <string name="sharing_dialog">关于共享文件的几点值得注意。 当上传目录首次设置时 应用程序必须阅读文件并解析它们，以便于随后的搜索和浏览请求。 这可能需要几分钟。 请确保您正在分享的文件中没有任何私密或敏感的信息(基本上是使用您对官方灵魂客户的相同判断)。</string>
-    <string name="privileges_more_info">Privileges allow one to support the Soulseek creator (Nir) and the central server which this app depends on.
-\n\nIt also allows one to get queued ahead of non privileged users in the download queue.
-\n\nNote: any donations do not go to the creator of this unofficial android client, Seeker. I do not currently accept donations.</string>
+
+    <string name="privileges_more_info">Privileges help support the Soulseek Network and the central server this app depends on.\n\nThey also let you skip ahead of non-privileged users in download queues.\n\nNote: donations do not go to the creator of this unofficial Android client (Seeker). I do not currently accept donations.</string>
     <string name="no_messages">没有消息。点击\"+\"开始操作。</string>
     <string name="messages">留言</string>
     <string name="browse_files">浏览文件</string>
@@ -135,12 +134,12 @@ Directory Count: {5}\"</string>
     <string name="persist_it">Sticky</string>
     <string name="type_chatroom_ticker_message">Type Ticker Message</string>
     <string name="change_download_folder">Change Download Folder</string>
-    <string name="max_search_results">最大搜索结果： </string>
+    <string name="max_search_results">最大搜索结果</string>
     <string name="only_show_free_slots">Only Show Results of Users with Free Slots</string>
     <string name="start_service_on_startup">启动时启动服务</string>
     <string name="allow_private_room_invitations">Allow Private Room Invitations</string>
-    <string name="show_bottom_notifs_complete">Show Notifications for File Completed</string>
-    <string name="show_notifs_on_folder_complete">Show Notifications for Folder Completed</string>
+    <string name="show_bottom_notifs_complete">Notify on file complete</string>
+    <string name="show_notifs_on_folder_complete">Notify on folder complete</string>
     <string name="remember_search_history">Remember Search History</string>
     <string name="clear_search_history">Clear Search History</string>
     <string name="file_backed_downloads">File Backed Downloads</string>
@@ -500,8 +499,8 @@ Directory Count: {5}\"</string>
     <string name="no_uploads_yet">No uploads currently, as you upload files they will appear here</string>
     <string name="no_uploads_yet_not_sharing">No uploads currently, you are not sharing any files</string>
     <string name="no_uploads_yet_failed_to_set_up_shared_files">No uploads currently, failed to set up shares</string>
-    <string name="auto_clear_complete">Auto Clear Complete Downloads</string>
-    <string name="auto_clear_complete_uploads">Auto Clear Complete Uploads</string>
+    <string name="auto_clear_complete">Auto-Clear Complete Downloads</string>
+    <string name="auto_clear_complete_uploads">Auto-Clear Complete Uploads</string>
     <string name="download_remaining">{0} download remaining</string>
     <string name="downloads_remaining">{0} downloads remaining</string>
     <string name="upload_remaining">{0} upload remaining</string>
@@ -606,22 +605,22 @@ Directory Count: {5}\"</string>
     <string name="OnlineStatus">在线状态</string>
     <string name="NoUsersFound">未找到用户</string>
     <string name="UsingThisWizardLong">Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options &gt; Extras &gt; \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences &gt; Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.</string>
-    <string name="CurrentDownloadFolder_">当前下载文件夹： </string>
+    <string name="CurrentDownloadFolder_">下载文件夹</string>
     <string name="CreateCompleteAndIncomplete">Create Soulseek Complete and Soulseek Incomplete Directories</string>
     <string name="CreateUsernameSubfolders">Create Username Subfolders</string>
-    <string name="DoNotCreateSubfoldersForSingleDownloads">Do not create Subfolders for Single Downloads</string>
+    <string name="DoNotCreateSubfoldersForSingleDownloads">Skip Subfolders for Single Files</string>
     <string name="ShowSmartFilters">Show Smart Filters</string>
     <string name="ShowPrivateLockedSearch">Show Private (Locked) Files in Search Results</string>
     <string name="ShowPrivateLockedBrowse">Show Private (Locked) Files in Browse Response</string>
     <string name="RememberRecent">Remember Recent Users</string>
     <string name="ClearRecentUsers">清除最近的用户</string>
     <string name="AutoRetryFailedOfflineOnline">Auto-Retry Failed Downloads When User Goes Back Online</string>
-    <string name="AwayOnInactivity">Automatically Set Status to Away on Inactivity</string>
+    <string name="AwayOnInactivity">Set status to away when inactive</string>
     <string name="DayVarient_">Day Varient: </string>
     <string name="NightVarient_">Night Varient: </string>
-    <string name="NoSharedAdd">No Shared Folders. Tap \'Add\' to get started.</string>
+    <string name="NoSharedAdd">No shared folders</string>
     <string name="RescanShares">Rescan Shares</string>
-    <string name="PauseSharingIfMetered">Pause Sharing if on Metered (Mobile) Connection</string>
+    <string name="PauseSharingIfMetered">Pause Sharing on Metered (Mobile) Connection</string>
     <string name="LimitDownloadSpeed">限制下载速度</string>
     <string name="LimitUploadSpeed">限制上传速度</string>
     <string name="LimitConcurrentDownloads">限制同时下载数量</string>
@@ -700,7 +699,7 @@ Directory Count: {5}\"</string>
     <string name="SetLanguage">Language:</string>
     <string name="Automatic">Automatic</string>
     <string name="ManuallySetIncompleteFolder">Manually Set Incomplete Folder</string>
-    <string name="CurrentIncompleteFolder">Current Incomplete Folder:</string>
+    <string name="CurrentIncompleteFolder">Incomplete folder</string>
     <string name="ClearFolder">Clear Folder</string>
     <string name="HideSize">Hide Size</string>
     <string name="HideSpeed">Hide Speed</string>

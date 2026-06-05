@@ -8,7 +8,6 @@ using Seeker.Helpers;
 using Common;
 namespace Seeker.UPnP
 {
-    // TODO Org UPNP folder
     public class UPnpManager
     {
         public static Context Context = null;
@@ -83,11 +82,16 @@ namespace Seeker.UPnP
             {
                 return new Tuple<ListeningIcon, string>(ListeningIcon.OffIcon, Context.GetString(Resource.String.listener_off));
             }
+            // if we already got a successful mapping, short circuit (otherwise we have to wait for timeout)
+            else if (DiagStatus == UPnPDiagStatus.Success)
+            {
+                return new Tuple<ListeningIcon, string>(ListeningIcon.SuccessIcon, Context.GetString(Resource.String.upnp_success));
+            }
             else if (RunningStatus == UPnPRunningStatus.NeverStarted)
             {
                 return new Tuple<ListeningIcon, string>(ListeningIcon.OffIcon, Context.GetString(Resource.String.upnp_not_ran));
             }
-            else if (RunningStatus == UPnPRunningStatus.CurrentlyRunning)
+            else if (RunningStatus == UPnPRunningStatus.CurrentlyRunning) 
             {
                 return new Tuple<ListeningIcon, string>(ListeningIcon.PendingIcon, Context.GetString(Resource.String.upnp_currently_running));
             }
@@ -112,10 +116,6 @@ namespace Seeker.UPnP
                 else if (DiagStatus == UPnPDiagStatus.ErrorUnspecified)
                 {
                     return new Tuple<ListeningIcon, string>(ListeningIcon.ErrorIcon, Context.GetString(Resource.String.error));
-                }
-                else if (DiagStatus == UPnPDiagStatus.Success)
-                {
-                    return new Tuple<ListeningIcon, string>(ListeningIcon.SuccessIcon, Context.GetString(Resource.String.upnp_success));
                 }
                 else
                 {
@@ -303,11 +303,13 @@ namespace Seeker.UPnP
 
                 DevicesFound = 0;
                 DevicesSuccessfullyMapped = 0;
+                DiagStatus = UPnPDiagStatus.None;
                 RunningStatus = UPnPRunningStatus.CurrentlyRunning;
                 SearchStarted?.Invoke(null, new EventArgs());
                 if (Feedback)
                 {
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.attempting_to_find_and_open), ToastLength.Short);
+                    // the UI does this for us much better than a toast can - its redundant and hard to read
+                    // SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.attempting_to_find_and_open), ToastLength.Short);
                 }
 
                 CancelSearchAfterTime();

@@ -18,25 +18,17 @@ namespace Seeker.Services
     public static class SharedFileService
     {
         public static SharedFileCache SharedFileCache { get; private set; } = null;
-        public static bool FailedShareParse { get; private set; } = false;
-        private static volatile bool isParsing = false;
-        public static int NumberParsed { get; private set; } = 0;
         public static bool NumberOfSharedDirectoriesIsStale { get; private set; } = true;
         public static bool AttemptedToSetUpSharing = false; // TODO make setter private
         public static EventHandler<EventArgs> SharingStatusChangedEvent;
 
-        public static bool IsParsing // TODO make setter private
-        {
-            get
-            {
-                return isParsing;
-            }
-            set
-            {
-                isParsing = value;
-                NumberParsed = 0; //reset
-            }
-        }
+        // Sole owner of the mutable parse state
+        private static readonly ParsingStatusState _parseStatus = new ParsingStatusState();
+        public static IParsingStatus ParseStatus => _parseStatus;
+
+        /// <summary>Flip the global parsing flag. Starting a parse (true) resets all progress counters.
+        /// For external callers.</summary>
+        public static void SetParsing(bool value) => _parseStatus.IsParsing = value;
 
         public class FullFileInfosResult
         {
@@ -84,9 +76,11 @@ namespace Seeker.Services
                 DocumentFile uploadDirectory = uploadDirEntry.UploadDirectory;
                 GetAllFolderInfo(uploadDirEntry, out string rootFolderDisplayName, out _);
 
+                _parseStatus.BeginRoot(uploadDirEntry.Info.UploadDataDirectoryUri, presentableNameToFullFileInfos.Count);
                 traverseDirectoriesGatherFullFileInfos(SeekerState.ActiveActivityRef.ContentResolver, uploadDirectory.Uri, DocumentsContract.GetTreeDocumentId(uploadDirectory.Uri), uploadDirectory.Uri,
                     presentableNameToFullFileInfos, allDirs, allLockedDirs, allHiddenDirs, dirMappingFriendlyNameToUri, allMediaStoreInfo, previousFileInfoToUse, rootFolderDisplayName,
                     ref directoryCount);
+                _parseStatus.EndRoot(uploadDirEntry.Info.UploadDataDirectoryUri, presentableNameToFullFileInfos.Count); // final count + mark complete
             }
 
             return new FullFileInfosResult
@@ -271,10 +265,12 @@ namespace Seeker.Services
                 DocumentFile dir = uploadDirEntry.UploadDirectory;
                 GetAllFolderInfo(uploadDirEntry, out string rootFolderDisplayName, out _);
 
+                _parseStatus.BeginRoot(uploadDirEntry.Info.UploadDataDirectoryUri, pairs.Count);
                 traverseDirectoryEntriesLegacy(dir, pairs, allDirs, allLockedDirs,
                     allHiddenDirs, dirMappingFriendlyNameToUri,
                     previousFileInfoToUse, rootFolderDisplayName,
                     ref directoryCount);
+                _parseStatus.EndRoot(uploadDirEntry.Info.UploadDataDirectoryUri, pairs.Count);
             }
 
             return new FullFileInfosResult
@@ -735,12 +731,8 @@ namespace Seeker.Services
                         }
 
                         presentableNameToFullFileInfos.Add(presentableName, new Tuple<long, string, Tuple<int, int, int, int>, bool, bool>(size, childUri.ToString(), attributes, FileFilterHelper.IsLockedFile(presentableName), FileFilterHelper.IsHiddenFile(presentableName)));
-                        if (presentableNameToFullFileInfos.Count % 50 == 0)
-                        {
-                            //update public status variable every so often
-                            SharedFileService.NumberParsed = presentableNameToFullFileInfos.Count;
-                        }
-                        //                        pairs.Add(new Tuple<string, string, long, string>(searchableName, childUri.ToString(), size, presentableName));
+                        _parseStatus.NumberParsed = presentableNameToFullFileInfos.Count;
+                        _parseStatus.UpdateCurrentRoot(presentableNameToFullFileInfos.Count);
 
                         string fname = SimpleHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
                                                                                                               //for the brose response should only be the filename!!! 
@@ -811,11 +803,9 @@ namespace Seeker.Services
                     }
 
                     pairs.Add(presentableName, new Tuple<long, string, Tuple<int, int, int, int>, bool, bool>(childDocFile.Length(), childDocFile.Uri.ToString(), attributes, FileFilterHelper.IsLockedFile(presentableName), FileFilterHelper.IsHiddenFile(presentableName))); //todo attributes was null here???? before
-                    if (pairs.Count % 50 == 0)
-                    {
-                        //update public status variable every so often
-                        SharedFileService.NumberParsed = pairs.Count;
-                    }
+                    _parseStatus.NumberParsed = pairs.Count;
+                    _parseStatus.UpdateCurrentRoot(pairs.Count);
+
                     string fname = SimpleHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
                                                                                                           //for the brose response should only be the filename!!! 
                                                                                                           //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
@@ -920,7 +910,7 @@ namespace Seeker.Services
                     int nonHiddenCountForServer = presentableNameToFullFileInfo.Count(pair1 => !pair1.Value.Item5);
                     Logger.Debug($"Non Hidden Count for Server: {nonHiddenCountForServer}");
 
-                    SharedFileService.NumberParsed = int.MaxValue; //our signal that we are finishing up...
+                    _parseStatus.NumberParsed = ParsingStatusState.FinishingUpSentinel; //our signal that we are finishing up...
 
                     Dictionary<int, string> fileKeyToPresentableName = GenerateFileKeyToPresentableNameIndex(presentableNameToFullFileInfo);
                     Dictionary<string, List<int>> searchTermTokenToListOfFileKeys = GenerateSearchTermTokenToFileKeysIndex(presentableNameToFullFileInfo, fileKeyToPresentableName);
@@ -965,7 +955,7 @@ namespace Seeker.Services
                     }
                 }
                 success = true;
-                SharedFileService.FailedShareParse = false;
+                _parseStatus.FailedShareParse = false;
                 SharedFileService.SharedFileCache.SuccessfullyInitialized = true;
             }
             catch (Exception e)
@@ -1018,7 +1008,7 @@ namespace Seeker.Services
                     //}
                     //SeekerState.UploadDataDirectoryUri = null;
                     //SeekerState.UploadDataDirectoryUriIsFromTree = true;
-                    SharedFileService.FailedShareParse = true;
+                    _parseStatus.FailedShareParse = true;
                     //if success if false then SharedFileService.SharedFileCache might be null still causing a crash!
                     if (SharedFileService.SharedFileCache != null)
                     {
@@ -1197,7 +1187,7 @@ namespace Seeker.Services
         /// <returns></returns>
         public static bool MeetsSharingConditions()
         {
-            return PreferencesState.SharingOn && UploadDirectoryManager.UploadDirectories.Count != 0 && !SharedFileService.IsParsing && !UploadDirectoryManager.AreAllFailed();
+            return PreferencesState.SharingOn && UploadDirectoryManager.UploadDirectories.Count != 0 && !_parseStatus.IsParsing && !UploadDirectoryManager.AreAllFailed();
         }
 
         /// <summary>

@@ -179,7 +179,7 @@
     <string name="type_chatroom_ticker_message">Тикер (закріплене повідомлення)</string>
 
     <string name="change_download_folder">Змінити папку завантаження</string>
-    <string name="max_search_results">Макс. кількість результатів пошуку:</string>
+    <string name="max_search_results">Макс. кількість результатів пошуку</string>
     <string name="only_show_free_slots">
         Показувати лише результати користувачів із вільними комірками
     </string>
@@ -958,13 +958,13 @@
     <string name="UsingThisWizardLong">
         За допомогою цього майстра можна імпортувати дані клієнта з SoulseekQT або Nicotine+.\n\nЩоб отримати дані клієнта з SoulseekQT, перейдіть до «Параметри» &gt; «Додатково» &gt; «Експортувати дані конфігурації клієнта», тип файлу має бути .scd1. Для Nicotine+ перейдіть у «Параметри» &gt; «Експорт», типом файлу може бути .tar.bz2 або необроблений файл конфігурації.\n\nSeeker імпортує список користувачів, список ігнорованих/недоступних,список «Вибране» і примітки користувачів. На наступних екранах можна буде вибрати, що експортувати.\n\nНатисніть «Імпорт», щоб почати.
     </string>
-    <string name="CurrentDownloadFolder_">Поточна папка для завантаження:</string>
+    <string name="CurrentDownloadFolder_">Папка для завантаження</string>
     <string name="CreateCompleteAndIncomplete">
         Створити каталоги Soulseek Complete і Soulseek Incomplete
     </string>
     <string name="CreateUsernameSubfolders">Створити підпапки імені користувача</string>
     <string name="DoNotCreateSubfoldersForSingleDownloads">
-        Do not create Subfolders for Single Downloads
+        Skip subfolders for single files
     </string>
     <string name="ShowSmartFilters">Показати розумні фільтри</string>
     <string name="ShowPrivateLockedSearch">
@@ -983,9 +983,7 @@
     </string>
     <string name="DayVarient_">Денний варіант</string>
     <string name="NightVarient_">Нічний варіант</string>
-    <string name="NoSharedAdd">
-        Немає спільних папок. Натисніть «Додати», щоб почати.
-    </string>
+    <string name="NoSharedAdd">Немає спільних папок</string>
     <string name="RescanShares">Повторне сканування</string>
     <string name="PauseSharingIfMetered">
         Призупинити спільний доступ, якщо використовується лічильний (мобільний) зв\'язок
@@ -1109,7 +1107,7 @@
     <string name="ManuallySetIncompleteFolder">
         Вручну встановити папку для незавершених завантажень
     </string>
-    <string name="CurrentIncompleteFolder">Поточна папка для незавершених завантажень:</string>
+    <string name="CurrentIncompleteFolder">Папка для незавершених завантажень</string>
     <string name="ClearFolder">Очистити папку</string>
 
     <string name="HideSize">Приховати розмір</string>
@@ -1126,7 +1124,7 @@
     </string>
 
     <string name="ForceFilesystemPermission">
-        Force Filesystem Permissions
+        Force filesystem permissions
     </string>
     <string name="permission_already_successfully_granted">
         Permission has already been succesfully granted
@@ -1140,7 +1138,7 @@
 
     <string name="setUpSharing">Set up Sharing</string>
 
-    <string name="change_password">Change Password</string>
+    <string name="change_password">Change password</string>
     <string name="new_password">New Password</string>
     <string name="cannot_be_empty">Cannot be empty</string>
 

@@ -1,0 +1,131 @@
+using Android.Content;
+using Common;
+using Seeker.Helpers;
+using System.Collections.Generic;
+
+namespace Seeker.Settings.Rows
+{
+    /// <summary>
+    /// Static methods to launch BottomSheets (language, theme, day/night)
+    /// </summary>
+    internal static class SettingPickers
+    {
+        public static List<(string label, string value)> BuildLanguageOptions(Context ctx)
+        {
+            return new List<(string label, string value)>
+            {
+                (ctx.GetString(Resource.String.Automatic), PreferencesState.FieldLangAuto),
+                ("العربية", PreferencesState.FieldLangAr),            // Arabic
+                ("Català", PreferencesState.FieldLangCa),             // Catalan
+                ("čeština", PreferencesState.FieldLangCs),            // Czech
+                ("Dansk", PreferencesState.FieldLangDa),              // Danish
+                ("Deutsch", PreferencesState.FieldLangDe),            // German
+                ("English", PreferencesState.FieldLangEn),
+                ("Español", PreferencesState.FieldLangEs),            // Spanish
+                ("Français", PreferencesState.FieldLangFr),           // French
+                ("italiano", PreferencesState.FieldLangIt),           // Italian
+                ("Magyar", PreferencesState.FieldLangHu),             // Hungarian
+                ("Nederlands", PreferencesState.FieldLangNl),         // Dutch
+                ("Norsk", PreferencesState.FieldLangNo),              // Norwegian
+                ("Polski", PreferencesState.FieldLangPl),             // Polish
+                ("Português (Brazil)", PreferencesState.FieldLangPtBr),
+                ("Português (Portugal)", PreferencesState.FieldLangPtPt),
+                ("ру́сский язы́к", PreferencesState.FieldLangRu),       // Russian
+                ("Srpski", PreferencesState.FieldLangSr),             // Serbian
+                ("українська мо́ва", PreferencesState.FieldLangUk),     // Ukrainian
+                ("简体中文", PreferencesState.FieldLangZhCn),           // Chinese Simplified
+                ("日本語", PreferencesState.FieldLangJa),              // Japanese
+            };
+        }
+
+        public static void PickLanguage(ISettingsHost host, ValueRow row)
+        {
+            var options = BuildLanguageOptions(host.Activity);
+            OptionPickerBottomSheet.ShowOptions(host, row, options,
+                // GetLegacyLanguageString reflects the per-app locale on API 33+,
+                // falling back to the saved preference on older devices.
+                () => LocaleHelper.GetLegacyLanguageString(),
+                v =>
+                {
+                    if (LocaleHelper.GetLegacyLanguageString() == v)
+                    {
+                        return;
+                    }
+                    PreferencesState.Language = v;
+                    PreferencesManager.SaveLanguage();
+                    LocaleHelper.SetLanguage(v);
+                });
+        }
+
+        public static void PickDayNightMode(ISettingsHost host, ValueRow row)
+        {
+            var options = new List<(string label, int value)>
+            {
+                ("Follow system", -1),
+                ("Light", 1),
+                ("Dark", 2),
+            };
+            OptionPickerBottomSheet.ShowOptions(host, row, options,
+                () => PreferencesState.DayNightMode,
+                v => {
+                    var old = PreferencesState.DayNightMode;
+                    PreferencesState.DayNightMode = v;
+                    PreferencesManager.SaveDayNightMode();
+                    if (old != v)
+                    {
+                        AndroidX.AppCompat.App.AppCompatDelegate.DefaultNightMode = v;
+                    }
+                });
+        }
+
+        public static void PickDayVariant(ISettingsHost host, ValueRow row)
+        {
+            var options = new List<(string label, DayThemeType value)>
+            {
+                ("Classic Purple", DayThemeType.ClassicPurple),
+                ("Red", DayThemeType.Red),
+                ("Blue", DayThemeType.Blue),
+                ("Grey", DayThemeType.Grey),
+            };
+            OptionPickerBottomSheet.ShowOptions(host, row, options,
+                () => PreferencesState.DayModeVariant,
+                v => {
+                    var old = PreferencesState.DayModeVariant;
+                    PreferencesState.DayModeVariant = v;
+                    PreferencesManager.SaveDayModeVariant();
+                    if (old != v && !host.Activity.Resources.Configuration.UiMode
+                            .HasFlag(Android.Content.Res.UiMode.NightYes))
+                    {
+                        UiHelpers.SetActivityTheme(host.Activity);
+                        SeekerApplication.RecreateActivies();
+                    }
+                });
+        }
+
+        public static void PickNightVariant(ISettingsHost host, ValueRow row)
+        {
+            var options = new List<(string label, NightThemeType value)>
+            {
+                ("Classic Purple", NightThemeType.ClassicPurple),
+                ("Grey", NightThemeType.Grey),
+                ("Blue", NightThemeType.Blue),
+                ("Red", NightThemeType.Red),
+                ("Amoled Classic Purple", NightThemeType.AmoledClassicPurple),
+                ("Amoled Grey", NightThemeType.AmoledGrey),
+            };
+            OptionPickerBottomSheet.ShowOptions(host, row, options,
+                () => PreferencesState.NightModeVariant,
+                v => {
+                    var old = PreferencesState.NightModeVariant;
+                    PreferencesState.NightModeVariant = v;
+                    PreferencesManager.SaveNightModeVariant();
+                    if (old != v && host.Activity.Resources.Configuration.UiMode
+                            .HasFlag(Android.Content.Res.UiMode.NightYes))
+                    {
+                        UiHelpers.SetActivityTheme(host.Activity);
+                        SeekerApplication.RecreateActivies();
+                    }
+                });
+        }
+    }
+}

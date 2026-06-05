@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Centered "button card" row: an outlined MaterialButton (styled like the action-row button)
+     with an icon drawable, optional two-line subtext, and an optional info button to its right.
+     Text/stroke/icon colors are assigned in code (ButtonCardViewHolder) to follow the
+     destructive / primary theme color. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/buttonCardRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/buttonCardButton"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:strokeWidth="2dp"
+        android:minHeight="48dp"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        app:iconGravity="textStart"
+        app:iconPadding="12dp"
+        android:textAllCaps="false"
+        android:gravity="center"
+        android:textSize="14sp" />
+
+    <ImageView
+        android:id="@+id/buttonCardInfo"
+        style="@style/SettingsHelpIcon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="3dp"
+        android:visibility="gone" />
+</LinearLayout>

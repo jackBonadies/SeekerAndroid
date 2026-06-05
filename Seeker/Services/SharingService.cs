@@ -249,7 +249,7 @@ namespace Seeker.Services
             }
         }
 
-        public static Tuple<SharingIcons, string> GetSharingMessageAndIcon(out bool isParsing)
+        public static (SharingIcons iconToUse, string statusMessage) GetSharingMessageAndIcon(out bool isParsing)
         {
             isParsing = false;
             if (SharedFileService.MeetsSharingConditions() && SharedFileService.IsSharingSetUpSuccessfully())
@@ -257,48 +257,48 @@ namespace Seeker.Services
                 //try to parse this into a path: SeekerState.ShareDataDirectoryUri
                 if (SharedFileService.MeetsCurrentSharingConditions())
                 {
-                    return new Tuple<SharingIcons, string>(SharingIcons.On, SeekerState.ActiveActivityRef.GetString(Resource.String.success_sharing));
+                    return new (SharingIcons.On, SeekerState.ActiveActivityRef.GetString(Resource.String.success_sharing));
                 }
                 else
                 {
-                    return new Tuple<SharingIcons, string>(SharingIcons.OffDueToNetwork, "Sharing disabled on metered connection");
+                    return new (SharingIcons.OffDueToNetwork, "Sharing disabled on metered connection");
                 }
             }
             else if (SharedFileService.MeetsSharingConditions() && !SharedFileService.IsSharingSetUpSuccessfully())
             {
                 if (SharedFileService.SharedFileCache == null)
                 {
-                    return new Tuple<SharingIcons, string>(SharingIcons.Off, "Not yet initialized.");
+                    return new (SharingIcons.Off, "Not yet initialized.");
                 }
                 else
                 {
-                    return new Tuple<SharingIcons, string>(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_share_not_set));
+                    return new (SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_share_not_set));
                 }
             }
             else if (!PreferencesState.SharingOn)
             {
-                return new Tuple<SharingIcons, string>(SharingIcons.Off, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_off));
+                return new (SharingIcons.Off, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_off));
             }
-            else if (SharedFileService.IsParsing)
+            else if (SharedFileService.ParseStatus.IsParsing)
             {
                 isParsing = true;
-                return new Tuple<SharingIcons, string>(SharingIcons.CurrentlyParsing, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_currently_parsing));
+                return new(SharingIcons.CurrentlyParsing, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_currently_parsing));
             }
-            else if (SharedFileService.FailedShareParse)
+            else if (SharedFileService.ParseStatus.FailedShareParse)
             {
-                return new Tuple<SharingIcons, string>(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_failure_parsing));
+                return new(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_failure_parsing));
             }
             else if (UploadDirectoryManager.UploadDirectories.Count == 0)
             {
-                return new Tuple<SharingIcons, string>(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_share_not_set));
+                return new(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_share_not_set));
             }
             else if (UploadDirectoryManager.AreAllFailed())
             {
-                return new Tuple<SharingIcons, string>(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_error)); //TODO get error
+                return new(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_error)); //TODO get error
             }
             else
             {
-                return new Tuple<SharingIcons, string>(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_error));
+                return new(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_error));
             }
         }
     }

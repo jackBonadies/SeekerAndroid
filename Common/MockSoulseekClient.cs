@@ -2025,15 +2025,23 @@ namespace Seeker
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public Task<bool> ReconfigureOptionsAsync(SoulseekClientOptionsPatch patch, CancellationToken? cancellationToken = null)
+        public async Task<bool> ReconfigureOptionsAsync(SoulseekClientOptionsPatch patch, CancellationToken? cancellationToken = null)
         {
-            if (ReconfigureOptionsAsyncHandler != null) return ReconfigureOptionsAsyncHandler(patch, cancellationToken);
+            if (ReconfigureOptionsAsyncHandler != null) return await ReconfigureOptionsAsyncHandler(patch, cancellationToken);
             Options = (Options ?? new SoulseekClientOptions()).With(
                 searchResponseResolver: patch.SearchResponseResolver,
                 browseResponseResolver: patch.BrowseResponseResolver,
                 enqueueDownload: patch.EnqueueDownload,
                 directoryContentsResolver: patch.DirectoryContentsResolver);
-            return Task.FromResult(true);
+            bool fast = _random.Next(0, 2) == 0;
+            bool fault = _random.Next(0, 4) == 0;
+            var delay = fast ? 100 : 2000;
+            await Task.Delay(delay).ConfigureAwait(false);
+            if (fault)
+            {
+                throw new Exception("Failed");
+            }
+            return true;
         }
 
         public async Task<RoomList> GetRoomListAsync(CancellationToken? cancellationToken = null)

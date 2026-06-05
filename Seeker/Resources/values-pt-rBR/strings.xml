@@ -179,7 +179,7 @@ Contador de diretórios: {5}
     <string name="type_chatroom_ticker_message">Mensagem de apresentação</string>
 
     <string name="change_download_folder">Alterar pasta de download</string>
-    <string name="max_search_results">Máximo de resultados de pesquisa:</string>
+    <string name="max_search_results">Máximo de resultados de pesquisa</string>
     <string name="only_show_free_slots">
         Mostrar apenas os resultados de usuários com slots livres
     </string>
@@ -957,7 +957,7 @@ Contador de diretórios: {5}
     <string name="UsingThisWizardLong">
         Usando este assistente pode-se importar dados de clientes do SoulseekQT ou Nicotine+.\n\nPara obter dados do cliente da SoulseekQT vá para Opções &gt; Extras &gt;\'Exportar dados de configuração do cliente\', o tipo de arquivo deve ser .scd1. Para Nicotine+ vá para Preferências &gt; Exportar, o tipo de arquivo pode ser .tar.bz2 ou o arquivo de configuração bruto.\n\nO Seeker importará Lista de Usuários, Lista de Ignorados/Não Compartilhados, Lista de Desejos e Notas de Usuário.  Você poderá escolher o que exportar nas telas a seguir.\n\nToque em \'Importar\' para começar.
     </string>
-    <string name="CurrentDownloadFolder_">Pasta de transferência atual:</string>
+    <string name="CurrentDownloadFolder_">Pasta de transferência</string>
     <string name="CreateCompleteAndIncomplete">
         Criar diretórios Soulseek completo e Soulseek incompleto
     </string>
@@ -982,9 +982,7 @@ Contador de diretórios: {5}
     </string>
     <string name="DayVarient_">Variante do dia</string>
     <string name="NightVarient_">Variante noturna</string>
-    <string name="NoSharedAdd">
-        Não há pastas compartilhadas. Toque em \'Adicionar\' para começar.
-    </string>
+    <string name="NoSharedAdd">Não há pastas compartilhadas</string>
     <string name="RescanShares">Reescanear compartilhamentos</string>
     <string name="PauseSharingIfMetered">
         Pausar o compartilhamento se estiver em uma conexão limitada (móvel)
@@ -1106,9 +1104,9 @@ Contador de diretórios: {5}
     <string name="Automatic">Automático</string>
 
     <string name="ManuallySetIncompleteFolder">
-        Definir manualmente Pasta de Incompletos
+        Definir manualmente pasta de incompletos
     </string>
-    <string name="CurrentIncompleteFolder">Pasta de Incompletos atual:</string>
+    <string name="CurrentIncompleteFolder">Pasta de incompletos</string>
     <string name="ClearFolder">Limpar Pasta</string>
 
     <string name="HideSize">Ocultar Tamanho</string>

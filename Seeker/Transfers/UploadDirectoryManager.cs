@@ -112,10 +112,7 @@ namespace Seeker
             }
         }
 
-        public static String UploadDataDirectoryUri = null;
-        public static bool UploadDataDirectoryUriIsFromTree = true;
-
-        public static List<UploadDirectoryEntry> UploadDirectories;
+        public static List<UploadDirectoryEntry> UploadDirectories { get; private set; }
 
         public static bool IsFromTree(string presentablePath)
         {
@@ -238,8 +235,8 @@ namespace Seeker
             return interestedVolnames;
         }
 
-        public static List<string> PresentableNameLockedDirectories = new List<string>();
-        public static List<string> PresentableNameHiddenDirectories = new List<string>();
+        public static List<string> PresentableNameLockedDirectories { get; private set; } = new List<string>();
+        public static List<string> PresentableNameHiddenDirectories { get; private set; } = new List<string>();
 
         public static void UpdateWithDocumentFileAndErrorStates()
         {

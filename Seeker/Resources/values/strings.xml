@@ -24,6 +24,8 @@
 
     <string name="stop">Stop</string>
     <string name="start">Start</string>
+    <string name="stop_service">Stop service</string>
+    <string name="start_service">Start service</string>
 
     <string name="saerch_user_list">Search User List</string>
     <string name="search_room">Search Room</string>
@@ -45,7 +47,9 @@
 \n\nTurning this off, the partial download results are stored in memory until
         they are finished then they are saved to disk.
     </string>
-    <string name="keep_alive_service">
+    <string name="keep_alive_service_subtitle">Allows Seeker respond to search requests (share), receive chat messages, and run wishlist searches while in background</string> 
+		
+		<string name="keep_alive_service">
         This service allows Seeker to run in the background.
 \n\nThis is necessary to respond to search requests (if sharing), receive chat
         messages, and receive wishlist results while in the background.
@@ -77,14 +81,8 @@
         same judgement you would for the official soulseek client).
     </string>
 
-    <string name="privileges_more_info">
-        Privileges allow one to support the Soulseek creator (Nir) and the
-        central server which this app depends on.
-\n\nIt also allows one to get queued ahead of non privileged users in the
-        download queue.
-\n\nNote: any donations do not go to the creator of this unofficial android
-        client, Seeker. I do not currently accept donations.
-    </string>
+    <string name="privileges_more_info">Privileges help support the Soulseek Network and the central server this app depends on.\n\nThey also let you skip ahead of non-privileged users in download queues.\n\nNote: donations do not go to the creator of this unofficial Android client (Seeker). I do not currently accept donations.</string>
+
 
     <string name="no_messages">No messages</string>
     <string name="no_messages_subtitle">Messages from users will appear here</string>
@@ -302,37 +300,41 @@ Directory Count: {5}"
     <string name="section_account">Account</string>
 
     <string name="change_download_folder">Change Download Folder</string>
-    <string name="max_search_results">Max Search Results:</string>
+    <string name="max_search_results">Max search results</string>
     <string name="only_show_free_slots">
-        Only Show Results of Users with Free Slots
+        Only show results of users with free slots
     </string>
-    <string name="start_service_on_startup">Start Service on Startup</string>
+    <string name="start_service_on_startup">Start service on startup</string>
     <string name="allow_private_room_invitations">
-        Allow Private Room Invitations
+        Allow private room invitations
     </string>
 
     <string name="show_bottom_notifs_complete">
-        Show Notifications for File Completed
+        Notify on file complete
     </string>
     <string name="show_notifs_on_folder_complete">
-        Show Notifications for Folder Completed
+        Notify on folder complete
     </string>
-    <string name="remember_search_history">Remember Search History</string>
-    <string name="clear_search_history">Clear Search History</string>
-    <string name="file_backed_downloads">File Backed Downloads</string>
-    <string name="night_mode_options">Night Mode</string>
-    <string name="enable_sharing">Enable Sharing</string>
+    <string name="remember_search_history">Remember search history</string>
+    <string name="clear_search_history">Clear search history</string>
+    <string name="file_backed_downloads">File backed downloads</string>
+    <string name="night_mode_options">Night mode</string>
+    <string name="enable_sharing">Enable sharing</string>
     <string name="set_shared_folder">Set Shared Folder</string>
     <string name="browse_yourself">Browse Self</string>
-    <string name="enable_listening">Enable Listening</string>
-    <string name="change_port">Change Port</string>
+    <string name="enable_listening">Enable listening</string>
+    <string name="change_port">Change port</string>
     <string name="port">Port</string>
-    <string name="check_your_port_status">Check Status</string>
+    <string name="check_your_port_status">Check status</string>
     <string name="use_pnp_for_port_forwarding">
-        Use UPnP for Port Forwarding
+        UPnP port forwarding
     </string>
-    <string name="edit_your_user_info">Edit User Info</string>
-    <string name="restore_default_settings">Restore Defaults</string>
+    <string name="edit_your_user_info">Edit user info</string>
+    <string name="restore_default_settings">Restore default settings</string>
+    <string name="restore_defaults_subtitle">Resets every setting to factory state</string>
+    <string name="force_filesystem_subtitle">Android\'s standard folder permissions don\'t always persist. If Seeker keeps re-prompting for Download or Shared Folder access, this will grant persisted full-storage access via system settings.\n\nThe Play Store version cannot request this permission — requires F-droid (IzzyOnDroid) or GitHub release version.</string>
+    <string name="get_fdroid_build">Get F-Droid (IzzyOnDroid) Build</string>
+    <string name="get_github_build">Get GitHub Release Build</string>
 
     <string name="no_transfers_yet">
         No downloads currently, as you download content it will appear here
@@ -946,9 +948,9 @@ The standard way of requesting folder access does not always persist permissions
         No uploads currently, failed to set up shares
     </string>
 
-    <string name="auto_clear_complete">Auto Clear Complete Downloads</string>
+    <string name="auto_clear_complete">Auto-clear complete downloads</string>
     <string name="auto_clear_complete_uploads">
-        Auto Clear Complete Uploads
+        Auto-clear complete uploads
     </string>
 
     <string name="download_remaining">{0} download remaining</string>
@@ -1158,42 +1160,41 @@ The standard way of requesting folder access does not always persist permissions
         able to pick and choose what to export in the following
         screens.\n\nTap \'Import\' to get started.
     </string>
-    <string name="CurrentDownloadFolder_">Current Download Folder:</string>
+    <string name="CurrentDownloadFolder_">Download folder</string>
     <string name="CreateCompleteAndIncomplete">
-        Create Soulseek Complete and Soulseek Incomplete Directories
+        Create Soulseek Complete and Soulseek Incomplete directories
     </string>
-    <string name="CreateUsernameSubfolders">Create Username Subfolders</string>
+    <string name="CreateUsernameSubfolders">Create username subfolders</string>
     <string name="DoNotCreateSubfoldersForSingleDownloads">
-        Do not create Subfolders for Single Downloads
+        Skip subfolders for single files
     </string>
-    <string name="ShowSmartFilters">Show Smart Filters</string>
+    <string name="ShowSmartFilters">Show smart filters</string>
     <string name="ShowPrivateLockedSearch">
-        Show Private (Locked) Files in Search Results
+        Show private (locked) files in search results
     </string>
     <string name="ShowPrivateLockedBrowse">
-        Show Private (Locked) Files in Browse Response
+        Show private (locked) files in browse response
     </string>
-    <string name="RememberRecent">Remember Recent Users</string>
-    <string name="ClearRecentUsers">Clear Recent Users</string>
+    <string name="RememberRecent">Remember recent users</string>
+    <string name="ClearRecentUsers">Clear recent users</string>
     <string name="AutoRetryFailedOfflineOnline">
-        Auto-Retry Failed Downloads When User Goes Back Online
+        Auto-retry failed downloads when user goes back online
     </string>
     <string name="AwayOnInactivity">
-        Automatically Set Status to Away on Inactivity
+        Set status to away when inactive
     </string>
-    <string name="DayVarient_">Day Variant</string>
-    <string name="NightVarient_">Night Variant</string>
-    <string name="NoSharedAdd">
-        No Shared Folders. Tap \'Add\' to get started.
-    </string>
+    <string name="DayVarient_">Day theme</string>
+    <string name="NightVarient_">Night theme</string>
+    <string name="NoSharedAdd">No shared folders</string>
     <string name="RescanShares">Rescan Shares</string>
+    <string name="add_folder">Add folder</string>
     <string name="PauseSharingIfMetered">
-        Pause Sharing if on Metered (Mobile) Connection
+        Pause sharing on metered (mobile) connection
     </string>
-    <string name="LimitDownloadSpeed">Limit Download Speed</string>
-    <string name="LimitUploadSpeed">Limit Upload Speed</string>
-    <string name="LimitConcurrentDownloads">Limit Concurrent Downloads</string>
-    <string name="EnableDiagnostics">Enable Diagnostics</string>
+    <string name="LimitDownloadSpeed">Limit download speed</string>
+    <string name="LimitUploadSpeed">Limit upload speed</string>
+    <string name="LimitConcurrentDownloads">Limit concurrent downloads</string>
+    <string name="EnableDiagnostics">Enable diagnostics</string>
     <string name="ImportExternalClientData">Import external client data</string>
     <string name="LockedUserListOnly">
         Locked (Only User List can Download)
@@ -1307,9 +1308,9 @@ The standard way of requesting folder access does not always persist permissions
     <string name="Automatic">Automatic</string>
 
     <string name="ManuallySetIncompleteFolder">
-        Override Incomplete Folder Location
+        Override incomplete folder location
     </string>
-    <string name="CurrentIncompleteFolder">Current Incomplete Folder:</string>
+    <string name="CurrentIncompleteFolder">Incomplete folder</string>
     <string name="ClearFolder">Clear Folder</string>
 
     <string name="HideSize">Hide Size</string>
@@ -1319,7 +1320,7 @@ The standard way of requesting folder access does not always persist permissions
     <string name="DeleteSelected">Delete Selected</string>
     <string name="deleted_selected_message_histories">Deleted {0} conversation(s)</string>
 
-    <string name="ExportClientData">Export Client Data</string>
+    <string name="ExportClientData">Export client data</string>
     <string name="export_more_info">
         Export User List, Ignore/Block List, User Notes, and Wishlist to
         xml. Useful for backing up or migrating data to new phone.
@@ -1329,7 +1330,7 @@ The standard way of requesting folder access does not always persist permissions
     </string>
 
     <string name="ForceFilesystemPermission">
-        Force Filesystem Permissions
+        Force filesystem permissions
     </string>
     <string name="permission_already_successfully_granted">
         Permission has already been successfully granted
@@ -1343,7 +1344,7 @@ The standard way of requesting folder access does not always persist permissions
 
     <string name="setUpSharing">Set up Sharing</string>
 
-    <string name="change_password">Change Password</string>
+    <string name="change_password">Change password</string>
     <string name="new_password">New Password</string>
     <string name="cannot_be_empty">Cannot be empty</string>
 
@@ -1374,5 +1375,75 @@ The standard way of requesting folder access does not always persist permissions
     <string name="hr_ago">hr ago</string>
     <string name="yesterday">yesterday</string>
     <string name="days_ago">days ago</string>
+
+    <!-- Modern settings screen -->
+    <string name="shared_folders">Shared folders</string>
+    <string name="Privileges">Privileges</string>
+    <string name="search_settings">Search settings</string>
+    <string name="no_matching_settings">No matching settings</string>
+    <string name="invalid_number">Enter a valid number</string>
+    <string name="value_must_be_between">Value must be between %1$d and %2$d</string>
+    <string name="speed_limit_enable">Enable limit</string>
+    <string name="speed_limit_per_transfer">Per transfer</string>
+    <string name="speed_limit_off">Off</string>
+    <string name="speed_limit_kbs_total">{0} KB/s · total</string>
+    <string name="speed_limit_kbs_per_transfer">{0} KB/s · per transfer</string>
+    <string name="shared_folders_count_zero">No folders shared</string>
+    <string name="shared_folders_count_one">1 folder shared</string>
+    <string name="shared_folders_count_many">{0} folders shared</string>
+    <string name="folder_file_count_one">1 file</string>
+    <string name="folder_file_count">{0} files</string>
+    <string name="shared_summary_folders_files">{0} folders · {1} files</string>
+    <string name="edit_folder">Edit folder</string>
+    <string name="folder_hidden">Hidden</string>
+    <string name="folder_locked">Locked</string>
+    <string name="Donate">Donate</string>
+    <string name="sharing_parsing_count">Currently parsing ({0} files)</string>
+    <string name="sharing_parsing_finishing">Currently parsing (finishing up)</string>
+    <string name="setting_subtitle_listening_port">Incoming connection port</string>
+    <string name="setting_subtitle_max_concurrent">Maximum number of simultaneous downloads</string>
+    <string name="setting_subtitle_max_results">Per-search result cap</string>
+    <string name="setting_subtitle_download_folder">Where completed downloads are saved</string>
+    <string name="setting_subtitle_incomplete_folder">Where in-progress downloads are stored</string>
+    <string name="setting_subtitle_create_subfolders">Separate Complete &amp; Incomplete trees</string>
+    <string name="setting_subtitle_username_subfolders">Group downloads by sharer</string>
+    <string name="setting_subtitle_skip_subfolders">For single-file downloads</string>
+    <string name="setting_subtitle_override_incomplete">Store in-progress downloads elsewhere</string>
+    <string name="setting_subtitle_file_backed">Recommended · allows pausing / resuming downloads · less memory intensive</string>
+    <string name="setting_subtitle_auto_retry">When user comes back online</string>
+    <string name="setting_subtitle_import_client_data">Import data from SoulseekQT, Nicotine+</string>
+    <string name="setting_subtitle_export_client_data">Export userlist, ignore list, wishlist to xml · for backup or migration</string>
+    <string name="setting_subtitle_listening">Allows connecting to users with closed ports</string>
+
+    <!-- Search keyword synonyms -->
+    <string name="keywords_download_folder">location directory save destination</string>
+    <string name="keywords_incomplete_folder">location directory partial</string>
+    <string name="keywords_skip_subfolders">single file</string>
+    <string name="keywords_override_incomplete">location directory partial</string>
+    <string name="keywords_auto_clear_downloads">remove delete transfers</string>
+    <string name="keywords_max_results">results limit count</string>
+    <string name="keywords_locked_search">private hide files</string>
+    <string name="keywords_locked_browse">private hide files</string>
+    <string name="keywords_remember_search_history">recent past</string>
+    <string name="keywords_notif_folder_complete">notification download</string>
+    <string name="keywords_notif_toast">notification download</string>
+    <string name="keywords_remember_recent_users">history past</string>
+    <string name="keywords_auto_away">inactive idle</string>
+    <string name="keywords_night_mode">dark light theme night day</string>
+    <string name="keywords_day_variant">theme color appearance</string>
+    <string name="keywords_night_variant">theme color appearance</string>
+    <string name="keywords_enable_sharing">upload share</string>
+    <string name="keywords_auto_clear_uploads">remove delete transfers</string>
+    <string name="keywords_manage_shared">folders directories upload sharing</string>
+    <string name="keywords_port">listening</string>
+    <string name="keywords_upnp">router port forwarding nat</string>
+    <string name="keywords_download_speed">limit bandwidth throttle</string>
+    <string name="keywords_upload_speed">limit bandwidth throttle</string>
+    <string name="keywords_max_concurrent">throttle bandwidth parallel limit</string>
+    <string name="keywords_privileges">donate</string>
+    <string name="keywords_diagnostics">log debug bug</string>
+    <string name="keywords_force_filesystem">storage permission</string>
+    <string name="keywords_edit_user_info">profile bio</string>
+    <string name="keywords_restore_defaults">reset factory</string>
 
 </resources>
