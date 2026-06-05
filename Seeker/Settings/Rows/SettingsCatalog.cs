@@ -639,9 +639,16 @@ namespace Seeker.Settings.Rows
                     () => (PreferencesState.LimitSimultaneousDownloads,
                            PreferencesState.MaxSimultaneousLimit),
                     result => {
+                        bool changed = PreferencesState.LimitSimultaneousDownloads != result.Enabled
+                                    || (result.Enabled && PreferencesState.MaxSimultaneousLimit != result.Value);
                         PreferencesState.LimitSimultaneousDownloads = result.Enabled;
                         PreferencesState.MaxSimultaneousLimit = result.Value;
                         PreferencesManager.SaveMaxConcurrentDownloadsSettings(result.Enabled, result.Value);
+                        if (changed)
+                        {
+                            SeekerApplication.Toaster.ShowToastShort(
+                                host.Activity.GetString(Resource.String.takes_effect_on_next_startup));
+                        }
                     }),
             });
 

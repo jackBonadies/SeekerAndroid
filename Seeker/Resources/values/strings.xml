@@ -1001,6 +1001,8 @@ The standard way of requesting folder access does not always persist permissions
         {0} from {1} successfully completed.
     </string>
 
+    <string name="takes_effect_on_next_startup">This will take effect on next startup</string>
+
     <string name="sort_results_by">Sort By</string>
 
     <string name="next">Next</string>
