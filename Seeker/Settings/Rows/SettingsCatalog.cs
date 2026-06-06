@@ -128,7 +128,7 @@ namespace Seeker.Settings.Rows
                 // The original UI exposes the inverse (memory-backed); store as file-backed semantics.
                 Getter = () => !PreferencesState.MemoryBackedDownload,
                 Setter = v => { PreferencesState.MemoryBackedDownload = !v;
-                                PreferenceWriter.WriteBool(KeyConsts.M_MemoryBackedDownload, PreferencesState.MemoryBackedDownload); },
+                                PreferencesManager.SaveBoolean(KeyConsts.M_MemoryBackedDownload, PreferencesState.MemoryBackedDownload); },
             });
 
             rows.Add(new ToggleRow
@@ -139,7 +139,7 @@ namespace Seeker.Settings.Rows
                 IconRes = Resource.Drawable.clear_all_28dp,
                 Getter = () => PreferencesState.AutoClearCompleteDownloads,
                 Setter = v => { PreferencesState.AutoClearCompleteDownloads = v;
-                                PreferenceWriter.WriteBool(KeyConsts.M_AutoClearComplete, v); },
+                                PreferencesManager.SaveBoolean(KeyConsts.M_AutoClearComplete, v); },
             });
 
             rows.Add(new ToggleRow
@@ -165,7 +165,7 @@ namespace Seeker.Settings.Rows
                 OnClick = (h, r) => OptionPickerBottomSheet.ShowPresetInts(h, r, SearchResultPresets,
                     () => PreferencesState.NumberSearchResults,
                     v => { PreferencesState.NumberSearchResults = v;
-                           PreferenceWriter.WriteInt(KeyConsts.M_NumberSearchResults, v); }),
+                           PreferencesManager.SaveInt(KeyConsts.M_NumberSearchResults, v); }),
             });
 
             rows.Add(new ToggleRow
@@ -194,7 +194,7 @@ namespace Seeker.Settings.Rows
                 IconRes = Resource.Drawable.bolt_28dp,
                 Getter = () => PreferencesState.FreeUploadSlotsOnly,
                 Setter = v => { PreferencesState.FreeUploadSlotsOnly = v;
-                                PreferenceWriter.WriteBool(KeyConsts.M_OnlyFreeUploadSlots, v); },
+                                PreferencesManager.SaveBoolean(KeyConsts.M_OnlyFreeUploadSlots, v); },
             });
 
             rows.Add(new ToggleRow
@@ -206,7 +206,7 @@ namespace Seeker.Settings.Rows
                 // Original checkbox represents "show locked" → !HideLocked.
                 Getter = () => !PreferencesState.HideLockedResultsInSearch,
                 Setter = v => { PreferencesState.HideLockedResultsInSearch = !v;
-                                PreferenceWriter.WriteBool(KeyConsts.M_HideLockedSearch, PreferencesState.HideLockedResultsInSearch); },
+                                PreferencesManager.SaveBoolean(KeyConsts.M_HideLockedSearch, PreferencesState.HideLockedResultsInSearch); },
             });
             rows.Add(new ToggleRow
             {
@@ -216,7 +216,7 @@ namespace Seeker.Settings.Rows
                 IconRes = Resource.Drawable.lock_28dp,
                 Getter = () => !PreferencesState.HideLockedResultsInBrowse,
                 Setter = v => { PreferencesState.HideLockedResultsInBrowse = !v;
-                                PreferenceWriter.WriteBool(KeyConsts.M_HideLockedBrowse, PreferencesState.HideLockedResultsInBrowse); },
+                                PreferencesManager.SaveBoolean(KeyConsts.M_HideLockedBrowse, PreferencesState.HideLockedResultsInBrowse); },
             });
 
             rows.Add(new ToggleRow
@@ -227,7 +227,7 @@ namespace Seeker.Settings.Rows
                 IconRes = Resource.Drawable.history_28dp,
                 Getter = () => PreferencesState.RememberSearchHistory,
                 Setter = v => { PreferencesState.RememberSearchHistory = v;
-                                PreferenceWriter.WriteBool(KeyConsts.M_RememberSearchHistory, v); },
+                                PreferencesManager.SaveBoolean(KeyConsts.M_RememberSearchHistory, v); },
                 //DependentRowIds = new[] { "search.clear_history" }, // Clear history is always enabled
             });
             rows.Add(new ActionRow
@@ -300,7 +300,7 @@ namespace Seeker.Settings.Rows
                 // Original checkbox represents "show toast" → !DisableToastNotification.
                 Getter = () => !PreferencesState.DisableDownloadToastNotification,
                 Setter = v => { PreferencesState.DisableDownloadToastNotification = !v;
-                                PreferenceWriter.WriteBool(KeyConsts.M_DisableToastNotifications, PreferencesState.DisableDownloadToastNotification); },
+                                PreferencesManager.SaveBoolean(KeyConsts.M_DisableToastNotifications, PreferencesState.DisableDownloadToastNotification); },
             });
 
             rows.Add(new ToggleRow
@@ -311,7 +311,7 @@ namespace Seeker.Settings.Rows
                 IconRes = Resource.Drawable.history_28dp,
                 Getter = () => PreferencesState.ShowRecentUsers,
                 Setter = v => { PreferencesState.ShowRecentUsers = v;
-                                PreferenceWriter.WriteBool(KeyConsts.M_RememberUserHistory, v); },
+                                PreferencesManager.SaveBoolean(KeyConsts.M_RememberUserHistory, v); },
                 //DependentRowIds = new[] { "general.clear_recent_users" },
             });
             rows.Add(new ActionRow
@@ -389,7 +389,7 @@ namespace Seeker.Settings.Rows
                 IconRes = Resource.Drawable.folder_shared_browse_outline_30dp,
                 Getter = () => PreferencesState.SharingOn,
                 Setter = v => { PreferencesState.SharingOn = v;
-                                PreferenceWriter.WriteBool(KeyConsts.M_SharingOn, v); },
+                                PreferencesManager.SaveBoolean(KeyConsts.M_SharingOn, v); },
                 DependentRowIds = new[] { "sharing.add_folder", "sharing.rescan_browse" },
                 StatusProvider = () =>
                 {
@@ -495,7 +495,7 @@ namespace Seeker.Settings.Rows
                 IconRes = Resource.Drawable.clear_all_28dp,
                 Getter = () => PreferencesState.AutoClearCompleteUploads,
                 Setter = v => { PreferencesState.AutoClearCompleteUploads = v;
-                                PreferenceWriter.WriteBool(KeyConsts.M_AutoClearCompleteUploads, v); },
+                                PreferencesManager.SaveBoolean(KeyConsts.M_AutoClearCompleteUploads, v); },
             });
 
             // ============================== NETWORK ==============================

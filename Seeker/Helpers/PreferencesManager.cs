@@ -400,6 +400,26 @@ namespace Seeker
             }
         }
 
+        public static void SaveBoolean(string key, bool value)
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(key, value);
+                editor.Apply();
+            }
+        }
+
+        public static void SaveInt(string key, int value)
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutInt(key, value);
+                editor.Apply();
+            }
+        }
+
         public static void SaveStartServiceOnStartup()
         {
             lock (SharedPrefLock)
