@@ -22,6 +22,7 @@ namespace Seeker.Settings.Rows
         void LaunchImportClientData();
         void LaunchExportClientData();
         void LaunchRestoreDefaults();
+        void UpdateSimulataneousDownloadsLimit(bool enabled, int limit);
         void LaunchForceFilesystemPermission();
 
         void CheckPrivileges();

@@ -759,6 +759,65 @@ namespace Seeker
             }
         }
 
+        // Excludes language and Allow Invites (requires server to update) since this is for RestoreDefaults
+        public static void SaveAllModernSettings()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                // Downloads
+                editor.PutBoolean(KeyConsts.M_CreateCompleteAndIncompleteFolders, PreferencesState.CreateCompleteAndIncompleteFolders);
+                editor.PutBoolean(KeyConsts.M_AdditionalUsernameSubdirectories,   PreferencesState.CreateUsernameSubfolders);
+                editor.PutBoolean(KeyConsts.M_NoSubfolderForSingle,               PreferencesState.NoSubfolderForSingle);
+                editor.PutBoolean(KeyConsts.M_UseManualIncompleteDirectoryUri,    PreferencesState.OverrideDefaultIncompleteLocations);
+                editor.PutBoolean(KeyConsts.M_MemoryBackedDownload,               PreferencesState.MemoryBackedDownload);
+                editor.PutBoolean(KeyConsts.M_AutoClearComplete,                  PreferencesState.AutoClearCompleteDownloads);
+                editor.PutBoolean(KeyConsts.M_AutoRetryBackOnline,                PreferencesState.AutoRetryBackOnline);
+                // Search
+                editor.PutInt    (KeyConsts.M_NumberSearchResults,                PreferencesState.NumberSearchResults);
+                editor.PutBoolean(KeyConsts.M_ShowSmartFilters,                   PreferencesState.ShowSmartFilters);
+                editor.PutInt    (KeyConsts.M_SmartFilterStyle,                   (int)PreferencesState.SmartFilterStyle);
+                editor.PutBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled,        PreferencesState.SmartFilterOptions.KeywordsEnabled);
+                editor.PutInt    (KeyConsts.M_SmartFilter_KeywordsOrder,          PreferencesState.SmartFilterOptions.KeywordsOrder);
+                editor.PutBoolean(KeyConsts.M_SmartFilter_TypesEnabled,           PreferencesState.SmartFilterOptions.FileTypesEnabled);
+                editor.PutInt    (KeyConsts.M_SmartFilter_TypesOrder,             PreferencesState.SmartFilterOptions.FileTypesOrder);
+                editor.PutBoolean(KeyConsts.M_SmartFilter_CountsEnabled,          PreferencesState.SmartFilterOptions.NumFilesEnabled);
+                editor.PutInt    (KeyConsts.M_SmartFilter_CountsOrder,            PreferencesState.SmartFilterOptions.NumFilesOrder);
+                editor.PutBoolean(KeyConsts.M_OnlyFreeUploadSlots,                PreferencesState.FreeUploadSlotsOnly);
+                editor.PutBoolean(KeyConsts.M_HideLockedSearch,                   PreferencesState.HideLockedResultsInSearch);
+                editor.PutBoolean(KeyConsts.M_HideLockedBrowse,                   PreferencesState.HideLockedResultsInBrowse);
+                editor.PutBoolean(KeyConsts.M_RememberSearchHistory,              PreferencesState.RememberSearchHistory);
+                // General
+                editor.PutBoolean(KeyConsts.M_ServiceOnStartup,                   PreferencesState.StartServiceOnStartup);
+                editor.PutBoolean(KeyConsts.M_NotifyFolderComplete,               PreferencesState.NotifyOnFolderCompleted);
+                editor.PutBoolean(KeyConsts.M_DisableToastNotifications,          PreferencesState.DisableDownloadToastNotification);
+                editor.PutBoolean(KeyConsts.M_RememberUserHistory,                PreferencesState.ShowRecentUsers);
+                editor.PutBoolean(KeyConsts.M_AutoSetAwayOnInactivity,            PreferencesState.AutoAwayOnInactivity);
+                // Appearance
+                editor.PutInt    (KeyConsts.M_DayNightMode,                       PreferencesState.DayNightMode);
+                editor.PutInt    (KeyConsts.M_DayVariant,                         (int)PreferencesState.DayModeVariant);
+                editor.PutInt    (KeyConsts.M_NightVariant,                       (int)PreferencesState.NightModeVariant);
+                // Sharing
+                editor.PutBoolean(KeyConsts.M_SharingOn,                          PreferencesState.SharingOn);
+                editor.PutBoolean(KeyConsts.M_AllowUploadsOnMetered,              PreferencesState.AllowUploadsOnMetered);
+                editor.PutBoolean(KeyConsts.M_AutoClearCompleteUploads,           PreferencesState.AutoClearCompleteUploads);
+                // Network
+                editor.PutBoolean(KeyConsts.M_ListenerEnabled,                    PreferencesState.ListenerEnabled);
+                editor.PutBoolean(KeyConsts.M_ListenerUPnpEnabled,                PreferencesState.ListenerUPnpEnabled);
+                editor.PutBoolean(KeyConsts.M_DownloadLimitEnabled,               PreferencesState.SpeedLimitDownloadOn);
+                editor.PutInt    (KeyConsts.M_DownloadSpeedLimitBytes,            PreferencesState.SpeedLimitDownloadBytesSec);
+                editor.PutBoolean(KeyConsts.M_DownloadPerTransfer,                PreferencesState.SpeedLimitDownloadIsPerTransfer);
+                editor.PutBoolean(KeyConsts.M_UploadLimitEnabled,                 PreferencesState.SpeedLimitUploadOn);
+                editor.PutInt    (KeyConsts.M_UploadSpeedLimitBytes,              PreferencesState.SpeedLimitUploadBytesSec);
+                editor.PutBoolean(KeyConsts.M_UploadPerTransfer,                  PreferencesState.SpeedLimitUploadIsPerTransfer);
+                editor.PutBoolean(KeyConsts.M_LimitSimultaneousDownloads,         PreferencesState.LimitSimultaneousDownloads);
+                editor.PutInt    (KeyConsts.M_MaxSimultaneousLimit,               PreferencesState.MaxSimultaneousLimit);
+                // Account
+                editor.PutBoolean(KeyConsts.M_LOG_DIAGNOSTICS,                    PreferencesState.LogDiagnostics);
+                editor.Apply();
+            }
+        }
+
         /// <summary>
         /// Saves the bulk state from MainActivity.OnPause — all PreferencesState fields
         /// plus a pre-serialized user list string (null to skip).

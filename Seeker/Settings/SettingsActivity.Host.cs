@@ -113,6 +113,7 @@ namespace Seeker
         void ISettingsHost.LaunchEditUserInfo() => EditUserInfo();
         void ISettingsHost.LaunchImportClientData() => ImportData();
         void ISettingsHost.LaunchExportClientData() => ExportClientData();
+
         void ISettingsHost.LaunchRestoreDefaults()
         {
             new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this)
@@ -121,22 +122,93 @@ namespace Seeker
                 .SetNegativeButton(Android.Resource.String.Cancel, (System.EventHandler<Android.Content.DialogClickEventArgs>)((s, e) => { }))
                 .SetPositiveButton(Android.Resource.String.Ok, (System.EventHandler<Android.Content.DialogClickEventArgs>)((s, e) =>
                 {
-                    PreferencesState.NumberSearchResults = Constants.DefaultSearchResults;
-                    PreferencesState.AutoClearCompleteDownloads = false;
-                    PreferencesState.AutoClearCompleteUploads = false;
-                    PreferencesState.RememberSearchHistory = true;
-                    PreferencesState.ShowRecentUsers = true;
-                    PreferencesState.SharingOn = false;
-                    PreferencesState.FreeUploadSlotsOnly = true;
-                    PreferencesState.DisableDownloadToastNotification = true;
-                    PreferencesState.MemoryBackedDownload = false;
-                    PreferencesState.DayNightMode = AndroidX.AppCompat.App.AppCompatDelegate.ModeNightFollowSystem;
-                    PreferencesState.HideLockedResultsInBrowse = true;
-                    PreferencesState.HideLockedResultsInSearch = true;
-                    Seeker.PreferencesManager.SaveOnPauseState(null);
-                    _settingsAdapter?.NotifyDataSetChanged();
+                    RestoreModernSettingsDefaults();
                 }))
                 .Show();
+        }
+
+        private void RestoreModernSettingsDefaults()
+        {
+            bool prevListenerEnabled = PreferencesState.ListenerEnabled;
+            bool prevLimitSimDownloads = PreferencesState.LimitSimultaneousDownloads;
+            int prevMaxSimDownloads = PreferencesState.MaxSimultaneousLimit;
+
+            PreferencesState.CreateCompleteAndIncompleteFolders = true;
+            PreferencesState.CreateUsernameSubfolders = false;
+            PreferencesState.NoSubfolderForSingle = false;
+            PreferencesState.OverrideDefaultIncompleteLocations = false;
+            PreferencesState.MemoryBackedDownload = false;
+            PreferencesState.AutoClearCompleteDownloads = false;
+            PreferencesState.AutoRetryBackOnline = true;
+
+            PreferencesState.NumberSearchResults = Constants.DefaultSearchResults;
+            PreferencesState.ShowSmartFilters = true;
+            PreferencesState.SmartFilterStyle = SmartFilterStyle.Flat;
+            PreferencesState.SmartFilterOptions = new PreferencesState.SmartFilterState
+            {
+                KeywordsEnabled = true,
+                KeywordsOrder = 0,
+                FileTypesEnabled = true,
+                FileTypesOrder = 1,
+                NumFilesEnabled = true,
+                NumFilesOrder = 2,
+            };
+            PreferencesState.FreeUploadSlotsOnly = true;
+            PreferencesState.HideLockedResultsInSearch = true;
+            PreferencesState.HideLockedResultsInBrowse = true;
+            PreferencesState.RememberSearchHistory = true;
+
+            PreferencesState.StartServiceOnStartup = true;
+            PreferencesState.NotifyOnFolderCompleted = true;
+            PreferencesState.DisableDownloadToastNotification = true;
+            PreferencesState.ShowRecentUsers = true;
+            PreferencesState.AutoAwayOnInactivity = false;
+
+            PreferencesState.DayNightMode = AndroidX.AppCompat.App.AppCompatDelegate.ModeNightFollowSystem;
+            PreferencesState.DayModeVariant = DayThemeType.ClassicPurple;
+            PreferencesState.NightModeVariant = NightThemeType.ClassicPurple;
+
+            PreferencesState.SharingOn = false;
+            PreferencesState.AllowUploadsOnMetered = true;
+            PreferencesState.AutoClearCompleteUploads = false;
+
+            PreferencesState.ListenerEnabled = true;
+            PreferencesState.ListenerUPnpEnabled = true;
+            PreferencesState.SpeedLimitDownloadOn = false;
+            PreferencesState.SpeedLimitDownloadBytesSec = 4 * 1024 * 1024;
+            PreferencesState.SpeedLimitDownloadIsPerTransfer = true;
+            PreferencesState.SpeedLimitUploadOn = false;
+            PreferencesState.SpeedLimitUploadBytesSec = 4 * 1024 * 1024;
+            PreferencesState.SpeedLimitUploadIsPerTransfer = true;
+            PreferencesState.LimitSimultaneousDownloads = false;
+            PreferencesState.MaxSimultaneousLimit = 1;
+
+            PreferencesState.LogDiagnostics = false;
+
+            PreferencesManager.SaveAllModernSettings();
+
+            // side effects
+            AndroidX.AppCompat.App.AppCompatDelegate.DefaultNightMode = PreferencesState.DayNightMode;
+
+            if (prevListenerEnabled != PreferencesState.ListenerEnabled)
+            {
+                Seeker.Services.SessionService.Instance.ReconfigureOptions(null, PreferencesState.ListenerEnabled, null);
+            }
+            if (PreferencesState.ListenerEnabled && PreferencesState.ListenerUPnpEnabled)
+            {
+                UPnP.UPnpManager.Instance.Feedback = true;
+                UPnP.UPnpManager.Instance.SearchAndSetMappingIfRequired();
+            }
+
+            bool concurrentChanged = prevLimitSimDownloads != PreferencesState.LimitSimultaneousDownloads
+                                  || prevMaxSimDownloads != PreferencesState.MaxSimultaneousLimit;
+            if (concurrentChanged)
+            {
+                SeekerApplication.Toaster.ShowToastShort(
+                    this.GetString(Resource.String.takes_effect_on_next_startup));
+            }
+
+            _settingsAdapter?.NotifyDataSetChanged();
         }
         void ISettingsHost.LaunchForceFilesystemPermission() => ForceFilesystemPermission();
 
@@ -160,6 +232,19 @@ namespace Seeker
         }
 
         void ISettingsHost.RefreshSharingFolders() => RefreshModernSharingRows();
+        public void UpdateSimulataneousDownloadsLimit(bool enabled, int limit)
+        {
+            bool changed = PreferencesState.LimitSimultaneousDownloads != enabled
+                        || (enabled && PreferencesState.MaxSimultaneousLimit != limit);
+            PreferencesState.LimitSimultaneousDownloads = enabled;
+            PreferencesState.MaxSimultaneousLimit = limit;
+            PreferencesManager.SaveMaxConcurrentDownloadsSettings(enabled, limit);
+            if (changed)
+            {
+                SeekerApplication.Toaster.ShowToastShort(
+                    this.GetString(Resource.String.takes_effect_on_next_startup));
+            }
+        }
 
         internal void RefreshModernSharingRows(bool suppressAnimation = true)
         {

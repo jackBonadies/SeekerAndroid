@@ -348,9 +348,6 @@ namespace Seeker
             }
         }
 
-
-
-
         private void CheckPriv()
         {
             PrivilegesManager.Instance.GetPrivilegesAPI(true);
@@ -710,10 +707,6 @@ namespace Seeker
             }
         }
 
-
-
-
-
         private void ClearHistory()
         {
             PreferencesManager.ClearSearchHistory();
@@ -825,8 +818,6 @@ namespace Seeker
 
                 });
         }
-
-
 
         private void ShowDirSettings(string startingDirectory, DirectoryType directoryType, bool errorReselectCase = false)
         {
@@ -987,8 +978,6 @@ namespace Seeker
                 }
             }
         }
-
-
 
         private void SuccessfulWriteExternalLegacyCallback(Android.Net.Uri uri, bool fromLegacyPicker = false)
         {
