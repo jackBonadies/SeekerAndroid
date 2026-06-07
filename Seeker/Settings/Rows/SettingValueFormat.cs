@@ -174,7 +174,10 @@ namespace Seeker.Settings.Rows
                 var cache = Seeker.Services.SharedFileService.SharedFileCache;
                 if (cache != null) files = cache.FileCount;
             }
-            catch { /* TODO log firebase */  }
+            catch (Exception ex)
+            {
+                Logger.FirebaseError("Error getting shared aggregate summary", ex);
+            }
             return string.Format(ctx.GetString(Resource.String.shared_summary_folders_files), folders, files);
         }
 
@@ -262,7 +265,11 @@ namespace Seeker.Settings.Rows
                     string r = e.GetPresentableName();
                     if (!string.IsNullOrEmpty(r)) roots.Add(r);
                 }
-                catch { /* DocumentFile may be unresolved; skip */ }
+                catch (Exception ex)
+                { 
+                    Logger.FirebaseError("Error ensure roots", ex);
+                    
+                }
             }
 
             var counts = new System.Collections.Generic.Dictionary<string, int>();
