@@ -247,6 +247,7 @@ namespace Seeker
                     this.GetString(Resource.String.takes_effect_on_next_startup));
             }
 
+            _settingsAdapter?.RebuildRows(SettingsCatalog.Build(this));
             _settingsAdapter?.NotifyDataSetChanged();
         }
         void ISettingsHost.LaunchForceFilesystemPermission() => ForceFilesystemPermission();

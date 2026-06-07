@@ -677,7 +677,7 @@ namespace Seeker.Settings.Rows
             _btn.SetTextColor(baseColor);
             _btn.StrokeColor = Android.Content.Res.ColorStateList.ValueOf(baseColor);
 
-            bool enabled = IsEnabledByParent(row, parent);
+            bool enabled = row.Enabled && IsEnabledByParent(row, parent);
             _btn.Alpha = enabled ? 1f : .5f;
             _btn.Enabled = enabled;
             _btn.Clickable = enabled;
