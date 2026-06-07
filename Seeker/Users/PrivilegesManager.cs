@@ -221,10 +221,19 @@ namespace Seeker.Managers
                 return;
             }
             SetCheckInProgress(true);
-            if (!SessionService.Instance.RunWithReconnect(() => GetPrivilegesLogic(feedback)))
+            SessionService.Instance.RunWithReconnect((Task reconnectTask) =>
             {
-                SetCheckInProgress(false);
-            }
+                if (reconnectTask.IsFaulted)
+                {
+                    if (feedback)
+                    {
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
+                    }
+                    SetCheckInProgress(false);
+                    return;
+                }
+                GetPrivilegesLogic(feedback);
+            });
         }
 
         public bool CheckIfPrivileged(string username)

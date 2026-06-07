@@ -113,41 +113,24 @@ namespace Seeker.Settings.Rows
 
         public static string DayVariantLabel(Context ctx, DayThemeType v) => v switch
         {
-            DayThemeType.ClassicPurple => "Classic Purple",
-            DayThemeType.Red => "Red",
-            DayThemeType.Blue => "Blue",
-            DayThemeType.Grey => "Grey",
+            DayThemeType.ClassicPurple => ThemeHelper.ClassicPurple,
+            DayThemeType.Red => ThemeHelper.Red,
+            DayThemeType.Blue => ThemeHelper.Blue,
+            DayThemeType.Grey => ThemeHelper.Grey,
             _ => v.ToString(),
         };
 
         public static string NightVariantLabel(Context ctx, NightThemeType v) => v switch
         {
-            NightThemeType.ClassicPurple => "Classic Purple",
-            NightThemeType.Grey => "Grey",
-            NightThemeType.Blue => "Blue",
-            NightThemeType.Red => "Red",
-            NightThemeType.AmoledClassicPurple => "Amoled Classic Purple",
-            NightThemeType.AmoledGrey => "Amoled Grey",
+            NightThemeType.ClassicPurple => ThemeHelper.ClassicPurple,
+            NightThemeType.Grey => ThemeHelper.Grey,
+            NightThemeType.Blue => ThemeHelper.Blue,
+            NightThemeType.Red => ThemeHelper.Red,
+            NightThemeType.AmoledClassicPurple => ThemeHelper.AmoledClassicPurple,
+            NightThemeType.AmoledGrey => ThemeHelper.AmoledGrey,
             _ => v.ToString(),
         };
 
-        public static string SharedFolderSummary(Context ctx)
-        {
-            int count = 0;
-            try
-            {
-                var dirs = UploadDirectoryManager.UploadDirectories;
-                if (dirs != null) count = dirs.Count;
-            }
-            catch { /* may not be initialized yet */ }
-
-            return count switch
-            {
-                0 => ctx.GetString(Resource.String.shared_folders_count_zero),
-                1 => ctx.GetString(Resource.String.shared_folders_count_one),
-                _ => string.Format(ctx.GetString(Resource.String.shared_folders_count_many), count),
-            };
-        }
 
         public static string ParsingStatusText(Context ctx)
         {

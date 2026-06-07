@@ -59,11 +59,12 @@ namespace Seeker.Settings.Rows
 
         public static void PickDayNightMode(ISettingsHost host, ValueRow row)
         {
+            var ctx = host.Activity;
             var options = new List<(string label, int value)>
             {
-                ("Follow system", -1),
-                ("Light", 1),
-                ("Dark", 2),
+                (ctx.GetString(Resource.String.follow_system), -1),
+                (ctx.GetString(Resource.String.always_light), 1),
+                (ctx.GetString(Resource.String.always_dark), 2),
             };
             OptionPickerBottomSheet.ShowOptions(host, row, options,
                 () => PreferencesState.DayNightMode,
@@ -82,10 +83,10 @@ namespace Seeker.Settings.Rows
         {
             var options = new List<(string label, DayThemeType value)>
             {
-                ("Classic Purple", DayThemeType.ClassicPurple),
-                ("Red", DayThemeType.Red),
-                ("Blue", DayThemeType.Blue),
-                ("Grey", DayThemeType.Grey),
+                (ThemeHelper.ClassicPurple, DayThemeType.ClassicPurple),
+                (ThemeHelper.Red, DayThemeType.Red),
+                (ThemeHelper.Blue, DayThemeType.Blue),
+                (ThemeHelper.Grey, DayThemeType.Grey),
             };
             OptionPickerBottomSheet.ShowOptions(host, row, options,
                 () => PreferencesState.DayModeVariant,
@@ -106,12 +107,12 @@ namespace Seeker.Settings.Rows
         {
             var options = new List<(string label, NightThemeType value)>
             {
-                ("Classic Purple", NightThemeType.ClassicPurple),
-                ("Grey", NightThemeType.Grey),
-                ("Blue", NightThemeType.Blue),
-                ("Red", NightThemeType.Red),
-                ("Amoled Classic Purple", NightThemeType.AmoledClassicPurple),
-                ("Amoled Grey", NightThemeType.AmoledGrey),
+                (ThemeHelper.ClassicPurple, NightThemeType.ClassicPurple),
+                (ThemeHelper.Grey, NightThemeType.Grey),
+                (ThemeHelper.Blue, NightThemeType.Blue),
+                (ThemeHelper.Red, NightThemeType.Red),
+                (ThemeHelper.AmoledClassicPurple, NightThemeType.AmoledClassicPurple),
+                (ThemeHelper.AmoledGrey, NightThemeType.AmoledGrey),
             };
             OptionPickerBottomSheet.ShowOptions(host, row, options,
                 () => PreferencesState.NightModeVariant,

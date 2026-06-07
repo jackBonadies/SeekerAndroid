@@ -69,6 +69,13 @@ namespace Seeker
             base.OnSaveInstanceState(outState);
         }
 
+        protected override void OnDestroy()
+        {
+            StopParsingTicker();
+            _settingsRecyclerView?.SetAdapter(null);
+            base.OnDestroy();
+        }
+
 
         private void WireInlineSearch()
         {

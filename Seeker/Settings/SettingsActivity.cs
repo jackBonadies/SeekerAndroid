@@ -78,9 +78,6 @@ namespace Seeker
         public const int SCROLL_TO_SHARING_SECTION = 10;
         public const string SCROLL_TO_SHARING_SECTION_STRING = "SCROLL_TO_SHARING_SECTION";
 
-        private static readonly int[] searchResultOptions = { 25, 50, 100, 250, 500, 1000, 2000 };
-        internal CheckBox allowPrivateRoomInvitations;
-
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
             MenuInflater.Inflate(Resource.Menu.settings_menu, menu);
