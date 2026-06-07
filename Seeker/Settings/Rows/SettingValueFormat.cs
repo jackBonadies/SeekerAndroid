@@ -113,23 +113,25 @@ namespace Seeker.Settings.Rows
 
         public static string DayVariantLabel(Context ctx, DayThemeType v) => v switch
         {
-            DayThemeType.ClassicPurple => ThemeHelper.ClassicPurple,
-            DayThemeType.Red => ThemeHelper.Red,
-            DayThemeType.Blue => ThemeHelper.Blue,
-            DayThemeType.Grey => ThemeHelper.Grey,
+            DayThemeType.ClassicPurple => ctx.GetString(Resource.String.theme_purple),
+            DayThemeType.Red => ctx.GetString(Resource.String.theme_red),
+            DayThemeType.Blue => ctx.GetString(Resource.String.theme_blue),
+            DayThemeType.Grey => ctx.GetString(Resource.String.theme_grey),
             _ => v.ToString(),
         };
 
         public static string NightVariantLabel(Context ctx, NightThemeType v) => v switch
         {
-            NightThemeType.ClassicPurple => ThemeHelper.ClassicPurple,
-            NightThemeType.Grey => ThemeHelper.Grey,
-            NightThemeType.Blue => ThemeHelper.Blue,
-            NightThemeType.Red => ThemeHelper.Red,
-            NightThemeType.AmoledClassicPurple => ThemeHelper.AmoledClassicPurple,
-            NightThemeType.AmoledGrey => ThemeHelper.AmoledGrey,
+            NightThemeType.ClassicPurple => ctx.GetString(Resource.String.theme_purple),
+            NightThemeType.Grey => ctx.GetString(Resource.String.theme_grey),
+            NightThemeType.Blue => ctx.GetString(Resource.String.theme_blue),
+            NightThemeType.Red => ctx.GetString(Resource.String.theme_red),
+            NightThemeType.AmoledClassicPurple => Amoled(ctx, Resource.String.theme_purple),
+            NightThemeType.AmoledGrey => Amoled(ctx, Resource.String.theme_grey),
             _ => v.ToString(),
         };
+
+        private static string Amoled(Context ctx, int colorRes) => "AMOLED - " + ctx.GetString(colorRes);
 
 
         public static string ParsingStatusText(Context ctx)

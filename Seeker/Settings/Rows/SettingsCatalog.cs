@@ -400,32 +400,20 @@ namespace Seeker.Settings.Rows
                     {
                         return default; // None
                     }
-                    // TODO refactor so this drives it. right now its a mix.
-                    var (sharingState, statusText) = Seeker.Services.SharingService.GetSharingMessageAndIcon(out bool isParsing);
-                    if (isParsing)
+                    var (sharingState, statusText) = Seeker.Services.SharingService.GetSharingMessageAndIcon();
+                    return sharingState switch
                     {
-                        return new SettingStatus { Kind = SettingStatusKind.Running,
-                            Text = SettingValueFormat.ParsingStatusText(ctx) };
-                    }
-                    if (UploadDirectoryManager.UploadDirectories.Count == 0)
-                    {
-                        return new SettingStatus { Kind = SettingStatusKind.Failure,
-                            Text = ctx.GetString(Resource.String.NoSharedAdd) };
-                    }
-                    bool allFailed = UploadDirectoryManager.UploadDirectories.Count > 0
-                        && UploadDirectoryManager.AreAllFailed();
-                    if (Seeker.Services.SharedFileService.ParseStatus.FailedShareParse || allFailed)
-                    {
-                        return new SettingStatus { Kind = SettingStatusKind.Failure,
-                            Text = ctx.GetString(Resource.String.sharing_disabled_failure_parsing) };
-                    }
-                    if (sharingState == SharingIcons.OffDueToNetwork)
-                    {
-                        return new SettingStatus { Kind = SettingStatusKind.Failure,
-                            Text = statusText };
-                    }
-                    return new SettingStatus { Kind = SettingStatusKind.Success,
-                        Text = SettingValueFormat.SharedAggregateSummary(ctx) };
+                        SharingIcons.CurrentlyParsing => new SettingStatus {
+                            Kind = SettingStatusKind.Running,
+                            Text = SettingValueFormat.ParsingStatusText(ctx) },
+                        SharingIcons.On => new SettingStatus {
+                            Kind = SettingStatusKind.Success,
+                            Text = SettingValueFormat.SharedAggregateSummary(ctx) },
+                        SharingIcons.Off => default, // not yet initialized — hide the status line
+                        _ => new SettingStatus {
+                            Kind = SettingStatusKind.Failure,
+                            Text = statusText },
+                    };
                 },
                 AddStatusListener = h => Seeker.Services.SharedFileService.SharingStatusChangedEvent += h,
                 RemoveStatusListener = h => Seeker.Services.SharedFileService.SharingStatusChangedEvent -= h,

@@ -722,4 +722,8 @@ Il modo standard di richiedere l\'accesso alle cartelle non sempre persiste auto
     <string name="failed_to_change_password">Impossibile cambiare password</string>
     <string name="password_successfully_updated">Password aggiornata con successo</string>
     <string name="error_dialog_content">Seeker has encountered an issue.  \n\nPlease consider sending a report to the developer.  \n\nAny information about the steps / conditions leading up to the issue is much appreciated.</string>
+    <string name="theme_purple">Viola</string>
+    <string name="theme_grey">Grigio</string>
+    <string name="theme_blue">Blu</string>
+    <string name="theme_red">Rosso</string>
 </resources>

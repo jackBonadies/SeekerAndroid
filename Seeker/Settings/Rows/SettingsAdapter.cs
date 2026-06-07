@@ -89,7 +89,7 @@ namespace Seeker.Settings.Rows
         private ToggleRow FindParentToggle(SettingRow row)
         {
             if (string.IsNullOrEmpty(row.ParentId)) return null;
-            // When filtering, sub-row whose parent isn't visible is promoted //TODO
+            // I dont think this is strictly necessary
             if (!_visible.Any(r => r.Id == row.ParentId)) return null;
             return _all.FirstOrDefault(r => r.Id == row.ParentId) as ToggleRow;
         }

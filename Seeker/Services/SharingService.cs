@@ -249,9 +249,8 @@ namespace Seeker.Services
             }
         }
 
-        public static (SharingIcons iconToUse, string statusMessage) GetSharingMessageAndIcon(out bool isParsing)
+        public static (SharingIcons state, string statusMessage) GetSharingMessageAndIcon()
         {
-            isParsing = false;
             if (SharedFileService.MeetsSharingConditions() && SharedFileService.IsSharingSetUpSuccessfully())
             {
                 //try to parse this into a path: SeekerState.ShareDataDirectoryUri
@@ -281,7 +280,6 @@ namespace Seeker.Services
             }
             else if (SharedFileService.ParseStatus.IsParsing)
             {
-                isParsing = true;
                 return new(SharingIcons.CurrentlyParsing, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_currently_parsing));
             }
             else if (SharedFileService.ParseStatus.FailedShareParse)
@@ -290,11 +288,11 @@ namespace Seeker.Services
             }
             else if (UploadDirectoryManager.UploadDirectories.Count == 0)
             {
-                return new(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_share_not_set));
+                return new(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.NoSharedAdd));
             }
             else if (UploadDirectoryManager.AreAllFailed())
             {
-                return new(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_error)); //TODO get error
+                return new(SharingIcons.Error, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_failure_parsing));
             }
             else
             {

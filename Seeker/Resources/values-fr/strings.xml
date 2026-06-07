@@ -1162,5 +1162,9 @@ Nombre de dossiers : {5}
     <string name="section_sharing">Sharing</string>
     <string name="section_network">Network</string>
     <string name="section_account">Account</string>
+    <string name="theme_purple">Violet</string>
+    <string name="theme_grey">Gris</string>
+    <string name="theme_blue">Bleu</string>
+    <string name="theme_red">Rouge</string>
 </resources>
 

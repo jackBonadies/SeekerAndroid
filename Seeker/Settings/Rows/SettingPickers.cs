@@ -81,13 +81,16 @@ namespace Seeker.Settings.Rows
 
         public static void PickDayVariant(ISettingsHost host, ValueRow row)
         {
-            var options = new List<(string label, DayThemeType value)>
+            var ctx = host.Activity;
+            var variants = new[]
             {
-                (ThemeHelper.ClassicPurple, DayThemeType.ClassicPurple),
-                (ThemeHelper.Red, DayThemeType.Red),
-                (ThemeHelper.Blue, DayThemeType.Blue),
-                (ThemeHelper.Grey, DayThemeType.Grey),
+                DayThemeType.ClassicPurple, DayThemeType.Red, DayThemeType.Blue, DayThemeType.Grey,
             };
+            var options = new List<(string label, DayThemeType value)>(variants.Length);
+            foreach (var variant in variants)
+            {
+                options.Add((SettingValueFormat.DayVariantLabel(ctx, variant), variant));
+            }
             OptionPickerBottomSheet.ShowOptions(host, row, options,
                 () => PreferencesState.DayModeVariant,
                 v => {
@@ -105,15 +108,17 @@ namespace Seeker.Settings.Rows
 
         public static void PickNightVariant(ISettingsHost host, ValueRow row)
         {
-            var options = new List<(string label, NightThemeType value)>
+            var ctx = host.Activity;
+            var variants = new[]
             {
-                (ThemeHelper.ClassicPurple, NightThemeType.ClassicPurple),
-                (ThemeHelper.Grey, NightThemeType.Grey),
-                (ThemeHelper.Blue, NightThemeType.Blue),
-                (ThemeHelper.Red, NightThemeType.Red),
-                (ThemeHelper.AmoledClassicPurple, NightThemeType.AmoledClassicPurple),
-                (ThemeHelper.AmoledGrey, NightThemeType.AmoledGrey),
+                NightThemeType.ClassicPurple, NightThemeType.Grey, NightThemeType.Blue,
+                NightThemeType.Red, NightThemeType.AmoledClassicPurple, NightThemeType.AmoledGrey,
             };
+            var options = new List<(string label, NightThemeType value)>(variants.Length);
+            foreach (var variant in variants)
+            {
+                options.Add((SettingValueFormat.NightVariantLabel(ctx, variant), variant));
+            }
             OptionPickerBottomSheet.ShowOptions(host, row, options,
                 () => PreferencesState.NightModeVariant,
                 v => {
