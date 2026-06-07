@@ -362,9 +362,9 @@
         Error Parsing Files, could not set Shared Directory
     </string>
 
-    <string name="follow_system">Follow System</string>
-    <string name="always_light">Always Light</string>
-    <string name="always_dark">Always Dark</string>
+    <string name="follow_system">Follow system</string>
+    <string name="always_light">Always light</string>
+    <string name="always_dark">Always dark</string>
 
     <string name="queue_length_">Queue Length</string>
     <string name="upload_slots_">Free Upload Slots</string>

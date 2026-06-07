@@ -371,9 +371,9 @@ Nombre de dossiers : {5}
         Erreur lors de l\'Analyse des Fichiers, impossible de définir le Répertoire Partagé
     </string>
 
-    <string name="follow_system">Valeur Système</string>
-    <string name="always_light">Toujours Clair</string>
-    <string name="always_dark">Toujours Sombre</string>
+    <string name="follow_system">Valeur système</string>
+    <string name="always_light">Toujours clair</string>
+    <string name="always_dark">Toujours sombre</string>
 
     <string name="queue_length_">Longueur de la File d\'Attente</string>
     <string name="upload_slots_">Canaux Disponibles</string>

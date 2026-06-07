@@ -103,12 +103,11 @@ namespace Seeker.Settings.Rows
 
         public static string DayNightModeLabel(Context ctx, int mode)
         {
-            // mode: -1 = follow system, 1 = light, 2 = dark
             return mode switch
             {
-                1 => "Light",
-                2 => "Dark",
-                _ => "Follow system",
+                1 => ctx.GetString(Resource.String.always_light),
+                2 => ctx.GetString(Resource.String.always_dark),
+                _ => ctx.GetString(Resource.String.follow_system),
             };
         }
 
@@ -306,36 +305,17 @@ namespace Seeker.Settings.Rows
 
         public static string SmartFilterSummary(Context ctx)
         {
-            try
+            var items = PreferencesState.SmartFilterOptions.GetAdapterItems();
+            if (items == null || items.Count == 0) return string.Empty;
+            var parts = new System.Collections.Generic.List<string>(items.Count);
+            foreach (var item in items)
             {
-                var items = PreferencesState.SmartFilterOptions.GetAdapterItems();
-                if (items == null || items.Count == 0) return string.Empty;
-                var parts = new System.Collections.Generic.List<string>(items.Count);
-                foreach (var item in items)
+                if (item.Enabled)
                 {
-                    if (item.Enabled)
-                    {
-                        parts.Add(item.Name);
-                    }
+                    parts.Add(item.Name);
                 }
-                return string.Join(", ", parts);
             }
-            catch { return string.Empty; }
-        }
-
-        public static string PrivilegesSummary(Context ctx)
-        {
-            try
-            {
-                var pm = PrivilegesManager.Instance;
-                if (pm == null) return string.Empty;
-                int secs = pm.GetRemainingSeconds();
-                if (secs <= 0) return "None";
-                int days = secs / (24 * 3600);
-                if (days >= 1) return $"{days} days";
-                return $"{secs / 3600} hours";
-            }
-            catch { return string.Empty; }
+            return string.Join(", ", parts);
         }
     }
 }

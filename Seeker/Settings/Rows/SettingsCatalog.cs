@@ -1,6 +1,7 @@
 using AndroidX.AppCompat.App;
 using Common;
 using Seeker.Helpers;
+using Seeker.Managers;
 using Seeker.Transfers;
 using Seeker.UPnP;
 using System;
@@ -669,7 +670,7 @@ namespace Seeker.Settings.Rows
                     {
                         Kind = statusKind,
                         Text = Seeker.Managers.PrivilegesManager.Instance.IsCheckInProgress ? 
-                            host.Activity.GetString(Resource.String.checking_priv_) : SettingValueFormat.PrivilegesSummary(host.Activity)
+                            host.Activity.GetString(Resource.String.checking_priv_) : Seeker.Managers.PrivilegesManager.Instance.GetPrivilegeStatus()
                     };
                 },
                 AddStatusListener = h2 => Seeker.Managers.PrivilegesManager.Instance.CheckStateChanged += h2,

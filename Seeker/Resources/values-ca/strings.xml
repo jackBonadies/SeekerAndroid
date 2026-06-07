@@ -372,8 +372,8 @@ Recompte de directoris: {5}\"
     </string>
 
     <string name="follow_system">Seguiu el sistema</string>
-    <string name="always_light">Sempre Clar</string>
-    <string name="always_dark">Sempre Fosc</string>
+    <string name="always_light">Sempre clar</string>
+    <string name="always_dark">Sempre fosc</string>
 
     <string name="queue_length_">Longitud de la cua</string>
     <string name="upload_slots_">Slots de càrrega gratuïts</string>

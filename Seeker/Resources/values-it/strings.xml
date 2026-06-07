@@ -235,7 +235,7 @@ Numero Cartelle: {5}\"</string>
     <string name="error_not_a_dir">Errore: Non è una cartella</string>
     <string name="successfully_changed_dl_dir">Cartella di download cambiata con successo in \"{0}\"</string>
     <string name="error_parsing_files_shared_dir">Errore nell\'Analisi dei File, non è stato possibile impostare una Cartella Condivisa</string>
-    <string name="follow_system">Segui Sistema</string>
+    <string name="follow_system">Segui sistema</string>
     <string name="always_light">Sempre chiaro</string>
     <string name="always_dark">Sempre scuro</string>
     <!-- info -->
