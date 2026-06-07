@@ -651,7 +651,7 @@ Il modo standard di richiedere l\'accesso alle cartelle non sempre persiste auto
     <string name="PerTransfer">Per Transfer</string>
     <string name="Global">Globale</string>
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
-    <string name="NotSet">Not Set</string>
+    <string name="NotSet">Not set</string>
     <string name="AppLocalStorage">App Local Storage</string>
     <string name="NotInUse">Non in uso</string>
     <string name="IncompleteFolderEmpty">Incomplete Folder is empty</string>

@@ -1027,7 +1027,7 @@ Nombre de dossiers : {5}
     <string name="ConfigureSmartFilters">Paramètres des Filtres Intelligents</string>
     <string name="NotSet">Non défini</string>
     <string name="AppLocalStorage">Stockage Local de l\'Application</string>
-    <string name="NotInUse">N\'est pas Utilisé</string>
+    <string name="NotInUse">N\'est pas utilisé</string>
 
     <string name="IncompleteFolderEmpty">Le Dossier Incomplet est vide</string>
     <string name="NoEligibleToClear">Aucun élément ne peut être supprimé</string>

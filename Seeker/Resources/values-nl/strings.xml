@@ -1026,9 +1026,9 @@ Aantal mappen: {5}
     <string name="PerTransfer">Per Transfer</string>
     <string name="Global">Global</string>
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
-    <string name="NotSet">Not Set</string>
+    <string name="NotSet">Not set</string>
     <string name="AppLocalStorage">App Local Storage</string>
-    <string name="NotInUse">Not in Use</string>
+    <string name="NotInUse">Not in use</string>
 
     <string name="IncompleteFolderEmpty">Incomplete Folder is empty</string>
     <string name="NoEligibleToClear">No eligible items to clear</string>

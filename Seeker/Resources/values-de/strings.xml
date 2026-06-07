@@ -1024,7 +1024,7 @@ Niemals wird er Werbung oder kostenpflichtige Funktionen enthalten.
     <string name="PerTransfer">pro Übertragung</string>
     <string name="Global">Global</string>
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
-    <string name="NotSet">Not Set</string>
+    <string name="NotSet">Not set</string>
     <string name="AppLocalStorage">App Local Storage</string>
     <string name="NotInUse">Nicht benutzt</string>
 

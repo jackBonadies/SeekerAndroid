@@ -650,7 +650,7 @@ Directory Count: {5}\"</string>
     <string name="PerTransfer">Per Transfer</string>
     <string name="Global">Global</string>
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
-    <string name="NotSet">Not Set</string>
+    <string name="NotSet">Not set</string>
     <string name="AppLocalStorage">应用本地存储</string>
     <string name="NotInUse">未使用</string>
     <string name="IncompleteFolderEmpty">Incomplete Folder is empty</string>
