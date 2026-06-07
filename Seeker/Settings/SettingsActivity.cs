@@ -84,7 +84,6 @@ namespace Seeker
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
             MenuInflater.Inflate(Resource.Menu.settings_menu, menu);
-            WireSearchMenu(menu);
             return base.OnCreateOptionsMenu(menu);
         }
 
@@ -95,6 +94,9 @@ namespace Seeker
             {
                 case Android.Resource.Id.Home:
                     OnBackPressedDispatcher.OnBackPressed();
+                    return true;
+                case Resource.Id.action_search_settings:
+                    ShowSearchRow();
                     return true;
             }
             return base.OnOptionsItemSelected(item);

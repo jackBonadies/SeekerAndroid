@@ -3,6 +3,7 @@ using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using Android.Views;
+using Android.Views.InputMethods;
 using Android.Widget;
 using AndroidX.AppCompat.Widget;
 using AndroidX.Core.View;
@@ -21,6 +22,10 @@ namespace Seeker
         private SettingsAdapter _settingsAdapter;
         private RecyclerView _settingsRecyclerView;
         private string _pendingSearchQuery;
+
+        private View _settingsSearchRow;
+        private AndroidX.AppCompat.Widget.SearchView _settingsSearchView;
+        private Seeker.Helpers.GenericOnBackPressedCallback _searchBackCallback;
 
         // Drives the live "Currently parsing (X files)" count while a share is parsing. The parse
         // emits no periodic event, so we self-tick on the main looper until parsing finishes.
@@ -41,10 +46,7 @@ namespace Seeker
             _settingsAdapter = new SettingsAdapter(this, rows);
             _settingsRecyclerView.SetAdapter(_settingsAdapter);
 
-            if (!string.IsNullOrEmpty(_pendingSearchQuery))
-            {
-                _settingsAdapter.Filter(_pendingSearchQuery);
-            }
+            WireInlineSearch();
 
             if (Intent != null &&
                 Intent.GetIntExtra(SettingsActivity.SCROLL_TO_SHARING_SECTION_STRING, -1) != -1)
@@ -68,32 +70,62 @@ namespace Seeker
         }
 
 
-        private void WireSearchMenu(IMenu menu)
+        private void WireInlineSearch()
         {
-            var searchItem = menu?.FindItem(Resource.Id.action_search_settings);
-            if (searchItem == null) return;
+            _settingsSearchRow = FindViewById<View>(Resource.Id.settingsSearchRow);
+            _settingsSearchView = FindViewById<AndroidX.AppCompat.Widget.SearchView>(Resource.Id.settingsSearchView);
 
-            var searchView = searchItem.ActionView.JavaCast<AndroidX.AppCompat.Widget.SearchView>();
-            if (searchView == null) return;
+            _settingsSearchView.QueryHint = GetString(Resource.String.search_settings);
 
-            searchView.QueryHint = GetString(Resource.String.search_settings);
 
-            if (!string.IsNullOrEmpty(_pendingSearchQuery))
-            {
-                searchItem.ExpandActionView();
-                searchView.SetQuery(_pendingSearchQuery, false);
-                searchView.ClearFocus();
-            }
-
-            searchView.QueryTextChange += (s, e) =>
+            _settingsSearchView.QueryTextChange += (s, e) =>
             {
                 _settingsAdapter?.Filter(e.NewText ?? string.Empty);
             };
-            searchView.QueryTextSubmit += (s, e) =>
+            _settingsSearchView.QueryTextSubmit += (s, e) =>
             {
-                _settingsAdapter?.Filter(e.NewText ?? string.Empty);
+                _settingsSearchView.ClearFocus();
                 e.Handled = true;
             };
+
+
+            // Back closes the search row (instead of the activity) while it is open.
+            _searchBackCallback = new Seeker.Helpers.GenericOnBackPressedCallback(false, cb => HideSearchRow());
+            OnBackPressedDispatcher.AddCallback(_searchBackCallback);
+
+            // Restore an in-progress search across rotation without popping the keyboard.
+            if (!string.IsNullOrEmpty(_pendingSearchQuery))
+            {
+                _settingsSearchRow.Visibility = ViewStates.Visible;
+                _settingsSearchView.SetQuery(_pendingSearchQuery, false);
+                _settingsSearchView.ClearFocus();
+                _searchBackCallback.Enabled = true;
+            }
+        }
+
+        internal void ShowSearchRow()
+        {
+            if (_settingsSearchRow == null)
+            {
+                return;
+            }
+            _settingsSearchRow.Visibility = ViewStates.Visible;
+            _settingsSearchView.Iconified = false;
+            _settingsSearchView.RequestFocus();
+            _searchBackCallback.Enabled = true;
+        }
+
+        private void HideSearchRow()
+        {
+            if (_settingsSearchRow == null)
+            {
+                return;
+            }
+            var imm = (InputMethodManager)GetSystemService(Context.InputMethodService);
+            imm?.HideSoftInputFromWindow(_settingsSearchView.WindowToken, 0);
+            _settingsSearchView.SetQuery(string.Empty, false); // clears the filter via QueryTextChange
+            _settingsSearchRow.Visibility = ViewStates.Gone;
+            _searchBackCallback.Enabled = false;
         }
 
 
