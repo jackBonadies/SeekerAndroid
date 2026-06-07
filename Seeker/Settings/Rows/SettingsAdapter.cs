@@ -613,8 +613,8 @@ namespace Seeker.Settings.Rows
         private readonly Google.Android.Material.Button.MaterialButton _btn;
         private readonly ImageView _info;
         private readonly SettingsAdapter _adapter;
+        private readonly LinearLayout _root;
         private ButtonRow _row;
-        private LinearLayout _root;
 
         public ButtonStandoutViewHolder(View v, SettingsAdapter adapter) : base(v, adapter)
         {

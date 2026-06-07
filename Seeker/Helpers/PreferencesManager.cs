@@ -8,8 +8,8 @@ namespace Seeker
 {
     public static class PreferencesManager
     {
-        private static object SharedPrefLock = new object();
-        private static object TransferStateSaveLock = new object();
+        private static readonly object SharedPrefLock = new object();
+        private static readonly object TransferStateSaveLock = new object();
 
         /// <summary>
         /// Restores all persisted preferences from the given shared preferences.
