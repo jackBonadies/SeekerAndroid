@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rowRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="64dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
+
+    <ImageView
+        android:id="@+id/rowIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="20dp"
+        android:tint="?attr/normalTextColor"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/rowTextWrap"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/rowTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="?attr/normalTextColorNonTinted" />
+
+        <TextView
+            android:id="@+id/rowSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="13sp"
+            android:alpha="0.6"
+            android:textColor="?attr/normalTextColor"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:id="@+id/rowStatusLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:id="@+id/rowStatusSpinner"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginEnd="8dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <View
+                android:id="@+id/rowStatusDot"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/setting_status_dot"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/rowStatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="?attr/normalTextColor" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/rowInfo"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="8dp"
+        style="@style/SettingsHelpIcon"
+        android:src="@drawable/help_circle_outline"
+        android:tint="?attr/normalTextColor"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="3dp"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/rowChevron"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="10dp"
+        android:src="@drawable/ic_chevron_right"
+        android:tint="?attr/normalTextColor" />
+</LinearLayout>

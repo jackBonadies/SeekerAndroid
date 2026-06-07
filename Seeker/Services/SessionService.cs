@@ -175,13 +175,36 @@ namespace Seeker.Services
             return (!PreferencesState.CurrentlyLoggedIn) || PreferencesState.Username == null || PreferencesState.Password == null || PreferencesState.Username == string.Empty;
         }
 
+        public void ReconfigureOptions(bool? allowPrivateInvites, bool? enableListener, int? newPort)
+        {
+            bool requiresConnection = allowPrivateInvites.HasValue;
+            if (!PreferencesState.CurrentlyLoggedIn && requiresConnection)
+            {
+                SeekerApplication.Toaster.ShowToast(
+                    SeekerApplication.GetString(Resource.String.must_be_logged_to_toggle_priv_invites),
+                    ToastLength.Short);
+                if (SeekerState.ActiveActivityRef is SettingsActivity sa)
+                {
+                    sa.NotifyRowChanged("general.allow_private_invites");
+                }
+                return;
+            }
+            if (requiresConnection)
+            {
+                RunWithReconnect(() => ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort));
+            }
+            else
+            {
+                ReconfigureOptionsLogic(allowPrivateInvites, enableListener, newPort);
+            }
+        }
+
         public void ReconfigureOptionsLogic(bool? allowPrivateInvites, bool? enableTheListener, int? listenerPort)
         {
             Task<bool> reconfigTask = null;
             try
             {
                 Soulseek.SoulseekClientOptionsPatch patch = new Soulseek.SoulseekClientOptionsPatch(acceptPrivateRoomInvitations: allowPrivateInvites, enableListener: enableTheListener, listenPort: listenerPort);
-
                 reconfigTask = SeekerState.SoulseekClient.ReconfigureOptionsAsync(patch);
             }
             catch (Exception e)
@@ -203,8 +226,9 @@ namespace Seeker.Services
                             SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.failed_setting_priv_invites), enabledDisabled), ToastLength.Long);
                             if (SeekerState.ActiveActivityRef is SettingsActivity settingsActivity)
                             {
-                                //set the check to false
-                                settingsActivity.allowPrivateRoomInvitations.Checked = PreferencesState.AllowPrivateRoomInvitations; //old value
+                                // Rebind the toggle row from PreferencesState (the unchanged old value,
+                                // since the setter no longer persists optimistically).
+                                settingsActivity.NotifyRowChanged("general.allow_private_invites");
                             }
                         }
 
@@ -218,9 +242,6 @@ namespace Seeker.Services
                         {
                             SeekerApplication.Toaster.ShowToast(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.network_error_setting_listener_port), listenerPort.Value), ToastLength.Long);
                         }
-
-
-
                     }
                     else
                     {

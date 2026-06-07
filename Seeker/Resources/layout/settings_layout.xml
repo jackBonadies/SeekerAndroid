@@ -5,50 +5,58 @@
     android:orientation="vertical"
     android:background="?attr/pseudo_window_background_color"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
->
+    android:layout_height="match_parent">
+
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbarLayout"
         android:fitsSystemWindows="true"
         android:background="?attr/mainPurple"
         android:layout_width="match_parent"
         android:theme="@style/AppTheme.AppBarOverlay"
-        android:layout_height="wrap_content"
-    >
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/setting_toolbar"
+        android:layout_height="wrap_content">
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/mainPurple"
-            android:minHeight="100dp"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
-            tools:layout_editor_absoluteX="0dp"
-            tools:layout_editor_absoluteY="0dp"
-        />
+            android:layout_height="wrap_content">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/setting_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/mainPurple"
+                android:minHeight="100dp"
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                tools:layout_editor_absoluteX="0dp"
+                tools:layout_editor_absoluteY="0dp" />
+
+            <LinearLayout
+                android:id="@+id/settingsSearchRow"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:minHeight="100dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="?attr/mainPurple"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:visibility="gone">
+
+                <androidx.appcompat.widget.SearchView
+                    android:id="@+id/settingsSearchView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:iconifiedByDefault="false"
+                    app:queryBackground="@android:color/transparent" />
+            </LinearLayout>
+        </FrameLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <ScrollView
-        android:paddingBottom="60dp"
-        android:clipToPadding="false"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/settingsRecyclerView"
         android:layout_width="match_parent"
-        android:id="@+id/mainScrollView"
-        android:layout_below="@id/appbarLayout"
         android:layout_height="match_parent"
-    >
-        <LinearLayout
-            android:orientation="vertical"
-            android:padding="4dip"
-            android:gravity="center_horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-        >
-            <include layout="@layout/settings_section_downloads" />
-            <include layout="@layout/settings_section_search" />
-            <include layout="@layout/settings_section_general" />
-            <include layout="@layout/settings_section_appearance" />
-            <include layout="@layout/settings_section_sharing" />
-            <include layout="@layout/settings_section_network" />
-            <include layout="@layout/settings_section_account" />
-        </LinearLayout>
-    </ScrollView>
+        android:layout_below="@id/appbarLayout"
+        android:clipToPadding="false"
+        android:paddingBottom="32dp"
+        android:scrollbars="vertical" />
 </RelativeLayout>

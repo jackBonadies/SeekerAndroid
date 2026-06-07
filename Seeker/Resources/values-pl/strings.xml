@@ -179,7 +179,7 @@ Liczba katalogów: {5}\"
     <string name="type_chatroom_ticker_message">Wiadomość na pasku przewijania</string>
 
     <string name="change_download_folder">Wybierz folder pobierania</string>
-    <string name="max_search_results">Maksymalna liczba wyników wyszukiwania:</string>
+    <string name="max_search_results">Maksymalna liczba wyników wyszukiwania</string>
     <string name="only_show_free_slots">
         Pokaż tylko wyniki użytkowników z wolnymi miejscami
     </string>
@@ -371,9 +371,9 @@ Liczba katalogów: {5}\"
         Error Parsing Files, could not set Shared Directory
     </string>
 
-    <string name="follow_system">Follow System</string>
-    <string name="always_light">Always Light</string>
-    <string name="always_dark">Always Dark</string>
+    <string name="follow_system">Follow system</string>
+    <string name="always_light">Always light</string>
+    <string name="always_dark">Always dark</string>
 
     <string name="queue_length_">Queue Length</string>
     <string name="upload_slots_">Free Upload Slots</string>
@@ -768,9 +768,9 @@ Liczba katalogów: {5}\"
         No uploads currently, failed to set up shares
     </string>
 
-    <string name="auto_clear_complete">Auto Clear Complete Downloads</string>
+    <string name="auto_clear_complete">Auto-clear complete downloads</string>
     <string name="auto_clear_complete_uploads">
-        Auto Clear Complete Uploads
+        Auto-clear complete uploads
     </string>
 
     <string name="download_remaining">{0} download remaining</string>
@@ -958,41 +958,39 @@ Liczba katalogów: {5}\"
     <string name="UsingThisWizardLong">
         Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options &gt; Extras &gt; \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences &gt; Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.
     </string>
-    <string name="CurrentDownloadFolder_">Current Download Folder:</string>
+    <string name="CurrentDownloadFolder_">Download folder</string>
     <string name="CreateCompleteAndIncomplete">
-        Create Soulseek Complete and Soulseek Incomplete Directories
+        Create Soulseek Complete and Soulseek Incomplete directories
     </string>
-    <string name="CreateUsernameSubfolders">Create Username Subfolders</string>
+    <string name="CreateUsernameSubfolders">Create username subfolders</string>
     <string name="DoNotCreateSubfoldersForSingleDownloads">
-        Do not create Subfolders for Single Downloads
+        Skip subfolders for single files
     </string>
-    <string name="ShowSmartFilters">Show Smart Filters</string>
+    <string name="ShowSmartFilters">Show smart filters</string>
     <string name="ShowPrivateLockedSearch">
-        Show Private (Locked) Files in Search Results
+        Show private (locked) files in search results
     </string>
     <string name="ShowPrivateLockedBrowse">
-        Show Private (Locked) Files in Browse Response
+        Show private (locked) files in browse response
     </string>
-    <string name="RememberRecent">Remember Recent Users</string>
-    <string name="ClearRecentUsers">Clear Recent Users</string>
+    <string name="RememberRecent">Remember recent users</string>
+    <string name="ClearRecentUsers">Clear recent users</string>
     <string name="AutoRetryFailedOfflineOnline">
-        Auto-Retry Failed Downloads When User Goes Back Online
+        Auto-retry failed downloads when user goes back online
     </string>
     <string name="AwayOnInactivity">
-        Automatically Set Status to Away on Inactivity
+        Set status to away when inactive
     </string>
-    <string name="DayVarient_">Day Variant</string>
-    <string name="NightVarient_">Night Variant</string>
-    <string name="NoSharedAdd">
-        No Shared Folders. Tap \'Add\' to get started.
-    </string>
+    <string name="DayVarient_">Day theme</string>
+    <string name="NightVarient_">Night theme</string>
+    <string name="NoSharedAdd">No shared folders</string>
     <string name="RescanShares">Rescan Shares</string>
     <string name="PauseSharingIfMetered">
-        Pause Sharing if on Metered (Mobile) Connection
+        Pause sharing on metered (mobile) connection
     </string>
-    <string name="LimitDownloadSpeed">Limit Download Speed</string>
-    <string name="LimitUploadSpeed">Limit Upload Speed</string>
-    <string name="LimitConcurrentDownloads">Limit Concurrent Downloads</string>
+    <string name="LimitDownloadSpeed">Limit download speed</string>
+    <string name="LimitUploadSpeed">Limit upload speed</string>
+    <string name="LimitConcurrentDownloads">Limit concurrent downloads</string>
     <string name="EnableDiagnostics">Włącz diagnostykę</string>
     <string name="ImportExternalClientData">Import external client data</string>
     <string name="LockedUserListOnly">
@@ -1028,9 +1026,9 @@ Liczba katalogów: {5}\"
     <string name="PerTransfer">Per Transfer</string>
     <string name="Global">Global</string>
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
-    <string name="NotSet">Not Set</string>
+    <string name="NotSet">Not set</string>
     <string name="AppLocalStorage">App Local Storage</string>
-    <string name="NotInUse">Not in Use</string>
+    <string name="NotInUse">Not in use</string>
 
     <string name="IncompleteFolderEmpty">Incomplete Folder is empty</string>
     <string name="NoEligibleToClear">No eligible items to clear</string>
@@ -1107,9 +1105,9 @@ Liczba katalogów: {5}\"
     <string name="Automatic">Automatyczny</string>
 
     <string name="ManuallySetIncompleteFolder">
-        Override Incomplete Folder Location
+        Override incomplete folder location
     </string>
-    <string name="CurrentIncompleteFolder">Current Incomplete Folder:</string>
+    <string name="CurrentIncompleteFolder">Incomplete folder</string>
     <string name="ClearFolder">Czyść folder</string>
 
     <string name="HideSize">Ukryj rozmiar</string>
@@ -1117,7 +1115,7 @@ Liczba katalogów: {5}\"
 
     <string name="Num_Selected">{0} Selected</string>
 
-    <string name="ExportClientData">Export Client Data</string>
+    <string name="ExportClientData">Export client data</string>
     <string name="export_more_info">
         Export User List, Ignore/Block List, User Notes, and Wishlist to xml. Useful for backing up or migrating data to new phone.
     </string>
@@ -1126,7 +1124,7 @@ Liczba katalogów: {5}\"
     </string>
 
     <string name="ForceFilesystemPermission">
-        Force Filesystem Permissions
+        Force filesystem permissions
     </string>
     <string name="permission_already_successfully_granted">
         Permission has already been succesfully granted
@@ -1140,7 +1138,7 @@ Liczba katalogów: {5}\"
 
     <string name="setUpSharing">Set up Sharing</string>
 
-    <string name="change_password">Change Password</string>
+    <string name="change_password">Change password</string>
     <string name="new_password">New Password</string>
     <string name="cannot_be_empty">Cannot be empty</string>
 

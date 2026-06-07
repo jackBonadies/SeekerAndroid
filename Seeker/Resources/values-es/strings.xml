@@ -179,7 +179,7 @@ Directorio: {5}
     <string name="type_chatroom_ticker_message">Mensaje Ticker</string>
 
     <string name="change_download_folder">Cambiar carpeta de descargas</string>
-    <string name="max_search_results">Resultado máx. de búsqueda:</string>
+    <string name="max_search_results">Resultado máx. de búsqueda</string>
     <string name="only_show_free_slots">
         Mostrar solo los resultados de los usuarios con ranuras libres
     </string>
@@ -208,7 +208,7 @@ Directorio: {5}
     <string name="use_pnp_for_port_forwarding">
         Usar UPnP para reenvío de puertos
     </string>
-    <string name="edit_your_user_info">Editar la Información del Usuario</string>
+    <string name="edit_your_user_info">Editar la información del usuario</string>
     <string name="restore_default_settings">Restaurar valores predeterminados</string>
 
     <string name="no_transfers_yet">
@@ -958,7 +958,7 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     <string name="UsingThisWizardLong">
         Usando este asistente uno puede importar datos del cliente de SoulseekQT o Nicotine+.\n\nPara obtener datos del cliente de SoulseekQT vaya a Opciones &gt; Extras &gt; \'Exportar datos de configuración del cliente\', el tipo de archivo debe ser .scd1. Para Nicotine+ vaya a Preferencias &gt; Exportar, el tipo de archivo puede ser .tar.bz2 o el archivo de configuración crudo.\n\nEl Buscador importará Lista de Usuarios, Ignorada / No compartida, Lista de deseos y notas de usuario. Uno podrá elegir y elegir qué exportar en las siguientes pantallas.\n\nToque en \"importar\" para empezar.
     </string>
-    <string name="CurrentDownloadFolder_">Carpeta de descarga actual:</string>
+    <string name="CurrentDownloadFolder_">Carpeta de descarga</string>
     <string name="CreateCompleteAndIncomplete">
         Crear directorios de completos e incompletos para Soulseek
     </string>
@@ -983,12 +983,10 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     </string>
     <string name="DayVarient_">Variante diurna</string>
     <string name="NightVarient_">Variante nocturna</string>
-    <string name="NoSharedAdd">
-        No hay Carpetas Compartidas. Pulse \'Añadir\' para empezar.
-    </string>
+    <string name="NoSharedAdd">No hay carpetas compartidas</string>
     <string name="RescanShares">Volver a escanear archivos compartidos</string>
     <string name="PauseSharingIfMetered">
-        Pausar el uso compartido si se encuentra en conexión Medida (Móvil)
+        Pausar el uso compartido si se encuentra en conexión medida (móvil)
     </string>
     <string name="LimitDownloadSpeed">Limitar velocidad de descarga</string>
     <string name="LimitUploadSpeed">Limitar velocidad de subida</string>
@@ -1109,7 +1107,7 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     <string name="ManuallySetIncompleteFolder">
         Establecer manualmente carpeta incompleta
     </string>
-    <string name="CurrentIncompleteFolder">Carpeta Incompleta Actual:</string>
+    <string name="CurrentIncompleteFolder">Carpeta incompleta</string>
     <string name="ClearFolder">Limpiar carpeta</string>
 
     <string name="HideSize">Ocultar tamaño</string>
@@ -1165,5 +1163,9 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     <string name="section_sharing">Sharing</string>
     <string name="section_network">Network</string>
     <string name="section_account">Account</string>
+    <string name="theme_purple">Morado</string>
+    <string name="theme_grey">Gris</string>
+    <string name="theme_blue">Azul</string>
+    <string name="theme_red">Rojo</string>
 </resources>
 

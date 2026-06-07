@@ -152,6 +152,23 @@ namespace Seeker.Managers
 
         public EventHandler PrivilegesChecked;
 
+        /// <summary>True while a privileges check is in flight (between GetPrivilegesAPI start and
+        /// the continuation completing). Fires <see cref="CheckStateChanged"/> when the value changes.</summary>
+        public bool IsCheckInProgress { get; private set; }
+
+        /// <summary>Raised when <see cref="IsCheckInProgress"/> transitions (start of check, end of check).</summary>
+        public EventHandler<EventArgs> CheckStateChanged;
+
+        private void SetCheckInProgress(bool value)
+        {
+            if (IsCheckInProgress == value)
+            {
+                return;
+            }
+            IsCheckInProgress = value;
+            CheckStateChanged?.Invoke(null, EventArgs.Empty);
+        }
+
         private void GetPrivilegesLogic(bool feedback)
         {
             SeekerState.SoulseekClient.GetPrivilegesAsync().ContinueWith(new Action<Task<int>>
@@ -171,6 +188,7 @@ namespace Seeker.Managers
                                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.priv_failed), ToastLength.Long);
                             }
                         }
+                        SetCheckInProgress(false);
                         return;
                     }
                     else
@@ -189,6 +207,7 @@ namespace Seeker.Managers
                         {
                             SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.priv_success) + ". " + SeekerApplication.GetString(Resource.String.status) + ": " + GetPrivilegeStatus(), ToastLength.Long);
                         }
+                        SetCheckInProgress(false);
                         PrivilegesChecked?.Invoke(null, new EventArgs());
                     }
                 }));
@@ -201,7 +220,20 @@ namespace Seeker.Managers
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_in_to_check_privileges), ToastLength.Short);
                 return;
             }
-            SessionService.Instance.RunWithReconnect(() => GetPrivilegesLogic(feedback));
+            SetCheckInProgress(true);
+            SessionService.Instance.RunWithReconnect((Task reconnectTask) =>
+            {
+                if (reconnectTask.IsFaulted)
+                {
+                    if (feedback)
+                    {
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
+                    }
+                    SetCheckInProgress(false);
+                    return;
+                }
+                GetPrivilegesLogic(feedback);
+            });
         }
 
         public bool CheckIfPrivileged(string username)

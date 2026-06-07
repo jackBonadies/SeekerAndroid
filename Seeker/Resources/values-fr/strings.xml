@@ -179,36 +179,36 @@ Nombre de dossiers : {5}
     <string name="type_chatroom_ticker_message">Message du ticker</string>
 
     <string name="change_download_folder">Changer de Dossier de Téléchargement</string>
-    <string name="max_search_results">Nombre Max. de Résultats :</string>
+    <string name="max_search_results">Nombre max. de résultats</string>
     <string name="only_show_free_slots">
-        Afficher Uniquement les Résultats des Utilisateurs à Canaux Libres
+        Afficher uniquement les résultats des utilisateurs à canaux libres
     </string>
-    <string name="start_service_on_startup">Démarrer le Service au Démarrage</string>
+    <string name="start_service_on_startup">Démarrer le service au démarrage</string>
     <string name="allow_private_room_invitations">
-        Autoriser les Invitations à un Salon Privé
+        Autoriser les invitations à un salon privé
     </string>
 
     <string name="show_bottom_notifs_complete">
-        Afficher les Notifications de Fin de Téléchargement
+        Afficher les notifications de fin de téléchargement
     </string>
     <string name="show_notifs_on_folder_complete">
-        Afficher les Notifications de Dossier Complet
+        Afficher les notifications de dossier complet
     </string>
-    <string name="remember_search_history">Conserve l\'Historique de Recherche</string>
-    <string name="clear_search_history">Efface l\'Historique de Recherche</string>
-    <string name="file_backed_downloads">Téléchargements en Fichier</string>
-    <string name="night_mode_options">Thème de Nuit</string>
-    <string name="enable_sharing">Activer le Partage</string>
+    <string name="remember_search_history">Conserve l\'historique de recherche</string>
+    <string name="clear_search_history">Efface l\'historique de recherche</string>
+    <string name="file_backed_downloads">Téléchargements en fichier</string>
+    <string name="night_mode_options">Thème de nuit</string>
+    <string name="enable_sharing">Activer le partage</string>
     <string name="set_shared_folder">Définir le Dossier Partagé</string>
     <string name="browse_yourself">Parcourir ses Fichiers</string>
-    <string name="enable_listening">Activer l\'Ecoute</string>
-    <string name="change_port">Changer de Port</string>
+    <string name="enable_listening">Activer l\'ecoute</string>
+    <string name="change_port">Changer de port</string>
     <string name="port">Port</string>
-    <string name="check_your_port_status">Vérifier le Statut</string>
+    <string name="check_your_port_status">Vérifier le statut</string>
     <string name="use_pnp_for_port_forwarding">
-        Utiliser UPnP pour la Redirection de Port
+        Utiliser UPnP pour la redirection de port
     </string>
-    <string name="edit_your_user_info">Editer les Infos d\'Utilisateur</string>
+    <string name="edit_your_user_info">Editer les infos d\'utilisateur</string>
     <string name="restore_default_settings">Réinitialiser</string>
 
     <string name="no_transfers_yet">
@@ -371,9 +371,9 @@ Nombre de dossiers : {5}
         Erreur lors de l\'Analyse des Fichiers, impossible de définir le Répertoire Partagé
     </string>
 
-    <string name="follow_system">Valeur Système</string>
-    <string name="always_light">Toujours Clair</string>
-    <string name="always_dark">Toujours Sombre</string>
+    <string name="follow_system">Valeur système</string>
+    <string name="always_light">Toujours clair</string>
+    <string name="always_dark">Toujours sombre</string>
 
     <string name="queue_length_">Longueur de la File d\'Attente</string>
     <string name="upload_slots_">Canaux Disponibles</string>
@@ -767,9 +767,9 @@ Nombre de dossiers : {5}
         Aucun téléversement à l\'heure actuelle, échec de mise en place des partages
     </string>
 
-    <string name="auto_clear_complete">Efface automatiquement les téléchargements Complets</string>
+    <string name="auto_clear_complete">Efface automatiquement les téléchargements complets</string>
     <string name="auto_clear_complete_uploads">
-        Auto Nettoyage du Téléversement Complets
+        Auto nettoyage du téléversement complets
     </string>
 
     <string name="download_remaining">{0} téléchargements restants</string>
@@ -957,40 +957,38 @@ Nombre de dossiers : {5}
     <string name="UsingThisWizardLong">
         En utilisant cet assistant, il est possible d\'importer des données client depuis SoulseekQT ou Nicotine+.\n\nPour obtenir les données client depuis SoulseekQT veuillez aller dans Options &gt; Extras &gt; \'Exporter les données de configuration client\',  l\'extension du fichier devrait être .scd1. Pour Nicotine+, veuillez aller dans Préférences &gt; Exporter, l\'extension du fichier peut être .tar.bz2 ou un fichier configuration intact.\n\nSeeker importera les Listes d\'Utilisateurs, Listes d\'Ignorés / sans partage, Liste de vœux, et Notes Utilisateur. Vous pourrez choisir qu\'importer via les écrans suivants.\n\nAppuyez sur \'Importer\' pour commencer.
     </string>
-    <string name="CurrentDownloadFolder_">Dossier de Téléchargement Courant:</string>
+    <string name="CurrentDownloadFolder_">Dossier de téléchargement</string>
     <string name="CreateCompleteAndIncomplete">
-        Création des Dossiers Soulseek Complet et Incomplet
+        Création des dossiers Soulseek complet et incomplet
     </string>
     <string name="CreateUsernameSubfolders">Créer des sous-dossiers pour les noms d\'utilisateur</string>
     <string name="DoNotCreateSubfoldersForSingleDownloads">
         Ne pas créer de sous-dossiers pour les téléchargements individuels
     </string>
-    <string name="ShowSmartFilters">Affiche les Filtres Intelligents</string>
+    <string name="ShowSmartFilters">Affiche les filtres intelligents</string>
     <string name="ShowPrivateLockedSearch">
-        Affiche les Fichiers Privés (Verrouillés) dans les Résultats de Recherche
+        Affiche les fichiers privés (verrouillés) dans les résultats de recherche
     </string>
     <string name="ShowPrivateLockedBrowse">
-        Affiche les Fichiers Privés (Verrouillés) dans les Réponses Parcouru
+        Affiche les fichiers privés (verrouillés) dans les réponses parcouru
     </string>
-    <string name="RememberRecent">Conserve les Utilisateurs Récent</string>
-    <string name="ClearRecentUsers">Efface les Utilisateurs Récent</string>
+    <string name="RememberRecent">Conserve les utilisateurs récent</string>
+    <string name="ClearRecentUsers">Efface les utilisateurs récent</string>
     <string name="AutoRetryFailedOfflineOnline">
-        Relancer les Téléchargements Échoués lorsque l\'Utilisateur se Reconnecte
+        Relancer les téléchargements échoués lorsque l\'utilisateur se reconnecte
     </string>
     <string name="AwayOnInactivity">
-        Toujours changer le statut à \'\'Inactif\'\' si inactif
+        Toujours changer le statut à \'\'inactif\'\' si inactif
     </string>
-    <string name="DayVarient_">Thème de Jour</string>
-    <string name="NightVarient_">Autre Thème de Nuit</string>
-    <string name="NoSharedAdd">
-        Aucun dossier partagé. Commencez par cliquer sur \"Ajouter\".
-    </string>
+    <string name="DayVarient_">Thème de jour</string>
+    <string name="NightVarient_">Autre thème de nuit</string>
+    <string name="NoSharedAdd">Aucun dossier partagé</string>
     <string name="RescanShares">Scanner les partages</string>
     <string name="PauseSharingIfMetered">
         Pauser le partage si les données mobiles sont en cours d\'utilisation
     </string>
     <string name="LimitDownloadSpeed">Limiter la vitesse de téléchargement</string>
-    <string name="LimitUploadSpeed">Limiter la vitesse d\'Upload</string>
+    <string name="LimitUploadSpeed">Limiter la vitesse d\'upload</string>
     <string name="LimitConcurrentDownloads">Limiter téléchargements concurrents</string>
     <string name="EnableDiagnostics">Activer les diagnostics</string>
     <string name="ImportExternalClientData">Importer les données externes</string>
@@ -1029,7 +1027,7 @@ Nombre de dossiers : {5}
     <string name="ConfigureSmartFilters">Paramètres des Filtres Intelligents</string>
     <string name="NotSet">Non défini</string>
     <string name="AppLocalStorage">Stockage Local de l\'Application</string>
-    <string name="NotInUse">N\'est pas Utilisé</string>
+    <string name="NotInUse">N\'est pas utilisé</string>
 
     <string name="IncompleteFolderEmpty">Le Dossier Incomplet est vide</string>
     <string name="NoEligibleToClear">Aucun élément ne peut être supprimé</string>
@@ -1106,9 +1104,9 @@ Nombre de dossiers : {5}
     <string name="Automatic">Automatique</string>
 
     <string name="ManuallySetIncompleteFolder">
-        Change le Dossier Incomplet
+        Change le dossier incomplet
     </string>
-    <string name="CurrentIncompleteFolder">Dossier Incomplet Actuel:</string>
+    <string name="CurrentIncompleteFolder">Dossier incomplet</string>
     <string name="ClearFolder">Nettoyer dossier</string>
 
     <string name="HideSize">Cacher taille</string>
@@ -1125,7 +1123,7 @@ Nombre de dossiers : {5}
     </string>
 
     <string name="ForceFilesystemPermission">
-        Forcer permissions Filesystem
+        Forcer permissions filesystem
     </string>
     <string name="permission_already_successfully_granted">
         Cette permission a déjà été accordée
@@ -1164,5 +1162,9 @@ Nombre de dossiers : {5}
     <string name="section_sharing">Sharing</string>
     <string name="section_network">Network</string>
     <string name="section_account">Account</string>
+    <string name="theme_purple">Violet</string>
+    <string name="theme_grey">Gris</string>
+    <string name="theme_blue">Bleu</string>
+    <string name="theme_red">Rouge</string>
 </resources>
 

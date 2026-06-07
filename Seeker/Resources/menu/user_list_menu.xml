@@ -2,13 +2,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
 >
-    <!--<item android:id="@+id/action_search"
-       android:title="@string/action_settings"
-       android:icon="@android:drawable/ic_menu_search"
-       app:showAsAction="ifRoom|collapseActionView"
-       android:layout_width="match_parent"
-       android:iconifiedByDefault="false"
-       app:actionViewClass="androidx.appcompat.widget.SearchView" />-->
 
     <!-- "Mark Favorite", should appear as action button if possible -->
     <item
