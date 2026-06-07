@@ -2120,7 +2120,7 @@ namespace Seeker
             {
                 seconds = 3600 * 24 * _random.Next(2, 100);
             }
-            return await Task.FromResult(seconds);
+            return seconds;
         }
 
         private int getBimodalDelay(int fast = 100, int slow = 10_000)

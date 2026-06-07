@@ -331,6 +331,7 @@ Directory Count: {5}"
     </string>
     <string name="edit_your_user_info">Edit user info</string>
     <string name="restore_default_settings">Restore default settings</string>
+    <string name="restore_default_settings_body">This will reset all settings to their defaults. This can\'t be undone.</string>
     <string name="restore_defaults_subtitle">Resets every setting to factory state</string>
     <string name="force_filesystem_subtitle">Android\'s standard folder permissions don\'t always persist. If Seeker keeps re-prompting for Download or Shared Folder access, this will grant persisted full-storage access via system settings.\n\nThe Play Store version cannot request this permission — requires F-droid (IzzyOnDroid) or GitHub release version.</string>
     <string name="get_fdroid_build">Get F-Droid (IzzyOnDroid) Build</string>

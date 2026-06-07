@@ -157,7 +157,7 @@ namespace Seeker
         {
             new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this)
                 .SetTitle(Resource.String.restore_default_settings)
-                .SetMessage("This will reset settings to their defaults. Continue?")
+                .SetMessage(Resource.String.restore_default_settings_body)
                 .SetNegativeButton(Android.Resource.String.Cancel, (System.EventHandler<Android.Content.DialogClickEventArgs>)((s, e) => { }))
                 .SetPositiveButton(Android.Resource.String.Ok, (System.EventHandler<Android.Content.DialogClickEventArgs>)((s, e) =>
                 {

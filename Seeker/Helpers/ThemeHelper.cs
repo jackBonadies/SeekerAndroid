@@ -6,11 +6,11 @@ namespace Seeker
 {
     public static class ThemeHelper
     {
-        public const string ClassicPurple = "Classic Purple";
+        public const string ClassicPurple = "Purple";
         public const string Grey = "Grey";
         public const string Blue = "Blue";
         public const string Red = "Red";
-        public const string AmoledClassicPurple = "Amoled - Classic Purple";
+        public const string AmoledClassicPurple = "Amoled - Purple";
         public const string AmoledGrey = "Amoled - Grey";
 
         public static DayThemeType FromDayThemeTypeString(string themeTypeString)
