@@ -285,69 +285,9 @@ namespace Seeker
             Rescan(null, -1, false, true);
         }
 
-        private static string GetFriendlyDownloadDirectoryName()
-        {
-            if (StorageState.RootDocumentFile == null)            
-            {
-                if (PlatformInfo.UseLegacyStorage())
-                {
-                    //if not set and legacy storage, then the directory is simple the default music
-                    string path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                    return Android.Net.Uri.Parse(new Java.IO.File(path).ToURI().ToString()).LastPathSegment;
-                }
-                else
-                {
-                    //if not set and not legacy storage, then that is bad.  user must set it.
-                    return SeekerApplication.GetString(Resource.String.NotSet);
-                }
-            }
-            else
-            {
-                return StorageState.RootDocumentFile.Uri.LastPathSegment;
-            }
-        }
-
         public static bool UseIncompleteManualFolder()
         {
             return (PreferencesState.OverrideDefaultIncompleteLocations && StorageState.RootIncompleteDocumentFile != null);
-        }
-
-        private static string GetFriendlyIncompleteDirectoryName()
-        {
-            if (PreferencesState.MemoryBackedDownload)
-            {
-                return SeekerApplication.GetString(Resource.String.NotInUse);
-            }
-            if (PreferencesState.OverrideDefaultIncompleteLocations && StorageState.RootIncompleteDocumentFile != null) //if doc file is null that means we could not write to it.
-            {
-                return StorageState.RootIncompleteDocumentFile.Uri.LastPathSegment;
-            }
-            else
-            {
-                if (!PreferencesState.CreateCompleteAndIncompleteFolders)
-                {
-                    return SeekerApplication.GetString(Resource.String.AppLocalStorage);
-                }
-                //if not override then its whatever the download directory is...
-                if (StorageState.RootDocumentFile == null)                
-                {
-                    if (PlatformInfo.UseLegacyStorage())
-                    {
-                        //if not set and legacy storage, then the directory is simple the default music
-                        string path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
-                        return Android.Net.Uri.Parse(new Java.IO.File(path).ToURI().ToString()).LastPathSegment; //this is to prevent line breaks.
-                    }
-                    else
-                    {
-                        //if not set and not legacy storage, then that is bad.  user must set it.
-                        return SeekerApplication.GetString(Resource.String.NotSet);
-                    }
-                }
-                else
-                {
-                    return StorageState.RootDocumentFile.Uri.LastPathSegment;
-                }
-            }
         }
 
         private void CheckPriv()
@@ -986,7 +926,8 @@ namespace Seeker
             this.RunOnUiThread(new Action(() =>
             {
                 StorageState.SetRootDownloadDirectory(this, uri, isFromTree: !fromLegacyPicker, raiseUpdatedEvent: true);
-                SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), uri.Path), ToastLength.Long);
+                // not needed, also this is by definition too long for a toast
+                //SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), uri.Path), ToastLength.Long);
             }));
         }
 
@@ -1000,7 +941,8 @@ namespace Seeker
             this.RunOnUiThread(new Action(() =>
             {
                 StorageState.SetRootIncompleteDirectory(this, uri, isFromTree: !fromLegacyPicker, raiseUpdatedEvent: true);
-                SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), uri.Path), ToastLength.Long);
+                // not needed, also this is by definition too long for a toast
+                //SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), uri.Path), ToastLength.Long);
             }));
         }
 

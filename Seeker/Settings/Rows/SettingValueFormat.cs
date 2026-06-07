@@ -2,6 +2,7 @@ using Android.Content;
 using Common;
 using Seeker.Helpers;
 using Seeker.Managers;
+using Seeker.Services;
 using Seeker.Transfers;
 using System;
 
@@ -9,19 +10,63 @@ namespace Seeker.Settings.Rows
 {
     internal static class SettingValueFormat
     {
-        public static string PrettyUri(string uri)
+        public static string GetFriendlyDownloadDirectoryName()
         {
-            if (string.IsNullOrEmpty(uri)) return "—";
-            try
+            if (StorageState.RootDocumentFile == null)            
             {
-                var parsed = Android.Net.Uri.Parse(uri);
-                var seg = parsed.LastPathSegment;
-                if (!string.IsNullOrEmpty(seg)) return seg;
-                return uri;
+                if (PlatformInfo.UseLegacyStorage())
+                {
+                    //if not set and legacy storage, then the directory is simple the default music
+                    string path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+                    return Android.Net.Uri.Parse(new Java.IO.File(path).ToURI().ToString()).LastPathSegment;
+                }
+                else
+                {
+                    //if not set and not legacy storage, then that is bad.  user must set it.
+                    return SeekerApplication.GetString(Resource.String.NotSet);
+                }
             }
-            catch
+            else
             {
-                return uri;
+                return StorageState.RootDocumentFile.Uri.LastPathSegment;
+            }
+        }
+
+        public static string GetFriendlyIncompleteDirectoryName()
+        {
+            if (PreferencesState.MemoryBackedDownload)
+            {
+                return SeekerApplication.GetString(Resource.String.NotInUse);
+            }
+            if (PreferencesState.OverrideDefaultIncompleteLocations && StorageState.RootIncompleteDocumentFile != null) //if doc file is null that means we could not write to it.
+            {
+                return StorageState.RootIncompleteDocumentFile.Uri.LastPathSegment;
+            }
+            else
+            {
+                if (!PreferencesState.CreateCompleteAndIncompleteFolders)
+                {
+                    return SeekerApplication.GetString(Resource.String.AppLocalStorage);
+                }
+                //if not override then its whatever the download directory is...
+                if (StorageState.RootDocumentFile == null)                
+                {
+                    if (PlatformInfo.UseLegacyStorage())
+                    {
+                        //if not set and legacy storage, then the directory is simple the default music
+                        string path = Android.OS.Environment.GetExternalStoragePublicDirectory(Android.OS.Environment.DirectoryMusic).AbsolutePath;
+                        return Android.Net.Uri.Parse(new Java.IO.File(path).ToURI().ToString()).LastPathSegment; //this is to prevent line breaks.
+                    }
+                    else
+                    {
+                        //if not set and not legacy storage, then that is bad.  user must set it.
+                        return SeekerApplication.GetString(Resource.String.NotSet);
+                    }
+                }
+                else
+                {
+                    return StorageState.RootDocumentFile.Uri.LastPathSegment;
+                }
             }
         }
 

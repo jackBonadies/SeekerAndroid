@@ -52,7 +52,7 @@ namespace Seeker.Settings.Rows
                 KeywordsRes = Resource.String.keywords_download_folder,
                 IconRes = Resource.Drawable.browse_48dp,
                 TrailingIconRes = Resource.Drawable.ic_arrow_outward,
-                ValueProvider = ctx => SettingValueFormat.PrettyUri(PreferencesState.SaveDataDirectoryUri),
+                ValueProvider = ctx => SettingValueFormat.GetFriendlyDownloadDirectoryName(),
                 OnClick = (h, r) => h.LaunchDownloadFolderPicker(),
             });
 
@@ -106,7 +106,7 @@ namespace Seeker.Settings.Rows
                 TitleRes = Resource.String.CurrentIncompleteFolder,
                 KeywordsRes = Resource.String.keywords_incomplete_folder,
                 TrailingIconRes = Resource.Drawable.ic_arrow_outward,
-                ValueProvider = ctx => SettingValueFormat.PrettyUri(PreferencesState.ManualIncompleteDataDirectoryUri),
+                ValueProvider = ctx => SettingValueFormat.GetFriendlyIncompleteDirectoryName(),
                 OnClick = (h, r) => h.LaunchIncompleteFolderPicker(),
             });
             rows.Add(new ActionRow
@@ -128,6 +128,7 @@ namespace Seeker.Settings.Rows
                 // The original UI exposes the inverse (memory-backed); store as file-backed semantics.
                 Getter = () => !PreferencesState.MemoryBackedDownload,
                 Setter = v => { PreferencesState.MemoryBackedDownload = !v;
+                                host.Adapter?.NotifyRowChanged("downloads.incomplete_path");
                                 PreferencesManager.SaveBoolean(KeyConsts.M_MemoryBackedDownload, PreferencesState.MemoryBackedDownload); },
             });
 
