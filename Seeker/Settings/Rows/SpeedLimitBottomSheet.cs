@@ -64,7 +64,7 @@ namespace Seeker.Settings.Rows
             view.FindViewById<MaterialButton>(Resource.Id.speedCancel).Click += (s, e) => Dismiss();
             view.FindViewById<MaterialButton>(Resource.Id.speedOk).Click += (s, e) =>
             {
-                if (!int.TryParse(input.Text, out int kbs) || kbs < 1)
+                if (!int.TryParse(input.Text, out int kbs) || kbs < 1 || kbs * 1024 < 1) // this last check is for overflow when we covert to bytes (i.e. 2*10^9 * 1024 < 1 due to overflow)
                 {
                     inputLayout.Error = Context.GetString(Resource.String.invalid_number);
                     return;
