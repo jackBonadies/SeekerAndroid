@@ -635,11 +635,6 @@ namespace Seeker
             }
         }
 
-        private void OnCloseClick(object sender, DialogClickEventArgs e)
-        {
-            (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
-        }
-
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
             switch (item.ItemId)
@@ -671,20 +666,7 @@ namespace Seeker
                     this.FinishAndRemoveTask();
                     return true;
                 case Resource.Id.about_action:
-                    var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
-                    //var diag = builder.SetMessage(string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body).TrimStart(' '), SeekerApplication.GetVersionString())).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
-                    var diag = builder.SetMessage(Resource.String.about_body).SetPositiveButton(Resource.String.close, OnCloseClick).Create();
-                    diag.Show();
-                    var origString = string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.about_body), CommonHelpers.GetVersionString()); //this is a literal CDATA string.
-                    if (OperatingSystem.IsAndroidVersionAtLeast(24))
-                    {
-                        ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(origString, Android.Text.FromHtmlOptions.ModeLegacy); //this can be slow so do NOT do it in loops...
-                    }
-                    else
-                    {
-                        ((TextView)diag.FindViewById(Android.Resource.Id.Message)).TextFormatted = Android.Text.Html.FromHtml(origString); //this can be slow so do NOT do it in loops...
-                    }
-                    ((TextView)diag.FindViewById(Android.Resource.Id.Message)).MovementMethod = (Android.Text.Method.LinkMovementMethod.Instance);
+                    Seeker.Settings.Rows.AboutBottomSheet.Show(this);
                     return true;
             }
 

@@ -735,12 +735,7 @@
         Щоб надати привілеї, необхідно увійти в систему
     </string>
 
-    <string name="about_body">
-        <![CDATA[Seeker — це безплатний клієнт Soulseek з відкритим кодом для Android. У ньому ніколи не буде реклами чи платних функцій.
-<br><br>Допомогти перекласти Seeker <a href="https://crwd.in/seeker">тут</a>.
-<br><br>Вихідний код <a href="https://github.com/jackBonadies/SeekerAndroid">тут</a>.
-<br><br>Версія: {0}.]]>
-    </string>
+    <string name="about_body">Seeker — це безплатний клієнт Soulseek з відкритим кодом для Android. У ньому ніколи не буде реклами чи платних функцій.</string>
     <string name="force_filesystem_message">
         <![CDATA[The standard way of requesting folder access does not always persist permissions.  If you find Seeker reprompting for Download Folder or Shared Folder access, this button will request the old style permissions which will always persist.
 <br><br>This function requires the Fdroid IzzyDroid version of Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Download Here</a>). The Google Play Store does not allow applications to request this permission.]]>

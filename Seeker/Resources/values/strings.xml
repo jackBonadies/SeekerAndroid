@@ -918,14 +918,9 @@ Directory Count: {5}"
         Must be logged in to give privileges
     </string>
 
-    <string name="about_body">
-<![CDATA[
-Seeker is a free and open source Soulseek client for Android.  It will never have ads or paid features.
-<br><br>Please help translate Seeker <a href="https://crwd.in/seeker">here</a>.
-<br><br>Source code is <a href="https://github.com/jackBonadies/SeekerAndroid">here</a>.
-<br><br>Version: {0}.
-]]>
-  </string>
+    <string name="about_body">Seeker is a free and open source Soulseek client for Android. It will never have ads or paid features.</string>
+    <string name="about_link_source_title">Source code</string>
+    <string name="about_link_translate_title">Help translate</string>
     <string name="force_filesystem_message">
 <![CDATA[
 The standard way of requesting folder access does not always persist permissions.  If you find Seeker reprompting for Download Folder or Shared Folder access, this button will request the old style permissions which will always persist.

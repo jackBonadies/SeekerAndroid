@@ -485,10 +485,7 @@ Directory Count: {5}\"</string>
     <string name="subfolders_warning_queue_paused">This folder contains subfolders, would you like to queue all files in those subfolders as well ({0}) or only the files in the current folder ({1})?</string>
     <string name="current_folder_only">Current Folder Only</string>
     <string name="must_be_logged_in_to_give_privileges">Must be logged in to give privileges</string>
-    <string name="about_body"><![CDATA[Seeker is a free and open source Soulseek client for Android.  It will never have ads or paid features.
-<br><br>Please help translate Seeker <a href="https://crwd.in/seeker">here</a>.
-<br><br>Source code is <a href="https://github.com/jackBonadies/SeekerAndroid">here</a>.
-<br><br>Version: {0}.]]></string>
+    <string name="about_body">Seeker is a free and open source Soulseek client for Android. It will never have ads or paid features.</string>
     <string name="force_filesystem_message"><![CDATA[The standard way of requesting folder access does not always persist permissions.  If you find Seeker reprompting for Download Folder or Shared Folder access, this button will request the old style permissions which will always persist.
 <br><br>This function requires the Fdroid IzzyDroid version of Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Download Here</a>). The Google Play Store does not allow applications to request this permission.]]></string>
     <string name="must_be_logged_in_to_get_dir_contents">Must be logged in to get directory contents</string>
