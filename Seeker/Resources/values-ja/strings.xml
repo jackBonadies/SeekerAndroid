@@ -31,7 +31,7 @@
         このサービスは、Seekerがバックグラウンドで動作することを可能にします。\n\nこれは、（共有している場合に）検索リクエストに応答し、チャットメッセージを受信し、バックグラウンド中にウィッシュリストの結果を受信するために必要です。\n\nダウンロードやアップロードをバックグラウンドで行うためには必要ありません（そのためのサービスは既に常時実行されています）。\n\n唯一の欠点は、バッテリーの消費が増える可能性があることです。その場合、デフォルトではオフにし、必要な時だけ実行することができます。
     </string>
     <string name="listening">
-        この設定により、Seekerは着信接続を受け入れることができ、開放ポートがなくてもクライアントに接続できるようになります。\n\n実際には、「ステータスを確認」でリッスン成功が示されている限り、より多くの検索結果を受信し、より多くのユーザーからダウンロードし、より多くのユーザーにアップロードすることが可能になります。\n\nSeekerはUPnP経由でのポート自動転送を試みます（これは公式デスクトップクライアントと同じ動作です）。WiFiに接続していない場合は機能せず、VPNを使用中の場合はお使いのVPNのポート転送方法を確認してください。ルーターがUPnPに対応していない場合は、手動でポート転送を行う必要があります。
+        この設定により、Seekerは着信接続を受け入れることができ、開放ポートがなくてもクライアントに接続できるようになります。\n\n実際には、「ステータスを確認」でリッスン成功が示されている限り、より多くの検索結果を受信し、より多くのユーザーからダウンロードし、より多くのユーザーにアップロードすることが可能になります。\n\nSeekerはUPnP経由でのポート自動転送を試みます（これは公式デスクトップクライアントと同じ動作です）。Wi-Fiに接続していない場合は機能せず、VPNを使用中の場合はお使いのVPNのポート転送方法を確認してください。ルーターがUPnPに対応していない場合は、手動でポート転送を行う必要があります。
     </string>
 
     <string name="sharing_dialog">
@@ -609,8 +609,8 @@
     <string name="no_upnp_devices_found">
         No UPnP compatible devices found
     </string>
-    <string name="upnp_wifi_only">UPnP is for wifi only</string>
-    <string name="upnp_no_wifi_conn">No wifi connection</string>
+    <string name="upnp_wifi_only">UPnP is for Wi-Fi only</string>
+    <string name="upnp_no_wifi_conn">No Wi-Fi connection</string>
     <string name="failed_to_set">Failed to set mapping on UPnP device</string>
     <string name="upnp_success">UPnP successfully forwarded port</string>
     <string name="upnp_last_success">UPnP was last ran successfully</string>

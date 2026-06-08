@@ -38,7 +38,7 @@
     <string name="listening">
         Denne innstillingen tillater Seeker å motta innkommende tilkoblinger, slik at vi kan koble til klienter uten å åpne porter.
 \n\nHva dette betyr i praksis, er at så lenge vi lykkes med å lytte (angitt via \"Skjekk Status\") vil vi motta mer søkeresultater, kunne laste ned fra flere personer, laste opp til flere personer osv.
-\n\nSeeker vil forsøke å automatisk videresende porter via UPnP (dette er hva den offisielle skrivebordsklient gjør). Hvis du IKKE er koblet til Wifi vil den ikke virke. hvis du er på en VPN-, vennligst søk etter hvordan du port frem for din spesifikke VPN, hvis ruteren din ikke er UPnP aktivert må du manuelt videresendt port.
+\n\nSeeker vil forsøke å automatisk videresende porter via UPnP (dette er hva den offisielle skrivebordsklient gjør). Hvis du IKKE er koblet til Wi-Fi vil den ikke virke. hvis du er på en VPN-, vennligst søk etter hvordan du port frem for din spesifikke VPN, hvis ruteren din ikke er UPnP aktivert må du manuelt videresendt port.
     </string>
 
     <string name="sharing_dialog">
@@ -618,8 +618,8 @@ Mappeantall: {5}\"
     <string name="no_upnp_devices_found">
         No UPnP compatible devices found
     </string>
-    <string name="upnp_wifi_only">UPnP is for wifi only</string>
-    <string name="upnp_no_wifi_conn">No wifi connection</string>
+    <string name="upnp_wifi_only">UPnP is for Wi-Fi only</string>
+    <string name="upnp_no_wifi_conn">No Wi-Fi connection</string>
     <string name="failed_to_set">Failed to set mapping on UPnP device</string>
     <string name="upnp_success">UPnP successfully forwarded port</string>
     <string name="upnp_last_success">UPnP was last ran successfully</string>

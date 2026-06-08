@@ -55,7 +55,7 @@ namespace Seeker
                     NetworkInfo info = cm.GetNetworkInfo(ConnectivityType.Wifi);
                     if (info.IsConnected)
                     {
-                        SeekerApplication.Toaster.ShowToast("Is Connected Wifi", ToastLength.Long);
+                        SeekerApplication.Toaster.ShowToast("Is Connected Wi-Fi", ToastLength.Long);
                     }
                     info = cm.GetNetworkInfo(ConnectivityType.Mobile);
                     if (info.IsConnected)

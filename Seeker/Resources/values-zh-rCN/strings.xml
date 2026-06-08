@@ -27,7 +27,7 @@
 \n\n唯一的下方是它可以使用更多的电池。 在这种情况下，人们可以默认关闭它，只能在需要时运行。</string>
     <string name="listening">此设置允许Seeker接受传入连接，这样我们就可以在没有开启端口的情况下连接到客户端。
 \n\n这实际上意味着只要我们成功地收听(通过“检查状态”表示)，我们就会收到更多的搜索结果。 能够从更多人下载，上传到更多人等。
-\n\n寻找者会尝试通过 UPnP 自动转发端口(这是官方桌面客户端的做法)。 如果你没有在 Wifi 上，它将不起作用。 如果您在 VPN 上，请搜索如何为您的指定VPN端口转发， 如果你的路由器未启用 UPnP，你必须手动转发端口。</string>
+\n\n寻找者会尝试通过 UPnP 自动转发端口(这是官方桌面客户端的做法)。 如果你没有在 Wi-Fi 上，它将不起作用。 如果您在 VPN 上，请搜索如何为您的指定VPN端口转发， 如果你的路由器未启用 UPnP，你必须手动转发端口。</string>
     <string name="sharing_dialog">关于共享文件的几点值得注意。 当上传目录首次设置时 应用程序必须阅读文件并解析它们，以便于随后的搜索和浏览请求。 这可能需要几分钟。 请确保您正在分享的文件中没有任何私密或敏感的信息(基本上是使用您对官方灵魂客户的相同判断)。</string>
 
     <string name="privileges_more_info">Privileges help support the Soulseek Network and the central server this app depends on.\n\nThey also let you skip ahead of non-privileged users in download queues.\n\nNote: donations do not go to the creator of this unofficial Android client (Seeker). I do not currently accept donations.</string>
@@ -401,8 +401,8 @@ Directory Count: {5}\"</string>
     <string name="upnp_not_ran">UPnP 未运行</string>
     <string name="upnp_currently_running">UPnP 正在运行</string>
     <string name="no_upnp_devices_found">未找到兼容的 UPnP 设备</string>
-    <string name="upnp_wifi_only">UPnP 仅适用于 WiFi 网络</string>
-    <string name="upnp_no_wifi_conn">没有 WiFi 连接</string>
+    <string name="upnp_wifi_only">UPnP 仅适用于 Wi-Fi 网络</string>
+    <string name="upnp_no_wifi_conn">没有 Wi-Fi 连接</string>
     <string name="failed_to_set">Failed to set mapping on UPnP device</string>
     <string name="upnp_success">UPnP successfully forwarded port</string>
     <string name="upnp_last_success">UPnP was last ran successfully</string>

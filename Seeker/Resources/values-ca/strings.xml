@@ -38,7 +38,7 @@
     <string name="listening">
         Aquesta configuració permet a Seeker acceptar connexions entrants, de manera que ens podem connectar amb clients sense ports oberts.
 \n\nEl que això vol dir a la pràctica és que mentre estiguem escoltant correctament (indicat a través de \"Comprova l\'estat\") rebrem més resultats de cerca, podrem baixar de més persones, pujar a més persones, etc.
-\n\nSeeker intentarà reenviar ports automàticament mitjançant UPnP (això és el que fa el client d\'escriptori oficial). Si NO esteu a Wifi, no funcionarà, si esteu a una VPN, cerqueu com reenviar el port per a la vostra VPN específica, si el vostre encaminador no està habilitat UPnP, heu de reenviar el port manualment.
+\n\nSeeker intentarà reenviar ports automàticament mitjançant UPnP (això és el que fa el client d\'escriptori oficial). Si NO esteu a Wi-Fi, no funcionarà, si esteu a una VPN, cerqueu com reenviar el port per a la vostra VPN específica, si el vostre encaminador no està habilitat UPnP, heu de reenviar el port manualment.
     </string>
 
     <string name="sharing_dialog">
@@ -618,8 +618,8 @@ Recompte de directoris: {5}\"
     <string name="no_upnp_devices_found">
         No UPnP compatible devices found
     </string>
-    <string name="upnp_wifi_only">UPnP is for wifi only</string>
-    <string name="upnp_no_wifi_conn">No wifi connection</string>
+    <string name="upnp_wifi_only">UPnP is for Wi-Fi only</string>
+    <string name="upnp_no_wifi_conn">No Wi-Fi connection</string>
     <string name="failed_to_set">Failed to set mapping on UPnP device</string>
     <string name="upnp_success">UPnP successfully forwarded port</string>
     <string name="upnp_last_success">UPnP was last ran successfully</string>
