@@ -735,11 +735,7 @@ Contador de diretórios: {5}
         Deve estar logado para conceder privilégios
     </string>
 
-    <string name="about_body">
-        <![CDATA[Seeker é um cliente Soulseek gratuito e de código aberto para Android. Ele nunca terá anúncios ou recursos pagos.
-<br><br>Por favor, ajude a traduzir Seeker <a href="https://docs.google.com/spreadsheets/d/1bmDz8pcN_cBLRRB3Bh59O2GWOXrfiGqbcYDQWMsebeQ/edit#gid=528362137">aqui</a>.<br><br>O código-fonte é <a href="https://crowdin.com/project/seeker">aqui</a>.
-<br><br>Versão: {0}.]]>
-    </string>
+    <string name="about_body">Seeker é um cliente Soulseek gratuito e de código aberto para Android. Ele nunca terá anúncios ou recursos pagos.</string>
     <string name="force_filesystem_message">
         <![CDATA[A maneira padrão de solicitar acesso à pasta nem sempre persiste as permissões.  Se você perceber que o Seeker solicita novamente o acesso à pasta de download ou à pasta compartilhada, este botão solicitará as permissões do estilo antigo, que sempre persistirão..
 <br><br>Esta função requer a versão Fdroid IzzyDroid do Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Baixe aqui</a>). A Google Play Store não permite que aplicativos solicitem essa permissão.]]>

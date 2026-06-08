@@ -731,12 +731,7 @@ Počet adresářů: {5}\"
         Must be logged in to give privileges
     </string>
 
-    <string name="about_body">
-        <![CDATA[Seeker is a free and open source Soulseek client for Android.  It will never have ads or paid features.
-<br><br>Please help translate Seeker <a href="https://crwd.in/seeker">here</a>.
-<br><br>Source code is <a href="https://github.com/jackBonadies/SeekerAndroid">here</a>.
-<br><br>Version: {0}.]]>
-    </string>
+    <string name="about_body">Seeker is a free and open source Soulseek client for Android. It will never have ads or paid features.</string>
     <string name="force_filesystem_message">
         <![CDATA[The standard way of requesting folder access does not always persist permissions.  If you find Seeker reprompting for Download Folder or Shared Folder access, this button will request the old style permissions which will always persist.
 <br><br>This function requires the Fdroid IzzyDroid version of Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Download Here</a>). The Google Play Store does not allow applications to request this permission.]]>

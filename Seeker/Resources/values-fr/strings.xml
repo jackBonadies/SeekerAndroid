@@ -735,11 +735,7 @@ Nombre de dossiers : {5}
         Vous devez être connecté pour donner des privilèges
     </string>
 
-    <string name="about_body">
-        <![CDATA[Seeker est un client Soulseek gratuit et open-source pour Android. Il n\'aura jamais de pub ou de fonctions payantes. <br><br>Aidez à traduire Seeker <a href="https://crwd.in/seeker">ici</a>.
-<br><br>Le code source est <a href="https://github.com/jackBonadies/SeekerAndroid">ici</a>.
-<br><br>Version: {0}.]]>
-    </string>
+    <string name="about_body">Seeker est un client Soulseek gratuit et open-source pour Android. Il n\'aura jamais de pub ou de fonctions payantes.</string>
     <string name="force_filesystem_message">
         <![CDATA[La méthode standard pour demander l\'accès aux dossiers ne conserve pas toujours les autorisations. Si vous constatez que Seeker redemande l\'accès au dossier de téléchargement ou au dossier partagé, ce bouton demandera les anciennes autorisations, qui seront toujours conservées.
 <br><br>Cette fonction nécessite la version F-Droid IzzyDroid de Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Télécharger ici</a>). Le Google Play Store n\'autorise pas les applications à demander cette autorisation.]]>

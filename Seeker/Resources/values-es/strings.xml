@@ -735,12 +735,7 @@ Directorio: {5}
         Debe iniciar sesión para dar permisos
     </string>
 
-    <string name="about_body">
-        <![CDATA[Seeker es un cliente de Soulseek gratuito y de código abierto para Android. Nunca tendrá anuncios ni características de pago.
-<br><br>Por favor ayude a traducir Seeker <a href="https://crwd.in/seeker">aquí</a>.
-<br><br>El código fuente está <a href="https://github.com/jackBonadies/SeekerAndroid">aquí</a>.
-<br><br>Versión: {0}.]]>
-    </string>
+    <string name="about_body">Seeker es un cliente de Soulseek gratuito y de código abierto para Android. Nunca tendrá anuncios ni características de pago.</string>
     <string name="force_filesystem_message">
         <![CDATA[La forma estándar de solicitar acceso a carpetas no siempre mantiene los permisos de forma permanente.
 Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una Carpeta Compartida, habilitar esta opción solicitará los permisos de forma que estos se mantengan.

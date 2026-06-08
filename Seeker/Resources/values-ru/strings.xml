@@ -736,12 +736,7 @@
         Необходимо войти в систему для предоставления привилегий
     </string>
 
-    <string name="about_body">
-        <![CDATA[Seeker - бесплатный android-клиент Soulseek с открытым исходным кодом. Здесь никогда не будет рекламы или платных функций.
-<br><br>Пожалуйста, помогите перевести Seeker <a href="https://docs.google.com/spreadsheets/d/1bmDz8pcN_cBLRRB3Bh59O2GWOXrfiGqbcYDQWMsebeQ/edit#gid=528362137">здесь</a>.
-<br><br>Исходный код <a href="https://crowdin.com/project/seeker">здесь</a>.
-<br><br>Версия: {0}.]]>
-    </string>
+    <string name="about_body">Seeker - бесплатный android-клиент Soulseek с открытым исходным кодом. Здесь никогда не будет рекламы или платных функций.</string>
     <string name="force_filesystem_message">
         <![CDATA[Разрешение на доступ к папкам на устройстве стандартным способом иногда сбрасывается. Если Seeker будет повторно запрашивать доступ к Общей папке или к папке Загрузок, воспользуйтесь этой кнопкой, чтобы запросить разрешения старого формата, которые точно не пропадут.<br><br>Эта функция работает только в версии Seeker из IzzyOnDroid F-Droid(<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">ссылка для скачивания</a>). Версия из Google Play не имеет возможности запрашивать доступ таким образом.]]>
     </string>
