@@ -66,7 +66,7 @@
         results, be able to download from more people, upload to more
         people, etc.
 \n\nSeeker will attempt to automatically forward ports via UPnP (this is what
-        the official desktop client does).  If you are NOT on Wifi it will not
+        the official desktop client does).  If you are NOT on Wi-Fi it will not
         work, if you are on a VPN please search how to port forward for your
         specific VPN, if your router is not UPnP enabled then you must manually
         forward port.
@@ -787,8 +787,8 @@ Directory Count: {5}"
     <string name="no_upnp_devices_found">
         No UPnP compatible devices found
     </string>
-    <string name="upnp_wifi_only">UPnP is for wifi only</string>
-    <string name="upnp_no_wifi_conn">No wifi connection</string>
+    <string name="upnp_wifi_only">UPnP is for Wi-Fi only</string>
+    <string name="upnp_no_wifi_conn">No Wi-Fi connection</string>
     <string name="failed_to_set">Failed to set mapping on UPnP device</string>
     <string name="upnp_success">UPnP successfully forwarded port</string>
     <string name="upnp_last_success">UPnP was last ran successfully</string>

@@ -26,7 +26,7 @@
 \n\nL\'unico aspetto negativo è che questo può causare un utilizzo maggiore della batteria. In questo caso si può disattivare per impostazione predefinita, ed eseguirlo solo se necessario.</string>
     <string name="listening">Questa impostazione consente a Seeker di accettare connessioni in ingresso, in modo da poter connettersi ai client senza porte aperte.
 \n\nQuesto significa che finché rimaniamo in ascolto con successo (indicato tramite \"Verifica Stato\") riceveremo più risultati di ricerca, saremo in grado di scaricare da più persone, di caricare a più persone, ecc.
-\n\nSeeker tenterà di inoltrare automaticamente le porte tramite UPnP (questo è ciò che fa il client desktop ufficiale). Se non sei collegato al Wifi questo non funzionerà, se sei coollegato ad una VPN cerca come effettuare il Port Forwarding con la tua VPN specifica, mentre se il router non è abilitato UPnP è necessario inoltrare manualmente la porta.</string>
+\n\nSeeker tenterà di inoltrare automaticamente le porte tramite UPnP (questo è ciò che fa il client desktop ufficiale). Se non sei collegato al Wi-Fi questo non funzionerà, se sei coollegato ad una VPN cerca come effettuare il Port Forwarding con la tua VPN specifica, mentre se il router non è abilitato UPnP è necessario inoltrare manualmente la porta.</string>
     <string name="sharing_dialog">Alcune cose da notare sulla condivisione dei file. Quando una directory di caricamento viene selezionata per la prima volta, l\'app deve leggere i file e analizzarli in modo da rendere più facile effettuare le ricerche successive e sfogliare le richieste. Questo può richiedere qualche minuto. Assicurarsi che i file che si sta condividendo non hanno alcuna informazione privata o sensibile in essi (fondamentalmente utilizzare le stesse precauzioni che si userebbero per il client ufficiale di Soulseek).</string>
     <string name="privileges_more_info">I \"privilegi\" consentono di supportare il creatore di Soulseek (Nir) e il server centrale su cui dipende questa app.
 \n\nPermette anche di essere posizionati più avanti rispetto agli utenti non privilegiati nella coda di download.
@@ -401,8 +401,8 @@ Numero Cartelle: {5}\"</string>
     <string name="upnp_not_ran">UPnP non è stato avviato</string>
     <string name="upnp_currently_running">UPnP è in esecuzione</string>
     <string name="no_upnp_devices_found">Nessun dispositivo compatibile con UPnP trovato</string>
-    <string name="upnp_wifi_only">UPnP è solo per wifi</string>
-    <string name="upnp_no_wifi_conn">Nessuna connessione wifi</string>
+    <string name="upnp_wifi_only">UPnP è solo per Wi-Fi</string>
+    <string name="upnp_no_wifi_conn">Nessuna connessione Wi-Fi</string>
     <string name="failed_to_set">Impossibile impostare la mappatura sul dispositivo UPnP</string>
     <string name="upnp_success">Porta UPnP inoltrata con successo</string>
     <string name="upnp_last_success">UPnP è stata precedentemente eseguita con successo</string>

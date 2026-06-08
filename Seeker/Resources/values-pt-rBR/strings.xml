@@ -38,7 +38,7 @@
     <string name="listening">
         Essa configuração permite que o Seeker aceite conexões de entrada, para que possamos nos conectar a clientes sem portas abertas.
 \n\nO que isso significa na prática é que, enquanto estivermos ouvindo com sucesso (indicado por meio de \"Verificar status\"), receberemos mais resultados de pesquisa, poderemos fazer download de mais pessoas, fazer upload para mais pessoas etc.
-\n\nSeeker tentará encaminhar automaticamente as portas via UPnP (isso é o que o cliente de desktop oficial faz). Se você NÃO estiver no Wifi, não funcionará, se estiver em uma VPN, pesquise como encaminhar a porta para sua VPN específica, se o seu roteador não estiver habilitado para UPnP, você deverá encaminhar a porta manualmente.
+\n\nSeeker tentará encaminhar automaticamente as portas via UPnP (isso é o que o cliente de desktop oficial faz). Se você NÃO estiver no Wi-Fi, não funcionará, se estiver em uma VPN, pesquise como encaminhar a porta para sua VPN específica, se o seu roteador não estiver habilitado para UPnP, você deverá encaminhar a porta manualmente.
     </string>
 
     <string name="sharing_dialog">
@@ -618,8 +618,8 @@ Contador de diretórios: {5}
     <string name="no_upnp_devices_found">
         Nenhum dispositivo compatível com UPnP encontrado
     </string>
-    <string name="upnp_wifi_only">UPnP é apenas para wifi</string>
-    <string name="upnp_no_wifi_conn">Sem conexão wifi</string>
+    <string name="upnp_wifi_only">UPnP é apenas para Wi-Fi</string>
+    <string name="upnp_no_wifi_conn">Sem conexão Wi-Fi</string>
     <string name="failed_to_set">Falha ao definir o mapeamento no dispositivo UPnP</string>
     <string name="upnp_success">UPnP encaminhou porta com sucesso</string>
     <string name="upnp_last_success">UPnP foi executado pela última vez com sucesso</string>

@@ -609,8 +609,8 @@ Directory Count: {5}\"
     <string name="no_upnp_devices_found">
         No UPnP compatible devices found
     </string>
-    <string name="upnp_wifi_only">UPnP is for wifi only</string>
-    <string name="upnp_no_wifi_conn">No wifi connection</string>
+    <string name="upnp_wifi_only">UPnP is for Wi-Fi only</string>
+    <string name="upnp_no_wifi_conn">No Wi-Fi connection</string>
     <string name="failed_to_set">Failed to set mapping on UPnP device</string>
     <string name="upnp_success">UPnP successfully forwarded port</string>
     <string name="upnp_last_success">UPnP was last ran successfully</string>

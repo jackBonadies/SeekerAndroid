@@ -38,7 +38,7 @@
     <string name="listening">
         يتيح هذا الإعداد لـ Seeker قبول الاتصالات الواردة، حتى نتمكن من الاتصال بالعملاء دون منافذ مفتوحة.
 \n\nما يعنيه هذا في عمليا هو أننا سنحصل على المزيد من نتائج البحث، ما دمنا نجحنا في الاتصال بالمنفذ المعتاد (يشار إلينا من خلال \"التحقق من الحالة\"). كن قادرا على التحميل من المزيد من الناس، التحميل إلى المزيد من الناس، إلخ.
-\n\nسيحاول الباحث (Seeker) إرسال الموانئ تلقائياً عن طريق UPnP (وهذا ما يفعله عميل الحاسوب المكتبي الرسمي). إذا لم تكن على شبكة Wifi فلن يعمل هذا التوصيل، واذا كنت على شبكة VPN، فيرجى البحث عن كيفية إعادة توجيه المنافذ لشبكة VPN الخاصة بك، و إذا لم يتم تمكين جهاز التوجيه الخاص بك، فيجب عليك إعادة توجيه المنفذ يدويًا.
+\n\nسيحاول الباحث (Seeker) إرسال الموانئ تلقائياً عن طريق UPnP (وهذا ما يفعله عميل الحاسوب المكتبي الرسمي). إذا لم تكن على شبكة Wi-Fi فلن يعمل هذا التوصيل، واذا كنت على شبكة VPN، فيرجى البحث عن كيفية إعادة توجيه المنافذ لشبكة VPN الخاصة بك، و إذا لم يتم تمكين جهاز التوجيه الخاص بك، فيجب عليك إعادة توجيه المنفذ يدويًا.
     </string>
 
     <string name="sharing_dialog">
@@ -614,8 +614,8 @@ Directory Count: {5}\"
     <string name="no_upnp_devices_found">
         No UPnP compatible devices found
     </string>
-    <string name="upnp_wifi_only">UPnP is for wifi only</string>
-    <string name="upnp_no_wifi_conn">No wifi connection</string>
+    <string name="upnp_wifi_only">UPnP is for Wi-Fi only</string>
+    <string name="upnp_no_wifi_conn">No Wi-Fi connection</string>
     <string name="failed_to_set">Failed to set mapping on UPnP device</string>
     <string name="upnp_success">UPnP successfully forwarded port</string>
     <string name="upnp_last_success">UPnP was last ran successfully</string>

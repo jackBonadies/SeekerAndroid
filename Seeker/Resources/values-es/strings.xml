@@ -38,7 +38,7 @@
     <string name="listening">
         Esta configuración permite a Seeker aceptar conexiones entrantes, para que podamos conectarnos a clientes sin puertos abiertos.
 \n\nLo que esto significa en la práctica es que mientras escuchemos con éxito (indicado a través de \"Estado de verificación\") recibiremos más resultados de búsqueda. ser capaz de descargar de más personas, subir a más personas, etc.
-\n\nEl Buscador intentará reenviar automáticamente puertos a través de UPnP (esto es lo que hace el cliente oficial de escritorio). Si NO estás en Wifi no funcionará, si está en una VPN, busque cómo redirigir su VPN específica, si su router no está habilitado UPnP entonces debe reenviar manualmente el puerto.
+\n\nEl Buscador intentará reenviar automáticamente puertos a través de UPnP (esto es lo que hace el cliente oficial de escritorio). Si NO estás en Wi-Fi no funcionará, si está en una VPN, busque cómo redirigir su VPN específica, si su router no está habilitado UPnP entonces debe reenviar manualmente el puerto.
     </string>
 
     <string name="sharing_dialog">
@@ -618,7 +618,7 @@ Directorio: {5}
     <string name="no_upnp_devices_found">
         No se encontraron dispositivos compatibles con UPnP
     </string>
-    <string name="upnp_wifi_only">UPnP es sólo para wifi</string>
+    <string name="upnp_wifi_only">UPnP es sólo para Wi-Fi</string>
     <string name="upnp_no_wifi_conn">Sin conexión Wi-Fi</string>
     <string name="failed_to_set">No se pudo establecer el mapeo en el dispositivo UPnP</string>
     <string name="upnp_success">Puerto reenviado con éxito UPnP</string>

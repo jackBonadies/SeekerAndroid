@@ -38,7 +38,7 @@
     <string name="listening">
         To ustawienie pozwala Seekerowi na akceptowanie przychodzących połączeń, dzięki czemu możemy łączyć się z klientami bez otwartych portów.
 \n\nW praktyce oznacza to, że dopóki będziemy skutecznie nasłuchiwać (wskazane przez \'Sprawdź status\'), otrzymamy więcej wyników wyszukiwania, będziemy mogli pobierać od większej liczby osób, przesyłać do większej liczby osób itd.
-\n\nSeeker spróbuje automatycznie przekierować porty za pomocą UPnP (to samo robi oficjalny klient desktopowy). Jeśli nie jesteś połączony przez WiFi, nie zadziała to. Jeśli korzystasz z VPN, poszukaj, jak przekierować porty dla swojego konkretnego VPN. Jeśli twój router nie obsługuje UPnP, musisz ręcznie przekierować port.
+\n\nSeeker spróbuje automatycznie przekierować porty za pomocą UPnP (to samo robi oficjalny klient desktopowy). Jeśli nie jesteś połączony przez Wi-Fi, nie zadziała to. Jeśli korzystasz z VPN, poszukaj, jak przekierować porty dla swojego konkretnego VPN. Jeśli twój router nie obsługuje UPnP, musisz ręcznie przekierować port.
     </string>
 
     <string name="sharing_dialog">
@@ -618,8 +618,8 @@ Liczba katalogów: {5}\"
     <string name="no_upnp_devices_found">
         No UPnP compatible devices found
     </string>
-    <string name="upnp_wifi_only">UPnP is for wifi only</string>
-    <string name="upnp_no_wifi_conn">No wifi connection</string>
+    <string name="upnp_wifi_only">UPnP is for Wi-Fi only</string>
+    <string name="upnp_no_wifi_conn">No Wi-Fi connection</string>
     <string name="failed_to_set">Failed to set mapping on UPnP device</string>
     <string name="upnp_success">UPnP successfully forwarded port</string>
     <string name="upnp_last_success">UPnP was last ran successfully</string>

@@ -33,7 +33,7 @@
     <string name="listening">
         Ez a beállítás lehetővé teszi, hogy a Seeker fogadja a bejövő kapcsolatokat, így nyitott portok nélkül tudunk kapcsolódni a kliensekhez.
 \n\nA gyakorlatban ez azt jelenti, hogy amíg működik a figyelés (az „Állapot ellenőrzés” jelzi), több keresési eredményt kapunk, több embertől tölthetünk le, több embernek tölthetünk fel stb.
-\n\nA Seeker megpróbálja automatikusan továbbítani a portokat UPnP-n keresztül (ezt teszi a hivatalos asztali kliens is). Ha nem Wifi-t használ, akkor ez nem fog működni, ha VPN-t használ, keresse meg, hogyan továbbíthatja a portot az adott VPN-hez, ha az útválasztón nincs engedélyezve az UPnP, akkor manuálisan kell továbbítania a portot.
+\n\nA Seeker megpróbálja automatikusan továbbítani a portokat UPnP-n keresztül (ezt teszi a hivatalos asztali kliens is). Ha nem Wi-Fi-t használ, akkor ez nem fog működni, ha VPN-t használ, keresse meg, hogyan továbbíthatja a portot az adott VPN-hez, ha az útválasztón nincs engedélyezve az UPnP, akkor manuálisan kell továbbítania a portot.
     </string>
 
     <string name="sharing_dialog">
@@ -611,8 +611,8 @@ Könyvtárak száma: {5}\"
     <string name="no_upnp_devices_found">
         No UPnP compatible devices found
     </string>
-    <string name="upnp_wifi_only">UPnP is for wifi only</string>
-    <string name="upnp_no_wifi_conn">No wifi connection</string>
+    <string name="upnp_wifi_only">UPnP is for Wi-Fi only</string>
+    <string name="upnp_no_wifi_conn">No Wi-Fi connection</string>
     <string name="failed_to_set">Failed to set mapping on UPnP device</string>
     <string name="upnp_success">UPnP successfully forwarded port</string>
     <string name="upnp_last_success">UPnP was last ran successfully</string>

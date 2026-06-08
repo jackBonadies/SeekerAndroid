@@ -38,7 +38,7 @@
     <string name="listening">
         Ce paramètre permet à Seeker d\'accepter les connections entrantes de clients sans avoir de ports ouverts.
 \n\nEn pratique, cela permet d\'avoir plus de résultats de recherche, de télécharger de plus de gens différents, d\'uploader à plus de gens etc tant que l\'écoute est assurée (indiqué par le bouton \"Vérifier le Statut\").
-\n\nSeeker va tenter une redirection automatique de ports via UPnP (comme le client PC officiel). Une connexion Wifi est nécessaire ; si vous disposez d\'un VPN, renseignez-vous sur la redirection de ports spécifique à votre VPN. Enfin, si UPnP est désactivé sur votre routeur il faut effectuer une redirection manuelle.
+\n\nSeeker va tenter une redirection automatique de ports via UPnP (comme le client PC officiel). Une connexion Wi-Fi est nécessaire ; si vous disposez d\'un VPN, renseignez-vous sur la redirection de ports spécifique à votre VPN. Enfin, si UPnP est désactivé sur votre routeur il faut effectuer une redirection manuelle.
     </string>
 
     <string name="sharing_dialog">
