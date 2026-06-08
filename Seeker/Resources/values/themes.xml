@@ -70,6 +70,7 @@
         <item name="slightestContrastColor">#e0e0e0</item>
         <item name="slightContrastColor">#c7c7c7</item>
         <item name="settingsDividerColor">#A3A3A3</item>
+        <item name="linkDividerColor">#70A3A3A3</item>
         <item name="mainTextColor">#4f58c4</item>
 
         <item name="searchTabHeader">#303030</item>
@@ -222,6 +223,7 @@
         <item name="slightestContrastColor">#4E4E4E</item>
         <item name="slightContrastColor">#6d6d6d</item>
         <item name="settingsDividerColor">#595959</item>
+        <item name="linkDividerColor">#70595959</item>
 
         <item name="the_rounded_corner_background_drawable">
             @drawable/rounded_corner_background_dark
@@ -337,6 +339,7 @@
         <item name="slightestContrastColor">#282828</item>
         <item name="slightContrastColor">#4E4E4E</item>
         <item name="settingsDividerColor">#3F3F3F</item>
+        <item name="linkDividerColor">#703F3F3F</item>
 
         <item name="dialog_background">#ff202020</item>
         <item name="surface_variant1">#ff202020</item>
