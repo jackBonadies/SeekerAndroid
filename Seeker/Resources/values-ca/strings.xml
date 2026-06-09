@@ -154,7 +154,6 @@ Recompte de directoris: {5}\"
     <string name="clear_image">Esborra la imatge</string>
     <string name="no_image_chosen">Cap</string>
 
-    <string name="enter_user_to_invite_to_room">Introduïu l\'usuari per convidar</string>
     <string name="inviteuser">Convida l\'usuari</string>
 
     <string name="give_up_room">Renuncia a l\'habitació</string>
@@ -169,7 +168,6 @@ Recompte de directoris: {5}\"
     <string name="choose_a_download_folder">Seleccioneu la carpeta de Descàrregues</string>
     <string name="settings">Configuració</string>
 
-    <string name="enter_user_to_message">Introduïu l\'usuari al missatge</string>
 
     <string name="search_result_style">Estil de resultats</string>
 

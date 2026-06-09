@@ -154,7 +154,6 @@ Aantal mappen: {5}
     <string name="clear_image">Verwijder afbeelding</string>
     <string name="no_image_chosen">Geen</string>
 
-    <string name="enter_user_to_invite_to_room">Voer gebruiker in om uit te nodigen</string>
     <string name="inviteuser">Nodig gebruiker uit</string>
 
     <string name="give_up_room">Geef Kamer op</string>
@@ -169,7 +168,6 @@ Aantal mappen: {5}
     <string name="choose_a_download_folder">Selecteer downloadmap</string>
     <string name="settings">Instellingen</string>
 
-    <string name="enter_user_to_message">Voer een gebruiker in voor het bericht</string>
 
     <string name="search_result_style">Zoekresultaten vormgeving</string>
 

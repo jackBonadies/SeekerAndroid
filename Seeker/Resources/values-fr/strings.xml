@@ -154,7 +154,6 @@ Nombre de dossiers : {5}
     <string name="clear_image">Enlever image</string>
     <string name="no_image_chosen">Aucun</string>
 
-    <string name="enter_user_to_invite_to_room">Spécifier l\'utilisateur à inviter</string>
     <string name="inviteuser">Inviter utilisateur</string>
 
     <string name="give_up_room">Quitter la salle</string>
@@ -169,7 +168,6 @@ Nombre de dossiers : {5}
     <string name="choose_a_download_folder">Sélectionner dossier téléchargement</string>
     <string name="settings">Paramètres</string>
 
-    <string name="enter_user_to_message">Spécifier l\'utilisateur à contacter</string>
 
     <string name="search_result_style">Style de résultat</string>
 

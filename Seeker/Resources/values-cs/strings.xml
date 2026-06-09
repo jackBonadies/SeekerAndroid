@@ -120,9 +120,6 @@ Počet adresářů: {5}\"
 
     <string name="search_here">Hledat zde</string>
 
-    <string name="seeker_needs_dl_dir">
-        Seeker needs access to a directory to save downloaded files
-    </string>
     <string name="seeker_needs_dl_dir_content">
         Please Choose a Download Directory (Default is the Music Folder)
     </string>
@@ -150,7 +147,6 @@ Počet adresářů: {5}\"
     <string name="clear_image">Vymazat obrázek</string>
     <string name="no_image_chosen">Žádné</string>
 
-    <string name="enter_user_to_invite_to_room">Zadejte uživatele pro pozvání</string>
     <string name="inviteuser">Pozvat uživatele</string>
 
     <string name="give_up_room">Vzdát se místnosti</string>
@@ -165,7 +161,6 @@ Počet adresářů: {5}\"
     <string name="choose_a_download_folder">Vyberte složku pro stahování</string>
     <string name="settings">Nastavení</string>
 
-    <string name="enter_user_to_message">Zadejte příjemce zprávy</string>
 
     <string name="search_result_style">Result Style</string>
 

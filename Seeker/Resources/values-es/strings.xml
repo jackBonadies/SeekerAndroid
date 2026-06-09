@@ -154,7 +154,6 @@ Directorio: {5}
     <string name="clear_image">Borrar imagen</string>
     <string name="no_image_chosen">Ninguna</string>
 
-    <string name="enter_user_to_invite_to_room">Introducir usuario para invitar</string>
     <string name="inviteuser">Invitar usuario</string>
 
     <string name="give_up_room">Abandonar sala</string>
@@ -169,7 +168,6 @@ Directorio: {5}
     <string name="choose_a_download_folder">Elija la carpeta de descarga</string>
     <string name="settings">Ajustes</string>
 
-    <string name="enter_user_to_message">Introducir usuario a mensajear</string>
 
     <string name="search_result_style">Estilo de resultado</string>
 

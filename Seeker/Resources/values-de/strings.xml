@@ -122,9 +122,6 @@ Ordneranzahl: {5}\"
 
     <string name="search_here">Hier suchen</string>
 
-    <string name="seeker_needs_dl_dir">
-        Seeker needs access to a directory to save downloaded files
-    </string>
     <string name="seeker_needs_dl_dir_content">
         Please Choose a Download Directory (Default is the Music Folder)
     </string>
@@ -152,7 +149,6 @@ Ordneranzahl: {5}\"
     <string name="clear_image">Bild löschen</string>
     <string name="no_image_chosen">Kein Bild ausgewählt</string>
 
-    <string name="enter_user_to_invite_to_room">Benutzer zum Einladen eingeben</string>
     <string name="inviteuser">Spieler einladen</string>
 
     <string name="give_up_room">Raum aufgeben</string>
@@ -167,7 +163,6 @@ Ordneranzahl: {5}\"
     <string name="choose_a_download_folder">Wähle Download-Ordner aus</string>
     <string name="settings">Einstellungen</string>
 
-    <string name="enter_user_to_message">Gebe Benutzername für die Nachricht ein</string>
 
     <string name="search_result_style">Result Style</string>
 

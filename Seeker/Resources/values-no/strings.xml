@@ -124,9 +124,6 @@ Mappeantall: {5}\"
 
     <string name="search_here">Search here</string>
 
-    <string name="seeker_needs_dl_dir">
-        Seeker needs access to a directory to save downloaded files
-    </string>
     <string name="seeker_needs_dl_dir_content">
         Please Choose a Download Directory (Default is the Music Folder)
     </string>
@@ -154,7 +151,6 @@ Mappeantall: {5}\"
     <string name="clear_image">Clear image</string>
     <string name="no_image_chosen">None</string>
 
-    <string name="enter_user_to_invite_to_room">Enter User to Invite</string>
     <string name="inviteuser">Invite User</string>
 
     <string name="give_up_room">Give up Room</string>
@@ -169,7 +165,6 @@ Mappeantall: {5}\"
     <string name="choose_a_download_folder">Select Download Folder</string>
     <string name="settings">Settings</string>
 
-    <string name="enter_user_to_message">Enter User to Message</string>
 
     <string name="search_result_style">Result Style</string>
 
