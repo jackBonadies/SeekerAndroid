@@ -18,7 +18,7 @@
     <string name="saerch_user_list">ユーザーリストを検索</string>
     <string name="search_room">検索ルーム</string>
     <string name="search_room_">{0}つ目検索ルーム</string>
-    <string name="search_user_">Search User {0}</string>
+    <string name="search_user_">Search user {0}</string>
     <string name="wishlist_search">願望リスト検索</string>
 
     <string name="no_account">
@@ -135,17 +135,16 @@
     <string name="size_column">サイズ</string>
     <string name="attribute_column">属性</string>
 
-    <string name="download_folder">Download Folder</string>
-    <string name="download_selected">Download Selected</string>
-    <string name="request_directories">Request Directories</string>
+    <string name="download_folder">Download folder</string>
+    <string name="download_selected">Download selected</string>
+    <string name="request_directories">Request directories</string>
     <string name="close_download_diag">Close</string>
 
     <string name="add_about_me">Tap to add an about me</string>
-    <string name="select_image">Select Image</string>
-    <string name="clear_image">Clear Image</string>
+    <string name="select_image">Select image</string>
+    <string name="clear_image">Clear image</string>
     <string name="no_image_chosen">None</string>
 
-    <string name="enter_user_to_invite_to_room">Enter User to Invite</string>
     <string name="inviteuser">Invite User</string>
 
     <string name="give_up_room">Give up Room</string>
@@ -160,7 +159,6 @@
     <string name="choose_a_download_folder">Select Download Folder</string>
     <string name="settings">Settings</string>
 
-    <string name="enter_user_to_message">Enter User to Message</string>
 
     <string name="search_result_style">Result Style</string>
 

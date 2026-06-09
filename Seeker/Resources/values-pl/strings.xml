@@ -18,7 +18,7 @@
     <string name="saerch_user_list">Szukaj listy użytkownika</string>
     <string name="search_room">Szukaj pokoju</string>
     <string name="search_room_">Szukaj pokoju {0}</string>
-    <string name="search_user_">Szukaj Użytkownika {0}</string>
+    <string name="search_user_">Szukaj użytkownika {0}</string>
     <string name="wishlist_search">Wyszukiwanie na liście życzeń</string>
 
     <string name="no_account">
@@ -95,14 +95,14 @@ Liczba katalogów: {5}\"
     </string>
     <string name="clear">Czyść</string>
     <string name="get_user_info">Uzyskaj informacje o użytkowniku</string>
-    <string name="quick_info">Szybkie Info</string>
+    <string name="quick_info">Szybkie info</string>
     <string name="enter_user_to_browse">Wpisz użytkownika żeby przeglądać</string>
     <string name="all_target">Wszyscy użytkownicy</string>
     <string name="target_user_list">Lista użytkowników</string>
     <string name="target_room">Pokój</string>
     <string name="target_room_joined">Dołączono:</string>
     <string name="target_room_name">Nazwa pokoju</string>
-    <string name="target_choose_user">Wybierz Użytkownika</string>
+    <string name="target_choose_user">Wybierz użytkownika</string>
     <string name="username">Nazwa użytkownika</string>
     <string name="search_target_">Wyszukaj cel</string>
     <string name="custom_">Własne:</string>
@@ -118,9 +118,9 @@ Liczba katalogów: {5}\"
     <string name="send_message">Wyślij</string>
     <string name="filter_chatrooms_here">Filtruj tu</string>
 
-    <string name="enter_listening_port">Wprowadź Port do słuchania</string>
+    <string name="enter_listening_port">Wprowadź port do słuchania</string>
 
-    <string name="create_chatroom_private">Zrób Prywatnym</string>
+    <string name="create_chatroom_private">Zrób prywatnym</string>
 
     <string name="search_here">Szukaj tutaj</string>
 
@@ -154,7 +154,6 @@ Liczba katalogów: {5}\"
     <string name="clear_image">Wyczyść obraz</string>
     <string name="no_image_chosen">Brak</string>
 
-    <string name="enter_user_to_invite_to_room">Wpisz użytkownika aby zaprosić</string>
     <string name="inviteuser">Zaproś Użytkownika</string>
 
     <string name="give_up_room">Opuść pokój</string>
@@ -169,7 +168,6 @@ Liczba katalogów: {5}\"
     <string name="choose_a_download_folder">Wybierz folder pobierania</string>
     <string name="settings">Ustawienia</string>
 
-    <string name="enter_user_to_message">Wprowadź użytkownika do wiadomości</string>
 
     <string name="search_result_style">Styl wyniku</string>
 

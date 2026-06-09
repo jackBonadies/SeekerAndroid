@@ -16,8 +16,8 @@
     <string name="start">Започни</string>
 
     <string name="saerch_user_list">Претражите листу корисника</string>
-    <string name="search_room">Претрагу Соба</string>
-    <string name="search_room_">Претрагу Соба {0}</string>
+    <string name="search_room">Претрагу соба</string>
+    <string name="search_room_">Претрагу соба {0}</string>
     <string name="search_user_">Претрагу корисник {0}</string>
     <string name="wishlist_search">Листа жеља</string>
 
@@ -80,22 +80,22 @@ Upload Speed: {3}
 File Count: {4}
 Directory Count: {5}\"
     </string>
-    <string name="add_user">Add User</string>
+    <string name="add_user">Add user</string>
     <string name="empty_browse_directory">
         This tab is used to browse a user\'s directory tree.\n\nTo get started perform a search in the search tab or tap the \'+\'.
     </string>
     <string name="clear">Clear</string>
     <string name="get_user_info">Get User Info</string>
-    <string name="quick_info">Quick Info</string>
+    <string name="quick_info">Quick info</string>
     <string name="enter_user_to_browse">Enter User to Browse</string>
-    <string name="all_target">All Users</string>
+    <string name="all_target">All users</string>
     <string name="target_user_list">User List</string>
     <string name="target_room">Room</string>
     <string name="target_room_joined">Joined:</string>
-    <string name="target_room_name">Room Name</string>
-    <string name="target_choose_user">Choose User</string>
+    <string name="target_room_name">Room name</string>
+    <string name="target_choose_user">Choose user</string>
     <string name="username">Username</string>
-    <string name="search_target_">Search Target</string>
+    <string name="search_target_">Search target</string>
     <string name="custom_">Custom:</string>
 
     <string name="friends">Friends</string>
@@ -105,19 +105,16 @@ Directory Count: {5}\"
     <string name="chatroom_disconnected_at">We disconnected: {0}</string>
     <string name="chatroom_reconnected_at">We reconnected: {0}</string>
     <string name="chatroom_loading_ticker">Loading current ticker...</string>
-    <string name="chatroom_enter_message">Enter Message</string>
+    <string name="chatroom_enter_message">Enter message</string>
     <string name="send_message">Send</string>
     <string name="filter_chatrooms_here">Filter here</string>
 
-    <string name="enter_listening_port">Enter Port to Listen On</string>
+    <string name="enter_listening_port">Enter port to listen on</string>
 
-    <string name="create_chatroom_private">Make Private</string>
+    <string name="create_chatroom_private">Make private</string>
 
-    <string name="search_here">Search Here</string>
+    <string name="search_here">Search here</string>
 
-    <string name="seeker_needs_dl_dir">
-        Seeker needs Access to a Directory to Save Downloaded Files
-    </string>
     <string name="seeker_needs_dl_dir_content">
         Please Choose a Download Directory (Default is the Music Folder)
     </string>
@@ -135,17 +132,16 @@ Directory Count: {5}\"
     <string name="size_column">Size</string>
     <string name="attribute_column">Attribute</string>
 
-    <string name="download_folder">Download Folder</string>
-    <string name="download_selected">Download Selected</string>
-    <string name="request_directories">Request Directories</string>
+    <string name="download_folder">Download folder</string>
+    <string name="download_selected">Download selected</string>
+    <string name="request_directories">Request directories</string>
     <string name="close_download_diag">Close</string>
 
     <string name="add_about_me">Tap to add an about me</string>
-    <string name="select_image">Select Image</string>
-    <string name="clear_image">Clear Image</string>
+    <string name="select_image">Select image</string>
+    <string name="clear_image">Clear image</string>
     <string name="no_image_chosen">None</string>
 
-    <string name="enter_user_to_invite_to_room">Enter User to Invite</string>
     <string name="inviteuser">Invite User</string>
 
     <string name="give_up_room">Give up Room</string>
@@ -160,7 +156,6 @@ Directory Count: {5}\"
     <string name="choose_a_download_folder">Select Download Folder</string>
     <string name="settings">Settings</string>
 
-    <string name="enter_user_to_message">Enter User to Message</string>
 
     <string name="search_result_style">Result Style</string>
 

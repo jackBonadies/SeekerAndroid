@@ -97,12 +97,12 @@ Recompte de directoris: {5}\"
     <string name="get_user_info">Obteniu informació de l\'usuari</string>
     <string name="quick_info">Informació ràpida</string>
     <string name="enter_user_to_browse">Introduïu l\'usuari per navegar</string>
-    <string name="all_target">Tots els Usuaris</string>
+    <string name="all_target">Tots els usuaris</string>
     <string name="target_user_list">Llista d\'usuaris</string>
     <string name="target_room">Sala de xat</string>
     <string name="target_room_joined">S\'ha unit:</string>
     <string name="target_room_name">Nom de la sala</string>
-    <string name="target_choose_user">Trieu Usuari</string>
+    <string name="target_choose_user">Trieu usuari</string>
     <string name="username">Nom d’usuari</string>
     <string name="search_target_">Objectiu de cerca</string>
     <string name="custom_">Personalitzat:</string>
@@ -154,7 +154,6 @@ Recompte de directoris: {5}\"
     <string name="clear_image">Esborra la imatge</string>
     <string name="no_image_chosen">Cap</string>
 
-    <string name="enter_user_to_invite_to_room">Introduïu l\'usuari per convidar</string>
     <string name="inviteuser">Convida l\'usuari</string>
 
     <string name="give_up_room">Renuncia a l\'habitació</string>
@@ -169,7 +168,6 @@ Recompte de directoris: {5}\"
     <string name="choose_a_download_folder">Seleccioneu la carpeta de Descàrregues</string>
     <string name="settings">Configuració</string>
 
-    <string name="enter_user_to_message">Introduïu l\'usuari al missatge</string>
 
     <string name="search_result_style">Estil de resultats</string>
 
