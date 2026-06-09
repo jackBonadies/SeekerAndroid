@@ -114,14 +114,14 @@ Počet adresářů: {5}\"
     <string name="send_message">Odeslat</string>
     <string name="filter_chatrooms_here">Filtrovat zde</string>
 
-    <string name="enter_listening_port">Enter Port to Listen On</string>
+    <string name="enter_listening_port">Enter port to listen on</string>
 
     <string name="create_chatroom_private">Nastavit jako soukromé</string>
 
     <string name="search_here">Hledat zde</string>
 
     <string name="seeker_needs_dl_dir">
-        Seeker needs Access to a Directory to Save Downloaded Files
+        Seeker needs access to a directory to save downloaded files
     </string>
     <string name="seeker_needs_dl_dir_content">
         Please Choose a Download Directory (Default is the Music Folder)

@@ -89,22 +89,22 @@ Uploadsnelheid: {3}
 Aantal bestanden: {4}
 Aantal mappen: {5}
     </string>
-    <string name="add_user">Gebruiker Toevoegen</string>
+    <string name="add_user">Gebruiker toevoegen</string>
     <string name="empty_browse_directory">
         Dit tabblad wordt gebruikt om door de map van een gebruiker te bladeren.\n\nOm een zoekopdracht uit te voeren gebruik het tabblad, of tik op de \'+\'.
     </string>
     <string name="clear">Wissen</string>
     <string name="get_user_info">Gebruikerinfo ophalen</string>
-    <string name="quick_info">Beknopte Info</string>
+    <string name="quick_info">Beknopte info</string>
     <string name="enter_user_to_browse">Voer gebruiker in om door te bladeren</string>
-    <string name="all_target">Alle Gebruikers</string>
+    <string name="all_target">Alle gebruikers</string>
     <string name="target_user_list">Gebruiker Lijst</string>
     <string name="target_room">Kamer</string>
     <string name="target_room_joined">Lid sinds:</string>
-    <string name="target_room_name">Kamer Naam</string>
+    <string name="target_room_name">Kamer naam</string>
     <string name="target_choose_user">Kies gebruiker</string>
     <string name="username">Gebruikersnaam</string>
-    <string name="search_target_">Zoek Doel</string>
+    <string name="search_target_">Zoek doel</string>
     <string name="custom_">Aangepast:</string>
 
     <string name="friends">Vrienden</string>
@@ -118,11 +118,11 @@ Aantal mappen: {5}
     <string name="send_message">Verzenden</string>
     <string name="filter_chatrooms_here">Hier filteren</string>
 
-    <string name="enter_listening_port">Voer Poort om te luisteren in</string>
+    <string name="enter_listening_port">Voer poort om te luisteren in</string>
 
     <string name="create_chatroom_private">Privé maken</string>
 
-    <string name="search_here">Zoek Hier</string>
+    <string name="search_here">Zoek hier</string>
 
     <string name="seeker_needs_dl_dir">
         Seeker heeft toegang nodig tot een map om gedownloade bestanden op te slaan
@@ -150,8 +150,8 @@ Aantal mappen: {5}
     <string name="close_download_diag">Sluiten</string>
 
     <string name="add_about_me">Tik, om een \"over mij\" toe te voegen</string>
-    <string name="select_image">Selecteer Afbeelding</string>
-    <string name="clear_image">Verwijder Afbeelding</string>
+    <string name="select_image">Selecteer afbeelding</string>
+    <string name="clear_image">Verwijder afbeelding</string>
     <string name="no_image_chosen">Geen</string>
 
     <string name="enter_user_to_invite_to_room">Voer gebruiker in om uit te nodigen</string>

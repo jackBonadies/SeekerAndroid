@@ -123,7 +123,7 @@ Ordneranzahl: {5}\"
     <string name="search_here">Hier suchen</string>
 
     <string name="seeker_needs_dl_dir">
-        Seeker needs Access to a Directory to Save Downloaded Files
+        Seeker needs access to a directory to save downloaded files
     </string>
     <string name="seeker_needs_dl_dir_content">
         Please Choose a Download Directory (Default is the Music Folder)

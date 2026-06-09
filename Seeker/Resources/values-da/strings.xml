@@ -16,9 +16,9 @@
     <string name="start">Start</string>
 
     <string name="saerch_user_list">Søg I Brugerlisten</string>
-    <string name="search_room">Søg Rum</string>
-    <string name="search_room_">Søg Rum {0}</string>
-    <string name="search_user_">Søg Bruger {0}</string>
+    <string name="search_room">Søg rum</string>
+    <string name="search_room_">Søg rum {0}</string>
+    <string name="search_user_">Søg bruger {0}</string>
     <string name="wishlist_search">Ønskeliste Søgning</string>
 
     <string name="no_account">
@@ -49,7 +49,7 @@
 
     <string name="no_messages">Ingen beskeder. Tryk på \"+\" for at komme i gang.</string>
     <string name="messages">Beskeder</string>
-    <string name="browse_files">Gennemse Filer</string>
+    <string name="browse_files">Gennemse filer</string>
     <string name="privateRoomCreation">Anmoder om oprettelse af privat rum</string>
     <string name="requesting_room_list">Anmoder Om Rumliste</string>
     <string name="requesting_user_info">Henter Brugerens Information</string>
@@ -85,20 +85,20 @@ Upload Speed: {3}
 File Count: {4}
 Directory Count: {5}\"
     </string>
-    <string name="add_user">Tilføj Bruger</string>
+    <string name="add_user">Tilføj bruger</string>
     <string name="empty_browse_directory">
         Dette faneblad bruges til at gennemse en brugers mappetræ.\n\nFor at komme i gang skal du udføre en søgning i fanen \'Søg\' eller trykke på \'+\'.
     </string>
     <string name="clear">Ryd</string>
     <string name="get_user_info">Hent Brugerinformation</string>
-    <string name="quick_info">Hurtig Info</string>
+    <string name="quick_info">Hurtig info</string>
     <string name="enter_user_to_browse">Indtast bruger for at gennemse</string>
-    <string name="all_target">Alle Brugere</string>
+    <string name="all_target">Alle brugere</string>
     <string name="target_user_list">Brugerliste</string>
     <string name="target_room">Rum</string>
     <string name="target_room_joined">Tilsluttet:</string>
-    <string name="target_room_name">Rum Navn</string>
-    <string name="target_choose_user">Vælg Bruger</string>
+    <string name="target_room_name">Rum navn</string>
+    <string name="target_choose_user">Vælg bruger</string>
     <string name="username">Brugernavn</string>
     <string name="search_target_">Søgemål</string>
     <string name="custom_">Brugerdefineret:</string>
@@ -110,18 +110,18 @@ Directory Count: {5}\"
     <string name="chatroom_disconnected_at">We disconnected: {0}</string>
     <string name="chatroom_reconnected_at">We reconnected: {0}</string>
     <string name="chatroom_loading_ticker">Loading current ticker...</string>
-    <string name="chatroom_enter_message">Enter Message</string>
+    <string name="chatroom_enter_message">Enter message</string>
     <string name="send_message">Send</string>
     <string name="filter_chatrooms_here">Filter here</string>
 
-    <string name="enter_listening_port">Enter Port to Listen On</string>
+    <string name="enter_listening_port">Enter port to listen on</string>
 
-    <string name="create_chatroom_private">Make Private</string>
+    <string name="create_chatroom_private">Make private</string>
 
-    <string name="search_here">Search Here</string>
+    <string name="search_here">Search here</string>
 
     <string name="seeker_needs_dl_dir">
-        Seeker needs Access to a Directory to Save Downloaded Files
+        Seeker needs access to a directory to save downloaded files
     </string>
     <string name="seeker_needs_dl_dir_content">
         Please Choose a Download Directory (Default is the Music Folder)
@@ -140,14 +140,14 @@ Directory Count: {5}\"
     <string name="size_column">Size</string>
     <string name="attribute_column">Attribute</string>
 
-    <string name="download_folder">Download Folder</string>
-    <string name="download_selected">Download Selected</string>
-    <string name="request_directories">Request Directories</string>
+    <string name="download_folder">Download folder</string>
+    <string name="download_selected">Download selected</string>
+    <string name="request_directories">Request directories</string>
     <string name="close_download_diag">Close</string>
 
     <string name="add_about_me">Tap to add an about me</string>
-    <string name="select_image">Select Image</string>
-    <string name="clear_image">Clear Image</string>
+    <string name="select_image">Select image</string>
+    <string name="clear_image">Clear image</string>
     <string name="no_image_chosen">None</string>
 
     <string name="enter_user_to_invite_to_room">Enter User to Invite</string>

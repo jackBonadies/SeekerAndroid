@@ -97,12 +97,12 @@ Recompte de directoris: {5}\"
     <string name="get_user_info">Obteniu informació de l\'usuari</string>
     <string name="quick_info">Informació ràpida</string>
     <string name="enter_user_to_browse">Introduïu l\'usuari per navegar</string>
-    <string name="all_target">Tots els Usuaris</string>
+    <string name="all_target">Tots els usuaris</string>
     <string name="target_user_list">Llista d\'usuaris</string>
     <string name="target_room">Sala de xat</string>
     <string name="target_room_joined">S\'ha unit:</string>
     <string name="target_room_name">Nom de la sala</string>
-    <string name="target_choose_user">Trieu Usuari</string>
+    <string name="target_choose_user">Trieu usuari</string>
     <string name="username">Nom d’usuari</string>
     <string name="search_target_">Objectiu de cerca</string>
     <string name="custom_">Personalitzat:</string>

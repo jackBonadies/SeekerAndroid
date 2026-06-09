@@ -12,7 +12,7 @@
     <string name="stop">Ferma</string>
     <string name="start">Avvia</string>
     <string name="saerch_user_list">Cerca Lista Utenti</string>
-    <string name="search_room">Cerca Stanza</string>
+    <string name="search_room">Cerca stanza</string>
     <string name="search_room_">Cerca nella stanza {0}</string>
     <string name="search_user_">Cerca utente {0}</string>
     <string name="wishlist_search">Ricerca Lista Desideri</string>
@@ -55,11 +55,11 @@ Upload in coda: {2}
 Velocità di Upload: {3}
 Numero Files: {4}
 Numero Cartelle: {5}\"</string>
-    <string name="add_user">Aggiungi Utente</string>
+    <string name="add_user">Aggiungi utente</string>
     <string name="empty_browse_directory">Questa scheda è usata per sfogliare la lista cartelle di un utente.\n\nPer iniziare eseguire una ricerca nella scheda di ricerca o tocca il tasto \'+\'.</string>
     <string name="clear">Cancella</string>
     <string name="get_user_info">Ottieni informazioni sull\'utente</string>
-    <string name="quick_info">Info Rapide</string>
+    <string name="quick_info">Info rapide</string>
     <string name="enter_user_to_browse">Inserisci l\'utente da esplorare</string>
     <!--
   These are search targets
@@ -71,7 +71,7 @@ Numero Cartelle: {5}\"</string>
     <string name="target_room_name">Nome stanza</string>
     <string name="target_choose_user">Seleziona utente</string>
     <string name="username">Nome utente</string>
-    <string name="search_target_">Obiettivo Ricerca</string>
+    <string name="search_target_">Obiettivo ricerca</string>
     <string name="custom_">Personalizzato:</string>
     <string name="friends">Amici</string>
     <string name="ignored">Ignorato</string>
@@ -85,7 +85,7 @@ Numero Cartelle: {5}\"</string>
     <string name="filter_chatrooms_here">Filtra qui</string>
     <string name="enter_listening_port">Inserisci la porta di ascolto</string>
     <string name="create_chatroom_name">Nome della stanza da creare</string>
-    <string name="create_chatroom_private">Rendi Privata</string>
+    <string name="create_chatroom_private">Rendi privata</string>
     <string name="search_here">Cerca qui</string>
     <string name="seeker_needs_dl_dir">Seeker ha bisogno di accesso a una directory per salvare i file scaricati</string>
     <string name="seeker_needs_dl_dir_content">Selezionare una directory di download (il default è la cartella Musica)</string>
@@ -101,7 +101,7 @@ Numero Cartelle: {5}\"</string>
     <!--
   Download Dialog Buttons
   -->
-    <string name="download_folder">Scarica Cartella</string>
+    <string name="download_folder">Scarica cartella</string>
     <string name="download_selected">Scarica selezionati</string>
     <string name="request_directories">Richiedi cartelle</string>
     <string name="close_download_diag">Chiudi</string>

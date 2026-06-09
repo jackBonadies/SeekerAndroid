@@ -16,9 +16,9 @@
     <string name="start">Iniciar</string>
 
     <string name="saerch_user_list">Pesquisar Lista de Usuários</string>
-    <string name="search_room">Pesquisar Sala</string>
-    <string name="search_room_">Pesquisar Sala {0}</string>
-    <string name="search_user_">Buscar Usuário {0}</string>
+    <string name="search_room">Pesquisar sala</string>
+    <string name="search_room_">Pesquisar sala {0}</string>
+    <string name="search_user_">Buscar usuário {0}</string>
     <string name="wishlist_search">Pesquisar lista de desejos</string>
 
     <string name="no_account">

@@ -59,19 +59,19 @@ Directory Count: {5}\"</string>
     <string name="empty_browse_directory">This tab is used to browse a user\'s directory tree.\n\nTo get started perform a search in the search tab or tap the \'+\'.</string>
     <string name="clear">清除</string>
     <string name="get_user_info">Get User Info</string>
-    <string name="quick_info">Quick Info</string>
+    <string name="quick_info">Quick info</string>
     <string name="enter_user_to_browse">Enter User to Browse</string>
     <!--
   These are search targets
   -->
-    <string name="all_target">All Users</string>
+    <string name="all_target">All users</string>
     <string name="target_user_list">用户列表</string>
     <string name="target_room">房间</string>
     <string name="target_room_joined">已加入：</string>
     <string name="target_room_name">房间名</string>
     <string name="target_choose_user">选择用户</string>
     <string name="username">用户名</string>
-    <string name="search_target_">Search Target</string>
+    <string name="search_target_">Search target</string>
     <string name="custom_">Custom:</string>
     <string name="friends">Friends</string>
     <string name="ignored">已忽略</string>
@@ -83,7 +83,7 @@ Directory Count: {5}\"</string>
     <string name="chatroom_enter_message">输入消息</string>
     <string name="send_message">发送</string>
     <string name="filter_chatrooms_here">Filter here</string>
-    <string name="enter_listening_port">Enter Port to Listen On</string>
+    <string name="enter_listening_port">Enter port to listen on</string>
     <string name="create_chatroom_name">要创建的房间名称</string>
     <string name="create_chatroom_private">设为私密</string>
     <string name="search_here">点击搜索</string>
