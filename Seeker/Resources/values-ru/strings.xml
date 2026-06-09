@@ -12,8 +12,6 @@
     <string name="new_result">Новый результат</string>
     <string name="new_results">Новые результаты</string>
 
-    <string name="stop">Остановить</string>
-    <string name="start">Начать</string>
 
     <string name="saerch_user_list">Найти пользовательский список</string>
     <string name="search_room">Открыть \"Поиск\"</string>
@@ -24,26 +22,7 @@
     <string name="no_account">
         У вас нет учетной записи? Просто введите уникальное имя пользователя, и для вас будет создан аккаунт.
     </string>
-    <string name="memory_file_backed">
-        Примечание: При загрузке с резервным копированием файлов результаты частичной загрузки сохраняются в папке \"Soulseek Incomplete\" и переносятся в папку \"Complete\" после завершения загрузки.
-\n\nЭто позволяет (1) приостанавливать и возобновлять загрузку с того места, на котором вы остановились (2) загружать большие файлы без ошибок памяти (и вообще меньше потреблять оперативной памяти).
-\n\nВыключив эту функцию, результаты частичной загрузки хранятся в памяти до тех пор, пока не будут завершены, затем они сохраняются на диск.
-    </string>
-    <string name="keep_alive_service">
-        Эта служба позволяет Seeker работать в фоновом режиме.
-\n\nЭто необходимо для того, чтобы отвечать на поисковые запросы (при совместном использовании), получать сообщения из чата и результаты из избранных запросов в фоновом режиме.
-\n\nЭто не нужно для загрузки или выгрузки в фоновом режиме (для этого уже есть служба, которая будет работать всегда).
-\n\nЕдинственным недостатком является то, что это может расходовать больше батареи. В таком случае можно отключить эту функцию по умолчанию и запускать ее только по мере необходимости.
-    </string>
-    <string name="listening">
-        Эта настройка позволяет Seeker принимать входящие подключения, чтобы мы могли подключаться к клиентам без открытых портов.
-\n\nНа практике это означает, что до тех пор, пока мы успешно прослушиваем (отображается в \"Проверить Статус\"), мы получим больше результатов поиска, быть в состоянии загрузить от других людей, загружать для большего количества пользователей и т. д.
-\n\nSeeker будет пытаться автоматически пересылать порты через UPnP (именно это делает официальный клиент для рабочего стола). Если вы НЕ используете Wi-Fi - он не будет работать. Если вы используете VPN, то, пожалуйста, найдите способ перенаправления портов для вашего конкретного VPN. Если ваш маршрутизатор не включен UPnP, то вам будет необходимо указать порт вручную.
-    </string>
 
-    <string name="sharing_dialog">
-        Несколько замечаний по поводу обмена файлами.  Когда каталог загрузки создается впервые, приложение должно прочитать файлы и разобрать их таким образом, чтобы это было удобно для последующего поиска и просмотра.  Это может занять до нескольких минут.  Убедитесь, что файлы, которыми вы делитесь, не содержат никакой частной или конфиденциальной информации (в основном используйте те же суждения, что и для официального клиента soulseek).
-    </string>
 
     <string name="privileges_more_info">
         Привилегии позволяют поддерживать создателя Soulseek (Nir) и центральный сервер, от которого зависит это приложение.
@@ -62,51 +41,28 @@
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Избранное</string>
-    <string name="wishlist_bold">
-        <b>Избранное</b>
-    </string>
-    <string name="wishlist_empty_bold">
-        <b>Избранное (пусто)</b>
-    </string>
     <string name="user_info_bio">
         <b>Информация о пользователе:</b>
     </string>
     <string name="user_info_picture">
         <b>Изображение</b>
     </string>
-    <string name="user_info_stats_header">
-        <b> Информация </b>
-    </string>
     <string name="unsaved_changes_title">Отменить несохранённые изменения?</string>
     <string name="unsaved_changes_body">
         У вас есть несохраненные изменения.
 Вы уверены, что хотите отказаться от них?
     </string>
-    <string name="user_status_string">
-        Загрузка слотов: {0}
-Бесплатно для загрузки: {1}
-Очереди загрузок: {2}
-Скорость загрузки: {3}
-Число файлов: {4}
-Число директорий: {5}
-    </string>
     <string name="add_user">Добавить пользователя</string>
-    <string name="empty_browse_directory">
-        Эта вкладка используется для обзора пользовательских директорий.\n\nДля начала работы поищите что-нибудь в \"Поиске\" или нажмите кнопку \'+\'.
-    </string>
-    <string name="clear">Очистить</string>
     <string name="get_user_info">Получить информацию о пользователе</string>
     <string name="quick_info">Краткая информация</string>
     <string name="enter_user_to_browse">Введите имя пользователя</string>
     <string name="all_target">Все пользователи</string>
     <string name="target_user_list">Список пользователей</string>
     <string name="target_room">Комната</string>
-    <string name="target_room_joined">Присоединился:</string>
     <string name="target_room_name">Название комнаты</string>
     <string name="target_choose_user">Выбрать пользователя</string>
     <string name="username">Имя пользователя</string>
     <string name="search_target_">Область поиска</string>
-    <string name="custom_">Выбор:</string>
 
     <string name="friends">Друзья</string>
     <string name="ignored">Игнорировать</string>
@@ -141,13 +97,10 @@
         Нет доступа к файловой системе. Выберите директорию для загрузок либо на странице входа в систему, либо в настройках.
     </string>
 
-    <string name="file_column">Файл</string>
     <string name="size_column">Размер</string>
-    <string name="attribute_column">Атрибут</string>
 
     <string name="download_folder">Скачать папку</string>
     <string name="download_selected">Скачать выбранные</string>
-    <string name="request_directories">Каталог запросов</string>
     <string name="close_download_diag">Закрыть</string>
 
     <string name="add_about_me">Нажмите, чтобы добавить информацию о себе</string>
@@ -164,7 +117,6 @@
     <string name="logout">Выйти</string>
     <string name="login">Войти</string>
     <string name="password">Пароль</string>
-    <string name="submit">Продолжить</string>
     <string name="ConnectingToServer">Подключаемся к серверу...</string>
     <string name="PleaseWait_">Пожалуйста, подождите...</string>
     <string name="choose_a_download_folder">Выберите папку для загрузок</string>
@@ -179,7 +131,6 @@
     <string name="persist_it">Закрепить</string>
     <string name="type_chatroom_ticker_message">Закреплённое сообщение</string>
 
-    <string name="change_download_folder">Изменить папку для загрузок</string>
     <string name="max_search_results">Макс. кол-во результатов поиска</string>
     <string name="only_show_free_slots">
         Показывать только результаты пользователей с бесплатными слотами
@@ -200,11 +151,9 @@
     <string name="file_backed_downloads">Файл резервных загрузок</string>
     <string name="night_mode_options">Ночной режим</string>
     <string name="enable_sharing">Включить доступ к файлам</string>
-    <string name="set_shared_folder">Папка общего доступа</string>
     <string name="browse_yourself">Просмотр себя</string>
     <string name="enable_listening">Включить прослушивание</string>
     <string name="change_port">Сменить порт</string>
-    <string name="port">Порт</string>
     <string name="check_your_port_status">Проверить статус</string>
     <string name="use_pnp_for_port_forwarding">
         Использовать UPnP для проброса порта
@@ -212,9 +161,6 @@
     <string name="edit_your_user_info">Редактировать информацию пользователя</string>
     <string name="restore_default_settings">Восстановить по умолчанию</string>
 
-    <string name="no_transfers_yet">
-        Пока здесь нет загрузок. Если вы что-нибудь загрузите, оно появится здесь
-    </string>
 
     <string name="user_has_no_bio">У пользователя нет биографии.</string>
     <string name="user_has_no_pic">Пользователь не имеет изображения.</string>
@@ -255,9 +201,6 @@
         "Не выбрано - нажмите для выбора"
     </string>
     <string name="failed_to_connect">Не удалось подключиться</string>
-    <string name="not_recursive_dirs_avaialbe_to_download">
-        В настоящее время реализована только загрузка файлов. Каталоги загружать не получится
-    </string>
     <string name="cannot_download_from_self">
         Не удается загрузить от себя
     </string>
@@ -279,9 +222,6 @@
     <string name="error_duplicate">Ошибка: Обнаружен дубликат запроса</string>
     <string name="error_browse_at_location">
         Ошибка при получении пользовательских каталогов в указанном месте
-    </string>
-    <string name="error_duplicates">
-        Ошибка: дубликат передачи. Если вы хотите повторить загрузку, нажмите на него и удерживайте.
     </string>
     <string name="room_data_still_loading">
         Слишком быстро! Все еще загружаем данные комнаты...
@@ -339,24 +279,10 @@
         Мы временно отключились. Переподключение
     </string>
     <string name="failed_to_undo">Ошибка отмены</string>
-    <string name="enabling_listener">Включение слушателя</string>
-    <string name="disabling_listener">Отключение слушателя</string>
     <string name="add_user_title">Добавить пользователей</string>
     <string name="ignore_user_title">Игнорировать пользователей</string>
 
-    <string name="success_setting_shared_dir_fnum_dnum">
-        Успешно установлена общая папка с каталогами {0} и {1} файлами.
-    </string>
-    <string name="parsing_files_wait">
-        Анализ файлов... Занимает несколько секунд...
-    </string>
 
-    <string name="port_out_of_range">
-        Номер порта вне диапазона. Убедитесь, что он находится между 1024 и 65535.
-    </string>
-    <string name="port_failed_parse">
-        Не удалось разобрать номер порта. Убедитесь, что это числовое значение без специальных символов.
-    </string>
 
     <string name="not_sharing">Вы не передаете ни одного файла</string>
     <string name="failed_to_parse_shares_post">
@@ -367,9 +293,6 @@
     <string name="error_not_a_dir">Ошибка: Не каталог</string>
     <string name="successfully_changed_dl_dir">
         Успешно изменена директория загрузки на \"{0}\"
-    </string>
-    <string name="error_parsing_files_shared_dir">
-        Ошибка разбора файлов, не удалось установить общую директорию
     </string>
 
     <string name="follow_system">Как в системных настройках</string>
@@ -410,7 +333,6 @@
         Ошибка при добавлении пользователя: пользователь не найден
     </string>
 
-    <string name="setting_priv_invites">Установка приватных приглашений: {0}</string>
     <string name="failed_setting_priv_invites">
         Не удалось установить разрешить приватные приглашения: {0}
     </string>
@@ -531,7 +453,6 @@
     <string name="deleted_message_history_with">
         Удалена история сообщений {0}
     </string>
-    <string name="welcome">Здравствуйте, {0}</string>
 
     <string name="failed_to_establish_direct_or_indirect">
         Не удалось установить прямую или косвенную связь с пользователем
@@ -568,7 +489,6 @@
     <string name="owner">Владелец</string>
     <string name="mod">Мод</string>
 
-    <string name="user_">Пользователь:</string>
     <string name="set_ticker">Закрепить сообщение</string>
     <string name="setticker">Закрепить сообщение</string>
     <string name="chatrooms">Чаты</string>
@@ -636,7 +556,6 @@
     <string name="paused">Paused</string>
     <string name="in_queue">В очереди</string>
     <string name="unknown">Не определен</string>
-    <string name="position_">Позиция: {0}</string>
 
     <string name="retry_dl">Повторить загрузку</string>
     <string name="clear_from_list">Очистить список</string>
@@ -657,7 +576,6 @@
         Seeker работает в фоновом режиме
     </string>
 
-    <string name="privileges">Привилегии</string>
     <string name="yes">Да</string>
     <string name="seconds_left">{0} Секунд</string>
     <string name="second_left">{0} Секунд</string>
@@ -737,9 +655,6 @@
     </string>
 
     <string name="about_body">Seeker - бесплатный android-клиент Soulseek с открытым исходным кодом. Здесь никогда не будет рекламы или платных функций.</string>
-    <string name="force_filesystem_message">
-        <![CDATA[Разрешение на доступ к папкам на устройстве стандартным способом иногда сбрасывается. Если Seeker будет повторно запрашивать доступ к Общей папке или к папке Загрузок, воспользуйтесь этой кнопкой, чтобы запросить разрешения старого формата, которые точно не пропадут.<br><br>Эта функция работает только в версии Seeker из IzzyOnDroid F-Droid(<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">ссылка для скачивания</a>). Версия из Google Play не имеет возможности запрашивать доступ таким образом.]]>
-    </string>
     <string name="must_be_logged_in_to_get_dir_contents">
         Необходимо войти в систему, чтобы получить содержимое каталога
     </string>
@@ -753,15 +668,6 @@
     <string name="successfully_changed_incomplete_dir">
         Неполный каталог успешно изменен на \"{0}\"
     </string>
-    <string name="no_uploads_yet">
-        Пока здесь нет раздач. Если вы чем-нибудь поделитесь, оно появится здесь
-    </string>
-    <string name="no_uploads_yet_not_sharing">
-        Пока здесь нет раздач. Вы не делитесь файлами
-    </string>
-    <string name="no_uploads_yet_failed_to_set_up_shared_files">
-        В настоящее время вы ничего не отдаёте: ошибка настройки общего доступа
-    </string>
 
     <string name="auto_clear_complete">Автоматически очищать завершенные загрузки</string>
     <string name="auto_clear_complete_uploads">
@@ -774,9 +680,6 @@
     <string name="upload_remaining">{0} Осталась выгрузка</string>
     <string name="uploads_remaining">{0} Остались выгрузки</string>
     <string name="uploads_in_progress">Идёт выгрузка</string>
-    <string name="search_tabs_bold">
-        <b>Поиск вкладок</b>
-    </string>
     <string name="shutdown">Выключить</string>
 
     <string name="set_online_alert">Установить оповещение</string>
@@ -789,13 +692,7 @@
     <string name="failed_denied">Ошибка - Отказано</string>
     <string name="re_requesting">Повторный запрос</string>
 
-    <string name="concurrent_dialog">
-        Ограничить количество одновременных загрузок. Например, если макс. одновременно - 1 и вы загружаете 2 папки от разных пользователей, вторая папка начнется после завершения первой папки. Это может быть полезно для тех, кто имеет низкую пропускную способность, чтобы не задерживать других пользователей и завершить более поздние загрузки раньше.
-    </string>
 
-    <string name="clear_incomplete_dialog">
-        Это удалит все ненужные файлы из папки с незавершенными загрузками. Seeker пытается выполнить это по умолчанию, но иногда это невозможно, поэтому эту кнопку можно использовать для освобождения файлов / пространства.
-    </string>
 
     <string name="diagnostics_more_info">
         Это сохранит диагностическую информацию в текстовый файл с именем \"seeker_diagnostics.txt\", который будет расположен в корне выбранной папки для загрузки.
@@ -822,29 +719,20 @@
     <string name="Speed">Скорость</string>
     <string name="FolderName">Имя папки</string>
     <string name="SetAsDefault">Установить по умолчанию</string>
-    <string name="Change">Изменить</string>
-    <string name="Get">Получить</string>
     <string name="Check">Проверка</string>
     <string name="Keywords">Ключевые слова</string>
     <string name="Configure">Настройка</string>
 
-    <string name="ViewErrorOptions">Настройки просмотра ошибок</string>
-    <string name="ViewFolderOptions">Просмотр настроек папки</string>
-    <string name="Remove">Удалить</string>
     <string name="Reselect">Выбрать повторно</string>
     <string name="RemoveFolder">Удалить папку</string>
     <string name="FolderError">Ошибка папки</string>
     <string name="ErrorForFolder">Ошибка в папке:</string>
 
-    <string name="AreYouSureClearAllDirectories">
-        Вы уверены, что хотите очистить все {0} директории из списка?
-    </string>
     <string name="ErrorDownloadDirNotProperlySet">
         Ошибка: Папка загрузок установлена неправильно.
     </string>
 
     <string name="CopySelectedURLs">Скопировать выбранные URL</string>
-    <string name="CopySelectedURL">Скопировать выбранный URL</string>
     <string name="CopyURL">Копировать ссылку</string>
     <string name="CopyFolderURL">Скопировать URL папки</string>
     <string name="LinkCopied">Ссылка скопирована</string>
@@ -892,7 +780,6 @@
         Пользователь, {0}, делится только пустым каталогом.
     </string>
 
-    <string name="DownloadIsQueued">Загрузка в очереди</string>
 
     <string name="GetFolderDoesntWorkForLockedShares">
         Папка Get не работает для заблокированных акций. Необходимо вместо этого использовать «Обзор» или «Переместить в папке».
@@ -937,7 +824,6 @@
     <string name="PermissionErrorShared">
         Ошибка доступа, невозможно записать (Пожалуйста, выберите заново).
     </string>
-    <string name="FolderNoExistShared">Папки не существует</string>
     <string name="FolderNotAccessible">
         Папка недоступна. Пожалуйста, выберите папку повторно.
     </string>
@@ -1016,10 +902,7 @@
     <string name="RetryFailed">Повторить поиск</string>
     <string name="InvertSelection">Инвертировать выбор</string>
     <string name="SelectAll">Выбрать всё</string>
-    <string name="MaxConcurrentIs">Макс. # одновременных загрузок:</string>
 
-    <string name="PerTransfer">За передачу</string>
-    <string name="Global">Общие</string>
     <string name="ConfigureSmartFilters">Настройка умных фильтров</string>
     <string name="NotSet">Не задано</string>
     <string name="AppLocalStorage">Локальное хранилище</string>
@@ -1027,20 +910,9 @@
 
     <string name="IncompleteFolderEmpty">Папка с незавершенными загрузками пуста</string>
     <string name="NoEligibleToClear">Нет подходящих элементов для очистки</string>
-    <string name="ChangeDownloadSpeed">Изменить скорость загрузки (кб/с):</string>
-    <string name="ChangeUploadSpeed">Изменить скорость отдачи (кб/с):</string>
-    <string name="EnterSpeed">Скорость ввода Кб/с</string>
-    <string name="EnterMaxDownloadSimultaneously">
-        Введите Max для одновременного скачивания
-    </string>
 
-    <string name="BrowseWhich">
-        Искать в публичных директориях или в списках пользователей?
-    </string>
     <string name="WaitForParsing">Дождитесь обработки файлов.</string>
 
-    <string name="finishingUp">Завершение</string>
-    <string name="XFilesParsed">{0} файлов обработано</string>
     <string name="ErrorAlreadyAdded">Ошибка: Каталог уже добавлен.</string>
     <string name="UploadFolderOptions">Загрузить параметры папки</string>
     <string name="CannotChangeNameNotUnique">
@@ -1092,10 +964,7 @@
     <string name="TimedOut">Время ожидания истекло</string>
     <string name="CannotConnect">Не удалось подключиться</string>
 
-    <string name="Succeeded">Выполнено</string>
     <string name="Aborted">Отменено</string>
-    <string name="Num_FilesRemaining">{0} файла(ов) осталось</string>
-    <string name="X_of_Y_Remaining">Осталось {0} из {1}</string>
     <string name="SetLanguage">Язык</string>
     <string name="Automatic">Автоматически</string>
 
@@ -1111,10 +980,6 @@
     <string name="Num_Selected">{0} Выбрано</string>
 
     <string name="ExportClientData">Экспорт данных</string>
-    <string name="export_more_info">
-        Экспортировать список пользователей, список заблокированных/заглушенных пользователей, комментарии к пользователям и список избранных запросов в формате XML.
-Полезно при бэкапе данных или их переносе на другой телефон
-    </string>
     <string name="successfully_exported">
         Данные успешно экспортированы
     </string>
@@ -1138,9 +1003,6 @@
     <string name="new_password">Новый пароль</string>
     <string name="cannot_be_empty">Не может быть пустым</string>
 
-    <string name="must_be_logged_in_generic">
-        Для выполнения этого действия необходимо авторизоваться
-    </string>
     <string name="must_be_logged_in_to_change_password">
         Для изменения пароля необходимо авторизоваться
     </string>

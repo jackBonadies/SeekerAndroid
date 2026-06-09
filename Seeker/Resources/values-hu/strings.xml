@@ -12,8 +12,6 @@
     <string name="new_result">új eredmény</string>
     <string name="new_results">új eredmények</string>
 
-    <string name="stop">Megállít</string>
-    <string name="start">Indítás</string>
 
     <string name="saerch_user_list">Felhasználói lista keresése</string>
     <string name="search_room">Szoba keresése</string>
@@ -24,21 +22,7 @@
     <string name="no_account">
         Nincs felhasználói fiókja? Egyszerűen írjon be egy egyedi felhasználónevet és létrehozunk Önnek egyet.
     </string>
-    <string name="memory_file_backed">
-        Megjegyzés: A fájlokkal támogatott letöltések a részleges letöltési eredményeket a „Soulseek Incomplete” nevű mappába mentik és a letöltés befejeztével áthelyezik őket a befejezett letöltések közé.\n\nEz lehetővé teszi (1) a letöltések szüneteltetését és folytatását onnan ahol abbahagyta (2) nagy fájlok letöltését memóriahibák nélkül (és általában kevésbé RAM igényes).\n\nHa ezt kikapcsolja, a részleges letöltési eredmények a memóriában tárolódnak amíg be nem fejeződnek, majd mentésre kerülnek.
-    </string>
-    <string name="keep_alive_service">
-        Ez a szolgáltatás lehetővé teszi a Seeker számára a háttérben való futást. \n\nSzükséges a keresési kérésekhez (ha megoszt), a csevegő üzenetek fogadásához és a kívánságlisták eléréséhez a háttérben. \n\nNem szükséges a háttérben való letöltéshez vagy feltöltéshez (erre van egy szolgáltatás ami mindig fut). \n\nAz egyetlen hátránya, hogy nagyobb akkumulátorhasználatot okoz. Ebben az esetben az alapértelmezés szerint kikapcsolhatja és csak szükség szerint futtathatja.
-    </string>
-    <string name="listening">
-        Ez a beállítás lehetővé teszi, hogy a Seeker fogadja a bejövő kapcsolatokat, így nyitott portok nélkül tudunk kapcsolódni a kliensekhez.
-\n\nA gyakorlatban ez azt jelenti, hogy amíg működik a figyelés (az „Állapot ellenőrzés” jelzi), több keresési eredményt kapunk, több embertől tölthetünk le, több embernek tölthetünk fel stb.
-\n\nA Seeker megpróbálja automatikusan továbbítani a portokat UPnP-n keresztül (ezt teszi a hivatalos asztali kliens is). Ha nem Wi-Fi-t használ, akkor ez nem fog működni, ha VPN-t használ, keresse meg, hogyan továbbíthatja a portot az adott VPN-hez, ha az útválasztón nincs engedélyezve az UPnP, akkor manuálisan kell továbbítania a portot.
-    </string>
 
-    <string name="sharing_dialog">
-        Néhány megjegyzés a fájlok megosztásával kapcsolatban. Amikor először beállít egy feltöltési könyvtárat, az alkalmazásnak át kell olvasnia a fájlokat és elemeznie kell, hogy a későbbi keresések és böngészési kérések könnyen elvégezhetőek legyenek. Ez akár néhány percig is eltarthat. Győződjön meg arról, hogy a megosztott fájlok nem tartalmaznak személyes vagy bizalmas információkat (alapvetően ugyanúgy ítélje meg, mint a hivatalos soulseek kliens esetében).
-    </string>
 
     <string name="privileges_more_info">
         A jogosultságok lehetővé teszik a Soulseek alkotójának (Nir) és a központi szervernek a támogatását, amelytől ez az alkalmazás függ.\n\nEz lehetővé teszi, hogy a letöltési sorban a nem kiváltságos felhasználók előtt álljon.\n\nMegjegyzés: az adományok nem ennek a nem hivatalos android kliens (Seeker) készítőjének érkeznek. Én jelenleg nem fogadok el adományokat.
@@ -55,50 +39,27 @@
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Kívánságlista</string>
-    <string name="wishlist_bold">
-        <b>Kívánságlista</b>
-    </string>
-    <string name="wishlist_empty_bold">
-        <b>Kívánságlista (Üres)</b>
-    </string>
     <string name="user_info_bio">
         <b>Felhasználói rövid életrajz</b>
     </string>
     <string name="user_info_picture">
         <b>Kép</b>
     </string>
-    <string name="user_info_stats_header">
-        <b>Információ</b>
-    </string>
     <string name="unsaved_changes_title">Elveti a nem mentett módosításokat?</string>
     <string name="unsaved_changes_body">
         Nem mentett módosításai vannak, biztos, hogy el akarja vetni őket?
     </string>
-    <string name="user_status_string">
-        \"Feltöltési szálak: {0}
-Szabad: {1}
-Sorba állított feltöltések: {2}
-Feltöltési sebesség: {3}
-Fájlok száma: {4}
-Könyvtárak száma: {5}\"
-    </string>
     <string name="add_user">Felhasználó hozzáadása</string>
-    <string name="empty_browse_directory">
-        Ezen a lapon böngészhet a felhasználó könyvtárfájában.\n\nA kezdéshez végezzen egy keresést a kereső lapon, vagy érintse meg a „+” jelet.
-    </string>
-    <string name="clear">Töröl</string>
     <string name="get_user_info">Felhasználói információ lekérése</string>
     <string name="quick_info">Gyors információ</string>
     <string name="enter_user_to_browse">Adja meg a felhasználó nevét a böngészéshez</string>
     <string name="all_target">Minden felhasználó</string>
     <string name="target_user_list">Felhasználó lista</string>
     <string name="target_room">Szoba</string>
-    <string name="target_room_joined">Csatlakozott:</string>
     <string name="target_room_name">Szoba neve</string>
     <string name="target_choose_user">Felhasználó kiválasztása</string>
     <string name="username">Felhasználónév</string>
     <string name="search_target_">Cél keresése</string>
-    <string name="custom_">Egyedi:</string>
 
     <string name="friends">Barátok</string>
     <string name="ignored">Figyelmen kívül hagyva</string>
@@ -133,13 +94,10 @@ Könyvtárak száma: {5}\"
         Nem lehet hozzáférni a fájlrendszerhez. Ki kell választania egy letöltési könyvtárat a bejelentkezési oldalon vagy a beállításokban.
     </string>
 
-    <string name="file_column">Fájl</string>
     <string name="size_column">Méret</string>
-    <string name="attribute_column">Tulajdonság</string>
 
     <string name="download_folder">Letöltési könyvtár</string>
     <string name="download_selected">A kijelölt letöltése</string>
-    <string name="request_directories">Könyvtár kérés</string>
     <string name="close_download_diag">Bezárás</string>
 
     <string name="add_about_me">Érintse meg a névjegye hozzáadásához</string>
@@ -156,7 +114,6 @@ Könyvtárak száma: {5}\"
     <string name="logout">Kijelentkezés</string>
     <string name="login">Bejelentkezés</string>
     <string name="password">Jelszó</string>
-    <string name="submit">Beküldés</string>
     <string name="ConnectingToServer">Kapcsolódás a kiszolgálóhoz</string>
     <string name="PleaseWait_">Please Wait...</string>
     <string name="choose_a_download_folder">Select Download Folder</string>
@@ -171,7 +128,6 @@ Könyvtárak száma: {5}\"
     <string name="persist_it">Sticky</string>
     <string name="type_chatroom_ticker_message">Ticker Message</string>
 
-    <string name="change_download_folder">Change Download Folder</string>
     <string name="max_search_results">Max search results</string>
     <string name="only_show_free_slots">
         Only show results of users with free slots
@@ -192,11 +148,9 @@ Könyvtárak száma: {5}\"
     <string name="file_backed_downloads">File backed downloads</string>
     <string name="night_mode_options">Night mode option</string>
     <string name="enable_sharing">Enable sharing</string>
-    <string name="set_shared_folder">Set Shared Folder</string>
     <string name="browse_yourself">Browse Self</string>
     <string name="enable_listening">Enable listening</string>
     <string name="change_port">Change port</string>
-    <string name="port">Port</string>
     <string name="check_your_port_status">Check status</string>
     <string name="use_pnp_for_port_forwarding">
         UPnP port forwarding
@@ -204,9 +158,6 @@ Könyvtárak száma: {5}\"
     <string name="edit_your_user_info">Edit user info</string>
     <string name="restore_default_settings">Restore default settings</string>
 
-    <string name="no_transfers_yet">
-        No downloads currently, as you download content it will appear here
-    </string>
 
     <string name="user_has_no_bio">User has no bio.</string>
     <string name="user_has_no_pic">User has no picture.</string>
@@ -247,9 +198,6 @@ Könyvtárak száma: {5}\"
         "Nothing Selected - Tap to select"
     </string>
     <string name="failed_to_connect">Failed to connect</string>
-    <string name="not_recursive_dirs_avaialbe_to_download">
-        Currently only downloading files are implemented, not directories
-    </string>
     <string name="cannot_download_from_self">
         Cannot download from yourself
     </string>
@@ -271,9 +219,6 @@ Könyvtárak száma: {5}\"
     <string name="error_duplicate">Error: Duplicate request detected</string>
     <string name="error_browse_at_location">
         Error getting user directories at specified location
-    </string>
-    <string name="error_duplicates">
-        Error: Duplicate Transfers.  If you want to retry a download, hold tap on it in transfers.
     </string>
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
@@ -331,24 +276,10 @@ Könyvtárak száma: {5}\"
         We got temporarily disconnected.. reconnecting now
     </string>
     <string name="failed_to_undo">Failure to Undo</string>
-    <string name="enabling_listener">Enabling Listener</string>
-    <string name="disabling_listener">Disabling Listener</string>
     <string name="add_user_title">Add User(s)</string>
     <string name="ignore_user_title">Ignore User(s)</string>
 
-    <string name="success_setting_shared_dir_fnum_dnum">
-        Successfully set Shared Directory with {0} directories and {1} files.
-    </string>
-    <string name="parsing_files_wait">
-        Parsing Files... this may take several seconds...
-    </string>
 
-    <string name="port_out_of_range">
-        Port number is out of range. Make sure it is between 1024 and 65535.
-    </string>
-    <string name="port_failed_parse">
-        Failed to parse port number. Make sure it is numeric without any special characters.
-    </string>
 
     <string name="not_sharing">You are not sharing any files</string>
     <string name="failed_to_parse_shares_post">
@@ -359,9 +290,6 @@ Könyvtárak száma: {5}\"
     <string name="error_not_a_dir">Error: Not a Directory</string>
     <string name="successfully_changed_dl_dir">
         Successfully changed Download Directory to \"{0}\"
-    </string>
-    <string name="error_parsing_files_shared_dir">
-        Error Parsing Files, could not set Shared Directory
     </string>
 
     <string name="follow_system">Follow system</string>
@@ -402,7 +330,6 @@ Könyvtárak száma: {5}\"
         Error adding user: user not found
     </string>
 
-    <string name="setting_priv_invites">Setting Private Invites to: {0}</string>
     <string name="failed_setting_priv_invites">
         Failed to set Allow Private Invites to: {0}
     </string>
@@ -523,7 +450,6 @@ Könyvtárak száma: {5}\"
     <string name="deleted_message_history_with">
         Deleted Message History with {0}
     </string>
-    <string name="welcome">Welcome, {0}</string>
 
     <string name="failed_to_establish_direct_or_indirect">
         Failed to establish a direct or indirect message connection to user
@@ -560,7 +486,6 @@ Könyvtárak száma: {5}\"
     <string name="owner">Owner</string>
     <string name="mod">Mod</string>
 
-    <string name="user_">User:</string>
     <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
@@ -628,7 +553,6 @@ Könyvtárak száma: {5}\"
     <string name="paused">Paused</string>
     <string name="in_queue">In Queue</string>
     <string name="unknown">Unknown</string>
-    <string name="position_">Position: {0}</string>
 
     <string name="retry_dl">Retry Download</string>
     <string name="clear_from_list">Clear from List</string>
@@ -649,7 +573,6 @@ Könyvtárak száma: {5}\"
         Seeker is currently running in background
     </string>
 
-    <string name="privileges">Privileges</string>
     <string name="yes">Yes</string>
     <string name="seconds_left">{0} seconds</string>
     <string name="second_left">{0} second</string>
@@ -729,10 +652,6 @@ Könyvtárak száma: {5}\"
     </string>
 
     <string name="about_body">Seeker is a free and open source Soulseek client for Android. It will never have ads or paid features.</string>
-    <string name="force_filesystem_message">
-        <![CDATA[The standard way of requesting folder access does not always persist permissions.  If you find Seeker reprompting for Download Folder or Shared Folder access, this button will request the old style permissions which will always persist.
-<br><br>This function requires the Fdroid IzzyDroid version of Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Download Here</a>). The Google Play Store does not allow applications to request this permission.]]>
-    </string>
     <string name="must_be_logged_in_to_get_dir_contents">
         Must be logged in to get directory contents
     </string>
@@ -746,15 +665,6 @@ Könyvtárak száma: {5}\"
     <string name="successfully_changed_incomplete_dir">
         Successfully changed Incomplete Directory to \"{0}\"
     </string>
-    <string name="no_uploads_yet">
-        No uploads currently, as you upload files they will appear here
-    </string>
-    <string name="no_uploads_yet_not_sharing">
-        No uploads currently, you are not sharing any files
-    </string>
-    <string name="no_uploads_yet_failed_to_set_up_shared_files">
-        No uploads currently, failed to set up shares
-    </string>
 
     <string name="auto_clear_complete">Auto-clear complete downloads</string>
     <string name="auto_clear_complete_uploads">
@@ -767,9 +677,6 @@ Könyvtárak száma: {5}\"
     <string name="upload_remaining">{0} upload remaining</string>
     <string name="uploads_remaining">{0} uploads remaining</string>
     <string name="uploads_in_progress">Uploads in Progress</string>
-    <string name="search_tabs_bold">
-        <b>Search Tabs</b>
-    </string>
     <string name="shutdown">Shutdown</string>
 
     <string name="set_online_alert">Set Online Alert</string>
@@ -782,13 +689,7 @@ Könyvtárak száma: {5}\"
     <string name="failed_denied">Failed - Denied</string>
     <string name="re_requesting">Re-Requesting</string>
 
-    <string name="concurrent_dialog">
-        Limit number of concurrent downloads.  ex. if max concurrent is 1 and you download 2 folders from different users, the second folder will begin once the first is complete.  This can be useful for those with low bandwidth, to not tie up the upload queues of other users and to completed more recent downloads faster.
-    </string>
 
-    <string name="clear_incomplete_dialog">
-        This will clear the no longer needed files in the incomplete folder.  Seeker tries to do this by default, but sometimes it will fail and so this button can be used to free up files / space.
-    </string>
 
     <string name="diagnostics_more_info">
         This will save diagnostic information to a text file named \"seeker_diagnostics.txt\" which will be located in the root of the selected download folder.
@@ -815,29 +716,20 @@ Könyvtárak száma: {5}\"
     <string name="Speed">Speed</string>
     <string name="FolderName">Folder Name</string>
     <string name="SetAsDefault">Set as Default</string>
-    <string name="Change">Change</string>
-    <string name="Get">Get</string>
     <string name="Check">Check</string>
     <string name="Keywords">Keywords</string>
     <string name="Configure">Configure</string>
 
-    <string name="ViewErrorOptions">View Error Options</string>
-    <string name="ViewFolderOptions">View Folder Options</string>
-    <string name="Remove">Remove</string>
     <string name="Reselect">Reselect</string>
     <string name="RemoveFolder">Remove Folder</string>
     <string name="FolderError">Folder Error</string>
     <string name="ErrorForFolder">Error for folder:</string>
 
-    <string name="AreYouSureClearAllDirectories">
-        Are you sure you want to clear all {0} directories from list?
-    </string>
     <string name="ErrorDownloadDirNotProperlySet">
         Error: The Download Directory is not properly set.
     </string>
 
     <string name="CopySelectedURLs">Copy Selected URLs</string>
-    <string name="CopySelectedURL">Copy Selected URL</string>
     <string name="CopyURL">Copy URL</string>
     <string name="CopyFolderURL">Copy Folder URL</string>
     <string name="LinkCopied">Link Copied</string>
@@ -885,7 +777,6 @@ Könyvtárak száma: {5}\"
         User, {0}, is sharing only an empty directory.
     </string>
 
-    <string name="DownloadIsQueued">Download is Queued</string>
 
     <string name="GetFolderDoesntWorkForLockedShares">
         Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.
@@ -930,7 +821,6 @@ Könyvtárak száma: {5}\"
     <string name="PermissionErrorShared">
         Permission Error, cannot write (Please reselect).
     </string>
-    <string name="FolderNoExistShared">Folder does not exist.</string>
     <string name="FolderNotAccessible">
         Folder is not accessible (Please reselect).
     </string>
@@ -1009,10 +899,7 @@ Könyvtárak száma: {5}\"
     <string name="RetryFailed">Retry Failed</string>
     <string name="InvertSelection">Invert Selection</string>
     <string name="SelectAll">Select All</string>
-    <string name="MaxConcurrentIs">Max # of Concurrent Downloads:</string>
 
-    <string name="PerTransfer">Per Transfer</string>
-    <string name="Global">Global</string>
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
     <string name="NotSet">Not set</string>
     <string name="AppLocalStorage">App Local Storage</string>
@@ -1020,20 +907,9 @@ Könyvtárak száma: {5}\"
 
     <string name="IncompleteFolderEmpty">Incomplete Folder is empty</string>
     <string name="NoEligibleToClear">No eligible items to clear</string>
-    <string name="ChangeDownloadSpeed">Change Download Speed (kb/s):</string>
-    <string name="ChangeUploadSpeed">Change Upload Speed (kb/s):</string>
-    <string name="EnterSpeed">Enter Speed in Kb/s</string>
-    <string name="EnterMaxDownloadSimultaneously">
-        Enter Max to Download Simultaneously
-    </string>
 
-    <string name="BrowseWhich">
-        Browse Public Shares or User List shares?
-    </string>
     <string name="WaitForParsing">Wait for parsing to complete.</string>
 
-    <string name="finishingUp">finishing up</string>
-    <string name="XFilesParsed">{0} files parsed</string>
     <string name="ErrorAlreadyAdded">Error: Directory Already Added.</string>
     <string name="UploadFolderOptions">Upload Folder Options</string>
     <string name="CannotChangeNameNotUnique">
@@ -1085,10 +961,7 @@ Könyvtárak száma: {5}\"
     <string name="TimedOut">Timed Out</string>
     <string name="CannotConnect">Cannot Connect</string>
 
-    <string name="Succeeded">Succeeded</string>
     <string name="Aborted">Aborted</string>
-    <string name="Num_FilesRemaining">{0} files remaining</string>
-    <string name="X_of_Y_Remaining">{0} of {1} remaining</string>
     <string name="SetLanguage">Language</string>
     <string name="Automatic">Automatic</string>
 
@@ -1104,9 +977,6 @@ Könyvtárak száma: {5}\"
     <string name="Num_Selected">{0} Selected</string>
 
     <string name="ExportClientData">Export client data</string>
-    <string name="export_more_info">
-        Export User List, Ignore/Block List, User Notes, and Wishlist to xml. Useful for backing up or migrating data to new phone.
-    </string>
     <string name="successfully_exported">
         Successfully exported Seeker client data.
     </string>
@@ -1130,9 +1000,6 @@ Könyvtárak száma: {5}\"
     <string name="new_password">New Password</string>
     <string name="cannot_be_empty">Cannot be empty</string>
 
-    <string name="must_be_logged_in_generic">
-        Must be logged in to perform this action
-    </string>
     <string name="must_be_logged_in_to_change_password">
         Must be logged in to change password
     </string>

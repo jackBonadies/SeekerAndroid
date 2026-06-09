@@ -12,8 +12,6 @@
     <string name="new_result">novo resultado</string>
     <string name="new_results">novos resultados</string>
 
-    <string name="stop">Parar</string>
-    <string name="start">Iniciar</string>
 
     <string name="saerch_user_list">Pesquisar Lista de Usuários</string>
     <string name="search_room">Pesquisar sala</string>
@@ -24,26 +22,7 @@
     <string name="no_account">
         Não tem uma conta? Basta digitar um nome de usuário exclusivo e um será criado para você.
     </string>
-    <string name="memory_file_backed">
-        Nota: Arquivos sendo baixados serão salvos parcialmente em uma pasta chamada \"Soulseek Incompleto\" e serão movidos para completos assim que terminarem de ser baixados.
-\n\nIsso permite (1) a capacidade de pausar e retomar os downloads de onde você parou (2) a capacidade de baixar arquivos grandes sem erros de falta de memória (e menos uso de RAM em geral).
-\n\nDesligando isso, os resultados parciais do download são armazenados na memória até que sejam concluídos e, em seguida, são salvos no disco.
-    </string>
-    <string name="keep_alive_service">
-        Este serviço permite que o Seeker seja executado em segundo plano.
-\n\nIsso é necessário para responder a solicitações de pesquisa (se compartilhar), receber mensagens de bate-papo e receber resultados da lista de desejos em segundo plano.
-\n\nNão é necessário fazer download ou upload em segundo plano (já existe um serviço para isso que sempre será executado).
-\n\nA única desvantagem é que isso pode consumir mais bateria. Nesse caso, pode-se desativá-lo por padrão e executá-lo apenas conforme necessário.
-    </string>
-    <string name="listening">
-        Essa configuração permite que o Seeker aceite conexões de entrada, para que possamos nos conectar a clientes sem portas abertas.
-\n\nO que isso significa na prática é que, enquanto estivermos ouvindo com sucesso (indicado por meio de \"Verificar status\"), receberemos mais resultados de pesquisa, poderemos fazer download de mais pessoas, fazer upload para mais pessoas etc.
-\n\nSeeker tentará encaminhar automaticamente as portas via UPnP (isso é o que o cliente de desktop oficial faz). Se você NÃO estiver no Wi-Fi, não funcionará, se estiver em uma VPN, pesquise como encaminhar a porta para sua VPN específica, se o seu roteador não estiver habilitado para UPnP, você deverá encaminhar a porta manualmente.
-    </string>
 
-    <string name="sharing_dialog">
-        Algumas coisas a serem observadas sobre o compartilhamento de arquivos. Quando um diretório de upload é definido pela primeira vez, o aplicativo precisa ler os arquivos e analisá-los de maneira fácil para pesquisas e solicitações de navegação subsequentes. Isso pode levar alguns minutos. Certifique-se de que os arquivos que você está compartilhando não tenham nenhuma informação privada ou sensível neles (basicamente use o mesmo julgamento que você faria para o cliente oficial do soulseek).
-    </string>
 
     <string name="privileges_more_info">
         Os privilégios permitem apoiar o criador do Soulseek (Nir) e o servidor central do qual este aplicativo depende.
@@ -62,50 +41,27 @@
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Lista de desejos</string>
-    <string name="wishlist_bold">
-        <b>Lista de desejos</b>
-    </string>
-    <string name="wishlist_empty_bold">
-        <b>Lista de desejos (Vazio)</b>
-    </string>
     <string name="user_info_bio">
         <b>Bio do usuário</b>
     </string>
     <string name="user_info_picture">
         <b>Foto</b>
     </string>
-    <string name="user_info_stats_header">
-        <b>Informações</b>
-    </string>
     <string name="unsaved_changes_title">Descartar alterações não salvas?</string>
     <string name="unsaved_changes_body">
         Você tem alterações não salvas. Tem certeza de que deseja descartá-las?
     </string>
-    <string name="user_status_string">
-        Slots de upload: {0}
-Livre para upload: {1}
-Uploads na fila: {2}
-Velocidade de upload: {3}
-Contagem de arquivos: {4}
-Contador de diretórios: {5}
-    </string>
     <string name="add_user">Adicionar usuário</string>
-    <string name="empty_browse_directory">
-        Essa aba é usada para navegar pela árvore do diretório de um usuário.\n\nPara começar a fazer uma pesquisa na aba de pesquisa ou toque em \'+\'.
-    </string>
-    <string name="clear">Limpar</string>
     <string name="get_user_info">Obter informações do usuário</string>
     <string name="quick_info">Informações rápidas</string>
     <string name="enter_user_to_browse">Digite o usuário para navegar</string>
     <string name="all_target">Todos os usuários</string>
     <string name="target_user_list">Lista de usuário</string>
     <string name="target_room">Sala</string>
-    <string name="target_room_joined">Entrou:</string>
     <string name="target_room_name">Nome da sala</string>
     <string name="target_choose_user">Escolher usuário</string>
     <string name="username">Nome de usuário</string>
     <string name="search_target_">Alvo da pesquisa</string>
-    <string name="custom_">Personalizado:</string>
 
     <string name="friends">Amigos</string>
     <string name="ignored">Ignorado</string>
@@ -140,13 +96,10 @@ Contador de diretórios: {5}
         Não é possível acessar o sistema de arquivos. Você deve selecionar um diretório de download, seja na página de login ou nas configurações.
     </string>
 
-    <string name="file_column">Arquivo</string>
     <string name="size_column">Tamanho</string>
-    <string name="attribute_column">Atributo</string>
 
     <string name="download_folder">Baixar diretório</string>
     <string name="download_selected">Baixar selecionado</string>
-    <string name="request_directories">Requisitar diretórios</string>
     <string name="close_download_diag">Fechar</string>
 
     <string name="add_about_me">Toque para adicionar um \"sobre mim\"</string>
@@ -162,7 +115,6 @@ Contador de diretórios: {5}
     <string name="logout">Sair da sua conta</string>
     <string name="login">Entrar</string>
     <string name="password">Senha</string>
-    <string name="submit">Enviar</string>
     <string name="ConnectingToServer">Conectando ao servidor</string>
     <string name="PleaseWait_">Por favor, aguarde...</string>
     <string name="choose_a_download_folder">Selecionar Pasta de Download</string>
@@ -176,7 +128,6 @@ Contador de diretórios: {5}
     <string name="persist_it">Afixado</string>
     <string name="type_chatroom_ticker_message">Mensagem de apresentação</string>
 
-    <string name="change_download_folder">Alterar pasta de download</string>
     <string name="max_search_results">Máximo de resultados de pesquisa</string>
     <string name="only_show_free_slots">
         Mostrar apenas os resultados de usuários com slots livres
@@ -197,11 +148,9 @@ Contador de diretórios: {5}
     <string name="file_backed_downloads">Transferências com backup de arquivos</string>
     <string name="night_mode_options">Opção de modo noturno</string>
     <string name="enable_sharing">Ativar compartilhamento</string>
-    <string name="set_shared_folder">Definir pasta compartilhada</string>
     <string name="browse_yourself">Navegar por conta própria</string>
     <string name="enable_listening">Ativar escuta</string>
     <string name="change_port">Alterar porta</string>
-    <string name="port">Porta</string>
     <string name="check_your_port_status">Checar status</string>
     <string name="use_pnp_for_port_forwarding">
         Usar UPnP para encaminhamento de portas
@@ -209,9 +158,6 @@ Contador de diretórios: {5}
     <string name="edit_your_user_info">Editar informações do usuário</string>
     <string name="restore_default_settings">Restaurar padrões</string>
 
-    <string name="no_transfers_yet">
-        Não há transferências no momento, conforme você baixa o conteúdo, ele aparecerá aqui
-    </string>
 
     <string name="user_has_no_bio">O usuário não tem bio.</string>
     <string name="user_has_no_pic">O usuário não tem imagem.</string>
@@ -252,9 +198,6 @@ Contador de diretórios: {5}
         "Nada foi selecionado - toque para selecionar"
     </string>
     <string name="failed_to_connect">Falha ao conectar</string>
-    <string name="not_recursive_dirs_avaialbe_to_download">
-        Atualmente, apenas a transferência de arquivos é implementado, não de diretórios
-    </string>
     <string name="cannot_download_from_self">
         Não é possível fazer transferência de você mesmo
     </string>
@@ -276,9 +219,6 @@ Contador de diretórios: {5}
     <string name="error_duplicate">Erro: Detectado pedido duplicado</string>
     <string name="error_browse_at_location">
         Erro ao obter diretórios de usuário no local especificado
-    </string>
-    <string name="error_duplicates">
-        Erro: Transferências Duplicadas. Se você quiser tentar baixar novamente, segure e toque nele em transferências.
     </string>
     <string name="room_data_still_loading">
         Muito rápido! Ainda recuperando dados da sala...
@@ -336,24 +276,10 @@ Contador de diretórios: {5}
         Fomos temporariamente desconectados... reconectando agora
     </string>
     <string name="failed_to_undo">Falha ao desfazer</string>
-    <string name="enabling_listener">Ativando ouvinte</string>
-    <string name="disabling_listener">Desativando ouvinte</string>
     <string name="add_user_title">Adicionar usuário(s)</string>
     <string name="ignore_user_title">Ignorar usuário(s)</string>
 
-    <string name="success_setting_shared_dir_fnum_dnum">
-        Definido com êxito o diretório compartilhado com {0} diretórios e {1} arquivos.
-    </string>
-    <string name="parsing_files_wait">
-        Analisando arquivos... isso pode levar vários segundos...
-    </string>
 
-    <string name="port_out_of_range">
-        O número da porta está fora do intervalo. Certifique-se de que está entre 1024 e 65535.
-    </string>
-    <string name="port_failed_parse">
-        Falha ao analisar o número da porta. Certifique-se de que é numérico sem caracteres especiais.
-    </string>
 
     <string name="not_sharing">Você não está compartilhando nenhum arquivo</string>
     <string name="failed_to_parse_shares_post">
@@ -364,9 +290,6 @@ Contador de diretórios: {5}
     <string name="error_not_a_dir">Erro: Não é um diretório</string>
     <string name="successfully_changed_dl_dir">
         Diretório de transferência alterado com sucesso para \"{0}\"
-    </string>
-    <string name="error_parsing_files_shared_dir">
-        Erro ao analisar arquivos, não foi possível definir o diretório compartilhado
     </string>
 
     <string name="follow_system">Padrão do sistema</string>
@@ -407,7 +330,6 @@ Contador de diretórios: {5}
         Erro ao adicionar usuário: usuário não encontrado
     </string>
 
-    <string name="setting_priv_invites">Definindo convites privados para: {0}</string>
     <string name="failed_setting_priv_invites">
         Falha ao definir Permitir Convites Privados para: {0}
     </string>
@@ -528,7 +450,6 @@ Contador de diretórios: {5}
     <string name="deleted_message_history_with">
         Histórico de mensagens excluídas com {0}
     </string>
-    <string name="welcome">Bem-vindo(a), {0}</string>
 
     <string name="failed_to_establish_direct_or_indirect">
         Falha ao estabelecer uma conexão de mensagem direta ou indireta com o usuário
@@ -565,7 +486,6 @@ Contador de diretórios: {5}
     <string name="owner">Proprietário</string>
     <string name="mod">Mod</string>
 
-    <string name="user_">Usuário:</string>
     <string name="set_ticker">Definir Ticker</string>
     <string name="setticker">Definir Ticker</string>
     <string name="chatrooms">Salas de conversa</string>
@@ -633,7 +553,6 @@ Contador de diretórios: {5}
     <string name="paused">Pausado</string>
     <string name="in_queue">Na fila</string>
     <string name="unknown">Desconhecido</string>
-    <string name="position_">Posição: {0}</string>
 
     <string name="retry_dl">Repetir download</string>
     <string name="clear_from_list">Limpar da lista</string>
@@ -654,7 +573,6 @@ Contador de diretórios: {5}
         O Seeker está sendo executado em segundo plano
     </string>
 
-    <string name="privileges">Privilégios</string>
     <string name="yes">Sim</string>
     <string name="seconds_left">{0} segundos</string>
     <string name="second_left">{0} segundo</string>
@@ -734,10 +652,6 @@ Contador de diretórios: {5}
     </string>
 
     <string name="about_body">Seeker é um cliente Soulseek gratuito e de código aberto para Android. Ele nunca terá anúncios ou recursos pagos.</string>
-    <string name="force_filesystem_message">
-        <![CDATA[A maneira padrão de solicitar acesso à pasta nem sempre persiste as permissões.  Se você perceber que o Seeker solicita novamente o acesso à pasta de download ou à pasta compartilhada, este botão solicitará as permissões do estilo antigo, que sempre persistirão..
-<br><br>Esta função requer a versão Fdroid IzzyDroid do Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Baixe aqui</a>). A Google Play Store não permite que aplicativos solicitem essa permissão.]]>
-    </string>
     <string name="must_be_logged_in_to_get_dir_contents">
         Deve estar logado para obter o conteúdo do diretório
     </string>
@@ -751,15 +665,6 @@ Contador de diretórios: {5}
     <string name="successfully_changed_incomplete_dir">
         Diretório incompleto alterado com sucesso para \"{0}\"
     </string>
-    <string name="no_uploads_yet">
-        Não há uploads no momento, à medida que você fizer upload de arquivos, eles aparecerão aqui
-    </string>
-    <string name="no_uploads_yet_not_sharing">
-        Nenhum upload no momento, você não está compartilhando nenhum arquivo
-    </string>
-    <string name="no_uploads_yet_failed_to_set_up_shared_files">
-        Nenhum envio atualmente, falha ao configurar compartilhamentos
-    </string>
 
     <string name="auto_clear_complete">Limpar automaticamente transferências completas</string>
     <string name="auto_clear_complete_uploads">
@@ -772,9 +677,6 @@ Contador de diretórios: {5}
     <string name="upload_remaining">{0} upload restante</string>
     <string name="uploads_remaining">{0} uploads restantes</string>
     <string name="uploads_in_progress">Uploads em progresso</string>
-    <string name="search_tabs_bold">
-        <b>Guias de pesquisa</b>
-    </string>
     <string name="shutdown">Desligar</string>
 
     <string name="set_online_alert">Definir alerta online</string>
@@ -787,13 +689,7 @@ Contador de diretórios: {5}
     <string name="failed_denied">Falha - Negado</string>
     <string name="re_requesting">Re-solicitando</string>
 
-    <string name="concurrent_dialog">
-        Limitar número de downloads simultâneos. ex. Se o máximo simultâneo for 1 e você baixar 2 pastas de diferentes usuários, a segunda pasta começará depois que a primeira for concluída. Isto pode ser útil para aqueles com baixa largura de banda, para não sobrecarregar as filas de upload de outros usuários e para completar os downloads mais recentes mais rapidamente.
-    </string>
 
-    <string name="clear_incomplete_dialog">
-        Isso limpará os arquivos não mais necessários na pasta incompleta. O Seeker tenta fazer isso por padrão, mas às vezes falha e, portanto, esse botão pode ser usado para liberar arquivos / espaço.
-    </string>
 
     <string name="diagnostics_more_info">
         Isso salvará as informações de diagnóstico em um arquivo de texto chamado \"seeker_diagnostics.txt\", que estará localizado na raiz da pasta de download selecionada.
@@ -820,29 +716,20 @@ Contador de diretórios: {5}
     <string name="Speed">Velocidade</string>
     <string name="FolderName">Nome da pasta</string>
     <string name="SetAsDefault">Definir como Padrão</string>
-    <string name="Change">Alterar</string>
-    <string name="Get">Obter</string>
     <string name="Check">Verificar</string>
     <string name="Keywords">Palavras-chave</string>
     <string name="Configure">Configurar</string>
 
-    <string name="ViewErrorOptions">Ver opções de erro</string>
-    <string name="ViewFolderOptions">Ver opções de pasta</string>
-    <string name="Remove">Remover</string>
     <string name="Reselect">Selecionar novamente</string>
     <string name="RemoveFolder">Remover pasta</string>
     <string name="FolderError">Pasta de erros</string>
     <string name="ErrorForFolder">Erro para pasta:</string>
 
-    <string name="AreYouSureClearAllDirectories">
-        Tem certeza de que deseja limpar todos os {0} diretórios da lista?
-    </string>
     <string name="ErrorDownloadDirNotProperlySet">
         Erro: O diretório de download não está definido corretamente.
     </string>
 
     <string name="CopySelectedURLs">Copiar URLs selecionadas</string>
-    <string name="CopySelectedURL">Copiar URL selecionada</string>
     <string name="CopyURL">Copiar URL</string>
     <string name="CopyFolderURL">Copiar URL da pasta</string>
     <string name="LinkCopied">Link copiado</string>
@@ -890,7 +777,6 @@ Contador de diretórios: {5}
         O usuário, {0}, está compartilhando apenas um diretório vazio.
     </string>
 
-    <string name="DownloadIsQueued">A transferência está na fila</string>
 
     <string name="GetFolderDoesntWorkForLockedShares">
         Obter pasta não funciona para compartilhamentos bloqueados.  Em vez disso, deve usar Procurar ou Procurar no local.
@@ -935,7 +821,6 @@ Contador de diretórios: {5}
     <string name="PermissionErrorShared">
         Erro de permissão, não é possível gravar (selecione novamente).
     </string>
-    <string name="FolderNoExistShared">A pasta não existe.</string>
     <string name="FolderNotAccessible">
         Pasta não está acessível (Por favor selecione-a).
     </string>
@@ -1014,10 +899,7 @@ Contador de diretórios: {5}
     <string name="RetryFailed">Tentar novamente os que falharam</string>
     <string name="InvertSelection">Inverter a seleção</string>
     <string name="SelectAll">Selecionar Todos</string>
-    <string name="MaxConcurrentIs">Máximo # de downloads simultâneos:</string>
 
-    <string name="PerTransfer">Por Transferência</string>
-    <string name="Global">Sistema</string>
     <string name="ConfigureSmartFilters">Configurar Filtros Inteligentes</string>
     <string name="NotSet">Não definido</string>
     <string name="AppLocalStorage">Armazenamento Local</string>
@@ -1025,20 +907,9 @@ Contador de diretórios: {5}
 
     <string name="IncompleteFolderEmpty">A pasta de incompletos está vazia</string>
     <string name="NoEligibleToClear">Não há itens elegíveis para limpar</string>
-    <string name="ChangeDownloadSpeed">Alterar a Velocidade de Download (kb/s):</string>
-    <string name="ChangeUploadSpeed">Alterar a Velocidade de Upload (kb/s):</string>
-    <string name="EnterSpeed">Insira a Velocidade em Kb/s</string>
-    <string name="EnterMaxDownloadSimultaneously">
-        Digite o Máximo para Baixar simultaneamente
-    </string>
 
-    <string name="BrowseWhich">
-        Procurar por compartilhamentos públicos ou por compartilhamentos da lista de usuários?
-    </string>
     <string name="WaitForParsing">Aguarde a conclusão da análise.</string>
 
-    <string name="finishingUp">terminando</string>
-    <string name="XFilesParsed">{0} arquivos processados</string>
     <string name="ErrorAlreadyAdded">Erro: Diretório já adicionado.</string>
     <string name="UploadFolderOptions">Opções da pasta de Upload</string>
     <string name="CannotChangeNameNotUnique">
@@ -1090,10 +961,7 @@ Contador de diretórios: {5}
     <string name="TimedOut">Tempo limite atingido</string>
     <string name="CannotConnect">Impossível Conectar-se</string>
 
-    <string name="Succeeded">Bem-sucedido</string>
     <string name="Aborted">Cancelado</string>
-    <string name="Num_FilesRemaining">{0} arquivos restante(s)</string>
-    <string name="X_of_Y_Remaining">{0} de {1} restantes</string>
     <string name="SetLanguage">Idioma</string>
     <string name="Automatic">Automático</string>
 
@@ -1109,9 +977,6 @@ Contador de diretórios: {5}
     <string name="Num_Selected">{0} Selecionado(s)</string>
 
     <string name="ExportClientData">Exportar dados do Seeker</string>
-    <string name="export_more_info">
-        Exportar Lista de Usuários, Lista de Ignorados/Bloqueados, Notas do Usuário e Lista de Desejos para XML. Útil para fazer backup ou migração de dados para o novo telefone.
-    </string>
     <string name="successfully_exported">
         Os dados do Seeker foram exportados com sucesso.
     </string>
@@ -1135,9 +1000,6 @@ Contador de diretórios: {5}
     <string name="new_password">Nova senha</string>
     <string name="cannot_be_empty">Não pode ficar vazio</string>
 
-    <string name="must_be_logged_in_generic">
-        Precisa estar logado para realizar esta ação
-    </string>
     <string name="must_be_logged_in_to_change_password">
         Precisa estar logado para alterar a senha
     </string>

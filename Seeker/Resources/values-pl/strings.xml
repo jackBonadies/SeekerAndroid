@@ -12,8 +12,6 @@
     <string name="new_result">nowy wynik</string>
     <string name="new_results">nowe wyniki</string>
 
-    <string name="stop">Zatrzymaj</string>
-    <string name="start">Rozpocznij</string>
 
     <string name="saerch_user_list">Szukaj listy użytkownika</string>
     <string name="search_room">Szukaj pokoju</string>
@@ -24,26 +22,7 @@
     <string name="no_account">
         Nie masz jeszcze konta? Wpisz unikalny nick którego będziesz używał.
     </string>
-    <string name="memory_file_backed">
-        Uwaga: Pobieranie plików z zapisem na dysku będzie przechowywać częściowe wyniki pobierania w folderze o nazwie \'Soulseek Incomplete\' i przenosić je do folderu ukończonych, gdy pobieranie zostanie zakończone.
-\n\nTo umożliwia: (1) możliwość pauzowania i wznawiania pobierania od miejsca, w którym zostało przerwane, (2) możliwość pobierania dużych plików bez błędów związanych z brakiem pamięci (oraz mniej obciążające pamięć RAM w ogóle).
-\n\nWyłączenie tej opcji powoduje, że częściowe wyniki pobierania są przechowywane w pamięci, dopóki nie zostaną zakończone, a następnie zapisywane na dysku.
-    </string>
-    <string name="keep_alive_service">
-        Ta usługa pozwala Seekerowi działać w tle.
-\n\nJest to konieczne, aby odpowiadać na zapytania wyszukiwania (jeśli udostępniasz pliki), odbierać wiadomości czatowe i wyniki z listy życzeń podczas pracy w tle.
-\n\nNie jest to potrzebne do pobierania ani przesyłania plików w tle (istnieje już usługa do tego, która zawsze będzie działać).
-\n\nJedynym minusem jest to, że może to zużywać więcej baterii. W takim przypadku można ją wyłączyć domyślnie i uruchamiać tylko w razie potrzeby.
-    </string>
-    <string name="listening">
-        To ustawienie pozwala Seekerowi na akceptowanie przychodzących połączeń, dzięki czemu możemy łączyć się z klientami bez otwartych portów.
-\n\nW praktyce oznacza to, że dopóki będziemy skutecznie nasłuchiwać (wskazane przez \'Sprawdź status\'), otrzymamy więcej wyników wyszukiwania, będziemy mogli pobierać od większej liczby osób, przesyłać do większej liczby osób itd.
-\n\nSeeker spróbuje automatycznie przekierować porty za pomocą UPnP (to samo robi oficjalny klient desktopowy). Jeśli nie jesteś połączony przez Wi-Fi, nie zadziała to. Jeśli korzystasz z VPN, poszukaj, jak przekierować porty dla swojego konkretnego VPN. Jeśli twój router nie obsługuje UPnP, musisz ręcznie przekierować port.
-    </string>
 
-    <string name="sharing_dialog">
-        Kilka rzeczy do zapamiętania przy udostępnianiu plików. Gdy katalog do przesyłania plików jest ustawiony po raz pierwszy, aplikacja musi przejść przez pliki i przetworzyć je w sposób, który ułatwi późniejsze wyszukiwanie i przeglądanie. Może to zająć kilka minut. Upewnij się, że pliki, które udostępniasz, nie zawierają żadnych prywatnych lub wrażliwych informacji (używaj tego samego rozsądku, co w przypadku oficjalnego klienta Soulseek).
-    </string>
 
     <string name="privileges_more_info">
         Uprawnienia pozwalają na wspieranie twórcy Soulseek (Nir) oraz głównego serwera, na którym ta aplikacja jest oparta.
@@ -62,50 +41,27 @@
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Lista życzeń</string>
-    <string name="wishlist_bold">
-        <b>Lista życzeń</b>
-    </string>
-    <string name="wishlist_empty_bold">
-        <b>Lista życzeń (puste)</b>
-    </string>
     <string name="user_info_bio">
         <b>Bio użytkownika</b>
     </string>
     <string name="user_info_picture">
         <b>Zdjęcie</b>
     </string>
-    <string name="user_info_stats_header">
-        <b>Info</b>
-    </string>
     <string name="unsaved_changes_title">Odrzucić niezapisane zmiany?</string>
     <string name="unsaved_changes_body">
         Masz niezapisane zmiany, czy na pewno chcesz je porzucić?
     </string>
-    <string name="user_status_string">
-        \"Sloty przesyłania: {0}
-Wolne sloty do przesyłania: {1}
-Przesyłania w kolejce: {2}
-Prędkość przesyłania: {3}
-Liczba plików: {4}
-Liczba katalogów: {5}\"
-    </string>
     <string name="add_user">Dodaj użytkownika</string>
-    <string name="empty_browse_directory">
-        Ta karta jest używana do przeglądania drzewa katalogu użytkownika.\n\nAby rozpocząć wyszukiwanie w zakładce wyszukiwania lub naciśnij \'+\'.
-    </string>
-    <string name="clear">Czyść</string>
     <string name="get_user_info">Uzyskaj informacje o użytkowniku</string>
     <string name="quick_info">Szybkie info</string>
     <string name="enter_user_to_browse">Wpisz użytkownika żeby przeglądać</string>
     <string name="all_target">Wszyscy użytkownicy</string>
     <string name="target_user_list">Lista użytkowników</string>
     <string name="target_room">Pokój</string>
-    <string name="target_room_joined">Dołączono:</string>
     <string name="target_room_name">Nazwa pokoju</string>
     <string name="target_choose_user">Wybierz użytkownika</string>
     <string name="username">Nazwa użytkownika</string>
     <string name="search_target_">Wyszukaj cel</string>
-    <string name="custom_">Własne:</string>
 
     <string name="friends">Znajomi</string>
     <string name="ignored">Ignorowani</string>
@@ -140,13 +96,10 @@ Liczba katalogów: {5}\"
         Brak dostępu do systemu plików. Musisz wybrać katalog pobierania, albo na stronie logowania, albo w ustawieniach.
     </string>
 
-    <string name="file_column">Plik</string>
     <string name="size_column">Rozmiar</string>
-    <string name="attribute_column">Atrybut</string>
 
     <string name="download_folder">Pobierz folder</string>
     <string name="download_selected">Pobierz zaznaczone</string>
-    <string name="request_directories">Prośba o katalogi</string>
     <string name="close_download_diag">Zamknij</string>
 
     <string name="add_about_me">Notatka o mnie</string>
@@ -162,7 +115,6 @@ Liczba katalogów: {5}\"
     <string name="logout">Wyloguj</string>
     <string name="login">Zaloguj</string>
     <string name="password">Hasło</string>
-    <string name="submit">Prześlij</string>
     <string name="ConnectingToServer">Łączę z serwerem</string>
     <string name="PleaseWait_">Czekaj...</string>
     <string name="choose_a_download_folder">Wybierz folder pobierania</string>
@@ -176,7 +128,6 @@ Liczba katalogów: {5}\"
     <string name="persist_it">Przypięty</string>
     <string name="type_chatroom_ticker_message">Wiadomość na pasku przewijania</string>
 
-    <string name="change_download_folder">Wybierz folder pobierania</string>
     <string name="max_search_results">Maksymalna liczba wyników wyszukiwania</string>
     <string name="only_show_free_slots">
         Pokaż tylko wyniki użytkowników z wolnymi miejscami
@@ -197,11 +148,9 @@ Liczba katalogów: {5}\"
     <string name="file_backed_downloads">Pliki z kopii zapasowej</string>
     <string name="night_mode_options">Tryb nocny</string>
     <string name="enable_sharing">Włącz udostępnianie</string>
-    <string name="set_shared_folder">Ustaw udostępniony katalog</string>
     <string name="browse_yourself">Przeglądaj siebie</string>
     <string name="enable_listening">Włącz nasłuchiwanie</string>
     <string name="change_port">Zmień port</string>
-    <string name="port">Port</string>
     <string name="check_your_port_status">Sprawdź status</string>
     <string name="use_pnp_for_port_forwarding">
         Użyj UPnP do przekazywania portów
@@ -209,9 +158,6 @@ Liczba katalogów: {5}\"
     <string name="edit_your_user_info">Edytuj informacje użytkownika</string>
     <string name="restore_default_settings">Przywróć domyślne</string>
 
-    <string name="no_transfers_yet">
-        Nie ma obecnie pobieranych plików, gdy pobierasz zawartość pojawi się tutaj
-    </string>
 
     <string name="user_has_no_bio">Użytkownik nie ma bio.</string>
     <string name="user_has_no_pic">Użytkownik nie ma zdjęcia.</string>
@@ -252,9 +198,6 @@ Liczba katalogów: {5}\"
         "Nic nie wybrano - Dotknij, aby wybrać"
     </string>
     <string name="failed_to_connect">Nie udało się połączyć</string>
-    <string name="not_recursive_dirs_avaialbe_to_download">
-        Obecnie tylko pobieranie plików jest zaimplementowane, nie katalogów
-    </string>
     <string name="cannot_download_from_self">
         Nie można pobrać od siebie
     </string>
@@ -276,9 +219,6 @@ Liczba katalogów: {5}\"
     <string name="error_duplicate">Error: Duplicate request detected</string>
     <string name="error_browse_at_location">
         Error getting user directories at specified location
-    </string>
-    <string name="error_duplicates">
-        Błąd: Zduplikowane transfery. Jeśli chcesz ponowić próbę, kliknij Transfery.
     </string>
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
@@ -336,24 +276,10 @@ Liczba katalogów: {5}\"
         We got temporarily disconnected.. reconnecting now
     </string>
     <string name="failed_to_undo">Failure to Undo</string>
-    <string name="enabling_listener">Enabling Listener</string>
-    <string name="disabling_listener">Disabling Listener</string>
     <string name="add_user_title">Add User(s)</string>
     <string name="ignore_user_title">Ignore User(s)</string>
 
-    <string name="success_setting_shared_dir_fnum_dnum">
-        Successfully set Shared Directory with {0} directories and {1} files.
-    </string>
-    <string name="parsing_files_wait">
-        Parsing Files... this may take several seconds...
-    </string>
 
-    <string name="port_out_of_range">
-        Port number is out of range. Make sure it is between 1024 and 65535.
-    </string>
-    <string name="port_failed_parse">
-        Failed to parse port number. Make sure it is numeric without any special characters.
-    </string>
 
     <string name="not_sharing">You are not sharing any files</string>
     <string name="failed_to_parse_shares_post">
@@ -364,9 +290,6 @@ Liczba katalogów: {5}\"
     <string name="error_not_a_dir">Error: Not a Directory</string>
     <string name="successfully_changed_dl_dir">
         Successfully changed Download Directory to \"{0}\"
-    </string>
-    <string name="error_parsing_files_shared_dir">
-        Error Parsing Files, could not set Shared Directory
     </string>
 
     <string name="follow_system">Follow system</string>
@@ -407,7 +330,6 @@ Liczba katalogów: {5}\"
         Error adding user: user not found
     </string>
 
-    <string name="setting_priv_invites">Setting Private Invites to: {0}</string>
     <string name="failed_setting_priv_invites">
         Failed to set Allow Private Invites to: {0}
     </string>
@@ -528,7 +450,6 @@ Liczba katalogów: {5}\"
     <string name="deleted_message_history_with">
         Deleted Message History with {0}
     </string>
-    <string name="welcome">Welcome, {0}</string>
 
     <string name="failed_to_establish_direct_or_indirect">
         Failed to establish a direct or indirect message connection to user
@@ -565,7 +486,6 @@ Liczba katalogów: {5}\"
     <string name="owner">Owner</string>
     <string name="mod">Mod</string>
 
-    <string name="user_">User:</string>
     <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
@@ -633,7 +553,6 @@ Liczba katalogów: {5}\"
     <string name="paused">Paused</string>
     <string name="in_queue">In Queue</string>
     <string name="unknown">Unknown</string>
-    <string name="position_">Position: {0}</string>
 
     <string name="retry_dl">Retry Download</string>
     <string name="clear_from_list">Clear from List</string>
@@ -654,7 +573,6 @@ Liczba katalogów: {5}\"
         Seeker is currently running in background
     </string>
 
-    <string name="privileges">Privileges</string>
     <string name="yes">Yes</string>
     <string name="seconds_left">{0} seconds</string>
     <string name="second_left">{0} second</string>
@@ -734,10 +652,6 @@ Liczba katalogów: {5}\"
     </string>
 
     <string name="about_body">Seeker is a free and open source Soulseek client for Android. It will never have ads or paid features.</string>
-    <string name="force_filesystem_message">
-        <![CDATA[The standard way of requesting folder access does not always persist permissions.  If you find Seeker reprompting for Download Folder or Shared Folder access, this button will request the old style permissions which will always persist.
-<br><br>This function requires the Fdroid IzzyDroid version of Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Download Here</a>). The Google Play Store does not allow applications to request this permission.]]>
-    </string>
     <string name="must_be_logged_in_to_get_dir_contents">
         Must be logged in to get directory contents
     </string>
@@ -751,15 +665,6 @@ Liczba katalogów: {5}\"
     <string name="successfully_changed_incomplete_dir">
         Successfully changed Incomplete Directory to \"{0}\"
     </string>
-    <string name="no_uploads_yet">
-        No uploads currently, as you upload files they will appear here
-    </string>
-    <string name="no_uploads_yet_not_sharing">
-        No uploads currently, you are not sharing any files
-    </string>
-    <string name="no_uploads_yet_failed_to_set_up_shared_files">
-        No uploads currently, failed to set up shares
-    </string>
 
     <string name="auto_clear_complete">Auto-clear complete downloads</string>
     <string name="auto_clear_complete_uploads">
@@ -772,9 +677,6 @@ Liczba katalogów: {5}\"
     <string name="upload_remaining">{0} upload remaining</string>
     <string name="uploads_remaining">{0} uploads remaining</string>
     <string name="uploads_in_progress">Uploads in Progress</string>
-    <string name="search_tabs_bold">
-        <b>Search Tabs</b>
-    </string>
     <string name="shutdown">Shutdown</string>
 
     <string name="set_online_alert">Set Online Alert</string>
@@ -787,13 +689,7 @@ Liczba katalogów: {5}\"
     <string name="failed_denied">Failed - Denied</string>
     <string name="re_requesting">Re-Requesting</string>
 
-    <string name="concurrent_dialog">
-        Limit number of concurrent downloads.  ex. if max concurrent is 1 and you download 2 folders from different users, the second folder will begin once the first is complete.  This can be useful for those with low bandwidth, to not tie up the upload queues of other users and to completed more recent downloads faster.
-    </string>
 
-    <string name="clear_incomplete_dialog">
-        This will clear the no longer needed files in the incomplete folder.  Seeker tries to do this by default, but sometimes it will fail and so this button can be used to free up files / space.
-    </string>
 
     <string name="diagnostics_more_info">
         This will save diagnostic information to a text file named \"seeker_diagnostics.txt\" which will be located in the root of the selected download folder.
@@ -820,29 +716,20 @@ Liczba katalogów: {5}\"
     <string name="Speed">Speed</string>
     <string name="FolderName">Folder Name</string>
     <string name="SetAsDefault">Set as Default</string>
-    <string name="Change">Change</string>
-    <string name="Get">Get</string>
     <string name="Check">Check</string>
     <string name="Keywords">Keywords</string>
     <string name="Configure">Configure</string>
 
-    <string name="ViewErrorOptions">View Error Options</string>
-    <string name="ViewFolderOptions">View Folder Options</string>
-    <string name="Remove">Remove</string>
     <string name="Reselect">Reselect</string>
     <string name="RemoveFolder">Remove Folder</string>
     <string name="FolderError">Folder Error</string>
     <string name="ErrorForFolder">Error for folder:</string>
 
-    <string name="AreYouSureClearAllDirectories">
-        Are you sure you want to clear all {0} directories from list?
-    </string>
     <string name="ErrorDownloadDirNotProperlySet">
         Error: The Download Directory is not properly set.
     </string>
 
     <string name="CopySelectedURLs">Copy Selected URLs</string>
-    <string name="CopySelectedURL">Copy Selected URL</string>
     <string name="CopyURL">Copy URL</string>
     <string name="CopyFolderURL">Copy Folder URL</string>
     <string name="LinkCopied">Link Copied</string>
@@ -890,7 +777,6 @@ Liczba katalogów: {5}\"
         User, {0}, is sharing only an empty directory.
     </string>
 
-    <string name="DownloadIsQueued">Download is Queued</string>
 
     <string name="GetFolderDoesntWorkForLockedShares">
         Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.
@@ -935,7 +821,6 @@ Liczba katalogów: {5}\"
     <string name="PermissionErrorShared">
         Permission Error, cannot write (Please reselect).
     </string>
-    <string name="FolderNoExistShared">Folder does not exist.</string>
     <string name="FolderNotAccessible">
         Folder is not accessible (Please reselect).
     </string>
@@ -1014,10 +899,7 @@ Liczba katalogów: {5}\"
     <string name="RetryFailed">Ponów niepowiedzione</string>
     <string name="InvertSelection">Odwróć zaznaczone</string>
     <string name="SelectAll">Wybierz wszystkie</string>
-    <string name="MaxConcurrentIs">Max # of Concurrent Downloads:</string>
 
-    <string name="PerTransfer">Per Transfer</string>
-    <string name="Global">Global</string>
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
     <string name="NotSet">Not set</string>
     <string name="AppLocalStorage">App Local Storage</string>
@@ -1025,20 +907,9 @@ Liczba katalogów: {5}\"
 
     <string name="IncompleteFolderEmpty">Incomplete Folder is empty</string>
     <string name="NoEligibleToClear">No eligible items to clear</string>
-    <string name="ChangeDownloadSpeed">Change Download Speed (kb/s):</string>
-    <string name="ChangeUploadSpeed">Change Upload Speed (kb/s):</string>
-    <string name="EnterSpeed">Enter Speed in Kb/s</string>
-    <string name="EnterMaxDownloadSimultaneously">
-        Enter Max to Download Simultaneously
-    </string>
 
-    <string name="BrowseWhich">
-        Browse Public Shares or User List shares?
-    </string>
     <string name="WaitForParsing">Wait for parsing to complete.</string>
 
-    <string name="finishingUp">finishing up</string>
-    <string name="XFilesParsed">{0} files parsed</string>
     <string name="ErrorAlreadyAdded">Error: Directory Already Added.</string>
     <string name="UploadFolderOptions">Upload Folder Options</string>
     <string name="CannotChangeNameNotUnique">
@@ -1090,10 +961,7 @@ Liczba katalogów: {5}\"
     <string name="TimedOut">Czas minął</string>
     <string name="CannotConnect">Nie mogę połączyć</string>
 
-    <string name="Succeeded">Sukces</string>
     <string name="Aborted">Porzucone</string>
-    <string name="Num_FilesRemaining">{0} files remaining</string>
-    <string name="X_of_Y_Remaining">{0} of {1} remaining</string>
     <string name="SetLanguage">Language</string>
     <string name="Automatic">Automatyczny</string>
 
@@ -1109,9 +977,6 @@ Liczba katalogów: {5}\"
     <string name="Num_Selected">{0} Selected</string>
 
     <string name="ExportClientData">Export client data</string>
-    <string name="export_more_info">
-        Export User List, Ignore/Block List, User Notes, and Wishlist to xml. Useful for backing up or migrating data to new phone.
-    </string>
     <string name="successfully_exported">
         Successfully exported Seeker client data.
     </string>
@@ -1135,9 +1000,6 @@ Liczba katalogów: {5}\"
     <string name="new_password">New Password</string>
     <string name="cannot_be_empty">Cannot be empty</string>
 
-    <string name="must_be_logged_in_generic">
-        Must be logged in to perform this action
-    </string>
     <string name="must_be_logged_in_to_change_password">
         Must be logged in to change password
     </string>

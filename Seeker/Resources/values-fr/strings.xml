@@ -12,8 +12,6 @@
     <string name="new_result">nouveau résultat</string>
     <string name="new_results">nouveaux résultats</string>
 
-    <string name="stop">Arrêter</string>
-    <string name="start">Démarrer</string>
 
     <string name="saerch_user_list">Chercher dans la Liste d\'Utilisateurs</string>
     <string name="search_room">Chercher un salon</string>
@@ -24,26 +22,7 @@
     <string name="no_account">
         Pas de compte ? Entrez un nom d\'utilisateur et un compte vous sera attribué.
     </string>
-    <string name="memory_file_backed">
-        Remarque : Les téléchargements en cours seront enregistrés dans un dossier nommé \"Soulseek Incomplete\" et seront déplacés vers \"Soulseek Complete\" une fois le transfers terminé.
-\n\nCela permet (1) de mettre en pause et reprendre les téléchargements là où ils se sont arrêtés (2) de télécharger des fichiers volumineux sans erreur de dépassement de mémoire (et globalement moins de RAM intensive).
-\n\nDésactiver l\'option entraine les résultats de téléchargement partiels à être temporairement stockés en mémoire puis sauvegardés sur le disque une fois terminés.
-    </string>
-    <string name="keep_alive_service">
-        Ce service permet à Seeker de tourner en arrière-plan.
-\n\nCette option est nécessaire pour répondre aux recherches (en cas de partage), recevoir des messages et des résultats de liste de souhaits en arrière-plan.
-\n\nElle est inutile pour tout tranfers en arrière-plan (un autre service s\'en charge et tourne en permanence).
-\n\nLe seul inconvénient est une éventuelle surconsommation de batterie ; il est conseillé de le désactiver s\'il n\'est pas nécessaire.
-    </string>
-    <string name="listening">
-        Ce paramètre permet à Seeker d\'accepter les connections entrantes de clients sans avoir de ports ouverts.
-\n\nEn pratique, cela permet d\'avoir plus de résultats de recherche, de télécharger de plus de gens différents, d\'uploader à plus de gens etc tant que l\'écoute est assurée (indiqué par le bouton \"Vérifier le Statut\").
-\n\nSeeker va tenter une redirection automatique de ports via UPnP (comme le client PC officiel). Une connexion Wi-Fi est nécessaire ; si vous disposez d\'un VPN, renseignez-vous sur la redirection de ports spécifique à votre VPN. Enfin, si UPnP est désactivé sur votre routeur il faut effectuer une redirection manuelle.
-    </string>
 
-    <string name="sharing_dialog">
-        Quelques mots avant de partager vos fichiers ; lors de la sélection du dossier partagé, l\'application doit parcourir les fichiers et les traiter pour faciliter les recherches et requêtes de dossiers. Ce processus peut prendre plusieurs minutes. Assurez-vous (comme sur le client officiel) que les fichiers que vous rendez publics ne contiennent aucune donnée sensible ou privée.
-    </string>
 
     <string name="privileges_more_info">
         Les privilèges permettent de soutenir le créateur de Soulseek (Nir) et le serveur central dont dépend cette application.
@@ -62,50 +41,27 @@
     <string name="kilobytes_per_second">kbps</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Liste de Souhaits</string>
-    <string name="wishlist_bold">
-        <b>Liste de Souhaits</b>
-    </string>
-    <string name="wishlist_empty_bold">
-        <b>Liste de souhaits (vide)</b>
-    </string>
     <string name="user_info_bio">
         <b>Biographie</b>
     </string>
     <string name="user_info_picture">
         <b>Photo</b>
     </string>
-    <string name="user_info_stats_header">
-        <b>Info</b>
-    </string>
     <string name="unsaved_changes_title">Ignorer les modifications?</string>
     <string name="unsaved_changes_body">
         Voulez-vous vraiment annuler les modifications apportées?
     </string>
-    <string name="user_status_string">
-        Canaux disponibles : {0}
-Téléchargement libre : {1}
-File d\'attente de téléchargement : {2}
-Vitesse d\'upload : {3}
-Nombre de fichiers : {4}
-Nombre de dossiers : {5}
-    </string>
     <string name="add_user">Ajouter un utilisateur</string>
-    <string name="empty_browse_directory">
-        Cet onglet est utilisé pour parcourir les répertoires de l\'utilisateur.\n\nPour commencer, effectuer une recherche dans l\'onglet de recherche ou appuyez sur \'+\'.
-    </string>
-    <string name="clear">Nettoyer</string>
     <string name="get_user_info">Obtenir les Informations de l\'Utilisateur</string>
     <string name="quick_info">Information rapide</string>
     <string name="enter_user_to_browse">Entrez l\'Utilisateur à Parcourir</string>
     <string name="all_target">Tous les utilisateurs</string>
     <string name="target_user_list">Liste d’Utilisateurs</string>
     <string name="target_room">Salon</string>
-    <string name="target_room_joined">Rejoint :</string>
     <string name="target_room_name">Nom du salon</string>
     <string name="target_choose_user">Choisir un utilisateur</string>
     <string name="username">Nom d\'Utilisateur</string>
     <string name="search_target_">Rechercher une cible</string>
-    <string name="custom_">Personnalisé:</string>
 
     <string name="friends">Amis</string>
     <string name="ignored">Ignoré</string>
@@ -140,13 +96,10 @@ Nombre de dossiers : {5}
         Accès aux fichiers impossible. Vous devez sélectionner un dossier de téléchargements dans la page de connexion ou les paramètres.
     </string>
 
-    <string name="file_column">Fichier</string>
     <string name="size_column">Taille</string>
-    <string name="attribute_column">Attribut</string>
 
     <string name="download_folder">Dossier téléchargements</string>
     <string name="download_selected">Téléchargement sélectionné</string>
-    <string name="request_directories">Demander dossiers</string>
     <string name="close_download_diag">Fermer</string>
 
     <string name="add_about_me">Appuyez pour ajouter une biographie</string>
@@ -162,7 +115,6 @@ Nombre de dossiers : {5}
     <string name="logout">Se déconnecter</string>
     <string name="login">Se connecter</string>
     <string name="password">Mot de passe</string>
-    <string name="submit">Envoyer</string>
     <string name="ConnectingToServer">Connexion au serveur</string>
     <string name="PleaseWait_">Veuillez patienter...</string>
     <string name="choose_a_download_folder">Sélectionner dossier téléchargement</string>
@@ -176,7 +128,6 @@ Nombre de dossiers : {5}
     <string name="persist_it">Epinglé</string>
     <string name="type_chatroom_ticker_message">Message du ticker</string>
 
-    <string name="change_download_folder">Changer de Dossier de Téléchargement</string>
     <string name="max_search_results">Nombre max. de résultats</string>
     <string name="only_show_free_slots">
         Afficher uniquement les résultats des utilisateurs à canaux libres
@@ -197,11 +148,9 @@ Nombre de dossiers : {5}
     <string name="file_backed_downloads">Téléchargements en fichier</string>
     <string name="night_mode_options">Thème de nuit</string>
     <string name="enable_sharing">Activer le partage</string>
-    <string name="set_shared_folder">Définir le Dossier Partagé</string>
     <string name="browse_yourself">Parcourir ses Fichiers</string>
     <string name="enable_listening">Activer l\'ecoute</string>
     <string name="change_port">Changer de port</string>
-    <string name="port">Port</string>
     <string name="check_your_port_status">Vérifier le statut</string>
     <string name="use_pnp_for_port_forwarding">
         Utiliser UPnP pour la redirection de port
@@ -209,9 +158,6 @@ Nombre de dossiers : {5}
     <string name="edit_your_user_info">Editer les infos d\'utilisateur</string>
     <string name="restore_default_settings">Réinitialiser</string>
 
-    <string name="no_transfers_yet">
-        Aucun téléchargement pour le moment - le contenu téléchargé apparaîtra ici
-    </string>
 
     <string name="user_has_no_bio">L\'utilisateur n\'a pas de biographie.</string>
     <string name="user_has_no_pic">L\'utilisateur n\'a pas de photo.</string>
@@ -252,9 +198,6 @@ Nombre de dossiers : {5}
         "Rien de sélectionné - Appuyez pour sélectionner"
     </string>
     <string name="failed_to_connect">Échec de la connexion</string>
-    <string name="not_recursive_dirs_avaialbe_to_download">
-        Seulement le téléchargement de fichiers est possible
-    </string>
     <string name="cannot_download_from_self">
         Vous ne pouvez pas télécharger de vous-même
     </string>
@@ -276,9 +219,6 @@ Nombre de dossiers : {5}
     <string name="error_duplicate">Erreur : requête double détectée</string>
     <string name="error_browse_at_location">
         Échec de l\'obtention des dossiers utilisateur au chemin spécifié
-    </string>
-    <string name="error_duplicates">
-        Erreur : transfères double. Pour réessayer un téléchargement, appuyez et maintenez dessus dans les transfères.
     </string>
     <string name="room_data_still_loading">
         Trop vite ! La récupération des donnés de la salle est toujours en cours...
@@ -336,24 +276,10 @@ Nombre de dossiers : {5}
         Nous avons été déconnectés.. reconnexion en cours
     </string>
     <string name="failed_to_undo">Échec d\'annulation</string>
-    <string name="enabling_listener">Activation de l\'écouteur</string>
-    <string name="disabling_listener">Désactivation de l\'écouteur</string>
     <string name="add_user_title">Ajouter un/des Utilisateur(s)</string>
     <string name="ignore_user_title">Utilisateur(s) ignoré(s)</string>
 
-    <string name="success_setting_shared_dir_fnum_dnum">
-        Répertoire partagé défini avec succès avec {0} répertoires et {1} fichiers.
-    </string>
-    <string name="parsing_files_wait">
-        Analyse des Fichiers... cela peut prendre plusieurs secondes...
-    </string>
 
-    <string name="port_out_of_range">
-        Le numéro de port est indisponible. Assurez-vous qu\'il est compris entre 1024 et 65535.
-    </string>
-    <string name="port_failed_parse">
-        Impossible d\'analyser le numéro de port. Assurez-vous qu\'il est numérique sans caractères spéciaux.
-    </string>
 
     <string name="not_sharing">Vous ne partagez aucun fichier</string>
     <string name="failed_to_parse_shares_post">
@@ -364,9 +290,6 @@ Nombre de dossiers : {5}
     <string name="error_not_a_dir">Erreur: Pas un répertoire</string>
     <string name="successfully_changed_dl_dir">
         Répertoire de téléchargement défini en \"{0}\"
-    </string>
-    <string name="error_parsing_files_shared_dir">
-        Erreur lors de l\'Analyse des Fichiers, impossible de définir le Répertoire Partagé
     </string>
 
     <string name="follow_system">Valeur système</string>
@@ -407,7 +330,6 @@ Nombre de dossiers : {5}
         Erreur lors de l\'ajout de l\'utilisateur : utilisateur introuvable
     </string>
 
-    <string name="setting_priv_invites">Changement des invitation privées en: {0}</string>
     <string name="failed_setting_priv_invites">
         Échec de changement d\'autorisations d\'invitation privées en : {0}
     </string>
@@ -528,7 +450,6 @@ Nombre de dossiers : {5}
     <string name="deleted_message_history_with">
         Supprime l\'Historique de Messages avec {0}
     </string>
-    <string name="welcome">Bienvenue, {0}</string>
 
     <string name="failed_to_establish_direct_or_indirect">
         Impossible d\'établir une connexion message directe ou indirecte avec l\'utilisateur
@@ -565,7 +486,6 @@ Nombre de dossiers : {5}
     <string name="owner">Propriétaire</string>
     <string name="mod">Modo</string>
 
-    <string name="user_">Utilisateur :</string>
     <string name="set_ticker">Changer le ticker</string>
     <string name="setticker">Changer le ticker</string>
     <string name="chatrooms">Salons de discussion</string>
@@ -633,7 +553,6 @@ Nombre de dossiers : {5}
     <string name="paused">En pause</string>
     <string name="in_queue">En file d\'attente</string>
     <string name="unknown">Inconnu</string>
-    <string name="position_">Position : {0}</string>
 
     <string name="retry_dl">Réessayer téléchargement</string>
     <string name="clear_from_list">Effacer de la liste</string>
@@ -654,7 +573,6 @@ Nombre de dossiers : {5}
         Seeker fonctionne en arrière-plan
     </string>
 
-    <string name="privileges">Privilèges</string>
     <string name="yes">Oui</string>
     <string name="seconds_left">{0} secondes</string>
     <string name="second_left">{0} seconde</string>
@@ -734,10 +652,6 @@ Nombre de dossiers : {5}
     </string>
 
     <string name="about_body">Seeker est un client Soulseek gratuit et open-source pour Android. Il n\'aura jamais de pub ou de fonctions payantes.</string>
-    <string name="force_filesystem_message">
-        <![CDATA[La méthode standard pour demander l\'accès aux dossiers ne conserve pas toujours les autorisations. Si vous constatez que Seeker redemande l\'accès au dossier de téléchargement ou au dossier partagé, ce bouton demandera les anciennes autorisations, qui seront toujours conservées.
-<br><br>Cette fonction nécessite la version F-Droid IzzyDroid de Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Télécharger ici</a>). Le Google Play Store n\'autorise pas les applications à demander cette autorisation.]]>
-    </string>
     <string name="must_be_logged_in_to_get_dir_contents">
         Vous devez être connecté pour voir le contenu des dossiers
     </string>
@@ -751,15 +665,6 @@ Nombre de dossiers : {5}
     <string name="successfully_changed_incomplete_dir">
         Changement du dossier Incomplet vers \"{0}\" réussi
     </string>
-    <string name="no_uploads_yet">
-        Aucun téléversement en cours, vos téléversements apparaîtront ici
-    </string>
-    <string name="no_uploads_yet_not_sharing">
-        Aucun téléversement en cours, vous n\'avez partagé aucun fichier
-    </string>
-    <string name="no_uploads_yet_failed_to_set_up_shared_files">
-        Aucun téléversement à l\'heure actuelle, échec de mise en place des partages
-    </string>
 
     <string name="auto_clear_complete">Efface automatiquement les téléchargements complets</string>
     <string name="auto_clear_complete_uploads">
@@ -772,9 +677,6 @@ Nombre de dossiers : {5}
     <string name="upload_remaining">{0} téléversements restants</string>
     <string name="uploads_remaining">{0} téléversements restants</string>
     <string name="uploads_in_progress">Téléversement en cours</string>
-    <string name="search_tabs_bold">
-        <b>Onglets de Recherche</b>
-    </string>
     <string name="shutdown">Quitter</string>
 
     <string name="set_online_alert">Activer l\'alerte « En ligne »</string>
@@ -787,13 +689,7 @@ Nombre de dossiers : {5}
     <string name="failed_denied">Erreur - Refusé</string>
     <string name="re_requesting">Redemander</string>
 
-    <string name="concurrent_dialog">
-        Limiter le nombre de téléchargements concurrents. Ex. : si ce nombre vaut 1 et que vous téléchargez 2 dossiers de deux utilisateurs différents, le téléchargement du second dossier commencera une fois celui du premier terminé. Cela peut être utile pour les bandes-passantes limitées, pour ne pas bloquer le la file de téléversement des autres utilisateurs et pour complétement les téléchargements récents plus tôt.
-    </string>
 
-    <string name="clear_incomplete_dialog">
-        Ceci vide la liste des fichiers non-nécessaires le dossier incomplete. Seeker a ce comportement par défaut, mais parfois échoue — ce bouton peut être utilisé pour libérer de l\'espace manuellement.
-    </string>
 
     <string name="diagnostics_more_info">
         Ceci sauvegarde les informations de diagnostic dans un fichier texte nommé « seeker_diagnostics.txt » qui sera placé à la racine du dossier de téléchargement.
@@ -820,29 +716,20 @@ Nombre de dossiers : {5}
     <string name="Speed">Débit</string>
     <string name="FolderName">Nom dossier</string>
     <string name="SetAsDefault">Définir par défaut</string>
-    <string name="Change">Modifier</string>
-    <string name="Get">Récupérer</string>
     <string name="Check">Vérifier</string>
     <string name="Keywords">Mots-clés</string>
     <string name="Configure">Configurer</string>
 
-    <string name="ViewErrorOptions">Afficher options erreurs</string>
-    <string name="ViewFolderOptions">Afficher options dossier</string>
-    <string name="Remove">Effacer</string>
     <string name="Reselect">Resélectionner</string>
     <string name="RemoveFolder">Enlever dossier</string>
     <string name="FolderError">Erreur dossier</string>
     <string name="ErrorForFolder">Erreur pour dossier :</string>
 
-    <string name="AreYouSureClearAllDirectories">
-        Êtes-vous sûr de vouloir effacer tous les dossiers {0} de la liste ?
-    </string>
     <string name="ErrorDownloadDirNotProperlySet">
         Erreur : Le dossier téléchargement n\'est pas configuré correctement.
     </string>
 
     <string name="CopySelectedURLs">Copier les URL sélectionnées</string>
-    <string name="CopySelectedURL">Copier l\'URL sélectionnée</string>
     <string name="CopyURL">Copier l\'URL</string>
     <string name="CopyFolderURL">Copier URL dossier</string>
     <string name="LinkCopied">Lien copié</string>
@@ -890,7 +777,6 @@ Nombre de dossiers : {5}
         L\'utilisateur, {0}, ne partage qu\'un dossier vide.
     </string>
 
-    <string name="DownloadIsQueued">Téléchargement en file d\'attente</string>
 
     <string name="GetFolderDoesntWorkForLockedShares">
         « Parcourir Dossier » ne marche pas pour les partages restreints. Vous devez utiliser « Parcourir » ou « Parcourir chemin » à la place.
@@ -935,7 +821,6 @@ Nombre de dossiers : {5}
     <string name="PermissionErrorShared">
         Problème d\'autorisation, modification impossible (sélectionnez à nouveau).
     </string>
-    <string name="FolderNoExistShared">Le dossier n\'existe pas.</string>
     <string name="FolderNotAccessible">
         Dossier inaccessible (Veuillez en sélectionner un nouveau).
     </string>
@@ -1014,10 +899,7 @@ Nombre de dossiers : {5}
     <string name="RetryFailed">Échec de tentative</string>
     <string name="InvertSelection">Inverser sélection</string>
     <string name="SelectAll">Tout sélectionner</string>
-    <string name="MaxConcurrentIs">Nombre maximum de téléchargements en parallèle :</string>
 
-    <string name="PerTransfer">Par transfert</string>
-    <string name="Global">Global</string>
     <string name="ConfigureSmartFilters">Paramètres des Filtres Intelligents</string>
     <string name="NotSet">Non défini</string>
     <string name="AppLocalStorage">Stockage Local de l\'Application</string>
@@ -1025,20 +907,9 @@ Nombre de dossiers : {5}
 
     <string name="IncompleteFolderEmpty">Le Dossier Incomplet est vide</string>
     <string name="NoEligibleToClear">Aucun élément ne peut être supprimé</string>
-    <string name="ChangeDownloadSpeed">Débit du Téléchargement (kb/s):</string>
-    <string name="ChangeUploadSpeed">Débit de Téléversement (kb/s):</string>
-    <string name="EnterSpeed">Entrer le Débit en Kb/s</string>
-    <string name="EnterMaxDownloadSimultaneously">
-        Entrer maximum à télécharger simultanément
-    </string>
 
-    <string name="BrowseWhich">
-        Chercher partages publics ou liste de partage d\'utilisateur ?
-    </string>
     <string name="WaitForParsing">Patienter pendant l\'analyse.</string>
 
-    <string name="finishingUp">finitions en cours</string>
-    <string name="XFilesParsed">{0} Fichiers</string>
     <string name="ErrorAlreadyAdded">Erreur: Ce Dossier a déjà été Ajouté.</string>
     <string name="UploadFolderOptions">Téléverser les options du dossier</string>
     <string name="CannotChangeNameNotUnique">
@@ -1090,10 +961,7 @@ Nombre de dossiers : {5}
     <string name="TimedOut">Délai expiré</string>
     <string name="CannotConnect">Connexion impossible</string>
 
-    <string name="Succeeded">Succès</string>
     <string name="Aborted">Annulé</string>
-    <string name="Num_FilesRemaining">{0} fichiers restants</string>
-    <string name="X_of_Y_Remaining">{0} sur {1} restants</string>
     <string name="SetLanguage">Langue</string>
     <string name="Automatic">Automatique</string>
 
@@ -1109,9 +977,6 @@ Nombre de dossiers : {5}
     <string name="Num_Selected">{0} Sélectionnés</string>
 
     <string name="ExportClientData">Exporter données client</string>
-    <string name="export_more_info">
-        Exporter Liste d\'Utilisateurs, Liste d\'Ignorés/Bloqués, Notes Utilisateur, et Liste de vœux en XML. Pratique pour faire des copies ou pour migrer des données vers un nouveau téléphone.
-    </string>
     <string name="successfully_exported">
         Données client Seeker exportées.
     </string>
@@ -1135,9 +1000,6 @@ Nombre de dossiers : {5}
     <string name="new_password">Nouveau mot de passe</string>
     <string name="cannot_be_empty">Ne peut pas être vide</string>
 
-    <string name="must_be_logged_in_generic">
-        Vous devez être connecté pour performer cette action
-    </string>
     <string name="must_be_logged_in_to_change_password">
         Vous devez être connecté pour changer votre mot de passe
     </string>

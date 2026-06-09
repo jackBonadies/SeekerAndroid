@@ -12,8 +12,6 @@
     <string name="new_result">nytt resultat</string>
     <string name="new_results">nye resultater</string>
 
-    <string name="stop">Stopp</string>
-    <string name="start">Start</string>
 
     <string name="saerch_user_list">Søk i brukerliste</string>
     <string name="search_room">Søk i rom</string>
@@ -24,26 +22,7 @@
     <string name="no_account">
         Har du ikke en konto? Bare skriv inn et unikt brukernavn og en vil bli opprettet for deg.
     </string>
-    <string name="memory_file_backed">
-        Note: File backed downloads will save partial download results in a folder called \"Soulseek Incomplete\" and move them to complete once they are finished downloading.
-\n\nThis allows (1) the ability to pause and resume downloads where you left off (2) the ability to download large files without getting out of memory errors (and less RAM intensive in general).
-\n\nTurning this off, the partial download results are stored in memory until they are finished then they are saved to disk.
-    </string>
-    <string name="keep_alive_service">
-        Med denne tjenesten kan Seeker kjøre i bakgrunnen.
-\n\nDette er nødvendig for å svare på søkeforespørsler (hvis deling), motta chat-meldinger, og motta ønskeliste resultater i bakgrunnen.
-\n\nDen er ikke nødvendig for å laste ned og laste opp i bakgrunnen (det finnes allerede en tjeneste for det som alltid vil kjøre).
-\n\nDen eneste nedsiden er at dette kan bruke mer batteri. I så fall kan man skru den av som standard, og bare kjøre den etter behov.
-    </string>
-    <string name="listening">
-        Denne innstillingen tillater Seeker å motta innkommende tilkoblinger, slik at vi kan koble til klienter uten å åpne porter.
-\n\nHva dette betyr i praksis, er at så lenge vi lykkes med å lytte (angitt via \"Skjekk Status\") vil vi motta mer søkeresultater, kunne laste ned fra flere personer, laste opp til flere personer osv.
-\n\nSeeker vil forsøke å automatisk videresende porter via UPnP (dette er hva den offisielle skrivebordsklient gjør). Hvis du IKKE er koblet til Wi-Fi vil den ikke virke. hvis du er på en VPN-, vennligst søk etter hvordan du port frem for din spesifikke VPN, hvis ruteren din ikke er UPnP aktivert må du manuelt videresendt port.
-    </string>
 
-    <string name="sharing_dialog">
-        Noen ting å merke med å dele filer. Når en mappe for deling er først sett, må appen lese gjennom filene og analysere dem på en måte som er lett for påfølgende søk og bla gjennom forespørsler. Dette kan ta opp til noen minutter. Sørg for at filene du deler, ikke har privat eller sensitiv informasjon i dem (i utgangspunktet bruk samme dom du ville for den offisielle soulseek klienten).
-    </string>
 
     <string name="privileges_more_info">
         Privilegier tillater en å støtte Soulseek skaperen (Nir) og den sentrale serveren som denne appen er avhengig av.
@@ -62,50 +41,27 @@
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Ønskeliste</string>
-    <string name="wishlist_bold">
-        <b>Ønskeliste</b>
-    </string>
-    <string name="wishlist_empty_bold">
-        <b>Ønskeliste (Tom)</b>
-    </string>
     <string name="user_info_bio">
         <b>Bruker Bio</b>
     </string>
     <string name="user_info_picture">
         <b>Bilde</b>
     </string>
-    <string name="user_info_stats_header">
-        <b>Info</b>
-    </string>
     <string name="unsaved_changes_title">Vil du forkaste endringer som ikke er lagret?</string>
     <string name="unsaved_changes_body">
         Du har ulagrede endringer, er du sikker på at du vil forkaste dem?
     </string>
-    <string name="user_status_string">
-        \"Opplasting Plasser: {0}
-Fri til å laste opp: {1}
-Opplastinger i kø: {2}
-Opplastingshastighet: {3}
-Filantall: {4}
-Mappeantall: {5}\"
-    </string>
     <string name="add_user">Legg til bruker</string>
-    <string name="empty_browse_directory">
-        Denne fanen brukes til å bla gjennom en brukers mappetre.\n\nFor å komme i gang søk i søkefanen eller trykk \'+\'.
-    </string>
-    <string name="clear">Tøm</string>
     <string name="get_user_info">Få brukerinfo</string>
     <string name="quick_info">Rask info</string>
     <string name="enter_user_to_browse">Enter User to Browse</string>
     <string name="all_target">All users</string>
     <string name="target_user_list">User List</string>
     <string name="target_room">Room</string>
-    <string name="target_room_joined">Joined:</string>
     <string name="target_room_name">Room name</string>
     <string name="target_choose_user">Choose user</string>
     <string name="username">Username</string>
     <string name="search_target_">Search target</string>
-    <string name="custom_">Custom:</string>
 
     <string name="friends">Friends</string>
     <string name="ignored">Ignored</string>
@@ -137,13 +93,10 @@ Mappeantall: {5}\"
         Cannot access filesystem.  You must select a download directory, either in the login page or in settings.
     </string>
 
-    <string name="file_column">File</string>
     <string name="size_column">Size</string>
-    <string name="attribute_column">Attribute</string>
 
     <string name="download_folder">Download folder</string>
     <string name="download_selected">Download selected</string>
-    <string name="request_directories">Request directories</string>
     <string name="close_download_diag">Close</string>
 
     <string name="add_about_me">Tap to add an about me</string>
@@ -159,7 +112,6 @@ Mappeantall: {5}\"
     <string name="logout">Logout</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
-    <string name="submit">Submit</string>
     <string name="ConnectingToServer">Connecting to Server</string>
     <string name="PleaseWait_">Please Wait...</string>
     <string name="choose_a_download_folder">Select Download Folder</string>
@@ -173,7 +125,6 @@ Mappeantall: {5}\"
     <string name="persist_it">Sticky</string>
     <string name="type_chatroom_ticker_message">Ticker Message</string>
 
-    <string name="change_download_folder">Change Download Folder</string>
     <string name="max_search_results">Max search results</string>
     <string name="only_show_free_slots">
         Only show results of users with free slots
@@ -194,11 +145,9 @@ Mappeantall: {5}\"
     <string name="file_backed_downloads">File backed downloads</string>
     <string name="night_mode_options">Night mode option</string>
     <string name="enable_sharing">Enable sharing</string>
-    <string name="set_shared_folder">Set Shared Folder</string>
     <string name="browse_yourself">Browse Self</string>
     <string name="enable_listening">Enable listening</string>
     <string name="change_port">Change port</string>
-    <string name="port">Port</string>
     <string name="check_your_port_status">Check status</string>
     <string name="use_pnp_for_port_forwarding">
         UPnP port forwarding
@@ -206,9 +155,6 @@ Mappeantall: {5}\"
     <string name="edit_your_user_info">Edit user info</string>
     <string name="restore_default_settings">Restore default settings</string>
 
-    <string name="no_transfers_yet">
-        No downloads currently, as you download content it will appear here
-    </string>
 
     <string name="user_has_no_bio">User has no bio.</string>
     <string name="user_has_no_pic">User has no picture.</string>
@@ -249,9 +195,6 @@ Mappeantall: {5}\"
         "Nothing Selected - Tap to select"
     </string>
     <string name="failed_to_connect">Failed to connect</string>
-    <string name="not_recursive_dirs_avaialbe_to_download">
-        Currently only downloading files are implemented, not directories
-    </string>
     <string name="cannot_download_from_self">
         Cannot download from yourself
     </string>
@@ -273,9 +216,6 @@ Mappeantall: {5}\"
     <string name="error_duplicate">Error: Duplicate request detected</string>
     <string name="error_browse_at_location">
         Error getting user directories at specified location
-    </string>
-    <string name="error_duplicates">
-        Error: Duplicate Transfers.  If you want to retry a download, hold tap on it in transfers.
     </string>
     <string name="room_data_still_loading">
         Too fast! Still retreiving room data...
@@ -333,24 +273,10 @@ Mappeantall: {5}\"
         We got temporarily disconnected.. reconnecting now
     </string>
     <string name="failed_to_undo">Failure to Undo</string>
-    <string name="enabling_listener">Enabling Listener</string>
-    <string name="disabling_listener">Disabling Listener</string>
     <string name="add_user_title">Add User(s)</string>
     <string name="ignore_user_title">Ignore User(s)</string>
 
-    <string name="success_setting_shared_dir_fnum_dnum">
-        Successfully set Shared Directory with {0} directories and {1} files.
-    </string>
-    <string name="parsing_files_wait">
-        Parsing Files... this may take several seconds...
-    </string>
 
-    <string name="port_out_of_range">
-        Port number is out of range. Make sure it is between 1024 and 65535.
-    </string>
-    <string name="port_failed_parse">
-        Failed to parse port number. Make sure it is numeric without any special characters.
-    </string>
 
     <string name="not_sharing">You are not sharing any files</string>
     <string name="failed_to_parse_shares_post">
@@ -361,9 +287,6 @@ Mappeantall: {5}\"
     <string name="error_not_a_dir">Error: Not a Directory</string>
     <string name="successfully_changed_dl_dir">
         Successfully changed Download Directory to \"{0}\"
-    </string>
-    <string name="error_parsing_files_shared_dir">
-        Error Parsing Files, could not set Shared Directory
     </string>
 
     <string name="follow_system">Follow system</string>
@@ -404,7 +327,6 @@ Mappeantall: {5}\"
         Error adding user: user not found
     </string>
 
-    <string name="setting_priv_invites">Setting Private Invites to: {0}</string>
     <string name="failed_setting_priv_invites">
         Failed to set Allow Private Invites to: {0}
     </string>
@@ -525,7 +447,6 @@ Mappeantall: {5}\"
     <string name="deleted_message_history_with">
         Deleted Message History with {0}
     </string>
-    <string name="welcome">Welcome, {0}</string>
 
     <string name="failed_to_establish_direct_or_indirect">
         Failed to establish a direct or indirect message connection to user
@@ -562,7 +483,6 @@ Mappeantall: {5}\"
     <string name="owner">Owner</string>
     <string name="mod">Mod</string>
 
-    <string name="user_">User:</string>
     <string name="set_ticker">Set Ticker</string>
     <string name="setticker">Set Ticker</string>
     <string name="chatrooms">Chatrooms</string>
@@ -630,7 +550,6 @@ Mappeantall: {5}\"
     <string name="paused">Paused</string>
     <string name="in_queue">In Queue</string>
     <string name="unknown">Unknown</string>
-    <string name="position_">Position: {0}</string>
 
     <string name="retry_dl">Retry Download</string>
     <string name="clear_from_list">Clear from List</string>
@@ -651,7 +570,6 @@ Mappeantall: {5}\"
         Seeker is currently running in background
     </string>
 
-    <string name="privileges">Privileges</string>
     <string name="yes">Yes</string>
     <string name="seconds_left">{0} seconds</string>
     <string name="second_left">{0} second</string>
@@ -731,10 +649,6 @@ Mappeantall: {5}\"
     </string>
 
     <string name="about_body">Seeker is a free and open source Soulseek client for Android. It will never have ads or paid features.</string>
-    <string name="force_filesystem_message">
-        <![CDATA[The standard way of requesting folder access does not always persist permissions.  If you find Seeker reprompting for Download Folder or Shared Folder access, this button will request the old style permissions which will always persist.
-<br><br>This function requires the Fdroid IzzyDroid version of Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Download Here</a>). The Google Play Store does not allow applications to request this permission.]]>
-    </string>
     <string name="must_be_logged_in_to_get_dir_contents">
         Must be logged in to get directory contents
     </string>
@@ -748,15 +662,6 @@ Mappeantall: {5}\"
     <string name="successfully_changed_incomplete_dir">
         Successfully changed Incomplete Directory to \"{0}\"
     </string>
-    <string name="no_uploads_yet">
-        No uploads currently, as you upload files they will appear here
-    </string>
-    <string name="no_uploads_yet_not_sharing">
-        No uploads currently, you are not sharing any files
-    </string>
-    <string name="no_uploads_yet_failed_to_set_up_shared_files">
-        No uploads currently, failed to set up shares
-    </string>
 
     <string name="auto_clear_complete">Auto-clear complete downloads</string>
     <string name="auto_clear_complete_uploads">
@@ -769,9 +674,6 @@ Mappeantall: {5}\"
     <string name="upload_remaining">{0} upload remaining</string>
     <string name="uploads_remaining">{0} uploads remaining</string>
     <string name="uploads_in_progress">Uploads in Progress</string>
-    <string name="search_tabs_bold">
-        <b>Search Tabs</b>
-    </string>
     <string name="shutdown">Shutdown</string>
 
     <string name="set_online_alert">Set Online Alert</string>
@@ -784,13 +686,7 @@ Mappeantall: {5}\"
     <string name="failed_denied">Failed - Denied</string>
     <string name="re_requesting">Re-Requesting</string>
 
-    <string name="concurrent_dialog">
-        Limit number of concurrent downloads.  ex. if max concurrent is 1 and you download 2 folders from different users, the second folder will begin once the first is complete.  This can be useful for those with low bandwidth, to not tie up the upload queues of other users and to completed more recent downloads faster.
-    </string>
 
-    <string name="clear_incomplete_dialog">
-        This will clear the no longer needed files in the incomplete folder.  Seeker tries to do this by default, but sometimes it will fail and so this button can be used to free up files / space.
-    </string>
 
     <string name="diagnostics_more_info">
         This will save diagnostic information to a text file named \"seeker_diagnostics.txt\" which will be located in the root of the selected download folder.
@@ -817,29 +713,20 @@ Mappeantall: {5}\"
     <string name="Speed">Speed</string>
     <string name="FolderName">Folder Name</string>
     <string name="SetAsDefault">Set as Default</string>
-    <string name="Change">Change</string>
-    <string name="Get">Get</string>
     <string name="Check">Check</string>
     <string name="Keywords">Keywords</string>
     <string name="Configure">Configure</string>
 
-    <string name="ViewErrorOptions">View Error Options</string>
-    <string name="ViewFolderOptions">View Folder Options</string>
-    <string name="Remove">Remove</string>
     <string name="Reselect">Reselect</string>
     <string name="RemoveFolder">Remove Folder</string>
     <string name="FolderError">Folder Error</string>
     <string name="ErrorForFolder">Error for folder:</string>
 
-    <string name="AreYouSureClearAllDirectories">
-        Are you sure you want to clear all {0} directories from list?
-    </string>
     <string name="ErrorDownloadDirNotProperlySet">
         Error: The Download Directory is not properly set.
     </string>
 
     <string name="CopySelectedURLs">Copy Selected URLs</string>
-    <string name="CopySelectedURL">Copy Selected URL</string>
     <string name="CopyURL">Copy URL</string>
     <string name="CopyFolderURL">Copy Folder URL</string>
     <string name="LinkCopied">Link Copied</string>
@@ -887,7 +774,6 @@ Mappeantall: {5}\"
         User, {0}, is sharing only an empty directory.
     </string>
 
-    <string name="DownloadIsQueued">Download is Queued</string>
 
     <string name="GetFolderDoesntWorkForLockedShares">
         Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.
@@ -932,7 +818,6 @@ Mappeantall: {5}\"
     <string name="PermissionErrorShared">
         Permission Error, cannot write (Please reselect).
     </string>
-    <string name="FolderNoExistShared">Folder does not exist.</string>
     <string name="FolderNotAccessible">
         Folder is not accessible (Please reselect).
     </string>
@@ -1011,10 +896,7 @@ Mappeantall: {5}\"
     <string name="RetryFailed">Retry Failed</string>
     <string name="InvertSelection">Invert Selection</string>
     <string name="SelectAll">Select All</string>
-    <string name="MaxConcurrentIs">Max # of Concurrent Downloads:</string>
 
-    <string name="PerTransfer">Per Transfer</string>
-    <string name="Global">Global</string>
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
     <string name="NotSet">Not set</string>
     <string name="AppLocalStorage">App Local Storage</string>
@@ -1022,20 +904,9 @@ Mappeantall: {5}\"
 
     <string name="IncompleteFolderEmpty">Incomplete Folder is empty</string>
     <string name="NoEligibleToClear">No eligible items to clear</string>
-    <string name="ChangeDownloadSpeed">Change Download Speed (kb/s):</string>
-    <string name="ChangeUploadSpeed">Change Upload Speed (kb/s):</string>
-    <string name="EnterSpeed">Enter Speed in Kb/s</string>
-    <string name="EnterMaxDownloadSimultaneously">
-        Enter Max to Download Simultaneously
-    </string>
 
-    <string name="BrowseWhich">
-        Browse Public Shares or User List shares?
-    </string>
     <string name="WaitForParsing">Wait for parsing to complete.</string>
 
-    <string name="finishingUp">finishing up</string>
-    <string name="XFilesParsed">{0} files parsed</string>
     <string name="ErrorAlreadyAdded">Error: Directory Already Added.</string>
     <string name="UploadFolderOptions">Upload Folder Options</string>
     <string name="CannotChangeNameNotUnique">
@@ -1087,10 +958,7 @@ Mappeantall: {5}\"
     <string name="TimedOut">Timed Out</string>
     <string name="CannotConnect">Cannot Connect</string>
 
-    <string name="Succeeded">Succeeded</string>
     <string name="Aborted">Aborted</string>
-    <string name="Num_FilesRemaining">{0} files remaining</string>
-    <string name="X_of_Y_Remaining">{0} of {1} remaining</string>
     <string name="SetLanguage">Language</string>
     <string name="Automatic">Automatic</string>
 
@@ -1106,9 +974,6 @@ Mappeantall: {5}\"
     <string name="Num_Selected">{0} Selected</string>
 
     <string name="ExportClientData">Export client data</string>
-    <string name="export_more_info">
-        Export User List, Ignore/Block List, User Notes, and Wishlist to xml. Useful for backing up or migrating data to new phone.
-    </string>
     <string name="successfully_exported">
         Successfully exported Seeker client data.
     </string>
@@ -1132,9 +997,6 @@ Mappeantall: {5}\"
     <string name="new_password">New Password</string>
     <string name="cannot_be_empty">Cannot be empty</string>
 
-    <string name="must_be_logged_in_generic">
-        Must be logged in to perform this action
-    </string>
     <string name="must_be_logged_in_to_change_password">
         Must be logged in to change password
     </string>

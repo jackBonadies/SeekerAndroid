@@ -18,25 +18,12 @@
     <string name="section_caps_account">CUENTA</string>
     <string name="new_result">nuevo resultado</string>
     <string name="new_results">nuevos resultados</string>
-    <string name="stop">Parar</string>
-    <string name="start">Iniciar</string>
     <string name="saerch_user_list">Buscar Lista de Usuarios</string>
     <string name="search_room">Buscar sala</string>
     <string name="search_room_">Buscar sala {0}</string>
     <string name="search_user_">Buscar usuario {0}</string>
     <string name="wishlist_search">Buscar Lista de deseos</string>
     <string name="no_account">¿No tienes cuenta? Simplemente ingresa un nombre de usuario único y crearemos una para ti</string>
-    <string name="memory_file_backed">Nota: Las descargas respaldadas por archivos guardarán los resultados de las descargas parciales en una carpeta llamada \"Soulseek Incomplete\" y los moverán a completar una vez que hayan terminado de descargar.
-\n\nEsto permite la posibilidad de pausar y reanudar las descargas donde se dejaron y la capacidad de descargar archivos grandes sin obtener errores de memoria (y disminuir el uso de RAM en general).
-\n\nDesactivando esto los resultados de las descargas parciales se almacenan en memoria hasta que se terminan, posteriormente se guardan en disco.</string>
-    <string name="keep_alive_service">Este servicio permite que Seeker se ejecute en segundo plano.
-\n\nEsto es necesario para responder a las solicitudes de búsqueda (si estás compartiendo), recibir mensajes de chat y recibir resultados de lista de deseos en segundo plano.
-\n\nNo es necesario para descargar o subir en segundo plano (ya hay un servicio para esto que siempre se ejecutará).
-\n\nEl único inconveniente es que esto puede consumir más batería. En cuyo caso uno puede desactivarlo por defecto y ejecutarlo sólo cuando sea necesario</string>
-    <string name="listening">Esta configuración permite a Seeker aceptar conexiones entrantes, para que podamos conectarnos a clientes sin puertos abiertos.
-\n\nLo que esto significa en la práctica es que mientras escuchemos con éxito (indicado a través de \"Estado de verificación\") recibiremos más resultados de búsqueda, podremos descargar archivos de más personas, subir archivos a más personas, etc.
-\n\nEl Buscador intentará reenviar automáticamente puertos a través de UPnP (esto es lo que hace el cliente oficial de escritorio). Si NO estás en Wifi no funcionará, si está en una VPN, busque cómo redirigir su VPN específica, si su router no tiene UPnP habilitado entonces debe reenviar manualmente el puerto.</string>
-    <string name="sharing_dialog">Unas pocas cosas a tener en cuenta sobre el intercambio de archivos. Cuando se establece un directorio de subidas la aplicación tiene que leer los archivos y analizarlos de una manera fácil para las búsquedas posteriores y las solicitudes de búsqueda. Esto puede tardar unos minutos. Asegúrese de que los archivos que está compartiendo no tienen ninguna información privada o confidencial en ellos (básicamente use el mismo criterio que haría para el cliente oficial de soulseek).</string>
     <string name="privileges_more_info">Los privilegios permiten apoyar al creador de Soulseek (Nir) y al servidor central del que depende esta aplicación.
 \n\nTambién permite una posicion privilegiada en la cola de descargas.
 \n\nNota: cualquier donación no va al creador de este cliente no oficial de android, Seeker. Actualmente no acepto donaciones.</string>
@@ -67,7 +54,6 @@
     <string name="category_file_type">Tipo de archivo</string>
     <string name="category_keyword">Palabra clave</string>
     <string name="category_num_files">Número de archivos</string>
-    <string name="grouped_chip_n_selected">{0} seleccionados</string>
     <string name="grouped_chips_toggle">Fichas de filtro agrupadas</string>
     <string name="filter_sheet_close_desc">Cerrar</string>
     <string name="filter_sheet_count_filtered">{0} / {1}</string>
@@ -83,30 +69,18 @@
     <string name="kilobytes_per_second">kbs</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Lista de deseos</string>
-    <string name="wishlist_bold"><b>Lista de deseos</b></string>
-    <string name="wishlist_empty_bold"><b>Lista de deseos (vacía)</b></string>
     <string name="user_info_bio"><b>Bio de usuario</b></string>
     <string name="user_info_picture"><b>Imagen</b></string>
-    <string name="user_info_stats_header"><b>Información</b></string>
     <string name="unsaved_changes_title">¿Descartar cambios no guardados?</string>
     <string name="unsaved_changes_body">Tienes cambios sin guardar. ¿Está seguro que desea descartarlos?</string>
-    <string name="user_status_string">Ranuras de subida: {0} \n
-Libres para subir: {1} \n
-Cargas en cola: {2} \n
-Velocidad de subida: {3} \n
-Número de archivos: {4} \n
-Directorio: {5}</string>
     <string name="statistics_header">Estadísticas</string>
     <string name="stat_upload_slots">Ranuras de subida</string>
     <string name="stat_queued">En cola</string>
     <string name="stat_speed">Velocidad</string>
     <string name="stat_files">Archivos</string>
-    <string name="stat_dirs">Directorios</string>
     <string name="stat_directories">Directorios</string>
     <string name="stat_free_upload">Subida gratuita</string>
     <string name="add_user">Añadir usuario</string>
-    <string name="empty_browse_directory">Esta pestaña se usa para explorar el árbol de directorios de un usuario.\n\n Para comenzar, realice una búsqueda en la pestaña de búsqueda o toque el \'+\'.</string>
-    <string name="clear">Limpiar</string>
     <string name="get_user_info">Obtener información del usuario</string>
     <string name="quick_info">Información rápida</string>
     <string name="filter">Filtro</string>
@@ -117,12 +91,10 @@ Directorio: {5}</string>
     <string name="all_target">Todos los usuarios</string>
     <string name="target_user_list">Lista de usuarios</string>
     <string name="target_room">Sala</string>
-    <string name="target_room_joined">Unido:</string>
     <string name="target_room_name">Nombre de la sala</string>
     <string name="target_choose_user">Elegir usuario</string>
     <string name="username">Nombre de usuario</string>
     <string name="search_target_">Buscar objetivo</string>
-    <string name="custom_">Personalizado:</string>
     <string name="friends">Amigos</string>
     <string name="ignored">Ignorado</string>
     <string name="chatroom_disconnected">Estamos desconectados...</string>
@@ -149,15 +121,12 @@ Directorio: {5}</string>
     <!--
   Download Dialog Columns
   -->
-    <string name="file_column">Archivo</string>
     <string name="size_column">Tamaño</string>
-    <string name="attribute_column">Atributo</string>
     <!--
   Download Dialog Buttons
   -->
     <string name="download_folder">Descargar carpeta</string>
     <string name="download_selected">Descargar selección</string>
-    <string name="request_directories">Solicitar directorios</string>
     <string name="close_download_diag">Cerrar</string>
     <string name="add_about_me">Pulsa para añadir un acerca de mí</string>
     <string name="select_image">Seleccionar imagen</string>
@@ -170,7 +139,6 @@ Directorio: {5}</string>
     <string name="logout">Cerrar sesión</string>
     <string name="login">Iniciar sesión</string>
     <string name="password">Contraseña</string>
-    <string name="submit">Enviar</string>
     <string name="ConnectingToServer">Conectándose al Servidor</string>
     <string name="PleaseWait_">Por favor espere...</string>
     <string name="choose_a_download_folder">Elija la carpeta de descarga</string>
@@ -209,7 +177,6 @@ Directorio: {5}</string>
     <string name="section_sharing">Compartir</string>
     <string name="section_network">Red</string>
     <string name="section_account">Cuenta</string>
-    <string name="change_download_folder">Cambiar carpeta de descargas</string>
     <string name="max_search_results">Resultado máx. de búsqueda</string>
     <string name="only_show_free_slots">Mostrar solo los resultados de los usuarios con ranuras libres</string>
     <string name="start_service_on_startup">Iniciar servicio al iniciar</string>
@@ -221,16 +188,13 @@ Directorio: {5}</string>
     <string name="file_backed_downloads">Archivar descargas respaldadas</string>
     <string name="night_mode_options">Opción modo nocturno</string>
     <string name="enable_sharing">Habilitar compartir</string>
-    <string name="set_shared_folder">Seleccione la carpeta compartida</string>
     <string name="browse_yourself">Navegar por ti</string>
     <string name="enable_listening">Activar escucha</string>
     <string name="change_port">Cambiar puerto</string>
-    <string name="port">Puerto</string>
     <string name="check_your_port_status">Comprobar estado</string>
     <string name="use_pnp_for_port_forwarding">Usar UPnP para reenvío de puertos</string>
     <string name="edit_your_user_info">Editar la información del usuario</string>
     <string name="restore_default_settings">Restaurar valores predeterminados</string>
-    <string name="no_transfers_yet">No hay descargas actualmente, al descargar el contenido aparecerá aquí</string>
     <string name="user_has_no_bio">El usuario no tiene biografía.</string>
     <string name="user_has_no_pic">El usuario no tiene imagen.</string>
     <string name="user_picture_failed_to_load">Error al cargar imagen de perfil del usuario.</string>
@@ -258,7 +222,6 @@ Directorio: {5}</string>
     <string name="nothing_selected">Nada seleccionado</string>
     <string name="nothing_selected_extra">Nada seleccionado - Toque para seleccionar</string>
     <string name="failed_to_connect">Error al conectar</string>
-    <string name="not_recursive_dirs_avaialbe_to_download">Actualmente solo está implementada la descarga de archivos, no de directorios</string>
     <string name="cannot_download_from_self">No se puede descargar archivos de si mismo</string>
     <string name="must_type_a_username_to_browse">Debe escribir el nombre de usuario a buscar</string>
     <string name="must_type_a_username_to_message">Debe escribir el nombre de usuario a contactar</string>
@@ -271,7 +234,6 @@ Directorio: {5}</string>
     <string name="error_">Error:</string>
     <string name="error_duplicate">Error: Se ha detectado una solicitud duplicada</string>
     <string name="error_browse_at_location">Error al obtener los directorios de usuario en la ubicación especificada</string>
-    <string name="error_duplicates">Error: Transferencias duplicadas. Si quieres volver a intentar una descarga, mantén pulsado sobre ella en transferencias</string>
     <string name="room_data_still_loading">¡Demasiado rápido! Todavía recuperando los datos de la sala...</string>
     <string name="must_be_logged_to_browse">Debe iniciar sesión para buscar un usuario</string>
     <string name="must_be_logged_to_get_room_list">Debe iniciar sesión para obtener la lista de salas de chat</string>
@@ -298,20 +260,13 @@ Directorio: {5}</string>
     <string name="request_user_error_empty">El nombre de usuario no puede estar vacío</string>
     <string name="temporary_disconnected">Nos desconectamos temporalmente.. Reconectando ahora</string>
     <string name="failed_to_undo">Error al deshacer</string>
-    <string name="enabling_listener">Habilitando escucha</string>
-    <string name="disabling_listener">Desactivando escucha</string>
     <string name="add_user_title">Añadir usuario(s)</string>
     <string name="ignore_user_title">Ignorar usuario(s)</string>
-    <string name="success_setting_shared_dir_fnum_dnum">Directorio compartido correctamente establecido con {0} directorios y {1} archivos</string>
-    <string name="parsing_files_wait">Analizando archivos... esto puede tardar varios segundos</string>
-    <string name="port_out_of_range">El número de puerto está fuera de rango. Asegúrese de que está entre 1024 y 65535</string>
-    <string name="port_failed_parse">Error al analizar el número de puerto. Asegúrese de que el valor es numérico y no contiene caracteres especiales</string>
     <string name="not_sharing">No está compartiendo ningún archivo</string>
     <string name="failed_to_parse_shares_post">Tus compartidos no fueron analizadas con éxito</string>
     <string name="error_reading_dir">Error al leer el directorio</string>
     <string name="error_not_a_dir">Error, no es un directorio</string>
     <string name="successfully_changed_dl_dir">Directorio de descarga cambiado con éxito a \"{0}\"</string>
-    <string name="error_parsing_files_shared_dir">Error al analizar archivos, no se pudo establecer el directorio compartido</string>
     <string name="follow_system">Igual que el sistema</string>
     <string name="always_light">Siempre claro</string>
     <string name="always_dark">Siempre oscuro</string>
@@ -344,7 +299,6 @@ Directorio: {5}</string>
     <string name="error_adding_user_timeout">Error al añadir usuario: tiempo de espera agotado</string>
     <string name="error_adding_user_not_found">Error al añadir usuario: usuario no encontrado</string>
     <!--For someone translating, position {0} is a placeholder for the allowed/denied-->
-    <string name="setting_priv_invites">Configurando invitaciones privadas a: {0}</string>
     <string name="failed_setting_priv_invites">Error al configurar Permitir Invitaciones Privadas a: {0}</string>
     <string name="network_error_setting_listener">Error de red estableciendo escucha a {0}</string>
     <string name="network_error_setting_listener_port">Error de red cambiando escucha a {0}</string>
@@ -410,7 +364,6 @@ Directorio: {5}</string>
     <string name="user_info_failed_offline">No se pudo obtener información del usuario: {0}. El usuario está desconectado.</string>
     <string name="user_info_failed_timeout">Error al obtener información del usuario: {0}. Tiempo de conexión agotado.</string>
     <string name="deleted_message_history_with">Borrar historial de mensajes con {0}</string>
-    <string name="welcome">Bienvenido/a, {0}</string>
     <string name="logged_in_as">Sesion iniciada como</string>
     <string name="status_connected">Conectado</string>
     <string name="status_connecting">Conectando</string>
@@ -437,7 +390,6 @@ Directorio: {5}</string>
     <string name="owner">Propietario</string>
     <string name="mod">Moderador</string>
     <!--Title-->
-    <string name="user_">Usuario:</string>
     <string name="set_ticker">Asignar Ticker</string>
     <string name="setticker">Asignar Ticker</string>
     <string name="chatrooms">Salas de chat</string>
@@ -503,7 +455,6 @@ Directorio: {5}</string>
     <string name="paused">Pausado</string>
     <string name="in_queue">En Cola</string>
     <string name="unknown">Desconocido</string>
-    <string name="position_">Posición: {0}</string>
     <string name="retry_dl">Reintentar la Descarga</string>
     <string name="clear_from_list">Borrar de la lista</string>
     <string name="cancel_and_clear">Cancelar descarga y borrar</string>
@@ -519,7 +470,6 @@ Directorio: {5}</string>
     <string name="seeker_running">Seeker está en ejecución</string>
     <string name="seeker_running_content">Seeker se está ejecutando en segundo plano</string>
     <!--Privileges-->
-    <string name="privileges">Permisos</string>
     <string name="yes">Si</string>
     <string name="seconds_left">{0} segundos</string>
     <string name="second_left">{0} segundo</string>
@@ -581,17 +531,11 @@ Directorio: {5}</string>
 <br><br>Por favor ayude a traducir Seeker <a href="https://crwd.in/seeker">aquí</a>.
 <br><br>El código fuente está <a href="https://github.com/jackBonadies/SeekerAndroid">aquí</a>.
 <br><br>Versión: {0}.]]></string>
-    <string name="force_filesystem_message"><![CDATA[La forma estándar de solicitar acceso a carpetas no siempre mantiene los permisos de forma permanente.
-Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una Carpeta Compartida, habilitar esta opción solicitará los permisos de forma que estos se mantengan.
-<br><br>Esta función requiere la versión de Fdroid IzzyDroid de Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Descarga aquí</a>). La versión de Google Play no permite a las aplicaciones solicitar este permiso.]]></string>
     <string name="must_be_logged_in_to_get_dir_contents">Debe iniciar sesión para obtener contenido del directorio</string>
     <string name="note">Nota</string>
     <string name="removed_user_from_ignored_list">Se eliminó el usuario \"{0}\" de la lista de ignorados</string>
     <string name="removed_user">Usuario eliminado:\"{0}\"</string>
     <string name="successfully_changed_incomplete_dir">Directorio de descargas incompletas cambiado con éxito a \"{0}\"</string>
-    <string name="no_uploads_yet">No hay subidas actualmente, a medida que subas archivos aparecerán aquí</string>
-    <string name="no_uploads_yet_not_sharing">No hay subidas actualmente, no estás compartiendo ningún archivo</string>
-    <string name="no_uploads_yet_failed_to_set_up_shared_files">No hay subidas actualmente, no se ha podido configurar Compartir</string>
     <string name="auto_clear_complete">Borrar descargas completas automáticamente</string>
     <string name="auto_clear_complete_uploads">Borrar cargas completas automáticamente</string>
     <string name="download_remaining">{0} descarga restante</string>
@@ -599,7 +543,6 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     <string name="upload_remaining">{0} carga restante</string>
     <string name="uploads_remaining">{0} cargas restantes</string>
     <string name="uploads_in_progress">Subidas en progreso</string>
-    <string name="search_tabs_bold"><b>Buscar entre pestañas</b></string>
     <string name="shutdown">Apagar</string>
     <string name="set_online_alert">Definir alerta de en línea</string>
     <string name="remove_online_alert">Eliminar alerta de en línea</string>
@@ -608,8 +551,6 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     <string name="failed_user_offline">Error - Usuario desconectado</string>
     <string name="failed_denied">Error - Denegado</string>
     <string name="re_requesting">Volviendo a solicitar</string>
-    <string name="concurrent_dialog">Limitar el número de descargas simultáneas. si el máximo de concurrencia es 1 y descarga 2 carpetas de diferentes usuarios, la segunda carpeta comenzará una vez que la primera se haya completado. Esto puede ser útil para aquellos con bajo ancho de banda, para no vincular las colas de carga de otros usuarios y para completar las descargas más recientes más rápido.</string>
-    <string name="clear_incomplete_dialog">Esto borrará los archivos que ya no se necesitan en la carpeta incompleta. Seeker intenta hacer esto de forma predeterminada, pero a veces falla, por lo que este botón se puede usar para liberar archivos/espacio.</string>
     <string name="diagnostics_more_info">Esto guardará la información de diagnóstico en un archivo de texto llamado \"seeker_diagnostics.txt\" que se ubicará en la raíz de la carpeta de descarga seleccionada. \n\nEsto puede ser útil para enviarlo al desarrollador con el fin de solucionar problemas. Si los problemas son de naturaleza de red, es posible que deba reiniciar la aplicación después de activar esta opción para obtener resultados completos.</string>
     <string name="folder_X_from_user_Y_finished">{0} de {1} completado con éxito</string>
     <string name="sort_results_by">Ordenar por</string>
@@ -624,22 +565,15 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     <string name="Speed">Velocidad</string>
     <string name="FolderName">Nombre de la carpeta</string>
     <string name="SetAsDefault">Establecer como predeterminado</string>
-    <string name="Change">Cambiar</string>
-    <string name="Get">Obtener</string>
     <string name="Check">Verificar</string>
     <string name="Keywords">Palabras claves</string>
     <string name="Configure">Configurar</string>
-    <string name="ViewErrorOptions">Ver opciones de error</string>
-    <string name="ViewFolderOptions">Opciones de carpeta</string>
-    <string name="Remove">Quitar</string>
     <string name="Reselect">Reseleccionar</string>
     <string name="RemoveFolder">Eliminar carpeta</string>
     <string name="FolderError">Error de carpeta</string>
     <string name="ErrorForFolder">Error para la carpeta:</string>
-    <string name="AreYouSureClearAllDirectories">¿Está seguro que desea borrar todos los directorios {0} de la lista?</string>
     <string name="ErrorDownloadDirNotProperlySet">Error: El directorio de descargas no está configurado correctamente</string>
     <string name="CopySelectedURLs">Copiar URLs seleccionadas</string>
-    <string name="CopySelectedURL">Copiar URL seleccionada</string>
     <string name="CopyURL">Copiar URL</string>
     <string name="CopyFolderURL">Copiar URL de la carpeta</string>
     <string name="LinkCopied">Enlace Copiado</string>
@@ -669,7 +603,6 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     <string name="CannotBrowseUsernameOffline">No se puede navegar por {0}, el usuario está desconectado</string>
     <string name="FailedToBrowseUsernameUnspecifiedError">Error al navegar {0} debido a un error no especificado</string>
     <string name="BrowseOnlyEmptyDir">El usuario {0} está compartiendo sólo un directorio vacío</string>
-    <string name="DownloadIsQueued">La descarga está en cola</string>
     <string name="GetFolderDoesntWorkForLockedShares">Obtener carpeta no funciona para Locked Shares. En su lugar debe usar Navegar o Navegar en ubicación</string>
     <string name="ImportWizard">Asistente de importación</string>
     <string name="Import">Importar</string>
@@ -687,7 +620,6 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     <string name="CannotConnectUserX">No se puede conectar al usuario {0}</string>
     <string name="TimeoutQueueUserX">Tiempo de espera agotado para obtener la posición de la cola desde {0}</string>
     <string name="PermissionErrorShared">Error de permiso, no se puede escribir (Por favor vuelva a seleccionar)</string>
-    <string name="FolderNoExistShared">La carpeta no existe.</string>
     <string name="FolderNotAccessible">La carpeta no es accesible (Por favor, vuelva a seleccionar)</string>
     <string name="UnknownErrorShared">Error desconocido. Ver dev.</string>
     <string name="MessagesWithUser">Mensajes con {0}</string>
@@ -738,23 +670,13 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     <string name="RetryFailed">Error al reintentar</string>
     <string name="InvertSelection">Invertir selección</string>
     <string name="SelectAll">Seleccionar Todo</string>
-    <string name="MaxConcurrentIs">Máximo número de descargas simultáneas:</string>
-    <string name="PerTransfer">Por transferencia</string>
-    <string name="Global">Global</string>
     <string name="ConfigureSmartFilters">Configurar filtros inteligentes</string>
     <string name="NotSet">No establecido</string>
     <string name="AppLocalStorage">Almacenamiento local</string>
     <string name="NotInUse">No está en uso</string>
     <string name="IncompleteFolderEmpty">Carpeta incompleta está vacía</string>
     <string name="NoEligibleToClear">No hay elementos elegibles para limpiar</string>
-    <string name="ChangeDownloadSpeed">Cambiar velocidad de descarga (kb/s):</string>
-    <string name="ChangeUploadSpeed">Cambiar velocidad de subida (kb/s):</string>
-    <string name="EnterSpeed">Introduzca velocidad en Kb/s</string>
-    <string name="EnterMaxDownloadSimultaneously">Introduzca el máximo para descargar simultáneamente</string>
-    <string name="BrowseWhich">¿Explorar compartimentos públicos o acciones de listas de usuarios?</string>
     <string name="WaitForParsing">Espere a que se complete el análisis.</string>
-    <string name="finishingUp">finalizando</string>
-    <string name="XFilesParsed">{0} archivos analizados</string>
     <string name="ErrorAlreadyAdded">Error: Directorio ya añadido.</string>
     <string name="UploadFolderOptions">Opciones de Carpeta de Carga</string>
     <string name="CannotChangeNameNotUnique">No se puede cambiar el nombre. No es único</string>
@@ -784,10 +706,7 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     <string name="Cancelled">Cancelado</string>
     <string name="TimedOut">Tiempo agotado</string>
     <string name="CannotConnect">No se puede conectar</string>
-    <string name="Succeeded">Logrado</string>
     <string name="Aborted">Cancelado</string>
-    <string name="Num_FilesRemaining">{0} archivos restantes</string>
-    <string name="X_of_Y_Remaining">{0} de {1} restantes</string>
     <string name="SetLanguage">Idioma</string>
     <string name="Automatic">Automático</string>
     <string name="ManuallySetIncompleteFolder">Anular la ubicación de la carpeta incompleta</string>
@@ -799,7 +718,6 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     <string name="DeleteSelected">Borrar Seleccionados</string>
     <string name="deleted_selected_message_histories">Eliminadas {0} conversación(es)</string>
     <string name="ExportClientData">Exportar datos de cliente</string>
-    <string name="export_more_info">Exportar lista de usuarios, lista de Ignorar/Bloquear lista, notas de usuario y lista de deseos a XML. Útil para respaldar o migrar datos al nuevo teléfono</string>
     <string name="successfully_exported">Datos del cliente Seeker exportados con éxito</string>
     <string name="ForceFilesystemPermission">Forzar permisos del sistema de archivos</string>
     <string name="permission_already_successfully_granted">El permiso ha sido concedido exitosamente</string>
@@ -810,7 +728,6 @@ Si nota que Seeker pide constantemente acceso a una Carpeta de Descarga o a una 
     <string name="change_password">Cambiar contraseña</string>
     <string name="new_password">Nueva contraseña</string>
     <string name="cannot_be_empty">No puede quedar en blanco</string>
-    <string name="must_be_logged_in_generic">Debes iniciar sesión para llevar a cabo esta acción</string>
     <string name="must_be_logged_in_to_change_password">Debes iniciar sesión para cambiar la contraseña</string>
     <string name="failed_to_change_password">No se pudo cambiar la contraseña</string>
     <string name="password_successfully_updated">Contraseña actualizada exitosamente</string>
