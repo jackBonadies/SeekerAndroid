@@ -62,8 +62,7 @@ namespace Seeker
         }
 
 
-
-        public static ImportedData ParseSoulseekQTData(System.IO.Stream stream)
+        private static ImportedData ParseSoulseekQTData(System.IO.Stream stream)
         {
             byte[] fourBytes = new byte[4];
             stream.Read(fourBytes, 0, 4);
@@ -359,7 +358,7 @@ namespace Seeker
             return items;
         }
 
-        public static void SkipTar(System.IO.Stream stream)
+        private static void SkipTar(System.IO.Stream stream)
         {
             byte[] paxHeader = new byte[14];
             stream.Read(paxHeader, 0, 14);
@@ -395,7 +394,7 @@ namespace Seeker
         /// <param name="stringObtained"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static bool GetNextString(string currentLine, out string restOfLine, out string stringObtained)
+        private static bool GetNextString(string currentLine, out string restOfLine, out string stringObtained)
         {
             //nicotine uses the built in python str() ex. str(["x","y"]), which has some things to watch out for.
             //normal strings -> 'xyz'
@@ -432,7 +431,7 @@ namespace Seeker
             return true;
         }
 
-        public static bool IsEscaped(string currentLine, int index)
+        private static bool IsEscaped(string currentLine, int index)
         {
             //check if odd number of '\\' before '\''
             //otherwise it is just an escaped slash.
@@ -448,13 +447,13 @@ namespace Seeker
             }
         }
 
-        public static void SkipNextValue(string currentLine, out string restOfLine)
+        private static void SkipNextValue(string currentLine, out string restOfLine)
         {
             //go to next ','
             restOfLine = currentLine.Substring(currentLine.IndexOf(','));
         }
 
-        public static List<string> GetListOfString(string line)
+        private static List<string> GetListOfString(string line)
         {
             List<string> listOfStrings = new List<string>();
             int keySep = line.IndexOf(" = ");
@@ -482,7 +481,7 @@ namespace Seeker
             return listOfStrings;
         }
 
-        public static List<string> GetListOfStringFromDictValues(string line)
+        private static List<string> GetListOfStringFromDictValues(string line)
         {
             List<string> listOfStrings = new List<string>();
             int keySep = line.IndexOf(" = ");
@@ -514,7 +513,7 @@ namespace Seeker
             return listOfStrings;
         }
 
-        public static List<string> ParseUserList(string line, out List<Tuple<string, string>> listOfNotes)
+        private static List<string> ParseUserList(string line, out List<Tuple<string, string>> listOfNotes)
         {
             //this is a list of lists
             List<string> listOfUsernames = new List<string>();
@@ -578,7 +577,7 @@ namespace Seeker
             }
         }
 
-        public static ImportedData ParseSeeker(System.IO.Stream stream)
+        private static ImportedData ParseSeeker(System.IO.Stream stream)
         {
             var data = new XmlSerializer(typeof(SeekerImportExportData)).Deserialize(stream) as SeekerImportExportData;
             List<Tuple<string, string>> userNotes = new List<Tuple<string, string>>();
@@ -594,8 +593,8 @@ namespace Seeker
         /// Note: there is an older config file version that has userlist in a section 
         /// called columns that can mess things up if we dont consider the section...
         /// </summary>
-        public const string sectionOfInterest = "[server]";
-        public static ImportedData ParseNicotine(System.IO.Stream stream)
+        private const string sectionOfInterest = "[server]";
+        private static ImportedData ParseNicotine(System.IO.Stream stream)
         {
             List<string> userList = new List<string>();
             List<string> bannedIgnoredList = new List<string>();
@@ -719,14 +718,14 @@ namespace Seeker
             }
         }
 
-    }
-    public enum ImportType : int
-    {
-        Unknown = -1,
-        SoulseekQT = 0,
-        NicotineTarBz2 = 1,
-        Nicotine = 2,
-        Seeker = 3
+        private enum ImportType : int
+        {
+            Unknown = -1,
+            SoulseekQT = 0,
+            NicotineTarBz2 = 1,
+            Nicotine = 2,
+            Seeker = 3
 
+        }
     }
 }
