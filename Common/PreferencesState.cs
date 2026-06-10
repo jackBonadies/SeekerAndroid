@@ -80,6 +80,7 @@ namespace Common
         public const string FieldLangEs = "es";
         public const string FieldLangFr = "fr";
         public const string FieldLangHu = "hu";
+        public const string FieldLangId = "id";
         public const string FieldLangIt = "it";
         public const string FieldLangJa = "ja";
         public const string FieldLangNl = "nl";
