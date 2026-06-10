@@ -1,0 +1,7 @@
+﻿{
+  UserList: [
+    usernameB,
+    usernameC,
+    usernameD
+  ]
+}

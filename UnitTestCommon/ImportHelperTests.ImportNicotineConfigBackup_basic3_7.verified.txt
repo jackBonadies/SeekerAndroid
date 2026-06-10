@@ -1,0 +1,13 @@
+﻿{
+  Wishlist: [
+    classical piano
+  ],
+  UserList: [
+    usernameB,
+    usernameC
+  ],
+  IgnoredBanned: [
+    usernameD x x x,
+    usernameE x
+  ]
+}

@@ -1,0 +1,37 @@
+﻿{
+  UserList: [
+    usernameB,
+    usernameC,
+    usernameD,
+    usernameE,
+    usernameF,
+    usernameG,
+    usernameH
+  ],
+  IgnoredBanned: [
+    usernameI,
+    usernameJ
+  ],
+  UserNotes: [
+    {
+      Item1: usernameB,
+      Item2: failed to parse files - due to case sensitive - fixed
+    },
+    {
+      Item1: usernameC,
+      Item2: failed to parse files
+    },
+    {
+      Item1: usernameD,
+      Item2: failed to parse files
+    },
+    {
+      Item1: usernameG,
+      Item2: failed to parse files - due to case sensitive - fixed
+    },
+    {
+      Item1: usernameH,
+      Item2: failed to parse files
+    }
+  ]
+}
