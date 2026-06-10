@@ -296,8 +296,8 @@
     <string name="always_light">Sempre claro</string>
     <string name="always_dark">Sempre escuro</string>
 
-    <string name="queue_length_">Comprimento da Fila</string>
-    <string name="upload_slots_">Slots de Upload Gratuitos</string>
+    <string name="queue_length_">Comprimento da fila</string>
+    <string name="upload_slots_">Slots de upload gratuitos</string>
     <string name="today">Hoje</string>
 
     <string name="pending_">Pendente...</string>
@@ -422,7 +422,7 @@
         Nome de usuário não pode conter caracteres especiais
     </string>
     <string name="network_unreachable">Rede está inacessível</string>
-    <string name="cannot_login">Acesso Incapaz</string>
+    <string name="cannot_login">Acesso incapaz</string>
     <string name="no_empty_user_pass">
         Nome de usuário e senha não podem ficar vazios
     </string>
@@ -470,7 +470,7 @@
     <string name="timeout_peer">Tempo limite para falar com o peer</string>
     <string name="transfer_rejected">Solicitação de transferência rejeitada</string>
     <string name="transfer_rejected_file_not_shared">
-        Solicitação de transferência rejeitada. Motivo: Arquivo não compartilhado
+        Solicitação de transferência rejeitada. Motivo: arquivo não compartilhado
     </string>
 
     <string name="delete_messages">Apagar mensagens</string>
@@ -686,7 +686,7 @@
     <string name="publicRoomCreation">Solicitando criação de sala pública</string>
 
     <string name="failed_user_offline">Falha - usuário off-line</string>
-    <string name="failed_denied">Falha - Negado</string>
+    <string name="failed_denied">Falha - negado</string>
     <string name="re_requesting">Re-solicitando</string>
 
 
@@ -902,7 +902,7 @@
 
     <string name="ConfigureSmartFilters">Configurar Filtros Inteligentes</string>
     <string name="NotSet">Não definido</string>
-    <string name="AppLocalStorage">Armazenamento Local</string>
+    <string name="AppLocalStorage">Armazenamento local</string>
     <string name="NotInUse">Não está em uso</string>
 
     <string name="IncompleteFolderEmpty">A pasta de incompletos está vazia</string>
@@ -974,7 +974,7 @@
     <string name="HideSize">Ocultar tamanho</string>
     <string name="HideSpeed">Ocultar velocidade</string>
 
-    <string name="Num_Selected">{0} Selecionado(s)</string>
+    <string name="Num_Selected">{0} selecionado(s)</string>
 
     <string name="ExportClientData">Exportar dados do Seeker</string>
     <string name="successfully_exported">

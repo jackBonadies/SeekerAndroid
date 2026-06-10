@@ -29,7 +29,7 @@
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">心愿单</string>
-    <string name="user_info_bio"><b>User Bio</b></string>
+    <string name="user_info_bio"><b>User bio</b></string>
     <string name="user_info_picture"><b>图片</b></string>
     <string name="unsaved_changes_title">放弃未保存的更改？</string>
     <string name="unsaved_changes_body">您有未保存的更改，您确定要放弃它们吗？</string>
@@ -112,7 +112,7 @@
     <string name="file_backed_downloads">File Backed Downloads</string>
     <string name="night_mode_options">Night Mode Option</string>
     <string name="enable_sharing">启用共享</string>
-    <string name="browse_yourself">Browse Self</string>
+    <string name="browse_yourself">Browse self</string>
     <string name="enable_listening">Enable Listening</string>
     <string name="change_port">更改端口</string>
     <string name="check_your_port_status">Check Status</string>
@@ -195,7 +195,7 @@
     <string name="always_dark">深色</string>
     <!-- info -->
     <string name="queue_length_">队列长度： </string>
-    <string name="upload_slots_">Free Upload Slots: </string>
+    <string name="upload_slots_">Free upload slots: </string>
     <string name="today">今天</string>
     <string name="pending_">等待中……</string>
     <string name="failed">失败</string>
@@ -290,8 +290,8 @@
     <string name="error_no_space">错误：设备上没有剩余空间。</string>
     <string name="error_unspecified">The task did not complete due to unhandled exception</string>
     <string name="timeout_peer">Timout talking to peer</string>
-    <string name="transfer_rejected">Transfer Request Rejected</string>
-    <string name="transfer_rejected_file_not_shared">Transfer Request Rejected. Reason: File Not Shared</string>
+    <string name="transfer_rejected">Transfer request rejected</string>
+    <string name="transfer_rejected_file_not_shared">Transfer request rejected. Reason: file not shared</string>
     <string name="delete_messages">删除消息</string>
     <string name="delete_all_messages">删除所有消息</string>
     <string name="deleted_all_messages">删除所有消息历史记录</string>
@@ -549,7 +549,7 @@
     <string name="DayVarient_">Day Varient: </string>
     <string name="NightVarient_">Night Varient: </string>
     <string name="NoSharedAdd">No shared folders</string>
-    <string name="RescanShares">Rescan Shares</string>
+    <string name="RescanShares">Rescan shares</string>
     <string name="PauseSharingIfMetered">Pause Sharing on Metered (Mobile) Connection</string>
     <string name="LimitDownloadSpeed">限制下载速度</string>
     <string name="LimitUploadSpeed">限制上传速度</string>
@@ -620,7 +620,7 @@
     <string name="ClearFolder">Clear folder</string>
     <string name="HideSize">Hide size</string>
     <string name="HideSpeed">Hide speed</string>
-    <string name="Num_Selected">{0} Selected</string>
+    <string name="Num_Selected">{0} selected</string>
     <string name="ExportClientData">Export Client Data</string>
     <string name="successfully_exported">Successfully exported Seeker client data.</string>
     <string name="ForceFilesystemPermission">Force Filesystem Permissions</string>

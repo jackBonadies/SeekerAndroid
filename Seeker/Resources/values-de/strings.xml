@@ -188,7 +188,7 @@
     <string name="directory_is_empty">Das Verzeichnis ist leer</string>
     <string name="nothing_selected">Nichts ausgewählt</string>
     <string name="nothing_selected_extra">
-        "Es wurde nichts ausgewählt - Tippe für Auswahl"
+        "Es wurde nichts ausgewählt - tippe für Auswahl"
     </string>
     <string name="failed_to_connect">Verbindungsversuch fehlgeschlagen</string>
     <string name="cannot_download_from_self">
@@ -289,8 +289,8 @@
     <string name="always_light">Immer hell</string>
     <string name="always_dark">Immer dunkel</string>
 
-    <string name="queue_length_">Queue Length</string>
-    <string name="upload_slots_">Free Upload Slots</string>
+    <string name="queue_length_">Queue length</string>
+    <string name="upload_slots_">Free upload slots</string>
     <string name="today">Heute</string>
 
     <string name="pending_">Ausstehend...</string>
@@ -461,9 +461,9 @@
     </string>
 
     <string name="timeout_peer">Timout talking to peer</string>
-    <string name="transfer_rejected">Transfer Request Rejected</string>
+    <string name="transfer_rejected">Transfer request rejected</string>
     <string name="transfer_rejected_file_not_shared">
-        Transfer Request Rejected. Reason: File Not Shared
+        Transfer request rejected. Reason: file not shared
     </string>
 
     <string name="delete_messages">Nachrichten löschen</string>
@@ -679,8 +679,8 @@
     <string name="publicRoomCreation">Requesting public room creation</string>
 
     <string name="failed_user_offline">Fehler - Benutzer offline</string>
-    <string name="failed_denied">Failed - Denied</string>
-    <string name="re_requesting">Re-Requesting</string>
+    <string name="failed_denied">Failed - denied</string>
+    <string name="re_requesting">Re-requesting</string>
 
 
 
@@ -774,7 +774,7 @@
     <string name="GetFolderDoesntWorkForLockedShares">
         Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.
     </string>
-    <string name="ImportWizard">Import Wizard</string>
+    <string name="ImportWizard">Import wizard</string>
     <string name="Import">Importieren</string>
     <string name="SuccessfullyParsed">
         Successfully parsed! Tap next to proceed
@@ -895,7 +895,7 @@
 
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
     <string name="NotSet">Not set</string>
-    <string name="AppLocalStorage">App Local Storage</string>
+    <string name="AppLocalStorage">App local storage</string>
     <string name="NotInUse">Nicht benutzt</string>
 
     <string name="IncompleteFolderEmpty">Incomplete folder is empty</string>

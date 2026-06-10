@@ -195,7 +195,7 @@
     <string name="directory_is_empty">This directory is empty</string>
     <string name="nothing_selected">Nothing selected</string>
     <string name="nothing_selected_extra">
-        "Nothing Selected - Tap to select"
+        "Nothing selected - tap to select"
     </string>
     <string name="failed_to_connect">Failed to connect</string>
     <string name="cannot_download_from_self">
@@ -468,12 +468,12 @@
     </string>
 
     <string name="timeout_peer">Timout talking to peer</string>
-    <string name="transfer_rejected">Transfer Request Rejected</string>
+    <string name="transfer_rejected">Transfer request rejected</string>
     <string name="transfer_rejected_file_not_shared">
-        Transfer Request Rejected. Reason: File Not Shared
+        Transfer request rejected. Reason: file not shared
     </string>
 
-    <string name="delete_messages">Delete Messages</string>
+    <string name="delete_messages">Delete messages</string>
     <string name="delete_all_messages">Delete all messages</string>
     <string name="deleted_all_messages">Deleted all message history</string>
     <string name="deleted_all_no_messages">No messages to delete!</string>
@@ -686,8 +686,8 @@
     <string name="publicRoomCreation">Requesting public room creation</string>
 
     <string name="failed_user_offline">Failed - user offline</string>
-    <string name="failed_denied">Failed - Denied</string>
-    <string name="re_requesting">Re-Requesting</string>
+    <string name="failed_denied">Failed - denied</string>
+    <string name="re_requesting">Re-requesting</string>
 
 
 
@@ -710,7 +710,7 @@
     <string name="Downloads">Downloads</string>
     <string name="You">You</string>
 
-    <string name="sendmessage_">Send Message...</string>
+    <string name="sendmessage_">Send message...</string>
 
     <string name="Availability">Availability</string>
     <string name="Speed">Speed</string>
@@ -781,7 +781,7 @@
     <string name="GetFolderDoesntWorkForLockedShares">
         Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.
     </string>
-    <string name="ImportWizard">Import Wizard</string>
+    <string name="ImportWizard">Import wizard</string>
     <string name="Import">Import</string>
     <string name="SuccessfullyParsed">
         Successfully parsed! Tap next to proceed
@@ -862,7 +862,7 @@
     <string name="DayVarient_">Day theme</string>
     <string name="NightVarient_">Night theme</string>
     <string name="NoSharedAdd">No shared folders</string>
-    <string name="RescanShares">Rescan Shares</string>
+    <string name="RescanShares">Rescan shares</string>
     <string name="PauseSharingIfMetered">
         Pause sharing on metered (mobile) connection
     </string>
@@ -902,7 +902,7 @@
 
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
     <string name="NotSet">Not set</string>
-    <string name="AppLocalStorage">App Local Storage</string>
+    <string name="AppLocalStorage">App local storage</string>
     <string name="NotInUse">Not in use</string>
 
     <string name="IncompleteFolderEmpty">Incomplete folder is empty</string>
@@ -974,7 +974,7 @@
     <string name="HideSize">Hide size</string>
     <string name="HideSpeed">Hide speed</string>
 
-    <string name="Num_Selected">{0} Selected</string>
+    <string name="Num_Selected">{0} selected</string>
 
     <string name="ExportClientData">Export client data</string>
     <string name="successfully_exported">

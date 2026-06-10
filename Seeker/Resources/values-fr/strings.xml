@@ -148,7 +148,7 @@
     <string name="file_backed_downloads">Téléchargements en fichier</string>
     <string name="night_mode_options">Thème de nuit</string>
     <string name="enable_sharing">Activer le partage</string>
-    <string name="browse_yourself">Parcourir ses Fichiers</string>
+    <string name="browse_yourself">Parcourir ses fichiers</string>
     <string name="enable_listening">Activer l\'ecoute</string>
     <string name="change_port">Changer de port</string>
     <string name="check_your_port_status">Vérifier le statut</string>
@@ -195,7 +195,7 @@
     <string name="directory_is_empty">Ce dossier est vide</string>
     <string name="nothing_selected">Rien de sélectionné</string>
     <string name="nothing_selected_extra">
-        "Rien de sélectionné - Appuyez pour sélectionner"
+        "Rien de sélectionné - appuyez pour sélectionner"
     </string>
     <string name="failed_to_connect">Échec de la connexion</string>
     <string name="cannot_download_from_self">
@@ -296,8 +296,8 @@
     <string name="always_light">Toujours clair</string>
     <string name="always_dark">Toujours sombre</string>
 
-    <string name="queue_length_">Longueur de la File d\'Attente</string>
-    <string name="upload_slots_">Canaux Disponibles</string>
+    <string name="queue_length_">Longueur de la file d\'attente</string>
+    <string name="upload_slots_">Canaux disponibles</string>
     <string name="today">Aujourd’hui</string>
 
     <string name="pending_">En attente...</string>
@@ -686,7 +686,7 @@
     <string name="publicRoomCreation">Demande de création de salon publique</string>
 
     <string name="failed_user_offline">Erreur - utilisateur inactif</string>
-    <string name="failed_denied">Erreur - Refusé</string>
+    <string name="failed_denied">Erreur - refusé</string>
     <string name="re_requesting">Redemander</string>
 
 
@@ -710,7 +710,7 @@
     <string name="Downloads">Téléchargements</string>
     <string name="You">Vous</string>
 
-    <string name="sendmessage_">Envoie du Message...</string>
+    <string name="sendmessage_">Envoie du message...</string>
 
     <string name="Availability">Disponible</string>
     <string name="Speed">Débit</string>
@@ -902,7 +902,7 @@
 
     <string name="ConfigureSmartFilters">Paramètres des Filtres Intelligents</string>
     <string name="NotSet">Non défini</string>
-    <string name="AppLocalStorage">Stockage Local de l\'Application</string>
+    <string name="AppLocalStorage">Stockage local de l\'application</string>
     <string name="NotInUse">N\'est pas utilisé</string>
 
     <string name="IncompleteFolderEmpty">Le dossier incomplet est vide</string>
@@ -974,7 +974,7 @@
     <string name="HideSize">Cacher taille</string>
     <string name="HideSpeed">Cacher vitesse</string>
 
-    <string name="Num_Selected">{0} Sélectionnés</string>
+    <string name="Num_Selected">{0} sélectionnés</string>
 
     <string name="ExportClientData">Exporter données client</string>
     <string name="successfully_exported">

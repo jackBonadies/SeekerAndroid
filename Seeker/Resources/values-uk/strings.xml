@@ -197,7 +197,7 @@
     <string name="directory_is_empty">Цей каталог порожній</string>
     <string name="nothing_selected">Нічого не вибрано</string>
     <string name="nothing_selected_extra">
-        "Нічого не вибрано - Натисніть, щоб вибрати"
+        "Нічого не вибрано - натисніть, щоб вибрати"
     </string>
     <string name="failed_to_connect">Не вдалося підключитися</string>
     <string name="cannot_download_from_self">
@@ -472,7 +472,7 @@
     <string name="timeout_peer">Тайм-аут з вузлом</string>
     <string name="transfer_rejected">Запит на передачу відхилено</string>
     <string name="transfer_rejected_file_not_shared">
-        Transfer Request Rejected. Reason: File Not Shared
+        Transfer request rejected. Reason: file not shared
     </string>
 
     <string name="delete_messages">Видалити повідомлення</string>
@@ -688,8 +688,8 @@
     <string name="publicRoomCreation">Запит на створення публічної кімнати</string>
 
     <string name="failed_user_offline">Помилка - користувач не в мережі</string>
-    <string name="failed_denied">Не вдалося - Відхилено</string>
-    <string name="re_requesting">Re-Requesting</string>
+    <string name="failed_denied">Не вдалося - відхилено</string>
+    <string name="re_requesting">Re-requesting</string>
 
 
 
@@ -976,7 +976,7 @@
     <string name="HideSize">Приховати розмір</string>
     <string name="HideSpeed">Приховати швидкість</string>
 
-    <string name="Num_Selected">{0} Вибрано</string>
+    <string name="Num_Selected">{0} вибрано</string>
 
     <string name="ExportClientData">Експорт даних клієнта</string>
     <string name="successfully_exported">

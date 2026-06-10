@@ -29,7 +29,7 @@
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Lista desideri</string>
-    <string name="user_info_bio"><b>Info Utente</b></string>
+    <string name="user_info_bio"><b>Info utente</b></string>
     <string name="user_info_picture"><b>Immagine</b></string>
     <string name="unsaved_changes_title">Scartare le modifiche non salvate?</string>
     <string name="unsaved_changes_body">Sono presenti modifiche non salvate. Vuoi davvero scartarle?</string>
@@ -143,7 +143,7 @@
     <string name="download_is_starting">Download in avvio...</string>
     <string name="directory_is_empty">La cartella è vuota</string>
     <string name="nothing_selected">Nessun elemento selezionato</string>
-    <string name="nothing_selected_extra">"Nulla di selezionato - Tocca per selezionare"</string>
+    <string name="nothing_selected_extra">"Nulla di selezionato - tocca per selezionare"</string>
     <string name="failed_to_connect">Connessione fallita</string>
     <string name="cannot_download_from_self">Non puoi scaricare da te stesso</string>
     <string name="must_type_a_username_to_browse">È necessario digitare un nome utente da esplorare</string>
@@ -290,8 +290,8 @@
     <string name="error_no_space">Errore: spazio sul dispositivo esaurito.</string>
     <string name="error_unspecified">L\'azione non è stata completata a causa di un\'eccezione non gestita</string>
     <string name="timeout_peer">Timout durante la comunicazione con il peer</string>
-    <string name="transfer_rejected">Richiesta Di Trasferimento Rifiutata</string>
-    <string name="transfer_rejected_file_not_shared">Richiesta Di Trasferimento Rifiutata. Motivo: File Non Condiviso</string>
+    <string name="transfer_rejected">Richiesta di trasferimento rifiutata</string>
+    <string name="transfer_rejected_file_not_shared">Richiesta di trasferimento rifiutata. Motivo: file non condiviso</string>
     <string name="delete_messages">Cancella messaggi</string>
     <string name="delete_all_messages">Cancella tutti i messaggi</string>
     <string name="deleted_all_messages">Cancella la cronologia dei messaggi</string>
@@ -454,8 +454,8 @@
     <string name="user_X_is_now_online">Utente {0} è in linea</string>
     <string name="publicRoomCreation">Requesting public room creation</string>
     <string name="failed_user_offline">Fallito - utente non in linea</string>
-    <string name="failed_denied">Fallito - Negato</string>
-    <string name="re_requesting">Re-Requesting</string>
+    <string name="failed_denied">Fallito - negato</string>
+    <string name="re_requesting">Re-requesting</string>
     <string name="diagnostics_more_info">This will save diagnostic information to a text file named \"seeker_diagnostics.txt\" which will be located in the root of the selected download folder.
 		\n\nThis can be useful to send to the dev for the purposes of troubleshooting issues.  If the issues are of a networking nature, one may have to restart the app after turning this option on for full results.</string>
     <string name="folder_X_from_user_Y_finished">{0} from {1} successfully completed.</string>
@@ -509,7 +509,7 @@
     <string name="FailedToBrowseUsernameUnspecifiedError">Failed to browse {0} due to unspecified error.</string>
     <string name="BrowseOnlyEmptyDir">User, {0}, is sharing only an empty directory.</string>
     <string name="GetFolderDoesntWorkForLockedShares">Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.</string>
-    <string name="ImportWizard">Import Wizard</string>
+    <string name="ImportWizard">Import wizard</string>
     <string name="Import">Import</string>
     <string name="SuccessfullyParsed">Successfully parsed! Tap next to proceed</string>
     <string name="FailedToParseContactDev">Failed to parse file. Please ensure file is valid. Contact developer for more help.</string>
@@ -546,7 +546,7 @@
     <string name="AutoRetryFailedOfflineOnline">Auto-retry failed downloads when user goes back online</string>
     <string name="AwayOnInactivity">Set status to away when inactive</string>
     <string name="NoSharedAdd">No shared folders</string>
-    <string name="RescanShares">Rescan Shares</string>
+    <string name="RescanShares">Rescan shares</string>
     <string name="PauseSharingIfMetered">Pause sharing on metered (mobile) connection</string>
     <string name="LimitDownloadSpeed">Limit download speed</string>
     <string name="LimitUploadSpeed">Limit upload speed</string>
@@ -575,7 +575,7 @@
     <string name="SelectAll">Select all</string>
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
     <string name="NotSet">Not set</string>
-    <string name="AppLocalStorage">App Local Storage</string>
+    <string name="AppLocalStorage">App local storage</string>
     <string name="NotInUse">Non in uso</string>
     <string name="IncompleteFolderEmpty">Incomplete folder is empty</string>
     <string name="NoEligibleToClear">No eligible items to clear</string>
@@ -617,7 +617,7 @@
     <string name="ClearFolder">Svuota cartella</string>
     <string name="HideSize">Nascondi dimensione</string>
     <string name="HideSpeed">Nascondi velocità</string>
-    <string name="Num_Selected">{0} Selezionato</string>
+    <string name="Num_Selected">{0} selezionato</string>
     <string name="ExportClientData">Esporta dati del client</string>
     <string name="successfully_exported">Successfully exported Seeker client data.</string>
     <string name="ForceFilesystemPermission">Force filesystem permissions</string>

@@ -689,7 +689,7 @@
     <string name="publicRoomCreation">Создаем публичную комнату...</string>
 
     <string name="failed_user_offline">Ошибка - пользователь не в сети</string>
-    <string name="failed_denied">Ошибка - Отказано</string>
+    <string name="failed_denied">Ошибка - отказано</string>
     <string name="re_requesting">Повторный запрос</string>
 
 
@@ -865,7 +865,7 @@
     <string name="DayVarient_">Дневной скин</string>
     <string name="NightVarient_">Ночной скин</string>
     <string name="NoSharedAdd">Нет общих папок</string>
-    <string name="RescanShares">Rescan Shares</string>
+    <string name="RescanShares">Rescan shares</string>
     <string name="PauseSharingIfMetered">
         Приостановить совместный доступ при подключении по счетчику (мобильное соединение)
     </string>
@@ -977,7 +977,7 @@
     <string name="HideSize">Скрыть размер</string>
     <string name="HideSpeed">Скрыть скорость</string>
 
-    <string name="Num_Selected">{0} Выбрано</string>
+    <string name="Num_Selected">{0} выбрано</string>
 
     <string name="ExportClientData">Экспорт данных</string>
     <string name="successfully_exported">

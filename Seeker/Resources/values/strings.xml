@@ -9,7 +9,7 @@
     <string name="searches_tab">Searches</string>
     <string name="searches_tab2">Search</string>
 
-	<string name="signin">Sign In</string>
+	<string name="signin">Sign in</string>
 	<string name="signin_or_create_account">Sign in or create new account</string>
 
     <string name="set_up_sharing">Set up sharing</string>
@@ -82,7 +82,7 @@
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Wishlist</string>
-    <string name="user_info_bio"><b>User Bio</b></string>
+    <string name="user_info_bio"><b>User bio</b></string>
     <string name="user_info_picture"><b>Picture</b></string>
     <string name="unsaved_changes_title">Discard unsaved changes?</string>
     <string name="unsaved_changes_body">You have unsaved changes, are you sure you want to discard them?</string>
@@ -156,14 +156,14 @@
 
     <string name="inviteuser">Invite user</string>
 
-    <string name="give_up_room">Give up Room</string>
+    <string name="give_up_room">Give up room</string>
     <string name="give_up_membership">Give up membership</string>
 
     <string name="logout">Logout</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="ConnectingToServer">Connecting to server</string>
-    <string name="PleaseWait_">Please Wait...</string>
+    <string name="PleaseWait_">Please wait...</string>
     <string name="choose_a_download_folder">Select download folder</string>
     <string name="settings">Settings</string>
 
@@ -216,7 +216,7 @@
     <string name="file_backed_downloads">File backed downloads</string>
     <string name="night_mode_options">Night mode</string>
     <string name="enable_sharing">Enable sharing</string>
-    <string name="browse_yourself">Browse Self</string>
+    <string name="browse_yourself">Browse self</string>
     <string name="enable_listening">Enable listening</string>
     <string name="change_port">Change port</string>
     <string name="check_your_port_status">Check status</string>
@@ -257,7 +257,7 @@
     <string name="download_is_starting">Download starting...</string>
     <string name="directory_is_empty">This directory is empty</string>
     <string name="nothing_selected">Nothing selected</string>
-    <string name="nothing_selected_extra">"Nothing Selected - Tap to select"</string>
+    <string name="nothing_selected_extra">"Nothing selected - tap to select"</string>
     <string name="failed_to_connect">Failed to connect</string>
     <string name="cannot_download_from_self">Cannot download from yourself</string>
     <string name="must_type_a_username_to_browse">Must type user to browse</string>
@@ -320,8 +320,8 @@
     <string name="theme_red">Red</string>
 
     <!-- info -->
-    <string name="queue_length_">Queue Length</string>
-    <string name="upload_slots_">Free Upload Slots</string>
+    <string name="queue_length_">Queue length</string>
+    <string name="upload_slots_">Free upload slots</string>
     <string name="today">Today</string>
 
     <string name="pending_">Pending...</string>
@@ -412,7 +412,7 @@
     <string name="user_too_long">Username must be under 30 characters</string>
     <string name="user_invalid_char">Username cannot contain special characters</string>
     <string name="network_unreachable">Network is unreachable</string>
-    <string name="cannot_login">Cannot Login</string>
+    <string name="cannot_login">Cannot login</string>
     <string name="no_empty_user_pass">Username and password cannot be empty</string>
     <string name="dns_failed_2">Failed to resolve soulseek server ip address.</string>
 
@@ -440,10 +440,10 @@
     <string name="error_unspecified">The task did not complete due to unhandled exception</string>
 
     <string name="timeout_peer">Timeout talking to peer</string>
-    <string name="transfer_rejected">Transfer Request Rejected</string>
-    <string name="transfer_rejected_file_not_shared">Transfer Request Rejected. Reason: File Not Shared</string>
+    <string name="transfer_rejected">Transfer request rejected</string>
+    <string name="transfer_rejected_file_not_shared">Transfer request rejected. Reason: file not shared</string>
 
-    <string name="delete_messages">Delete Messages</string>
+    <string name="delete_messages">Delete messages</string>
     <string name="delete_all_messages">Delete all messages</string>
     <string name="deleted_all_messages">Deleted all message history</string>
     <string name="deleted_all_no_messages">No messages to delete!</string>
@@ -646,8 +646,8 @@
     <string name="publicRoomCreation">Requesting public room creation</string>
 
     <string name="failed_user_offline">Failed - user offline</string>
-    <string name="failed_denied">Failed - Denied</string>
-    <string name="re_requesting">Re-Requesting</string>
+    <string name="failed_denied">Failed - denied</string>
+    <string name="re_requesting">Re-requesting</string>
 
 
 
@@ -674,7 +674,7 @@
     <string name="Downloads">Downloads</string>
     <string name="You">You</string>
 
-    <string name="sendmessage_">Send Message...</string>
+    <string name="sendmessage_">Send message...</string>
 
     <string name="Availability">Availability</string>
     <string name="Speed">Speed</string>
@@ -733,7 +733,7 @@
 
 
     <string name="GetFolderDoesntWorkForLockedShares">Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.</string>
-    <string name="ImportWizard">Import Wizard</string>
+    <string name="ImportWizard">Import wizard</string>
     <string name="Import">Import</string>
     <string name="SuccessfullyParsed">Successfully parsed! Tap next to proceed</string>
     <string name="FailedToParseContactDev">Failed to parse file. Please ensure file is valid. Contact developer for more help.</string>
@@ -787,7 +787,7 @@
     <string name="DayVarient_">Day theme</string>
     <string name="NightVarient_">Night theme</string>
     <string name="NoSharedAdd">No shared folders</string>
-    <string name="RescanShares">Rescan Shares</string>
+    <string name="RescanShares">Rescan shares</string>
     <string name="add_folder">Add folder</string>
     <string name="PauseSharingIfMetered">Pause sharing on metered (mobile) connection</string>
     <string name="LimitDownloadSpeed">Limit download speed</string>
@@ -822,7 +822,7 @@
 
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
     <string name="NotSet">Not set</string>
-    <string name="AppLocalStorage">App Local Storage</string>
+    <string name="AppLocalStorage">App local storage</string>
     <string name="NotInUse">Not in use</string>
 
     <string name="IncompleteFolderEmpty">Incomplete folder is empty</string>
@@ -876,8 +876,8 @@
     <string name="HideSize">Hide size</string>
     <string name="HideSpeed">Hide speed</string>
 
-    <string name="Num_Selected">{0} Selected</string>
-    <string name="DeleteSelected">Delete Selected</string>
+    <string name="Num_Selected">{0} selected</string>
+    <string name="DeleteSelected">Delete selected</string>
     <string name="deleted_selected_message_histories">Deleted {0} conversation(s)</string>
 
     <string name="ExportClientData">Export client data</string>

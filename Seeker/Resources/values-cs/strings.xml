@@ -461,12 +461,12 @@
     </string>
 
     <string name="timeout_peer">Timout talking to peer</string>
-    <string name="transfer_rejected">Transfer Request Rejected</string>
+    <string name="transfer_rejected">Transfer request rejected</string>
     <string name="transfer_rejected_file_not_shared">
-        Transfer Request Rejected. Reason: File Not Shared
+        Transfer request rejected. Reason: file not shared
     </string>
 
-    <string name="delete_messages">Delete Messages</string>
+    <string name="delete_messages">Delete messages</string>
     <string name="delete_all_messages">Delete all messages</string>
     <string name="deleted_all_messages">Deleted all message history</string>
     <string name="deleted_all_no_messages">Žádné zprávy ke smazání!</string>
@@ -680,7 +680,7 @@
 
     <string name="failed_user_offline">Nezdařilo se - uživatel offline</string>
     <string name="failed_denied">Nezdařilo se - zamítnuto</string>
-    <string name="re_requesting">Re-Requesting</string>
+    <string name="re_requesting">Re-requesting</string>
 
 
 
@@ -967,7 +967,7 @@
     <string name="HideSize">Skrýt velikost</string>
     <string name="HideSpeed">Skrýt rychlost</string>
 
-    <string name="Num_Selected">{0} Vybráno</string>
+    <string name="Num_Selected">{0} vybráno</string>
 
     <string name="ExportClientData">Export client data</string>
     <string name="successfully_exported">

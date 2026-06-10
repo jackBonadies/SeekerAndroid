@@ -220,7 +220,7 @@
     <string name="download_is_starting">Iniciando descarga...</string>
     <string name="directory_is_empty">Directorio vacío</string>
     <string name="nothing_selected">Nada seleccionado</string>
-    <string name="nothing_selected_extra">Nada seleccionado - Toque para seleccionar</string>
+    <string name="nothing_selected_extra">Nada seleccionado - toque para seleccionar</string>
     <string name="failed_to_connect">Error al conectar</string>
     <string name="cannot_download_from_self">No se puede descargar archivos de si mismo</string>
     <string name="must_type_a_username_to_browse">Debe escribir el nombre de usuario a buscar</string>
@@ -377,8 +377,8 @@
     <string name="error_unspecified">Tarea incompleta debido a una excepcion no manejada</string>
     <string name="timeout_peer">Tiempo de espera agotado para hablar con un compañero</string>
     <string name="transfer_rejected">Solicitud de transferencia rechazada</string>
-    <string name="transfer_rejected_file_not_shared">Petición de transferencia rechazada. Razon: Archivo no compatido</string>
-    <string name="delete_messages">Borrar Mensajes</string>
+    <string name="transfer_rejected_file_not_shared">Petición de transferencia rechazada. Razon: archivo no compatido</string>
+    <string name="delete_messages">Borrar mensajes</string>
     <string name="delete_all_messages">Eliminar todos los mensajes</string>
     <string name="deleted_all_messages">Borrar todo el historial de mensajes</string>
     <string name="deleted_all_no_messages">¡No hay mensajes para eliminar!</string>
@@ -549,7 +549,7 @@
     <string name="user_X_is_now_online">El usuario {0} está ahora conectado</string>
     <string name="publicRoomCreation">Solicitando creación de sala pública</string>
     <string name="failed_user_offline">Error - usuario desconectado</string>
-    <string name="failed_denied">Error - Denegado</string>
+    <string name="failed_denied">Error - denegado</string>
     <string name="re_requesting">Volviendo a solicitar</string>
     <string name="diagnostics_more_info">Esto guardará la información de diagnóstico en un archivo de texto llamado \"seeker_diagnostics.txt\" que se ubicará en la raíz de la carpeta de descarga seleccionada. \n\nEsto puede ser útil para enviarlo al desarrollador con el fin de solucionar problemas. Si los problemas son de naturaleza de red, es posible que deba reiniciar la aplicación después de activar esta opción para obtener resultados completos.</string>
     <string name="folder_X_from_user_Y_finished">{0} de {1} completado con éxito</string>
@@ -560,7 +560,7 @@
     <string name="Uploads">Subidas</string>
     <string name="Downloads">Descargas</string>
     <string name="You">Tú</string>
-    <string name="sendmessage_">Enviar Mensaje...</string>
+    <string name="sendmessage_">Enviar mensaje...</string>
     <string name="Availability">Disponibilidad</string>
     <string name="Speed">Velocidad</string>
     <string name="FolderName">Nombre de la carpeta</string>
@@ -715,7 +715,7 @@
     <string name="HideSize">Ocultar tamaño</string>
     <string name="HideSpeed">Ocultar velocidad</string>
     <string name="Num_Selected">{0} seleccionados</string>
-    <string name="DeleteSelected">Borrar Seleccionados</string>
+    <string name="DeleteSelected">Borrar seleccionados</string>
     <string name="deleted_selected_message_histories">Eliminadas {0} conversación(es)</string>
     <string name="ExportClientData">Exportar datos de cliente</string>
     <string name="successfully_exported">Datos del cliente Seeker exportados con éxito</string>
