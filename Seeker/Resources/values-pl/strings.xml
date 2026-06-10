@@ -191,7 +191,7 @@
 
     <string name="we_are_already_logging_in">Jesteś już zalogowany</string>
     <string name="nothing_to_download">Nie ma nic do pobrania</string>
-    <string name="download_is_starting">Rozpoczęto Pobieranie...</string>
+    <string name="download_is_starting">Rozpoczęto pobieranie...</string>
     <string name="directory_is_empty">Katalog jest pusty</string>
     <string name="nothing_selected">Nic nie wybrano</string>
     <string name="nothing_selected_extra">
@@ -205,7 +205,7 @@
         Musisz wpisać użytkownika aby przeglądać
     </string>
     <string name="must_type_a_username_to_message">
-        Must type User to Message
+        Must type user to message
     </string>
     <string name="must_type_a_username_to_invite">
         Musisz wpisać użytkownika aby zaprosić
@@ -264,8 +264,8 @@
     <string name="setting_ticker">Setting ticker...</string>
     <string name="failed_to_set_ticker">Failed to set ticker</string>
     <string name="successfully_set_ticker">Successfully set ticker</string>
-    <string name="folder_request_timed_out">Folder Request Timed Out</string>
-    <string name="folder_request_failed">Folder Request Failed</string>
+    <string name="folder_request_timed_out">Folder request timed out</string>
+    <string name="folder_request_failed">Folder request failed</string>
     <string name="folder_request_already_have">
         We already have the complete folder
     </string>
@@ -275,9 +275,9 @@
     <string name="temporary_disconnected">
         We got temporarily disconnected.. reconnecting now
     </string>
-    <string name="failed_to_undo">Failure to Undo</string>
-    <string name="add_user_title">Add User(s)</string>
-    <string name="ignore_user_title">Ignore User(s)</string>
+    <string name="failed_to_undo">Failure to undo</string>
+    <string name="add_user_title">Add user(s)</string>
+    <string name="ignore_user_title">Ignore user(s)</string>
 
 
 

@@ -123,8 +123,8 @@
 
     <string name="search_result_style">Style de résultat</string>
 
-    <string name="new_search_tab">Nouvelle Recherche</string>
-    <string name="filter_search_results_here">Filtrer les Résultats</string>
+    <string name="new_search_tab">Nouvelle recherche</string>
+    <string name="filter_search_results_here">Filtrer les résultats</string>
     <string name="persist_it">Epinglé</string>
     <string name="type_chatroom_ticker_message">Message du ticker</string>
 
@@ -178,7 +178,7 @@
         L\'image est trop grande. Veuillez choisir une image plus petite. (&lt;5Mo).
     </string>
 
-    <string name="no_room_tickers">Aucun Message...</string>
+    <string name="no_room_tickers">Aucun message...</string>
     <string name="user_list_empty">
         La liste des utilisateurs est vide. Veuillez ajouter un utilisateur à la liste.
     </string>
@@ -187,7 +187,7 @@
     <string name="no_search_results">Aucun résultat</string>
     <string name="no_search_text">Tapez du texte pour rechercher</string>
     <string name="no_wish_text">Taper du texte pour chercher dans la liste de souhaits</string>
-    <string name="search_error_unspecified">Erreur de Recherche.</string>
+    <string name="search_error_unspecified">Erreur de recherche.</string>
 
     <string name="we_are_already_logging_in">Tentative d\'authentification en cours</string>
     <string name="nothing_to_download">Rien à télécharger</string>
@@ -276,7 +276,7 @@
         Nous avons été déconnectés.. reconnexion en cours
     </string>
     <string name="failed_to_undo">Échec d\'annulation</string>
-    <string name="add_user_title">Ajouter un/des Utilisateur(s)</string>
+    <string name="add_user_title">Ajouter un/des utilisateur(s)</string>
     <string name="ignore_user_title">Utilisateur(s) ignoré(s)</string>
 
 

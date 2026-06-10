@@ -97,10 +97,10 @@
     <string name="search_result_style_collapsed">Espandibile: Chiuso</string>
     <string name="search_result_style_medium">Medio</string>
     <string name="search_result_style_minimal">Minimale</string>
-    <string name="new_search_tab">Nuova Ricerca</string>
+    <string name="new_search_tab">Nuova ricerca</string>
     <string name="filter_search_results_here">Filtra i risultati</string>
     <string name="persist_it">Fissa</string>
-    <string name="type_chatroom_ticker_message">Scrivi Messaggio Ticker</string>
+    <string name="type_chatroom_ticker_message">Scrivi messaggio ticker</string>
     <string name="max_search_results">Numero massimo risultati di ricerca</string>
     <string name="only_show_free_slots">Mostra solo i risultati degli utenti con slot liberi</string>
     <string name="start_service_on_startup">Avvia il servizio all\'avvio</string>
@@ -129,7 +129,7 @@
     <string name="error_no_file_manager_dir_manage_storage">ERROR - Nessun file manager installato in grado di selezionare una cartella. Si prega di installarne uno. Se il tuo dispositivo non implementa l\'intento OPEN_DOCUMENT_TREE, installa Seeker da Fdroid (IzzyOnDroid Repo) che ha il permesso \'Gestisci memoria esterna\'.</string>
     <string name="error_image_doesnt_exist">L\'immagine non esiste</string>
     <string name="error_image_too_large">L\'immagine è troppo grande. Si prega di scegliere un\'immagine più piccola (&lt;5MB).</string>
-    <string name="no_room_tickers">Nessun Ticker della Stanza...</string>
+    <string name="no_room_tickers">Nessun ticker della stanza...</string>
     <string name="user_list_empty">La lista utenti è vuota. Si prega di aggiungere un utente alla lista utenti.</string>
     <string name="no_user">Nessun utente selezionato</string>
     <string name="no_room">Nessuna stanza selezionata</string>

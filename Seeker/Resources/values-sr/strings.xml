@@ -118,10 +118,10 @@
 
     <string name="search_result_style">Result style</string>
 
-    <string name="new_search_tab">New Search</string>
-    <string name="filter_search_results_here">Filter Results</string>
+    <string name="new_search_tab">New search</string>
+    <string name="filter_search_results_here">Filter results</string>
     <string name="persist_it">Sticky</string>
-    <string name="type_chatroom_ticker_message">Ticker Message</string>
+    <string name="type_chatroom_ticker_message">Ticker message</string>
 
     <string name="max_search_results">Max search results</string>
     <string name="only_show_free_slots">
@@ -157,7 +157,7 @@
     <string name="user_has_no_bio">User has no bio.</string>
     <string name="user_has_no_pic">User has no picture.</string>
     <string name="no_pic_set">No picture is set</string>
-    <string name="select_pic">Select Picture</string>
+    <string name="select_pic">Select picture</string>
     <string name="success_set_pic">Successfully set picture</string>
     <string name="error_no_file_manager_image">
         ERROR - No file manager installed that is capable of choosing an image. Please install one.
@@ -173,20 +173,20 @@
         Image is too large. Please choose a smaller image. (&lt;5MB).
     </string>
 
-    <string name="no_room_tickers">No Room Tickers Yet...</string>
+    <string name="no_room_tickers">No room tickers yet...</string>
     <string name="user_list_empty">
-        User List is empty. Please add a user to User List.
+        User list is empty. Please add a user to User list.
     </string>
     <string name="no_user">No User is selected</string>
     <string name="no_room">No Room is selected</string>
     <string name="no_search_results">No results found</string>
     <string name="no_search_text">Must type text to search</string>
     <string name="no_wish_text">Must type text for wishlist search</string>
-    <string name="search_error_unspecified">Search Error.</string>
+    <string name="search_error_unspecified">Search error.</string>
 
     <string name="we_are_already_logging_in">We are already logging in</string>
     <string name="nothing_to_download">Nothing to download</string>
-    <string name="download_is_starting">Download Starting...</string>
+    <string name="download_is_starting">Download starting...</string>
     <string name="directory_is_empty">This directory is empty</string>
     <string name="nothing_selected">Nothing selected</string>
     <string name="nothing_selected_extra">
@@ -197,15 +197,15 @@
         Cannot download from yourself
     </string>
     <string name="must_type_a_username_to_browse">
-        Must type User to Browse
+        Must type user to browse
     </string>
     <string name="must_type_a_username_to_message">
-        Must type User to Message
+        Must type user to message
     </string>
     <string name="must_type_a_username_to_invite">
-        Must type User to Invite
+        Must type user to invite
     </string>
-    <string name="must_type_a_username_to_add">Must type User to Add</string>
+    <string name="must_type_a_username_to_add">Must type user to add</string>
     <string name="must_type_ticker_text">Must type ticker text</string>
     <string name="must_type_chatroom_name">Must type a chatroom name</string>
     <string name="must_type_text_to_send">Must type text to send</string>
@@ -259,8 +259,8 @@
     <string name="setting_ticker">Setting ticker...</string>
     <string name="failed_to_set_ticker">Failed to set ticker</string>
     <string name="successfully_set_ticker">Successfully set ticker</string>
-    <string name="folder_request_timed_out">Folder Request Timed Out</string>
-    <string name="folder_request_failed">Folder Request Failed</string>
+    <string name="folder_request_timed_out">Folder request timed out</string>
+    <string name="folder_request_failed">Folder request failed</string>
     <string name="folder_request_already_have">
         We already have the complete folder
     </string>
@@ -270,9 +270,9 @@
     <string name="temporary_disconnected">
         We got temporarily disconnected.. reconnecting now
     </string>
-    <string name="failed_to_undo">Failure to Undo</string>
-    <string name="add_user_title">Add User(s)</string>
-    <string name="ignore_user_title">Ignore User(s)</string>
+    <string name="failed_to_undo">Failure to undo</string>
+    <string name="add_user_title">Add user(s)</string>
+    <string name="ignore_user_title">Ignore user(s)</string>
 
 
 

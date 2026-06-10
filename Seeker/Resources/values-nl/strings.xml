@@ -123,10 +123,10 @@
 
     <string name="search_result_style">Zoekresultaten vormgeving</string>
 
-    <string name="new_search_tab">Nieuwe Zoekopdracht</string>
-    <string name="filter_search_results_here">Hier Resultaten Filteren</string>
+    <string name="new_search_tab">Nieuwe zoekopdracht</string>
+    <string name="filter_search_results_here">Hier resultaten filteren</string>
     <string name="persist_it">Vastgeplakt (sticky)</string>
-    <string name="type_chatroom_ticker_message">Ticker Bericht</string>
+    <string name="type_chatroom_ticker_message">Ticker bericht</string>
 
     <string name="max_search_results">Max. aantal zoekresultaten</string>
     <string name="only_show_free_slots">
@@ -191,7 +191,7 @@
 
     <string name="we_are_already_logging_in">U bent al aangemeld</string>
     <string name="nothing_to_download">Niets om te downloaden</string>
-    <string name="download_is_starting">Download wordt Gestart...</string>
+    <string name="download_is_starting">Download wordt gestart...</string>
     <string name="directory_is_empty">Deze map is leeg</string>
     <string name="nothing_selected">Niets geselecteerd</string>
     <string name="nothing_selected_extra">
@@ -202,15 +202,15 @@
         Kan niet downloaden van jezelf
     </string>
     <string name="must_type_a_username_to_browse">
-        Gebruiker moet User typen om te bladeren
+        Gebruiker moet user typen om te bladeren
     </string>
     <string name="must_type_a_username_to_message">
-        Gebruiker moet User typen om bericht te sturen
+        Gebruiker moet user typen om bericht te sturen
     </string>
     <string name="must_type_a_username_to_invite">
-        Gebruiker moet User typen om uit te nodigen
+        Gebruiker moet user typen om uit te nodigen
     </string>
-    <string name="must_type_a_username_to_add">Gebruiker moet User typen om toe te voegen</string>
+    <string name="must_type_a_username_to_add">Gebruiker moet user typen om toe te voegen</string>
     <string name="must_type_ticker_text">Moet ticker tekst typen</string>
     <string name="must_type_chatroom_name">Moet een chatroom naam typen</string>
     <string name="must_type_text_to_send">Moet tekst invoeren om te verzenden</string>
@@ -264,8 +264,8 @@
     <string name="setting_ticker">Setting ticker...</string>
     <string name="failed_to_set_ticker">Failed to set ticker</string>
     <string name="successfully_set_ticker">Successfully set ticker</string>
-    <string name="folder_request_timed_out">Folder Request Timed Out</string>
-    <string name="folder_request_failed">Folder Request Failed</string>
+    <string name="folder_request_timed_out">Folder request timed out</string>
+    <string name="folder_request_failed">Folder request failed</string>
     <string name="folder_request_already_have">
         We already have the complete folder
     </string>
@@ -275,9 +275,9 @@
     <string name="temporary_disconnected">
         We got temporarily disconnected.. reconnecting now
     </string>
-    <string name="failed_to_undo">Failure to Undo</string>
-    <string name="add_user_title">Add User(s)</string>
-    <string name="ignore_user_title">Ignore User(s)</string>
+    <string name="failed_to_undo">Failure to undo</string>
+    <string name="add_user_title">Add user(s)</string>
+    <string name="ignore_user_title">Ignore user(s)</string>
 
 
 

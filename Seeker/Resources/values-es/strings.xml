@@ -158,7 +158,7 @@
     <string name="search_result_style_on">Encendido</string>
     <string name="expand_all">Expandir todos</string>
     <string name="collapse_all">Desplegar todos</string>
-    <string name="new_search_tab">Nueva Búsqueda</string>
+    <string name="new_search_tab">Nueva búsqueda</string>
     <string name="search_tabs_header">BUSCAR ENTRE PESTAÑAS</string>
     <string name="wishlist_header">LISTA DE DESEOS</string>
     <string name="wishlist_empty_header">LISTA DE DESEOS (VACÍA)</string>
@@ -169,7 +169,7 @@
     <string name="filter_format_lossless">Lossless</string>
     <string name="filter_format_lossy">Lossy</string>
     <string name="filter_min_bitrate_label">Bitrate minimo</string>
-    <string name="type_chatroom_ticker_message">Escribir mensaje Ticker</string>
+    <string name="type_chatroom_ticker_message">Escribir mensaje ticker</string>
     <string name="section_downloads">Descargas</string>
     <string name="section_search">Buscar</string>
     <string name="section_general">General</string>
@@ -206,7 +206,7 @@
     <string name="error_no_file_manager_dir_manage_storage">ERROR - Ninguna aplicación de archivos puede elegir una imagen, por favor instale uno. Si su dispositivo no tiene la intent OPEN_DOCUMENT_TREE, por favor instale Seeker desde F-droid (Repositorio IzzyOnDroid), el cual tiene permisos para gestionar el almacenamiento externo.</string>
     <string name="error_image_doesnt_exist">La imagen no existe</string>
     <string name="error_image_too_large">La imagen es demasiado grande, por favor elija una de menor tamaño (&lt;5MB)</string>
-    <string name="no_room_tickers">Aún no hay Tickers de Salón...</string>
+    <string name="no_room_tickers">Aún no hay tickers de salón...</string>
     <string name="user_list_empty">La lista de usuarios está vacía. Por favor, añada un usuario a la lista de usuarios</string>
     <string name="no_user">No hay usuarios seleccionados</string>
     <string name="no_room">No hay sala seleccionada</string>
@@ -252,7 +252,7 @@
     <string name="setting_ticker">Asignando solicitud...</string>
     <string name="failed_to_set_ticker">Error al asignar solicitud</string>
     <string name="successfully_set_ticker">Solicitud establecida correctamente</string>
-    <string name="folder_request_timed_out">Solicitud de Carpeta agotada</string>
+    <string name="folder_request_timed_out">Solicitud de carpeta agotada</string>
     <string name="folder_request_failed">Falló la solicitud de carpeta</string>
     <string name="folder_request_already_have">Ya tenemos la carpeta completa</string>
     <string name="saved">Guardado</string>

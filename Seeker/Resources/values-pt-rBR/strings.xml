@@ -264,7 +264,7 @@
     <string name="setting_ticker">Configurando ticker...</string>
     <string name="failed_to_set_ticker">Falha ao definir o ticker</string>
     <string name="successfully_set_ticker">Ticker definido com sucesso</string>
-    <string name="folder_request_timed_out">A Solicitação de Pasta Expirou</string>
+    <string name="folder_request_timed_out">A solicitação de pasta expirou</string>
     <string name="folder_request_failed">Falha na solicitação de pasta</string>
     <string name="folder_request_already_have">
         Já temos a pasta completa

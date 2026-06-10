@@ -119,7 +119,7 @@
     <string name="new_search_tab">Neue Suche</string>
     <string name="filter_search_results_here">Ergebnisse hier filtern</string>
     <string name="persist_it">Sticky</string>
-    <string name="type_chatroom_ticker_message">Ticker Message</string>
+    <string name="type_chatroom_ticker_message">Ticker message</string>
 
     <string name="max_search_results">Max Search Results</string>
     <string name="only_show_free_slots">
@@ -171,7 +171,7 @@
         Bild ist zu groß. Bitte wählen Sie ein kleineres Bild. (&lt;5 MB).
     </string>
 
-    <string name="no_room_tickers">No Room Tickers Yet...</string>
+    <string name="no_room_tickers">No room tickers yet...</string>
     <string name="user_list_empty">
         Benutzerliste leer. Bitte Benutzer zur Benutzerliste hinzufügen.
     </string>
@@ -257,8 +257,8 @@
     <string name="setting_ticker">Ticker einstellen...</string>
     <string name="failed_to_set_ticker">Ticker konnte nicht gesetzt werden</string>
     <string name="successfully_set_ticker">Successfully set ticker</string>
-    <string name="folder_request_timed_out">Folder Request Timed Out</string>
-    <string name="folder_request_failed">Folder Request Failed</string>
+    <string name="folder_request_timed_out">Folder request timed out</string>
+    <string name="folder_request_failed">Folder request failed</string>
     <string name="folder_request_already_have">
         We already have the complete folder
     </string>
