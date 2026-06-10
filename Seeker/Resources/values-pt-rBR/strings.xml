@@ -911,7 +911,7 @@
     <string name="WaitForParsing">Aguarde a conclusão da análise.</string>
 
     <string name="ErrorAlreadyAdded">Erro: Diretório já adicionado.</string>
-    <string name="UploadFolderOptions">Opções da pasta de Upload</string>
+    <string name="UploadFolderOptions">Opções da pasta de upload</string>
     <string name="CannotChangeNameNotUnique">
         Não é possível alterar o nome. Não é único.
     </string>
@@ -969,7 +969,7 @@
         Definir manualmente pasta de incompletos
     </string>
     <string name="CurrentIncompleteFolder">Pasta de incompletos</string>
-    <string name="ClearFolder">Limpar Pasta</string>
+    <string name="ClearFolder">Limpar pasta</string>
 
     <string name="HideSize">Ocultar Tamanho</string>
     <string name="HideSpeed">Ocultar Velocidade</string>

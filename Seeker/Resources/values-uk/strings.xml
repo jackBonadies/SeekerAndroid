@@ -996,10 +996,10 @@
 
     <string name="bitrate">Bitrate</string>
 
-    <string name="setUpSharing">Set up Sharing</string>
+    <string name="setUpSharing">Set up sharing</string>
 
     <string name="change_password">Change password</string>
-    <string name="new_password">New Password</string>
+    <string name="new_password">New password</string>
     <string name="cannot_be_empty">Cannot be empty</string>
 
     <string name="must_be_logged_in_to_change_password">

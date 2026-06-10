@@ -492,12 +492,12 @@
     <string name="QueueFolderAsPaused">Queued folder as paused</string>
     <!--meaning duration of song / songs-->
     <string name="Length">长度</string>
-    <string name="NumFiles">Num Files</string>
-    <string name="NumSubfolders">Num Subfolders</string>
-    <string name="HideTickerView">Hide Ticker View</string>
-    <string name="ShowTickerView">Show Ticker View</string>
-    <string name="HideStatusView">Hide Status View</string>
-    <string name="ShowStatusView">Show Status View</string>
+    <string name="NumFiles">Num files</string>
+    <string name="NumSubfolders">Num subfolders</string>
+    <string name="HideTickerView">Hide ticker view</string>
+    <string name="ShowTickerView">Show ticker view</string>
+    <string name="HideStatusView">Hide status view</string>
+    <string name="ShowStatusView">Show status view</string>
     <string name="theUserJoined">已加入</string>
     <string name="theUserLeft">left</string>
     <string name="theUserWentAway">went away</string>
@@ -512,9 +512,9 @@
     <string name="GetFolderDoesntWorkForLockedShares">Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.</string>
     <string name="ImportWizard">导入向导</string>
     <string name="Import">导入</string>
-    <string name="SuccessfullyParsed">Successfully Parsed! Tap Next to Proceed</string>
-    <string name="FailedToParseContactDev">Failed to Parse File. Please ensure file is valid. Contact developer for more help.</string>
-    <string name="FailedToParseReasonContactDev">Failed to Parse File. {0}. Contact developer for more help.</string>
+    <string name="SuccessfullyParsed">Successfully parsed! Tap next to proceed</string>
+    <string name="FailedToParseContactDev">Failed to parse file. Please ensure file is valid. Contact developer for more help.</string>
+    <string name="FailedToParseReasonContactDev">Failed to parse file. {0}. Contact developer for more help.</string>
     <string name="NoSuitableFileManager">No suitable file manager found</string>
     <string name="SuccessfullyImported">Successfully imported client data</string>
     <string name="SelectUserNotes">Select the following user notes to add</string>
@@ -580,11 +580,11 @@
     <string name="NotSet">Not set</string>
     <string name="AppLocalStorage">应用本地存储</string>
     <string name="NotInUse">未使用</string>
-    <string name="IncompleteFolderEmpty">Incomplete Folder is empty</string>
+    <string name="IncompleteFolderEmpty">Incomplete folder is empty</string>
     <string name="NoEligibleToClear">No eligible items to clear</string>
     <string name="WaitForParsing">Wait for parsing to complete.</string>
     <string name="ErrorAlreadyAdded">Error: Directory Already Added.</string>
-    <string name="UploadFolderOptions">Upload Folder Options</string>
+    <string name="UploadFolderOptions">Upload folder options</string>
     <string name="CannotChangeNameNotUnique">Cannot change name. Not unique.</string>
     <string name="AlreadyParsing">Already parsing</string>
     <string name="DirectoryNotSet">Directory not set</string>
@@ -617,7 +617,7 @@
     <string name="Automatic">Automatic</string>
     <string name="ManuallySetIncompleteFolder">Manually Set Incomplete Folder</string>
     <string name="CurrentIncompleteFolder">Incomplete folder</string>
-    <string name="ClearFolder">Clear Folder</string>
+    <string name="ClearFolder">Clear folder</string>
     <string name="HideSize">Hide Size</string>
     <string name="HideSpeed">Hide Speed</string>
     <string name="Num_Selected">{0} Selected</string>
@@ -628,9 +628,9 @@
     <string name="permission_successfully_granted">Permission succesfully granted</string>
     <string name="permission_failed">Failed to grant permission</string>
     <string name="bitrate">Bitrate</string>
-    <string name="setUpSharing">Set up Sharing</string>
+    <string name="setUpSharing">Set up sharing</string>
     <string name="change_password">Change Password</string>
-    <string name="new_password">New Password</string>
+    <string name="new_password">New password</string>
     <string name="cannot_be_empty">Cannot be empty</string>
     <string name="must_be_logged_in_to_change_password">Must be logged in to change password</string>
     <string name="failed_to_change_password">Failed to change password</string>

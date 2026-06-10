@@ -588,8 +588,8 @@
     <string name="Length">Duración</string>
     <string name="NumFiles">Número de archivos</string>
     <string name="NumSubfolders">Número de subcarpetas</string>
-    <string name="HideTickerView">Ocultar vista de Ticker</string>
-    <string name="ShowTickerView">Mostrar vista de Ticker</string>
+    <string name="HideTickerView">Ocultar vista de ticker</string>
+    <string name="ShowTickerView">Mostrar vista de ticker</string>
     <string name="HideStatusView">Ocultar barra de estado</string>
     <string name="ShowStatusView">Mostrar barra de estado</string>
     <string name="theUserJoined">unido</string>
@@ -678,7 +678,7 @@
     <string name="NoEligibleToClear">No hay elementos elegibles para limpiar</string>
     <string name="WaitForParsing">Espere a que se complete el análisis.</string>
     <string name="ErrorAlreadyAdded">Error: Directorio ya añadido.</string>
-    <string name="UploadFolderOptions">Opciones de Carpeta de Carga</string>
+    <string name="UploadFolderOptions">Opciones de carpeta de carga</string>
     <string name="CannotChangeNameNotUnique">No se puede cambiar el nombre. No es único</string>
     <string name="AlreadyParsing">Analizando</string>
     <string name="DirectoryNotSet">Directorio no establecido</string>
@@ -724,7 +724,7 @@
     <string name="permission_successfully_granted">Permiso concedido exitosamente</string>
     <string name="permission_failed">Fallo al conceder permisos</string>
     <string name="bitrate">Tasa de bits</string>
-    <string name="setUpSharing">Configurar Compartir</string>
+    <string name="setUpSharing">Configurar compartir</string>
     <string name="change_password">Cambiar contraseña</string>
     <string name="new_password">Nueva contraseña</string>
     <string name="cannot_be_empty">No puede quedar en blanco</string>

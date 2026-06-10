@@ -741,8 +741,8 @@
     <string name="NumFiles">Počet souborů</string>
     <string name="NumSubfolders">Počet podsložek</string>
 
-    <string name="HideTickerView">Hide Ticker View</string>
-    <string name="ShowTickerView">Show Ticker View</string>
+    <string name="HideTickerView">Hide ticker view</string>
+    <string name="ShowTickerView">Show ticker view</string>
     <string name="HideStatusView">Skrýt zobrazení stavu</string>
     <string name="ShowStatusView">Zobrazit zobrazení stavu</string>
 
@@ -795,7 +795,7 @@
         Select the following user notes to add
     </string>
     <string name="FolderFinishedDownloading">
-        Folder Finished Downloading
+        Folder finished downloading
     </string>
     <string name="FinishedDownloading">stahování dokončeno</string>
     <string name="PermissionsIssueShared">
@@ -898,13 +898,13 @@
     <string name="AppLocalStorage">Místní úložiště aplikací</string>
     <string name="NotInUse">Není používáno</string>
 
-    <string name="IncompleteFolderEmpty">Incomplete Folder is empty</string>
+    <string name="IncompleteFolderEmpty">Incomplete folder is empty</string>
     <string name="NoEligibleToClear">No eligible items to clear</string>
 
     <string name="WaitForParsing">Wait for parsing to complete.</string>
 
     <string name="ErrorAlreadyAdded">Error: Directory Already Added.</string>
-    <string name="UploadFolderOptions">Upload Folder Options</string>
+    <string name="UploadFolderOptions">Upload folder options</string>
     <string name="CannotChangeNameNotUnique">
         Cannot change name. Not unique.
     </string>
@@ -962,7 +962,7 @@
         Override incomplete folder location
     </string>
     <string name="CurrentIncompleteFolder">Incomplete folder</string>
-    <string name="ClearFolder">Clear Folder</string>
+    <string name="ClearFolder">Clear folder</string>
 
     <string name="HideSize">Skrýt velikost</string>
     <string name="HideSpeed">Skrýt rychlost</string>
@@ -987,10 +987,10 @@
 
     <string name="bitrate">Bitrate</string>
 
-    <string name="setUpSharing">Set up Sharing</string>
+    <string name="setUpSharing">Set up sharing</string>
 
     <string name="change_password">Change password</string>
-    <string name="new_password">New Password</string>
+    <string name="new_password">New password</string>
     <string name="cannot_be_empty">Cannot be empty</string>
 
     <string name="must_be_logged_in_to_change_password">
