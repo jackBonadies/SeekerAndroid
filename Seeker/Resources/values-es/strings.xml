@@ -614,7 +614,7 @@
     <string name="SelectUserNotes">Seleccione las siguientes notas de usuario para añadir</string>
     <string name="FolderFinishedDownloading">Se terminó de descargar la carpeta</string>
     <string name="FinishedDownloading">descarga completada</string>
-    <string name="PermissionsIssueShared">Problema de permisos al abrir la carpeta compartida. Vaya a la configuración y vuelva a seleccionar Carpeta compartida</string>
+    <string name="PermissionsIssueShared">Problema de permisos al abrir la carpeta compartida. Vaya a la configuración y vuelva a seleccionar carpeta compartida</string>
     <string name="SharedFolderIssuesAllFailed">Problema al acceder a carpetas compartidas. Toque carpetas para más información</string>
     <string name="UserXIsOffline">El usuario {0} está desconectado</string>
     <string name="CannotConnectUserX">No se puede conectar al usuario {0}</string>

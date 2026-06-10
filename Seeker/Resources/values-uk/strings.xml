@@ -824,7 +824,7 @@
         Помилка дозволу, неможливо записати (виберіть повторно).
     </string>
     <string name="FolderNotAccessible">
-        Folder is not accessible (Please reselect).
+        Folder is not accessible (please reselect).
     </string>
     <string name="UnknownErrorShared">Невідома помилка. Див.</string>
     <string name="MessagesWithUser">Повідомлення від {0}</string>

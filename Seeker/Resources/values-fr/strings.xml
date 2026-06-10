@@ -182,8 +182,8 @@
     <string name="user_list_empty">
         La liste des utilisateurs est vide. Veuillez ajouter un utilisateur à la liste.
     </string>
-    <string name="no_user">Aucun Utilisateur sélectionné</string>
-    <string name="no_room">Aucun Salon sélectionné</string>
+    <string name="no_user">Aucun utilisateur sélectionné</string>
+    <string name="no_room">Aucun salon sélectionné</string>
     <string name="no_search_results">Aucun résultat</string>
     <string name="no_search_text">Tapez du texte pour rechercher</string>
     <string name="no_wish_text">Taper du texte pour chercher dans la liste de souhaits</string>
@@ -663,7 +663,7 @@
     <string name="removed_user">Utilisateur supprimé : \"{0}\"</string>
 
     <string name="successfully_changed_incomplete_dir">
-        Changement du dossier Incomplet vers \"{0}\" réussi
+        Changement du dossier incomplet vers \"{0}\" réussi
     </string>
 
     <string name="auto_clear_complete">Efface automatiquement les téléchargements complets</string>
@@ -824,7 +824,7 @@
     <string name="FolderNotAccessible">
         Dossier inaccessible (Veuillez en sélectionner un nouveau).
     </string>
-    <string name="UnknownErrorShared">Erreur Inconnue. Se référer au développeur.</string>
+    <string name="UnknownErrorShared">Erreur inconnue. Se référer au développeur.</string>
     <string name="MessagesWithUser">Messages avec {0}</string>
 
     <string name="DateAddedAsc">Date d\'ajout (asc)</string>

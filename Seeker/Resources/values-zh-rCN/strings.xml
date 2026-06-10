@@ -132,7 +132,7 @@
     <string name="no_room_tickers">No room tickers yet...</string>
     <string name="user_list_empty">用户列表为空。请添加用户到用户列表。</string>
     <string name="no_user">没有选中用户</string>
-    <string name="no_room">No Room is selected</string>
+    <string name="no_room">No room is selected</string>
     <string name="no_search_results">未找到结果</string>
     <string name="no_search_text">必须输入要搜索的文本</string>
     <string name="no_wish_text">必须输入文本进行心愿单搜索</string>
@@ -264,7 +264,7 @@
     <string name="browse_onlylocked">User is only sharing locked directories</string>
     <string name="kicked_due_to_other_client">Disconnecting... is another client using this username?</string>
     <string name="port_already_in_use">无法设置监听器。端口可能已在使用。</string>
-    <string name="dns_failed">DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.</string>
+    <string name="dns_failed">DNS lookup of server failed. Falling back on hardcoded IP succeeded.</string>
     <string name="bad_user_pass">用户名或密码错误</string>
     <string name="invalid_username">无效的用户名</string>
     <string name="invalid_password">无效的密码</string>
@@ -440,7 +440,7 @@
     <string name="note">Note</string>
     <string name="removed_user_from_ignored_list">Removed user \"{0}\" from ignore list</string>
     <string name="removed_user">Removed user: \"{0}\"</string>
-    <string name="successfully_changed_incomplete_dir">Successfully changed Incomplete Directory to \"{0}\"</string>
+    <string name="successfully_changed_incomplete_dir">Successfully changed incomplete directory to \"{0}\"</string>
     <string name="auto_clear_complete">Auto-Clear Complete Downloads</string>
     <string name="auto_clear_complete_uploads">Auto-Clear Complete Uploads</string>
     <string name="download_remaining">{0} download remaining</string>
@@ -509,7 +509,7 @@
     <string name="CannotBrowseUsernameOffline">Cannot browse {0}, user is offline.</string>
     <string name="FailedToBrowseUsernameUnspecifiedError">Failed to browse {0} due to unspecified error.</string>
     <string name="BrowseOnlyEmptyDir">User, {0}, is sharing only an empty directory.</string>
-    <string name="GetFolderDoesntWorkForLockedShares">Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.</string>
+    <string name="GetFolderDoesntWorkForLockedShares">Get folder does not work for locked shares.  Must use Browse or Browse at location instead.</string>
     <string name="ImportWizard">导入向导</string>
     <string name="Import">导入</string>
     <string name="SuccessfullyParsed">Successfully parsed! Tap next to proceed</string>
@@ -520,13 +520,13 @@
     <string name="SelectUserNotes">Select the following user notes to add</string>
     <string name="FolderFinishedDownloading">文件夹已下载完成</string>
     <string name="FinishedDownloading">下载完成</string>
-    <string name="PermissionsIssueShared">Permissions Issue opening Shared Folder.  Please go into settings and reselect Shared Folder.</string>
+    <string name="PermissionsIssueShared">Permissions issue opening shared folder.  Please go into settings and reselect shared folder.</string>
     <string name="SharedFolderIssuesAllFailed">Issue accessing shared folders. Tap folders for more info.</string>
     <string name="UserXIsOffline">用户 {0} 已离线</string>
     <string name="CannotConnectUserX">无法连接到用户 {0}</string>
     <string name="TimeoutQueueUserX">Timeout getting queue position from {0}</string>
-    <string name="PermissionErrorShared">Permission Error, cannot write (Please reselect).</string>
-    <string name="FolderNotAccessible">Folder is not accessible (Please reselect).</string>
+    <string name="PermissionErrorShared">Permission error, cannot write (please reselect).</string>
+    <string name="FolderNotAccessible">Folder is not accessible (please reselect).</string>
     <string name="UnknownErrorShared">未知错误。请参阅dev。</string>
     <string name="MessagesWithUser">Messages with {0}</string>
     <string name="DateAddedAsc">Date added (asc)</string>

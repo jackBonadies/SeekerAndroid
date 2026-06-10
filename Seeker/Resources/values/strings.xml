@@ -226,8 +226,8 @@
     <string name="restore_default_settings_body">This will reset all settings to their defaults. This can\'t be undone.</string>
     <string name="restore_defaults_subtitle">Resets every setting to factory state</string>
     <string name="force_filesystem_subtitle">Android\'s standard folder permissions don\'t always persist. If Seeker keeps re-prompting for Download or Shared Folder access, this will grant persisted full-storage access via system settings.\n\nThe Play Store version cannot request this permission — requires F-droid (IzzyOnDroid) or GitHub release version.</string>
-    <string name="get_fdroid_build">Get F-Droid (IzzyOnDroid) Build</string>
-    <string name="get_github_build">Get GitHub Release Build</string>
+    <string name="get_fdroid_build">Get F-Droid (IzzyOnDroid) build</string>
+    <string name="get_github_build">Get GitHub release build</string>
 
 
     <string name="user_has_no_bio">User has no bio.</string>
@@ -243,9 +243,9 @@
     <string name="error_image_too_large">Image is too large. Please choose a smaller image. ( &lt; 5MB).</string>
 
     <string name="no_room_tickers">No room tickers yet...</string>
-    <string name="user_list_empty">User list is empty. Please add a user to User list.</string>
-    <string name="no_user">No User is selected</string>
-    <string name="no_room">No Room is selected</string>
+    <string name="user_list_empty">User list is empty. Please add a user to user list.</string>
+    <string name="no_user">No user is selected</string>
+    <string name="no_room">No room is selected</string>
     <string name="no_search_results">No results found</string>
     <string name="no_search_text">Must type text to search</string>
     <string name="no_wish_text">Must type text for wishlist search</string>
@@ -405,7 +405,7 @@
     <string name="browse_onlylocked">User is only sharing locked directories</string>
     <string name="kicked_due_to_other_client">Disconnecting... is another client using this username?</string>
     <string name="port_already_in_use">Failed to set up listener. Port likely already in use.</string>
-    <string name="dns_failed">DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.</string>
+    <string name="dns_failed">DNS lookup of server failed. Falling back on hardcoded IP succeeded.</string>
     <string name="bad_user_pass">Bad username or password</string>
     <string name="invalid_username">Invalid username</string>
     <string name="invalid_password">Invalid password</string>
@@ -626,7 +626,7 @@
 
     <string name="removed_user">Removed user: \"{0}\"</string>
 
-    <string name="successfully_changed_incomplete_dir">Successfully changed Incomplete Directory to \"{0}\"</string>
+    <string name="successfully_changed_incomplete_dir">Successfully changed incomplete directory to \"{0}\"</string>
 
     <string name="auto_clear_complete">Auto-clear complete downloads</string>
     <string name="auto_clear_complete_uploads">Auto-clear complete uploads</string>
@@ -732,7 +732,7 @@
     <string name="BrowseOnlyEmptyDir">User, {0}, is sharing only an empty directory.</string>
 
 
-    <string name="GetFolderDoesntWorkForLockedShares">Get Folder does not work for Locked Shares.  Must use Browse or Browse At Location instead.</string>
+    <string name="GetFolderDoesntWorkForLockedShares">Get folder does not work for locked shares.  Must use Browse or Browse at location instead.</string>
     <string name="ImportWizard">Import wizard</string>
     <string name="Import">Import</string>
     <string name="SuccessfullyParsed">Successfully parsed! Tap next to proceed</string>
@@ -745,16 +745,16 @@
     <string name="SelectUserNotes">Select the following user notes to add</string>
     <string name="FolderFinishedDownloading">Folder finished downloading</string>
     <string name="FinishedDownloading">finished downloading</string>
-    <string name="PermissionsIssueShared">Permissions Issue opening Shared Folder.  Please go into settings and reselect Shared Folder.</string>
+    <string name="PermissionsIssueShared">Permissions issue opening shared folder.  Please go into settings and reselect shared folder.</string>
     <string name="SharedFolderIssuesAllFailed">Issue accessing shared folders. Tap folders for more info.</string>
 
     <string name="UserXIsOffline">User {0} is offline</string>
     <string name="CannotConnectUserX">Cannot connect to user {0}</string>
     <string name="TimeoutQueueUserX">Timeout getting queue position from {0}</string>
 
-    <string name="PermissionErrorShared">Permission Error, cannot write (Please reselect).</string>
-    <string name="FolderNotAccessible">Folder is not accessible (Please reselect).</string>
-    <string name="UnknownErrorShared">Unknown Error. See dev.</string>
+    <string name="PermissionErrorShared">Permission error, cannot write (please reselect).</string>
+    <string name="FolderNotAccessible">Folder is not accessible (please reselect).</string>
+    <string name="UnknownErrorShared">Unknown error. See dev.</string>
     <string name="MessagesWithUser">Messages with {0}</string>
 
     <string name="DateAddedAsc">Date added (asc)</string>
