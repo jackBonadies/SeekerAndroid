@@ -107,14 +107,14 @@
     <string name="inviteuser">Convidar usuário</string>
 
     <string name="give_up_room">Renunciar Sala</string>
-    <string name="give_up_membership">Renunciar Inscrição</string>
+    <string name="give_up_membership">Renunciar inscrição</string>
 
     <string name="logout">Logout</string>
     <string name="login">Login</string>
     <string name="password">Senha</string>
-    <string name="ConnectingToServer">Connecting to Server</string>
+    <string name="ConnectingToServer">Connecting to server</string>
     <string name="PleaseWait_">Please Wait...</string>
-    <string name="choose_a_download_folder">Selecionar Diretório de Download</string>
+    <string name="choose_a_download_folder">Selecionar diretório de download</string>
     <string name="settings">Configurações</string>
 
     <string name="enter_user_to_message">Inserir usuário a ser contatado</string>

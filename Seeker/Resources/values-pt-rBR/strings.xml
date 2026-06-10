@@ -13,7 +13,7 @@
     <string name="new_results">novos resultados</string>
 
 
-    <string name="saerch_user_list">Pesquisar Lista de Usuários</string>
+    <string name="saerch_user_list">Pesquisar lista de usuários</string>
     <string name="search_room">Pesquisar sala</string>
     <string name="search_room_">Pesquisar sala {0}</string>
     <string name="search_user_">Buscar usuário {0}</string>
@@ -117,7 +117,7 @@
     <string name="password">Senha</string>
     <string name="ConnectingToServer">Conectando ao servidor</string>
     <string name="PleaseWait_">Por favor, aguarde...</string>
-    <string name="choose_a_download_folder">Selecionar Pasta de Download</string>
+    <string name="choose_a_download_folder">Selecionar pasta de download</string>
     <string name="settings">Configurações</string>
 
 

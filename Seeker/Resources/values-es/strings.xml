@@ -18,11 +18,11 @@
     <string name="section_caps_account">CUENTA</string>
     <string name="new_result">nuevo resultado</string>
     <string name="new_results">nuevos resultados</string>
-    <string name="saerch_user_list">Buscar Lista de Usuarios</string>
+    <string name="saerch_user_list">Buscar lista de usuarios</string>
     <string name="search_room">Buscar sala</string>
     <string name="search_room_">Buscar sala {0}</string>
     <string name="search_user_">Buscar usuario {0}</string>
-    <string name="wishlist_search">Buscar Lista de deseos</string>
+    <string name="wishlist_search">Buscar lista de deseos</string>
     <string name="no_account">¿No tienes cuenta? Simplemente ingresa un nombre de usuario único y crearemos una para ti</string>
     <string name="privileges_more_info">Los privilegios permiten apoyar al creador de Soulseek (Nir) y al servidor central del que depende esta aplicación.
 \n\nTambién permite una posicion privilegiada en la cola de descargas.
@@ -139,7 +139,7 @@
     <string name="logout">Cerrar sesión</string>
     <string name="login">Iniciar sesión</string>
     <string name="password">Contraseña</string>
-    <string name="ConnectingToServer">Conectándose al Servidor</string>
+    <string name="ConnectingToServer">Conectándose al servidor</string>
     <string name="PleaseWait_">Por favor espere...</string>
     <string name="choose_a_download_folder">Elija la carpeta de descarga</string>
     <string name="settings">Ajustes</string>

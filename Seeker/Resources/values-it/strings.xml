@@ -9,11 +9,11 @@
     <string name="searches_tab2">Ricerca</string>
     <string name="new_result">Nuovo risultato</string>
     <string name="new_results">Nuovi risultati</string>
-    <string name="saerch_user_list">Cerca Lista Utenti</string>
+    <string name="saerch_user_list">Cerca lista utenti</string>
     <string name="search_room">Cerca stanza</string>
     <string name="search_room_">Cerca nella stanza {0}</string>
     <string name="search_user_">Cerca utente {0}</string>
-    <string name="wishlist_search">Ricerca Lista Desideri</string>
+    <string name="wishlist_search">Ricerca lista desideri</string>
     <string name="no_account">Non hai un account? Basta inserire un nome utente univoco e ne verrà creato uno per te.</string>
     <string name="privileges_more_info">I \"privilegi\" consentono di supportare il creatore di Soulseek (Nir) e il server centrale su cui dipende questa app.
 \n\nPermette anche di essere posizionati più avanti rispetto agli utenti non privilegiati nella coda di download.
@@ -23,9 +23,9 @@
     <string name="browse_files">Sfoglia documenti</string>
     <string name="chatroomListLoading">Richiesta elenco delle chat disponibili. Attendere...</string>
     <string name="privateRoomCreation">Richiesta creazione stanza privata</string>
-    <string name="requesting_room_list">Richiesta Elenco Stanze</string>
-    <string name="requesting_user_info">Richiesta Informazioni Utente</string>
-    <string name="room_list_received">Elenco Stanze Ricevuto</string>
+    <string name="requesting_room_list">Richiesta elenco stanze</string>
+    <string name="requesting_user_info">Richiesta informazioni utente</string>
+    <string name="room_list_received">Elenco stanze ricevuto</string>
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Lista desideri</string>

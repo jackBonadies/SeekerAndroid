@@ -13,7 +13,7 @@
 	<string name="signin_or_create_account">Sign in or create new account</string>
 
     <string name="set_up_sharing">Set up sharing</string>
-    <string name="manage_user_list">Manage User List</string>
+    <string name="manage_user_list">Manage user list</string>
     <string name="unread_count">{0} unread</string>
     <string name="section_caps_setup">SETUP</string>
     <string name="section_caps_communication">COMMUNICATION</string>
@@ -25,11 +25,11 @@
     <string name="stop_service">Stop service</string>
     <string name="start_service">Start service</string>
 
-    <string name="saerch_user_list">Search User List</string>
+    <string name="saerch_user_list">Search user list</string>
     <string name="search_room">Search room</string>
     <string name="search_room_">Search room {0}</string>
     <string name="search_user_">Search user {0}</string>
-    <string name="wishlist_search">Wishlist Search</string>
+    <string name="wishlist_search">Wishlist search</string>
 
     <string name="no_account">Don\'t have an account?  Simply enter a unique username and one will be created for you.</string>
     <string name="keep_alive_service_subtitle">Allows Seeker respond to search requests (share), receive chat messages, and run wishlist searches while in background</string> 
@@ -54,18 +54,18 @@
     <string name="no_searches_subtitle">Enter a term to search the Soulseek network</string>
     <string name="searching_label">Searching</string>
     <string name="loading_wishlist_label">Loading wishlist</string>
-    <string name="no_results_title">No Results Found</string>
+    <string name="no_results_title">No results found</string>
     <string name="no_results_subtitle">Nothing found for \"{0}\"</string>
     <string name="results_hidden_title">{0} results hidden by filters</string>
     <string name="results_hidden_subtitle">Open filters to adjust</string>
     <string name="search_results_count_none">No results found</string>
-    <string name="search_results_count">{0} Results</string>
-    <string name="search_results_count_filtered">Showing {0} of {1} Results</string>
+    <string name="search_results_count">{0} results</string>
+    <string name="search_results_count_filtered">Showing {0} of {1} results</string>
     <string name="wishlist_results_count">{0} results</string>
     <string name="wishlist_never_run">Never run</string>
-    <string name="category_file_type">File Type</string>
+    <string name="category_file_type">File type</string>
     <string name="category_keyword">Keyword</string>
-    <string name="category_num_files">Num Files</string>
+    <string name="category_num_files">Num files</string>
     <string name="grouped_chips_toggle">Grouped filter chips</string>
     <string name="filter_sheet_close_desc">Close</string>
     <string name="filter_sheet_count_filtered">{0} / {1}</string>
@@ -74,9 +74,9 @@
     <string name="browse_files">Browse files</string>
     <string name="chatroomsLoading">Loading chatrooms...</string>
     <string name="privateRoomCreation">Requesting private room creation</string>
-    <string name="requesting_room_list">Requesting Room List</string>
-    <string name="requesting_user_info">Requesting User\'s Info</string>
-    <string name="room_list_received">Room List Received</string>
+    <string name="requesting_room_list">Requesting room list</string>
+    <string name="requesting_user_info">Requesting user\'s info</string>
+    <string name="room_list_received">Room list received</string>
     <string name="room_list_request_failed">Failed to fetch chat room list</string>
 
     <string name="kilobytes_per_second">kb/s</string>
@@ -94,14 +94,14 @@
     <string name="stat_directories">Directories</string>
     <string name="stat_free_upload">Free upload</string>
     <string name="add_user">Add user</string>
-    <string name="get_user_info">Get User Info</string>
+    <string name="get_user_info">Get user info</string>
     <string name="quick_info">Quick info</string>
     <string name="filter">Filter</string>
     <!--
   These are search targets
   -->
     <string name="all_target">All users</string>
-    <string name="target_user_list">User List</string>
+    <string name="target_user_list">User list</string>
     <string name="target_room">Room</string>
     <string name="target_room_name">Room name</string>
     <string name="target_choose_user">Choose user</string>
@@ -154,34 +154,34 @@
     <string name="clear_image">Clear image</string>
     <string name="no_image_chosen">None</string>
 
-    <string name="inviteuser">Invite User</string>
+    <string name="inviteuser">Invite user</string>
 
     <string name="give_up_room">Give up Room</string>
-    <string name="give_up_membership">Give up Membership</string>
+    <string name="give_up_membership">Give up membership</string>
 
     <string name="logout">Logout</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
-    <string name="ConnectingToServer">Connecting to Server</string>
+    <string name="ConnectingToServer">Connecting to server</string>
     <string name="PleaseWait_">Please Wait...</string>
-    <string name="choose_a_download_folder">Select Download Folder</string>
+    <string name="choose_a_download_folder">Select download folder</string>
     <string name="settings">Settings</string>
 
 
     <!--Search Result Styles-->
-    <string name="search_result_style">Result Style</string>
+    <string name="search_result_style">Result style</string>
     <string name="search_result_style_style_label">Style</string>
     <string name="search_result_style_simple">Simple</string>
     <string name="search_result_style_modern">Modern</string>
     <string name="search_result_style_compact">Compact</string>
-    <string name="search_result_style_filetype_position_label">File Type Position</string>
+    <string name="search_result_style_filetype_position_label">File type position</string>
     <string name="search_result_style_filetype_bottom">Bottom</string>
     <string name="search_result_style_filetype_top">Top</string>
     <string name="search_result_style_expandable">Expandable</string>
     <string name="search_result_style_off">Off</string>
     <string name="search_result_style_on">On</string>
-    <string name="expand_all">Expand All</string>
-    <string name="collapse_all">Collapse All</string>
+    <string name="expand_all">Expand all</string>
+    <string name="collapse_all">Collapse all</string>
 
     <string name="new_search_tab">New Search</string>
     <string name="search_tabs_header">SEARCH TABS</string>

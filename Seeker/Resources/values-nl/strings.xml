@@ -13,11 +13,11 @@
     <string name="new_results">nieuwe resultaten</string>
 
 
-    <string name="saerch_user_list">Zoek Gebruikerslijst</string>
+    <string name="saerch_user_list">Zoek gebruikerslijst</string>
     <string name="search_room">Zoek kamer</string>
     <string name="search_room_">Zoek kamer {0}</string>
     <string name="search_user_">Zoek gebruiker {0}</string>
-    <string name="wishlist_search">Verlanglijst Zoeken</string>
+    <string name="wishlist_search">Verlanglijst zoeken</string>
 
     <string name="no_account">
         Heb je geen account? Voer een unieke gebruikersnaam in en er wordt er een voor je aangemaakt.
@@ -56,7 +56,7 @@
     <string name="quick_info">Beknopte info</string>
     <string name="enter_user_to_browse">Voer gebruiker in om door te bladeren</string>
     <string name="all_target">Alle gebruikers</string>
-    <string name="target_user_list">Gebruiker Lijst</string>
+    <string name="target_user_list">Gebruiker lijst</string>
     <string name="target_room">Kamer</string>
     <string name="target_room_name">Kamer naam</string>
     <string name="target_choose_user">Kies gebruiker</string>
@@ -115,7 +115,7 @@
     <string name="logout">Uitloggen</string>
     <string name="login">Aanmelden</string>
     <string name="password">Wachtwoord</string>
-    <string name="ConnectingToServer">Verbinden met Server</string>
+    <string name="ConnectingToServer">Verbinden met server</string>
     <string name="PleaseWait_">Even geduld aub...</string>
     <string name="choose_a_download_folder">Selecteer downloadmap</string>
     <string name="settings">Instellingen</string>

@@ -13,11 +13,11 @@
     <string name="new_results">nye resultater</string>
 
 
-    <string name="saerch_user_list">Søg I Brugerlisten</string>
+    <string name="saerch_user_list">Søg i brugerlisten</string>
     <string name="search_room">Søg rum</string>
     <string name="search_room_">Søg rum {0}</string>
     <string name="search_user_">Søg bruger {0}</string>
-    <string name="wishlist_search">Ønskeliste Søgning</string>
+    <string name="wishlist_search">Ønskeliste søgning</string>
 
     <string name="no_account">
         Har du ikke en konto? Indtast blot et unikt brugernavn og en konto vil blive oprettet til dig.
@@ -30,9 +30,9 @@
     <string name="messages">Beskeder</string>
     <string name="browse_files">Gennemse filer</string>
     <string name="privateRoomCreation">Anmoder om oprettelse af privat rum</string>
-    <string name="requesting_room_list">Anmoder Om Rumliste</string>
-    <string name="requesting_user_info">Henter Brugerens Information</string>
-    <string name="room_list_received">Rumliste Modtaget</string>
+    <string name="requesting_room_list">Anmoder om rumliste</string>
+    <string name="requesting_user_info">Henter brugerens information</string>
+    <string name="room_list_received">Rumliste modtaget</string>
 
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
@@ -48,7 +48,7 @@
         Du har ikke-gemte ændringer, er du sikker på, at du vil kassere dem?
     </string>
     <string name="add_user">Tilføj bruger</string>
-    <string name="get_user_info">Hent Brugerinformation</string>
+    <string name="get_user_info">Hent brugerinformation</string>
     <string name="quick_info">Hurtig info</string>
     <string name="enter_user_to_browse">Indtast bruger for at gennemse</string>
     <string name="all_target">Alle brugere</string>
@@ -100,21 +100,21 @@
     <string name="clear_image">Clear image</string>
     <string name="no_image_chosen">None</string>
 
-    <string name="inviteuser">Invite User</string>
+    <string name="inviteuser">Invite user</string>
 
     <string name="give_up_room">Give up Room</string>
-    <string name="give_up_membership">Give up Membership</string>
+    <string name="give_up_membership">Give up membership</string>
 
     <string name="logout">Logout</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
-    <string name="ConnectingToServer">Connecting to Server</string>
+    <string name="ConnectingToServer">Connecting to server</string>
     <string name="PleaseWait_">Please Wait...</string>
-    <string name="choose_a_download_folder">Select Download Folder</string>
+    <string name="choose_a_download_folder">Select download folder</string>
     <string name="settings">Settings</string>
 
 
-    <string name="search_result_style">Result Style</string>
+    <string name="search_result_style">Result style</string>
 
     <string name="new_search_tab">New Search</string>
     <string name="filter_search_results_here">Filter Results</string>

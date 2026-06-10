@@ -34,7 +34,7 @@
     <string name="unsaved_changes_title">放弃未保存的更改？</string>
     <string name="unsaved_changes_body">您有未保存的更改，您确定要放弃它们吗？</string>
     <string name="add_user">新增用户</string>
-    <string name="get_user_info">Get User Info</string>
+    <string name="get_user_info">Get user info</string>
     <string name="quick_info">Quick info</string>
     <string name="enter_user_to_browse">Enter User to Browse</string>
     <!--
@@ -83,7 +83,7 @@
     <string name="inviteuser">邀请成员</string>
     <string name="invite_user">邀请成员：</string>
     <string name="give_up_room">放弃房间</string>
-    <string name="give_up_membership">Give up Membership</string>
+    <string name="give_up_membership">Give up membership</string>
     <string name="logout">退出登录</string>
     <string name="login">登录</string>
     <string name="password">密码</string>
@@ -92,7 +92,7 @@
     <string name="choose_a_download_folder">选择下载文件夹</string>
     <string name="settings">设置</string>
     <!--Search Result Styles-->
-    <string name="search_result_style">Result Style:</string>
+    <string name="search_result_style">Result style:</string>
     <string name="search_result_style_expanded">Expandable: Expanded</string>
     <string name="search_result_style_collapsed">展开：已折叠</string>
     <string name="search_result_style_medium">中</string>

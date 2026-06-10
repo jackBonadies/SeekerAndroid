@@ -13,11 +13,11 @@
     <string name="new_results">nouveaux résultats</string>
 
 
-    <string name="saerch_user_list">Chercher dans la Liste d\'Utilisateurs</string>
+    <string name="saerch_user_list">Chercher dans la liste d\'utilisateurs</string>
     <string name="search_room">Chercher un salon</string>
     <string name="search_room_">Chercher le salon {0}</string>
     <string name="search_user_">Chercher l\'utilisateur {0}</string>
-    <string name="wishlist_search">Rechercher dans la Liste de Souhaits</string>
+    <string name="wishlist_search">Rechercher dans la liste de souhaits</string>
 
     <string name="no_account">
         Pas de compte ? Entrez un nom d\'utilisateur et un compte vous sera attribué.
@@ -34,9 +34,9 @@
     <string name="messages">Messages</string>
     <string name="browse_files">Parcourir les fichiers</string>
     <string name="privateRoomCreation">Requête de création d\'un salon privé</string>
-    <string name="requesting_room_list">Requête de la Liste des Salons</string>
-    <string name="requesting_user_info">Requête des Infos d\'Utilisateur</string>
-    <string name="room_list_received">Liste des Salons reçue</string>
+    <string name="requesting_room_list">Requête de la liste des salons</string>
+    <string name="requesting_user_info">Requête des infos d\'utilisateur</string>
+    <string name="room_list_received">Liste des salons reçue</string>
 
     <string name="kilobytes_per_second">kbps</string>
     <string name="kilohertz">kHz</string>
@@ -52,11 +52,11 @@
         Voulez-vous vraiment annuler les modifications apportées?
     </string>
     <string name="add_user">Ajouter un utilisateur</string>
-    <string name="get_user_info">Obtenir les Informations de l\'Utilisateur</string>
+    <string name="get_user_info">Obtenir les informations de l\'utilisateur</string>
     <string name="quick_info">Information rapide</string>
     <string name="enter_user_to_browse">Entrez l\'Utilisateur à Parcourir</string>
     <string name="all_target">Tous les utilisateurs</string>
-    <string name="target_user_list">Liste d’Utilisateurs</string>
+    <string name="target_user_list">Liste d’utilisateurs</string>
     <string name="target_room">Salon</string>
     <string name="target_room_name">Nom du salon</string>
     <string name="target_choose_user">Choisir un utilisateur</string>
