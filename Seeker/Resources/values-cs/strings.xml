@@ -733,8 +733,8 @@
     <string name="ThisFolderContainsSubfolders">
         Tato složka obsahuje podsložky
     </string>
-    <string name="QueuedForDownload">Queued for Download</string>
-    <string name="QueueFolderAsPaused">Queued Folder as Paused</string>
+    <string name="QueuedForDownload">Queued for download</string>
+    <string name="QueueFolderAsPaused">Queued folder as paused</string>
 
     <string name="Length">Délka</string>
 
@@ -820,12 +820,12 @@
     <string name="UnknownErrorShared">Unknown Error. See dev.</string>
     <string name="MessagesWithUser">Messages with {0}</string>
 
-    <string name="DateAddedAsc">Date Added (Asc)</string>
-    <string name="DateAddedDesc">Date Added (Desc)</string>
+    <string name="DateAddedAsc">Date added (asc)</string>
+    <string name="DateAddedDesc">Date added (desc)</string>
     <string name="Name">Jméno</string>
     <string name="OnlineStatus">Online stav</string>
 
-    <string name="NoUsersFound">No Users Found</string>
+    <string name="NoUsersFound">No users found</string>
     <string name="UsingThisWizardLong">
         Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options &gt; Extras &gt; \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences &gt; Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.
     </string>
@@ -865,25 +865,25 @@
     <string name="EnableDiagnostics">Diagnostický e-mail</string>
     <string name="ImportExternalClientData">Import external client data</string>
     <string name="LockedUserListOnly">
-        Locked (Only User List can Download)
+        Locked (only user list can download)
     </string>
-    <string name="HiddenUserListOnly">Hidden (Only User List can View)</string>
-    <string name="OverrideFolderName">Override Folder Name</string>
-    <string name="CustomFolderName">Custom Folder Name</string>
-    <string name="QueueSelectedAsPaused">Queue Selected as Paused</string>
+    <string name="HiddenUserListOnly">Hidden (only user list can view)</string>
+    <string name="OverrideFolderName">Override folder name</string>
+    <string name="CustomFolderName">Custom folder name</string>
+    <string name="QueueSelectedAsPaused">Queue selected as paused</string>
 
     <string name="UserOptions">Možnosti uživatele</string>
     <string name="Options">Možnosti</string>
     <string name="Save">Uložit</string>
     <string name="SortOrder">Řazení</string>
-    <string name="AddUserToIgnored">Add User To Ignored</string>
+    <string name="AddUserToIgnored">Add user to ignored</string>
 
     <string name="ClearAllCompleteAndAborted">
         Vymazat vše kompletní a přerušeno
     </string>
     <string name="AbortAll">Přerušit vše</string>
 
-    <string name="BatchSelect">Batch Select</string>
+    <string name="BatchSelect">Batch select</string>
     <string name="ShowSize">Zobrazit velikost</string>
     <string name="ShowSpeed">Zobrazit rychlost</string>
 
@@ -949,9 +949,9 @@
     <string name="AbortandClearUploads">Zrušit a vymazat nahrávání</string>
     <string name="HideSmartFilters">Skrýt chytré filtry</string>
 
-    <string name="UserIsOffline">User is Offline</string>
+    <string name="UserIsOffline">User is offline</string>
     <string name="Cancelled">Zrušené</string>
-    <string name="TimedOut">Timed Out</string>
+    <string name="TimedOut">Timed out</string>
     <string name="CannotConnect">Nelze se připojit</string>
 
     <string name="Aborted">Přerušené</string>

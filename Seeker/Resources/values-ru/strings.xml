@@ -830,7 +830,7 @@
     <string name="UnknownErrorShared">Неизвестная ошибка. Подробнее.</string>
     <string name="MessagesWithUser">Сообщения {0}</string>
 
-    <string name="DateAddedAsc">Дата Добавлена (Asc)</string>
+    <string name="DateAddedAsc">Дата добавлена (asc)</string>
     <string name="DateAddedDesc">Дата добавления (с самых новых)</string>
     <string name="Name">Имя</string>
     <string name="OnlineStatus">Статус пользователя</string>

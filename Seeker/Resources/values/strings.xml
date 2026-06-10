@@ -600,7 +600,7 @@
     <string name="add_note">Add note</string>
     <string name="note_title">{0}\'s note</string>
     <string name="more_options">More options</string>
-    <string name="remove_from_user_list">Remove from User List</string>
+    <string name="remove_from_user_list">Remove from user list</string>
 
     <string name="filter_is_on">Filter is on</string>
     <string name="filter_is_on_body">Would you like to download the full folder or just filtered items?</string>
@@ -694,15 +694,15 @@
     <string name="CopySelectedURLs">Copy Selected URLs</string>
     <string name="CopyURL">Copy URL</string>
     <string name="CopyFolderURL">Copy Folder URL</string>
-    <string name="LinkCopied">Link Copied</string>
-    <string name="LinksCopied">Links Copied</string>
-    <string name="ShowFolderInfo">Show Folder Info</string>
-    <string name="ShowSelectedInfo">Show Selected Info</string>
+    <string name="LinkCopied">Link copied</string>
+    <string name="LinksCopied">Links copied</string>
+    <string name="ShowFolderInfo">Show folder info</string>
+    <string name="ShowSelectedInfo">Show selected info</string>
 
-    <string name="NothingToCopy">Nothing to Copy</string>
-    <string name="ThisFolderContainsSubfolders">This Folder contains Subfolders</string>
-    <string name="QueuedForDownload">Queued for Download</string>
-    <string name="QueueFolderAsPaused">Queued Folder as Paused</string>
+    <string name="NothingToCopy">Nothing to copy</string>
+    <string name="ThisFolderContainsSubfolders">This folder contains subfolders</string>
+    <string name="QueuedForDownload">Queued for download</string>
+    <string name="QueueFolderAsPaused">Queued folder as paused</string>
 
     <!--meaning duration of song / songs-->
     <string name="Length">Length</string>
@@ -757,12 +757,12 @@
     <string name="UnknownErrorShared">Unknown Error. See dev.</string>
     <string name="MessagesWithUser">Messages with {0}</string>
 
-    <string name="DateAddedAsc">Date Added (Asc)</string>
-    <string name="DateAddedDesc">Date Added (Desc)</string>
+    <string name="DateAddedAsc">Date added (asc)</string>
+    <string name="DateAddedDesc">Date added (desc)</string>
     <string name="Name">Name</string>
-    <string name="OnlineStatus">Online Status</string>
+    <string name="OnlineStatus">Online status</string>
 
-    <string name="NoUsersFound">No Users Found</string>
+    <string name="NoUsersFound">No users found</string>
     <string name="UsingThisWizardLong">
         Using this wizard one can import client data from SoulseekQT or
         Nicotine+.\n\nTo obtain client data from SoulseekQT go to
@@ -795,30 +795,30 @@
     <string name="LimitConcurrentDownloads">Limit concurrent downloads</string>
     <string name="EnableDiagnostics">Enable diagnostics</string>
     <string name="ImportExternalClientData">Import external client data</string>
-    <string name="LockedUserListOnly">Locked (Only User List can Download)</string>
-    <string name="HiddenUserListOnly">Hidden (Only User List can View)</string>
-    <string name="OverrideFolderName">Override Folder Name</string>
-    <string name="CustomFolderName">Custom Folder Name</string>
-    <string name="QueueSelectedAsPaused">Queue Selected as Paused</string>
+    <string name="LockedUserListOnly">Locked (only user list can download)</string>
+    <string name="HiddenUserListOnly">Hidden (only user list can view)</string>
+    <string name="OverrideFolderName">Override folder name</string>
+    <string name="CustomFolderName">Custom folder name</string>
+    <string name="QueueSelectedAsPaused">Queue selected as paused</string>
 
-    <string name="UserOptions">User Options</string>
+    <string name="UserOptions">User options</string>
     <string name="Options">Options</string>
     <string name="Save">Save</string>
-    <string name="SortOrder">Sort Order</string>
-    <string name="AddUserToIgnored">Add User To Ignored</string>
+    <string name="SortOrder">Sort order</string>
+    <string name="AddUserToIgnored">Add user to ignored</string>
 
-    <string name="ClearAllCompleteAndAborted">Clear all Complete and Aborted</string>
-    <string name="AbortAll">Abort All</string>
+    <string name="ClearAllCompleteAndAborted">Clear all complete and aborted</string>
+    <string name="AbortAll">Abort all</string>
 
-    <string name="BatchSelect">Batch Select</string>
-    <string name="ShowSize">Show Size</string>
-    <string name="ShowSpeed">Show Speed</string>
+    <string name="BatchSelect">Batch select</string>
+    <string name="ShowSize">Show size</string>
+    <string name="ShowSpeed">Show speed</string>
 
-    <string name="ResumeSelected">Resume Selected</string>
-    <string name="PauseSelected">Pause Selected</string>
-    <string name="RetryFailed">Retry Failed</string>
-    <string name="InvertSelection">Invert Selection</string>
-    <string name="SelectAll">Select All</string>
+    <string name="ResumeSelected">Resume selected</string>
+    <string name="PauseSelected">Pause selected</string>
+    <string name="RetryFailed">Retry failed</string>
+    <string name="InvertSelection">Invert selection</string>
+    <string name="SelectAll">Select all</string>
 
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
     <string name="NotSet">Not set</string>
@@ -847,23 +847,23 @@
 
     <string name="FailedDownloadDirectoryNotSet">Failed: Download directory not properly set.</string>
 
-    <string name="CopyLink">Copy Link</string>
-    <string name="DownloadFile">Download File</string>
+    <string name="CopyLink">Copy link</string>
+    <string name="DownloadFile">Download file</string>
 
-    <string name="IgnoreUnshareUser">Ignore (Unshare) User</string>
-    <string name="RetryFailedFiles">Retry Failed Files</string>
-    <string name="ResumeFolder">Resume Folder</string>
-    <string name="PauseFolder">Pause Folder</string>
-    <string name="AbortUpload">Abort Upload</string>
-    <string name="AbortUploads">Abort Uploads</string>
-    <string name="AbortandClearUpload">Abort and Clear Upload</string>
-    <string name="AbortandClearUploads">Abort and Clear Uploads</string>
+    <string name="IgnoreUnshareUser">Ignore (unshare) user</string>
+    <string name="RetryFailedFiles">Retry failed files</string>
+    <string name="ResumeFolder">Resume folder</string>
+    <string name="PauseFolder">Pause folder</string>
+    <string name="AbortUpload">Abort upload</string>
+    <string name="AbortUploads">Abort uploads</string>
+    <string name="AbortandClearUpload">Abort and clear upload</string>
+    <string name="AbortandClearUploads">Abort and clear uploads</string>
     <string name="HideSmartFilters">Hide Smart Filters</string>
 
-    <string name="UserIsOffline">User is Offline</string>
+    <string name="UserIsOffline">User is offline</string>
     <string name="Cancelled">Cancelled</string>
-    <string name="TimedOut">Timed Out</string>
-    <string name="CannotConnect">Cannot Connect</string>
+    <string name="TimedOut">Timed out</string>
+    <string name="CannotConnect">Cannot connect</string>
 
     <string name="Aborted">Aborted</string>
     <string name="SetLanguage">Language</string>

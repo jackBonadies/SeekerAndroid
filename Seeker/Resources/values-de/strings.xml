@@ -619,7 +619,7 @@
     <string name="add_note">Notiz hinzufügen</string>
     <string name="note_title">{0}s Note</string>
     <string name="more_options">Weitere Optionen</string>
-    <string name="remove_from_user_list">Remove from User List</string>
+    <string name="remove_from_user_list">Remove from user list</string>
 
     <string name="filter_is_on">Filter ist aktiv</string>
     <string name="filter_is_on_body">
@@ -731,10 +731,10 @@
 
     <string name="NothingToCopy">Nichts zum Kopieren</string>
     <string name="ThisFolderContainsSubfolders">
-        This Folder contains Subfolders
+        This folder contains subfolders
     </string>
-    <string name="QueuedForDownload">Queued for Download</string>
-    <string name="QueueFolderAsPaused">Queued Folder as Paused</string>
+    <string name="QueuedForDownload">Queued for download</string>
+    <string name="QueueFolderAsPaused">Queued folder as paused</string>
 
     <string name="Length">Dauer</string>
 
@@ -865,32 +865,32 @@
     <string name="EnableDiagnostics">Enable Diagnostics</string>
     <string name="ImportExternalClientData">Import external client data</string>
     <string name="LockedUserListOnly">
-        Locked (Only User List can Download)
+        Locked (only user list can download)
     </string>
-    <string name="HiddenUserListOnly">Hidden (Only User List can View)</string>
-    <string name="OverrideFolderName">Override Folder Name</string>
-    <string name="CustomFolderName">Custom Folder Name</string>
-    <string name="QueueSelectedAsPaused">Queue Selected as Paused</string>
+    <string name="HiddenUserListOnly">Hidden (only user list can view)</string>
+    <string name="OverrideFolderName">Override folder name</string>
+    <string name="CustomFolderName">Custom folder name</string>
+    <string name="QueueSelectedAsPaused">Queue selected as paused</string>
 
     <string name="UserOptions">Benutzer Einstellungen</string>
     <string name="Options">Einstellungen</string>
     <string name="Save">Speichern</string>
     <string name="SortOrder">Sortierreihenfolge</string>
-    <string name="AddUserToIgnored">Add User To Ignored</string>
+    <string name="AddUserToIgnored">Add user to ignored</string>
 
     <string name="ClearAllCompleteAndAborted">
-        Clear all Complete and Aborted
+        Clear all complete and aborted
     </string>
     <string name="AbortAll">Alle abbrechen</string>
 
-    <string name="BatchSelect">Batch Select</string>
+    <string name="BatchSelect">Batch select</string>
     <string name="ShowSize">Dateigröße anzeigen</string>
     <string name="ShowSpeed">Geschwindigkeit anzeigen</string>
 
-    <string name="ResumeSelected">Resume Selected</string>
-    <string name="PauseSelected">Pause Selected</string>
-    <string name="RetryFailed">Retry Failed</string>
-    <string name="InvertSelection">Invert Selection</string>
+    <string name="ResumeSelected">Resume selected</string>
+    <string name="PauseSelected">Pause selected</string>
+    <string name="RetryFailed">Retry failed</string>
+    <string name="InvertSelection">Invert selection</string>
     <string name="SelectAll">Alles Auswählen</string>
 
     <string name="ConfigureSmartFilters">Configure Smart Filters</string>
@@ -945,8 +945,8 @@
     <string name="PauseFolder">Ordner pausieren</string>
     <string name="AbortUpload">Upload abbrechen</string>
     <string name="AbortUploads">Uploads abbrechen</string>
-    <string name="AbortandClearUpload">Abort and Clear Upload</string>
-    <string name="AbortandClearUploads">Abort and Clear Uploads</string>
+    <string name="AbortandClearUpload">Abort and clear upload</string>
+    <string name="AbortandClearUploads">Abort and clear uploads</string>
     <string name="HideSmartFilters">Hide Smart Filters</string>
 
     <string name="UserIsOffline">Benutzer ist offline</string>

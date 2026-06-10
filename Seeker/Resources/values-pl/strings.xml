@@ -626,7 +626,7 @@
     <string name="add_note">Add note</string>
     <string name="note_title">{0}\'s note</string>
     <string name="more_options">More options</string>
-    <string name="remove_from_user_list">Remove from User List</string>
+    <string name="remove_from_user_list">Remove from user list</string>
 
     <string name="filter_is_on">Filter is on</string>
     <string name="filter_is_on_body">
@@ -732,16 +732,16 @@
     <string name="CopySelectedURLs">Copy Selected URLs</string>
     <string name="CopyURL">Copy URL</string>
     <string name="CopyFolderURL">Copy Folder URL</string>
-    <string name="LinkCopied">Link Copied</string>
-    <string name="LinksCopied">Links Copied</string>
-    <string name="ShowFolderInfo">Show Folder Info</string>
+    <string name="LinkCopied">Link copied</string>
+    <string name="LinksCopied">Links copied</string>
+    <string name="ShowFolderInfo">Show folder info</string>
 
-    <string name="NothingToCopy">Nothing to Copy</string>
+    <string name="NothingToCopy">Nothing to copy</string>
     <string name="ThisFolderContainsSubfolders">
-        This Folder contains Subfolders
+        This folder contains subfolders
     </string>
-    <string name="QueuedForDownload">Queued for Download</string>
-    <string name="QueueFolderAsPaused">Queued Folder as Paused</string>
+    <string name="QueuedForDownload">Queued for download</string>
+    <string name="QueueFolderAsPaused">Queued folder as paused</string>
 
     <string name="Length">Length</string>
 
@@ -827,12 +827,12 @@
     <string name="UnknownErrorShared">Unknown Error. See dev.</string>
     <string name="MessagesWithUser">Messages with {0}</string>
 
-    <string name="DateAddedAsc">Date Added (Asc)</string>
-    <string name="DateAddedDesc">Date Added (Desc)</string>
+    <string name="DateAddedAsc">Date added (asc)</string>
+    <string name="DateAddedDesc">Date added (desc)</string>
     <string name="Name">Name</string>
-    <string name="OnlineStatus">Online Status</string>
+    <string name="OnlineStatus">Online status</string>
 
-    <string name="NoUsersFound">No Users Found</string>
+    <string name="NoUsersFound">No users found</string>
     <string name="UsingThisWizardLong">
         Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options &gt; Extras &gt; \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences &gt; Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.
     </string>
@@ -872,25 +872,25 @@
     <string name="EnableDiagnostics">Włącz diagnostykę</string>
     <string name="ImportExternalClientData">Import external client data</string>
     <string name="LockedUserListOnly">
-        Locked (Only User List can Download)
+        Locked (only user list can download)
     </string>
-    <string name="HiddenUserListOnly">Hidden (Only User List can View)</string>
-    <string name="OverrideFolderName">Override Folder Name</string>
-    <string name="CustomFolderName">Custom Folder Name</string>
-    <string name="QueueSelectedAsPaused">Queue Selected as Paused</string>
+    <string name="HiddenUserListOnly">Hidden (only user list can view)</string>
+    <string name="OverrideFolderName">Override folder name</string>
+    <string name="CustomFolderName">Custom folder name</string>
+    <string name="QueueSelectedAsPaused">Queue selected as paused</string>
 
     <string name="UserOptions">Opcje użytkownika</string>
     <string name="Options">Opcje</string>
     <string name="Save">Zapisz</string>
     <string name="SortOrder">Sortuj według</string>
-    <string name="AddUserToIgnored">Add User To Ignored</string>
+    <string name="AddUserToIgnored">Add user to ignored</string>
 
     <string name="ClearAllCompleteAndAborted">
         Czyść kompletne i porzucone
     </string>
     <string name="AbortAll">Porzuć wszystkie</string>
 
-    <string name="BatchSelect">Batch Select</string>
+    <string name="BatchSelect">Batch select</string>
     <string name="ShowSize">Pokaż rozmiar</string>
     <string name="ShowSpeed">Pokaż prędkość</string>
 

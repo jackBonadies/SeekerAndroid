@@ -827,10 +827,10 @@
     <string name="UnknownErrorShared">Erro desconhecido. Veja dev.</string>
     <string name="MessagesWithUser">Mensagens com {0}</string>
 
-    <string name="DateAddedAsc">Data adicionada (Asc)</string>
+    <string name="DateAddedAsc">Data adicionada (asc)</string>
     <string name="DateAddedDesc">Data adicionada (desc)</string>
     <string name="Name">Nome</string>
-    <string name="OnlineStatus">Status Online</string>
+    <string name="OnlineStatus">Status online</string>
 
     <string name="NoUsersFound">Usuários não encontrados</string>
     <string name="UsingThisWizardLong">
@@ -882,8 +882,8 @@
     <string name="UserOptions">Opções do usuário</string>
     <string name="Options">Opções</string>
     <string name="Save">Salvar</string>
-    <string name="SortOrder">Ordem de Exibição</string>
-    <string name="AddUserToIgnored">Adicionar Usuário à Ignorado</string>
+    <string name="SortOrder">Ordem de exibição</string>
+    <string name="AddUserToIgnored">Adicionar usuário à ignorado</string>
 
     <string name="ClearAllCompleteAndAborted">
         Limpar todos concluídos e cancelados
@@ -891,14 +891,14 @@
     <string name="AbortAll">Interromper tudo</string>
 
     <string name="BatchSelect">Seleção em lote</string>
-    <string name="ShowSize">Mostrar Tamanho</string>
+    <string name="ShowSize">Mostrar tamanho</string>
     <string name="ShowSpeed">Mostrar velocidade</string>
 
-    <string name="ResumeSelected">Retomar Selecionados</string>
+    <string name="ResumeSelected">Retomar selecionados</string>
     <string name="PauseSelected">Pausar selecionado</string>
     <string name="RetryFailed">Tentar novamente os que falharam</string>
     <string name="InvertSelection">Inverter a seleção</string>
-    <string name="SelectAll">Selecionar Todos</string>
+    <string name="SelectAll">Selecionar todos</string>
 
     <string name="ConfigureSmartFilters">Configurar Filtros Inteligentes</string>
     <string name="NotSet">Não definido</string>
@@ -944,22 +944,22 @@
     </string>
 
     <string name="CopyLink">Copiar link</string>
-    <string name="DownloadFile">Baixar Arquivo</string>
+    <string name="DownloadFile">Baixar arquivo</string>
 
-    <string name="IgnoreUnshareUser">Ignorar (Unshare) Usuário</string>
+    <string name="IgnoreUnshareUser">Ignorar (unshare) usuário</string>
     <string name="RetryFailedFiles">Tentar novamente arquivos com falha</string>
-    <string name="ResumeFolder">Retomar Pasta</string>
-    <string name="PauseFolder">Pausar Pasta</string>
-    <string name="AbortUpload">Abortar Envio</string>
-    <string name="AbortUploads">Abortar Envios</string>
-    <string name="AbortandClearUpload">Cancelar e Limpar Envio</string>
-    <string name="AbortandClearUploads">Cancelar e limpar Uploads</string>
+    <string name="ResumeFolder">Retomar pasta</string>
+    <string name="PauseFolder">Pausar pasta</string>
+    <string name="AbortUpload">Abortar envio</string>
+    <string name="AbortUploads">Abortar envios</string>
+    <string name="AbortandClearUpload">Cancelar e limpar envio</string>
+    <string name="AbortandClearUploads">Cancelar e limpar uploads</string>
     <string name="HideSmartFilters">Ocultar filtros inteligentes</string>
 
-    <string name="UserIsOffline">Usuário está Offline</string>
+    <string name="UserIsOffline">Usuário está offline</string>
     <string name="Cancelled">Cancelado</string>
     <string name="TimedOut">Tempo limite atingido</string>
-    <string name="CannotConnect">Impossível Conectar-se</string>
+    <string name="CannotConnect">Impossível conectar-se</string>
 
     <string name="Aborted">Cancelado</string>
     <string name="SetLanguage">Idioma</string>

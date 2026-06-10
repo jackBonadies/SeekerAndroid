@@ -827,12 +827,12 @@
     <string name="UnknownErrorShared">Erreur Inconnue. Se référer au développeur.</string>
     <string name="MessagesWithUser">Messages avec {0}</string>
 
-    <string name="DateAddedAsc">Date d\'ajout (Asc)</string>
-    <string name="DateAddedDesc">Date d\'ajout (Desc)</string>
+    <string name="DateAddedAsc">Date d\'ajout (asc)</string>
+    <string name="DateAddedDesc">Date d\'ajout (desc)</string>
     <string name="Name">Nom</string>
-    <string name="OnlineStatus">Status de Connexion</string>
+    <string name="OnlineStatus">Status de connexion</string>
 
-    <string name="NoUsersFound">Aucun Utilisateur Trouvé</string>
+    <string name="NoUsersFound">Aucun utilisateur trouvé</string>
     <string name="UsingThisWizardLong">
         En utilisant cet assistant, il est possible d\'importer des données client depuis SoulseekQT ou Nicotine+.\n\nPour obtenir les données client depuis SoulseekQT veuillez aller dans Options &gt; Extras &gt; \'Exporter les données de configuration client\',  l\'extension du fichier devrait être .scd1. Pour Nicotine+, veuillez aller dans Préférences &gt; Exporter, l\'extension du fichier peut être .tar.bz2 ou un fichier configuration intact.\n\nSeeker importera les Listes d\'Utilisateurs, Listes d\'Ignorés / sans partage, Liste de vœux, et Notes Utilisateur. Vous pourrez choisir qu\'importer via les écrans suivants.\n\nAppuyez sur \'Importer\' pour commencer.
     </string>
@@ -875,11 +875,11 @@
         Verrouillé (seuls les Utilisateurs sur la Liste peuvent télécharger ceci)
     </string>
     <string name="HiddenUserListOnly">Caché (seuls les utilisateurs sur la liste peuvent voir ceci)</string>
-    <string name="OverrideFolderName">Remplacer le Nom du Dossier</string>
-    <string name="CustomFolderName">Nom du Dossier Personnalisé</string>
+    <string name="OverrideFolderName">Remplacer le nom du dossier</string>
+    <string name="CustomFolderName">Nom du dossier personnalisé</string>
     <string name="QueueSelectedAsPaused">Pauser file d\'attente sélectionnée</string>
 
-    <string name="UserOptions">Options de l\'Utilisateur</string>
+    <string name="UserOptions">Options de l\'utilisateur</string>
     <string name="Options">Options</string>
     <string name="Save">Sauvegarder</string>
     <string name="SortOrder">Tri dans l\'ordre</string>
@@ -943,20 +943,20 @@
         Erreur : Le répertoire de téléchargements n\'a pas bien été indiqué.
     </string>
 
-    <string name="CopyLink">Copier le Lien</string>
-    <string name="DownloadFile">Télécharger le Fichier</string>
+    <string name="CopyLink">Copier le lien</string>
+    <string name="DownloadFile">Télécharger le fichier</string>
 
-    <string name="IgnoreUnshareUser">Ignorer (Départager) Utilisateur</string>
-    <string name="RetryFailedFiles">Relancer Fichiers en Échecs</string>
+    <string name="IgnoreUnshareUser">Ignorer (départager) utilisateur</string>
+    <string name="RetryFailedFiles">Relancer fichiers en échecs</string>
     <string name="ResumeFolder">Continuer dossier</string>
-    <string name="PauseFolder">Dossier en Pause</string>
-    <string name="AbortUpload">Arrêter le Téléversement</string>
-    <string name="AbortUploads">Annuler le Téléversement</string>
-    <string name="AbortandClearUpload">Annule et Efface le Téléversement</string>
-    <string name="AbortandClearUploads">Annule et Efface les Téléversements</string>
+    <string name="PauseFolder">Dossier en pause</string>
+    <string name="AbortUpload">Arrêter le téléversement</string>
+    <string name="AbortUploads">Annuler le téléversement</string>
+    <string name="AbortandClearUpload">Annule et efface le téléversement</string>
+    <string name="AbortandClearUploads">Annule et efface les téléversements</string>
     <string name="HideSmartFilters">Cache les Filtres Intelligents</string>
 
-    <string name="UserIsOffline">Utilisateur Déconnecté</string>
+    <string name="UserIsOffline">Utilisateur déconnecté</string>
     <string name="Cancelled">Annulé</string>
     <string name="TimedOut">Délai expiré</string>
     <string name="CannotConnect">Connexion impossible</string>

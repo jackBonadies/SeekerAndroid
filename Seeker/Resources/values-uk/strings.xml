@@ -829,8 +829,8 @@
     <string name="UnknownErrorShared">Невідома помилка. Див.</string>
     <string name="MessagesWithUser">Повідомлення від {0}</string>
 
-    <string name="DateAddedAsc">Дата додавання (Asc)</string>
-    <string name="DateAddedDesc">Дата додавання (Desc)</string>
+    <string name="DateAddedAsc">Дата додавання (asc)</string>
+    <string name="DateAddedDesc">Дата додавання (desc)</string>
     <string name="Name">Іменем</string>
     <string name="OnlineStatus">Статус користувача</string>
 
@@ -885,7 +885,7 @@
     <string name="Options">Параметри</string>
     <string name="Save">Зберегти</string>
     <string name="SortOrder">Порядок сортування</string>
-    <string name="AddUserToIgnored">Add User To Ignored</string>
+    <string name="AddUserToIgnored">Add user to ignored</string>
 
     <string name="ClearAllCompleteAndAborted">
         Очистити всі завершені та скасовані
