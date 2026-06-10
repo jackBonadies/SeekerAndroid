@@ -107,13 +107,16 @@ namespace Seeker.Helpers
         {
             //"en" ""
             //"pt" "br"
+            // normalize so comparisons against our stored modern codes (e.g. "id") work
+            // even though the Java Locale ctor converts them to obsolete ones ("in").
+            string lang = NormalizeObsoleteLanguageCode(locale.Language);
             if (string.IsNullOrEmpty(locale.Variant))
             {
-                return locale.Language;
+                return lang;
             }
             else
             {
-                return locale.Language + "-r" + locale.Variant.ToUpper();
+                return lang + "-r" + locale.Variant.ToUpper();
             }
         }
 
