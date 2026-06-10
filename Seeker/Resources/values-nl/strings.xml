@@ -54,7 +54,6 @@
     <string name="add_user">Gebruiker toevoegen</string>
     <string name="get_user_info">Gebruikerinfo ophalen</string>
     <string name="quick_info">Beknopte info</string>
-    <string name="enter_user_to_browse">Voer gebruiker in om door te bladeren</string>
     <string name="all_target">Alle gebruikers</string>
     <string name="target_user_list">Gebruiker lijst</string>
     <string name="target_room">Kamer</string>

@@ -21,7 +21,6 @@
     <string name="no_messages">Nessun messaggio. Clicca \"+\" per iniziare.</string>
     <string name="messages">Messaggi</string>
     <string name="browse_files">Sfoglia documenti</string>
-    <string name="chatroomListLoading">Richiesta elenco delle chat disponibili. Attendere...</string>
     <string name="privateRoomCreation">Richiesta creazione stanza privata</string>
     <string name="requesting_room_list">Richiesta elenco stanze</string>
     <string name="requesting_user_info">Richiesta informazioni utente</string>
@@ -36,7 +35,6 @@
     <string name="add_user">Aggiungi utente</string>
     <string name="get_user_info">Ottieni informazioni sull\'utente</string>
     <string name="quick_info">Info rapide</string>
-    <string name="enter_user_to_browse">Inserisci l\'utente da esplorare</string>
     <!--
   These are search targets
   -->
@@ -58,7 +56,6 @@
     <string name="send_message">Invia</string>
     <string name="filter_chatrooms_here">Filtra qui</string>
     <string name="enter_listening_port">Inserisci la porta di ascolto</string>
-    <string name="create_chatroom_name">Nome della stanza da creare</string>
     <string name="create_chatroom_private">Rendi privata</string>
     <string name="search_here">Cerca qui</string>
     <string name="seeker_needs_dl_dir">Seeker ha bisogno di accesso a una directory per salvare i file scaricati</string>
@@ -81,7 +78,6 @@
     <string name="clear_image">Rimuovi immagine</string>
     <string name="no_image_chosen">Nessuna</string>
     <string name="inviteuser">Invita utente</string>
-    <string name="invite_user">Invita utente</string>
     <string name="give_up_room">Abbandona la stanza</string>
     <string name="give_up_membership">Disiscriviti</string>
     <string name="logout">Esci</string>
@@ -93,10 +89,6 @@
     <string name="settings">Impostazioni</string>
     <!--Search Result Styles-->
     <string name="search_result_style">Visualizzazione risultati:</string>
-    <string name="search_result_style_expanded">Espandibile: Espanso</string>
-    <string name="search_result_style_collapsed">Espandibile: Chiuso</string>
-    <string name="search_result_style_medium">Medio</string>
-    <string name="search_result_style_minimal">Minimale</string>
     <string name="new_search_tab">Nuova ricerca</string>
     <string name="filter_search_results_here">Filtra i risultati</string>
     <string name="persist_it">Fissa</string>
@@ -304,7 +296,6 @@
     <string name="owner">Proprietario</string>
     <string name="mod">Moderatore</string>
     <!--Title-->
-    <string name="browse_user_files">Scorrere utenti</string>
     <string name="set_ticker">Imposta ticker</string>
     <string name="setticker">Imposta ticker</string>
     <string name="chatrooms">Stanze</string>
@@ -327,10 +318,6 @@
     <string name="online">In linea</string>
     <string name="offline">Non in linea</string>
     <!--Menu Items-->
-    <string name="auto_join_on">Auto ingresso [acceso]</string>
-    <string name="auto_join_off">Auto ingresso [spento]</string>
-    <string name="notification_on">Notifiche [accese]</string>
-    <string name="notification_off">Notifiche [spente]</string>
     <string name="copy_text">Copia testo</string>
     <string name="ignore_user">Ignora utente</string>
     <string name="remove_user">Rimuovi utente</string>
@@ -419,7 +406,6 @@
     <string name="give_priv_success">Successly gave {0} days of privileges to {1}.</string>
     <string name="sending__">Inviando...</string>
     <string name="give_hint"># of days</string>
-    <string name="type_notes_here">Scrivi note sull\'utente qui</string>
     <string name="edit_note">Modifica nota</string>
     <string name="add_note">Aggiungi nota</string>
     <string name="note_title">{0}\'s note</string>

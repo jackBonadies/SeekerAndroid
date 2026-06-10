@@ -50,7 +50,6 @@
     <string name="add_user">Benutzer hinzufügen</string>
     <string name="get_user_info">Benutzerinformationen abrufen</string>
     <string name="quick_info">Kurzinfo</string>
-    <string name="enter_user_to_browse">Benutzer eingeben zum Durchsuchen</string>
     <string name="all_target">Alle Benutzer</string>
     <string name="target_user_list">Benutzerliste</string>
     <string name="target_room">Raum</string>

@@ -50,7 +50,6 @@
     <string name="add_user">Tilføj bruger</string>
     <string name="get_user_info">Hent brugerinformation</string>
     <string name="quick_info">Hurtig info</string>
-    <string name="enter_user_to_browse">Indtast bruger for at gennemse</string>
     <string name="all_target">Alle brugere</string>
     <string name="target_user_list">Brugerliste</string>
     <string name="target_room">Rum</string>

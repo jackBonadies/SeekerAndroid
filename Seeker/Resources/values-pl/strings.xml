@@ -54,7 +54,6 @@
     <string name="add_user">Dodaj użytkownika</string>
     <string name="get_user_info">Uzyskaj informacje o użytkowniku</string>
     <string name="quick_info">Szybkie info</string>
-    <string name="enter_user_to_browse">Wpisz użytkownika żeby przeglądać</string>
     <string name="all_target">Wszyscy użytkownicy</string>
     <string name="target_user_list">Lista użytkowników</string>
     <string name="target_room">Pokój</string>

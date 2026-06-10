@@ -52,7 +52,6 @@
     <string name="add_user">ユーザーを追加</string>
     <string name="get_user_info">ユーザー情報を取得</string>
     <string name="quick_info">クイック情報</string>
-    <string name="enter_user_to_browse">閲覧するユーザーを入力</string>
     <string name="all_target">すべてのユーザー</string>
     <string name="target_user_list">ユーザーリスト</string>
     <string name="target_room">ルーム</string>

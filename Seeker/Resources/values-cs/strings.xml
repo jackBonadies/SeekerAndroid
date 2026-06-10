@@ -50,7 +50,6 @@
     <string name="add_user">Přidat uživatele</string>
     <string name="get_user_info">Získat informace o uživateli</string>
     <string name="quick_info">Rychlé info</string>
-    <string name="enter_user_to_browse">Zadejte uživatele pro procházení</string>
     <string name="all_target">Všichni uživatelé</string>
     <string name="target_user_list">Seznam uživatelů</string>
     <string name="target_room">Místnost</string>

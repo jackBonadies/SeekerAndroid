@@ -54,7 +54,6 @@
     <string name="add_user">Додати користувача</string>
     <string name="get_user_info">Отримати інформацію про користувача</string>
     <string name="quick_info">Швидка інформація</string>
-    <string name="enter_user_to_browse">Ввести ім\'я користувача</string>
     <string name="all_target">Усі користувачі</string>
     <string name="target_user_list">Список користувачів</string>
     <string name="target_room">Кімната</string>
@@ -107,7 +106,6 @@
     <string name="clear_image">Видалити зображення</string>
     <string name="no_image_chosen">Немає</string>
 
-    <string name="enter_user_to_invite_to_room">Ввести ім\'я користувача, щоб запросити</string>
     <string name="inviteuser">Запросити користувача</string>
 
     <string name="give_up_room">Відмовитися від кімнати</string>
@@ -121,7 +119,6 @@
     <string name="choose_a_download_folder">Виберіть папку для завантажень</string>
     <string name="settings">Налаштування</string>
 
-    <string name="enter_user_to_message">Ввести ім\'я користувача, щоб написати</string>
 
     <string name="search_result_style">Вигляд результату</string>
 

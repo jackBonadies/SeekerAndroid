@@ -52,7 +52,6 @@
     <string name="add_user">Felhasználó hozzáadása</string>
     <string name="get_user_info">Felhasználói információ lekérése</string>
     <string name="quick_info">Gyors információ</string>
-    <string name="enter_user_to_browse">Adja meg a felhasználó nevét a böngészéshez</string>
     <string name="all_target">Minden felhasználó</string>
     <string name="target_user_list">Felhasználó lista</string>
     <string name="target_room">Szoba</string>
@@ -105,7 +104,6 @@
     <string name="clear_image">Kép törlése</string>
     <string name="no_image_chosen">Egyik sem</string>
 
-    <string name="enter_user_to_invite_to_room">Meghívandó felhasználó megadása</string>
     <string name="inviteuser">Felhasználó meghívása</string>
 
     <string name="give_up_room">Szoba lemondása</string>
@@ -119,7 +117,6 @@
     <string name="choose_a_download_folder">Select download folder</string>
     <string name="settings">Settings</string>
 
-    <string name="enter_user_to_message">Enter User to Message</string>
 
     <string name="search_result_style">Result style</string>
 

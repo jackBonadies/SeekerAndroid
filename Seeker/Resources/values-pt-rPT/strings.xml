@@ -50,7 +50,6 @@
     <string name="add_user">Adicionar usuário</string>
     <string name="get_user_info">Obter informações de usuário</string>
     <string name="quick_info">Informações rápidas</string>
-    <string name="enter_user_to_browse">Inserir usuário para navegar</string>
     <string name="all_target">Todos os usuários</string>
     <string name="target_user_list">Lista de usuários</string>
     <string name="target_room">Sala</string>
@@ -103,7 +102,6 @@
     <string name="clear_image">Limpar imagem</string>
     <string name="no_image_chosen">Nenhuma</string>
 
-    <string name="enter_user_to_invite_to_room">Insira o usuário a ser convidado</string>
     <string name="inviteuser">Convidar usuário</string>
 
     <string name="give_up_room">Renunciar sala</string>
@@ -117,7 +115,6 @@
     <string name="choose_a_download_folder">Selecionar diretório de download</string>
     <string name="settings">Configurações</string>
 
-    <string name="enter_user_to_message">Inserir usuário a ser contatado</string>
 
     <string name="search_result_style">Estilo de resultados</string>
 

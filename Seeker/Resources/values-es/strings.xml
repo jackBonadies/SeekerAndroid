@@ -84,7 +84,6 @@
     <string name="get_user_info">Obtener información del usuario</string>
     <string name="quick_info">Información rápida</string>
     <string name="filter">Filtro</string>
-    <string name="enter_user_to_browse">Introducir usuario para buscar</string>
     <!--
   These are search targets
   -->
@@ -132,7 +131,6 @@
     <string name="select_image">Seleccionar imagen</string>
     <string name="clear_image">Borrar imagen</string>
     <string name="no_image_chosen">Ninguna</string>
-    <string name="enter_user_to_invite_to_room">Introducir usuario para invitar</string>
     <string name="inviteuser">Invitar usuario</string>
     <string name="give_up_room">Abandonar sala</string>
     <string name="give_up_membership">Abandonar la membresía</string>
@@ -143,7 +141,6 @@
     <string name="PleaseWait_">Por favor espere...</string>
     <string name="choose_a_download_folder">Elija la carpeta de descarga</string>
     <string name="settings">Ajustes</string>
-    <string name="enter_user_to_message">Introducir usuario a mensajear</string>
     <!--Search Result Styles-->
     <string name="search_result_style">Estilo de resultado</string>
     <string name="search_result_style_style_label">Apariencia</string>
@@ -270,6 +267,10 @@
     <string name="follow_system">Igual que el sistema</string>
     <string name="always_light">Siempre claro</string>
     <string name="always_dark">Siempre oscuro</string>
+    <string name="theme_purple">Morado</string>
+    <string name="theme_grey">Gris</string>
+    <string name="theme_blue">Azul</string>
+    <string name="theme_red">Rojo</string>
     <!-- info -->
     <string name="queue_length_">Tamaño de la cola</string>
     <string name="upload_slots_">Espacios de subida libres</string>
@@ -527,10 +528,7 @@
     <string name="subfolders_warning_queue_paused">Esta carpeta contiene sub carpetas, ¿Le gustaría agregar a la cola todos los archivos en esas sub carpetas también ({0}) o solo los archivos de la carpeta actual ({1})?</string>
     <string name="current_folder_only">Sólo la carpeta actual</string>
     <string name="must_be_logged_in_to_give_privileges">Debe iniciar sesión para dar permisos</string>
-    <string name="about_body"><![CDATA[Seeker es un cliente de Soulseek gratuito y de código abierto para Android. Nunca tendrá anuncios ni características de pago.
-<br><br>Por favor ayude a traducir Seeker <a href="https://crwd.in/seeker">aquí</a>.
-<br><br>El código fuente está <a href="https://github.com/jackBonadies/SeekerAndroid">aquí</a>.
-<br><br>Versión: {0}.]]></string>
+    <string name="about_body">Seeker es un cliente de Soulseek gratuito y de código abierto para Android. Nunca tendrá anuncios ni características de pago.</string>
     <string name="must_be_logged_in_to_get_dir_contents">Debe iniciar sesión para obtener contenido del directorio</string>
     <string name="note">Nota</string>
     <string name="removed_user_from_ignored_list">Se eliminó el usuario \"{0}\" de la lista de ignorados</string>

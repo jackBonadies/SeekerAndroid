@@ -54,7 +54,6 @@
     <string name="add_user">Legg til bruker</string>
     <string name="get_user_info">Få brukerinfo</string>
     <string name="quick_info">Rask info</string>
-    <string name="enter_user_to_browse">Enter User to Browse</string>
     <string name="all_target">All users</string>
     <string name="target_user_list">User list</string>
     <string name="target_room">Room</string>

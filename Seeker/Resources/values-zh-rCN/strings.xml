@@ -21,7 +21,6 @@
     <string name="no_messages">没有消息。点击\"+\"开始操作。</string>
     <string name="messages">留言</string>
     <string name="browse_files">浏览文件</string>
-    <string name="chatroomListLoading">正在请求可用聊天室列表。请稍候...</string>
     <string name="privateRoomCreation">正在请求创建私人房间</string>
     <string name="requesting_room_list">正在申请房间列表</string>
     <string name="requesting_user_info">正在请求用户信息</string>
@@ -36,7 +35,6 @@
     <string name="add_user">新增用户</string>
     <string name="get_user_info">Get user info</string>
     <string name="quick_info">Quick info</string>
-    <string name="enter_user_to_browse">Enter User to Browse</string>
     <!--
   These are search targets
   -->
@@ -58,7 +56,6 @@
     <string name="send_message">发送</string>
     <string name="filter_chatrooms_here">Filter here</string>
     <string name="enter_listening_port">Enter port to listen on</string>
-    <string name="create_chatroom_name">要创建的房间名称</string>
     <string name="create_chatroom_private">设为私密</string>
     <string name="search_here">点击搜索</string>
     <string name="seeker_needs_dl_dir">Seeker需要访问目录来保存下载的文件</string>
@@ -81,7 +78,6 @@
     <string name="clear_image">清除图片</string>
     <string name="no_image_chosen">None</string>
     <string name="inviteuser">邀请成员</string>
-    <string name="invite_user">邀请成员：</string>
     <string name="give_up_room">放弃房间</string>
     <string name="give_up_membership">Give up membership</string>
     <string name="logout">退出登录</string>
@@ -93,10 +89,6 @@
     <string name="settings">设置</string>
     <!--Search Result Styles-->
     <string name="search_result_style">Result style:</string>
-    <string name="search_result_style_expanded">Expandable: Expanded</string>
-    <string name="search_result_style_collapsed">展开：已折叠</string>
-    <string name="search_result_style_medium">中</string>
-    <string name="search_result_style_minimal">小</string>
     <string name="new_search_tab">New search</string>
     <string name="filter_search_results_here">Filter results</string>
     <string name="persist_it">Sticky</string>
@@ -304,7 +296,6 @@
     <string name="owner">所有者</string>
     <string name="mod">Mod</string>
     <!--Title-->
-    <string name="browse_user_files">浏览用户：</string>
     <string name="set_ticker">Set ticker:</string>
     <string name="setticker">Set ticker</string>
     <string name="chatrooms">聊天室</string>
@@ -327,10 +318,6 @@
     <string name="online">在线</string>
     <string name="offline">离线</string>
     <!--Menu Items-->
-    <string name="auto_join_on">自动加入 [开]</string>
-    <string name="auto_join_off">自动加入 [关]</string>
-    <string name="notification_on">通知 [开]</string>
-    <string name="notification_off">通知 [关]</string>
     <string name="copy_text">复制文本</string>
     <string name="ignore_user">屏蔽用户</string>
     <string name="remove_user">移除用户</string>
@@ -419,7 +406,6 @@
     <string name="give_priv_success">Successly gave {0} days of privileges to {1}.</string>
     <string name="sending__">发送中……</string>
     <string name="give_hint"># of days</string>
-    <string name="type_notes_here">type notes about user here</string>
     <string name="edit_note">Edit note</string>
     <string name="add_note">Add note</string>
     <string name="note_title">{0}\'s note</string>
@@ -460,7 +446,6 @@
 		\n\nThis can be useful to send to the dev for the purposes of troubleshooting issues.  If the issues are of a networking nature, one may have to restart the app after turning this option on for full results.</string>
     <string name="folder_X_from_user_Y_finished">{0} from {1} successfully completed.</string>
     <string name="sort_results_by">排序</string>
-    <string name="sort_results_by_">排序方式：</string>
     <string name="next">Next</string>
     <string name="prev">Prev</string>
     <string name="finish">完成</string>

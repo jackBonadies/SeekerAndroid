@@ -54,7 +54,6 @@
     <string name="add_user">Afegeix usuari</string>
     <string name="get_user_info">Obteniu informació de l\'usuari</string>
     <string name="quick_info">Informació ràpida</string>
-    <string name="enter_user_to_browse">Introduïu l\'usuari per navegar</string>
     <string name="all_target">Tots els usuaris</string>
     <string name="target_user_list">Llista d\'usuaris</string>
     <string name="target_room">Sala de xat</string>
