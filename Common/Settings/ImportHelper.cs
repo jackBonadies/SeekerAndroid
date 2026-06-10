@@ -18,18 +18,25 @@ namespace Seeker
         /// <returns></returns>
         public static ImportedData ImportFile(string fileName, System.IO.Stream stream)
         {
+            // android content resolver streams can be pipe-backed (ex. cloud providers)
+            // and Read may return fewer bytes than requested. buffer upfront.
+            MemoryStream bufferedStream = new MemoryStream();
+            stream.CopyTo(bufferedStream);
+            bufferedStream.Seek(0, SeekOrigin.Begin);
+
+            string extension = System.IO.Path.GetExtension(fileName);
             ImportType importType = ImportType.Unknown;
-            if (System.IO.Path.GetExtension(fileName) == ".scd1" || System.IO.Path.GetExtension(fileName) == ".dat")
+            if (string.Equals(extension, ".scd1", StringComparison.OrdinalIgnoreCase) || string.Equals(extension, ".dat", StringComparison.OrdinalIgnoreCase))
             {
                 importType = ImportType.SoulseekQT;
             }
-            else if (System.IO.Path.GetExtension(fileName) == ".bz2")
+            else if (string.Equals(extension, ".bz2", StringComparison.OrdinalIgnoreCase))
             {
                 importType = ImportType.NicotineTarBz2;
             }
-            else// if (string.IsNullOrEmpty(System.IO.Path.GetExtension(fileName)) || System.IO.Path.GetExtension(fileName) == ".txt" || System.IO.Path.GetExtension(fileName) == ".xml")
+            else
             {
-                importType = DetermineImportTypeByFirstLine(stream);
+                importType = DetermineImportTypeByFirstLine(bufferedStream);
             }
 
             //if import type still unknown then assume QT
@@ -38,24 +45,25 @@ namespace Seeker
             {
                 case ImportType.SoulseekQT:
                 case ImportType.Unknown:
-                    data = ParseSoulseekQTData(stream);
+                    data = ParseSoulseekQTData(bufferedStream);
                     break;
                 case ImportType.NicotineTarBz2:
-                    //unzip
-                    Bzip2.BZip2InputStream zippedStream = new Bzip2.BZip2InputStream(stream, false);
-                    MemoryStream memStream = new MemoryStream();
-                    zippedStream.CopyTo(memStream);
-                    memStream.Seek(0, SeekOrigin.Begin);
-                    //seek past tar header
-                    SkipTar(memStream);
-                    //parse actual config file
-                    data = ParseNicotine(memStream);
+                    using (Bzip2.BZip2InputStream zippedStream = new Bzip2.BZip2InputStream(bufferedStream, false))
+                    {
+                        MemoryStream memStream = new MemoryStream();
+                        zippedStream.CopyTo(memStream);
+                        memStream.Seek(0, SeekOrigin.Begin);
+                        //seek past tar header
+                        SkipTar(memStream);
+                        //parse actual config file
+                        data = ParseNicotine(memStream);
+                    }
                     break;
                 case ImportType.Nicotine:
-                    data = ParseNicotine(stream);
+                    data = ParseNicotine(bufferedStream);
                     break;
                 case ImportType.Seeker:
-                    data = ParseSeeker(stream);
+                    data = ParseSeeker(bufferedStream);
                     break;
             }
             return data.Value;
@@ -96,27 +104,25 @@ namespace Seeker
                 };
 
 
-            List<Tuple<int, byte[]>> user_list_table = null;
-            List<Tuple<int, string>> user_note_table = null;
-            Dictionary<int, string> user_table = null;
-            List<Tuple<int, byte[]>> is_ignored_table = null;
-            List<Tuple<int, byte[]>> unshared_table = null;
-            List<Tuple<int, byte[]>> user_online_alert_table = null;
-            List<Tuple<int, string>> wish_list_item_table = null;
+            List<Tuple<int, byte[]>> user_list_table = new List<Tuple<int, byte[]>>();
+            List<Tuple<int, string>> user_note_table = new List<Tuple<int, string>>();
+            Dictionary<int, string> user_table = new Dictionary<int, string>();
+            List<Tuple<int, byte[]>> is_ignored_table = new List<Tuple<int, byte[]>>();
+            List<Tuple<int, byte[]>> unshared_table = new List<Tuple<int, byte[]>>();
+            List<Tuple<int, byte[]>> user_online_alert_table = new List<Tuple<int, byte[]>>();
+            List<Tuple<int, string>> wish_list_item_table = new List<Tuple<int, string>>();
 
 
             while (numberOfTables > 0)
             {
-                stream.Read(fourBytes, 0, 4);
-
-                int tableNameLength = BitConverter.ToInt32(fourBytes);
+                int tableNameLength = ReadLengthChecked(stream, fourBytes, "table name");
                 byte[] tableNameBytes = new byte[tableNameLength];
                 stream.Read(tableNameBytes, 0, tableNameBytes.Length);
 
 
                 string tableName = System.Text.Encoding.UTF8.GetString(tableNameBytes); //ascii works fine, but just in case.
 
-                System.Console.WriteLine(tableName);
+                Logger.Debug(tableName);
 
                 stream.Read(fourBytes, 0, 4);
                 int itemsInTable = BitConverter.ToInt32(fourBytes);
@@ -267,6 +273,17 @@ namespace Seeker
             return new ImportedData(user_list, ignored_unshared_list, wish_list_item_table.Select(item => item.Item2).ToList(), user_notes);
         }
 
+        private static int ReadLengthChecked(System.IO.Stream stream, byte[] fourBytes, string context)
+        {
+            stream.Read(fourBytes, 0, 4);
+            int length = BitConverter.ToInt32(fourBytes);
+            if (length < 0 || length > stream.Length - stream.Position)
+            {
+                throw new Exception($"The SoulseekQT File does not seem to be valid.  The {context} length ({length}) exceeds the remaining file size.");
+            }
+            return length;
+        }
+
         private static void SkipTable(System.IO.Stream stream, int itemsInTable)
         {
             byte[] fourBytes = new byte[4];
@@ -276,8 +293,7 @@ namespace Seeker
                 //stream.Read(fourBytes, 0, 4);
                 stream.Seek(4, System.IO.SeekOrigin.Current);
                 //item's length in bytes (read so we know how much to skip)
-                stream.Read(fourBytes, 0, 4);
-                int itemLen = BitConverter.ToInt32(fourBytes);
+                int itemLen = ReadLengthChecked(stream, fourBytes, "item");
                 //just skip the item
                 stream.Seek(itemLen, System.IO.SeekOrigin.Current);
             }
@@ -292,10 +308,8 @@ namespace Seeker
                 //item's key
                 stream.Read(fourBytes, 0, 4);
                 int key = BitConverter.ToInt32(fourBytes);
-                //item's length in bytes (read so we know how much to skip)
-                stream.Read(fourBytes, 0, 4);
-                int itemLen = BitConverter.ToInt32(fourBytes);
-                //just skip the item
+                //item's length in bytes
+                int itemLen = ReadLengthChecked(stream, fourBytes, "item");
                 byte[] itemBytes = new byte[itemLen];
                 stream.Read(itemBytes, 0, itemLen);
                 //the first 128 chars in utf8 and ascii are the same. so all valid ascii text is valid utf8 text.
@@ -320,10 +334,8 @@ namespace Seeker
                 //item's key
                 stream.Read(fourBytes, 0, 4);
                 int key = BitConverter.ToInt32(fourBytes);
-                //item's length in bytes (read so we know how much to skip)
-                stream.Read(fourBytes, 0, 4);
-                int itemLen = BitConverter.ToInt32(fourBytes);
-                //just skip the item
+                //item's length in bytes
+                int itemLen = ReadLengthChecked(stream, fourBytes, "item");
                 byte[] itemBytes = new byte[itemLen];
                 stream.Read(itemBytes, 0, itemLen);
                 items.Add(new Tuple<int, byte[]>(key, itemBytes));
@@ -340,10 +352,8 @@ namespace Seeker
                 //item's key
                 stream.Read(fourBytes, 0, 4);
                 int key = BitConverter.ToInt32(fourBytes);
-                //item's length in bytes (read so we know how much to skip)
-                stream.Read(fourBytes, 0, 4);
-                int itemLen = BitConverter.ToInt32(fourBytes);
-                //just skip the item
+                //item's length in bytes
+                int itemLen = ReadLengthChecked(stream, fourBytes, "item");
                 byte[] itemBytes = new byte[itemLen];
                 stream.Read(itemBytes, 0, itemLen);
                 string itemValue = System.Text.Encoding.UTF8.GetString(itemBytes);
@@ -510,7 +520,6 @@ namespace Seeker
                     valuePortion = valuePortion.Substring(2);
                 }
             }
-            return listOfStrings;
         }
 
         private static List<string> ParseUserList(string line, out List<Tuple<string, string>> listOfNotes)
@@ -563,16 +572,17 @@ namespace Seeker
                     valuePortion = valuePortion.Substring(3);
                 }
             }
-            return listOfUsernames;
         }
 
         public class NicotineParsingException : System.Exception
         {
-            public System.Exception InnerException;
-            public string MessageToToast;
-            public NicotineParsingException(System.Exception ex, string msgToToast)
+            public string MessageToToast { get; set; }
+            public NicotineParsingException(string msgToToast) : base(msgToToast)
             {
-                InnerException = ex;
+                MessageToToast = msgToToast;
+            }
+            public NicotineParsingException(System.Exception ex, string msgToToast) : base(msgToToast, ex)
+            {
                 MessageToToast = msgToToast;
             }
         }
@@ -580,12 +590,23 @@ namespace Seeker
         private static ImportedData ParseSeeker(System.IO.Stream stream)
         {
             var data = new XmlSerializer(typeof(SeekerImportExportData)).Deserialize(stream) as SeekerImportExportData;
-            List<Tuple<string, string>> userNotes = new List<Tuple<string, string>>();
-            foreach (KeyValueEl keyValueEl in data.UserNotes)
+            if (data == null)
             {
-                userNotes.Add(new Tuple<string, string>(keyValueEl.Key, keyValueEl.Value));
+                throw new Exception("Failed to read the Seeker export file.");
             }
-            var importData = new ImportedData(data.Userlist, data.BanIgnoreList, data.Wishlist, userNotes);
+            List<Tuple<string, string>> userNotes = new List<Tuple<string, string>>();
+            if (data.UserNotes != null)
+            {
+                foreach (KeyValueEl keyValueEl in data.UserNotes)
+                {
+                    userNotes.Add(new Tuple<string, string>(keyValueEl.Key, keyValueEl.Value));
+                }
+            }
+            var importData = new ImportedData(
+                data.Userlist ?? new List<string>(),
+                data.BanIgnoreList ?? new List<string>(),
+                data.Wishlist ?? new List<string>(),
+                userNotes);
             return importData;
         }
 
@@ -601,6 +622,8 @@ namespace Seeker
             List<string> wishlists = new List<string>();
             List<Tuple<string, string>> notes = new List<Tuple<string, string>>();
             string currentSection = string.Empty;
+            bool sawSectionOfInterest = false;
+            bool sawAnyKey = false;
             using (var reader = new StreamReader(stream, Encoding.UTF8))
             {
                 string line;
@@ -610,6 +633,7 @@ namespace Seeker
                     //possible key
                     if (line.Contains(" = "))
                     {
+                        sawAnyKey = true;
                         if (currentSection != sectionOfInterest)
                         {
                             continue;
@@ -689,11 +713,19 @@ namespace Seeker
                         if (line.StartsWith("[") && line.EndsWith("]"))
                         {
                             currentSection = line;
+                            if (currentSection == sectionOfInterest)
+                            {
+                                sawSectionOfInterest = true;
+                            }
                         }
                     }
 
 
                 }
+            }
+            if (!sawSectionOfInterest && !sawAnyKey)
+            {
+                throw new NicotineParsingException("No [server] section or config keys found - this does not appear to be a Nicotine config file");
             }
             return new ImportedData(userList, bannedIgnoredList.Distinct().ToList(), wishlists, notes);
         }
@@ -703,6 +735,10 @@ namespace Seeker
             System.IO.StreamReader fStream = new System.IO.StreamReader(stream);
             string firstLine = fStream.ReadLine();
             stream.Seek(0, SeekOrigin.Begin);
+            if (firstLine == null)
+            {
+                throw new Exception("The file is empty.");
+            }
             if (firstLine.StartsWith("<?xml"))
             {
                 return ImportType.Seeker;
