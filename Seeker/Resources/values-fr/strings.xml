@@ -595,7 +595,7 @@
     <string name="pause_all">Tout mettre en pause</string>
     <string name="retry_all_failed">Échec essai</string>
     <string name="cancel_and_clear_all">Annuler et tout vider</string>
-    <string name="clear_all_complete">Nettoyage des Complétés</string>
+    <string name="clear_all_complete">Nettoyage des complétés</string>
 
     <string name="file">fichier</string>
     <string name="files">fichiers</string>

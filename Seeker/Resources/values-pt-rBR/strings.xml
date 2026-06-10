@@ -522,7 +522,7 @@
     <string name="add_to_user_list">Adicionar à lista de usuários</string>
     <string name="msg_user">Usuário da mensagem</string>
     <string name="copy_image">Copiar imagem</string>
-    <string name="save_image">Salvar Imagem</string>
+    <string name="save_image">Salvar imagem</string>
 
     <string name="success_save">Foto do usuário salva com sucesso.</string>
 
@@ -549,7 +549,7 @@
 
     <string name="completed">Concluído</string>
     <string name="in_progress">Em andamento</string>
-    <string name="not_started">Não Iniciado</string>
+    <string name="not_started">Não iniciado</string>
     <string name="paused">Pausado</string>
     <string name="in_queue">Na fila</string>
     <string name="unknown">Desconhecido</string>
@@ -589,7 +589,7 @@
 
     <string name="view_users">Visualizar usuários</string>
     <string name="view_self">Visualizar a si mesmo</string>
-    <string name="view_all_tickers">Ver todos os Tickers</string>
+    <string name="view_all_tickers">Ver todos os tickers</string>
 
     <string name="resume_all">Retomar todos</string>
     <string name="pause_all">Pausar todos</string>

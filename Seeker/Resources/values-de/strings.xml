@@ -510,9 +510,9 @@
     <string name="remove_mod_priv">Moderatorrechte entfernen</string>
     <string name="add_mod_priv">Moderatorrechte hinzufügen</string>
     <string name="browse_user">Benutzer durchsuchen</string>
-    <string name="browse_at_location">Browse At Location</string>
-    <string name="search_user_files">Search User\'s Files</string>
-    <string name="add_to_user_list">Add to User List</string>
+    <string name="browse_at_location">Browse at location</string>
+    <string name="search_user_files">Search user\'s files</string>
+    <string name="add_to_user_list">Add to user list</string>
     <string name="msg_user">Benutzer anschreiben</string>
     <string name="copy_image">Bild kopieren</string>
     <string name="save_image">Bild speichern</string>
@@ -549,14 +549,14 @@
 
     <string name="retry_dl">Download wiederholen</string>
     <string name="clear_from_list">Aus der Liste entfernen</string>
-    <string name="cancel_and_clear">Cancel Download and Clear</string>
+    <string name="cancel_and_clear">Cancel download and clear</string>
     <string name="resume_dl">Download fortsetzen</string>
-    <string name="refresh_queue_pos">Refresh Queue Position</string>
+    <string name="refresh_queue_pos">Refresh queue position</string>
     <string name="play_file">Datei öffnen</string>
     <string name="chosen_transfer_doesnt_exist">
         Chosen Transfer Item does not exist anymore.
     </string>
-    <string name="position_is_still_">Position in Queue is still: {0}</string>
+    <string name="position_is_still_">Position in queue is still: {0}</string>
     <string name="failed_to_play">Failed to play file in default player</string>
 
     <string name="download_in_progress">Downloads in progress</string>
@@ -580,15 +580,15 @@
     <string name="priv_success">Berechtigungen erfolgreich aktualisiert</string>
     <string name="status">Status</string>
 
-    <string name="view_users">View Users</string>
-    <string name="view_self">View Self</string>
-    <string name="view_all_tickers">View all Tickers</string>
+    <string name="view_users">View users</string>
+    <string name="view_self">View self</string>
+    <string name="view_all_tickers">View all tickers</string>
 
     <string name="resume_all">Alle fortsetzen</string>
     <string name="pause_all">Alle pausieren</string>
-    <string name="retry_all_failed">Retry All Failed</string>
-    <string name="cancel_and_clear_all">Cancel and Clear All</string>
-    <string name="clear_all_complete">Clear All Complete</string>
+    <string name="retry_all_failed">Retry all failed</string>
+    <string name="cancel_and_clear_all">Cancel and clear all</string>
+    <string name="clear_all_complete">Clear all complete</string>
 
     <string name="file">Datei</string>
     <string name="files">Dateien</string>

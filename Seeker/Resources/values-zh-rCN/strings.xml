@@ -334,12 +334,12 @@
     <string name="copy_text">复制文本</string>
     <string name="ignore_user">屏蔽用户</string>
     <string name="remove_user">移除用户</string>
-    <string name="remove_mod_priv">Remove Moderator Privilege</string>
-    <string name="add_mod_priv">Add Moderator Privilege</string>
-    <string name="browse_user">Browse User</string>
-    <string name="browse_at_location">Browse At Location</string>
-    <string name="search_user_files">Search User\'s Files</string>
-    <string name="add_to_user_list">Add to User List</string>
+    <string name="remove_mod_priv">Remove moderator privilege</string>
+    <string name="add_mod_priv">Add moderator privilege</string>
+    <string name="browse_user">Browse user</string>
+    <string name="browse_at_location">Browse at location</string>
+    <string name="search_user_files">Search user\'s files</string>
+    <string name="add_to_user_list">Add to user list</string>
     <string name="msg_user">向用户发送消息</string>
     <string name="copy_image">复制图像</string>
     <string name="save_image">保存图像</string>
@@ -375,7 +375,7 @@
     <string name="refresh_queue_pos">刷新队列位置</string>
     <string name="play_file">打开文件</string>
     <string name="chosen_transfer_doesnt_exist">所选的传输项不存在。</string>
-    <string name="position_is_still_">Position in Queue is still: {0}</string>
+    <string name="position_is_still_">Position in queue is still: {0}</string>
     <string name="failed_to_play">默认播放器播放文件失败</string>
     <!--Notification-->
     <string name="download_in_progress">正在下载</string>
@@ -397,8 +397,8 @@
     <string name="priv_success">权限更新成功</string>
     <string name="status">状态</string>
     <string name="view_users">查看用户</string>
-    <string name="view_self">View Self</string>
-    <string name="view_all_tickers">View all Tickers</string>
+    <string name="view_self">View self</string>
+    <string name="view_all_tickers">View all tickers</string>
     <string name="resume_all">全部开始</string>
     <string name="pause_all">暂停所有</string>
     <string name="retry_all_failed">重试所有失败</string>
@@ -420,10 +420,10 @@
     <string name="sending__">发送中……</string>
     <string name="give_hint"># of days</string>
     <string name="type_notes_here">type notes about user here</string>
-    <string name="edit_note">Edit Note</string>
-    <string name="add_note">Add Note</string>
-    <string name="note_title">{0}\'s Note</string>
-    <string name="more_options">More Options</string>
+    <string name="edit_note">Edit note</string>
+    <string name="add_note">Add note</string>
+    <string name="note_title">{0}\'s note</string>
+    <string name="more_options">More options</string>
     <string name="remove_from_user_list">Remove from User List</string>
     <string name="filter_is_on">Filter is on</string>
     <string name="filter_is_on_body">Would you like to download the full folder or just filtered items?</string>

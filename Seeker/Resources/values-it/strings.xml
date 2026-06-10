@@ -363,18 +363,18 @@
     <!--Sharing-->
     <!--Transfer States-->
     <string name="completed">Completati</string>
-    <string name="in_progress">In Progresso</string>
-    <string name="not_started">Non Iniziato</string>
+    <string name="in_progress">In progresso</string>
+    <string name="not_started">Non iniziato</string>
     <string name="paused">In Pausa</string>
-    <string name="in_queue">In Coda</string>
+    <string name="in_queue">In coda</string>
     <string name="unknown">Sconosciuto</string>
-    <string name="retry_dl">Ritenta il Download</string>
-    <string name="clear_from_list">Pulisci dalla Lista</string>
-    <string name="cancel_and_clear">Cancella il Download e Cancella</string>
-    <string name="resume_dl">Riprendi il Download</string>
-    <string name="refresh_queue_pos">Aggiorna la Posizione in Coda</string>
-    <string name="play_file">Apri File</string>
-    <string name="chosen_transfer_doesnt_exist">L\'Oggetto di Trasferimento Scelto non esiste più.</string>
+    <string name="retry_dl">Ritenta il download</string>
+    <string name="clear_from_list">Pulisci dalla lista</string>
+    <string name="cancel_and_clear">Cancella il download e cancella</string>
+    <string name="resume_dl">Riprendi il download</string>
+    <string name="refresh_queue_pos">Aggiorna la posizione in coda</string>
+    <string name="play_file">Apri file</string>
+    <string name="chosen_transfer_doesnt_exist">L\'oggetto di trasferimento scelto non esiste più.</string>
     <string name="position_is_still_">La posizione nella coda è ancora: {0}</string>
     <string name="failed_to_play">Failed to play file in default player</string>
     <!--Notification-->
@@ -397,8 +397,8 @@
     <string name="priv_success">Privilegi aggiornati correttamente</string>
     <string name="status">Stato</string>
     <string name="view_users">Vedi utenti</string>
-    <string name="view_self">View Self</string>
-    <string name="view_all_tickers">View all Tickers</string>
+    <string name="view_self">View self</string>
+    <string name="view_all_tickers">View all tickers</string>
     <string name="resume_all">Riprendi tutto</string>
     <string name="pause_all">Pausa tutto</string>
     <string name="retry_all_failed">Riprova tutti i falliti</string>
@@ -422,7 +422,7 @@
     <string name="type_notes_here">Scrivi note sull\'utente qui</string>
     <string name="edit_note">Modifica nota</string>
     <string name="add_note">Aggiungi nota</string>
-    <string name="note_title">{0}\'s Note</string>
+    <string name="note_title">{0}\'s note</string>
     <string name="more_options">Più opzioni</string>
     <string name="remove_from_user_list">Rimuovi da lista utenti</string>
     <string name="filter_is_on">Filtro acceso</string>

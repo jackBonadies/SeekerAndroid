@@ -504,15 +504,15 @@
 
     <string name="auto_join">Automatické připojení</string>
     <string name="notification">Oznámení</string>
-    <string name="copy_text">Kopírovat Text</string>
-    <string name="ignore_user">Ignorovat Uživatele</string>
+    <string name="copy_text">Kopírovat text</string>
+    <string name="ignore_user">Ignorovat uživatele</string>
     <string name="remove_user">Odebrat uživatele</string>
     <string name="remove_mod_priv">Odstranit oprávnění moderátora</string>
     <string name="add_mod_priv">Přidat oprávnění moderátora</string>
     <string name="browse_user">Procházet uživatele</string>
-    <string name="browse_at_location">Browse At Location</string>
+    <string name="browse_at_location">Browse at location</string>
     <string name="search_user_files">Procházet soubory uživatele</string>
-    <string name="add_to_user_list">Add to User List</string>
+    <string name="add_to_user_list">Add to user list</string>
     <string name="msg_user">Poslat zprávu uživateli</string>
     <string name="copy_image">Kopírovat obrázek</string>
     <string name="save_image">Uložit obrázek</string>
@@ -582,7 +582,7 @@
 
     <string name="view_users">Zobrazit uživatele</string>
     <string name="view_self">Zobrazit sebe</string>
-    <string name="view_all_tickers">View all Tickers</string>
+    <string name="view_all_tickers">View all tickers</string>
 
     <string name="resume_all">Obnovit vše</string>
     <string name="pause_all">Pozastavit vše</string>

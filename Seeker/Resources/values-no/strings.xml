@@ -506,20 +506,20 @@
     <string name="online">Online</string>
     <string name="offline">Offline</string>
 
-    <string name="auto_join">Auto Join</string>
+    <string name="auto_join">Auto join</string>
     <string name="notification">Notifications</string>
-    <string name="copy_text">Copy Text</string>
-    <string name="ignore_user">Ignore User</string>
-    <string name="remove_user">Remove User</string>
-    <string name="remove_mod_priv">Remove Moderator Privilege</string>
-    <string name="add_mod_priv">Add Moderator Privilege</string>
-    <string name="browse_user">Browse User</string>
-    <string name="browse_at_location">Browse At Location</string>
-    <string name="search_user_files">Search User\'s Files</string>
-    <string name="add_to_user_list">Add to User List</string>
-    <string name="msg_user">Message User</string>
-    <string name="copy_image">Copy Image</string>
-    <string name="save_image">Save Image</string>
+    <string name="copy_text">Copy text</string>
+    <string name="ignore_user">Ignore user</string>
+    <string name="remove_user">Remove user</string>
+    <string name="remove_mod_priv">Remove moderator privilege</string>
+    <string name="add_mod_priv">Add moderator privilege</string>
+    <string name="browse_user">Browse user</string>
+    <string name="browse_at_location">Browse at location</string>
+    <string name="search_user_files">Search user\'s files</string>
+    <string name="add_to_user_list">Add to user list</string>
+    <string name="msg_user">Message user</string>
+    <string name="copy_image">Copy image</string>
+    <string name="save_image">Save image</string>
 
     <string name="success_save">User picture successfully saved.</string>
 
@@ -545,22 +545,22 @@
 
 
     <string name="completed">Completed</string>
-    <string name="in_progress">In Progress</string>
-    <string name="not_started">Not Started</string>
+    <string name="in_progress">In progress</string>
+    <string name="not_started">Not started</string>
     <string name="paused">Paused</string>
-    <string name="in_queue">In Queue</string>
+    <string name="in_queue">In queue</string>
     <string name="unknown">Unknown</string>
 
-    <string name="retry_dl">Retry Download</string>
-    <string name="clear_from_list">Clear from List</string>
-    <string name="cancel_and_clear">Cancel Download and Clear</string>
-    <string name="resume_dl">Resume Download</string>
-    <string name="refresh_queue_pos">Refresh Queue Position</string>
-    <string name="play_file">Open File</string>
+    <string name="retry_dl">Retry download</string>
+    <string name="clear_from_list">Clear from list</string>
+    <string name="cancel_and_clear">Cancel download and clear</string>
+    <string name="resume_dl">Resume download</string>
+    <string name="refresh_queue_pos">Refresh queue position</string>
+    <string name="play_file">Open file</string>
     <string name="chosen_transfer_doesnt_exist">
         Chosen Transfer Item does not exist anymore.
     </string>
-    <string name="position_is_still_">Position in Queue is still: {0}</string>
+    <string name="position_is_still_">Position in queue is still: {0}</string>
     <string name="failed_to_play">Failed to play file in default player</string>
 
     <string name="download_in_progress">Downloads in progress</string>
@@ -584,15 +584,15 @@
     <string name="priv_success">Successfully updated privileges</string>
     <string name="status">Status</string>
 
-    <string name="view_users">View Users</string>
-    <string name="view_self">View Self</string>
-    <string name="view_all_tickers">View all Tickers</string>
+    <string name="view_users">View users</string>
+    <string name="view_self">View self</string>
+    <string name="view_all_tickers">View all tickers</string>
 
-    <string name="resume_all">Resume All</string>
-    <string name="pause_all">Pause All</string>
-    <string name="retry_all_failed">Retry All Failed</string>
-    <string name="cancel_and_clear_all">Cancel and Clear All</string>
-    <string name="clear_all_complete">Clear All Complete</string>
+    <string name="resume_all">Resume all</string>
+    <string name="pause_all">Pause all</string>
+    <string name="retry_all_failed">Retry all failed</string>
+    <string name="cancel_and_clear_all">Cancel and clear all</string>
+    <string name="clear_all_complete">Clear all complete</string>
 
     <string name="file">file</string>
     <string name="files">files</string>
@@ -619,10 +619,10 @@
     </string>
     <string name="sending__">Sending...</string>
     <string name="give_hint"># of days</string>
-    <string name="edit_note">Edit Note</string>
-    <string name="add_note">Add Note</string>
-    <string name="note_title">{0}\'s Note</string>
-    <string name="more_options">More Options</string>
+    <string name="edit_note">Edit note</string>
+    <string name="add_note">Add note</string>
+    <string name="note_title">{0}\'s note</string>
+    <string name="more_options">More options</string>
     <string name="remove_from_user_list">Remove from User List</string>
 
     <string name="filter_is_on">Filter is on</string>
