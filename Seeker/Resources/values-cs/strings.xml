@@ -371,7 +371,7 @@
         Sharing disabled. Failed to parse shares.
     </string>
     <string name="sharing_disabled_share_not_set">
-        Sharing disabled. Share Directory is not set.
+        Sharing disabled. Share directory is not set.
     </string>
     <string name="sharing_disabled_error">Error: Sharing disabled.</string>
 
@@ -678,7 +678,7 @@
 
     <string name="publicRoomCreation">Requesting public room creation</string>
 
-    <string name="failed_user_offline">Nezdařilo se - Uživatel offline</string>
+    <string name="failed_user_offline">Nezdařilo se - uživatel offline</string>
     <string name="failed_denied">Nezdařilo se - zamítnuto</string>
     <string name="re_requesting">Re-Requesting</string>
 
@@ -719,10 +719,10 @@
     <string name="ErrorForFolder">Chyba pro složku:</string>
 
     <string name="ErrorDownloadDirNotProperlySet">
-        Error: The Download Directory is not properly set.
+        Error: the download directory is not properly set.
     </string>
 
-    <string name="CopySelectedURLs">Copy Selected URLs</string>
+    <string name="CopySelectedURLs">Copy selected URLs</string>
     <string name="CopyURL">Kopírovat URL</string>
     <string name="CopyFolderURL">Kopírovat URL složky</string>
     <string name="LinkCopied">Odkaz zkopírován</string>
@@ -903,7 +903,7 @@
 
     <string name="WaitForParsing">Wait for parsing to complete.</string>
 
-    <string name="ErrorAlreadyAdded">Error: Directory Already Added.</string>
+    <string name="ErrorAlreadyAdded">Error: directory already added.</string>
     <string name="UploadFolderOptions">Upload folder options</string>
     <string name="CannotChangeNameNotUnique">
         Cannot change name. Not unique.

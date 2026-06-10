@@ -479,7 +479,7 @@
     <string name="RemoveFolder">删除文件夹</string>
     <string name="FolderError">文件夹错误</string>
     <string name="ErrorForFolder">文件夹错误： </string>
-    <string name="ErrorDownloadDirNotProperlySet">Error: The Download Directory is not properly set.</string>
+    <string name="ErrorDownloadDirNotProperlySet">Error: the download directory is not properly set.</string>
     <string name="CopySelectedURLs">复制选中的链接</string>
     <string name="CopyURL">复制链接</string>
     <string name="CopyFolderURL">复制文件夹地址</string>
@@ -583,7 +583,7 @@
     <string name="IncompleteFolderEmpty">Incomplete folder is empty</string>
     <string name="NoEligibleToClear">No eligible items to clear</string>
     <string name="WaitForParsing">Wait for parsing to complete.</string>
-    <string name="ErrorAlreadyAdded">Error: Directory Already Added.</string>
+    <string name="ErrorAlreadyAdded">Error: directory already added.</string>
     <string name="UploadFolderOptions">Upload folder options</string>
     <string name="CannotChangeNameNotUnique">Cannot change name. Not unique.</string>
     <string name="AlreadyParsing">Already parsing</string>
@@ -618,8 +618,8 @@
     <string name="ManuallySetIncompleteFolder">Manually Set Incomplete Folder</string>
     <string name="CurrentIncompleteFolder">Incomplete folder</string>
     <string name="ClearFolder">Clear folder</string>
-    <string name="HideSize">Hide Size</string>
-    <string name="HideSpeed">Hide Speed</string>
+    <string name="HideSize">Hide size</string>
+    <string name="HideSpeed">Hide speed</string>
     <string name="Num_Selected">{0} Selected</string>
     <string name="ExportClientData">Export Client Data</string>
     <string name="successfully_exported">Successfully exported Seeker client data.</string>

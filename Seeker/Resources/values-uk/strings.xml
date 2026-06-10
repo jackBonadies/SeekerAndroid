@@ -687,7 +687,7 @@
 
     <string name="publicRoomCreation">Запит на створення публічної кімнати</string>
 
-    <string name="failed_user_offline">Помилка - Користувач не в мережі</string>
+    <string name="failed_user_offline">Помилка - користувач не в мережі</string>
     <string name="failed_denied">Не вдалося - Відхилено</string>
     <string name="re_requesting">Re-Requesting</string>
 
@@ -728,7 +728,7 @@
     <string name="ErrorForFolder">Помилка папки:</string>
 
     <string name="ErrorDownloadDirNotProperlySet">
-        Помилка: Каталог завантажень не встановлено належним чином.
+        Помилка: каталог завантажень не встановлено належним чином.
     </string>
 
     <string name="CopySelectedURLs">Копіювати вибрані URL-адреси</string>

@@ -685,7 +685,7 @@
 
     <string name="publicRoomCreation">Solicitando criação de sala pública</string>
 
-    <string name="failed_user_offline">Falha - Usuário off-line</string>
+    <string name="failed_user_offline">Falha - usuário off-line</string>
     <string name="failed_denied">Falha - Negado</string>
     <string name="re_requesting">Re-solicitando</string>
 
@@ -726,7 +726,7 @@
     <string name="ErrorForFolder">Erro para pasta:</string>
 
     <string name="ErrorDownloadDirNotProperlySet">
-        Erro: O diretório de download não está definido corretamente.
+        Erro: o diretório de download não está definido corretamente.
     </string>
 
     <string name="CopySelectedURLs">Copiar URLs selecionadas</string>
@@ -910,7 +910,7 @@
 
     <string name="WaitForParsing">Aguarde a conclusão da análise.</string>
 
-    <string name="ErrorAlreadyAdded">Erro: Diretório já adicionado.</string>
+    <string name="ErrorAlreadyAdded">Erro: diretório já adicionado.</string>
     <string name="UploadFolderOptions">Opções da pasta de upload</string>
     <string name="CannotChangeNameNotUnique">
         Não é possível alterar o nome. Não é único.
@@ -971,8 +971,8 @@
     <string name="CurrentIncompleteFolder">Pasta de incompletos</string>
     <string name="ClearFolder">Limpar pasta</string>
 
-    <string name="HideSize">Ocultar Tamanho</string>
-    <string name="HideSpeed">Ocultar Velocidade</string>
+    <string name="HideSize">Ocultar tamanho</string>
+    <string name="HideSpeed">Ocultar velocidade</string>
 
     <string name="Num_Selected">{0} Selecionado(s)</string>
 

@@ -688,7 +688,7 @@
 
     <string name="publicRoomCreation">Создаем публичную комнату...</string>
 
-    <string name="failed_user_offline">Ошибка - Пользователь не в сети</string>
+    <string name="failed_user_offline">Ошибка - пользователь не в сети</string>
     <string name="failed_denied">Ошибка - Отказано</string>
     <string name="re_requesting">Повторный запрос</string>
 
@@ -729,7 +729,7 @@
     <string name="ErrorForFolder">Ошибка в папке:</string>
 
     <string name="ErrorDownloadDirNotProperlySet">
-        Ошибка: Папка загрузок установлена неправильно.
+        Ошибка: папка загрузок установлена неправильно.
     </string>
 
     <string name="CopySelectedURLs">Скопировать выбранные URL</string>
@@ -913,7 +913,7 @@
 
     <string name="WaitForParsing">Дождитесь обработки файлов.</string>
 
-    <string name="ErrorAlreadyAdded">Ошибка: Каталог уже добавлен.</string>
+    <string name="ErrorAlreadyAdded">Ошибка: каталог уже добавлен.</string>
     <string name="UploadFolderOptions">Загрузить параметры папки</string>
     <string name="CannotChangeNameNotUnique">
         Нельзя изменить имя. Не уникально.

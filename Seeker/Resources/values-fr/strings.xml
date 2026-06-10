@@ -685,7 +685,7 @@
 
     <string name="publicRoomCreation">Demande de création de salon publique</string>
 
-    <string name="failed_user_offline">Erreur - Utilisateur Inactif</string>
+    <string name="failed_user_offline">Erreur - utilisateur inactif</string>
     <string name="failed_denied">Erreur - Refusé</string>
     <string name="re_requesting">Redemander</string>
 
@@ -726,7 +726,7 @@
     <string name="ErrorForFolder">Erreur pour dossier :</string>
 
     <string name="ErrorDownloadDirNotProperlySet">
-        Erreur : Le dossier téléchargement n\'est pas configuré correctement.
+        Erreur : le dossier téléchargement n\'est pas configuré correctement.
     </string>
 
     <string name="CopySelectedURLs">Copier les URL sélectionnées</string>
@@ -910,7 +910,7 @@
 
     <string name="WaitForParsing">Patienter pendant l\'analyse.</string>
 
-    <string name="ErrorAlreadyAdded">Erreur: Ce Dossier a déjà été Ajouté.</string>
+    <string name="ErrorAlreadyAdded">Erreur: ce dossier a déjà été ajouté.</string>
     <string name="UploadFolderOptions">Téléverser les options du dossier</string>
     <string name="CannotChangeNameNotUnique">
         Impossible de changer le nom. Pas unique.

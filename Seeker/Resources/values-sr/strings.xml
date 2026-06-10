@@ -373,7 +373,7 @@
         Sharing disabled. Failed to parse shares.
     </string>
     <string name="sharing_disabled_share_not_set">
-        Sharing disabled. Share Directory is not set.
+        Sharing disabled. Share directory is not set.
     </string>
     <string name="sharing_disabled_error">Error: Sharing disabled.</string>
 
@@ -680,7 +680,7 @@
 
     <string name="publicRoomCreation">Requesting public room creation</string>
 
-    <string name="failed_user_offline">Failed - User Offline</string>
+    <string name="failed_user_offline">Failed - user offline</string>
     <string name="failed_denied">Failed - Denied</string>
     <string name="re_requesting">Re-Requesting</string>
 
@@ -695,7 +695,7 @@
         {0} from {1} successfully completed.
     </string>
 
-    <string name="sort_results_by">Sort By</string>
+    <string name="sort_results_by">Sort by</string>
 
     <string name="next">Next</string>
     <string name="prev">Prev</string>
@@ -721,12 +721,12 @@
     <string name="ErrorForFolder">Error for folder:</string>
 
     <string name="ErrorDownloadDirNotProperlySet">
-        Error: The Download Directory is not properly set.
+        Error: the download directory is not properly set.
     </string>
 
-    <string name="CopySelectedURLs">Copy Selected URLs</string>
+    <string name="CopySelectedURLs">Copy selected URLs</string>
     <string name="CopyURL">Copy URL</string>
-    <string name="CopyFolderURL">Copy Folder URL</string>
+    <string name="CopyFolderURL">Copy folder URL</string>
     <string name="LinkCopied">Link copied</string>
     <string name="LinksCopied">Links copied</string>
     <string name="ShowFolderInfo">Show folder info</string>
@@ -905,7 +905,7 @@
 
     <string name="WaitForParsing">Wait for parsing to complete.</string>
 
-    <string name="ErrorAlreadyAdded">Error: Directory Already Added.</string>
+    <string name="ErrorAlreadyAdded">Error: directory already added.</string>
     <string name="UploadFolderOptions">Upload folder options</string>
     <string name="CannotChangeNameNotUnique">
         Cannot change name. Not unique.
@@ -966,8 +966,8 @@
     <string name="CurrentIncompleteFolder">Incomplete folder</string>
     <string name="ClearFolder">Clear folder</string>
 
-    <string name="HideSize">Hide Size</string>
-    <string name="HideSpeed">Hide Speed</string>
+    <string name="HideSize">Hide size</string>
+    <string name="HideSpeed">Hide speed</string>
 
     <string name="Num_Selected">{0} Selected</string>
 

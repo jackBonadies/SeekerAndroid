@@ -371,7 +371,7 @@
         Sharing disabled. Failed to parse shares.
     </string>
     <string name="sharing_disabled_share_not_set">
-        Sharing disabled. Share Directory is not set.
+        Sharing disabled. Share directory is not set.
     </string>
     <string name="sharing_disabled_error">Error: Sharing disabled.</string>
 
@@ -678,7 +678,7 @@
 
     <string name="publicRoomCreation">Requesting public room creation</string>
 
-    <string name="failed_user_offline">Fehler - Benutzer Offline</string>
+    <string name="failed_user_offline">Fehler - Benutzer offline</string>
     <string name="failed_denied">Failed - Denied</string>
     <string name="re_requesting">Re-Requesting</string>
 
@@ -693,7 +693,7 @@
         {0} from {1} successfully completed.
     </string>
 
-    <string name="sort_results_by">Sort By</string>
+    <string name="sort_results_by">Sort by</string>
 
     <string name="next">Weiter</string>
     <string name="prev">Zurück</string>
@@ -719,7 +719,7 @@
     <string name="ErrorForFolder">Error for folder:</string>
 
     <string name="ErrorDownloadDirNotProperlySet">
-        Error: The Download Directory is not properly set.
+        Error: the download directory is not properly set.
     </string>
 
     <string name="CopySelectedURLs">Ausgewählte URLs kopieren</string>

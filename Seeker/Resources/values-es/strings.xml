@@ -328,7 +328,7 @@
     <string name="sharing_off">Compartir está apagado</string>
     <string name="sharing_currently_parsing">Analizando archivos actualmente...</string>
     <string name="sharing_disabled_failure_parsing">Compartir desactivado. Fallo al analizar compartidas.</string>
-    <string name="sharing_disabled_share_not_set">Compartir deshabilitado. No se ha establecido el Directorio Compartir.</string>
+    <string name="sharing_disabled_share_not_set">Compartir deshabilitado. No se ha establecido el directorio compartir.</string>
     <string name="sharing_disabled_error">Error: Compartir desactivado.</string>
     <string name="change_target">Cambiar objetivo</string>
     <string name="change_result_style">Cambiar el estilo de resultado</string>
@@ -548,7 +548,7 @@
     <string name="remove_online_alert">Eliminar alerta de en línea</string>
     <string name="user_X_is_now_online">El usuario {0} está ahora conectado</string>
     <string name="publicRoomCreation">Solicitando creación de sala pública</string>
-    <string name="failed_user_offline">Error - Usuario desconectado</string>
+    <string name="failed_user_offline">Error - usuario desconectado</string>
     <string name="failed_denied">Error - Denegado</string>
     <string name="re_requesting">Volviendo a solicitar</string>
     <string name="diagnostics_more_info">Esto guardará la información de diagnóstico en un archivo de texto llamado \"seeker_diagnostics.txt\" que se ubicará en la raíz de la carpeta de descarga seleccionada. \n\nEsto puede ser útil para enviarlo al desarrollador con el fin de solucionar problemas. Si los problemas son de naturaleza de red, es posible que deba reiniciar la aplicación después de activar esta opción para obtener resultados completos.</string>
@@ -572,7 +572,7 @@
     <string name="RemoveFolder">Eliminar carpeta</string>
     <string name="FolderError">Error de carpeta</string>
     <string name="ErrorForFolder">Error para la carpeta:</string>
-    <string name="ErrorDownloadDirNotProperlySet">Error: El directorio de descargas no está configurado correctamente</string>
+    <string name="ErrorDownloadDirNotProperlySet">Error: el directorio de descargas no está configurado correctamente</string>
     <string name="CopySelectedURLs">Copiar URLs seleccionadas</string>
     <string name="CopyURL">Copiar URL</string>
     <string name="CopyFolderURL">Copiar URL de la carpeta</string>
@@ -677,7 +677,7 @@
     <string name="IncompleteFolderEmpty">Carpeta incompleta está vacía</string>
     <string name="NoEligibleToClear">No hay elementos elegibles para limpiar</string>
     <string name="WaitForParsing">Espere a que se complete el análisis.</string>
-    <string name="ErrorAlreadyAdded">Error: Directorio ya añadido.</string>
+    <string name="ErrorAlreadyAdded">Error: directorio ya añadido.</string>
     <string name="UploadFolderOptions">Opciones de carpeta de carga</string>
     <string name="CannotChangeNameNotUnique">No se puede cambiar el nombre. No es único</string>
     <string name="AlreadyParsing">Analizando</string>
@@ -713,7 +713,7 @@
     <string name="CurrentIncompleteFolder">Carpeta incompleta</string>
     <string name="ClearFolder">Limpiar carpeta</string>
     <string name="HideSize">Ocultar tamaño</string>
-    <string name="HideSpeed">Ocultar Velocidad</string>
+    <string name="HideSpeed">Ocultar velocidad</string>
     <string name="Num_Selected">{0} seleccionados</string>
     <string name="DeleteSelected">Borrar Seleccionados</string>
     <string name="deleted_selected_message_histories">Eliminadas {0} conversación(es)</string>
