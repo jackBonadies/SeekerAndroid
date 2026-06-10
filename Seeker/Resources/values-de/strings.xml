@@ -282,7 +282,7 @@
     <string name="error_reading_dir">Fehler beim Lesen des Verzeichnisses</string>
     <string name="error_not_a_dir">Fehler: Kein Verzeichnis</string>
     <string name="successfully_changed_dl_dir">
-        Successfully changed Download Directory to \"{0}\"
+        Successfully changed download directory to \"{0}\"
     </string>
 
     <string name="follow_system">Systemeinstellung folgen</string>
@@ -312,10 +312,10 @@
     <string name="notif_room_off">Benachrichtigungen deaktiviert für: {0}</string>
     <string name="notif_room_on">Benachrichtigungen aktiviert für: {0}</string>
     <string name="new_room_message_received">Neue Nachricht im Raum {0}</string>
-    <string name="removing_mod">Removing User as Moderator in {0}</string>
-    <string name="adding_mod">Adding User as Moderator in {0}</string>
-    <string name="inviting_user_to">Inviting User to {0}</string>
-    <string name="removing_user_from">Removing User from {0}</string>
+    <string name="removing_mod">Removing user as moderator in {0}</string>
+    <string name="adding_mod">Adding user as moderator in {0}</string>
+    <string name="inviting_user_to">Inviting user to {0}</string>
+    <string name="removing_user_from">Removing user from {0}</string>
     <string name="leaving_room">Raum verlassen: {0}</string>
     <string name="adding_user_">Benutzer hinzufügen: {0}</string>
     <string name="error_adding_user_timeout">Error adding user: timeout</string>
@@ -324,7 +324,7 @@
     </string>
 
     <string name="failed_setting_priv_invites">
-        Failed to set Allow Private Invites to: {0}
+        Failed to set allow private invites to: {0}
     </string>
     <string name="network_error_setting_listener">
         Network error setting listener to {0}
@@ -342,14 +342,14 @@
     <string name="success_added_mod">Moderator erfolgreich hinzugefügt</string>
     <string name="failed_added_mod">Moderator konnte nicht hinzugefügt werden</string>
     <string name="success_invite_user">Benutzer erfolgreich eingeladen</string>
-    <string name="failed_invite_user">Failed to Invite User</string>
+    <string name="failed_invite_user">Failed to invite user</string>
     <string name="success_remove_mod">Moderator erfolgreich entfernt</string>
-    <string name="failed_remove_mod">Failed to Remove Moderator</string>
+    <string name="failed_remove_mod">Failed to remove moderator</string>
     <string name="success_removed_user">Benutzer erfolgreich entfernt</string>
     <string name="failed_removed_user">Fehler beim Entfernen des Benutzers</string>
 
     <string name="wishlist_tab_error">
-        Desired Wishlist tab no longer exists
+        Desired wishlist tab no longer exists
     </string>
     <string name="perform_search_first">
         Must perform a search first to add to wishlist
@@ -360,9 +360,9 @@
     <string name="wishlist_tab_target">
         Cannot change target for wishlist search
     </string>
-    <string name="search_tab_error">Desired Search tab no longer exists</string>
+    <string name="search_tab_error">Desired search tab no longer exists</string>
     <string name="error_sharing">
-        Error Parsing Files, could not set Shared Directory
+        Error parsing files, could not set shared directory
     </string>
     <string name="success_sharing">Sharing successfully set up</string>
     <string name="sharing_off">Sharing is off</string>
@@ -376,7 +376,7 @@
     <string name="sharing_disabled_error">Error: Sharing disabled.</string>
 
     <string name="change_target">Ziel ändern</string>
-    <string name="change_result_style">Change Result Style</string>
+    <string name="change_result_style">Change result style</string>
     <string name="add_to_wish">Zur Wunschliste hinzufügen</string>
     <string name="remove_from_ignored">Aus Ignorierliste entfernen</string>
 

@@ -331,7 +331,7 @@
     </string>
 
     <string name="failed_setting_priv_invites">
-        Falha ao definir Permitir Convites Privados para: {0}
+        Falha ao definir permitir convites privados para: {0}
     </string>
     <string name="network_error_setting_listener">
         Erro de rede configurando ouvinte para {0}
@@ -367,7 +367,7 @@
     <string name="wishlist_tab_target">
         Não é possível alterar o destino da pesquisa na lista de desejos
     </string>
-    <string name="search_tab_error">Aba de Pesquisa desejada não existe mais</string>
+    <string name="search_tab_error">Aba de pesquisa desejada não existe mais</string>
     <string name="error_sharing">
         Erro ao analisar arquivos, não foi possível definir o diretório compartilhado
     </string>
@@ -383,9 +383,9 @@
     <string name="sharing_disabled_error">Erro: Compartilhamento desabilitado.</string>
 
     <string name="change_target">Mudar o destino</string>
-    <string name="change_result_style">Mudar Estilo do Resultado</string>
-    <string name="add_to_wish">Adicionar à Lista de Desejos</string>
-    <string name="remove_from_ignored">Remover dos Ignorados</string>
+    <string name="change_result_style">Mudar estilo do resultado</string>
+    <string name="add_to_wish">Adicionar à lista de desejos</string>
+    <string name="remove_from_ignored">Remover dos ignorados</string>
 
     <string name="failed_to_send_message">Falha ao enviar a mensagem</string>
     <string name="empty_message_error">Não é possível enviar uma mensagem vazia</string>
@@ -715,7 +715,7 @@
     <string name="Availability">Disponibilidade</string>
     <string name="Speed">Velocidade</string>
     <string name="FolderName">Nome da pasta</string>
-    <string name="SetAsDefault">Definir como Padrão</string>
+    <string name="SetAsDefault">Definir como padrão</string>
     <string name="Check">Verificar</string>
     <string name="Keywords">Palavras-chave</string>
     <string name="Configure">Configurar</string>

@@ -319,10 +319,10 @@
     <string name="notif_room_off">Notifications désactivées pour: {0}</string>
     <string name="notif_room_on">Notifications activées pour: {0}</string>
     <string name="new_room_message_received">Nouveau message du salon {0}</string>
-    <string name="removing_mod">Suppression de l\'Utilisateur en tant que Modérateur dans {0}</string>
-    <string name="adding_mod">Ajout de l\'Utilisateur en tant que Modérateur dans {0}</string>
-    <string name="inviting_user_to">Invitation de l\'Utilisateur dans {0}</string>
-    <string name="removing_user_from">Suppression de l\'Utilisateur de {0}</string>
+    <string name="removing_mod">Suppression de l\'utilisateur en tant que modérateur dans {0}</string>
+    <string name="adding_mod">Ajout de l\'utilisateur en tant que modérateur dans {0}</string>
+    <string name="inviting_user_to">Invitation de l\'utilisateur dans {0}</string>
+    <string name="removing_user_from">Suppression de l\'utilisateur de {0}</string>
     <string name="leaving_room">Sortie du salon: {0}</string>
     <string name="adding_user_">Ajout de l\'utilisateur: {0}</string>
     <string name="error_adding_user_timeout">Erreur lors de l\'ajout de l\'utilisateur : délai d\'attente dépassé</string>
@@ -356,7 +356,7 @@
     <string name="failed_removed_user">Échec de la suppression de l\'utilisateur</string>
 
     <string name="wishlist_tab_error">
-        Onglet Liste de Vœux n\'existe plus
+        Onglet liste de vœux n\'existe plus
     </string>
     <string name="perform_search_first">
         Vous devez faire une recherche avant de pouvoir ajouter dans la liste de vœux
@@ -367,7 +367,7 @@
     <string name="wishlist_tab_target">
         Impossible de changer la cible pour la recherche de liste de vœux
     </string>
-    <string name="search_tab_error">L\'onglet Recherche Désirée n\'existe plus</string>
+    <string name="search_tab_error">L\'onglet recherche désirée n\'existe plus</string>
     <string name="error_sharing">
         Erreur d\'analyse de fichiers, impossible de mettre le dossier partagé
     </string>

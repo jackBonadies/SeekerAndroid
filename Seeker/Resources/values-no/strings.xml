@@ -284,9 +284,9 @@
     </string>
 
     <string name="error_reading_dir">Error reading directory</string>
-    <string name="error_not_a_dir">Error: Not a Directory</string>
+    <string name="error_not_a_dir">Error: Not a directory</string>
     <string name="successfully_changed_dl_dir">
-        Successfully changed Download Directory to \"{0}\"
+        Successfully changed download directory to \"{0}\"
     </string>
 
     <string name="follow_system">Follow system</string>
@@ -316,19 +316,19 @@
     <string name="notif_room_off">Notifications turned off for: {0}</string>
     <string name="notif_room_on">Notifications turned on for: {0}</string>
     <string name="new_room_message_received">New message in room {0}</string>
-    <string name="removing_mod">Removing User as Moderator in {0}</string>
-    <string name="adding_mod">Adding User as Moderator in {0}</string>
-    <string name="inviting_user_to">Inviting User to {0}</string>
-    <string name="removing_user_from">Removing User from {0}</string>
+    <string name="removing_mod">Removing user as moderator in {0}</string>
+    <string name="adding_mod">Adding user as moderator in {0}</string>
+    <string name="inviting_user_to">Inviting user to {0}</string>
+    <string name="removing_user_from">Removing user from {0}</string>
     <string name="leaving_room">Leaving room: {0}</string>
-    <string name="adding_user_">Adding User: {0}</string>
+    <string name="adding_user_">Adding user: {0}</string>
     <string name="error_adding_user_timeout">Error adding user: timeout</string>
     <string name="error_adding_user_not_found">
         Error adding user: user not found
     </string>
 
     <string name="failed_setting_priv_invites">
-        Failed to set Allow Private Invites to: {0}
+        Failed to set allow private invites to: {0}
     </string>
     <string name="network_error_setting_listener">
         Network error setting listener to {0}
@@ -339,21 +339,21 @@
     <string name="allowed">Allowed</string>
     <string name="denied">Denied</string>
 
-    <string name="get_folder">Get Folder</string>
+    <string name="get_folder">Get folder</string>
 
-    <string name="success_added_user">Successfully Added User</string>
+    <string name="success_added_user">Successfully added user</string>
 
-    <string name="success_added_mod">Successfully Added Moderator</string>
-    <string name="failed_added_mod">Failed to Add Moderator</string>
-    <string name="success_invite_user">Successfully Invited User</string>
-    <string name="failed_invite_user">Failed to Invite User</string>
-    <string name="success_remove_mod">Successfully Removed Moderator</string>
-    <string name="failed_remove_mod">Failed to Remove Moderator</string>
-    <string name="success_removed_user">Successfully Removed User</string>
-    <string name="failed_removed_user">Failed to Remove User</string>
+    <string name="success_added_mod">Successfully added moderator</string>
+    <string name="failed_added_mod">Failed to add moderator</string>
+    <string name="success_invite_user">Successfully invited user</string>
+    <string name="failed_invite_user">Failed to invite user</string>
+    <string name="success_remove_mod">Successfully removed moderator</string>
+    <string name="failed_remove_mod">Failed to remove moderator</string>
+    <string name="success_removed_user">Successfully removed user</string>
+    <string name="failed_removed_user">Failed to remove user</string>
 
     <string name="wishlist_tab_error">
-        Desired Wishlist tab no longer exists
+        Desired wishlist tab no longer exists
     </string>
     <string name="perform_search_first">
         Must perform a search first to add to wishlist
@@ -364,9 +364,9 @@
     <string name="wishlist_tab_target">
         Cannot change target for wishlist search
     </string>
-    <string name="search_tab_error">Desired Search tab no longer exists</string>
+    <string name="search_tab_error">Desired search tab no longer exists</string>
     <string name="error_sharing">
-        Error Parsing Files, could not set Shared Directory
+        Error parsing files, could not set shared directory
     </string>
     <string name="success_sharing">Sharing successfully set up</string>
     <string name="sharing_off">Sharing is off</string>
@@ -379,10 +379,10 @@
     </string>
     <string name="sharing_disabled_error">Error: Sharing disabled.</string>
 
-    <string name="change_target">Change Target</string>
-    <string name="change_result_style">Change Result Style</string>
-    <string name="add_to_wish">Add to Wishlist</string>
-    <string name="remove_from_ignored">Remove from Ignored</string>
+    <string name="change_target">Change target</string>
+    <string name="change_result_style">Change result style</string>
+    <string name="add_to_wish">Add to wishlist</string>
+    <string name="remove_from_ignored">Remove from ignored</string>
 
     <string name="failed_to_send_message">Failed to send message</string>
     <string name="empty_message_error">Cannot send an empty message</string>
@@ -711,15 +711,15 @@
 
     <string name="Availability">Availability</string>
     <string name="Speed">Speed</string>
-    <string name="FolderName">Folder Name</string>
-    <string name="SetAsDefault">Set as Default</string>
+    <string name="FolderName">Folder name</string>
+    <string name="SetAsDefault">Set as default</string>
     <string name="Check">Check</string>
     <string name="Keywords">Keywords</string>
     <string name="Configure">Configure</string>
 
     <string name="Reselect">Reselect</string>
-    <string name="RemoveFolder">Remove Folder</string>
-    <string name="FolderError">Folder Error</string>
+    <string name="RemoveFolder">Remove folder</string>
+    <string name="FolderError">Folder error</string>
     <string name="ErrorForFolder">Error for folder:</string>
 
     <string name="ErrorDownloadDirNotProperlySet">

@@ -299,7 +299,7 @@
     <string name="error_adding_user_timeout">Error al añadir usuario: tiempo de espera agotado</string>
     <string name="error_adding_user_not_found">Error al añadir usuario: usuario no encontrado</string>
     <!--For someone translating, position {0} is a placeholder for the allowed/denied-->
-    <string name="failed_setting_priv_invites">Error al configurar Permitir Invitaciones Privadas a: {0}</string>
+    <string name="failed_setting_priv_invites">Error al configurar permitir invitaciones privadas a: {0}</string>
     <string name="network_error_setting_listener">Error de red estableciendo escucha a {0}</string>
     <string name="network_error_setting_listener_port">Error de red cambiando escucha a {0}</string>
     <string name="allowed">Permitido</string>
