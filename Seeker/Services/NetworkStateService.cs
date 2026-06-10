@@ -9,10 +9,21 @@ namespace Seeker.Services
     public static class NetworkStateService
     {
         public static bool CurrentConnectionIsUnmetered = true;
+        public static bool CurrentConnectionIsVpn = false;
 
         public static bool IsNetworkPermitting()
         {
+            return IsMeteredPermitting() && IsVpnPermitting();
+        }
+
+        public static bool IsMeteredPermitting()
+        {
             return PreferencesState.AllowUploadsOnMetered || CurrentConnectionIsUnmetered;
+        }
+
+        public static bool IsVpnPermitting()
+        {
+            return !PreferencesState.RequireVpnForSharing || CurrentConnectionIsVpn;
         }
 
         /// <summary>
@@ -33,10 +44,12 @@ namespace Seeker.Services
 
                 if (cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
                 {
-                    bool oldState = CurrentConnectionIsUnmetered;
+                    bool oldUnmetered = CurrentConnectionIsUnmetered;
+                    bool oldVpn = CurrentConnectionIsVpn;
                     CurrentConnectionIsUnmetered = IsUnmetered(context, cm);
-                    Logger.Debug("SetNetworkState is metered " + !CurrentConnectionIsUnmetered);
-                    return oldState != CurrentConnectionIsUnmetered;
+                    CurrentConnectionIsVpn = IsVpn(cm);
+                    Logger.Debug("SetNetworkState is metered " + !CurrentConnectionIsUnmetered + " is vpn " + CurrentConnectionIsVpn);
+                    return oldUnmetered != CurrentConnectionIsUnmetered || oldVpn != CurrentConnectionIsVpn;
                 }
                 return false;
             }
@@ -44,6 +57,69 @@ namespace Seeker.Services
             {
                 Logger.Firebase("SetNetworkState" + e.Message + e.StackTrace);
                 return false;
+            }
+        }
+
+        private static bool IsVpn(ConnectivityManager cm)
+        {
+            // HasTransport(Vpn) on the app's default network means this app's traffic actually routes through the VPN
+            var capabilities = cm.GetNetworkCapabilities(cm.ActiveNetwork); // null mid-transition
+            return capabilities != null && capabilities.HasTransport(TransportType.Vpn);
+        }
+
+        /// <summary>
+        /// CONNECTIVITY_ACTION (ConnectionReceiver) does not fire when a VPN comes up over the
+        /// same underlying network, so on API 24+ we also listen to default network callbacks.
+        /// On API 23 ConnectionReceiver remains the only signal.
+        /// </summary>
+        public static void RegisterDefaultNetworkCallback(Context context)
+        {
+            if (!OperatingSystem.IsAndroidVersionAtLeast(24))
+            {
+                return;
+            }
+            try
+            {
+                ConnectivityManager cm = (ConnectivityManager)context.GetSystemService(Context.ConnectivityService);
+                cm?.RegisterDefaultNetworkCallback(new DefaultNetworkCallback(context.ApplicationContext));
+            }
+            catch (Exception e)
+            {
+                Logger.Firebase("RegisterDefaultNetworkCallback" + e.Message + e.StackTrace);
+            }
+        }
+
+        private class DefaultNetworkCallback : ConnectivityManager.NetworkCallback
+        {
+            private readonly Context appContext;
+
+            public DefaultNetworkCallback(Context context)
+            {
+                appContext = context;
+            }
+
+            public override void OnAvailable(Network network)
+            {
+                Recompute();
+            }
+
+            public override void OnCapabilitiesChanged(Network network, NetworkCapabilities networkCapabilities)
+            {
+                Recompute();
+            }
+
+            public override void OnLost(Network network)
+            {
+                Recompute();
+            }
+
+            private void Recompute()
+            {
+                if (SetNetworkState(appContext))
+                {
+                    SharingService.SetUnsetSharingBasedOnConditions(true);
+                    SharedFileService.SharingStatusChangedEvent?.Invoke(null, new EventArgs());
+                }
             }
         }
 

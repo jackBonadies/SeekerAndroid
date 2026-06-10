@@ -122,6 +122,7 @@ namespace Common
         public static bool SharingOn = false;
         public static int UploadSpeed = -1;
         public static bool AllowUploadsOnMetered = true;
+        public static bool RequireVpnForSharing = false;
 
         // Social
         public static bool AllowPrivateRoomInvitations = false;

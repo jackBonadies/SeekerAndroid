@@ -209,6 +209,7 @@ namespace Seeker
 
             PreferencesState.SharingOn = false;
             PreferencesState.AllowUploadsOnMetered = true;
+            PreferencesState.RequireVpnForSharing = false;
             PreferencesState.AutoClearCompleteUploads = false;
 
             PreferencesState.ListenerEnabled = true;

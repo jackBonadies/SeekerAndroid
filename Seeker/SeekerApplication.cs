@@ -241,6 +241,7 @@ namespace Seeker
             }
 
             NetworkStateService.SetNetworkState(this);
+            NetworkStateService.RegisterDefaultNetworkCallback(this);
 
             //need search response and enqueue download action...
             //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:PreferencesState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.

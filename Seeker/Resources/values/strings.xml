@@ -769,6 +769,8 @@
     <string name="RescanShares">Rescan shares</string>
     <string name="add_folder">Add folder</string>
     <string name="PauseSharingIfMetered">Pause sharing on metered (mobile) connection</string>
+    <string name="OnlyShareOnVpn">Only share when VPN is active</string>
+    <string name="sharing_disabled_no_vpn">Sharing disabled. No active VPN.</string>
     <string name="LimitDownloadSpeed">Limit download speed</string>
     <string name="LimitUploadSpeed">Limit upload speed</string>
     <string name="LimitConcurrentDownloads">Limit concurrent downloads</string>
