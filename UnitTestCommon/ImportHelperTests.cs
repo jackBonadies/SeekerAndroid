@@ -29,5 +29,18 @@ namespace UnitTestCommon
             ImportedData result = ImportHelper.ImportFile(path, fileStream);
             await Verifier.Verify(result).UseTextForParameters(fileName.Split('.')[0]);
         }
+
+        // seeker_data_empty_usernotes — export with an empty <UserNotes /> element
+        // seeker_data_with_usernotes  — note containing comma, quotes, and escaped html;
+        //                               duplicate userlist entry
+        [TestCase("seeker_data_empty_usernotes.xml")]
+        [TestCase("seeker_data_with_usernotes.xml")]
+        public async Task ImportSeekerConfig(string fileName)
+        {
+            string path = Path.Combine(TestContext.CurrentContext.TestDirectory, "TestData", "SeekerSettings", fileName);
+            using var fileStream = File.OpenRead(path);
+            ImportedData result = ImportHelper.ImportFile(path, fileStream);
+            await Verifier.Verify(result).UseTextForParameters(fileName.Split('.')[0]);
+        }
     }
 }

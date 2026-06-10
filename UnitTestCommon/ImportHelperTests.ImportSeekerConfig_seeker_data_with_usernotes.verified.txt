@@ -1,0 +1,19 @@
+﻿{
+  Wishlist: [
+    pianomusic
+  ],
+  UserList: [
+    username1,
+    username2,
+    username2
+  ],
+  IgnoredBanned: [
+    ignoreduser
+  ],
+  UserNotes: [
+    {
+      Item1: username1,
+      Item2: this, is a "user note" <b>test</b>
+    }
+  ]
+}
