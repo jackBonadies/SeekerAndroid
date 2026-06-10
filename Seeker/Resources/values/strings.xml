@@ -34,10 +34,7 @@
     <string name="no_account">Don\'t have an account?  Simply enter a unique username and one will be created for you.</string>
     <string name="keep_alive_service_subtitle">Allows Seeker respond to search requests (share), receive chat messages, and run wishlist searches while in background</string> 
 		
-
-
     <string name="privileges_more_info">Privileges help support the Soulseek Network and the central server this app depends on.\n\nThey also let you skip ahead of non-privileged users in download queues.\n\nNote: donations do not go to the creator of this unofficial Android client (Seeker). I do not currently accept donations.</string>
-
 
     <string name="no_messages">No messages</string>
     <string name="no_messages_subtitle">Messages from users will appear here</string>
@@ -649,16 +646,7 @@
     <string name="failed_denied">Failed - denied</string>
     <string name="re_requesting">Re-requesting</string>
 
-
-
-    <string name="diagnostics_more_info">
-        This will save diagnostic information to a text file
-        named \"seeker_diagnostics.txt\" which will be located in the root of
-        the selected download folder.
-		\n\nThis can be useful to send to the dev for the purposes of troubleshooting
-        issues.  If the issues are of a networking nature, one may have to
-        restart the app after turning this option on for full results.
-    </string>
+    <string name="diagnostics_more_info">This will save diagnostic information to a text file named \"seeker_diagnostics.txt\" which will be located in the root of the selected download folder.\n\nThis can be useful to send to the dev for the purposes of troubleshooting issues.  If the issues are of a networking nature, one may have to restart the app after turning this option on for full results.</string>
 
     <string name="folder_X_from_user_Y_finished">{0} from {1} successfully completed.</string>
 
@@ -763,16 +751,7 @@
     <string name="OnlineStatus">Online status</string>
 
     <string name="NoUsersFound">No users found</string>
-    <string name="UsingThisWizardLong">
-        Using this wizard one can import client data from SoulseekQT or
-        Nicotine+.\n\nTo obtain client data from SoulseekQT go to
-        Options > Extras > \'Export Client Configuration Data\', the file type
-        should be .scd1.  For Nicotine+ go to Preferences > Export, the file
-        type can be .tar.bz2 or the raw config file.\n\nSeeker will import User
-        List, Ignored / Unshared List, Wishlist, and User Notes.  One will be
-        able to pick and choose what to export in the following
-        screens.\n\nTap \'Import\' to get started.
-    </string>
+    <string name="UsingThisWizardLong">Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options > Extras > \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences > Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.</string>
     <string name="CurrentDownloadFolder_">Download folder</string>
     <string name="CreateCompleteAndIncomplete">Create Soulseek Complete and Soulseek Incomplete directories</string>
     <string name="CreateUsernameSubfolders">Create username subfolders</string>
@@ -900,11 +879,7 @@
 
     <string name="failed_to_change_password">Failed to change password</string>
     <string name="password_successfully_updated">Password successfully updated</string>
-    <string name="error_dialog_content">
-        Seeker has encountered an issue.  \n\nPlease consider sending a report
-        to the developer.  \n\nAny information about the steps / conditions
-        leading up to the issue is much appreciated.
-    </string>
+    <string name="error_dialog_content">Seeker has encountered an issue.  \n\nPlease consider sending a report to the developer.  \n\nAny information about the steps / conditions leading up to the issue is much appreciated.</string>
 
     <string name="folder_request_user_returned_empty_response">User returned an empty response for this folder</string>
 	
