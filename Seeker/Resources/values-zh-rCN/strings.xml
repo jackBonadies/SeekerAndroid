@@ -275,16 +275,16 @@
     <string name="no_empty_user_pass">用户名和密码不能为空</string>
     <string name="dns_failed_2">Failed to resolve soulseek server ip address.</string>
     <!--In this case the placeholder {0} is for the username-->
-    <string name="added_to_ignore">Added user \"{0}\" to Ignore List</string>
+    <string name="added_to_ignore">Added user \"{0}\" to ignore list</string>
     <string name="already_added_to_ignore">用户 \"{0}\" 已经在忽略列表中了</string>
     <string name="failed_to_establish_connection_to_peer">Failed to establish connection to {0}</string>
-    <string name="user_info_received">User Info from {0} received</string>
+    <string name="user_info_received">User info from {0} received</string>
     <string name="user_info_failed_conn">Failed to get info for user: {0}.  Could not establish connection.</string>
     <string name="user_info_failed_offline">Failed to get info for user: {0}.  User is offline.</string>
     <string name="user_info_failed_timeout">Failed to get info for user: {0}.  Connection timed out.</string>
-    <string name="deleted_message_history_with">Deleted Message History with {0}</string>
+    <string name="deleted_message_history_with">Deleted message history with {0}</string>
     <string name="failed_to_establish_direct_or_indirect">Failed to establish a direct or indirect message connection to user</string>
-    <string name="remote_conn_closed">Read Error: Remote Connection Closed</string>
+    <string name="remote_conn_closed">Read error: remote connection closed</string>
     <string name="network_down">网络子系统已经关闭</string>
     <string name="reported_as_failed">Error: Transfer reported as failed by the uploader</string>
     <string name="error_no_space">错误：设备上没有剩余空间。</string>
@@ -305,11 +305,11 @@
     <string name="mod">Mod</string>
     <!--Title-->
     <string name="browse_user_files">浏览用户：</string>
-    <string name="set_ticker">Set Ticker:</string>
-    <string name="setticker">Set Ticker</string>
+    <string name="set_ticker">Set ticker:</string>
+    <string name="setticker">Set ticker</string>
     <string name="chatrooms">聊天室</string>
-    <string name="create_chatroom_">Create Chatroom:</string>
-    <string name="edit_info">Edit Info</string>
+    <string name="create_chatroom_">Create chatroom:</string>
+    <string name="edit_info">Edit info</string>
     <!--Dialog Action-->
     <string name="okay">OK</string>
     <string name="undo">撤销</string>
@@ -322,7 +322,7 @@
     <string name="close">关闭</string>
     <string name="report">Report</string>
     <string name="create_chatroom">创建房间</string>
-    <string name="refresh_room_list">Refresh Room List</string>
+    <string name="refresh_room_list">Refresh room list</string>
     <string name="away">离开</string>
     <string name="online">在线</string>
     <string name="offline">离线</string>
@@ -415,7 +415,7 @@
     <string name="error_days_entered_not_positive">输入的天数必须是正数。</string>
     <string name="error_insufficient_days">You do not have {0} days to give.</string>
     <string name="give_to_">Give to {0}</string>
-    <string name="error_give_priv">Give Privileges Failed</string>
+    <string name="error_give_priv">Give privileges failed</string>
     <string name="give_priv_success">Successly gave {0} days of privileges to {1}.</string>
     <string name="sending__">发送中……</string>
     <string name="give_hint"># of days</string>
@@ -428,17 +428,17 @@
     <string name="filter_is_on">Filter is on</string>
     <string name="filter_is_on_body">Would you like to download the full folder or just filtered items?</string>
     <string name="all">All</string>
-    <string name="just_filtered">Just Filtered</string>
+    <string name="just_filtered">Just filtered</string>
     <string name="item_total_singular">{0} item total</string>
     <string name="item_total_plural">{0} items total</string>
     <string name="subfolders_warning">This folder contains subfolders, would you like to download all files in those subfolders as well ({0}) or only the files in the current folder ({1})?</string>
     <string name="subfolders_warning_queue_paused">This folder contains subfolders, would you like to queue all files in those subfolders as well ({0}) or only the files in the current folder ({1})?</string>
-    <string name="current_folder_only">Current Folder Only</string>
+    <string name="current_folder_only">Current folder only</string>
     <string name="must_be_logged_in_to_give_privileges">Must be logged in to give privileges</string>
     <string name="about_body">Seeker is a free and open source Soulseek client for Android. It will never have ads or paid features.</string>
     <string name="must_be_logged_in_to_get_dir_contents">Must be logged in to get directory contents</string>
     <string name="note">Note</string>
-    <string name="removed_user_from_ignored_list">Removed user \"{0}\" from Ignore List</string>
+    <string name="removed_user_from_ignored_list">Removed user \"{0}\" from ignore list</string>
     <string name="removed_user">Removed user: \"{0}\"</string>
     <string name="successfully_changed_incomplete_dir">Successfully changed Incomplete Directory to \"{0}\"</string>
     <string name="auto_clear_complete">Auto-Clear Complete Downloads</string>
@@ -447,9 +447,9 @@
     <string name="downloads_remaining">{0} downloads remaining</string>
     <string name="upload_remaining">{0} upload remaining</string>
     <string name="uploads_remaining">{0} uploads remaining</string>
-    <string name="uploads_in_progress">Uploads in Progress</string>
+    <string name="uploads_in_progress">Uploads in progress</string>
     <string name="shutdown">关闭</string>
-    <string name="set_online_alert">Set Online Alert</string>
+    <string name="set_online_alert">Set online alert</string>
     <string name="remove_online_alert">删除在线提醒</string>
     <string name="user_X_is_now_online">用户 {0} 已上线</string>
     <string name="publicRoomCreation">Requesting public room creation</string>

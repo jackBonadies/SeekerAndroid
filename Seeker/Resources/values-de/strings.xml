@@ -423,14 +423,14 @@
         Failed to resolve soulseek server ip address.
     </string>
 
-    <string name="added_to_ignore">Added user \"{0}\" to Ignore List</string>
+    <string name="added_to_ignore">Added user \"{0}\" to ignore list</string>
     <string name="already_added_to_ignore">
-        User \"{0}\" already added to Ignore List
+        User \"{0}\" already added to ignore list
     </string>
     <string name="failed_to_establish_connection_to_peer">
         Failed to establish connection to {0}
     </string>
-    <string name="user_info_received">User Info from {0} received</string>
+    <string name="user_info_received">User info from {0} received</string>
     <string name="user_info_failed_conn">
         Failed to get info for user: {0}.  Could not establish connection.
     </string>
@@ -441,16 +441,16 @@
         Failed to get info for user: {0}.  Connection timed out.
     </string>
     <string name="deleted_message_history_with">
-        Deleted Message History with {0}
+        Deleted message history with {0}
     </string>
 
     <string name="failed_to_establish_direct_or_indirect">
         Failed to establish a direct or indirect message connection to user
     </string>
     <string name="remote_conn_closed">
-        Read Error: Remote Connection Closed
+        Read error: remote connection closed
     </string>
-    <string name="network_down">Network Subsystem is Down</string>
+    <string name="network_down">Network subsystem is down</string>
     <string name="reported_as_failed">
         Error: Transfer reported as failed by the uploader
     </string>
@@ -479,8 +479,8 @@
     <string name="owner">Besitzer</string>
     <string name="mod">Moderator</string>
 
-    <string name="set_ticker">Set Ticker</string>
-    <string name="setticker">Set Ticker</string>
+    <string name="set_ticker">Set ticker</string>
+    <string name="setticker">Set ticker</string>
     <string name="chatrooms">Chatrooms</string>
     <string name="create_chatroom_">Chatroom erstellen</string>
     <string name="edit_info">Information bearbeiten</string>
@@ -559,9 +559,9 @@
     <string name="position_is_still_">Position in Queue is still: {0}</string>
     <string name="failed_to_play">Failed to play file in default player</string>
 
-    <string name="download_in_progress">Downloads in Progress</string>
+    <string name="download_in_progress">Downloads in progress</string>
     <string name="transfers_in_progress">Transfers in progress...</string>
-    <string name="seeker_running">Seeker is Running</string>
+    <string name="seeker_running">Seeker is running</string>
     <string name="seeker_running_content">
         Seeker is currently running in background
     </string>
@@ -598,7 +598,7 @@
 
     <string name="about_title">Info</string>
 
-    <string name="give_privileges">Give Privileges</string>
+    <string name="give_privileges">Give privileges</string>
     <string name="error_days_entered_no_parse">
         Days entered must be a whole number.
     </string>
@@ -609,7 +609,7 @@
         You do not have {0} days to give.
     </string>
     <string name="give_to_">Give to {0}</string>
-    <string name="error_give_priv">Give Privileges Failed</string>
+    <string name="error_give_priv">Give privileges failed</string>
     <string name="give_priv_success">
         Successly gave {0} days of privileges to {1}.
     </string>
@@ -626,7 +626,7 @@
         Would you like to download the full folder or just filtered items?
     </string>
     <string name="all">All</string>
-    <string name="just_filtered">Just Filtered</string>
+    <string name="just_filtered">Just filtered</string>
 
     <string name="item_total_singular">{0} item total</string>
     <string name="item_total_plural">{0} items total</string>
@@ -639,7 +639,7 @@
         This folder contains subfolders, would you like to queue all files in those subfolders as well ({0}) or only the files in the current folder ({1})?
     </string>
 
-    <string name="current_folder_only">Current Folder Only</string>
+    <string name="current_folder_only">Current folder only</string>
     <string name="must_be_logged_in_to_give_privileges">
         Must be logged in to give privileges
     </string>
@@ -650,7 +650,7 @@
     </string>
     <string name="note">Notiz</string>
     <string name="removed_user_from_ignored_list">
-        Removed user \"{0}\" from Ignore List
+        Removed user \"{0}\" from ignore list
     </string>
 
     <string name="removed_user">Benutzer entfernt: \"{0}\"</string>

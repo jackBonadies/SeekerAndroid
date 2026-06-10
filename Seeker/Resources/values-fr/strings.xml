@@ -448,7 +448,7 @@
         Échec de l\'obtention d\'info d\'utilisateur : {0}. Délai d\'attente dépassé.
     </string>
     <string name="deleted_message_history_with">
-        Supprime l\'Historique de Messages avec {0}
+        Supprime l\'historique de messages avec {0}
     </string>
 
     <string name="failed_to_establish_direct_or_indirect">
@@ -646,7 +646,7 @@
         Ce dossier contient des sous-dossiers, voulez-vous mettre en file d\'attente tous les fichiers dans ce sous-dossier ({0}) ou seulement les fichiers dans le dossier courant ({1}) ?
     </string>
 
-    <string name="current_folder_only">Dossier Actuel Uniquement</string>
+    <string name="current_folder_only">Dossier actuel uniquement</string>
     <string name="must_be_logged_in_to_give_privileges">
         Vous devez être connecté pour donner des privilèges
     </string>
@@ -657,7 +657,7 @@
     </string>
     <string name="note">Note</string>
     <string name="removed_user_from_ignored_list">
-        L\'utilisateur \"{0}\" est supprimé de la Liste Noir
+        L\'utilisateur \"{0}\" est supprimé de la liste noir
     </string>
 
     <string name="removed_user">Utilisateur supprimé : \"{0}\"</string>

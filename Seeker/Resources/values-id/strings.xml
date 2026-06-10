@@ -379,23 +379,23 @@
     <string name="port_already_in_use">Gagal menyiapkan listener. Port kemungkinan besar sudah digunakan.</string>
     <string name="dns_failed">Pencarian DNS Server Gagal. Berhasil beralih menggunakan IP hardcoded.</string>
     <string name="bad_user_pass">Nama pengguna atau kata sandi salah</string>
-    <string name="invalid_username">Nama Pengguna Tidak Valid</string>
-    <string name="invalid_password">Kata Sandi Tidak Valid</string>
+    <string name="invalid_username">Nama pengguna tidak valid</string>
+    <string name="invalid_password">Kata sandi tidak valid</string>
     <string name="user_too_long">Nama pengguna harus di bawah 30 karakter</string>
     <string name="user_invalid_char">Nama pengguna tidak boleh mengandung karakter khusus</string>
     <string name="network_unreachable">Jaringan tidak dapat dijangkau</string>
     <string name="cannot_login">Tidak Dapat Masuk</string>
-    <string name="no_empty_user_pass">Nama pengguna dan Kata Sandi tidak boleh kosong</string>
+    <string name="no_empty_user_pass">Nama pengguna dan kata sandi tidak boleh kosong</string>
     <string name="dns_failed_2">Gagal melacak alamat IP server soulseek.</string>
     <!--In this case the placeholder {0} is for the username-->
-    <string name="added_to_ignore">Berhasil menambahkan pengguna \"{0}\" ke Daftar Abaikan</string>
-    <string name="already_added_to_ignore">Pengguna \"{0}\" sudah ada di Daftar Abaikan</string>
+    <string name="added_to_ignore">Berhasil menambahkan pengguna \"{0}\" ke daftar abaikan</string>
+    <string name="already_added_to_ignore">Pengguna \"{0}\" sudah ada di daftar abaikan</string>
     <string name="failed_to_establish_connection_to_peer">Gagal membuat koneksi ke {0}</string>
-    <string name="user_info_received">Info Pengguna dari {0} diterima</string>
+    <string name="user_info_received">Info pengguna dari {0} diterima</string>
     <string name="user_info_failed_conn">Gagal mendapatkan info pengguna: {0}. Tidak dapat membuat koneksi.</string>
     <string name="user_info_failed_offline">Gagal mendapatkan info pengguna: {0}. Pengguna sedang luring.</string>
     <string name="user_info_failed_timeout">Gagal mendapatkan info pengguna: {0}. Koneksi habis waktu.</string>
-    <string name="deleted_message_history_with">Riwayat Pesan dengan {0} telah dihapus</string>
+    <string name="deleted_message_history_with">Riwayat pesan dengan {0} telah dihapus</string>
     <string name="welcome">Selamat datang, {0}</string>
     <string name="logged_in_as">Masuk sebagai</string>
     <string name="status_connected">Terhubung</string>
@@ -403,8 +403,8 @@
     <string name="status_disconnected">Terputus</string>
     <string name="status_disconnecting">Memutuskan sambungan</string>
     <string name="failed_to_establish_direct_or_indirect">Gagal membuat koneksi pesan langsung atau tidak langsung ke pengguna</string>
-    <string name="remote_conn_closed">Error Membaca: Koneksi Jarak Jauh Ditutup</string>
-    <string name="network_down">Subsistem Jaringan Mati</string>
+    <string name="remote_conn_closed">Error membaca: koneksi jarak jauh ditutup</string>
+    <string name="network_down">Subsistem jaringan mati</string>
     <string name="reported_as_failed">Error: Transfer dilaporkan gagal oleh pengunggah</string>
     <string name="error_no_space">Error: Ruang penyimpanan perangkat penuh.</string>
     <string name="error_unspecified">Tugas tidak selesai karena adanya pengecualian (exception) yang tidak ditangani</string>
@@ -412,7 +412,7 @@
     <string name="transfer_rejected">Permintaan Transfer Ditolak</string>
     <string name="transfer_rejected_file_not_shared">Permintaan Transfer Ditolak. Alasan: File Tidak Dibagikan</string>
     <string name="delete_messages">Hapus Pesan</string>
-    <string name="delete_all_messages">Hapus Semua Pesan</string>
+    <string name="delete_all_messages">Hapus semua pesan</string>
     <string name="deleted_all_messages">Semua riwayat pesan telah dihapus</string>
     <string name="deleted_all_no_messages">Tidak ada pesan untuk dihapus!</string>
     <!--Room Categories-->
@@ -424,11 +424,11 @@
     <string name="mod">Mod</string>
     <!--Title-->
     <string name="user_">Pengguna:</string>
-    <string name="set_ticker">Atur Ticker</string>
-    <string name="setticker">Atur Ticker</string>
+    <string name="set_ticker">Atur ticker</string>
+    <string name="setticker">Atur ticker</string>
     <string name="chatrooms">Ruang Obrolan</string>
-    <string name="create_chatroom_">Buat Ruang Obrolan</string>
-    <string name="edit_info">Edit Info</string>
+    <string name="create_chatroom_">Buat ruang obrolan</string>
+    <string name="edit_info">Edit info</string>
     <!--Dialog Action-->
     <string name="okay">OK</string>
     <string name="undo">Batal</string>
@@ -440,8 +440,8 @@
     <string name="cancel">Batal</string>
     <string name="close">Tutup</string>
     <string name="report">Laporkan</string>
-    <string name="create_chatroom">Buat Ruangan</string>
-    <string name="refresh_room_list">Perbarui Daftar Ruangan</string>
+    <string name="create_chatroom">Buat ruangan</string>
+    <string name="refresh_room_list">Perbarui daftar ruangan</string>
     <string name="away">Sembunyi</string>
     <string name="online">Daring</string>
     <string name="offline">Luring</string>
@@ -500,9 +500,9 @@
     <string name="position_is_still_">Posisi dalam Antrean masih: {0}</string>
     <string name="failed_to_play">Gagal memutar file di pemutar default</string>
     <!--Notification-->
-    <string name="download_in_progress">Unduhan Sedang Berjalan</string>
+    <string name="download_in_progress">Unduhan sedang berjalan</string>
     <string name="transfers_in_progress">Transfer sedang berjalan...</string>
-    <string name="seeker_running">Seeker Sedang Berjalan</string>
+    <string name="seeker_running">Seeker sedang berjalan</string>
     <string name="seeker_running_content">Seeker saat ini berjalan di latar belakang</string>
     <!--Privileges-->
     <string name="privileges">Hak Istimewa</string>
@@ -538,12 +538,12 @@
     <string name="from_directories">Dari direktori</string>
     <string name="upload_f_string">Berhasil mengunggah {0} {1} ke pengguna: {2}</string>
     <string name="about_title">Tentang</string>
-    <string name="give_privileges">Berikan Hak Istimewa</string>
+    <string name="give_privileges">Berikan hak istimewa</string>
     <string name="error_days_entered_no_parse">Jumlah hari yang dimasukkan harus berupa bilangan bulat.</string>
     <string name="error_days_entered_not_positive">Jumlah hari yang dimasukkan harus bernilai positif.</string>
     <string name="error_insufficient_days">Anda tidak memiliki cukup {0} hari untuk diberikan.</string>
     <string name="give_to_">Berikan kepada {0}</string>
-    <string name="error_give_priv">Gagal Memberikan Hak Istimewa</string>
+    <string name="error_give_priv">Gagal memberikan hak istimewa</string>
     <string name="give_priv_success">Berhasil memberikan {0} hari hak istimewa kepada {1}.</string>
     <string name="sending__">Mengirim...</string>
     <string name="give_hint">jumlah hari</string>
@@ -556,12 +556,12 @@
     <string name="filter_is_on">Filter aktif</string>
     <string name="filter_is_on_body">Apakah Anda ingin mengunduh seluruh folder atau hanya item yang difilter?</string>
     <string name="all">Semua</string>
-    <string name="just_filtered">Hanya yang Difilter</string>
+    <string name="just_filtered">Hanya yang difilter</string>
     <string name="item_total_singular">Total {0} item</string>
     <string name="item_total_plural">Total {0} item</string>
     <string name="subfolders_warning">Folder ini berisi subfolder, apakah Anda ingin mengunduh semua file di dalam subfolder tersebut juga ({0}) atau hanya file di folder saat ini ({1})?</string>
     <string name="subfolders_warning_queue_paused">Folder ini berisi subfolder, apakah Anda ingin memasukkan semua file di dalam subfolder tersebut ke antrean juga ({0}) atau hanya file di folder saat ini ({1})?</string>
-    <string name="current_folder_only">Hanya Folder Saat Ini</string>
+    <string name="current_folder_only">Hanya folder saat ini</string>
     <string name="must_be_logged_in_to_give_privileges">Harus masuk log terlebih dahulu untuk memberikan hak istimewa</string>
     <string name="about_body"><![CDATA[Seeker adalah klien Soulseek gratis dan sumber terbuka (open source) untuk Android. Aplikasi ini tidak akan pernah memiliki iklan atau fitur berbayar.
 <br><br>Silakan bantu menerjemahkan Seeker <a href="https://crwd.in/seeker">di sini</a>.
@@ -571,7 +571,7 @@
 <br><br>Fungsi ini memerlukan Seeker versi Fdroid IzzyDroid (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Unduh Di Sini</a>). Google Play Store tidak mengizinkan aplikasi untuk meminta izin jenis ini.]]></string>
     <string name="must_be_logged_in_to_get_dir_contents">Harus masuk log terlebih dahulu untuk mendapatkan konten direktori</string>
     <string name="note">Catatan</string>
-    <string name="removed_user_from_ignored_list">Berhasil menghapus pengguna \"{0}\" dari Daftar Abaikan</string>
+    <string name="removed_user_from_ignored_list">Berhasil menghapus pengguna \"{0}\" dari daftar abaikan</string>
     <string name="removed_user">Berhasil menghapus pengguna: \"{0}\"</string>
     <string name="successfully_changed_incomplete_dir">Berhasil mengubah Direktori Belum Selesai (Incomplete) menjadi \"{0}\"</string>
     <string name="no_uploads_yet">Belum ada unggahan saat ini, file yang Anda unggah akan muncul di sini</string>
@@ -583,11 +583,11 @@
     <string name="downloads_remaining">{0} unduhan tersisa</string>
     <string name="upload_remaining">{0} unggahan tersisa</string>
     <string name="uploads_remaining">{0} unggahan tersisa</string>
-    <string name="uploads_in_progress">Unggahan Sedang Berjalan</string>
+    <string name="uploads_in_progress">Unggahan sedang berjalan</string>
     <string name="search_tabs_bold"><b>Tab Pencarian</b></string>
     <string name="shutdown">Matikan Aplikasi</string>
-    <string name="set_online_alert">Atur Peringatan Daring</string>
-    <string name="remove_online_alert">Hapus Peringatan Daring</string>
+    <string name="set_online_alert">Atur peringatan daring</string>
+    <string name="remove_online_alert">Hapus peringatan daring</string>
     <string name="user_X_is_now_online">Pengguna {0} sekarang sedang daring</string>
     <string name="publicRoomCreation">Meminta pembuatan ruangan publik</string>
     <string name="failed_user_offline">Gagal - Pengguna Luring</string>

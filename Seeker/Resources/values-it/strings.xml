@@ -275,17 +275,17 @@
     <string name="no_empty_user_pass">Nome utente e password non possono essere vuoti</string>
     <string name="dns_failed_2">Risoluzione dell\'indirizzo IP del server soulseek non riuscita.</string>
     <!--In this case the placeholder {0} is for the username-->
-    <string name="added_to_ignore">Aggiunto l\'Utente \"{0}\" alla Lista Ignora</string>
-    <string name="already_added_to_ignore">L\'Utente \"{0}\" è già nella Lista Ignora</string>
+    <string name="added_to_ignore">Aggiunto l\'utente \"{0}\" alla lista ignora</string>
+    <string name="already_added_to_ignore">L\'utente \"{0}\" è già nella lista ignora</string>
     <string name="failed_to_establish_connection_to_peer">Fallita la connessione a {0}</string>
-    <string name="user_info_received">Informazioni Utente da {0} ricevute</string>
+    <string name="user_info_received">Informazioni utente da {0} ricevute</string>
     <string name="user_info_failed_conn">Impossibile ottenere informazioni per l\'utente: {0}. Impossibile stabilire la connessione.</string>
     <string name="user_info_failed_offline">Recupero delle informazioni per l\'utente non riuscito: {0}. L\'utente è offline.</string>
     <string name="user_info_failed_timeout">Impossibile ottenere informazioni per l\'utente:{0}. Connessione scaduta.</string>
     <string name="deleted_message_history_with">Cronologia messaggi eliminati con {0}</string>
     <string name="failed_to_establish_direct_or_indirect">Non è stato possibile stabilire una connessione diretta o indiretta del messaggio all\'utente</string>
-    <string name="remote_conn_closed">Errore Di Lettura: Connessione Remota Chiusa</string>
-    <string name="network_down">Il Sottosistema di Rete è in Down</string>
+    <string name="remote_conn_closed">Errore di lettura: connessione remota chiusa</string>
+    <string name="network_down">Il sottosistema di rete è in down</string>
     <string name="reported_as_failed">Errore: Trasferimento segnalato come fallito dal caricatore</string>
     <string name="error_no_space">Errore: spazio sul dispositivo esaurito.</string>
     <string name="error_unspecified">L\'azione non è stata completata a causa di un\'eccezione non gestita</string>
@@ -305,8 +305,8 @@
     <string name="mod">Moderatore</string>
     <!--Title-->
     <string name="browse_user_files">Scorrere utenti</string>
-    <string name="set_ticker">Imposta Ticker</string>
-    <string name="setticker">Imposta Ticker</string>
+    <string name="set_ticker">Imposta ticker</string>
+    <string name="setticker">Imposta ticker</string>
     <string name="chatrooms">Stanze</string>
     <string name="create_chatroom_">Crea stanza</string>
     <string name="edit_info">Modifica informazioni</string>
@@ -378,9 +378,9 @@
     <string name="position_is_still_">La posizione nella coda è ancora: {0}</string>
     <string name="failed_to_play">Failed to play file in default player</string>
     <!--Notification-->
-    <string name="download_in_progress">Downloads in Progress</string>
+    <string name="download_in_progress">Downloads in progress</string>
     <string name="transfers_in_progress">Transfers in progress...</string>
-    <string name="seeker_running">Seeker is Running</string>
+    <string name="seeker_running">Seeker is running</string>
     <string name="seeker_running_content">Seeker is currently running in background</string>
     <!--Privileges-->
     <string name="yes">Yes</string>
@@ -433,12 +433,12 @@
     <string name="item_total_plural">{0} items total</string>
     <string name="subfolders_warning">Questa cartella contiene sottocartelle, vuoi scaricare tutti i file anche in quelle sottocartelle ({0}) o solo i file nella cartella corrente ({1})?</string>
     <string name="subfolders_warning_queue_paused">This folder contains subfolders, would you like to queue all files in those subfolders as well ({0}) or only the files in the current folder ({1})?</string>
-    <string name="current_folder_only">Current Folder Only</string>
+    <string name="current_folder_only">Current folder only</string>
     <string name="must_be_logged_in_to_give_privileges">Must be logged in to give privileges</string>
     <string name="about_body">Seeker is a free and open source Soulseek client for Android. It will never have ads or paid features.</string>
     <string name="must_be_logged_in_to_get_dir_contents">Must be logged in to get directory contents</string>
     <string name="note">Nota</string>
-    <string name="removed_user_from_ignored_list">Removed user \"{0}\" from Ignore List</string>
+    <string name="removed_user_from_ignored_list">Removed user \"{0}\" from ignore list</string>
     <string name="removed_user">Removed user: \"{0}\"</string>
     <string name="successfully_changed_incomplete_dir">Successfully changed Incomplete Directory to \"{0}\"</string>
     <string name="auto_clear_complete">Auto-clear complete downloads</string>
@@ -449,8 +449,8 @@
     <string name="uploads_remaining">{0} uploads remaining</string>
     <string name="uploads_in_progress">Caricamenti in corso</string>
     <string name="shutdown">Arresto</string>
-    <string name="set_online_alert">Set Online Alert</string>
-    <string name="remove_online_alert">Remove Online Alert</string>
+    <string name="set_online_alert">Set online alert</string>
+    <string name="remove_online_alert">Remove online alert</string>
     <string name="user_X_is_now_online">Utente {0} è in linea</string>
     <string name="publicRoomCreation">Requesting public room creation</string>
     <string name="failed_user_offline">Fallito - Utente non in linea</string>

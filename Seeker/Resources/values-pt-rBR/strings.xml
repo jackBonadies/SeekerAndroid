@@ -486,11 +486,11 @@
     <string name="owner">Proprietário</string>
     <string name="mod">Mod</string>
 
-    <string name="set_ticker">Definir Ticker</string>
-    <string name="setticker">Definir Ticker</string>
+    <string name="set_ticker">Definir ticker</string>
+    <string name="setticker">Definir ticker</string>
     <string name="chatrooms">Salas de conversa</string>
     <string name="create_chatroom_">Criar sala de bate-papo</string>
-    <string name="edit_info">Editar Informação</string>
+    <string name="edit_info">Editar informação</string>
 
     <string name="okay">Certo</string>
     <string name="undo">Desfazer</string>
@@ -502,7 +502,7 @@
     <string name="cancel">Cancelar</string>
     <string name="close">Fechar</string>
     <string name="report">Denunciar</string>
-    <string name="create_chatroom">Criar Sala</string>
+    <string name="create_chatroom">Criar sala</string>
     <string name="refresh_room_list">Atualizar lista de salas</string>
 
     <string name="away">Ausente</string>
@@ -657,7 +657,7 @@
     </string>
     <string name="note">Nota</string>
     <string name="removed_user_from_ignored_list">
-        Removido o usuário \"{0}\" da lista de Ignorados
+        Removido o usuário \"{0}\" da lista de ignorados
     </string>
 
     <string name="removed_user">Usuário removido: \"{0}\"</string>

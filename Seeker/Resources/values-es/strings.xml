@@ -356,8 +356,8 @@
     <string name="no_empty_user_pass">El nombre de usuario o la contraseña no pueden estar vacíos</string>
     <string name="dns_failed_2">Error al resolver la dirección Ip del servidor soulseek.</string>
     <!--In this case the placeholder {0} is for the username-->
-    <string name="added_to_ignore">Añadido usuario \"{0}\" a Lista de Ignorados</string>
-    <string name="already_added_to_ignore">Usuario \"{0}\" ya ha sido añadido a la Lista de Ignorados</string>
+    <string name="added_to_ignore">Añadido usuario \"{0}\" a lista de ignorados</string>
+    <string name="already_added_to_ignore">Usuario \"{0}\" ya ha sido añadido a la lista de ignorados</string>
     <string name="failed_to_establish_connection_to_peer">Error al establecer la conexión con {0}</string>
     <string name="user_info_received">Información de usuario de {0} recibida</string>
     <string name="user_info_failed_conn">Error al obtener información del usuario: {0}. No se pudo establecer la conexión.</string>
@@ -370,7 +370,7 @@
     <string name="status_disconnected">Desconectado</string>
     <string name="status_disconnecting">Desconectando</string>
     <string name="failed_to_establish_direct_or_indirect">Error al establecer una conexion de mensajes (directa o indirecta) con el usuario</string>
-    <string name="remote_conn_closed">Error de lectura: Conexión remota cerrada</string>
+    <string name="remote_conn_closed">Error de lectura: conexión remota cerrada</string>
     <string name="network_down">Subsistema de red caído</string>
     <string name="reported_as_failed">Error: Transferencia reportada como fallida por quien la subió</string>
     <string name="error_no_space">Error: No queda espacio en el dispositivo.</string>
@@ -379,7 +379,7 @@
     <string name="transfer_rejected">Solicitud de transferencia rechazada</string>
     <string name="transfer_rejected_file_not_shared">Petición de transferencia rechazada. Razon: Archivo no compatido</string>
     <string name="delete_messages">Borrar Mensajes</string>
-    <string name="delete_all_messages">Eliminar Todos los Mensajes</string>
+    <string name="delete_all_messages">Eliminar todos los mensajes</string>
     <string name="deleted_all_messages">Borrar todo el historial de mensajes</string>
     <string name="deleted_all_no_messages">¡No hay mensajes para eliminar!</string>
     <!--Room Categories-->
@@ -390,8 +390,8 @@
     <string name="owner">Propietario</string>
     <string name="mod">Moderador</string>
     <!--Title-->
-    <string name="set_ticker">Asignar Ticker</string>
-    <string name="setticker">Asignar Ticker</string>
+    <string name="set_ticker">Asignar ticker</string>
+    <string name="setticker">Asignar ticker</string>
     <string name="chatrooms">Salas de chat</string>
     <string name="create_chatroom_">Crear sala de chat</string>
     <string name="edit_info">Editar información</string>
@@ -406,7 +406,7 @@
     <string name="cancel">Cancelar</string>
     <string name="close">Cerrar</string>
     <string name="report">Reportar</string>
-    <string name="create_chatroom">Crear Sala</string>
+    <string name="create_chatroom">Crear sala</string>
     <string name="refresh_room_list">Actualizar lista de salas</string>
     <string name="away">Ausente</string>
     <string name="online">En línea</string>

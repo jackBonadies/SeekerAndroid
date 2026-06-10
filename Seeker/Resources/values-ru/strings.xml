@@ -683,7 +683,7 @@
     <string name="shutdown">Выключить</string>
 
     <string name="set_online_alert">Установить оповещение</string>
-    <string name="remove_online_alert">Удалить Оповещение</string>
+    <string name="remove_online_alert">Удалить оповещение</string>
     <string name="user_X_is_now_online">Пользователь {0} теперь онлайн</string>
 
     <string name="publicRoomCreation">Создаем публичную комнату...</string>
