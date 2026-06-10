@@ -16,6 +16,7 @@ namespace Seeker.Settings.Rows
             {
                 (ctx.GetString(Resource.String.Automatic), PreferencesState.FieldLangAuto),
                 ("العربية", PreferencesState.FieldLangAr),            // Arabic
+                ("Bahasa Indonesia", PreferencesState.FieldLangId),   // Indonesian
                 ("Català", PreferencesState.FieldLangCa),             // Catalan
                 ("čeština", PreferencesState.FieldLangCs),            // Czech
                 ("Dansk", PreferencesState.FieldLangDa),              // Danish

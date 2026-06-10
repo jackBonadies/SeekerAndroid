@@ -44,7 +44,10 @@ namespace Seeker.Helpers
                 else
                 {
                     Java.Util.Locale locale = appLocales.Get(0);
-                    string lang = locale.Language; // ex. fr, uk
+                    // Java reports obsolete ISO codes for some languages (id->in, he->iw,
+                    // yi->ji); normalize back to the modern code we store and that matches
+                    // our resource dirs / language options.
+                    string lang = NormalizeObsoleteLanguageCode(locale.Language); // ex. fr, uk
                     string country = locale.Country; // ex. BR, PT, CN
                     if (!string.IsNullOrEmpty(country))
                     {
@@ -57,6 +60,17 @@ namespace Seeker.Helpers
             {
                 return PreferencesState.Language;
             }
+        }
+
+        private static string NormalizeObsoleteLanguageCode(string lang)
+        {
+            return lang switch
+            {
+                "in" => "id", // Indonesian
+                "iw" => "he", // Hebrew
+                "ji" => "yi", // Yiddish
+                _ => lang,
+            };
         }
 
         /// <summary>
@@ -93,13 +107,16 @@ namespace Seeker.Helpers
         {
             //"en" ""
             //"pt" "br"
+            // normalize so comparisons against our stored modern codes (e.g. "id") work
+            // even though the Java Locale ctor converts them to obsolete ones ("in").
+            string lang = NormalizeObsoleteLanguageCode(locale.Language);
             if (string.IsNullOrEmpty(locale.Variant))
             {
-                return locale.Language;
+                return lang;
             }
             else
             {
-                return locale.Language + "-r" + locale.Variant.ToUpper();
+                return lang + "-r" + locale.Variant.ToUpper();
             }
         }
 

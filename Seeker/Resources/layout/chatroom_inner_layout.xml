@@ -49,6 +49,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
+                    android:breakStrategy="balanced"
                     android:textStyle="italic"
                     android:text="@string/room_statuses_empty_placeholder"
                     android:visibility="gone"

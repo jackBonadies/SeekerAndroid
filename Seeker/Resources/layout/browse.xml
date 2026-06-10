@@ -61,6 +61,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:maxWidth="320dp"
+                android:gravity="center"
+                android:breakStrategy="balanced"
                 android:text="@string/no_browse_results"
                 android:textSize="18sp"
                 android:textColor="?attr/cellTextColor"
@@ -69,6 +72,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:maxWidth="320dp"
+                android:gravity="center"
+                android:breakStrategy="balanced"
                 android:text="@string/no_browse_subtitle"
                 android:textSize="14sp"
                 android:textColor="?attr/cellTextColorSubdued"

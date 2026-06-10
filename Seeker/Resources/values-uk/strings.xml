@@ -12,8 +12,6 @@
     <string name="new_result">новий результат</string>
     <string name="new_results">нові результати</string>
 
-    <string name="stop">Призупинити</string>
-    <string name="start">Розпочати</string>
 
     <string name="saerch_user_list">Пошук користувачів</string>
     <string name="search_room">Пошук кімнати</string>
@@ -24,26 +22,7 @@
     <string name="no_account">
         Не маєте облікового запису? Просто введіть унікальне ім\'я користувача і його буде створено.
     </string>
-    <string name="memory_file_backed">
-        Примітка: Завантаження файлів збереже часткові результати завантаження в папку під назвою «Soulseek Incomplete» і перемістить їх до завершення після успішного завантаження.
-\n\nЦе дає можливість (1) призупиняти та відновлювати завантаження там, де ви зупинилися (2) можливість завантажувати великі файли без помилок у пам’яті (і загалом займає менше RAM).
- \n\nЯкщо вимкнути цю функцію, результати часткового завантаження зберігатимуться в пам\'яті, доки вони не будуть завершені, а потім вони будуть збережені на диску.
-    </string>
-    <string name="keep_alive_service">
-        Ця служба дозволяє Seeker працювати у фоновому режимі.
-\n\nЦе необхідно, щоб у фоновому режимі відповідати на пошукові запити (якщо надсилається), отримувати повідомлення чату та результати вибраних.
-\n\nВін не потрібен для завантаження або вивантаження у фоновому режимі (для цього вже існує служба, яка працюватиме завжди).
-\n\nЄдиним недоліком є ​​те, що це може використовувати більше енергії акумулятора. У цьому випадку його можна вимкнути за замовчуванням і запускати лише за потреби.
-    </string>
-    <string name="listening">
-        Цей параметр дозволяє Seeker приймати вхідні підключення, щоб ми могли підключатися до клієнтів без відкритих портів.
-\n\nНа практиці це означає, що поки ми успішно прослуховуємо (вказується через «Перевірити статус»), ми отримуватимемо більше результатів пошуку, зможемо завантажувати від більшої кількості людей, вивантажувати для більшої кількості людей тощо.
-\n\nSeeker спробує автоматично перенаправити порти через UPnP (це те, що робить офіційний клієнт для робочого столу). Якщо ви НЕ використовуєте Wi-Fi, це не працюватиме, якщо ви використовуєте VPN, будь ласка, знайдіть, як перенаправити порт для вашого конкретного VPN, якщо ваш маршрутизатор не ввімкнено UPnP, ви повинні вручну перенаправити порт.
-    </string>
 
-    <string name="sharing_dialog">
-        Кілька речей, про які слід пам’ятати про спільний доступ до файлів. Коли вперше встановлено папку для вивантаження, додаток має прочитати файли та проаналізувати їх таким чином, щоб це було зручно для наступних пошуків і запитів перегляду. Це може зайняти кілька хвилин. Переконайтеся, що файли, яким ви надаєте спільний доступ, не містять жодної конфіденційної інформації (загалом використовуйте те ж саме рішення, що й для офіційного клієнта Soulseek).
-    </string>
 
     <string name="privileges_more_info">
         Привілеї дозволяють підтримувати творця Soulseek (Nir) і центральний сервер, від якого залежить ця програма.
@@ -62,50 +41,26 @@
     <string name="kilobytes_per_second">кб/с</string>
     <string name="kilohertz">кГц</string>
     <string name="wishlist">Вибране</string>
-    <string name="wishlist_bold">
-        <b>Вибране</b>
-    </string>
-    <string name="wishlist_empty_bold">
-        <b>Вибране (Порожнє)</b>
-    </string>
     <string name="user_info_bio">
         <b>Біографія користувача</b>
     </string>
     <string name="user_info_picture">
         <b>Фотографія</b>
     </string>
-    <string name="user_info_stats_header">
-        <b>Інформація</b>
-    </string>
     <string name="unsaved_changes_title">Скасувати незбережені зміни?</string>
     <string name="unsaved_changes_body">
         У вас є незбережені зміни. Ви впевнені, що бажаєте їх скасувати?
     </string>
-    <string name="user_status_string">
-        «Вивантажені комірки: {0}
-Вільне до вивантаження: {1}
-Вивантаження в черзі: {2}
-Швидкість вивантаження: {3}
-Кількість файлів: {4}
-Кількість папок: {5}»
-    </string>
     <string name="add_user">Додати користувача</string>
-    <string name="empty_browse_directory">
-        Ця вкладка використовується для перегляду папок користувача.\n\nЩоб почати, виконайте пошук у вкладці пошуку або торкніться «+».
-    </string>
-    <string name="clear">Очистити</string>
     <string name="get_user_info">Отримати інформацію про користувача</string>
     <string name="quick_info">Швидка інформація</string>
-    <string name="enter_user_to_browse">Ввести ім\'я користувача</string>
     <string name="all_target">Усі користувачі</string>
     <string name="target_user_list">Список користувачів</string>
     <string name="target_room">Кімната</string>
-    <string name="target_room_joined">Приєдналися:</string>
     <string name="target_room_name">Назва кімнати</string>
     <string name="target_choose_user">Вибрати користувача</string>
     <string name="username">Ім\'я користувача</string>
     <string name="search_target_">Мета пошуку</string>
-    <string name="custom_">Користувацький:</string>
 
     <string name="friends">Друзі</string>
     <string name="ignored">Ігноровані</string>
@@ -140,13 +95,10 @@
         Не вдається отримати доступ до файлової системи. Ви повинні вибрати каталог завантажень на сторінці входу або в налаштуваннях.
     </string>
 
-    <string name="file_column">Файл</string>
     <string name="size_column">Розмір</string>
-    <string name="attribute_column">Атрибут</string>
 
     <string name="download_folder">Завантажити папку</string>
     <string name="download_selected">Завантажити вибране</string>
-    <string name="request_directories">Каталоги запитів</string>
     <string name="close_download_diag">Закрити</string>
 
     <string name="add_about_me">Натисніть, щоб додати інформацію про себе</string>
@@ -154,7 +106,6 @@
     <string name="clear_image">Видалити зображення</string>
     <string name="no_image_chosen">Немає</string>
 
-    <string name="enter_user_to_invite_to_room">Ввести ім\'я користувача, щоб запросити</string>
     <string name="inviteuser">Запросити користувача</string>
 
     <string name="give_up_room">Відмовитися від кімнати</string>
@@ -163,13 +114,11 @@
     <string name="logout">Вийти</string>
     <string name="login">Увійти</string>
     <string name="password">Пароль</string>
-    <string name="submit">Продовжити</string>
     <string name="ConnectingToServer">Підключення до сервера</string>
     <string name="PleaseWait_">Будь ласка, зачекайте...</string>
     <string name="choose_a_download_folder">Виберіть папку для завантажень</string>
     <string name="settings">Налаштування</string>
 
-    <string name="enter_user_to_message">Ввести ім\'я користувача, щоб написати</string>
 
     <string name="search_result_style">Вигляд результату</string>
 
@@ -178,7 +127,6 @@
     <string name="persist_it">Закріпити</string>
     <string name="type_chatroom_ticker_message">Тикер (закріплене повідомлення)</string>
 
-    <string name="change_download_folder">Змінити папку завантаження</string>
     <string name="max_search_results">Макс. кількість результатів пошуку</string>
     <string name="only_show_free_slots">
         Показувати лише результати користувачів із вільними комірками
@@ -199,11 +147,9 @@
     <string name="file_backed_downloads">Файл резервного завантаження</string>
     <string name="night_mode_options">Тема</string>
     <string name="enable_sharing">Увімкнути спільний доступ</string>
-    <string name="set_shared_folder">Папка спільного доступу</string>
     <string name="browse_yourself">Переглянути</string>
     <string name="enable_listening">Увімкнути прослуховування</string>
     <string name="change_port">Змінити порт</string>
-    <string name="port">Порт</string>
     <string name="check_your_port_status">Перевірити статус</string>
     <string name="use_pnp_for_port_forwarding">
         Використовувати UPnP для переадресації портів
@@ -211,9 +157,6 @@
     <string name="edit_your_user_info">Редагувати дані користувача</string>
     <string name="restore_default_settings">Відновити за стандартом</string>
 
-    <string name="no_transfers_yet">
-        Зараз немає завантажень, коли ви завантажуєте вміст, він з\'являтиметься тут
-    </string>
 
     <string name="user_has_no_bio">Користувач не має біографії.</string>
     <string name="user_has_no_pic">Користувач не має зображення.</string>
@@ -251,12 +194,9 @@
     <string name="directory_is_empty">Цей каталог порожній</string>
     <string name="nothing_selected">Нічого не вибрано</string>
     <string name="nothing_selected_extra">
-        "Нічого не вибрано - Натисніть, щоб вибрати"
+        "Нічого не вибрано - натисніть, щоб вибрати"
     </string>
     <string name="failed_to_connect">Не вдалося підключитися</string>
-    <string name="not_recursive_dirs_avaialbe_to_download">
-        Наразі реалізовано лише завантаження файлів, а не каталогів
-    </string>
     <string name="cannot_download_from_self">
         Неможливо завантажити від себе
     </string>
@@ -278,9 +218,6 @@
     <string name="error_duplicate">Помилка: виявлено дублікат запиту</string>
     <string name="error_browse_at_location">
         Помилка отримання каталогів користувачів у вказаному місці
-    </string>
-    <string name="error_duplicates">
-        Помилка: Повторювані передачі. Якщо ви хочете повторити спробу завантаження, утримуйте його в передачах.
     </string>
     <string name="room_data_still_loading">
         Занадто швидко! Триває отримання даних кімнати...
@@ -338,24 +275,10 @@
         Нас тимчасово відключили.. зараз знову підключаємося
     </string>
     <string name="failed_to_undo">Неможливо скасувати</string>
-    <string name="enabling_listener">Увімкнення слухача</string>
-    <string name="disabling_listener">Вимкнення слухача</string>
     <string name="add_user_title">Додати користувачів</string>
     <string name="ignore_user_title">Ігнорувати користувача(ів)</string>
 
-    <string name="success_setting_shared_dir_fnum_dnum">
-        Успішно встановлено спільний каталог із {0} папками та {1} файлами.
-    </string>
-    <string name="parsing_files_wait">
-        Аналіз файлів... це може зайняти кілька секунд...
-    </string>
 
-    <string name="port_out_of_range">
-        Номер порту поза діапазоном. Переконайтеся, що це між 1024 і 65535.
-    </string>
-    <string name="port_failed_parse">
-        Не вдалося проаналізувати номер порту. Переконайтеся, що це число без спеціальних символів.
-    </string>
 
     <string name="not_sharing">Ви не ділитеся файлами</string>
     <string name="failed_to_parse_shares_post">
@@ -366,9 +289,6 @@
     <string name="error_not_a_dir">Помилка: Це не папка</string>
     <string name="successfully_changed_dl_dir">
         Каталог завантажень успішно змінено на «{0}»
-    </string>
-    <string name="error_parsing_files_shared_dir">
-        Помилка аналізу файлів, не вдалося встановити спільний каталог
     </string>
 
     <string name="follow_system">Системна</string>
@@ -409,7 +329,6 @@
         Помилка додавання користувача: Користувача не знайдено
     </string>
 
-    <string name="setting_priv_invites">Налаштування приватних запрошень: {0}</string>
     <string name="failed_setting_priv_invites">
         Не вдалося налаштувати дозвіл приватних запрошень для: {0}
     </string>
@@ -530,13 +449,12 @@
     <string name="deleted_message_history_with">
         Видалено історію повідомлень із {0}
     </string>
-    <string name="welcome">Вітання, {0}</string>
 
     <string name="failed_to_establish_direct_or_indirect">
         Не вдалося встановити пряме чи непряме підключення до користувача
     </string>
     <string name="remote_conn_closed">
-        Помилка зчитування: Віддалене підключення закрито
+        Помилка зчитування: віддалене підключення закрито
     </string>
     <string name="network_down">Підсистема мережі не працює</string>
     <string name="reported_as_failed">
@@ -551,7 +469,7 @@
     <string name="timeout_peer">Тайм-аут з вузлом</string>
     <string name="transfer_rejected">Запит на передачу відхилено</string>
     <string name="transfer_rejected_file_not_shared">
-        Transfer Request Rejected. Reason: File Not Shared
+        Transfer request rejected. Reason: file not shared
     </string>
 
     <string name="delete_messages">Видалити повідомлення</string>
@@ -567,7 +485,6 @@
     <string name="owner">Власник</string>
     <string name="mod">Модератор</string>
 
-    <string name="user_">Користувач:</string>
     <string name="set_ticker">Встановити тикер</string>
     <string name="setticker">Встановити тикер</string>
     <string name="chatrooms">Чат кімнати</string>
@@ -635,7 +552,6 @@
     <string name="paused">Призупинено</string>
     <string name="in_queue">В черзі</string>
     <string name="unknown">Невідомо</string>
-    <string name="position_">Позиція: {0}</string>
 
     <string name="retry_dl">Повторити завантаження</string>
     <string name="clear_from_list">Очистити зі списку</string>
@@ -656,7 +572,6 @@
         Seeker працює у фоновому режимі
     </string>
 
-    <string name="privileges">Привілеї</string>
     <string name="yes">Так</string>
     <string name="seconds_left">{0} секунд</string>
     <string name="second_left">{0} секунда</string>
@@ -736,10 +651,6 @@
     </string>
 
     <string name="about_body">Seeker — це безплатний клієнт Soulseek з відкритим кодом для Android. У ньому ніколи не буде реклами чи платних функцій.</string>
-    <string name="force_filesystem_message">
-        <![CDATA[The standard way of requesting folder access does not always persist permissions.  If you find Seeker reprompting for Download Folder or Shared Folder access, this button will request the old style permissions which will always persist.
-<br><br>This function requires the Fdroid IzzyDroid version of Seeker (<a href="https://android.izzysoft.de/repo/apk/com.companyname.Seeker">Download Here</a>). The Google Play Store does not allow applications to request this permission.]]>
-    </string>
     <string name="must_be_logged_in_to_get_dir_contents">
         Щоб отримати вміст каталогу, необхідно увійти в систему
     </string>
@@ -753,15 +664,6 @@
     <string name="successfully_changed_incomplete_dir">
         Неповний каталог успішно змінено на «{0}»
     </string>
-    <string name="no_uploads_yet">
-        Наразі немає передавань, коли ви передаватимете файли, вони з\'являтимуться тут
-    </string>
-    <string name="no_uploads_yet_not_sharing">
-        Зараз немає передавань, ви не ділитеся файлами
-    </string>
-    <string name="no_uploads_yet_failed_to_set_up_shared_files">
-        No uploads currently, failed to set up shares
-    </string>
 
     <string name="auto_clear_complete">Авто очищення завершених завантажень</string>
     <string name="auto_clear_complete_uploads">
@@ -774,9 +676,6 @@
     <string name="upload_remaining">Залишилося вивантажити: {0}</string>
     <string name="uploads_remaining">Залишилося вивантажень: {0}</string>
     <string name="uploads_in_progress">Триває вивантаження</string>
-    <string name="search_tabs_bold">
-        <b>Вкладки пошуку</b>
-    </string>
     <string name="shutdown">Вимкнути</string>
 
     <string name="set_online_alert">Встановити сповіщення</string>
@@ -785,17 +684,11 @@
 
     <string name="publicRoomCreation">Запит на створення публічної кімнати</string>
 
-    <string name="failed_user_offline">Помилка - Користувач не в мережі</string>
-    <string name="failed_denied">Не вдалося - Відхилено</string>
-    <string name="re_requesting">Re-Requesting</string>
+    <string name="failed_user_offline">Помилка - користувач не в мережі</string>
+    <string name="failed_denied">Не вдалося - відхилено</string>
+    <string name="re_requesting">Re-requesting</string>
 
-    <string name="concurrent_dialog">
-        Обмеження кількості одночасних завантажень. Наприклад, якщо максимальна одночасна кількість дорівнює 1 і ви завантажуєте 2 папки від різних користувачів, друга папка завантажеться після завершення першої. Це може бути корисним для тих, хто має низьку пропускну здатність, щоб не обмежувати черги завантаження інших користувачів і швидше завершувати останні завантаження.
-    </string>
 
-    <string name="clear_incomplete_dialog">
-        Це очистить непотрібні файли в незавершеній папці. Seeker намагається зробити це за замовчуванням, але іноді це не вдається, тому цю кнопку можна використовувати, щоб звільнити файли/простір.
-    </string>
 
     <string name="diagnostics_more_info">
         Діагностичну інформацію буде збережено в текстовому файлі з назвою «seeker_diagnostics.txt», який буде розміщено в корені вибраної папки для завантаження.
@@ -822,29 +715,20 @@
     <string name="Speed">Швидкістю</string>
     <string name="FolderName">Назвою папки</string>
     <string name="SetAsDefault">Встановити за замовчуванням</string>
-    <string name="Change">Змінити</string>
-    <string name="Get">Отримати</string>
     <string name="Check">Перевірити</string>
     <string name="Keywords">Ключові слова</string>
     <string name="Configure">Налаштувати</string>
 
-    <string name="ViewErrorOptions">Переглянути параметри помилок</string>
-    <string name="ViewFolderOptions">Переглянути параметри папки</string>
-    <string name="Remove">Вилучити</string>
     <string name="Reselect">Вибрати повторно</string>
     <string name="RemoveFolder">Видалити папку</string>
     <string name="FolderError">Помилка папки</string>
     <string name="ErrorForFolder">Помилка папки:</string>
 
-    <string name="AreYouSureClearAllDirectories">
-        Ви впевнені, що бажаєте очистити всі {0} каталогів зі списку?
-    </string>
     <string name="ErrorDownloadDirNotProperlySet">
-        Помилка: Каталог завантажень не встановлено належним чином.
+        Помилка: каталог завантажень не встановлено належним чином.
     </string>
 
     <string name="CopySelectedURLs">Копіювати вибрані URL-адреси</string>
-    <string name="CopySelectedURL">Копіювати вибрану URL-адресу</string>
     <string name="CopyURL">Копіювати URL-адресу</string>
     <string name="CopyFolderURL">Копіювати URL-адресу папки</string>
     <string name="LinkCopied">Посилання скопійовано</string>
@@ -892,7 +776,6 @@
         Користувач {0} надає спільний доступ лише до порожнього каталогу.
     </string>
 
-    <string name="DownloadIsQueued">Завантаження в черзі</string>
 
     <string name="GetFolderDoesntWorkForLockedShares">
         «Завантажити папку» не працює для Locked Shares. Замість цього потрібно використовувати «Огляд» або «Огляд у місці».
@@ -937,15 +820,14 @@
     <string name="PermissionErrorShared">
         Помилка дозволу, неможливо записати (виберіть повторно).
     </string>
-    <string name="FolderNoExistShared">Папки не існує.</string>
     <string name="FolderNotAccessible">
-        Folder is not accessible (Please reselect).
+        Folder is not accessible (please reselect).
     </string>
     <string name="UnknownErrorShared">Невідома помилка. Див.</string>
     <string name="MessagesWithUser">Повідомлення від {0}</string>
 
-    <string name="DateAddedAsc">Дата додавання (Asc)</string>
-    <string name="DateAddedDesc">Дата додавання (Desc)</string>
+    <string name="DateAddedAsc">Дата додавання (asc)</string>
+    <string name="DateAddedDesc">Дата додавання (desc)</string>
     <string name="Name">Іменем</string>
     <string name="OnlineStatus">Статус користувача</string>
 
@@ -1000,7 +882,7 @@
     <string name="Options">Параметри</string>
     <string name="Save">Зберегти</string>
     <string name="SortOrder">Порядок сортування</string>
-    <string name="AddUserToIgnored">Add User To Ignored</string>
+    <string name="AddUserToIgnored">Add user to ignored</string>
 
     <string name="ClearAllCompleteAndAborted">
         Очистити всі завершені та скасовані
@@ -1016,10 +898,7 @@
     <string name="RetryFailed">Повторити</string>
     <string name="InvertSelection">Інвертувати вибір</string>
     <string name="SelectAll">Вибрати всі</string>
-    <string name="MaxConcurrentIs">Макс. кількість одночасних завантажень:</string>
 
-    <string name="PerTransfer">За передачу</string>
-    <string name="Global">Загальні</string>
     <string name="ConfigureSmartFilters">Налаштування розумних фільтрів</string>
     <string name="NotSet">Не встановлено</string>
     <string name="AppLocalStorage">Локальне сховище</string>
@@ -1027,20 +906,9 @@
 
     <string name="IncompleteFolderEmpty">Папка з незавершеними завантаженнями порожня</string>
     <string name="NoEligibleToClear">Немає придатних елементів для очищення</string>
-    <string name="ChangeDownloadSpeed">Змінити швидкість завантаження (кб/с):</string>
-    <string name="ChangeUploadSpeed">Змінити швидкість вивантаження (кб/с):</string>
-    <string name="EnterSpeed">Ввести швидкість в кб/с</string>
-    <string name="EnterMaxDownloadSimultaneously">
-        Ввести макс. значення для одночасного завантаження
-    </string>
 
-    <string name="BrowseWhich">
-        Переглядати публічні спільні ресурси чи спільні списки користувачів?
-    </string>
     <string name="WaitForParsing">Дочекайтеся завершення аналізу.</string>
 
-    <string name="finishingUp">завершення</string>
-    <string name="XFilesParsed">Проаналізовано {0} файлів</string>
     <string name="ErrorAlreadyAdded">Помилка: каталог уже додано.</string>
     <string name="UploadFolderOptions">Вивантажити параметри папки</string>
     <string name="CannotChangeNameNotUnique">
@@ -1092,10 +960,7 @@
     <string name="TimedOut">Час вийшов</string>
     <string name="CannotConnect">Не вдалося підключитися</string>
 
-    <string name="Succeeded">Виконано</string>
     <string name="Aborted">Перервано</string>
-    <string name="Num_FilesRemaining">Залишилося файлів: {0}</string>
-    <string name="X_of_Y_Remaining">Залишилося {0} з {1}</string>
     <string name="SetLanguage">Language</string>
     <string name="Automatic">Автоматично</string>
 
@@ -1108,12 +973,9 @@
     <string name="HideSize">Приховати розмір</string>
     <string name="HideSpeed">Приховати швидкість</string>
 
-    <string name="Num_Selected">{0} Вибрано</string>
+    <string name="Num_Selected">{0} вибрано</string>
 
     <string name="ExportClientData">Експорт даних клієнта</string>
-    <string name="export_more_info">
-        Експорт списку користувачів, списку ігнорування/блокування, приміток користувачів і списку бажань у формат xml. Корисно для резервного копіювання або перенесення даних на новий телефон.
-    </string>
     <string name="successfully_exported">
         Дані клієнта Seeker успішно експортовано.
     </string>
@@ -1131,15 +993,12 @@
 
     <string name="bitrate">Bitrate</string>
 
-    <string name="setUpSharing">Set up Sharing</string>
+    <string name="setUpSharing">Set up sharing</string>
 
     <string name="change_password">Change password</string>
-    <string name="new_password">New Password</string>
+    <string name="new_password">New password</string>
     <string name="cannot_be_empty">Cannot be empty</string>
 
-    <string name="must_be_logged_in_generic">
-        Must be logged in to perform this action
-    </string>
     <string name="must_be_logged_in_to_change_password">
         Must be logged in to change password
     </string>
