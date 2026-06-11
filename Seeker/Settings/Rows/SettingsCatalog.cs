@@ -474,7 +474,21 @@ namespace Seeker.Settings.Rows
                 IconRes = Resource.Drawable.android_cell_4_bar_off_28dp,
                 Getter = () => !PreferencesState.AllowUploadsOnMetered,
                 Setter = v => { PreferencesState.AllowUploadsOnMetered = !v;
-                                PreferencesManager.SaveAllowUploadsOnMetered(); },
+                                PreferencesManager.SaveAllowUploadsOnMetered();
+                                Seeker.Services.SharingService.SetUnsetSharingBasedOnConditions(true);
+                                Seeker.Services.SharedFileService.SharingStatusChangedEvent?.Invoke(null, new EventArgs()); },
+            });
+
+            rows.Add(new ToggleRow
+            {
+                Id = "sharing.require_vpn",
+                TitleRes = Resource.String.OnlyShareOnVpn,
+                IconRes = Resource.Drawable.vpn_key_28dp,
+                Getter = () => PreferencesState.RequireVpnForSharing,
+                Setter = v => { PreferencesState.RequireVpnForSharing = v;
+                                PreferencesManager.SaveRequireVpnForSharing();
+                                Seeker.Services.SharingService.SetUnsetSharingBasedOnConditions(true);
+                                Seeker.Services.SharedFileService.SharingStatusChangedEvent?.Invoke(null, new EventArgs()); },
             });
 
             rows.Add(new ToggleRow

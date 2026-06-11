@@ -24,6 +24,7 @@ namespace Common
         public const string M_NotifyFolderComplete = "Momento_NotifyFolderComplete";
 
         public const string M_AllowUploadsOnMetered = "Momento_AllowUploadsOnMetered";
+        public const string M_RequireVpnForSharing = "Momento_RequireVpnForSharing";
 
         public const string M_LimitSimultaneousDownloads = "Momento_LimitSimultaneousDownloads";
         public const string M_MaxSimultaneousLimit = "Momento_MaxSimultaneousLimit";

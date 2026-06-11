@@ -56,7 +56,7 @@ namespace Seeker.Helpers.ActionSheet
 
             if (options.IncludeGivePrivileges && PrivilegesManager.Instance.GetRemainingDays() >= 1)
             {
-                section.Rows.Add(MakeCommonRow(Resource.Drawable.star_wishlist, Resource.String.give_privileges, username, ctx, snackView, options));
+                section.Rows.Add(MakeCommonRow(Resource.Drawable.star_shine_give_privileges24dp, Resource.String.give_privileges, username, ctx, snackView, options));
             }
 
             bool ignored = UserListService.Instance.IsUserInIgnoreList(username);
@@ -86,7 +86,7 @@ namespace Seeker.Helpers.ActionSheet
 
             section.Rows.Add(new ActionSheetRow
             {
-                IconResId = Resource.Drawable.account_cancel,
+                IconResId = Resource.Drawable.account_cancel_outline,
                 Label = ctx.GetString(Resource.String.remove_from_ignored),
                 OnClick = () => UserListService.Instance.RemoveFromIgnoreList(username)
             });

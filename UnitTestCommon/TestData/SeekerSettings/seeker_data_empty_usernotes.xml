@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SeekerImportExportData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Wishlist>
+    <string>tedt</string>
+  </Wishlist>
+  <Userlist>
+    <string>userq</string>
+    <string>user1</string>
+    <string>user2</string>
+  </Userlist>
+  <BanIgnoreList>
+    <string>ignored</string>
+  </BanIgnoreList>
+  <UserNotes />
+</SeekerImportExportData>

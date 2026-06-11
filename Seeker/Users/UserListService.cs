@@ -104,7 +104,31 @@ namespace Seeker
                     }
                 }
             }
+            if (found)
+            {
+                PersistUserList();
+            }
             return found;
+        }
+
+        private static void PersistUserList()
+        {
+            string serialized;
+            lock (CommonState.UserList)
+            {
+                serialized = SerializationHelper.SaveUserListToString(CommonState.UserList);
+            }
+            PreferencesManager.SaveUserList(serialized);
+        }
+
+        private static void PersistIgnoreList()
+        {
+            string serialized;
+            lock (CommonState.IgnoreUserList)
+            {
+                serialized = SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList);
+            }
+            PreferencesManager.SaveIgnoreUserList(serialized);
         }
 
         /// <summary>
@@ -153,6 +177,7 @@ namespace Seeker
             if (addedItem != null)
             {
                 UserListChanged?.Invoke(null, new UserListChangedEventArgs(userData.Username, addedItem, UserListChangeType.Added));
+                PersistUserList();
                 return false;
             }
             return true;
@@ -188,14 +213,7 @@ namespace Seeker
                 }
                 else
                 {
-                    Instance.AddUser(t.Result);
-                    if (!massImportCase)
-                    {
-                        if (SeekerState.SharedPreferences != null && CommonState.UserList != null)
-                        {
-                            PreferencesManager.SaveUserList(SerializationHelper.SaveUserListToString(CommonState.UserList));
-                        }
-                    }
+                    Instance.AddUser(t.Result); //AddUser persists the list when a user is actually added
                     if (UIaction != null)
                     {
                         SeekerState.ActiveActivityRef.RunOnUiThread(UIaction);
@@ -205,6 +223,28 @@ namespace Seeker
 
             //Add User Logic...
             SeekerState.SoulseekClient.WatchUserAsync(username).ContinueWith(continueWithAction);
+        }
+
+        /// <summary>
+        /// Adds a user to the user list locally, without requiring a login or a server round trip.
+        /// For the mass import case (import wizard) so that in cases where we are logged out / 
+        /// have network issues we do not drop all the added users (bug report).
+        /// We still call watch if logged in.
+        /// </summary>
+        public static void AddUserMassImport(string username)
+        {
+            if (string.IsNullOrEmpty(username) || Instance.ContainsUser(username))
+            {
+                return;
+            }
+            lock (CommonState.UserList)
+            {
+                CommonState.UserList.Add(new UserListItem(username, UserRole.Friend));
+            }
+            if (PreferencesState.CurrentlyLoggedIn)
+            {
+                SeekerState.SoulseekClient.WatchUserAsync(username).ContinueWith((task) => SeekerApplication.UpdateUserInfo(task, username));
+            }
         }
 
         public static void AddUserAPI(Context c, string username, Action UIaction, bool massImportCase = false)
@@ -270,6 +310,7 @@ namespace Seeker
                 CommonState.UserList.Remove(removedItem);
             }
             UserListChanged?.Invoke(null, new UserListChangedEventArgs(username, removedItem, UserListChangeType.Removed));
+            PersistUserList();
             return true;
         }
 
@@ -292,7 +333,7 @@ namespace Seeker
                 CommonState.IgnoreUserList.Add(addedItem);
             }
             IgnoreListChanged?.Invoke(null, new UserListChangedEventArgs(username, addedItem, UserListChangeType.Added));
-            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList));
+            PersistIgnoreList();
             return true;
         }
 
@@ -309,7 +350,7 @@ namespace Seeker
                 CommonState.IgnoreUserList = CommonState.IgnoreUserList.Where(userListItem => { return userListItem.Username != username; }).ToList();
             }
             IgnoreListChanged?.Invoke(null, new UserListChangedEventArgs(username, removedItem, UserListChangeType.Removed));
-            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList));
+            PersistIgnoreList();
             return true;
         }
 

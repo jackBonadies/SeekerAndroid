@@ -128,23 +128,32 @@ namespace Seeker
                         {
 
                             Android.Database.ICursor cursor = this.ContentResolver.Query(data.Data, new string[] { Android.Provider.MediaStore.IMediaColumns.DisplayName }, null, null, null);
-                            try
+                            if (cursor != null)
                             {
-                                if (cursor != null && cursor.MoveToFirst())
+                                try
                                 {
-                                    realName = cursor.GetString(0);
+                                    if (cursor.MoveToFirst())
+                                    {
+                                        realName = cursor.GetString(0);
+                                    }
+                                }
+                                finally
+                                {
+                                    cursor.Close();
                                 }
                             }
-                            finally
-                            {
-                                cursor.Close();
-                            }
-
-                            var stream = this.ContentResolver.OpenInputStream(data.Data);
-                            fullImportedData = ImportHelper.ImportFile(realName, stream);
-                            selectedImportedData = new ImportedData();
-
                         }
+                        else
+                        {
+                            //i.e. "file" scheme from some file managers.  OpenInputStream handles it too.
+                            realName = data.Data.LastPathSegment ?? string.Empty;
+                        }
+
+                        using (var stream = this.ContentResolver.OpenInputStream(data.Data))
+                        {
+                            fullImportedData = ImportHelper.ImportFile(realName, stream);
+                        }
+                        selectedImportedData = new ImportedData();
                     }).ContinueWith(
                             (System.Threading.Tasks.Task t) =>
                             {
@@ -269,10 +278,7 @@ namespace Seeker
             }
             foreach (string uname in selectedData.UserList)
             {
-                lock (CommonState.UserList)
-                {
-                    UserListService.AddUserAPI(this, uname, null, true);
-                }
+                UserListService.AddUserMassImport(uname);
             }
             foreach (var unote in selectedData.UserNotes)
             {

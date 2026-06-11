@@ -258,6 +258,10 @@ namespace Seeker.Services
                 {
                     return new (SharingIcons.On, SeekerState.ActiveActivityRef.GetString(Resource.String.success_sharing));
                 }
+                else if (!NetworkStateService.IsVpnPermitting())
+                {
+                    return new (SharingIcons.OffDueToVpn, SeekerState.ActiveActivityRef.GetString(Resource.String.sharing_disabled_no_vpn));
+                }
                 else
                 {
                     return new (SharingIcons.OffDueToNetwork, "Sharing disabled on metered connection");

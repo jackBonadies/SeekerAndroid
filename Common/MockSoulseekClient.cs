@@ -2075,9 +2075,24 @@ namespace Seeker
 
         public async Task<UserData> WatchUserAsync(string username, CancellationToken? cancellationToken = null)
         {
-            if (WatchUserAsyncHandler != null) return await WatchUserAsyncHandler(username, cancellationToken);
-            await Task.Delay(SimulatedDelayMs / 2).ConfigureAwait(false);
-            return new UserData(username, UserPresence.Online, 0, 0, 0, 0, GenerateMockCountryCode());
+            var delay = getBimodalDelay(100, 5000);
+            await Task.Delay(delay).ConfigureAwait(false);
+            UserPresence userPresence = _random.Next(0, 3) switch
+            {
+                0 => UserPresence.Offline,
+                1 => UserPresence.Away,
+                2 => UserPresence.Online,
+                _ => UserPresence.Offline
+            };
+            if (username.Contains("doesnotexist") || (username.Contains("transient") && _random.Next(0,2) == 0))
+            {
+                throw new UserNotFoundException($"User {username} does not exist");
+            }
+            if (username.Contains("transient"))
+            {
+                throw new UserNotFoundException($"User {username} does not exist");
+            }
+            return new UserData(username, userPresence, _random.Next(0, 10000), _random.Next(0, 10000), _random.Next(0, 10000), _random.Next(0, 10000), GenerateMockCountryCode());
         }
 
         public async Task UnwatchUserAsync(string username, CancellationToken? cancellationToken = null)

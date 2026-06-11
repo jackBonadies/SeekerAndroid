@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SeekerImportExportData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Wishlist>
+    <string>pianomusic</string>
+  </Wishlist>
+  <Userlist>
+    <string>username1</string>
+    <string>username2</string>
+    <string>username2</string>
+  </Userlist>
+  <BanIgnoreList>
+    <string>ignoreduser</string>
+  </BanIgnoreList>
+  <UserNotes>
+    <KeyValueEl>
+      <Key>username1</Key>
+      <Value>this, is a "user note" &lt;b&gt;test&lt;/b&gt;</Value>
+    </KeyValueEl>
+  </UserNotes>
+</SeekerImportExportData>

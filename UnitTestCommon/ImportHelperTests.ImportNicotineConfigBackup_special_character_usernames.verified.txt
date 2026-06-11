@@ -1,0 +1,33 @@
+﻿{
+  UserList: [
+    usernameB,
+    usernameC@,
+    usernameD,
+    usernameE,
+    usernameF"{,
+    usernameG['"'[]"',
+    usernameA,
+    usernameH'"x,
+    usernameI,
+    usernameJ,
+    usernameK,
+    usernameL\\x\\,
+    usernameM
+  ],
+  IgnoredBanned: [
+    usernameN x,
+    usernameO,
+    usernameP x x x x x,
+    usernameQ
+  ],
+  UserNotes: [
+    {
+      Item1: usernameB,
+      Item2: hello
+    },
+    {
+      Item1: usernameI,
+      Item2: not
+    }
+  ]
+}

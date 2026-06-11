@@ -7,5 +7,6 @@ namespace Seeker
         On = 2,
         CurrentlyParsing = 3,
         OffDueToNetwork = 4,
+        OffDueToVpn = 5,
     }
 }

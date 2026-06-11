@@ -1046,9 +1046,6 @@ namespace Seeker
             }
         }
 
-
-
-
         /// <summary>
         /// 
         /// </summary>
@@ -1056,18 +1053,6 @@ namespace Seeker
         public static bool OnUIthread()
         {
             return Looper.MainLooper.IsCurrentThread;
-        }
-
-
-
-        protected override void OnPause()
-        {
-            base.OnPause();
-
-            string userListSerialized = CommonState.UserList != null
-                ? SerializationHelper.SaveUserListToString(CommonState.UserList)
-                : null;
-            PreferencesManager.SaveOnPauseState(userListSerialized);
         }
 
         protected override void OnSaveInstanceState(Bundle outState)

@@ -1,0 +1,13 @@
+﻿{
+  Wishlist: [
+    tedt
+  ],
+  UserList: [
+    userq,
+    user1,
+    user2
+  ],
+  IgnoredBanned: [
+    ignored
+  ]
+}

@@ -241,6 +241,7 @@ namespace Seeker
             }
 
             NetworkStateService.SetNetworkState(this);
+            NetworkStateService.RegisterDefaultNetworkCallback(this);
 
             //need search response and enqueue download action...
             //SeekerState.SoulseekClient = new SoulseekClient(new SoulseekClientOptions(messageTimeout: 30000, enableListener: false, autoAcknowledgePrivateMessages: false, acceptPrivateRoomInvitations:PreferencesState.AllowPrivateRoomInvitations)); //Enable Listener is False.  Default is True.
@@ -690,7 +691,7 @@ namespace Seeker
                         foreach (UserListItem item in CommonState.UserList)
                         {
                             Logger.Debug("adding user: " + item.Username);
-                            SeekerState.SoulseekClient.WatchUserAsync(item.Username).ContinueWith(UpdateUserInfo);
+                            SeekerState.SoulseekClient.WatchUserAsync(item.Username).ContinueWith((Task<UserData> userDataTask) => UpdateUserInfo(userDataTask, item.Username));
                         }
                     }
 
@@ -770,42 +771,34 @@ namespace Seeker
         /// <summary>
         /// UserStatusChanged will not get called until an actual change. hence this call..
         /// </summary>
-        /// <param name="t"></param>
-        private static void UpdateUserInfo(Task<UserData> t)
+        /// <param name="task"></param>
+        public static void UpdateUserInfo(Task<UserData> task, string suppliedUsername)
         {
             try
             {
                 Logger.Debug("Update User Info Received");
-                if (t.IsCompletedSuccessfully)
+                if (task.IsCompletedSuccessfully)
                 {
-                    string username = t.Result.Username;
-                    Logger.Debug("Update User Info: " + username + " status: " + t.Result.Status.ToString());
+                    string username = task.Result.Username;
+                    Logger.Debug("Update User Info: " + username + " status: " + task.Result.Status.ToString());
                     if (UserListService.Instance.ContainsUser(username))
                     {
-                        UserListService.Instance.AddUser(t.Result, t.Result.Status);
+                        UserListService.Instance.AddUser(task.Result, task.Result.Status);
                     }
 
 
                 }
-                else if (t.Exception?.InnerException is UserNotFoundException)
+                else if (task.Exception?.InnerException is UserNotFoundException)
                 {
-                    if (t.Exception.InnerException.Message.Contains("User ") && t.Exception.InnerException.Message.Contains("does not exist"))
+                    if (UserListService.Instance.ContainsUser(suppliedUsername))
                     {
-                        string username = t.Exception.InnerException.Message.Split(null)[1];
-                        if (UserListService.Instance.ContainsUser(username))
-                        {
-                            UserListService.Instance.SetDoesNotExist(username);
-                        }
-                    }
-                    else
-                    {
-                        Logger.Firebase("unexcepted error message - " + t.Exception.InnerException.Message);
+                        UserListService.Instance.SetDoesNotExist(suppliedUsername);
                     }
                 }
                 else
                 {
                     //timeout
-                    Logger.Firebase("UpdateUserInfo case 3 " + t.Exception.Message);
+                    Logger.Firebase("UpdateUserInfo case 3 " + task.Exception.Message);
                 }
             }
             catch (Exception e)
