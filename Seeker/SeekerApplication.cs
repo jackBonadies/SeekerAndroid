@@ -772,7 +772,7 @@ namespace Seeker
         /// UserStatusChanged will not get called until an actual change. hence this call..
         /// </summary>
         /// <param name="task"></param>
-        private static void UpdateUserInfo(Task<UserData> task, string suppliedUsername)
+        public static void UpdateUserInfo(Task<UserData> task, string suppliedUsername)
         {
             try
             {

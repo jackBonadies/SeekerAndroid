@@ -225,6 +225,28 @@ namespace Seeker
             SeekerState.SoulseekClient.WatchUserAsync(username).ContinueWith(continueWithAction);
         }
 
+        /// <summary>
+        /// Adds a user to the user list locally, without requiring a login or a server round trip.
+        /// For the mass import case (import wizard) so that in cases where we are logged out / 
+        /// have network issues we do not drop all the added users (bug report).
+        /// We still call watch if logged in.
+        /// </summary>
+        public static void AddUserMassImport(string username)
+        {
+            if (string.IsNullOrEmpty(username) || Instance.ContainsUser(username))
+            {
+                return;
+            }
+            lock (CommonState.UserList)
+            {
+                CommonState.UserList.Add(new UserListItem(username, UserRole.Friend));
+            }
+            if (PreferencesState.CurrentlyLoggedIn)
+            {
+                SeekerState.SoulseekClient.WatchUserAsync(username).ContinueWith((task) => SeekerApplication.UpdateUserInfo(task, username));
+            }
+        }
+
         public static void AddUserAPI(Context c, string username, Action UIaction, bool massImportCase = false)
         {
 

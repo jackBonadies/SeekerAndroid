@@ -278,10 +278,7 @@ namespace Seeker
             }
             foreach (string uname in selectedData.UserList)
             {
-                lock (CommonState.UserList)
-                {
-                    UserListService.AddUserAPI(this, uname, null, true);
-                }
+                UserListService.AddUserMassImport(uname);
             }
             foreach (var unote in selectedData.UserNotes)
             {
