@@ -136,6 +136,18 @@ namespace Seeker
             {
                 //app going to background — drain buffered diagnostics before Android can kill us.
                 DiagnosticFileWriter.FlushBlocking();
+
+                //snapshot state that is not saved at mutation time (e.g. transient user list
+                //status / data fields from Server)
+                string userListSerialized = null;
+                if (CommonState.UserList != null)
+                {
+                    lock (CommonState.UserList)
+                    {
+                        userListSerialized = SerializationHelper.SaveUserListToString(CommonState.UserList);
+                    }
+                }
+                PreferencesManager.SaveOnPauseState(userListSerialized);
             }
 
             if (NumberOfActiveActivities == 0 && PreferencesState.AutoAwayOnInactivity)

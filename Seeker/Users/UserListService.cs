@@ -104,7 +104,31 @@ namespace Seeker
                     }
                 }
             }
+            if (found)
+            {
+                PersistUserList();
+            }
             return found;
+        }
+
+        private static void PersistUserList()
+        {
+            string serialized;
+            lock (CommonState.UserList)
+            {
+                serialized = SerializationHelper.SaveUserListToString(CommonState.UserList);
+            }
+            PreferencesManager.SaveUserList(serialized);
+        }
+
+        private static void PersistIgnoreList()
+        {
+            string serialized;
+            lock (CommonState.IgnoreUserList)
+            {
+                serialized = SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList);
+            }
+            PreferencesManager.SaveIgnoreUserList(serialized);
         }
 
         /// <summary>
@@ -153,6 +177,7 @@ namespace Seeker
             if (addedItem != null)
             {
                 UserListChanged?.Invoke(null, new UserListChangedEventArgs(userData.Username, addedItem, UserListChangeType.Added));
+                PersistUserList();
                 return false;
             }
             return true;
@@ -188,14 +213,7 @@ namespace Seeker
                 }
                 else
                 {
-                    Instance.AddUser(t.Result);
-                    if (!massImportCase)
-                    {
-                        if (SeekerState.SharedPreferences != null && CommonState.UserList != null)
-                        {
-                            PreferencesManager.SaveUserList(SerializationHelper.SaveUserListToString(CommonState.UserList));
-                        }
-                    }
+                    Instance.AddUser(t.Result); //AddUser persists the list when a user is actually added
                     if (UIaction != null)
                     {
                         SeekerState.ActiveActivityRef.RunOnUiThread(UIaction);
@@ -270,6 +288,7 @@ namespace Seeker
                 CommonState.UserList.Remove(removedItem);
             }
             UserListChanged?.Invoke(null, new UserListChangedEventArgs(username, removedItem, UserListChangeType.Removed));
+            PersistUserList();
             return true;
         }
 
@@ -292,7 +311,7 @@ namespace Seeker
                 CommonState.IgnoreUserList.Add(addedItem);
             }
             IgnoreListChanged?.Invoke(null, new UserListChangedEventArgs(username, addedItem, UserListChangeType.Added));
-            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList));
+            PersistIgnoreList();
             return true;
         }
 
@@ -309,7 +328,7 @@ namespace Seeker
                 CommonState.IgnoreUserList = CommonState.IgnoreUserList.Where(userListItem => { return userListItem.Username != username; }).ToList();
             }
             IgnoreListChanged?.Invoke(null, new UserListChangedEventArgs(username, removedItem, UserListChangeType.Removed));
-            PreferencesManager.SaveIgnoreUserList(SerializationHelper.SaveUserListToString(CommonState.IgnoreUserList));
+            PersistIgnoreList();
             return true;
         }
 
