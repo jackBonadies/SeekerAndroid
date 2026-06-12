@@ -500,7 +500,7 @@ namespace Seeker
             // Navigate into the sub-directory
             if (sel.Equals(UpDir))
             {
-                _mDir = _mDir.Substring(0, _mDir.LastIndexOf("/"));
+                _mDir = _mDir.Substring(0, _mDir.LastIndexOf('/'));
                 if ("".Equals(_mDir))
                 {
                     _mDir = "/";

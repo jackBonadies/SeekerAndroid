@@ -317,6 +317,56 @@ namespace UnitTestCommon
             Assert.That(result, Is.EqualTo(""));
         }
 
+        [Test]
+        public void GetFileNameFromFile_ThaiCulture_DoesNotThrow()
+        {
+            // Thai collation ignores punctuation, so the culture-sensitive
+            // string.LastIndexOf("\\") returns Length (empty-needle behavior) and the
+            // following Substring(begin + 1) threw ArgumentOutOfRangeException.
+            // The fix uses the ordinal char overload, which is culture-independent.
+            RunInCulture("th-TH", () =>
+            {
+                string result = SimpleHelpers.GetFileNameFromFile(@"music\artist\song.mp3");
+                Assert.That(result, Is.EqualTo("song.mp3"));
+            });
+        }
+
+        [Test]
+        public void GetDirectoryRequestFolderName_ThaiCulture_ReturnsFolder()
+        {
+            // same root cause as GetFileNameFromFile, but the try/catch hid it:
+            // Substring(0, Length) silently returned the whole string instead of the folder
+            RunInCulture("th-TH", () =>
+            {
+                string result = SimpleHelpers.GetDirectoryRequestFolderName(@"music\artist\album\song.mp3");
+                Assert.That(result, Is.EqualTo(@"music\artist\album"));
+            });
+        }
+
+        [Test]
+        public void GetAllButLast_ThaiCulture_ReturnsParent()
+        {
+            RunInCulture("th-TH", () =>
+            {
+                string result = SimpleHelpers.GetAllButLast(@"raw:\storage\emulated\0\Download\Soulseek Complete");
+                Assert.That(result, Is.EqualTo(@"raw:\storage\emulated\0\Download"));
+            });
+        }
+
+        private static void RunInCulture(string cultureName, Action action)
+        {
+            var previous = System.Globalization.CultureInfo.CurrentCulture;
+            try
+            {
+                System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo(cultureName);
+                action();
+            }
+            finally
+            {
+                System.Globalization.CultureInfo.CurrentCulture = previous;
+            }
+        }
+
         // --- GetAllButLast ---
 
         [Test]

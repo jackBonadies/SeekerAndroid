@@ -102,8 +102,8 @@ namespace Seeker.Helpers
                 {
                     if (!string.IsNullOrEmpty(subject))
                     {
-                        int firstQuote = subject.IndexOf("\"");
-                        int lastQuote = subject.LastIndexOf("\"");
+                        int firstQuote = subject.IndexOf('"');
+                        int lastQuote = subject.LastIndexOf('"');
                         searchTerm = subject.Substring(firstQuote + 1, lastQuote - (firstQuote + 1));
                         return true;
                     }

@@ -18,7 +18,7 @@ namespace Common
         {
             if (rootCase)
             {
-                if (possibleChild.LastIndexOf("\\") == -1 && possibleParent.LastIndexOf("\\") == -1)
+                if (possibleChild.LastIndexOf('\\') == -1 && possibleParent.LastIndexOf('\\') == -1)
                 {
                     if (possibleParent.IndexOf(':') == (possibleParent.Length - 1)) //i.e. primary:
                     {
@@ -30,7 +30,7 @@ namespace Common
                     }
                 }
             }
-            int pathSep = possibleChild.LastIndexOf("\\");
+            int pathSep = possibleChild.LastIndexOf('\\');
             if (pathSep == -1)
             {
                 return false;
@@ -40,7 +40,7 @@ namespace Common
                 //fails in possibleChild="Music (1)\\test" possibleParent="Music" case
                 //return possibleChild.Substring(0, pathSep).Contains(possibleParent);
 
-                return possibleChild.Substring(0, pathSep + 1).StartsWith(possibleParent + "\\") || possibleChild.Substring(0, pathSep) == possibleParent || possibleParent == String.Empty;
+                return possibleChild.Substring(0, pathSep + 1).StartsWith(possibleParent + "\\", StringComparison.Ordinal) || possibleChild.Substring(0, pathSep) == possibleParent || possibleParent == String.Empty;
             }
         }
 
