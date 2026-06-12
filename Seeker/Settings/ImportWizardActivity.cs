@@ -79,6 +79,9 @@ namespace Seeker
             nextButton = this.FindViewById<Button>(Resource.Id.next_button);
             nextButton.Click += NextButton_Click;
 
+            var buttonBar = this.FindViewById<LinearLayout>(Resource.Id.wizard_button_bar);
+            AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(buttonBar, new BottomOnlyInsetsListener());
+
             pager = this.FindViewById<AndroidX.ViewPager.Widget.ViewPager>(Resource.Id.pager);
             pager.Adapter = new WizardPagerAdapter(this.SupportFragmentManager);
             pager.PageSelected += Pager_PageSelected;

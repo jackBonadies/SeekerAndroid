@@ -110,6 +110,7 @@
 
     <style name="DefaultLight_Blue" parent="DefaultLight">
         <item name="colorPrimary">#126291</item>
+        <item name="colorSecondaryContainer">#dde9f2</item>
         <item name="mainPurple">#126291</item>
         <item name="swipeToRefreshProgress">#126291</item>
 
@@ -136,6 +137,7 @@
 
     <style name="DefaultLight_Red" parent="DefaultLight">
         <item name="colorPrimary">#B22525</item>
+        <item name="colorSecondaryContainer">#f5dfdf</item>
         <item name="mainPurple">#B22525</item>
         <item name="swipeToRefreshProgress">#B22525</item>
         <item name="mainPurpleStatusBar">#7B0000</item>

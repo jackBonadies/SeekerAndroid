@@ -38,6 +38,7 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="colorPrimary">#4f58c4</item>
+        <item name="colorSecondaryContainer">#e4e6f6</item>
         <item name="mainPurple">#4f58c4</item>
         <item name="swipeToRefreshProgress">#4f58c4</item>
         <item name="swipeToRefreshBackground">#ffffffff</item>
