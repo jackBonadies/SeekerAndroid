@@ -62,7 +62,7 @@ namespace Seeker
         Button prevButton;
         Button nextButton;
         AndroidX.ViewPager.Widget.ViewPager pager;
-        StepPagerStrip strip1;
+        PageDotsIndicator pageDots;
         public static ImportedData? fullImportedData = null; //this has to be static.  otherwise someone can just rotate the screen on a later step and clear it.
         public static ImportedData? selectedImportedData = null; //this has to be static.  otherwise someone can just rotate the screen on a later step and clear it.
         protected override void OnCreate(Bundle savedInstanceState)
@@ -82,10 +82,11 @@ namespace Seeker
             pager = this.FindViewById<AndroidX.ViewPager.Widget.ViewPager>(Resource.Id.pager);
             pager.Adapter = new WizardPagerAdapter(this.SupportFragmentManager);
             pager.PageSelected += Pager_PageSelected;
+            pager.PageScrolled += Pager_PageScrolled;
 
-            strip1 = this.FindViewById<StepPagerStrip>(Resource.Id.strip);
-            strip1.setPageCount(pager.Adapter.Count);
-            strip1.setCurrentPage(pager.CurrentItem);
+            pageDots = this.FindViewById<PageDotsIndicator>(Resource.Id.strip);
+            pageDots.SetPageCount(pager.Adapter.Count);
+            pageDots.SetPosition(pager.CurrentItem);
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.setting_toolbar);
             myToolbar.Title = SeekerApplication.GetString(Resource.String.ImportWizard);
@@ -315,10 +316,15 @@ namespace Seeker
             }
         }
 
+        private void Pager_PageScrolled(object sender, AndroidX.ViewPager.Widget.ViewPager.PageScrolledEventArgs e)
+        {
+            pageDots.SetPosition(e.Position + e.PositionOffset);
+        }
+
         private void Pager_PageSelected(object sender, AndroidX.ViewPager.Widget.ViewPager.PageSelectedEventArgs e)
         {
             SetButtonText(e.Position);
-            strip1.setCurrentPage(e.Position);
+            pageDots.SetPosition(e.Position);
             if (e.Position != 0)
             {
                 ((pager.Adapter as WizardPagerAdapter).GetItem(pager.CurrentItem) as ImportListFragment).SetState(this);
@@ -556,7 +562,7 @@ namespace Seeker
         private View rootView;
         private TextView noneFound;
         private TextView alreadyAdded;
-        private TextView selectTheFollowing;
+        private TextView importHeader;
         private Button toggleAll;
         private AndroidX.RecyclerView.Widget.RecyclerView recyclerView;
         private Guid guid = Guid.NewGuid();
@@ -596,7 +602,7 @@ namespace Seeker
             this.rootView = inflater.Inflate(Resource.Layout.import_list_layout, container, false);
             noneFound = this.rootView.FindViewById<TextView>(Resource.Id.noneFound);
             alreadyAdded = this.rootView.FindViewById<TextView>(Resource.Id.alreadyPresentTextView);
-            selectTheFollowing = this.rootView.FindViewById<TextView>(Resource.Id.selectTheFollowing);
+            importHeader = this.rootView.FindViewById<TextView>(Resource.Id.selectTheFollowing);
             recyclerView = this.rootView.FindViewById<AndroidX.RecyclerView.Widget.RecyclerView>(Resource.Id.recyclerViewImportList);
             var lm = new LinearLayoutManager(this.Context, LinearLayoutManager.Vertical, false);
             recyclerView.SetLayoutManager(lm);
@@ -690,16 +696,15 @@ namespace Seeker
         private ImportListAdapter importListAdapter;
         public void SetState(ImportedData data, ImportListType listType)
         {
-            string title = "Select the following {0} to add to {1}";
             string none = "No {0} found to import";
-            if (selectTheFollowing == null)
+            if (importHeader == null)
             {
                 return;//too early.
             }
             switch (listType)
             {
                 case ImportListType.UserList:
-                    selectTheFollowing.Text = string.Format(title, "friends", "User List");
+                    importHeader.Text = this.GetString(Resource.String.ImportFriends);
                     if (data.UserList == null || data.UserList.Count == 0)
                     {
                         noneFound.Visibility = ViewStates.Visible;
@@ -749,7 +754,7 @@ namespace Seeker
                     //
                     break;
                 case ImportListType.Ignore:
-                    selectTheFollowing.Text = string.Format(title, "users", "Ignored");
+                    importHeader.Text = this.GetString(Resource.String.ImportIgnored);
                     if (data.IgnoredBanned == null || data.IgnoredBanned.Count == 0)
                     {
                         noneFound.Visibility = ViewStates.Visible;
@@ -795,7 +800,7 @@ namespace Seeker
                     }
                     break;
                 case ImportListType.UserNotes:
-                    selectTheFollowing.Text = SeekerApplication.GetString(Resource.String.SelectUserNotes);
+                    importHeader.Text = this.GetString(Resource.String.ImportUserNotes);
                     if (data.UserNotes == null || data.UserNotes.Count == 0)
                     {
                         noneFound.Visibility = ViewStates.Visible;
@@ -849,7 +854,7 @@ namespace Seeker
                     //}
                     break;
                 case ImportListType.Wishlist:
-                    selectTheFollowing.Text = string.Format(title, "searches", "Wishlist");
+                    importHeader.Text = this.GetString(Resource.String.ImportWishlist);
                     if (data.Wishlist == null || data.Wishlist.Count == 0)
                     {
                         noneFound.Visibility = ViewStates.Visible;
@@ -974,93 +979,46 @@ namespace Seeker
             return PositionNone;
         }
 
-        //public override ICharSequence GetPageTitleFormatted(int position)
-        //{
-        //    ICharSequence title;
-        //    switch (position)
-        //    {
-        //        case 0:
-        //            title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.account_tab));
-        //            break;
-        //        case 1:
-        //            title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.searches_tab));
-        //            break;
-        //        case 2:
-        //            title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.transfer_tab));
-        //            break;
-        //        case 3:
-        //            title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.browse_tab));
-        //            break;
-        //        default:
-        //            throw new System.Exception("Invalid Tab");
-        //    }
-        //    return title;
-        //}
     }
 
 
 
-    public class StepPagerStrip : View
+    /// <summary>
+    /// Centered "worm" style page indicator. Inactive pages are small dots and the
+    /// current page expands into a rounded pill. The position is fractional (driven
+    /// by ViewPager.PageScrolled) so the expansion animates with the page transition.
+    /// </summary>
+    public class PageDotsIndicator : View
     {
-        private static int[] ATTRS = new int[]{
-            Android.Resource.Attribute.Gravity    };
         private int mPageCount;
-        private int mCurrentPage;
+        private float mPosition;
 
-        private int mGravity = (int)(GravityFlags.Left | GravityFlags.Top);
-        private float mTabWidth;
-        private float mTabHeight;
-        private float mTabSpacing;
+        private readonly float mDotDiameter;
+        private readonly float mPillWidth;
+        private readonly float mDotSpacing;
 
-        private Paint mPrevTabPaint;
-        private Paint mSelectedTabPaint;
-        private Paint mSelectedLastTabPaint;
-        private Paint mNextTabPaint;
+        private readonly Paint mPaint;
+        private readonly Android.Graphics.Color mActiveColor;
+        private readonly Android.Graphics.Color mInactiveColor;
 
-        private RectF mTempRectF = new RectF();
+        private readonly RectF mTempRectF = new RectF();
 
-        //private Scroller mScroller;
-
-        //private OnPageSelectedListener mOnPageSelectedListener;
-
-        public StepPagerStrip(Context context) : this(context, null, 0)
-        {
-
-        }
-
-        public StepPagerStrip(Context context, IAttributeSet attrs) : this(context, attrs, 0)
+        public PageDotsIndicator(Context context) : this(context, null)
         {
         }
 
-        public StepPagerStrip(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public PageDotsIndicator(Context context, IAttributeSet attrs) : base(context, attrs)
         {
+            float density = this.Resources.DisplayMetrics.Density;
+            mDotDiameter = 8f * density;
+            mPillWidth = 36f * density;
+            mDotSpacing = 8f * density;
+            var color = UiHelpers.GetColorFromAttribute(context, Resource.Attribute.mainPurple);
+            mActiveColor = color;
+            mInactiveColor = Android.Graphics.Color.Argb(0x42, mActiveColor.R, mActiveColor.G, mActiveColor.B);
 
-            //final TypedArray a = context.obtainStyledAttributes(attrs, ATTRS);
-            //mGravity = a.getInteger(0, mGravity);
-            //a.recycle();
-
-            //final Resources res = getResources();
-            mTabWidth = this.Resources.GetDimensionPixelSize(Resource.Dimension.step_pager_tab_width);
-            mTabHeight = this.Resources.GetDimensionPixelSize(Resource.Dimension.step_pager_tab_height);
-            mTabSpacing = this.Resources.GetDimensionPixelSize(Resource.Dimension.step_pager_tab_spacing);
-
-            mPrevTabPaint = new Paint();
-            mPrevTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(context, Resource.Color.prevPage));
-
-            mSelectedTabPaint = new Paint();
-            mSelectedTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(context, Resource.Color.currentPage));
-
-            mSelectedLastTabPaint = new Paint();
-            mSelectedLastTabPaint = mSelectedTabPaint;//Color.Red;
-
-            mNextTabPaint = new Paint();
-            mNextTabPaint.Color = new Android.Graphics.Color(ContextCompat.GetColor(context, Resource.Color.nextPage));
+            mPaint = new Paint(PaintFlags.AntiAlias);
         }
-
-        //public void setOnPageSelectedListener(OnPageSelectedListener onPageSelectedListener)
-        //{
-        //    mOnPageSelectedListener = onPageSelectedListener;
-        //}
 
         protected override void OnDraw(Canvas canvas)
         {
@@ -1071,183 +1029,61 @@ namespace Seeker
                 return;
             }
 
-            float totalWidth = mPageCount * (mTabWidth + mTabSpacing) - mTabSpacing;
-            float totalLeft;
-            bool fillHorizontal = false;
+            float position = Math.Clamp(mPosition, 0f, mPageCount - 1);
+            float pillExtra = mPillWidth - mDotDiameter;
+            // the expansion influences below always sum to 1, so total width is constant
+            float totalWidth = mPageCount * mDotDiameter + (mPageCount - 1) * mDotSpacing + pillExtra;
+            float left = (this.Width - totalWidth) / 2f;
+            float top = this.PaddingTop + (this.Height - this.PaddingTop - this.PaddingBottom - mDotDiameter) / 2f;
 
-            switch (((GravityFlags)mGravity & GravityFlags.HorizontalGravityMask))
-            {
-                case GravityFlags.CenterHorizontal:
-                    totalLeft = (this.Width - totalWidth) / 2;
-                    break;
-                case GravityFlags.Right:
-                    totalLeft = this.Width - this.Right - totalWidth;
-                    break;
-                case GravityFlags.FillHorizontal:
-                    totalLeft = this.PaddingLeft;
-                    fillHorizontal = true;
-                    break;
-                default:
-                    totalLeft = this.PaddingLeft;
-                    break;
-            }
-
-            switch (((GravityFlags)mGravity & GravityFlags.VerticalGravityMask))
-            {
-                case GravityFlags.CenterVertical:
-                    mTempRectF.Top = (int)(this.Height - mTabHeight) / 2;
-                    break;
-                case GravityFlags.Bottom:
-                    mTempRectF.Top = this.Height - this.PaddingBottom - mTabHeight;
-                    break;
-                default:
-                    mTempRectF.Top = this.PaddingTop;
-                    break;
-            }
-
-            mTempRectF.Bottom = mTempRectF.Top + mTabHeight;
-
-            float tabWidth = mTabWidth;
-            if (fillHorizontal)
-            {
-                tabWidth = (this.Width - this.PaddingRight - this.PaddingLeft
-                        - (mPageCount - 1) * mTabSpacing) / mPageCount;
-            }
+            mTempRectF.Top = top;
+            mTempRectF.Bottom = top + mDotDiameter;
+            float cornerRadius = mDotDiameter / 2f;
 
             for (int i = 0; i < mPageCount; i++)
             {
-                mTempRectF.Left = totalLeft + (i * (tabWidth + mTabSpacing));
-                mTempRectF.Right = mTempRectF.Left + tabWidth;
-                canvas.DrawRect(mTempRectF, i < mCurrentPage
-                        ? mPrevTabPaint
-                        : (i > mCurrentPage
-                                ? mNextTabPaint
-                                : (i == mPageCount - 1
-                                        ? mSelectedLastTabPaint
-                                        : mSelectedTabPaint)));
+                float influence = Math.Max(0f, 1f - Math.Abs(i - position));
+                float width = mDotDiameter + pillExtra * influence;
+                // visited pages stay fully colored; the upcoming page fades in as it becomes current
+                float colorFraction = Math.Clamp(position - i + 1f, 0f, 1f);
+                mPaint.Color = BlendColor(mInactiveColor, mActiveColor, colorFraction);
+
+                mTempRectF.Left = left;
+                mTempRectF.Right = left + width;
+                canvas.DrawRoundRect(mTempRectF, cornerRadius, cornerRadius, mPaint);
+                left += width + mDotSpacing;
             }
+        }
+
+        private static Android.Graphics.Color BlendColor(Android.Graphics.Color from, Android.Graphics.Color to, float t)
+        {
+            return Android.Graphics.Color.Argb(
+                (int)(from.A + (to.A - from.A) * t),
+                (int)(from.R + (to.R - from.R) * t),
+                (int)(from.G + (to.G - from.G) * t),
+                (int)(from.B + (to.B - from.B) * t));
         }
 
         protected override void OnMeasure(int widthMeasureSpec, int heightMeasureSpec)
         {
+            int contentWidth = (int)Math.Ceiling(
+                mPageCount * mDotDiameter + Math.Max(0, mPageCount - 1) * mDotSpacing + (mPillWidth - mDotDiameter));
             SetMeasuredDimension(
-                    View.ResolveSize(
-                            (int)(mPageCount * (mTabWidth + mTabSpacing) - mTabSpacing)
-                                    + this.PaddingLeft + this.PaddingRight,
-                            widthMeasureSpec),
-                    View.ResolveSize(
-                            (int)mTabHeight
-                                    + this.PaddingTop + this.PaddingBottom,
-                            heightMeasureSpec));
+                View.ResolveSize(contentWidth + this.PaddingLeft + this.PaddingRight, widthMeasureSpec),
+                View.ResolveSize((int)Math.Ceiling(mDotDiameter) + this.PaddingTop + this.PaddingBottom, heightMeasureSpec));
         }
 
-        protected override void OnSizeChanged(int w, int h, int oldw, int oldh)
+        public void SetPosition(float position)
         {
-            scrollCurrentPageIntoView();
-            base.OnSizeChanged(w, h, oldw, oldh);
-        }
-
-        //@Override
-        //public boolean onTouchEvent(MotionEvent event)
-        //{
-        //    if (mOnPageSelectedListener != null)
-        //    {
-        //        switch (event.getActionMasked()) {
-        //            case MotionEvent.ACTION_DOWN:
-        //            case MotionEvent.ACTION_MOVE:
-        //                int position = hitTest(event.getX());
-        //            if (position >= 0)
-        //            {
-        //                mOnPageSelectedListener.onPageStripSelected(position);
-        //            }
-        //            return true;
-        //        }
-        //    }
-        //    return super.onTouchEvent(event);
-        //}
-
-        //private int hitTest(float x)
-        //{
-        //    if (mPageCount == 0)
-        //    {
-        //        return -1;
-        //    }
-
-        //    float totalWidth = mPageCount * (mTabWidth + mTabSpacing) - mTabSpacing;
-        //    float totalLeft;
-        //    boolean fillHorizontal = false;
-
-        //    switch (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK)
-        //    {
-        //        case Gravity.CENTER_HORIZONTAL:
-        //            totalLeft = (getWidth() - totalWidth) / 2;
-        //            break;
-        //        case Gravity.RIGHT:
-        //            totalLeft = getWidth() - getPaddingRight() - totalWidth;
-        //            break;
-        //        case Gravity.FILL_HORIZONTAL:
-        //            totalLeft = getPaddingLeft();
-        //            fillHorizontal = true;
-        //            break;
-        //        default:
-        //            totalLeft = getPaddingLeft();
-        //    }
-
-        //    float tabWidth = mTabWidth;
-        //    if (fillHorizontal)
-        //    {
-        //        tabWidth = (getWidth() - getPaddingRight() - getPaddingLeft()
-        //                - (mPageCount - 1) * mTabSpacing) / mPageCount;
-        //    }
-
-        //    float totalRight = totalLeft + (mPageCount * (tabWidth + mTabSpacing));
-        //    if (x >= totalLeft && x <= totalRight && totalRight > totalLeft)
-        //    {
-        //        return (int)(((x - totalLeft) / (totalRight - totalLeft)) * mPageCount);
-        //    }
-        //    else
-        //    {
-        //        return -1;
-        //    }
-        //}
-
-        public void setCurrentPage(int currentPage)
-        {
-            mCurrentPage = currentPage;
+            mPosition = position;
             this.Invalidate();
-            //scrollCurrentPageIntoView();
-
-            // TODO: Set content description appropriately
         }
 
-        private void scrollCurrentPageIntoView()
-        {
-            // TODO: only works with left gravity for now
-            //
-            //        float widthToActive = getPaddingLeft() + (mCurrentPage + 1) * (mTabWidth + mTabSpacing)
-            //                - mTabSpacing;
-            //        int viewWidth = getWidth();
-            //
-            //        int startScrollX = getScrollX();
-            //        int destScrollX = (widthToActive > viewWidth) ? (int) (widthToActive - viewWidth) : 0;
-            //
-            //        if (mScroller == null) {
-            //            mScroller = new Scroller(getContext());
-            //        }
-            //
-            //        mScroller.abortAnimation();
-            //        mScroller.startScroll(startScrollX, 0, destScrollX - startScrollX, 0);
-            //        postInvalidate();
-        }
-
-        public void setPageCount(int count)
+        public void SetPageCount(int count)
         {
             mPageCount = count;
+            this.RequestLayout();
             this.Invalidate();
-
-            // TODO: Set content description appropriately
         }
-
-
     }
 }

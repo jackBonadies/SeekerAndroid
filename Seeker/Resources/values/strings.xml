@@ -730,7 +730,11 @@
     <string name="NoSuitableFileManager">No suitable file manager found</string>
     <string name="SuccessfullyImported">Successfully imported client data</string>
 
-    <string name="SelectUserNotes">Select the following user notes to add</string>
+    <string name="ImportUserNotes">Import user notes</string>
+    <string name="ImportFriends">Import user list</string>
+    <string name="ImportIgnored">Import ignored list</string>
+    <string name="ImportWishlist">Import wishlist</string>
+
     <string name="FolderFinishedDownloading">Folder finished downloading</string>
     <string name="FinishedDownloading">finished downloading</string>
     <string name="PermissionsIssueShared">Permissions issue opening shared folder.  Please go into settings and reselect shared folder.</string>
