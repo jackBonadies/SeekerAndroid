@@ -10,7 +10,7 @@ using Android.Widget;
 using AndroidX.Core.Content;
 using AndroidX.Fragment.App;
 using AndroidX.RecyclerView.Widget;
-using AndroidX.ViewPager.Widget;
+using AndroidX.ViewPager2.Widget;
 using Common;
 using System;
 using System.Collections.Generic;
@@ -22,38 +22,6 @@ using AndroidX.Activity;
 
 namespace Seeker
 {
-    public class SwipeDisabledViewPager : ViewPager
-    {
-
-        public bool SwipeEnabled = false;
-
-        public SwipeDisabledViewPager(Context context, IAttributeSet attrs) : base(context, attrs)
-        {
-        }
-
-        public override bool OnTouchEvent(MotionEvent motionEvent)
-        {
-            if (this.SwipeEnabled)
-            {
-                return base.OnTouchEvent(motionEvent);
-            }
-
-            return false;
-        }
-
-        public override bool OnInterceptTouchEvent(MotionEvent motionEvent)
-        {
-            if (this.SwipeEnabled)
-            {
-                return base.OnInterceptTouchEvent(motionEvent);
-            }
-
-            return false;
-        }
-    }
-
-
-
     /// <summary>
     /// ImportParse State - read on resume, + state change events
     /// </summary>
@@ -96,7 +64,8 @@ namespace Seeker
 
         Button prevButton;
         Button nextButton;
-        AndroidX.ViewPager.Widget.ViewPager pager;
+        AndroidX.ViewPager2.Widget.ViewPager2 pager;
+        WizardPageChangeCallback pageChangeCallback;
         PageDotsIndicator pageDots;
         public static ImportedData? selectedImportedData = null; //this has to be static.  otherwise someone can just rotate the screen on a later step and clear it.
         protected override void OnCreate(Bundle savedInstanceState)
@@ -116,13 +85,14 @@ namespace Seeker
             var buttonBar = this.FindViewById<LinearLayout>(Resource.Id.wizard_button_bar);
             AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(buttonBar, new BottomOnlyInsetsListener());
 
-            pager = this.FindViewById<AndroidX.ViewPager.Widget.ViewPager>(Resource.Id.pager);
-            pager.Adapter = new WizardPagerAdapter(this.SupportFragmentManager);
-            pager.PageSelected += Pager_PageSelected;
-            pager.PageScrolled += Pager_PageScrolled;
+            pager = this.FindViewById<AndroidX.ViewPager2.Widget.ViewPager2>(Resource.Id.pager);
+            pager.Adapter = new WizardPagerAdapter(this);
+            pager.UserInputEnabled = false; //swipe disabled
+            pageChangeCallback = new WizardPageChangeCallback(this);
+            pager.RegisterOnPageChangeCallback(pageChangeCallback);
 
             pageDots = this.FindViewById<PageDotsIndicator>(Resource.Id.strip);
-            pageDots.SetPageCount(pager.Adapter.Count);
+            pageDots.SetPageCount(pager.Adapter.ItemCount);
             pageDots.SetPosition(pager.CurrentItem);
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.setting_toolbar);
@@ -152,10 +122,16 @@ namespace Seeker
             SetButtonText(pager.CurrentItem);
         }
 
-        /// <summary>The currently displayed list fragment, or null if the start page is showing.</summary>
+        // FragmentStateAdapter tags its fragments "f" + getItemId(position)
+        private AndroidX.Fragment.App.Fragment FragmentAt(int position)
+        {
+            return SupportFragmentManager.FindFragmentByTag("f" + position);
+        }
+
+        /// <summary>The currently displayed list fragment, or null if the start page is showing / not yet attached.</summary>
         private ImportListFragment CurrentListFragment()
         {
-            return (pager.Adapter as WizardPagerAdapter).GetItem(pager.CurrentItem) as ImportListFragment;
+            return FragmentAt(pager.CurrentItem) as ImportListFragment;
         }
 
         /// <summary>
@@ -167,19 +143,18 @@ namespace Seeker
             pager.Post(() => pager.SetCurrentItem(PAGE_START, false));
         }
 
-        public void UpdatePagerReference(AndroidX.Fragment.App.Fragment frag, ImportListType importListType)
-        {
-            (pager.Adapter as WizardPagerAdapter).UpdatePagerReference(frag, importListType);
-        }
-
         protected override void OnDestroy()
         {
+            if (pager != null && pageChangeCallback != null)
+            {
+                pager.UnregisterOnPageChangeCallback(pageChangeCallback);
+            }
             base.OnDestroy();
         }
 
         public bool IsCurrentStep(AndroidX.Fragment.App.Fragment f)
         {
-            return f == (this.pager.Adapter as WizardPagerAdapter).GetItem(this.pager.CurrentItem);
+            return f == FragmentAt(pager.CurrentItem);
         }
 
         private void onBackPressedAction(OnBackPressedCallback callback)
@@ -381,18 +356,38 @@ namespace Seeker
             }
         }
 
-        private void Pager_PageScrolled(object sender, AndroidX.ViewPager.Widget.ViewPager.PageScrolledEventArgs e)
+        private void OnPagerScrolled(int position, float positionOffset)
         {
-            pageDots.SetPosition(e.Position + e.PositionOffset);
+            pageDots.SetPosition(position + positionOffset);
         }
 
-        private void Pager_PageSelected(object sender, AndroidX.ViewPager.Widget.ViewPager.PageSelectedEventArgs e)
+        private void OnPagerSelected(int position)
         {
-            SetButtonText(e.Position);
-            pageDots.SetPosition(e.Position);
-            if (e.Position != PAGE_START)
+            SetButtonText(position);
+            pageDots.SetPosition(position);
+            if (position != PAGE_START)
             {
-                CurrentListFragment().SetState(this);
+                CurrentListFragment()?.SetState(this);
+            }
+        }
+
+        /// <summary>Bridges ViewPager2's page-change callback to the activity (ViewPager2 is final / not an events source).</summary>
+        private class WizardPageChangeCallback : AndroidX.ViewPager2.Widget.ViewPager2.OnPageChangeCallback
+        {
+            private readonly ImportWizardActivity activity;
+            public WizardPageChangeCallback(ImportWizardActivity activity)
+            {
+                this.activity = activity;
+            }
+
+            public override void OnPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            {
+                activity.OnPagerScrolled(position, positionOffset);
+            }
+
+            public override void OnPageSelected(int position)
+            {
+                activity.OnPagerSelected(position);
             }
         }
 
@@ -725,7 +720,6 @@ namespace Seeker
             selectAllCheckbox = this.rootView.FindViewById<Google.Android.Material.CheckBox.MaterialCheckBox>(Resource.Id.selectAllCheckbox);
             selectAllCheckbox.Click += SelectAll_Click;
 
-            (this.Activity as ImportWizardActivity).UpdatePagerReference(this, importListType);
             return rootView;
         }
 
@@ -767,7 +761,6 @@ namespace Seeker
             {
                 return;
             }
-            wizard.UpdatePagerReference(this, importListType);
             if (wizard.IsCurrentStep(this))
             {
                 RenderCurrentStep(wizard);
@@ -986,77 +979,34 @@ namespace Seeker
     }
 
 
-    public class WizardPagerAdapter : FragmentPagerAdapter
+    public class WizardPagerAdapter : AndroidX.ViewPager2.Adapter.FragmentStateAdapter
     {
-        AndroidX.Fragment.App.Fragment startPage = null;
-
-        AndroidX.Fragment.App.Fragment userListPage1 = null;
-        AndroidX.Fragment.App.Fragment ignoredPage2 = null;
-        AndroidX.Fragment.App.Fragment userNotesPage3 = null;
-        AndroidX.Fragment.App.Fragment wishlistPage4 = null;
-
-
-        public WizardPagerAdapter(AndroidX.Fragment.App.FragmentManager fm) : base(fm)
+        public WizardPagerAdapter(AndroidX.Fragment.App.FragmentActivity fa) : base(fa)
         {
-            startPage = new StartPageFragment();
-            userListPage1 = new ImportListFragment(ImportListType.UserList);
-            ignoredPage2 = new ImportListFragment(ImportListType.Ignore);
-            userNotesPage3 = new ImportListFragment(ImportListType.UserNotes);
-            wishlistPage4 = new ImportListFragment(ImportListType.Wishlist);
         }
 
-        public void UpdatePagerReference(AndroidX.Fragment.App.Fragment frag, ImportListType importListType)
-        {
-            switch (importListType)
-            {
-                case ImportListType.UserList:
-                    userListPage1 = frag;
-                    break;
-                case ImportListType.Ignore:
-                    ignoredPage2 = frag;
-                    break;
-                case ImportListType.UserNotes:
-                    userNotesPage3 = frag;
-                    break;
-                case ImportListType.Wishlist:
-                    wishlistPage4 = frag;
-                    break;
-            }
-        }
+        public override int ItemCount => 5;
 
-        public override int Count => 5;
-
-        public override AndroidX.Fragment.App.Fragment GetItem(int position)
+        //FragmentStateAdapter manages the fragment instances itself (creating, restoring and
+        //destroying them); this just produces a fresh fragment for a given page.
+        public override AndroidX.Fragment.App.Fragment CreateFragment(int position)
         {
-            AndroidX.Fragment.App.Fragment frag = null;
             switch (position)
             {
                 case 0:
-                    frag = startPage;
-                    break;
+                    return new StartPageFragment();
                 case 1:
-                    frag = userListPage1;
-                    break;
+                    return new ImportListFragment(ImportListType.UserList);
                 case 2:
-                    frag = ignoredPage2;
-                    break;
+                    return new ImportListFragment(ImportListType.Ignore);
                 case 3:
-                    frag = userNotesPage3;
-                    break;
+                    return new ImportListFragment(ImportListType.UserNotes);
                 case 4:
-                    frag = wishlistPage4;
-                    break;
+                    return new ImportListFragment(ImportListType.Wishlist);
                 default:
                     throw new System.Exception("Invalid Tab");
             }
-            return frag;
         }
-
-        public override int GetItemPosition(Java.Lang.Object @object)
-        {
-            return PositionNone;
-        }
-
     }
 
 
