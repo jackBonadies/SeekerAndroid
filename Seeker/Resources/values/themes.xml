@@ -161,7 +161,7 @@
 
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
         <item name="colorOnPrimary">#ffffff</item>
-        <item name="colorPrimary">#8AB4F8</item>
+        <item name="colorPrimary">#7C8DEB</item>
         <item name="colorSurface">#303030</item>
         <item name="colorSurfaceLogin">#404040</item>
         <item name="colorOnSurface">?attr/normalTextColor</item>

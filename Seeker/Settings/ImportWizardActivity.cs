@@ -479,7 +479,7 @@ namespace Seeker
         private void SetExportPathLine(int textViewId, int pathStringId, params string[] codeChunks)
         {
             var textView = this.rootView.FindViewById<TextView>(textViewId);
-            var accentColor = UiHelpers.GetColorFromAttribute(textView.Context, Resource.Attribute.mainPurple);
+            var accentColor = UiHelpers.GetColorFromAttribute(textView.Context, Resource.Attribute.colorPrimary);
             var builder = new Android.Text.SpannableStringBuilder(this.GetString(pathStringId));
             bool firstSeparator = true;
             foreach (string chunk in codeChunks)
@@ -1041,7 +1041,7 @@ namespace Seeker
             mDotDiameter = 8f * density;
             mPillWidth = 36f * density;
             mDotSpacing = 8f * density;
-            var color = UiHelpers.GetColorFromAttribute(context, Resource.Attribute.mainPurple);
+            var color = UiHelpers.GetColorFromAttribute(context, Resource.Attribute.colorPrimary);
             mActiveColor = color;
             mInactiveColor = Android.Graphics.Color.Argb(0x42, mActiveColor.R, mActiveColor.G, mActiveColor.B);
 
