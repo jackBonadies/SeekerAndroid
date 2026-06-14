@@ -302,8 +302,8 @@ namespace Seeker
 
             UPnpManager.Context = this;
             UPnpManager.Instance.SearchAndSetMappingIfRequired();
-            SimpleHelpers.STRINGS_KBS = this.Resources.GetString(Resource.String.kilobytes_per_second);
-            SimpleHelpers.STRINGS_KHZ = this.Resources.GetString(Resource.String.kilohertz);
+            SimpleHelpers.STRINGS_KBS = TryGetStringOr(Resource.String.kilobytes_per_second, "kbps");
+            SimpleHelpers.STRINGS_KHZ = TryGetStringOr(Resource.String.kilohertz, "kHz");
 
             SimpleHelpers.UserListService = UserListService.Instance;
         }
@@ -642,6 +642,25 @@ namespace Seeker
         public static string GetString(int resId)
         {
             return SeekerApplication.ApplicationContext.GetString(resId);
+        }
+
+        /// <summary>
+        /// Resolve a string resource, falling back to a hardcoded default if the lookup throws
+        /// (e.g. Resources.NotFoundException from a stale resource-ID mismatch after an incomplete
+        /// deploy / partial install). A trivial units string must never be allowed to crash
+        /// Application.OnCreate and brick app startup. We still log so the real frequency is visible.
+        /// </summary>
+        private string TryGetStringOr(int resId, string fallback)
+        {
+            try
+            {
+                return this.Resources.GetString(resId);
+            }
+            catch (Exception e)
+            {
+                Logger.Firebase("TryGetStringOr failed for resId 0x" + resId.ToString("x8") + ": " + e.Message);
+                return fallback;
+            }
         }
 
         public static void SetUpLoginContinueWith(Task t)
