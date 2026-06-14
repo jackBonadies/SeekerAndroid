@@ -355,11 +355,11 @@ namespace Seeker
                     nextButton.Text = SeekerApplication.GetString(Resource.String.next);
                     break;
                 case 4:
-                    prevButton.Text = SeekerApplication.GetString(Resource.String.prev);
+                    prevButton.Text = SeekerApplication.GetString(Resource.String.back_desc);
                     nextButton.Text = SeekerApplication.GetString(Resource.String.finish);
                     break;
                 default:
-                    prevButton.Text = SeekerApplication.GetString(Resource.String.prev);
+                    prevButton.Text = SeekerApplication.GetString(Resource.String.back_desc);
                     nextButton.Text = SeekerApplication.GetString(Resource.String.next);
                     break;
             }
@@ -450,13 +450,16 @@ namespace Seeker
 
     public class ImportListAdapter : RecyclerView.Adapter
     {
-        public void ToggleAll()
+        /// <summary>
+        /// Raised whenever the user toggles a row, so the fragment can refresh the select-all checkbox.
+        /// </summary>
+        public event Action SelectionChanged;
+
+        public void SetAll(bool isChecked)
         {
-            bool allChecked = localDataSet.TrueForAll((item) => item.isChecked);
             for (int i = 0; i < localDataSet.Count; i++)
             {
-                //if they are all checked, then uncheck them all.  else check them all.
-                localDataSet[i].isChecked = !allChecked;
+                localDataSet[i].isChecked = isChecked;
             }
         }
 
@@ -467,21 +470,27 @@ namespace Seeker
 
             ImportItemView view = ImportItemView.inflate(parent);
             view.setupChildren();
-            view.ImportItemCheckbox.CheckedChange += ImportItemCheckbox_CheckedChange;
-            return new ImportItemViewHolder(view as View);
+            var holder = new ImportItemViewHolder(view as View);
+            (view as View).Click += (object sender, EventArgs e) =>
+            {
+                int pos = holder.BindingAdapterPosition;
+                if (pos == RecyclerView.NoPosition)
+                {
+                    return;
+                }
+                localDataSet[pos].isChecked = !localDataSet[pos].isChecked;
+                view.ImportItemCheckbox.Checked = localDataSet[pos].isChecked;
+                SelectionChanged?.Invoke();
+            };
+            return holder;
 
 
-        }
-
-        private void ImportItemCheckbox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
-        {
-            int pos = (sender as TextView).FindAncestor<ImportItemView>().ViewHolder.BindingAdapterPosition;
-            localDataSet[pos].isChecked = e.IsChecked;
         }
 
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
         {
             (holder as ImportItemViewHolder).pathItemView.setItem(localDataSet[position]);
+            (holder as ImportItemViewHolder).pathItemView.SetDividerVisible(position != ItemCount - 1);
         }
 
         public ImportListAdapter(List<ImportItem> ti)
@@ -518,6 +527,8 @@ namespace Seeker
     {
         //public TransfersFragment.TransferViewHolder ViewHolder { get; set; }
         public CheckBox ImportItemCheckbox;
+        public TextView ImportItemText;
+        private View importItemDivider;
         public ImportItem InnerImportItem { get; set; }
         public ImportItemViewHolder ViewHolder;
 
@@ -541,6 +552,8 @@ namespace Seeker
         public void setupChildren()
         {
             ImportItemCheckbox = FindViewById<CheckBox>(Resource.Id.importItemCheckbox);
+            ImportItemText = FindViewById<TextView>(Resource.Id.importItemText);
+            importItemDivider = FindViewById<View>(Resource.Id.importItemDivider);
         }
 
         public void setItem(ImportItem item)
@@ -548,13 +561,18 @@ namespace Seeker
             InnerImportItem = item;
             if (item.showAsterisk)
             {
-                ImportItemCheckbox.Text = item.item + "*";
+                ImportItemText.Text = item.item + "*";
             }
             else
             {
-                ImportItemCheckbox.Text = item.item;
+                ImportItemText.Text = item.item;
             }
             ImportItemCheckbox.Checked = item.isChecked;
+        }
+
+        public void SetDividerVisible(bool visible)
+        {
+            importItemDivider.Visibility = visible ? ViewStates.Visible : ViewStates.Gone;
         }
     }
 
@@ -562,11 +580,18 @@ namespace Seeker
 
     public class ImportListFragment : AndroidX.Fragment.App.Fragment
     {
+        // Mirrors Material's MaterialCheckBox.STATE_* constants. Using local copies
+        // because the Xamarin binding surface for these constants varies by version;
+        // Java source guarantees these exact int values.
+        private const int STATE_UNCHECKED = 0;
+        private const int STATE_CHECKED = 1;
+        private const int STATE_INDETERMINATE = 2;
+
         private View rootView;
         private TextView noneFound;
         private TextView alreadyAdded;
         private TextView importHeader;
-        private Button toggleAll;
+        private Google.Android.Material.CheckBox.MaterialCheckBox selectAllCheckbox;
         private AndroidX.RecyclerView.Widget.RecyclerView recyclerView;
         private Guid guid = Guid.NewGuid();
         private ImportListType importListType;
@@ -609,18 +634,43 @@ namespace Seeker
             recyclerView = this.rootView.FindViewById<AndroidX.RecyclerView.Widget.RecyclerView>(Resource.Id.recyclerViewImportList);
             var lm = new LinearLayoutManager(this.Context, LinearLayoutManager.Vertical, false);
             recyclerView.SetLayoutManager(lm);
-            toggleAll = this.rootView.FindViewById<Button>(Resource.Id.toggleAllButton);
-            toggleAll.Click += ToggleAll_Click;
+            recyclerView.ClipToOutline = true; //so row ripples do not draw over the card's rounded corners
+            selectAllCheckbox = this.rootView.FindViewById<Google.Android.Material.CheckBox.MaterialCheckBox>(Resource.Id.selectAllCheckbox);
+            selectAllCheckbox.Click += SelectAll_Click;
 
             (SeekerState.ActiveActivityRef as ImportWizardActivity).UpdatePagerReference(this, importListType);
             Console.WriteLine("OnCreateView: " + importListType.ToString() + " " + guid.ToString());
             return rootView;
         }
 
-        private void ToggleAll_Click(object sender, EventArgs e)
+        private void SelectAll_Click(object sender, EventArgs e)
         {
-            this.importListAdapter.ToggleAll();
+            //the click already toggled the checkbox (indeterminate counts as unchecked, so
+            //clicking an indeterminate checkbox moves it to checked i.e. "select all").
+            bool isChecked = selectAllCheckbox.CheckedState == STATE_CHECKED;
+            this.importListAdapter.SetAll(isChecked);
             this.importListAdapter.NotifyDataSetChanged();
+        }
+
+        private void UpdateSelectAllState()
+        {
+            if (selectAllCheckbox == null || importListAdapter == null)
+            {
+                return;
+            }
+            int checkedCount = importListAdapter.localDataSet.Count((item) => item.isChecked);
+            if (checkedCount == 0)
+            {
+                selectAllCheckbox.CheckedState = STATE_UNCHECKED;
+            }
+            else if (checkedCount == importListAdapter.localDataSet.Count)
+            {
+                selectAllCheckbox.CheckedState = STATE_CHECKED;
+            }
+            else
+            {
+                selectAllCheckbox.CheckedState = STATE_INDETERMINATE;
+            }
         }
 
         public override void OnDestroy()
@@ -741,17 +791,19 @@ namespace Seeker
                         importListAdapter = new ImportListAdapter(notYetAdded.Select(item => new ImportItem(item, true, false)).ToList());
                     }
 
+                    importListAdapter.SelectionChanged += UpdateSelectAllState;
                     this.recyclerView.SetAdapter(importListAdapter);
+                    UpdateSelectAllState();
 
                     if (notYetAdded == null || notYetAdded.Count == 0)
                     {
                         this.recyclerView.Visibility = ViewStates.Gone;
-                        this.toggleAll.Visibility = ViewStates.Gone;
+                        this.selectAllCheckbox.Visibility = ViewStates.Gone;
                     }
                     else
                     {
                         this.recyclerView.Visibility = ViewStates.Visible;
-                        this.toggleAll.Visibility = ViewStates.Visible;
+                        this.selectAllCheckbox.Visibility = ViewStates.Visible;
                     }
 
                     //
@@ -789,17 +841,19 @@ namespace Seeker
                     {
                         importListAdapter = new ImportListAdapter(notYetIgnored.Select(item => new ImportItem(item, true, false)).ToList());
                     }
+                    importListAdapter.SelectionChanged += UpdateSelectAllState;
                     this.recyclerView.SetAdapter(importListAdapter);
+                    UpdateSelectAllState();
                     //}
                     if (notYetIgnored == null || notYetIgnored.Count == 0)
                     {
                         this.recyclerView.Visibility = ViewStates.Gone;
-                        this.toggleAll.Visibility = ViewStates.Gone;
+                        this.selectAllCheckbox.Visibility = ViewStates.Gone;
                     }
                     else
                     {
                         this.recyclerView.Visibility = ViewStates.Visible;
-                        this.toggleAll.Visibility = ViewStates.Visible;
+                        this.selectAllCheckbox.Visibility = ViewStates.Visible;
                     }
                     break;
                 case ImportListType.UserNotes:
@@ -843,16 +897,18 @@ namespace Seeker
                         }
                     }
                     importListAdapter = new ImportListAdapter(notYetNotedItems.ToList());
+                    importListAdapter.SelectionChanged += UpdateSelectAllState;
                     this.recyclerView.SetAdapter(importListAdapter);
+                    UpdateSelectAllState();
                     if (notYetNotedItems == null || notYetNotedItems.Count == 0)
                     {
                         this.recyclerView.Visibility = ViewStates.Gone;
-                        this.toggleAll.Visibility = ViewStates.Gone;
+                        this.selectAllCheckbox.Visibility = ViewStates.Gone;
                     }
                     else
                     {
                         this.recyclerView.Visibility = ViewStates.Visible;
-                        this.toggleAll.Visibility = ViewStates.Visible;
+                        this.selectAllCheckbox.Visibility = ViewStates.Visible;
                     }
                     //}
                     break;
@@ -888,18 +944,20 @@ namespace Seeker
                     {
                         importListAdapter = new ImportListAdapter(notYetWished.Select(item => new ImportItem(item, true, false)).ToList());
                     }
+                    importListAdapter.SelectionChanged += UpdateSelectAllState;
                     this.recyclerView.SetAdapter(importListAdapter);
+                    UpdateSelectAllState();
                     //}
 
                     if (notYetWished == null || notYetWished.Count == 0)
                     {
                         this.recyclerView.Visibility = ViewStates.Gone;
-                        this.toggleAll.Visibility = ViewStates.Gone;
+                        this.selectAllCheckbox.Visibility = ViewStates.Gone;
                     }
                     else
                     {
                         this.recyclerView.Visibility = ViewStates.Visible;
-                        this.toggleAll.Visibility = ViewStates.Visible;
+                        this.selectAllCheckbox.Visibility = ViewStates.Visible;
                     }
 
                     //todo already present
