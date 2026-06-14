@@ -54,16 +54,50 @@ namespace Seeker
 
 
 
+    /// <summary>
+    /// ImportParse State - read on resume, + state change events
+    /// </summary>
+    public static class ImportParseState
+    {
+        public enum Phase { Idle, Loading, Loaded, Failed }
+
+        public static Phase Current { get; private set; } = Phase.Idle;
+        public static ImportedData? Data { get; private set; }
+        public static string FailureMessage { get; private set; }
+
+        public static event EventHandler Changed;
+
+        /// <summary>Must be called on the main thread. Sets the latched state then notifies listeners.</summary>
+        public static void Publish(Phase phase, ImportedData? data = null, string failure = null)
+        {
+            Current = phase;
+            Data = data;
+            FailureMessage = failure;
+            Changed?.Invoke(null, EventArgs.Empty);
+        }
+
+        public static void Reset()
+        {
+            Publish(Phase.Idle);
+        }
+    }
+
+
     [Activity(Label = "ImportWizardActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false)]
     public class ImportWizardActivity : ThemeableActivity
     {
         private const int IMPORT_FILE_SELECTED = 2000;
 
+        private const int PAGE_START = 0;
+        private const int PAGE_USERLIST = 1;
+        private const int PAGE_IGNORE = 2;
+        private const int PAGE_USERNOTES = 3;
+        private const int PAGE_WISHLIST = 4;
+
         Button prevButton;
         Button nextButton;
         AndroidX.ViewPager.Widget.ViewPager pager;
         PageDotsIndicator pageDots;
-        public static ImportedData? fullImportedData = null; //this has to be static.  otherwise someone can just rotate the screen on a later step and clear it.
         public static ImportedData? selectedImportedData = null; //this has to be static.  otherwise someone can just rotate the screen on a later step and clear it.
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -96,6 +130,43 @@ namespace Seeker
             SetButtonText(pager.CurrentItem);
         }
 
+        protected override void OnResume()
+        {
+            base.OnResume();
+            ImportParseState.Changed += OnParseStateChanged;
+            SetButtonText(pager.CurrentItem);
+        }
+
+        protected override void OnPause()
+        {
+            ImportParseState.Changed -= OnParseStateChanged;
+            base.OnPause();
+        }
+
+        private void OnParseStateChanged(object sender, EventArgs e)
+        {
+            if (IsFinishing || IsDestroyed)
+            {
+                return;
+            }
+            SetButtonText(pager.CurrentItem);
+        }
+
+        /// <summary>The currently displayed list fragment, or null if the start page is showing.</summary>
+        private ImportListFragment CurrentListFragment()
+        {
+            return (pager.Adapter as WizardPagerAdapter).GetItem(pager.CurrentItem) as ImportListFragment;
+        }
+
+        /// <summary>
+        /// Returns the wizard to the start page. Used when a restored list page has no parsed data to
+        /// show (e.g. the process was killed and <see cref="ImportParseState"/> reset to Idle).
+        /// </summary>
+        public void ResetToStartPage()
+        {
+            pager.Post(() => pager.SetCurrentItem(PAGE_START, false));
+        }
+
         public void UpdatePagerReference(AndroidX.Fragment.App.Fragment frag, ImportListType importListType)
         {
             (pager.Adapter as WizardPagerAdapter).UpdatePagerReference(frag, importListType);
@@ -122,15 +193,13 @@ namespace Seeker
             {
                 if (resultCode == Result.Ok)
                 {
-
-                    StartPageFragment.Instance.PreImportLoad();
+                    ImportParseState.Publish(ImportParseState.Phase.Loading);
                     string realName = string.Empty;
+                    var mainHandler = new Android.OS.Handler(Android.OS.Looper.MainLooper);
                     System.Threading.Tasks.Task.Run(() =>
                     {
-
                         if (data.Data.Scheme == "content")
                         {
-
                             Android.Database.ICursor cursor = this.ContentResolver.Query(data.Data, new string[] { Android.Provider.MediaStore.IMediaColumns.DisplayName }, null, null, null);
                             if (cursor != null)
                             {
@@ -155,42 +224,36 @@ namespace Seeker
 
                         using (var stream = this.ContentResolver.OpenInputStream(data.Data))
                         {
-                            fullImportedData = ImportHelper.ImportFile(realName, stream);
+                            return ImportHelper.ImportFile(realName, stream);
                         }
-                        selectedImportedData = new ImportedData();
                     }).ContinueWith(
-                            (System.Threading.Tasks.Task t) =>
+                            (System.Threading.Tasks.Task<ImportedData> t) =>
                             {
-                                this.RunOnUiThread(() =>
+                                mainHandler.Post(() =>
                                 {
                                     if (t.IsCompletedSuccessfully)
                                     {
-                                        StartPageFragment.Instance.PostImportLoad();
-                                        SetButtonText(this.pager.CurrentItem);
+                                        selectedImportedData = new ImportedData();
+                                        ImportParseState.Publish(ImportParseState.Phase.Loaded, t.Result);
                                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.SuccessfullyParsed), ToastLength.Long);
                                     }
                                     else
                                     {
-                                        StartPageFragment.Instance.PostImportLoad();
-                                        SetButtonText(this.pager.CurrentItem);
-                                        if (t.Exception.InnerException is ImportHelper.NicotineParsingException npe)
+                                        Exception inner = t.Exception?.InnerException;
+                                        if (inner is ImportHelper.NicotineParsingException npe)
                                         {
+                                            ImportParseState.Publish(ImportParseState.Phase.Failed, failure: npe.MessageToToast);
                                             SeekerApplication.Toaster.ShowToast(String.Format(SeekerApplication.GetString(Resource.String.FailedToParseReasonContactDev), npe.MessageToToast), ToastLength.Long);
                                         }
                                         else
                                         {
+                                            ImportParseState.Publish(ImportParseState.Phase.Failed, failure: inner?.Message);
                                             SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.FailedToParseContactDev), ToastLength.Long);
                                         }
-                                        Logger.Firebase("failed to parse: " + realName + " " + t.Exception.InnerException.Message + "---" + t.Exception.InnerException.StackTrace);
+                                        Logger.Firebase("failed to parse: " + realName + " " + inner?.Message + "---" + inner?.StackTrace);
                                     }
-
                                 });
                             });
-                    //if(fullImportedData != null)
-                    //{
-                    //    //go to next step
-                    //    pager.SetCurrentItem(1, true);
-                    //}
                 }
             }
             base.OnActivityResult(requestCode, resultCode, data);
@@ -228,24 +291,24 @@ namespace Seeker
         {
             switch (pager.CurrentItem)
             {
-                case 0:
+                case PAGE_START:
                     pager.SetCurrentItem(pager.CurrentItem + 1, true);
                     break;
-                case 1:
+                case PAGE_USERLIST:
                     //need to select which data
-                    selectedImportedData = new ImportedData(((pager.Adapter as WizardPagerAdapter).GetItem(pager.CurrentItem) as ImportListFragment).GetSelectedItems(), selectedImportedData.Value.IgnoredBanned, selectedImportedData.Value.Wishlist, selectedImportedData.Value.UserNotes);
+                    selectedImportedData = new ImportedData(CurrentListFragment().GetSelectedItems(), selectedImportedData.Value.IgnoredBanned, selectedImportedData.Value.Wishlist, selectedImportedData.Value.UserNotes);
                     pager.SetCurrentItem(pager.CurrentItem + 1, true);
                     break;
-                case 2:
+                case PAGE_IGNORE:
                     //need to select which data
-                    selectedImportedData = new ImportedData(selectedImportedData.Value.UserList, ((pager.Adapter as WizardPagerAdapter).GetItem(pager.CurrentItem) as ImportListFragment).GetSelectedItems(), selectedImportedData.Value.Wishlist, selectedImportedData.Value.UserNotes);
+                    selectedImportedData = new ImportedData(selectedImportedData.Value.UserList, CurrentListFragment().GetSelectedItems(), selectedImportedData.Value.Wishlist, selectedImportedData.Value.UserNotes);
                     pager.SetCurrentItem(pager.CurrentItem + 1, true);
                     break;
-                case 3:
+                case PAGE_USERNOTES:
                     //need to select which data
-                    var userNotesUsernames = ((pager.Adapter as WizardPagerAdapter).GetItem(pager.CurrentItem) as ImportListFragment).GetSelectedItems();
+                    var userNotesUsernames = CurrentListFragment().GetSelectedItems();
                     List<Tuple<string, string>> userNotes = new List<Tuple<string, string>>();
-                    var lookupNotes = fullImportedData.Value.UserNotes.ToDictionary(x => x.Item1, x => x.Item2);
+                    var lookupNotes = ImportParseState.Data.Value.UserNotes.ToDictionary(x => x.Item1, x => x.Item2);
                     foreach (string name in userNotesUsernames)
                     {
                         userNotes.Add(new Tuple<string, string>(name, lookupNotes[name]));
@@ -253,22 +316,21 @@ namespace Seeker
                     selectedImportedData = new ImportedData(selectedImportedData.Value.UserList, selectedImportedData.Value.IgnoredBanned, selectedImportedData.Value.Wishlist, userNotes);
                     pager.SetCurrentItem(pager.CurrentItem + 1, true);
                     break;
-                case 4:
+                case PAGE_WISHLIST:
                     //finish
-                    selectedImportedData = new ImportedData(selectedImportedData.Value.UserList, selectedImportedData.Value.IgnoredBanned, ((pager.Adapter as WizardPagerAdapter).GetItem(pager.CurrentItem) as ImportListFragment).GetSelectedItems(), selectedImportedData.Value.UserNotes);
+                    selectedImportedData = new ImportedData(selectedImportedData.Value.UserList, selectedImportedData.Value.IgnoredBanned, CurrentListFragment().GetSelectedItems(), selectedImportedData.Value.UserNotes);
                     ImportSelectedData(selectedImportedData.Value);
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.SuccessfullyImported), ToastLength.Long);
                     MemoryCleanup();
                     this.Finish();
                     break;
             }
-            //pager.SetCurrentItem(pager.CurrentItem + 1, true);
         }
 
         private void MemoryCleanup()
         {
             selectedImportedData = null;
-            fullImportedData = null;
+            ImportParseState.Reset();
         }
 
         private void ImportSelectedData(ImportedData selectedData)
@@ -328,33 +390,25 @@ namespace Seeker
         {
             SetButtonText(e.Position);
             pageDots.SetPosition(e.Position);
-            if (e.Position != 0)
+            if (e.Position != PAGE_START)
             {
-                ((pager.Adapter as WizardPagerAdapter).GetItem(pager.CurrentItem) as ImportListFragment).SetState(this);
+                CurrentListFragment().SetState(this);
             }
         }
 
         private void SetButtonText(int position)
         {
-            if (fullImportedData != null)
-            {
-                nextButton.Enabled = true;
-                nextButton.Clickable = true;
-                nextButton.Alpha = 1.0f;
-            }
-            else
-            {
-                nextButton.Enabled = false;
-                nextButton.Clickable = false;
-                nextButton.Alpha = 0.5f;
-            }
+            bool loaded = ImportParseState.Current == ImportParseState.Phase.Loaded;
+            nextButton.Enabled = loaded;
+            nextButton.Clickable = loaded;
+            nextButton.Alpha = loaded ? 1.0f : 0.5f;
             switch (position)
             {
-                case 0:
+                case PAGE_START:
                     prevButton.Text = SeekerApplication.GetString(Resource.String.cancel);
                     nextButton.Text = SeekerApplication.GetString(Resource.String.next);
                     break;
-                case 4:
+                case PAGE_WISHLIST:
                     prevButton.Text = SeekerApplication.GetString(Resource.String.back_desc);
                     nextButton.Text = SeekerApplication.GetString(Resource.String.finish);
                     break;
@@ -381,26 +435,46 @@ namespace Seeker
             SetExportPathLine(Resource.Id.nicotineExportPath, Resource.String.ImportPathNicotine, ".tar.bz2", "config");
             SetExportPathLine(Resource.Id.seekerExportPath, Resource.String.ImportPathSeeker, ".xml");
             this.loadingBar = this.rootView.FindViewById<AndroidX.Core.Widget.ContentLoadingProgressBar>(Resource.Id.contentLoadingProgressBar1);
-            if (isLoading)
-            {
-                this.loadingBar.Show();
-            }
-            else
-            {
-                this.loadingBar.Hide();
-            }
-            Instance = this;
             return rootView;
         }
 
-        public override void OnDestroy()
+        public override void OnResume()
         {
-            base.OnDestroy();
+            base.OnResume();
+            ImportParseState.Changed += OnParseStateChanged;
+            RenderParsePhase();
         }
 
-        public override void OnDestroyView()
+        public override void OnPause()
         {
-            base.OnDestroyView();
+            ImportParseState.Changed -= OnParseStateChanged;
+            base.OnPause();
+        }
+
+        private void OnParseStateChanged(object sender, EventArgs e)
+        {
+            RenderParsePhase();
+        }
+
+        /// <summary>Disables the import button + shows the spinner while a parse is in progress.</summary>
+        private void RenderParsePhase()
+        {
+            if (importButton == null)
+            {
+                return;
+            }
+            bool loading = ImportParseState.Current == ImportParseState.Phase.Loading;
+            importButton.Enabled = !loading;
+            importButton.Clickable = !loading;
+            importButton.Alpha = loading ? 0.5f : 1.0f;
+            if (loading)
+            {
+                loadingBar.Show();
+            }
+            else
+            {
+                loadingBar.Hide();
+            }
         }
 
         /// <summary>
@@ -439,27 +513,7 @@ namespace Seeker
 
         private void ImportButton_Click(object sender, EventArgs e)
         {
-            //nullref for this.Activity ??
-            (SeekerState.ActiveActivityRef as ImportWizardActivity).LaunchImportIntent();
-        }
-        private static bool isLoading = false;
-        public static StartPageFragment Instance = null; //needed for rotation.
-        public void PreImportLoad()
-        {
-            isLoading = true;
-            importButton.Enabled = false;
-            importButton.Clickable = false;
-            importButton.Alpha = 0.5f;
-            loadingBar.Show();
-        }
-
-        public void PostImportLoad()
-        {
-            isLoading = false;
-            importButton.Enabled = true;
-            importButton.Clickable = true;
-            importButton.Alpha = 1.0f;
-            loadingBar.Hide();
+            (this.Activity as ImportWizardActivity).LaunchImportIntent();
         }
     }
 
@@ -549,12 +603,6 @@ namespace Seeker
 
             pathItemView = (ImportItemView)view;
             pathItemView.ViewHolder = this;
-            //(ChatroomOverviewView as View).SetOnCreateContextMenuListener(this);
-        }
-
-        public ImportItemView getUnderlyingView()
-        {
-            return pathItemView;
         }
     }
 
@@ -631,7 +679,6 @@ namespace Seeker
         private TextView importHeader;
         private Google.Android.Material.CheckBox.MaterialCheckBox selectAllCheckbox;
         private AndroidX.RecyclerView.Widget.RecyclerView recyclerView;
-        private Guid guid = Guid.NewGuid();
         private ImportListType importListType;
 
         public List<string> GetSelectedItems()
@@ -678,8 +725,7 @@ namespace Seeker
             selectAllCheckbox = this.rootView.FindViewById<Google.Android.Material.CheckBox.MaterialCheckBox>(Resource.Id.selectAllCheckbox);
             selectAllCheckbox.Click += SelectAll_Click;
 
-            (SeekerState.ActiveActivityRef as ImportWizardActivity).UpdatePagerReference(this, importListType);
-            Console.WriteLine("OnCreateView: " + importListType.ToString() + " " + guid.ToString());
+            (this.Activity as ImportWizardActivity).UpdatePagerReference(this, importListType);
             return rootView;
         }
 
@@ -713,41 +759,42 @@ namespace Seeker
             }
         }
 
-        public override void OnDestroy()
-        {
-            Console.WriteLine("OnDestroy: " + importListType.ToString() + " " + guid.ToString());
-            base.OnDestroy();
-        }
-
-        public override void OnDestroyView()
-        {
-            Console.WriteLine("OnDestroyView: " + importListType.ToString() + " " + guid.ToString());
-            base.OnDestroyView();
-        }
-
         public override void OnResume()
         {
-            Console.WriteLine("OnResume: " + importListType.ToString() + " " + guid.ToString());
-            (SeekerState.ActiveActivityRef as ImportWizardActivity).UpdatePagerReference(this, importListType);
-            if ((SeekerState.ActiveActivityRef as ImportWizardActivity).IsCurrentStep(this))
-            {
-                SetState(ImportWizardActivity.fullImportedData.Value, this.importListType);
-            }
             base.OnResume();
-        }
-
-        public override void OnAttach(Context context)
-        {
-            Console.WriteLine("OnAttach: " + importListType.ToString() + " " + guid.ToString());
-            base.OnAttach(context);
+            var wizard = this.Activity as ImportWizardActivity;
+            if (wizard == null)
+            {
+                return;
+            }
+            wizard.UpdatePagerReference(this, importListType);
+            if (wizard.IsCurrentStep(this))
+            {
+                RenderCurrentStep(wizard);
+            }
         }
 
         public void SetState(ImportWizardActivity wizard)
         {
-            if ((wizard as ImportWizardActivity).IsCurrentStep(this))
+            if (wizard.IsCurrentStep(this))
             {
-                SetState(ImportWizardActivity.fullImportedData.Value, this.importListType);
+                RenderCurrentStep(wizard);
             }
+        }
+
+        /// <summary>
+        /// Renders this page from the parsed data, or — if there is no parsed data (e.g. the process
+        /// was killed and <see cref="ImportParseState"/> reset to Idle) — bails back to the start page
+        /// instead of dereferencing a null result.
+        /// </summary>
+        private void RenderCurrentStep(ImportWizardActivity wizard)
+        {
+            if (ImportParseState.Current != ImportParseState.Phase.Loaded || !ImportParseState.Data.HasValue)
+            {
+                wizard.ResetToStartPage();
+                return;
+            }
+            SetState(ImportParseState.Data.Value, this.importListType);
         }
 
         private Java.Lang.ICharSequence CreateAlreadyAddedString(IEnumerable<string> usernames, ImportListType listType)
@@ -873,8 +920,6 @@ namespace Seeker
                     break;
                 case ImportListType.UserNotes:
                     importHeader.Text = this.GetString(Resource.String.ImportUserNotes);
-                    //todo already present
-                    //maybe do asterick
                     var currentlyHaveNoted = UserMetadataService.UserNotes.Select(item => item.Key).ToList();
                     var notYetNoted = data.UserNotes.Select(item => item.Item1).Except(currentlyHaveNoted).ToList();
                     var alreadyNotedList = data.UserNotes.Select(item => item.Item1).Except(notYetNoted).ToList();
@@ -885,10 +930,8 @@ namespace Seeker
                     else
                     {
                         alreadyAdded.Visibility = ViewStates.Visible;
-                        alreadyAdded.Text = "* denotes that the user has a current note which will be overwritten if selected.";
+                        alreadyAdded.Text = this.GetString(Resource.String.ImportUserNotesOverwriteNote);
                     }
-                    //if (importListAdapter == null)
-                    //{
                     var notYetNotedItems = notYetNoted.Select(item => new ImportItem(item, true, false)).ToList();
                     notYetNotedItems.AddRange(alreadyNotedList.Select(item => new ImportItem(item, true, true)));
                     if (ImportWizardActivity.selectedImportedData.Value.UserNotes != null)
