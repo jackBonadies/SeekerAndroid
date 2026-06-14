@@ -33,11 +33,19 @@ namespace Seeker.Chatroom
 
         public static RoomUserListDialog forContextHelp = null;
 
+        // bundle for process death - as fragment manager will restore the user to this dialog on restore
+        private const string ARG_ROOM_NAME = "RoomUserListDialog.RoomName";
+        private const string ARG_IS_PRIVATE = "RoomUserListDialog.IsPrivate";
+
         public RoomUserListDialog(string ourRoomName, bool isPrivate)
         {
             OurRoomName = ourRoomName;
             IsPrivate = isPrivate;
             forContextHelp = this;
+            var args = new Bundle();
+            args.PutString(ARG_ROOM_NAME, ourRoomName);
+            args.PutBoolean(ARG_IS_PRIVATE, isPrivate);
+            Arguments = args;
         }
         public RoomUserListDialog()
         {
@@ -301,6 +309,20 @@ namespace Seeker.Chatroom
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
             base.OnViewCreated(view, savedInstanceState);
+
+            // for process death
+            if (Arguments != null && Arguments.ContainsKey(ARG_ROOM_NAME))
+            {
+                OurRoomName = Arguments.GetString(ARG_ROOM_NAME, string.Empty);
+                IsPrivate = Arguments.GetBoolean(ARG_IS_PRIVATE, false);
+            }
+
+            // if we dont have room data (i.e. process death) then lets dismiss this dialog and go back to the room
+            if (string.IsNullOrEmpty(OurRoomName) || !ChatroomController.HasRoomData(OurRoomName))
+            {
+                DismissAllowingStateLoss();
+                return;
+            }
 
             var bottomSheet = ((BottomSheetDialog)Dialog).FindViewById<View>(Resource.Id.design_bottom_sheet);
             if (bottomSheet != null)
