@@ -630,6 +630,7 @@ namespace Seeker
             this.rootView = inflater.Inflate(Resource.Layout.import_list_layout, container, false);
             noneFound = this.rootView.FindViewById<TextView>(Resource.Id.noneFound);
             alreadyAdded = this.rootView.FindViewById<TextView>(Resource.Id.alreadyPresentTextView);
+            alreadyAdded.MovementMethod = Android.Text.Method.ScrollingMovementMethod.Instance; //capped at 4 lines, scrollable beyond that
             importHeader = this.rootView.FindViewById<TextView>(Resource.Id.selectTheFollowing);
             recyclerView = this.rootView.FindViewById<AndroidX.RecyclerView.Widget.RecyclerView>(Resource.Id.recyclerViewImportList);
             var lm = new LinearLayoutManager(this.Context, LinearLayoutManager.Vertical, false);
@@ -710,40 +711,34 @@ namespace Seeker
             }
         }
 
-        private string CreateAlreadyAddedString(IEnumerable<string> usernames, ImportListType listType)
+        private Java.Lang.ICharSequence CreateAlreadyAddedString(IEnumerable<string> usernames, ImportListType listType)
         {
-            string userString = "users";
-            string userListString = "User List";
-            if (listType == ImportListType.Ignore)
+            string alreadyPresentPrefix = listType switch {
+                ImportListType.Ignore => SeekerApplication.GetString(Resource.String.ImportIgnoredAlreadyPresent),
+                ImportListType.Wishlist => SeekerApplication.GetString(Resource.String.ImportWishlistAlreadyPresent),
+                _ => SeekerApplication.GetString(Resource.String.ImportFriendsAlreadyPresent)
+            };
+            var alreadyAddedNote = new Android.Text.SpannableStringBuilder(alreadyPresentPrefix + " ");
+
+            bool first = true;
+            foreach (string name in usernames)
             {
-                userListString = "Ignore List";
-            }
-            else if (listType == ImportListType.Wishlist)
-            {
-                userString = "searches";
-                userListString = "Wishlist";
-            }
-            StringBuilder alreadyAddedNote = new StringBuilder(string.Format("Note: The following {0} are already present in {1} - ", userString, userListString));
-            if (usernames.Count() > 10)
-            {
-                foreach (string name in usernames.Take(10))
+                if (!first)
                 {
-                    alreadyAddedNote.Append(name);
                     alreadyAddedNote.Append(", ");
                 }
-                alreadyAddedNote.Append(" and others...");
-                return alreadyAddedNote.ToString();
+                first = false;
+                int start = alreadyAddedNote.Length();
+                alreadyAddedNote.Append(name);
+                alreadyAddedNote.SetSpan(new Android.Text.Style.StyleSpan(TypefaceStyle.Bold), start, alreadyAddedNote.Length(), Android.Text.SpanTypes.ExclusiveExclusive);
             }
-            else
-            {
-                foreach (string name in usernames)
-                {
-                    alreadyAddedNote.Append(name);
-                    alreadyAddedNote.Append(", ");
-                }
-                alreadyAddedNote.Remove(alreadyAddedNote.Length - 2, 2);
-                return alreadyAddedNote.ToString();
-            }
+            return alreadyAddedNote;
+        }
+
+        private void SetAlreadyAddedText(Java.Lang.ICharSequence text)
+        {
+            alreadyAdded.TextFormatted = text;
+            alreadyAdded.ScrollTo(0, 0); //the note is scrollable; reset in case a previous longer note was scrolled
         }
 
         private ImportListAdapter importListAdapter;
@@ -778,7 +773,7 @@ namespace Seeker
                     else
                     {
                         alreadyAdded.Visibility = ViewStates.Visible;
-                        alreadyAdded.Text = CreateAlreadyAddedString(alreadyAddedList, listType);
+                        SetAlreadyAddedText(CreateAlreadyAddedString(alreadyAddedList, listType));
                     }
 
                     if (ImportWizardActivity.selectedImportedData.Value.UserList != null)
@@ -830,7 +825,7 @@ namespace Seeker
                     else
                     {
                         alreadyAdded.Visibility = ViewStates.Visible;
-                        alreadyAdded.Text = CreateAlreadyAddedString(alreadyIgnoredList, listType);
+                        SetAlreadyAddedText(CreateAlreadyAddedString(alreadyIgnoredList, listType));
                     }
                     if (ImportWizardActivity.selectedImportedData.Value.IgnoredBanned != null)
                     {
@@ -933,7 +928,7 @@ namespace Seeker
                     else
                     {
                         alreadyAdded.Visibility = ViewStates.Visible;
-                        alreadyAdded.Text = CreateAlreadyAddedString(alreadyWishedList, listType);
+                        SetAlreadyAddedText(CreateAlreadyAddedString(alreadyWishedList, listType));
                     }
                     if (ImportWizardActivity.selectedImportedData.Value.Wishlist != null)
                     {

@@ -59,6 +59,9 @@
         android:layout_marginEnd="6dp"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="6dp"
+        android:maxLines="4"
+        android:scrollbars="vertical"
+        android:fadeScrollbars="false"
         android:text="Note: The following users are already present in X - a, b, c dummy"
     />
 </LinearLayout>

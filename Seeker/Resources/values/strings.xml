@@ -735,6 +735,10 @@
     <string name="ImportIgnored">Import ignored list</string>
     <string name="ImportWishlist">Import wishlist</string>
 
+    <string name="ImportFriendsAlreadyPresent">Already present in user list:</string>
+    <string name="ImportIgnoredAlreadyPresent">Already present in ignored list:</string>
+    <string name="ImportWishlistAlreadyPresent">Already present in wishlist:</string>
+
     <string name="FolderFinishedDownloading">Folder finished downloading</string>
     <string name="FinishedDownloading">finished downloading</string>
     <string name="PermissionsIssueShared">Permissions issue opening shared folder.  Please go into settings and reselect shared folder.</string>
