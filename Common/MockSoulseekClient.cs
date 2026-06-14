@@ -320,7 +320,7 @@ namespace Seeker
         public Func<string, string, CancellationToken?, Task>? SetRoomTickerAsyncHandler { get; set; }
 
         // --- Mutable properties ---
-        public SoulseekClientStates State { get; set; } = SoulseekClientStates.None;
+        public SoulseekClientStates State { get; set; } = SoulseekClientStates.Disconnected;
         public string Username { get; set; } = "mockUser";
         public string Address { get; set; } = "mock.server";
         public int? Port { get; set; } = 2242;
