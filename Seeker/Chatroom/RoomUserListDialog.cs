@@ -25,13 +25,11 @@ namespace Seeker.Chatroom
     public class RoomUserListDialog : BottomSheetDialogFragment
     {
 
-        public static string OurRoomName = string.Empty;
-        public static bool IsPrivate = false;
+        public string OurRoomName { get; private set; } = string.Empty;
+        public bool IsPrivate { get; private set; } = false;
         private RecyclerView recyclerViewUsers = null;
         private RoomUserListRecyclerAdapter roomUserListAdapter = null;
         private LinearLayoutManager recycleLayoutManager = null;
-
-        public static RoomUserListDialog forContextHelp = null;
 
         // bundle for process death - as fragment manager will restore the user to this dialog on restore
         private const string ARG_ROOM_NAME = "RoomUserListDialog.RoomName";
@@ -41,7 +39,6 @@ namespace Seeker.Chatroom
         {
             OurRoomName = ourRoomName;
             IsPrivate = isPrivate;
-            forContextHelp = this;
             var args = new Bundle();
             args.PutString(ARG_ROOM_NAME, ourRoomName);
             args.PutBoolean(ARG_IS_PRIVATE, isPrivate);
@@ -49,7 +46,6 @@ namespace Seeker.Chatroom
         }
         public RoomUserListDialog()
         {
-            forContextHelp = this;
         }
 
 
@@ -209,8 +205,7 @@ namespace Seeker.Chatroom
         }
 
         private static AndroidX.AppCompat.App.AlertDialog dialogInstance = null;
-        private static RoomUserListDialog RoomDialogInstance;
-        public static void ShowSortRoomUserListDialog()
+        public void ShowSortRoomUserListDialog()
         {
             var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
             builder.SetTitle(Resource.String.SortUsersBy);
@@ -250,7 +245,6 @@ namespace Seeker.Chatroom
                 {
                     dialogInstance.Dismiss();
                 }
-                RoomDialogInstance = null;
                 dialogInstance = null; //memory cleanup
             });
 
@@ -260,18 +254,18 @@ namespace Seeker.Chatroom
 
         }
 
-        private static void AlwaysPlaceFriendsAtTopCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
+        private void AlwaysPlaceFriendsAtTopCheckBox_CheckedChange(object sender, CompoundButton.CheckedChangeEventArgs e)
         {
             bool putFriendsAtTop = PreferencesState.PutFriendsOnTop;
             PreferencesState.PutFriendsOnTop = e.IsChecked;
             if (putFriendsAtTop != PreferencesState.PutFriendsOnTop)
             {
                 PreferencesManager.SavePutFriendsOnTop();
-                RoomDialogInstance.RefreshUserListFull();
+                RefreshUserListFull();
             }
         }
 
-        private static void RadioGroupChangeUserSort_CheckedChange(object sender, RadioGroup.CheckedChangeEventArgs e)
+        private void RadioGroupChangeUserSort_CheckedChange(object sender, RadioGroup.CheckedChangeEventArgs e)
         {
             SortOrderChatroomUsers prev = PreferencesState.SortChatroomUsersBy;
             switch (e.CheckedId)
@@ -287,7 +281,7 @@ namespace Seeker.Chatroom
             if (prev != PreferencesState.SortChatroomUsersBy)
             {
                 PreferencesManager.SaveSortChatroomUsersBy();
-                RoomDialogInstance.RefreshUserListFull();
+                RefreshUserListFull();
             }
         }
 
@@ -389,7 +383,6 @@ namespace Seeker.Chatroom
             var sortButton = view.FindViewById<ImageButton>(Resource.Id.roomUsersHeaderSort);
             sortButton.Click += (s, e) =>
             {
-                RoomDialogInstance = this;
                 ShowSortRoomUserListDialog();
             };
 
@@ -459,7 +452,7 @@ namespace Seeker.Chatroom
         public void RefreshUserListFull()
         {
             UI_userDataList = ChatroomController.GetWrappedUserData(OurRoomName, IsPrivate, this.FilterText);
-            roomUserListAdapter = new RoomUserListRecyclerAdapter(UI_userDataList);
+            roomUserListAdapter = new RoomUserListRecyclerAdapter(this, UI_userDataList);
             recyclerViewUsers.SetAdapter(roomUserListAdapter);
             UpdateMembersHeader();
         }
