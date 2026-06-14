@@ -40,16 +40,38 @@
             android:layout_height="wrap_content"
             android:background="@drawable/import_list_card_bg"
         />
+
+        <LinearLayout
+            android:id="@+id/noneFoundView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:visibility="gone"
+        >
+            <ImageView
+                android:id="@+id/noneFoundIcon"
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:src="@drawable/check_circle_96dp"
+                android:tint="?attr/cellTextColorSubdued"
+            />
+
+            <TextView
+                android:id="@+id/noneFound"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxWidth="320dp"
+                android:gravity="center"
+                android:breakStrategy="balanced"
+                android:text="@string/NothingToImport"
+                android:textSize="18sp"
+                android:textColor="?attr/cellTextColor"
+                android:layout_marginTop="12dp"
+            />
+        </LinearLayout>
     </FrameLayout>
-    <TextView
-        android:id="@+id/noneFound"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/NoUsersFound"
-        android:layout_marginTop="28dp"
-        android:gravity="center_horizontal"
-        android:textSize="20dp"
-    />
 
     <TextView
         android:id="@+id/alreadyPresentTextView"

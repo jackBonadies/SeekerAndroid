@@ -625,6 +625,7 @@ namespace Seeker
         private const int STATE_INDETERMINATE = 2;
 
         private View rootView;
+        private View noneFoundView;
         private TextView noneFound;
         private TextView alreadyAdded;
         private TextView importHeader;
@@ -665,6 +666,7 @@ namespace Seeker
                 importListType = (ImportListType)(savedInstanceState.GetInt("IMPORT_LIST_TYPE", (int)-1));
             }
             this.rootView = inflater.Inflate(Resource.Layout.import_list_layout, container, false);
+            noneFoundView = this.rootView.FindViewById<View>(Resource.Id.noneFoundView);
             noneFound = this.rootView.FindViewById<TextView>(Resource.Id.noneFound);
             alreadyAdded = this.rootView.FindViewById<TextView>(Resource.Id.alreadyPresentTextView);
             alreadyAdded.MovementMethod = Android.Text.Method.ScrollingMovementMethod.Instance; //capped at 4 lines, scrollable beyond that
@@ -778,10 +780,30 @@ namespace Seeker
             alreadyAdded.ScrollTo(0, 0); //the note is scrollable; reset in case a previous longer note was scrolled
         }
 
+        /// <summary>
+        /// Toggles between the list view and the centered empty state.
+        /// Empty is "Nothing (new) to import"
+        /// </summary>
+        private void SetListVisibility(bool hasItemsToImport, bool sourceHadItems)
+        {
+            if (hasItemsToImport)
+            {
+                this.recyclerView.Visibility = ViewStates.Visible;
+                this.selectAllCheckbox.Visibility = ViewStates.Visible;
+                this.noneFoundView.Visibility = ViewStates.Gone;
+            }
+            else
+            {
+                this.recyclerView.Visibility = ViewStates.Gone;
+                this.selectAllCheckbox.Visibility = ViewStates.Gone;
+                this.noneFoundView.Visibility = ViewStates.Visible;
+                this.noneFound.SetText(sourceHadItems ? Resource.String.NothingNewToImport : Resource.String.NothingToImport);
+            }
+        }
+
         private ImportListAdapter importListAdapter;
         public void SetState(ImportedData data, ImportListType listType)
         {
-            string none = "No {0} found to import";
             if (importHeader == null)
             {
                 return;//too early.
@@ -790,15 +812,6 @@ namespace Seeker
             {
                 case ImportListType.UserList:
                     importHeader.Text = this.GetString(Resource.String.ImportFriends);
-                    if (data.UserList == null || data.UserList.Count == 0)
-                    {
-                        noneFound.Visibility = ViewStates.Visible;
-                        noneFound.Text = string.Format(none, "friends");
-                    }
-                    else
-                    {
-                        noneFound.Visibility = ViewStates.Gone;
-                    }
                     //todo already present
                     var currentlyHave = CommonState.UserList.Select(item => item.Username).ToList();
                     var notYetAdded = data.UserList.Except(currentlyHave).ToList();
@@ -827,30 +840,10 @@ namespace Seeker
                     this.recyclerView.SetAdapter(importListAdapter);
                     UpdateSelectAllState();
 
-                    if (notYetAdded == null || notYetAdded.Count == 0)
-                    {
-                        this.recyclerView.Visibility = ViewStates.Gone;
-                        this.selectAllCheckbox.Visibility = ViewStates.Gone;
-                    }
-                    else
-                    {
-                        this.recyclerView.Visibility = ViewStates.Visible;
-                        this.selectAllCheckbox.Visibility = ViewStates.Visible;
-                    }
-
-                    //
+                    SetListVisibility(notYetAdded.Count > 0, data.UserList != null && data.UserList.Count > 0);
                     break;
                 case ImportListType.Ignore:
                     importHeader.Text = this.GetString(Resource.String.ImportIgnored);
-                    if (data.IgnoredBanned == null || data.IgnoredBanned.Count == 0)
-                    {
-                        noneFound.Visibility = ViewStates.Visible;
-                        noneFound.Text = string.Format(none, "users");
-                    }
-                    else
-                    {
-                        noneFound.Visibility = ViewStates.Gone;
-                    }
                     //todo already present
                     var currentlyHaveIgnored = CommonState.IgnoreUserList.Select(item => item.Username).ToList();
                     var notYetIgnored = data.IgnoredBanned.Except(currentlyHaveIgnored).ToList();
@@ -876,29 +869,10 @@ namespace Seeker
                     importListAdapter.SelectionChanged += UpdateSelectAllState;
                     this.recyclerView.SetAdapter(importListAdapter);
                     UpdateSelectAllState();
-                    //}
-                    if (notYetIgnored == null || notYetIgnored.Count == 0)
-                    {
-                        this.recyclerView.Visibility = ViewStates.Gone;
-                        this.selectAllCheckbox.Visibility = ViewStates.Gone;
-                    }
-                    else
-                    {
-                        this.recyclerView.Visibility = ViewStates.Visible;
-                        this.selectAllCheckbox.Visibility = ViewStates.Visible;
-                    }
+                    SetListVisibility(notYetIgnored.Count > 0, data.IgnoredBanned != null && data.IgnoredBanned.Count > 0);
                     break;
                 case ImportListType.UserNotes:
                     importHeader.Text = this.GetString(Resource.String.ImportUserNotes);
-                    if (data.UserNotes == null || data.UserNotes.Count == 0)
-                    {
-                        noneFound.Visibility = ViewStates.Visible;
-                        noneFound.Text = string.Format(none, "user notes");
-                    }
-                    else
-                    {
-                        noneFound.Visibility = ViewStates.Gone;
-                    }
                     //todo already present
                     //maybe do asterick
                     var currentlyHaveNoted = UserMetadataService.UserNotes.Select(item => item.Key).ToList();
@@ -932,29 +906,10 @@ namespace Seeker
                     importListAdapter.SelectionChanged += UpdateSelectAllState;
                     this.recyclerView.SetAdapter(importListAdapter);
                     UpdateSelectAllState();
-                    if (notYetNotedItems == null || notYetNotedItems.Count == 0)
-                    {
-                        this.recyclerView.Visibility = ViewStates.Gone;
-                        this.selectAllCheckbox.Visibility = ViewStates.Gone;
-                    }
-                    else
-                    {
-                        this.recyclerView.Visibility = ViewStates.Visible;
-                        this.selectAllCheckbox.Visibility = ViewStates.Visible;
-                    }
-                    //}
+                    SetListVisibility(notYetNotedItems.Count > 0, data.UserNotes != null && data.UserNotes.Count > 0);
                     break;
                 case ImportListType.Wishlist:
                     importHeader.Text = this.GetString(Resource.String.ImportWishlist);
-                    if (data.Wishlist == null || data.Wishlist.Count == 0)
-                    {
-                        noneFound.Visibility = ViewStates.Visible;
-                        noneFound.Text = string.Format(none, "wishlist searches");
-                    }
-                    else
-                    {
-                        noneFound.Visibility = ViewStates.Gone;
-                    }
                     var currentlyHaveWishes = SearchTabHelper.SearchTabCollection.Where(item => item.Key < 0).Select(item => item.Value.LastSearchTerm).ToList();
                     var notYetWished = data.Wishlist.Except(currentlyHaveWishes).ToList();
                     var alreadyWishedList = data.Wishlist.Except(notYetWished).ToList();
@@ -979,21 +934,8 @@ namespace Seeker
                     importListAdapter.SelectionChanged += UpdateSelectAllState;
                     this.recyclerView.SetAdapter(importListAdapter);
                     UpdateSelectAllState();
-                    //}
 
-                    if (notYetWished == null || notYetWished.Count == 0)
-                    {
-                        this.recyclerView.Visibility = ViewStates.Gone;
-                        this.selectAllCheckbox.Visibility = ViewStates.Gone;
-                    }
-                    else
-                    {
-                        this.recyclerView.Visibility = ViewStates.Visible;
-                        this.selectAllCheckbox.Visibility = ViewStates.Visible;
-                    }
-
-                    //todo already present
-                    //maybe do asterick
+                    SetListVisibility(notYetWished.Count > 0, data.Wishlist != null && data.Wishlist.Count > 0);
                     break;
             }
         }

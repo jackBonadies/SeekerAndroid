@@ -759,6 +759,8 @@
     <string name="OnlineStatus">Online status</string>
 
     <string name="NoUsersFound">No users found</string>
+    <string name="NothingToImport">Nothing to import</string>
+    <string name="NothingNewToImport">Nothing new to import</string>
     <string name="ImportClientData">Import client data</string>
     <string name="ImportWizardIntro">Friends, ignored users, wishlist and notes — choose what to keep on the next screens.</string>
     <string name="WorksWithExportsFrom">Works with exports from</string>
