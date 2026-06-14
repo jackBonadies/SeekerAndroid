@@ -832,9 +832,6 @@
     <string name="OnlineStatus">Status de connexion</string>
 
     <string name="NoUsersFound">Aucun utilisateur trouvé</string>
-    <string name="UsingThisWizardLong">
-        En utilisant cet assistant, il est possible d\'importer des données client depuis SoulseekQT ou Nicotine+.\n\nPour obtenir les données client depuis SoulseekQT veuillez aller dans Options &gt; Extras &gt; \'Exporter les données de configuration client\',  l\'extension du fichier devrait être .scd1. Pour Nicotine+, veuillez aller dans Préférences &gt; Exporter, l\'extension du fichier peut être .tar.bz2 ou un fichier configuration intact.\n\nSeeker importera les Listes d\'Utilisateurs, Listes d\'Ignorés / sans partage, Liste de vœux, et Notes Utilisateur. Vous pourrez choisir qu\'importer via les écrans suivants.\n\nAppuyez sur \'Importer\' pour commencer.
-    </string>
     <string name="CurrentDownloadFolder_">Dossier de téléchargement</string>
     <string name="CreateCompleteAndIncomplete">
         Création des dossiers Soulseek complet et incomplet

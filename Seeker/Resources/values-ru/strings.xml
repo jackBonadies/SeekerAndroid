@@ -833,9 +833,6 @@
     <string name="OnlineStatus">Статус пользователя</string>
 
     <string name="NoUsersFound">Не найден пользователь</string>
-    <string name="UsingThisWizardLong">
-        С помощью этого мастера можно импортировать клиентские данные из SoulseekQT или Nicotine+.\n\nЧтобы получить клиентские данные изSoulseekQT, перейдите в Настройки &gt; Дополнения &gt; \'Экспорт данных конфигурации клиента\', тип файла должен быть .scd1. Для Nicotine+ перейдите в Настройки &gt; Экспорт, тип файла может быть .tar.bz2 или файл конфигурации сырой.\n\nSeeker импортирует список пользователей, список Игнорируемых / Неразделяемых, список Избранных запросов и заметки Пользователя. Далее можно будет выбрать один из них и экспортировать.\n\nНажмите \'Импорт\', чтобы начать.
-    </string>
     <string name="CurrentDownloadFolder_">Папка для загрузок</string>
     <string name="CreateCompleteAndIncomplete">
         Создать директории Soulseek_Complete и Soulseek_Incomplete

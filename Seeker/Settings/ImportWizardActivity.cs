@@ -377,6 +377,9 @@ namespace Seeker
             this.rootView = inflater.Inflate(Resource.Layout.import_start_page, container, false);
             this.importButton = this.rootView.FindViewById<Button>(Resource.Id.importData);
             importButton.Click += ImportButton_Click;
+            SetExportPathLine(Resource.Id.qtExportPath, Resource.String.ImportPathQT, ".scd1");
+            SetExportPathLine(Resource.Id.nicotineExportPath, Resource.String.ImportPathNicotine, ".tar.bz2", "config");
+            SetExportPathLine(Resource.Id.seekerExportPath, Resource.String.ImportPathSeeker, ".xml");
             this.loadingBar = this.rootView.FindViewById<AndroidX.Core.Widget.ContentLoadingProgressBar>(Resource.Id.contentLoadingProgressBar1);
             if (isLoading)
             {
@@ -398,6 +401,40 @@ namespace Seeker
         public override void OnDestroyView()
         {
             base.OnDestroyView();
+        }
+
+        /// <summary>
+        /// Sets a "where to find the export" line, i.e. the translatable menu path followed by
+        /// the literal file names / extensions rendered as monospace accent-colored code chunks.
+        /// </summary>
+        private void SetExportPathLine(int textViewId, int pathStringId, params string[] codeChunks)
+        {
+            var textView = this.rootView.FindViewById<TextView>(textViewId);
+            var accentColor = UiHelpers.GetColorFromAttribute(textView.Context, Resource.Attribute.mainPurple);
+            var builder = new Android.Text.SpannableStringBuilder(this.GetString(pathStringId));
+            bool firstSeparator = true;
+            foreach (string chunk in codeChunks)
+            {
+                if (firstSeparator)
+                {
+                    int separatorStart = builder.Length();
+                    builder.Append(" — ");
+                    var subduedColor = new Color(textView.CurrentTextColor);
+                    subduedColor.A = (byte)(subduedColor.A / 2);
+                    builder.SetSpan(new Android.Text.Style.ForegroundColorSpan(subduedColor), separatorStart, builder.Length(), Android.Text.SpanTypes.ExclusiveExclusive);
+                }
+                else
+                {
+                    builder.Append(" / ");
+                }
+                firstSeparator = false;
+                int start = builder.Length();
+                builder.Append(chunk);
+                builder.SetSpan(new Android.Text.Style.TypefaceSpan("monospace"), start, builder.Length(), Android.Text.SpanTypes.ExclusiveExclusive);
+                builder.SetSpan(new Android.Text.Style.ForegroundColorSpan(accentColor), start, builder.Length(), Android.Text.SpanTypes.ExclusiveExclusive);
+                builder.SetSpan(new Android.Text.Style.RelativeSizeSpan(0.95f), start, builder.Length(), Android.Text.SpanTypes.ExclusiveExclusive);
+            }
+            textView.TextFormatted = builder;
         }
 
         private void ImportButton_Click(object sender, EventArgs e)

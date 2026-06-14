@@ -519,7 +519,6 @@
     <string name="Name">Name</string>
     <string name="OnlineStatus">Online status</string>
     <string name="NoUsersFound">No users found</string>
-    <string name="UsingThisWizardLong">Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options &gt; Extras &gt; \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences &gt; Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.</string>
     <string name="CurrentDownloadFolder_">Cartella dei download</string>
     <string name="CreateCompleteAndIncomplete">Create Soulseek Complete and Soulseek Incomplete directories</string>
     <string name="CreateUsernameSubfolders">Create username subfolders</string>
