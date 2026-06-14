@@ -80,6 +80,12 @@ namespace Seeker.Settings.Rows
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             var view = inflater.Inflate(Resource.Layout.bottom_sheet_option_picker, container, false);
+            // Process death restore: _options and the _onSelected delegate are non-serializeable
+            if (_options == null || _onSelected == null)
+            {
+                DismissAllowingStateLoss();
+                return view;
+            }
             view.FindViewById<TextView>(Resource.Id.sheetTitle).Text = _title ?? string.Empty;
             var list = view.FindViewById<RecyclerView>(Resource.Id.sheetList);
             list.SetLayoutManager(new LinearLayoutManager(Context));

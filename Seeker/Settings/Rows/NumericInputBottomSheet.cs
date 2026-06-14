@@ -38,6 +38,12 @@ namespace Seeker.Settings.Rows
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             var view = inflater.Inflate(Resource.Layout.bottom_sheet_numeric_input, container, false);
+            // Process death restore: the submit delegate is non-serializable
+            if (_onSubmit == null)
+            {
+                DismissAllowingStateLoss();
+                return view;
+            }
             view.FindViewById<TextView>(Resource.Id.numericTitle).Text = _title ?? string.Empty;
             var help = view.FindViewById<TextView>(Resource.Id.numericHelp);
             if (!string.IsNullOrEmpty(_help)) { help.Text = _help; help.Visibility = ViewStates.Visible; }

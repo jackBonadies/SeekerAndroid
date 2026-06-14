@@ -23,6 +23,12 @@ namespace Seeker.Settings.Rows
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             var view = inflater.Inflate(Resource.Layout.more_info_bottom_sheet, container, false);
+            // Process death restore
+            if (_row == null)
+            {
+                DismissAllowingStateLoss();
+                return view;
+            }
             view.FindViewById<TextView>(Resource.Id.more_info_title).Text = this._row.ResolveTitle(this.Context);
             view.FindViewById<TextView>(Resource.Id.more_info_body).Text = this.Context.GetString(_row.MoreInfoTextRes.Value);
 

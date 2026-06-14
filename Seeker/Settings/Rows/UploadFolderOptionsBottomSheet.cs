@@ -45,6 +45,12 @@ namespace Seeker.Settings.Rows
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             var view = inflater.Inflate(Resource.Layout.bottom_sheet_upload_folder_options, container, false);
+            // Process death restore: the submit delegate is non-serializable
+            if (_onSubmit == null)
+            {
+                DismissAllowingStateLoss();
+                return view;
+            }
             view.FindViewById<TextView>(Resource.Id.ufoSubtitle).Text = _subtitle ?? string.Empty;
 
             var lockedSwitch = view.FindViewById<MaterialSwitch>(Resource.Id.ufoLocked);

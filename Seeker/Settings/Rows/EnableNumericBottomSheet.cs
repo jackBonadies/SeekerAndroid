@@ -52,6 +52,12 @@ namespace Seeker.Settings.Rows
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             var view = inflater.Inflate(Resource.Layout.bottom_sheet_enable_numeric, container, false);
+            // Process death restore: the getter/submit delegates are non-serializable
+            if (_getter == null)
+            {
+                DismissAllowingStateLoss();
+                return view;
+            }
             view.FindViewById<TextView>(Resource.Id.enableNumericTitle).Text = _title ?? string.Empty;
 
             var toggleLabel = view.FindViewById<TextView>(Resource.Id.enableNumericToggleLabel);

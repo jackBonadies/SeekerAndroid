@@ -39,6 +39,12 @@ namespace Seeker.Settings.Rows
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             var view = inflater.Inflate(Resource.Layout.bottom_sheet_speed_limit, container, false);
+            // Process death restore: the getter/submit delegates are non-serializable
+            if (_getter == null)
+            {
+                DismissAllowingStateLoss();
+                return view;
+            }
             view.FindViewById<TextView>(Resource.Id.speedTitle).Text = _title ?? string.Empty;
 
             var enableSwitch = view.FindViewById<MaterialSwitch>(Resource.Id.speedEnableSwitch);
