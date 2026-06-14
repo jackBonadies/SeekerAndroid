@@ -89,6 +89,13 @@ namespace Seeker
 
             public bool OnActionItemClicked(ActionMode mode, IMenuItem item)
             {
+                // Clicks are posted to the main looper, so one can arrive after the action
+                // mode was already finished (double-tap, a transfer completing and clearing
+                // the last selection, a page swipe). Ignore it rather than act on a dead mode.
+                if (TransfersActionMode == null)
+                {
+                    return true;
+                }
                 switch (item.ItemId)
                 {
                     //this is the only option that uploads gets
@@ -110,27 +117,27 @@ namespace Seeker
                             Adapter.NotifyItemRemoved(pos);
                         }
                         //since all selected stuff is going away. its what Gmail action mode does.
-                        TransfersActionMode.Finish(); //TransfersActionMode can be null!
+                        mode.Finish();
                         break;
                     case Resource.Id.pause_selected_batch:
                         TransferItems.TransferItemManagerWrapped.CancelSelectedItems(false);
                         NotifyChangedAndClear(Adapter);
                         //since all selected stuff is going away. its what Gmail action mode does.
-                        TransfersActionMode.Finish();
+                        mode.Finish();
                         break;
                     case Resource.Id.resume_selected_batch:
                         Frag.RetryAllConditionEntry(false, true);
                         NotifyChangedAndClear(Adapter);
-                        TransfersActionMode.Finish();
+                        mode.Finish();
                         break;
                     case Resource.Id.retry_all_failed_batch:
                         Frag.RetryAllConditionEntry(true, true);
                         NotifyChangedAndClear(Adapter);
-                        TransfersActionMode.Finish();
+                        mode.Finish();
                         break;
                     case Resource.Id.select_all:
                         ViewState.BatchSelectedItems.Clear();
-                        int cnt = TransfersActionModeCallback.Adapter.ItemCount;
+                        int cnt = Adapter.ItemCount;
                         for (int i = 0; i < cnt; i++)
                         {
                             var iti = TransferItems.TransferItemManagerWrapped.GetItemAtUserIndex(i);
@@ -140,14 +147,14 @@ namespace Seeker
                             }
                         }
 
-                        TransfersActionModeCallback.Adapter.NotifyDataSetChanged();
+                        Adapter.NotifyDataSetChanged();
 
-                        TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                        TransfersActionMode.Invalidate();
+                        mode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
+                        mode.Invalidate();
                         return true;
                     case Resource.Id.invert_selection:
                         ForceOutIfZeroSelected = false;
-                        int cnt1 = TransfersActionModeCallback.Adapter.ItemCount;
+                        int cnt1 = Adapter.ItemCount;
                         var inverted = new HashSet<ITransferItem>();
                         for (int i = 0; i < cnt1; i++)
                         {
@@ -163,10 +170,10 @@ namespace Seeker
                             ViewState.BatchSelectedItems.Add(iti);
                         }
 
-                        TransfersActionModeCallback.Adapter.NotifyDataSetChanged();
+                        Adapter.NotifyDataSetChanged();
 
-                        TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), ViewState.BatchSelectedItems.Count.ToString());
-                        TransfersActionMode.Invalidate();
+                        mode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), ViewState.BatchSelectedItems.Count.ToString());
+                        mode.Invalidate();
                         return true;
                 }
                 return true;
