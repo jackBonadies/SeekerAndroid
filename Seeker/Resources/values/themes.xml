@@ -110,6 +110,7 @@
 
     <style name="DefaultLight_Blue" parent="DefaultLight">
         <item name="colorPrimary">#126291</item>
+        <item name="colorSecondaryContainer">#dde9f2</item>
         <item name="mainPurple">#126291</item>
         <item name="swipeToRefreshProgress">#126291</item>
 
@@ -136,6 +137,7 @@
 
     <style name="DefaultLight_Red" parent="DefaultLight">
         <item name="colorPrimary">#B22525</item>
+        <item name="colorSecondaryContainer">#f5dfdf</item>
         <item name="mainPurple">#B22525</item>
         <item name="swipeToRefreshProgress">#B22525</item>
         <item name="mainPurpleStatusBar">#7B0000</item>
@@ -157,9 +159,36 @@
         <item name="snackbarActionColor">#d57676</item>
     </style>
 
+    <style name="DefaultLight_Grey" parent="DefaultLight">
+        <!--grey chrome (app bar / status bar) but a blue accent, since a grey accent looks very bad-->
+        <item name="colorPrimary">#3d6485</item>
+        <item name="colorSecondaryContainer">#e8eaed</item>
+        <item name="mainPurple">#424242</item>
+        <item name="mainPurpleForNavBar">#424242</item>
+        <item name="swipeToRefreshProgress">#126291</item>
+        <item name="mainPurpleStatusBar">#303030</item>
+
+        <item name="seeker_notification_other_person_color">#546E7A</item>
+
+        <item name="whitePurpleForNavBar">#556070</item>
+
+        <item name="expandIconColor">#888888</item>
+        <item name="searchTabHeader">#303030</item>
+        <item name="mainTextColorHinted">#4D4D4D</item>
+        <item name="mainTextColorHintedFlair">#888888</item>
+        <item name="mainTextColor">#3c4043</item>
+        <item name="slskAccent">#679DC6</item>
+        <item name="cellStroke">#99888888</item>
+        <item name="colorAccent">#86b2cb</item>
+        <item name="checkBoxColor">#4496ee</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#86b2cb</item>
+    </style>
+
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
         <item name="colorOnPrimary">#ffffff</item>
-        <item name="colorPrimary">#8AB4F8</item>
+        <item name="colorPrimary">#7C8DEB</item>
         <item name="colorSurface">#303030</item>
         <item name="colorSurfaceLogin">#404040</item>
         <item name="colorOnSurface">?attr/normalTextColor</item>
@@ -271,6 +300,30 @@
 
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#10496b</item>
+    </style>
+
+    <style name="DefaultDark_Red" parent="DefaultDark">
+        <item name="colorPrimary">#d57676</item>
+        <item name="mainPurple">#B22525</item>
+        <item name="mainPurpleStatusBar">#7B0000</item>
+        <item name="colorAccent">#d57676</item>
+        <item name="checkBoxColor">#B22525</item>
+        <item name="whitePurpleForNavBar">#c44e4e</item>
+        <item name="mainTextColor">#d57676</item>
+
+        <item name="slskAccent">#d57676</item>
+        <item name="cellStroke">#d57676</item>
+        <item name="secondaryColor">#3b3b40</item> 
+
+        <item name="seeker_notification_other_person_color">#E69A9A</item>
+
+        <item name="expandIconColor">#d57676</item>
+        <item name="searchTabHeader">#dddddd</item>
+        <item name="mainTextColorHinted">#dddddd</item>
+        <item name="mainTextColorHintedFlair">#d57676</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#7B0000</item>
     </style>
 
     <style name="DefaultDark_Grey" parent="DefaultDark">

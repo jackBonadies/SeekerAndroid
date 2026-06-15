@@ -354,3 +354,7 @@ healthchecksdb
 
 # Verify Recieved Files
 *.received.txt
+
+# QT import test data: ignore raw
+/UnitTestCommon/TestData/QT/*.scd1
+!/UnitTestCommon/TestData/QT/*_Encrypted.scd1

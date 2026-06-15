@@ -620,7 +620,6 @@
     <string name="Name">Nama</string>
     <string name="OnlineStatus">Status daring</string>
     <string name="NoUsersFound">Pengguna tidak ditemukan</string>
-    <string name="UsingThisWizardLong">Lewat panduan ini, Anda dapat mengimpor data klien dari SoulseekQT atau Nicotine+.\n\nUntuk mendapatkan data klien dari SoulseekQT, buka Opsi &gt; Ekstra &gt; \'Ekspor Data Konfigurasi Klien\', jenis filenya harus berupa .scd1. Untuk Nicotine+, buka Preferensi &gt; Ekspor, jenis filenya bisa berupa .tar.bz2 atau file konfigurasi mentah.\n\nSeeker akan mengimpor Daftar Pengguna, Daftar Abaikan/Tidak Dibagikan, Wishlist, dan Catatan Pengguna. Anda dapat memilih data apa saja yang ingin diekspor pada layar berikutnya.\n\nKetuk \'Impor\' untuk memulai.</string>
     <string name="CurrentDownloadFolder_">Folder unduhan saat ini</string>
     <string name="CreateCompleteAndIncomplete">Buat Direktori Soulseek Selesai (Complete) dan Belum Selesai (Incomplete)</string>
     <string name="CreateUsernameSubfolders">Buat subfolder berdasarkan nama pengguna</string>

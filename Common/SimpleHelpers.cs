@@ -425,7 +425,7 @@ namespace Seeker
         {
             try
             {
-                int end = filename.LastIndexOf("\\");
+                int end = filename.LastIndexOf('\\');
                 string clipped = filename.Substring(0, end);
                 return clipped;
             }
@@ -437,7 +437,9 @@ namespace Seeker
 
         public static string GetFileNameFromFile(string filename) //is also used to get the last folder
         {
-            int begin = filename.LastIndexOf("\\");
+            // char overload is ordinal - the string overload is culture-sensitive and returns
+            // Length under Thai collation (punctuation is ignorable), crashing the Substring.
+            int begin = filename.LastIndexOf('\\');
             string clipped = filename.Substring(begin + 1);
             return clipped;
         }
@@ -484,7 +486,7 @@ namespace Seeker
 
         public static string GetAllButLast(string path) //"raw:\\storage\\emulated\\0\\Download\\Soulseek Complete"
         {
-            int end = path.LastIndexOf("\\");
+            int end = path.LastIndexOf('\\');
             string clipped = path.Substring(0, end);
             return clipped; //"raw:\\storage\\emulated\\0\\Download"
         }

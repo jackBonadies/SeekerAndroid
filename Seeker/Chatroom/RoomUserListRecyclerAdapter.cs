@@ -19,6 +19,7 @@ namespace Seeker.Chatroom
     public class RoomUserListRecyclerAdapter : RecyclerView.Adapter
     {
         private List<Soulseek.UserData> localDataSet;
+        private readonly RoomUserListDialog dialog;
         public override int ItemCount => localDataSet.Count;
         private int position = -1;
 
@@ -86,7 +87,7 @@ namespace Seeker.Chatroom
 
         private void ShowUserActionSheet(Soulseek.UserData userdata)
         {
-            var dialog = RoomUserListDialog.forContextHelp;
+            var dialog = this.dialog;
             var activity = SeekerState.ActiveActivityRef;
             var snackView = dialog?.View?.FindViewById<ViewGroup>(Resource.Id.userListRoom);
 
@@ -106,7 +107,7 @@ namespace Seeker.Chatroom
 
         private static RoomAdminContext BuildRoomAdminContext(Soulseek.UserData userdata, RoomUserListDialog dialog)
         {
-            string roomName = RoomUserListDialog.OurRoomName;
+            string roomName = dialog.OurRoomName;
             bool isPrivate = ChatroomController.IsPrivate(roomName);
             if (!isPrivate || !(userdata is ChatroomUserData cData))
             {
@@ -148,8 +149,9 @@ namespace Seeker.Chatroom
             };
         }
 
-        public RoomUserListRecyclerAdapter(List<Soulseek.UserData> ti)
+        public RoomUserListRecyclerAdapter(RoomUserListDialog dialog, List<Soulseek.UserData> ti)
         {
+            this.dialog = dialog;
             localDataSet = ti;
         }
 

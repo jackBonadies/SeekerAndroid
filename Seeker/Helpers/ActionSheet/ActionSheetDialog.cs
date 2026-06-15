@@ -32,6 +32,13 @@ namespace Seeker.Helpers.ActionSheet
         {
             base.OnViewCreated(view, savedInstanceState);
 
+            // Process death restore
+            if (config == null)
+            {
+                DismissAllowingStateLoss();
+                return;
+            }
+
             var bottomSheet = ((BottomSheetDialog)Dialog).FindViewById<View>(Resource.Id.design_bottom_sheet);
             if (bottomSheet != null)
             {

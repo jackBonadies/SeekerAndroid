@@ -941,6 +941,12 @@ namespace Seeker
         public static bool ForceOutIfZeroSelected = true;
         public static void ToggleItemBatchSelect(TransferAdapterRecyclerVersion recyclerTransferAdapter, int pos)
         {
+            // Row clicks are posted to the main looper, so one can arrive after the action
+            // mode was already finished and nulled out. Ignore it.
+            if (TransfersActionMode == null)
+            {
+                return;
+            }
             var item = TransferItems.TransferItemManagerWrapped.GetItemAtUserIndex(pos);
             if (item == null)
             {

@@ -13,7 +13,7 @@ namespace Seeker
                 case DayThemeType.ClassicPurple:
                     return Resource.Style.DefaultLight;
                 case DayThemeType.Grey:
-                    return Resource.Style.DefaultDark_Grey; //TODO
+                    return Resource.Style.DefaultLight_Grey;
                 case DayThemeType.Blue:
                     return Resource.Style.DefaultLight_Blue;
                 case DayThemeType.Red:
@@ -34,7 +34,7 @@ namespace Seeker
                 case NightThemeType.Blue:
                     return Resource.Style.DefaultDark_Blue;
                 case NightThemeType.Red:
-                    return Resource.Style.DefaultDark_Blue; //doesnt exist
+                    return Resource.Style.DefaultDark_Red;
                 case NightThemeType.AmoledClassicPurple:
                     return Resource.Style.Amoled;
                 case NightThemeType.AmoledGrey:
@@ -63,9 +63,15 @@ namespace Seeker
                     switch (PreferencesState.NightModeVariant)
                     {
                         case NightThemeType.ClassicPurple:
+                        case NightThemeType.AmoledClassicPurple:
                             return ThemeHelper.ToDayThemeProper(DayThemeType.ClassicPurple);
                         case NightThemeType.Blue:
                             return ThemeHelper.ToDayThemeProper(DayThemeType.Blue);
+                        case NightThemeType.Red:
+                            return ThemeHelper.ToDayThemeProper(DayThemeType.Red);
+                        case NightThemeType.Grey:
+                        case NightThemeType.AmoledGrey:
+                            return ThemeHelper.ToDayThemeProper(DayThemeType.Grey);
                         default:
                             return ThemeHelper.ToDayThemeProper(DayThemeType.ClassicPurple);
                     }
@@ -85,6 +91,10 @@ namespace Seeker
                             return ThemeHelper.ToNightThemeProper(NightThemeType.ClassicPurple);
                         case DayThemeType.Blue:
                             return ThemeHelper.ToNightThemeProper(NightThemeType.Blue);
+                        case DayThemeType.Red:
+                            return ThemeHelper.ToNightThemeProper(NightThemeType.Red);
+                        case DayThemeType.Grey:
+                            return ThemeHelper.ToNightThemeProper(NightThemeType.Grey);
                         default:
                             return ThemeHelper.ToNightThemeProper(NightThemeType.ClassicPurple);
                     }

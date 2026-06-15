@@ -24,9 +24,7 @@
     <color name="mainPurpleTurnedOff">#77437eab</color>
     <color name="chatBoxSplitterElevation">#e0e0e0</color>
 
-    <color name="nextPage">#ff5A595B</color>
     <color name="currentPage">#ff0C9DCE</color>
-    <color name="prevPage">#ffC1E1ED</color>
 
     <color name="subTextColor">#ff757575</color>
     <color name="slightTint">#18000000</color>

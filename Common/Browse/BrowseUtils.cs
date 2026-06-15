@@ -484,9 +484,9 @@ namespace Common.Browse
                     newRootDirName = "";
                     emptyRoot = true;
                 }
-                if (newRootDirName.LastIndexOf("\\") != -1)
+                if (newRootDirName.LastIndexOf('\\') != -1)
                 {
-                    newRootDirName = newRootDirName.Substring(0, newRootDirName.LastIndexOf("\\"));
+                    newRootDirName = newRootDirName.Substring(0, newRootDirName.LastIndexOf('\\'));
                 }
                 Directory rootDirectory = new Directory(newRootDirName);
 
