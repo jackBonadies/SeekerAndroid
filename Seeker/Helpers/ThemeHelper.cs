@@ -13,7 +13,7 @@ namespace Seeker
                 case DayThemeType.ClassicPurple:
                     return Resource.Style.DefaultLight;
                 case DayThemeType.Grey:
-                    return Resource.Style.DefaultDark_Grey; //TODO
+                    return Resource.Style.DefaultLight_Grey;
                 case DayThemeType.Blue:
                     return Resource.Style.DefaultLight_Blue;
                 case DayThemeType.Red:

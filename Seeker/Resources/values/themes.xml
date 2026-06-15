@@ -159,6 +159,33 @@
         <item name="snackbarActionColor">#d57676</item>
     </style>
 
+    <style name="DefaultLight_Grey" parent="DefaultLight">
+        <!--grey chrome (app bar / status bar) but a blue accent, since a grey accent looks very bad-->
+        <item name="colorPrimary">#3d6485</item>
+        <item name="colorSecondaryContainer">#e8eaed</item>
+        <item name="mainPurple">#424242</item>
+        <item name="mainPurpleForNavBar">#424242</item>
+        <item name="swipeToRefreshProgress">#126291</item>
+        <item name="mainPurpleStatusBar">#303030</item>
+
+        <item name="seeker_notification_other_person_color">#546E7A</item>
+
+        <item name="whitePurpleForNavBar">#556070</item>
+
+        <item name="expandIconColor">#888888</item>
+        <item name="searchTabHeader">#303030</item>
+        <item name="mainTextColorHinted">#4D4D4D</item>
+        <item name="mainTextColorHintedFlair">#888888</item>
+        <item name="mainTextColor">#3c4043</item>
+        <item name="slskAccent">#679DC6</item>
+        <item name="cellStroke">#99888888</item>
+        <item name="colorAccent">#86b2cb</item>
+        <item name="checkBoxColor">#4496ee</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#86b2cb</item>
+    </style>
+
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
         <item name="colorOnPrimary">#ffffff</item>
         <item name="colorPrimary">#7C8DEB</item>
