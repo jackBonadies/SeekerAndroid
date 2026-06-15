@@ -34,7 +34,7 @@ namespace Seeker
                 case NightThemeType.Blue:
                     return Resource.Style.DefaultDark_Blue;
                 case NightThemeType.Red:
-                    return Resource.Style.DefaultDark_Blue; //doesnt exist
+                    return Resource.Style.DefaultDark_Red;
                 case NightThemeType.AmoledClassicPurple:
                     return Resource.Style.Amoled;
                 case NightThemeType.AmoledGrey:

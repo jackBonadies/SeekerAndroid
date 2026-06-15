@@ -275,6 +275,30 @@
         <item name="snackbarActionColor">#10496b</item>
     </style>
 
+    <style name="DefaultDark_Red" parent="DefaultDark">
+        <item name="colorPrimary">#d57676</item>
+        <item name="mainPurple">#B22525</item>
+        <item name="mainPurpleStatusBar">#7B0000</item>
+        <item name="colorAccent">#d57676</item>
+        <item name="checkBoxColor">#B22525</item>
+        <item name="whitePurpleForNavBar">#c44e4e</item>
+        <item name="mainTextColor">#d57676</item>
+
+        <item name="slskAccent">#d57676</item>
+        <item name="cellStroke">#d57676</item>
+        <item name="secondaryColor">#3b3b40</item> 
+
+        <item name="seeker_notification_other_person_color">#E69A9A</item>
+
+        <item name="expandIconColor">#d57676</item>
+        <item name="searchTabHeader">#dddddd</item>
+        <item name="mainTextColorHinted">#dddddd</item>
+        <item name="mainTextColorHintedFlair">#d57676</item>
+
+		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <item name="snackbarActionColor">#7B0000</item>
+    </style>
+
     <style name="DefaultDark_Grey" parent="DefaultDark">
         <item name="colorPrimary">#86b2cb</item>
         <item name="mainPurple">#202124</item>
