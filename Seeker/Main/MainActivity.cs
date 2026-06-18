@@ -203,9 +203,7 @@ namespace Seeker
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.toolbar);
             myToolbar.Title = this.GetString(Resource.String.home_tab);
-            myToolbar.InflateMenu(Resource.Menu.account_menu);
             SetSupportActionBar(myToolbar);
-            myToolbar.InflateMenu(Resource.Menu.account_menu); //twice??
 
 
             backPressedCallback = new GenericOnBackPressedCallback(false, onBackPressedAction);
@@ -327,13 +325,11 @@ namespace Seeker
                 }
             }
 
-            //a deep link above may have moved off the home tab via SetCurrentItem before the pager was
-            //laid out, in which case ViewPager2 won't dispatch OnPageSelected — sync the chrome explicitly
-            //once laid out. (home/0 is already configured above, so skip the redundant re-sync.)
-            if (pager.CurrentItem != 0)
-            {
-                pager.Post(() => SyncToPage(pager.CurrentItem));
-            }
+            //Sync the chrome to the landed tab once the pager is laid out. Needed (a) because a deep
+            //link above may have moved off home via SetCurrentItem before layout, which ViewPager2
+            //doesn't dispatch OnPageSelected for, and (b) so the initial page's menu visibility is
+            //gated from the start (otherwise every resident fragment's menu shows until the first swipe).
+            pager.Post(() => SyncToPage(pager.CurrentItem));
 
             //TODO2026 - need to think about this
             //if we have all the conditions to share, then set sharing up.
@@ -1052,6 +1048,15 @@ namespace Seeker
                 navigator.Menu.GetItem(position).SetCheckable(true); //necessary if side scrolling...
                 navigator.Menu.GetItem(position).SetChecked(true);
             }
+            //Gate options-menu visibility to the current tab. FragmentStateAdapter (unlike
+            //FragmentPagerAdapter) does not call setMenuVisibility per primary item, so without this
+            //every resident tab fragment contributes its OnCreateOptionsMenu to the action bar at once.
+            int tabCount = pager?.Adapter?.ItemCount ?? 0;
+            for (int i = 0; i < tabCount; i++)
+            {
+                SupportFragmentManager.FindFragmentByTag("f" + i)?.SetMenuVisibility(i == position);
+            }
+            InvalidateOptionsMenu();
             OnPagerPageSelected(position);
         }
 
@@ -1095,7 +1100,6 @@ namespace Seeker
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
                     this.SupportActionBar.Title = this.GetString(Resource.String.home_tab);
                     this.SupportActionBar.SubtitleFormatted = null;
-                    this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
                     break;
                 case 1:
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
@@ -1105,7 +1109,6 @@ namespace Seeker
                     this.SupportActionBar.SetDisplayShowTitleEnabled(false);
                     this.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);
                     SearchFragment.ConfigureSupportCustomView(this.SupportActionBar.CustomView/*, this*/);
-                    this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
                     if (goToSearchTab != int.MaxValue)
                     {
                         if (SearchFragment.Instance?.Activity == null || !(SearchFragment.Instance.Activity.Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Started))) //this happens if we come from settings activity. Main Activity has NOT been started. SearchFragment has the .Actvity ref of an OLD activity.  so we are not ready yet. 
@@ -1127,8 +1130,6 @@ namespace Seeker
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
 
                     SetTransferSupportActionBarState();
-
-                    this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.browse_menu_empty);  //todo remove?
                     break;
                 case 3:
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
@@ -1137,7 +1138,6 @@ namespace Seeker
                     this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
                     BrowseFragment.SetActionBarTitle();
-                    this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.transfers_menu);
                     break;
             }
             RefreshBackCallbackState();
