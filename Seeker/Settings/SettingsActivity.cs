@@ -276,9 +276,8 @@ namespace Seeker
 
         private void RescanShares()
         {
-            //for rescan=true, we use the previous parse to get metadata if there is a match...
-            //so that we do not have to read the file again to get things like bitrate, samples, etc.
-            //if the presentable name is in the last parse, and the size matches, then use those attributes we previously had to read the file to get..
+            //for Rescan, we use the previous parse to get metadata if there is a match (i.e. if the presentable name and size matches)
+            //  that way we do not have to read the file again to get things like bitrate, samples, duration, bitdepth
             Rescan(null, -1, false, true);
         }
 
