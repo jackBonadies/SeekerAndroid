@@ -278,6 +278,7 @@ namespace Seeker
                 UploadDirectoryEntry entry = UploadDirectories[i];
                 var ourUri = Android.Net.Uri.Parse(entry.Info.UploadDataDirectoryUri);
 
+                entry.IsSubdir = false;
                 for (int j = 0; j < UploadDirectories.Count; j++)
                 {
                     if (i != j)

@@ -1049,8 +1049,9 @@ namespace Seeker.Services
                     return false;
                 }
 
-                // Any remaining entry nested under the removed root would be orphaned (and IsSubdir never resets),
-                // so defer to a full rescan. Mirrors UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates.
+                // A remaining entry nested under the removed root needs to be re-keyed/promoted from a subdir back
+                // to a root, which the in-memory WithFolderRemoved can't do. Defer to a full rescan, which
+                // recomputes IsSubdir in UpdateWithDocumentFileAndErrorStates and promotes the orphan correctly.
                 string removedLastSegment = Android.Net.Uri.Parse(removedEntry.Info.UploadDataDirectoryUri).LastPathSegment;
                 foreach (var remaining in UploadDirectoryManager.UploadDirectories)
                 {
