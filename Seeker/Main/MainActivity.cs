@@ -345,9 +345,9 @@ namespace Seeker
                 Android.Net.Uri res = string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri)
                     ? Android.Net.Uri.Parse(StorageState.DefaultMusicUri)
                     : Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
-                var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
-                b.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
-                b.SetMessage(this.GetString(Resource.String.seeker_needs_dl_dir_content));
+                var dialogBuilder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
+                dialogBuilder.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
+                dialogBuilder.SetMessage(this.GetString(Resource.String.seeker_needs_dl_dir_content));
                 EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
                     var storageManager = Android.OS.Storage.StorageManager.FromContext(this);
@@ -370,9 +370,9 @@ namespace Seeker
                         }
                     }
                 });
-                b.SetPositiveButton(Resource.String.okay, eventHandler);
-                b.SetCancelable(false);
-                b.Show();
+                dialogBuilder.SetPositiveButton(Resource.String.okay, eventHandler);
+                dialogBuilder.SetCancelable(false);
+                dialogBuilder.Show();
             }
         }
 
@@ -1190,13 +1190,9 @@ namespace Seeker
                 case POST_NOTIFICATION_PERMISSION:
                     break;
                 default:
-                    if (grantResults.Length > 0 && grantResults[0] == Permission.Granted)
+                    if (!(grantResults.Length > 0 && grantResults[0] == Permission.Granted))
                     {
-                        return;
-                    }
-                    else
-                    {
-                        FinishAndRemoveTask(); //TODO - why?? this was added in initial commit. kills process if permission not granted?
+                        Logger.Debug("Permission denied for request code " + requestCode + "; continuing.");
                     }
                     break;
             }
