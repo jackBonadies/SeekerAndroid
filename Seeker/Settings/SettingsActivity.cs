@@ -199,6 +199,9 @@ namespace Seeker
 
         private void ClearAllFolders()
         {
+            // If a parse is in flight, cancel it FIRST so it can't finish and clobber the cleared state by
+            // committing / persisting its (now-stale) cache. No-op when nothing is parsing.
+            SharedFileService.CancelOngoingParse();
             UploadDirectoryManager.UploadDirectories.Clear();
             UploadDirectoryManager.SaveToSharedPreferences(SeekerState.SharedPreferences);
             SharedFileService.ClearFileCache();
@@ -1134,6 +1137,7 @@ namespace Seeker
                 Logger.Debug("Parsing now......");
 
                 SharedFileService.SetParsing(true);
+                var parseCancellationToken = SharedFileService.BeginNewParseCancellation();
                 int prevFiles = -1;
                 bool success = false;
                 if (rescanClicked && SharedFileService.SharedFileCache != null)
@@ -1148,12 +1152,24 @@ namespace Seeker
                 try
                 {
 
-                    success = SharedFileService.InitializeDatabase(null, false, out string errorMessage);
+                    success = SharedFileService.InitializeDatabase(null, false, parseCancellationToken, out string errorMessage);
                     if (!success)
                     {
                         throw new Exception("Failed to parse shared files: " + errorMessage);
                     }
                     SharedFileService.SetParsing(false);
+                }
+                catch (System.OperationCanceledException)
+                {
+                    // All folders were removed mid-parse (the only cancel trigger). This is a clean cancel,
+                    // NOT a failure: do not clear caches or show an error toast. ClearAllFolders has already
+                    // reset the sharing state; just stop parsing and refresh the rows.
+                    SharedFileService.SetParsing(false);
+                    this.RunOnUiThread(new Action(() =>
+                    {
+                        RefreshModernSharingRows(false);
+                    }));
+                    return;
                 }
                 catch (Exception e)
                 {

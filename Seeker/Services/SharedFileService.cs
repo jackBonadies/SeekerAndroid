@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading;
 using static Android.Provider.DocumentsContract;
 
 namespace Seeker.Services
@@ -30,6 +31,45 @@ namespace Seeker.Services
         /// For external callers.</summary>
         public static void SetParsing(bool value) => _parseStatus.IsParsing = value;
 
+        // Cancellation for the in-flight parse. Only one parse runs at a time (rescans are guarded by
+        // IsParsing; startup parse is once), so a single source suffices.
+        private static CancellationTokenSource _parseCts;
+
+        /// <summary>Begin a fresh cancellation scope for a parse and return its token. Disposes the
+        /// previous source (safe — the prior parse has finished by the time a new one begins).</summary>
+        public static CancellationToken BeginNewParseCancellation()
+        {
+            var old = _parseCts;
+            _parseCts = new CancellationTokenSource();
+            try
+            {
+                old?.Dispose();
+            }
+            catch
+            {
+                // ignore — defensive against a disposed/in-use source
+            }
+            return _parseCts.Token;
+        }
+
+        /// <summary>Request cancellation of the in-flight parse, if any. No-op when nothing is parsing.</summary>
+        public static void CancelOngoingParse()
+        {
+            var cts = _parseCts;
+            if (cts == null)
+            {
+                return;
+            }
+            try
+            {
+                cts.Cancel();
+            }
+            catch
+            {
+                // ignore ObjectDisposedException etc.
+            }
+        }
+
         public class FullFileInfosResult
         {
             public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> PresentableNameToFullFileInfo { get; set; }
@@ -40,7 +80,7 @@ namespace Seeker.Services
         }
 
         private static FullFileInfosResult GetFullFileInfoFromSharedDirectory(
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse)
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, CancellationToken ct)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
             //so the presentablename should be FolderSelected/path to rest
@@ -62,6 +102,7 @@ namespace Seeker.Services
             var uploadDirectories = UploadDirectoryManager.UploadDirectories.ToList(); //avoid race conditions and enumeration modified exceptions.
             foreach (var uploadDirEntry in uploadDirectories)
             {
+                ct.ThrowIfCancellationRequested();
                 if (uploadDirEntry.IsSubdir || uploadDirEntry.Info.HasError())
                 {
                     continue;
@@ -73,7 +114,7 @@ namespace Seeker.Services
                 _parseStatus.BeginRoot(uploadDirEntry.Info.UploadDataDirectoryUri, presentableNameToFullFileInfos.Count);
                 traverseDirectoriesGatherFullFileInfos(SeekerState.ActiveActivityRef.ContentResolver, uploadDirectory.Uri, DocumentsContract.GetTreeDocumentId(uploadDirectory.Uri), uploadDirectory.Uri,
                     presentableNameToFullFileInfos, allDirs, allLockedDirs, allHiddenDirs, dirMappingFriendlyNameToUri, allMediaStoreInfo, previousFileInfoToUse, rootFolderDisplayName,
-                    ref directoryCount);
+                    ref directoryCount, ct);
                 _parseStatus.EndRoot(uploadDirEntry.Info.UploadDataDirectoryUri, presentableNameToFullFileInfos.Count); // final count + mark complete
             }
 
@@ -220,7 +261,7 @@ namespace Seeker.Services
         }
 
         private static FullFileInfosResult GetFullFileInfoFromSharedDirectoryLegacy(
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse)
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, CancellationToken ct)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
             //so the presentablename should be FolderSelected/path to rest
@@ -236,6 +277,7 @@ namespace Seeker.Services
             var tmpUploadDirs = UploadDirectoryManager.UploadDirectories.ToList(); //avoid race conditions and enumeration modified exceptions.
             foreach (var uploadDirEntry in tmpUploadDirs)
             {
+                ct.ThrowIfCancellationRequested();
                 if (uploadDirEntry.IsSubdir || uploadDirEntry.Info.HasError())
                 {
                     continue;
@@ -248,7 +290,7 @@ namespace Seeker.Services
                 traverseDirectoryEntriesLegacy(dir, pairs, allDirs, allLockedDirs,
                     allHiddenDirs, dirMappingFriendlyNameToUri,
                     previousFileInfoToUse, rootFolderDisplayName,
-                    ref directoryCount);
+                    ref directoryCount, ct);
                 _parseStatus.EndRoot(uploadDirEntry.Info.UploadDataDirectoryUri, pairs.Count);
             }
 
@@ -642,7 +684,7 @@ namespace Seeker.Services
             Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfos, List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs,
             List<Tuple<string, string>> dirMappingFriendlyNameToUri,
             Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
-            string parentDisplayName, ref int totalDirectoryCount)
+            string parentDisplayName, ref int totalDirectoryCount, CancellationToken ct)
         {
             //this should be the folder before the selected to strip away..
             Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, parentDoc);
@@ -670,6 +712,7 @@ namespace Seeker.Services
             {
                 while (c.MoveToNext())
                 {
+                    ct.ThrowIfCancellationRequested();
                     string docId = c.GetString(0);
                     string name = c.GetString(1);
                     string mime = c.GetString(2);
@@ -681,7 +724,7 @@ namespace Seeker.Services
                         totalDirectoryCount++;
                         traverseDirectoriesGatherFullFileInfos(contentResolver, rootUri, docId, childUri, presentableNameToFullFileInfos, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
                             dirMappingFriendlyNameToUri, allMediaInfoDict, previousFileInfoToUse,
-                            parentDisplayName + '\\' + name, ref totalDirectoryCount);
+                            parentDisplayName + '\\' + name, ref totalDirectoryCount, ct);
                     }
                     else
                     {
@@ -742,18 +785,19 @@ namespace Seeker.Services
             List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri,
             Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
             string parentDisplayName,
-            ref int totalDirectoryCount)
+            ref int totalDirectoryCount, CancellationToken ct)
         {
             //this should be the folder before the selected to strip away..
             List<Soulseek.File> files = new List<Soulseek.File>();
             foreach (var childDocFile in parentDocFile.ListFiles())
             {
+                ct.ThrowIfCancellationRequested();
                 if (childDocFile.IsDirectory)
                 {
                     totalDirectoryCount++;
                     traverseDirectoryEntriesLegacy(childDocFile, pairs, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
                         dirMappingFriendlyNameToUri, previousFileInfoToUse,
-                        parentDisplayName + '\\' + childDocFile.Name, ref totalDirectoryCount);
+                        parentDisplayName + '\\' + childDocFile.Name, ref totalDirectoryCount, ct);
                 }
                 else
                 {
@@ -832,10 +876,11 @@ namespace Seeker.Services
         /// </summary>
         /// <param name="dir"></param>
         /// <param name="checkCache"></param>
-        public static bool InitializeDatabase(UploadDirectoryEntry newlyAddedDirectoryIfApplicable, bool checkCache, out string errorMsg)
+        public static bool InitializeDatabase(UploadDirectoryEntry newlyAddedDirectoryIfApplicable, bool checkCache, CancellationToken ct, out string errorMsg)
         {
             errorMsg = string.Empty;
             bool success = false;
+            bool cancelled = false;
             try
             {
                 CachedParseResults cachedParseResults = null;
@@ -857,12 +902,16 @@ namespace Seeker.Services
                     FullFileInfosResult result;
                     if (UploadDirectoryManager.AreAnyFromLegacy())
                     {
-                        result = GetFullFileInfoFromSharedDirectoryLegacy(SharedFileService.SharedFileCache?.PresentableNameToFullFileInfo);
+                        result = GetFullFileInfoFromSharedDirectoryLegacy(SharedFileService.SharedFileCache?.PresentableNameToFullFileInfo, ct);
                     }
                     else
                     {
-                        result = GetFullFileInfoFromSharedDirectory(SharedFileService.SharedFileCache?.PresentableNameToFullFileInfo);
+                        result = GetFullFileInfoFromSharedDirectory(SharedFileService.SharedFileCache?.PresentableNameToFullFileInfo, ct);
                     }
+
+                    // Final guard: abort before we commit / persist so a cancel landing right as the walk
+                    // finishes never overwrites or persists the (now-stale) cache.
+                    ct.ThrowIfCancellationRequested();
 
                     var presentableNameToFullFileInfo = result.PresentableNameToFullFileInfo;
                     var browseResponse = result.BrowseResponse;
@@ -918,8 +967,18 @@ namespace Seeker.Services
                     }
                 }
                 success = true;
-                _parseStatus.FailedShareParse = false;
+                _parseStatus.LastParseResult = ParseResultFlags.None;
                 SharedFileService.SharedFileCache.SuccessfullyInitialized = true;
+            }
+            catch (OperationCanceledException)
+            {
+                // User removed all folders mid-parse (or other cancellation). NOT a failure — leave the
+                // previous/empty cache intact and let callers handle it quietly. Rethrow so the caller can
+                // distinguish a cancel from a real failure.
+                cancelled = true;
+                _parseStatus.LastParseResult = ParseResultFlags.Cancelled;
+                Logger.Debug("Parse cancelled.");
+                throw;
             }
             catch (Exception e)
             {
@@ -962,7 +1021,7 @@ namespace Seeker.Services
             }
             finally
             {
-                if (!success)
+                if (!success && !cancelled)
                 {
                     //if(newlyAddedDirectoryIfApplicable!=null)
                     //{
@@ -971,7 +1030,7 @@ namespace Seeker.Services
                     //}
                     //SeekerState.UploadDataDirectoryUri = null;
                     //SeekerState.UploadDataDirectoryUriIsFromTree = true;
-                    _parseStatus.FailedShareParse = true;
+                    _parseStatus.LastParseResult = ParseResultFlags.Failed;
                     //if success if false then SharedFileService.SharedFileCache might be null still causing a crash!
                     if (SharedFileService.SharedFileCache != null)
                     {
