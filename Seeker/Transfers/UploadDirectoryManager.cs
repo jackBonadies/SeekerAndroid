@@ -281,6 +281,24 @@ namespace Seeker
             }
         }
 
+        public static bool IsNestedUnder(Android.Net.Uri childUri, Android.Net.Uri parentUri)
+        {
+            string child = childUri?.LastPathSegment;
+            string parent = parentUri?.LastPathSegment;
+            if (string.IsNullOrEmpty(child) || string.IsNullOrEmpty(parent))
+            {
+                return false;
+            }
+            if (child.Length <= parent.Length || !child.StartsWith(parent, StringComparison.Ordinal))
+            {
+                return false;
+            }
+            // Require a real path boundary right after the parent id, so "Music" doesn't match "Music2": either the
+            // next char is the path separator, or the parent is a volume root ending in ':' (e.g. "primary:").
+            char boundary = child[parent.Length];
+            return boundary == '/' || parent.EndsWith(":", StringComparison.Ordinal);
+        }
+
         private static void RecomputeSubdirFlags()
         {
             for (int i = 0; i < UploadDirectories.Count; i++)
@@ -293,7 +311,7 @@ namespace Seeker
                 {
                     if (i != j)
                     {
-                        if (ourUri.LastPathSegment.Contains(Android.Net.Uri.Parse(UploadDirectories[j].Info.UploadDataDirectoryUri).LastPathSegment))
+                        if (IsNestedUnder(ourUri, Android.Net.Uri.Parse(UploadDirectories[j].Info.UploadDataDirectoryUri)))
                         {
                             entry.IsSubdir = true;
                         }
@@ -336,7 +354,7 @@ namespace Seeker
                     {
                         if (i != j)
                         {
-                            if (!UploadDirectories[j].IsSubdir && ourUri.LastPathSegment.Contains(Android.Net.Uri.Parse(UploadDirectories[j].Info.UploadDataDirectoryUri).LastPathSegment))
+                            if (!UploadDirectories[j].IsSubdir && IsNestedUnder(ourUri, Android.Net.Uri.Parse(UploadDirectories[j].Info.UploadDataDirectoryUri)))
                             {
                                 ourTopLevelParent = UploadDirectories[j];
                                 break;

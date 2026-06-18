@@ -1015,11 +1015,10 @@ namespace Seeker.Services
                 // A remaining entry nested under the removed root needs to be re-keyed/promoted from a subdir back
                 // to a root, which the in-memory WithFolderRemoved can't do. Defer to a full rescan, which
                 // recomputes IsSubdir in RecomputeDirectoryState and promotes the orphan correctly.
-                string removedLastSegment = Android.Net.Uri.Parse(removedEntry.Info.UploadDataDirectoryUri).LastPathSegment;
+                var removedUri = Android.Net.Uri.Parse(removedEntry.Info.UploadDataDirectoryUri);
                 foreach (var remaining in UploadDirectoryManager.UploadDirectories)
                 {
-                    string remainingLastSegment = Android.Net.Uri.Parse(remaining.Info.UploadDataDirectoryUri).LastPathSegment;
-                    if (remainingLastSegment != null && removedLastSegment != null && remainingLastSegment.Contains(removedLastSegment))
+                    if (UploadDirectoryManager.IsNestedUnder(Android.Net.Uri.Parse(remaining.Info.UploadDataDirectoryUri), removedUri))
                     {
                         errorMsg = "a remaining folder is nested under the removed one";
                         return false;
