@@ -1105,7 +1105,7 @@ namespace Seeker
                 UploadDirectoryManager.UploadDirectories.Add(newlyAddedDirectory);
             }
 
-            UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
+            UploadDirectoryManager.RecomputeDirectoryState();
             if (UploadDirectoryManager.AreAllFailed())
             {
                 throw new DirectoryAccessFailure("All Failed");

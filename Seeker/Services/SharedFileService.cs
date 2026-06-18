@@ -53,12 +53,6 @@ namespace Seeker.Services
             var dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
             int directoryCount = 0;
 
-            //UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
-            //if (UploadDirectoryManager.AreAllFailed()) //the newly added one is always good.
-            //{
-            //    throw new DirectoryAccessFailure("All Failed");
-            //}
-
             HashSet<string> volNames = UploadDirectoryManager.GetInterestedVolNames();
 
             Dictionary<string, List<Tuple<string, int, int>>> allMediaStoreInfo = new Dictionary<string, List<Tuple<string, int, int>>>();
@@ -239,21 +233,6 @@ namespace Seeker.Services
             var dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
             int directoryCount = 0;
 
-            //UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
-            //if(UploadDirectoryManager.AreAllFailed())
-            //{
-            //    throw new DirectoryAccessFailure("All Failed");
-            //}
-
-
-            //string lastPathSegment = dir.Uri.Path.Replace('/', '\\');
-            //string toStrip = string.Empty;
-            //if (lastPathSegment.Contains('\\'))
-            //{
-            //    int stripIndex = lastPathSegment.LastIndexOf('\\');
-            //    toStrip = lastPathSegment.Substring(0, stripIndex + 1);
-            //}
-
             var tmpUploadDirs = UploadDirectoryManager.UploadDirectories.ToList(); //avoid race conditions and enumeration modified exceptions.
             foreach (var uploadDirEntry in tmpUploadDirs)
             {
@@ -295,22 +274,6 @@ namespace Seeker.Services
         {
             string directoryPath = dirFile.Uri.LastPathSegment; //on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
             directoryPath = directoryPath.Replace("/", @"\");
-            //try
-            //{
-            //    directoryPath = directoryPath.Substring(directoryPath.ToLower().IndexOf(dirToStrip.ToLower()));
-            //    directoryPath = directoryPath.Replace("/", @"\"); //probably strip out the root shared dir...
-            //}
-            //catch(Exception e)
-            //{
-            //    //Non-fatal Exception: java.lang.Throwable: directoryPath: False\tree\msd:824\document\msd:825MusicStartIndex cannot be less than zero.
-            //    //its possible for dirToStrip to be null
-            //    //True\tree\0000-0000:Musica iTunes\document\0000-0000:Musica iTunesObject reference not set to an instance of an object 
-            //    //Non-fatal Exception: java.lang.Throwable: directoryPath: True\tree\3061-6232:Musica\document\3061-6232:MusicaObject reference not set to an instance of an object  at AndriodApp1.MainActivity.SlskDirFromDocumentFile (AndroidX.DocumentFile.Provider.DocumentFile dirFile, System.String dirToStrip) [0x00024] in <778faaf2e13641b38ae2700aacc789af>:0 
-            //    Logger.Firebase("directoryPath: " + (dirToStrip==null).ToString() + directoryPath + " from directory resolver: "+ diagFromDirectoryResolver+" toStrip: " + dirToStrip + e.Message + e.StackTrace);
-            //}
-            //friendlyDirNameToUriMapping.Add(new Tuple<string, string>(directoryPath, dirFile.Uri.ToString()));
-            //strip out the shared root dir
-            //directoryPath.Substring(directoryPath.IndexOf(dir.Name))
 
             List<Soulseek.File> files = new List<Soulseek.File>();
             foreach (DocumentFile f in dirFile.ListFiles())
@@ -885,7 +848,7 @@ namespace Seeker.Services
                 {
                     //optimization - if new directory is a subdir we can skip this part. !!!! but we still have things to do like make all files that start with said presentableDir to be locked / hidden. etc.
 
-                    UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
+                    UploadDirectoryManager.RecomputeDirectoryState();
                     if (UploadDirectoryManager.AreAllFailed())
                     {
                         throw new DirectoryAccessFailure("All Failed");
@@ -938,7 +901,7 @@ namespace Seeker.Services
                 else
                 {
                     Logger.Debug("Using cached results");
-                    UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
+                    UploadDirectoryManager.RecomputeDirectoryState();
                     if (UploadDirectoryManager.AreAllFailed())
                     {
                         throw new DirectoryAccessFailure("All Failed");
@@ -1051,7 +1014,7 @@ namespace Seeker.Services
 
                 // A remaining entry nested under the removed root needs to be re-keyed/promoted from a subdir back
                 // to a root, which the in-memory WithFolderRemoved can't do. Defer to a full rescan, which
-                // recomputes IsSubdir in UpdateWithDocumentFileAndErrorStates and promotes the orphan correctly.
+                // recomputes IsSubdir in RecomputeDirectoryState and promotes the orphan correctly.
                 string removedLastSegment = Android.Net.Uri.Parse(removedEntry.Info.UploadDataDirectoryUri).LastPathSegment;
                 foreach (var remaining in UploadDirectoryManager.UploadDirectories)
                 {

@@ -238,7 +238,14 @@ namespace Seeker
         public static List<string> PresentableNameLockedDirectories { get; private set; } = new List<string>();
         public static List<string> PresentableNameHiddenDirectories { get; private set; } = new List<string>();
 
-        public static void UpdateWithDocumentFileAndErrorStates()
+        public static void RecomputeDirectoryState()
+        {
+            ResolveDocumentFilesAndErrorStates();
+            RecomputeSubdirFlags();
+            RebuildLockedAndHiddenPrefixLists();
+        }
+
+        private static void ResolveDocumentFilesAndErrorStates()
         {
             for (int i = 0; i < UploadDirectories.Count; i++)
             {
@@ -272,7 +279,10 @@ namespace Seeker
                     entry.Info.ErrorState = UploadDirectoryError.Unknown;
                 }
             }
+        }
 
+        private static void RecomputeSubdirFlags()
+        {
             for (int i = 0; i < UploadDirectories.Count; i++)
             {
                 UploadDirectoryEntry entry = UploadDirectories[i];
@@ -290,7 +300,10 @@ namespace Seeker
                     }
                 }
             }
+        }
 
+        private static void RebuildLockedAndHiddenPrefixLists()
+        {
             PresentableNameLockedDirectories.Clear();
             PresentableNameHiddenDirectories.Clear();
             for (int i = 0; i < UploadDirectories.Count; i++)
@@ -331,6 +344,8 @@ namespace Seeker
                         }
                     }
 
+                    // TODO: ourTopLevelParent can be null here (a subdir whose only container is itself a subdir),
+                    // which would NPE on the HasError() check below
                     if (!entry.Info.HasError() && !ourTopLevelParent.Info.HasError())
                     {
                         if (entry.Info.IsLocked)
