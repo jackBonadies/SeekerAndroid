@@ -328,17 +328,6 @@ namespace Seeker
             //gated from the start (otherwise every resident fragment's menu shows until the first swipe).
             pager.Post(() => SyncToPage(pager.CurrentItem));
 
-            //TODO2026 - need to think about this
-            //if we have all the conditions to share, then set sharing up.
-            if (SharedFileService.MeetsSharingConditions() && !SharedFileService.ParseStatus.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
-            {
-                Seeker.Services.SharingService.SetUpSharing();
-            }
-            else if (SharedFileService.NumberOfSharedDirectoriesIsStale)
-            {
-                SharedFileService.InformServerOfSharedFiles();
-                SharedFileService.AttemptedToSetUpSharing = true;
-            }
 
             // Document files are initialized once per process in SeekerApplication.OnCreate.
             // Here we only handle the things that require an Activity context.

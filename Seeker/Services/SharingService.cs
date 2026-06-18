@@ -229,6 +229,19 @@ namespace Seeker.Services
             System.Threading.ThreadPool.QueueUserWorkItem((object o) => { setUpSharedFileCache(); });
         }
 
+        public static void TrySetUpSharingOnAppForeground()
+        {
+            if (SharedFileService.MeetsSharingConditions() && !SharedFileService.ParseStatus.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
+            {
+                SetUpSharing();
+            }
+            else if (SharedFileService.NumberOfSharedDirectoriesIsStale)
+            {
+                SharedFileService.InformServerOfSharedFiles();
+                SharedFileService.AttemptedToSetUpSharing = true;
+            }
+        }
+
         /// <summary>
         /// Do this on any changes (like in Settings) but also on Login.
         /// </summary>
