@@ -181,16 +181,9 @@ namespace Seeker
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            bool reborn = false;
-            if (savedInstanceState == null)
-            {
-                Logger.Debug("Main Activity On Create NEW");
-            }
-            else
-            {
-                reborn = true;
-                Logger.Debug("Main Activity On Create REBORN");
-            }
+            bool reborn = savedInstanceState != null;
+            Logger.Debug($"Main Activity On Create reborn? {reborn}");
+
             base.OnCreate(savedInstanceState);
             //System.Threading.Thread.CurrentThread.Name = "Main Activity Thread";
             Xamarin.Essentials.Platform.Init(this, savedInstanceState); //this is what you are supposed to do.
@@ -203,7 +196,6 @@ namespace Seeker
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.toolbar);
             myToolbar.Title = this.GetString(Resource.String.home_tab);
             SetSupportActionBar(myToolbar);
-
 
             backPressedCallback = new GenericOnBackPressedCallback(false, onBackPressedAction);
             OnBackPressedDispatcher.AddCallback(backPressedCallback);
@@ -227,20 +219,8 @@ namespace Seeker
             bool alreadyHandled = Intent.GetBooleanExtra("ALREADY_HANDLED", false);
             Intent = Intent.PutExtra("ALREADY_HANDLED", true);
 
-            //Intent = i;
             if (Intent != null)
             {
-                //if(Intent.Flags == (ActivityFlags.LaunchedFromHistory | ActivityFlags.NewTask))
-                //{
-                //    //FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY | FLAG_ACTIVITY_NEW_TASK
-                //    //-back button then resumed from history
-                //    //FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
-                //    //-home button then resumed from history
-                //    //FLAG_ACTIVITY_NEW_TASK
-                //    //-clicking app icon or intent filter
-                //    Logger.Debug("new task | launched from history");
-                //}
-
                 if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
                 {
                     pager.SetCurrentItem(2, false);
