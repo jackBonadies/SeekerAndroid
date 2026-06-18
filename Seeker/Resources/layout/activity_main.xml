@@ -34,23 +34,13 @@
         android:layout_below="@id/appbarLayout"
         android:gravity="center_horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
     >
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabs"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:visibility="gone"
-            app:tabMode="fixed"
-            app:tabGravity="fill"
-        />
-
-        <Seeker.ViewPagerFixed
+        <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/pager"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_above="@id/navigation"
-            tools:context="android.tabitytabs.TabLayoutActivity"
         />
 
         <com.google.android.material.bottomnavigation.BottomNavigationView

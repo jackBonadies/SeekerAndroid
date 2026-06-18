@@ -38,7 +38,7 @@ using AndroidX.Core.Content;
 using AndroidX.DocumentFile.Provider;
 using AndroidX.Fragment.App;
 using AndroidX.Lifecycle;
-using AndroidX.ViewPager.Widget;
+using AndroidX.ViewPager2.Widget;
 using Common;
 using Google.Android.Material.BottomNavigation;
 using Google.Android.Material.Snackbar;
@@ -146,7 +146,7 @@ namespace Seeker
         private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42D;
         private const int POST_NOTIFICATION_PERMISSION = 0x42E;
 
-        private AndroidX.ViewPager.Widget.ViewPager pager = null;
+        private AndroidX.ViewPager2.Widget.ViewPager2 pager = null;
 
 
 
@@ -163,7 +163,7 @@ namespace Seeker
             {
                 return;
             }
-            var pager = FindViewById<AndroidX.ViewPager.Widget.ViewPager>(Resource.Id.pager);
+            var pager = FindViewById<AndroidX.ViewPager2.Widget.ViewPager2>(Resource.Id.pager);
             bool consumable = false;
             if (pager != null)
             {
@@ -215,22 +215,22 @@ namespace Seeker
 
             sharedPreferences = this.GetSharedPreferences(Constants.SharedPrefFile, 0);
 
-            TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
+            //set the activity refs BEFORE the adapter, because ViewPager2 with OffscreenPageLimit=3
+            //eagerly creates all four tab fragments, whose OnCreateView read SeekerState.MainActivityRef.
+            SeekerState.MainActivityRef = this;
+            SeekerState.ActiveActivityRef = this;
 
-            pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
-            pager.PageSelected += Pager_PageSelected;
-            TabsPagerAdapter adapter = new TabsPagerAdapter(SupportFragmentManager);
+            pager = (AndroidX.ViewPager2.Widget.ViewPager2)FindViewById(Resource.Id.pager);
+            TabsPagerAdapter adapter = new TabsPagerAdapter(this);
 
-            tabs.TabSelected += Tabs_TabSelected;
             pager.Adapter = adapter;
-            pager.AddOnPageChangeListener(new OnPageChangeLister1());
-            //tabs.SetupWithViewPager(pager);
+            //keep all four tab fragments resident (FragmentPagerAdapter never destroyed them); the app
+            //relies on long-lived fragments via SearchFragment.Instance / BrowseFragment.Instance etc.
+            pager.OffscreenPageLimit = 3;
+            pager.RegisterOnPageChangeCallback(new OnPageChangeLister1());
             //this is a relatively safe way that prevents rotates from redoing the intent.
             bool alreadyHandled = Intent.GetBooleanExtra("ALREADY_HANDLED", false);
             Intent = Intent.PutExtra("ALREADY_HANDLED", true);
-
-            SeekerState.MainActivityRef = this;
-            SeekerState.ActiveActivityRef = this;
 
             //Intent = i;
             if (Intent != null)
@@ -327,6 +327,14 @@ namespace Seeker
                 }
             }
 
+            //a deep link above may have moved off the home tab via SetCurrentItem before the pager was
+            //laid out, in which case ViewPager2 won't dispatch OnPageSelected — sync the chrome explicitly
+            //once laid out. (home/0 is already configured above, so skip the redundant re-sync.)
+            if (pager.CurrentItem != 0)
+            {
+                pager.Post(() => SyncToPage(pager.CurrentItem));
+            }
+
             //TODO2026 - need to think about this
             //if we have all the conditions to share, then set sharing up.
             if (SharedFileService.MeetsSharingConditions() && !SharedFileService.ParseStatus.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
@@ -340,7 +348,6 @@ namespace Seeker
             }
 
             SeekerState.SharedPreferences = sharedPreferences;
-            UpdateForScreenSize();
 
             // Document files are initialized once per process in SeekerApplication.OnCreate.
             // Here we only handle the things that require an Activity context.
@@ -696,7 +703,7 @@ namespace Seeker
         {
             try
             {
-                var pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
+                var pager = (AndroidX.ViewPager2.Widget.ViewPager2)FindViewById(Resource.Id.pager);
                 return pager.CurrentItem == 3;
             }
             catch
@@ -714,7 +721,7 @@ namespace Seeker
         {
             try
             {
-                var pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
+                var pager = (AndroidX.ViewPager2.Widget.ViewPager2)FindViewById(Resource.Id.pager);
                 if (pager.CurrentItem == 3) //browse tab
                 {
                     BrowseFragment.Instance?.BackButton();
@@ -746,34 +753,6 @@ namespace Seeker
             RefreshBackCallbackState();
         }
 
-
-        private void UpdateForScreenSize()
-        {
-            if (!PlatformInfo.IsLowDpi()) return;
-            try
-            {
-                TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
-                LinearLayout vg = (LinearLayout)tabs.GetChildAt(0);
-                int tabsCount = vg.ChildCount;
-                for (int j = 0; j < tabsCount; j++)
-                {
-                    ViewGroup vgTab = (ViewGroup)vg.GetChildAt(j);
-                    int tabChildsCount = vgTab.ChildCount;
-                    for (int i = 0; i < tabChildsCount; i++)
-                    {
-                        View tabViewChild = vgTab.GetChildAt(i);
-                        if (tabViewChild is TextView)
-                        {
-                            ((TextView)tabViewChild).SetAllCaps(false);
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                //not worth throwing over..
-            }
-        }
 
         public void RecreateFragment(AndroidX.Fragment.App.Fragment f)
         {
@@ -1060,24 +1039,23 @@ namespace Seeker
             base.OnSaveInstanceState(outState);
         }
 
-        private void Tabs_TabSelected(object sender, TabLayout.TabSelectedEventArgs e)
-        {
-            System.Console.WriteLine(e.Tab.Position);
-            if (e.Tab.Position != 1) //i.e. if we are not the search tab
-            {
-                try
-                {
-                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)this.GetSystemService(Context.InputMethodService);
-                    imm.HideSoftInputFromWindow((sender as View).WindowToken, 0);
-                }
-                catch
-                {
-                    //not worth throwing over
-                }
-            }
-        }
         public static int goToSearchTab = int.MaxValue;
-        private void Pager_PageSelected(object sender, ViewPager.PageSelectedEventArgs e)
+        public void SyncToPage(int position)
+        {
+            if (position < 0)
+            {
+                return;
+            }
+            var navigator = FindViewById<BottomNavigationView>(Resource.Id.navigation);
+            if (navigator != null)
+            {
+                navigator.Menu.GetItem(position).SetCheckable(true); //necessary if side scrolling...
+                navigator.Menu.GetItem(position).SetChecked(true);
+            }
+            OnPagerPageSelected(position);
+        }
+
+        public void OnPagerPageSelected(int position)
         {
             //if we are changing modes and the transfers action mode is not null (i.e. is active)
             //then we need to get out of it.
@@ -1090,7 +1068,7 @@ namespace Seeker
                 BrowseFragment.BrowseActionMode.Finish();
             }
             // Hide download dialog when leaving search tab (i.e. clicking browse user -> go to browse response), show when returning
-            if (e.Position != 1)
+            if (position != 1)
             {
                 if (SearchFragment.dlDialogShown)
                 {
@@ -1107,7 +1085,7 @@ namespace Seeker
                 }
             }
             //in addition each fragment is responsible for expanding their menu...
-            switch (e.Position)
+            switch (position)
             {
                 case 0:
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
@@ -1246,16 +1224,16 @@ namespace Seeker
             switch (item.ItemId)
             {
                 case Resource.Id.navigation_home:
-                    pager.CurrentItem = 0;
+                    pager.SetCurrentItem(0, true);
                     break;
                 case Resource.Id.navigation_search:
-                    pager.CurrentItem = 1;
+                    pager.SetCurrentItem(1, true);
                     break;
                 case Resource.Id.navigation_transfers:
-                    pager.CurrentItem = 2;
+                    pager.SetCurrentItem(2, true);
                     break;
                 case Resource.Id.navigation_browse:
-                    pager.CurrentItem = 3;
+                    pager.SetCurrentItem(3, true);
                     break;
             }
             return true;

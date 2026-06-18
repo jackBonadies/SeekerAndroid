@@ -37,71 +37,32 @@ using System.Linq;
 
 namespace Seeker
 {
-    public class TabsPagerAdapter : FragmentPagerAdapter
+    public class TabsPagerAdapter : AndroidX.ViewPager2.Adapter.FragmentStateAdapter
     {
-        Fragment login = null;
-        Fragment search = null;
-        Fragment transfer = null;
-        Fragment browse = null;
-        public TabsPagerAdapter(FragmentManager fm) : base(fm)
+        public TabsPagerAdapter(FragmentActivity fa) : base(fa)
         {
-            login = new LoginFragment();
-            search = new SearchFragment();
-            transfer = new TransfersFragment();
-            browse = new BrowseFragment();
         }
 
-        public override int Count => 4;
+        public override int ItemCount => 4;
 
-        public override Fragment GetItem(int position)
+        //FragmentStateAdapter owns the fragment instances; this just produces a fresh fragment for a
+        //given tab. The page titles that used to live here are gone with the (unused) TabLayout —
+        //tab labels come from the BottomNavigationView menu.
+        public override Fragment CreateFragment(int position)
         {
-            Fragment frag = null;
             switch (position)
             {
                 case 0:
-                    frag = login;
-                    break;
+                    return new LoginFragment();
                 case 1:
-                    frag = search;
-                    break;
+                    return new SearchFragment();
                 case 2:
-                    frag = transfer;
-                    break;
+                    return new TransfersFragment();
                 case 3:
-                    frag = browse;
-                    break;
+                    return new BrowseFragment();
                 default:
                     throw new System.Exception("Invalid Tab");
             }
-            return frag;
-        }
-
-        public override int GetItemPosition(Java.Lang.Object @object)
-        {
-            return PositionNone;
-        }
-
-        public override ICharSequence GetPageTitleFormatted(int position)
-        {
-            ICharSequence title;
-            switch (position)
-            {
-                case 0:
-                    title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.account_tab));
-                    break;
-                case 1:
-                    title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.searches_tab));
-                    break;
-                case 2:
-                    title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.transfer_tab));
-                    break;
-                case 3:
-                    title = new Java.Lang.String(SeekerState.ActiveActivityRef.GetString(Resource.String.browse_tab));
-                    break;
-                default:
-                    throw new System.Exception("Invalid Tab");
-            }
-            return title;
         }
     }
 

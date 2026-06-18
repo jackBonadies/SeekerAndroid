@@ -588,7 +588,7 @@ namespace Seeker
                     Action<View> action = new Action<View>((v) =>
                     {
                         this.Dismiss();
-                        ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
+                        ((AndroidX.ViewPager2.Widget.ViewPager2)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
                     });
                     if (!PreferencesState.HideLockedResultsInSearch && PreferencesState.HideLockedResultsInBrowse && SearchResponse.IsLockedOnly())
                     {
