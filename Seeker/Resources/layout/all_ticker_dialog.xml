@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -29,11 +30,60 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/slightTint" />
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewTickers"
+    <ViewFlipper
+        android:id="@+id/tickerStateFlipper"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="4dp"
-        android:paddingBottom="8dp"
-        android:clipToPadding="false" />
+        android:layout_height="wrap_content">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewTickers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
+            android:clipToPadding="false" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="140dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxWidth="320dp"
+                android:gravity="center"
+                android:breakStrategy="balanced"
+                android:textSize="15sp"
+                android:textStyle="italic"
+                android:textColor="?attr/normalTextColor"
+                android:text="@string/no_room_tickers" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="140dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp">
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:indicatorSize="56dp"
+                app:trackCornerRadius="5dp"
+                app:trackThickness="5dp"
+                app:indicatorColor="?attr/mainPurple"
+                android:indeterminateOnly="true" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxWidth="320dp"
+                android:gravity="center"
+                android:breakStrategy="balanced"
+                android:layout_marginTop="16dp"
+                android:textSize="15sp"
+                android:textColor="?attr/normalTextColor"
+                android:text="@string/loading_tickers" />
+        </LinearLayout>
+    </ViewFlipper>
 </LinearLayout>

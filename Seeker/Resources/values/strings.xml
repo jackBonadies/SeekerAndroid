@@ -240,6 +240,7 @@
     <string name="error_image_too_large">Image is too large. Please choose a smaller image. ( &lt; 5MB).</string>
 
     <string name="no_room_tickers">No room tickers yet...</string>
+    <string name="loading_tickers">Loading tickers…</string>
     <string name="user_list_empty">User list is empty. Please add a user to user list.</string>
     <string name="no_user">No user is selected</string>
     <string name="no_room">No room is selected</string>

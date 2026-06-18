@@ -18,6 +18,15 @@ namespace Seeker.Chatroom
 
         private string ourRoomName = string.Empty;
         private RecyclerView recyclerView;
+        private ViewFlipper stateFlipper;
+        private TickerRowAdapter adapter;
+
+        private enum TickerDisplayState
+        {
+            Tickers = 0,
+            Empty = 1,
+            Loading = 2,
+        }
 
         public AllTickersDialog(string ourRoomName)
         {
@@ -40,19 +49,70 @@ namespace Seeker.Chatroom
 
             var root = inflater.Inflate(Resource.Layout.all_ticker_dialog, container, false);
 
+            stateFlipper = root.FindViewById<ViewFlipper>(Resource.Id.tickerStateFlipper);
             recyclerView = root.FindViewById<RecyclerView>(Resource.Id.recyclerViewTickers);
             recyclerView.SetLayoutManager(new LinearLayoutManager(root.Context));
 
-            var tickers = new List<RoomTicker>();
-            if (ChatroomController.JoinedRoomTickers.TryGetValue(ourRoomName, out var stored))
-            {
-                tickers = stored.ToList();
-                tickers.Reverse();
-            }
-
-            recyclerView.SetAdapter(new TickerRowAdapter(tickers));
+            adapter = new TickerRowAdapter(new List<RoomTicker>());
+            recyclerView.SetAdapter(adapter);
 
             return root;
+        }
+
+        public override void OnResume()
+        {
+            base.OnResume();
+            ChatroomController.RoomTickerListReceived += OnRoomTickerListReceived;
+            ApplyState();
+        }
+
+        public override void OnPause()
+        {
+            base.OnPause();
+            ChatroomController.RoomTickerListReceived -= OnRoomTickerListReceived;
+        }
+
+        private void OnRoomTickerListReceived(object sender, Soulseek.RoomTickerListReceivedEventArgs e)
+        {
+            if (e.RoomName != ourRoomName)
+            {
+                return;
+            }
+            Activity?.RunOnUiThread(ApplyState);
+        }
+
+        private void ApplyState()
+        {
+            if (stateFlipper == null)
+            {
+                return;
+            }
+            if (ChatroomController.JoinedRoomTickers.TryGetValue(ourRoomName, out var stored))
+            {
+                if (stored.Count > 0)
+                {
+                    var list = stored.ToList();
+                    list.Reverse();
+                    adapter.SetData(list);
+                    SetState(TickerDisplayState.Tickers);
+                }
+                else
+                {
+                    SetState(TickerDisplayState.Empty);
+                }
+            }
+            else
+            {
+                SetState(TickerDisplayState.Loading);
+            }
+        }
+
+        private void SetState(TickerDisplayState state)
+        {
+            if (stateFlipper.DisplayedChild != (int)state)
+            {
+                stateFlipper.DisplayedChild = (int)state;
+            }
         }
 
         private sealed class TickerRowAdapter : RecyclerView.Adapter
@@ -62,6 +122,13 @@ namespace Seeker.Chatroom
             public TickerRowAdapter(List<RoomTicker> tickers)
             {
                 this.tickers = tickers;
+            }
+
+            public void SetData(List<RoomTicker> newData)
+            {
+                tickers.Clear();
+                tickers.AddRange(newData);
+                NotifyDataSetChanged();
             }
 
             public override int ItemCount => tickers.Count;
