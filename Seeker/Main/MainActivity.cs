@@ -135,9 +135,8 @@ namespace Seeker
         }
 
         public const string SETTINGS_INTENT = "com.example.seeker.SETTINGS";
-        public const int SETTINGS_EXTERNAL = 0x430;
-        public const int DEFAULT_SEARCH_RESULTS = 250;
-        private const int WRITE_EXTERNAL = 9999;
+
+        private const int WRITE_EXTERNAL_LEGACY = 0x427;
         private const int NEW_WRITE_EXTERNAL = 0x428;
         private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL = 0x429;
         private const int NEW_WRITE_EXTERNAL_VIA_LEGACY = 0x42A;
@@ -145,6 +144,7 @@ namespace Seeker
         private const int NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42C;
         private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42D;
         private const int POST_NOTIFICATION_PERMISSION = 0x42E;
+        public const int SETTINGS_EXTERNAL = 0x430;
 
         private AndroidX.ViewPager2.Widget.ViewPager2 pager = null;
 
@@ -335,7 +335,7 @@ namespace Seeker
             {
                 if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.WriteExternalStorage) == Android.Content.PM.Permission.Denied)
                 {
-                    ActivityCompat.RequestPermissions(this, new string[] { Manifest.Permission.WriteExternalStorage }, WRITE_EXTERNAL);
+                    ActivityCompat.RequestPermissions(this, new string[] { Manifest.Permission.WriteExternalStorage }, WRITE_EXTERNAL_LEGACY);
                 }
             }
             else if (StorageState.RootDocumentFile == null)
