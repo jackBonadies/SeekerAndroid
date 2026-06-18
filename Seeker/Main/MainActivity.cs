@@ -150,7 +150,6 @@ namespace Seeker
 
 
 
-        private ISharedPreferences sharedPreferences;
         private GenericOnBackPressedCallback backPressedCallback;
 
         /// <summary>
@@ -210,8 +209,6 @@ namespace Seeker
             OnBackPressedDispatcher.AddCallback(backPressedCallback);
 
             System.Console.WriteLine("Testing.....");
-
-            sharedPreferences = this.GetSharedPreferences(Constants.SharedPrefFile, 0);
 
             //set the activity refs BEFORE the adapter, because ViewPager2 with OffscreenPageLimit=3
             //eagerly creates all four tab fragments, whose OnCreateView read SeekerState.MainActivityRef.
@@ -342,8 +339,6 @@ namespace Seeker
                 SharedFileService.InformServerOfSharedFiles();
                 SharedFileService.AttemptedToSetUpSharing = true;
             }
-
-            SeekerState.SharedPreferences = sharedPreferences;
 
             // Document files are initialized once per process in SeekerApplication.OnCreate.
             // Here we only handle the things that require an Activity context.
