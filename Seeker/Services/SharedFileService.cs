@@ -912,8 +912,8 @@ namespace Seeker.Services
 
                     _parseStatus.NumberParsed = ParsingStatusState.FinishingUpSentinel; //our signal that we are finishing up...
 
-                    Dictionary<int, string> fileKeyToPresentableName = GenerateFileKeyToPresentableNameIndex(presentableNameToFullFileInfo);
-                    Dictionary<string, List<int>> searchTermTokenToListOfFileKeys = GenerateSearchTermTokenToFileKeysIndex(presentableNameToFullFileInfo, fileKeyToPresentableName);
+                    Dictionary<int, string> fileKeyToPresentableName = SharedFileCache.GenerateFileKeyToPresentableNameIndex(presentableNameToFullFileInfo);
+                    Dictionary<string, List<int>> searchTermTokenToListOfFileKeys = SharedFileCache.GenerateSearchTermTokenToFileKeysIndex(presentableNameToFullFileInfo, fileKeyToPresentableName);
 
                     var newCachedResults = new CachedParseResults(
                         presentableNameToFullFileInfo,
@@ -1021,47 +1021,83 @@ namespace Seeker.Services
             //SeekerState.SoulseekClient.SearchResponseDeliveryFailed += SoulseekClient_SearchResponseDeliveryFailed;
         }
 
-        private static Dictionary<string, List<int>> GenerateSearchTermTokenToFileKeysIndex(Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfo, Dictionary<int, string> fileKeyToPresentableName)
+        /// <summary>
+        /// Remove a single shared folder WITHOUT re-walking disk. Remove folder from shared file cache, 
+        /// regenerates the derived search indices, re-persists, and re-informs the server. 
+        /// Returns false (caller should fall back to a full Rescan) when the removal needs metadata re-derivation 
+        /// that only a disk walk can do safely
+        /// </summary>
+        public static bool TryRemoveSharedFolderInMemory(UploadDirectoryEntry removedEntry, out string errorMsg)
         {
-            Dictionary<string, List<int>> searchTermTokenToListOfFileKeys = new Dictionary<string, List<int>>();
-            var presentableNameToFileKey = fileKeyToPresentableName.ToDictionary(x => x.Value, x => x.Key);
-            foreach (string presentableName in presentableNameToFullFileInfo.Keys)
+            errorMsg = string.Empty;
+            try
             {
-                string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(SimpleHelpers.GetFileNameFromFile(presentableName));
-                searchableName = SharedFileCache.MatchSpecialCharAgnostic(searchableName);
-                int code = presentableNameToFileKey[presentableName];
-                foreach (string token in searchableName.ToLower().Split(null)) //null means whitespace
+                var cache = SharedFileService.SharedFileCache;
+                if (cache == null || !cache.SuccessfullyInitialized)
                 {
-                    if (token == string.Empty)
+                    errorMsg = "cache not initialized";
+                    return false;
+                }
+                if (ParseStatus.IsParsing)
+                {
+                    errorMsg = "parse in progress";
+                    return false;
+                }
+                if (removedEntry.IsSubdir)
+                {
+                    errorMsg = "removed entry is a subdir";
+                    return false;
+                }
+
+                // Any remaining entry nested under the removed root would be orphaned (and IsSubdir never resets),
+                // so defer to a full rescan. Mirrors UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates.
+                string removedLastSegment = Android.Net.Uri.Parse(removedEntry.Info.UploadDataDirectoryUri).LastPathSegment;
+                foreach (var remaining in UploadDirectoryManager.UploadDirectories)
+                {
+                    string remainingLastSegment = Android.Net.Uri.Parse(remaining.Info.UploadDataDirectoryUri).LastPathSegment;
+                    if (remainingLastSegment != null && removedLastSegment != null && remainingLastSegment.Contains(removedLastSegment))
                     {
-                        continue;
-                    }
-                    if (searchTermTokenToListOfFileKeys.ContainsKey(token))
-                    {
-                        searchTermTokenToListOfFileKeys[token].Add(code);
-                    }
-                    else
-                    {
-                        searchTermTokenToListOfFileKeys[token] = new List<int>();
-                        searchTermTokenToListOfFileKeys[token].Add(code);
+                        errorMsg = "a remaining folder is nested under the removed one";
+                        return false;
                     }
                 }
-            }
 
-            return searchTermTokenToListOfFileKeys;
+                string prefix = removedEntry.GetPresentableName();
+                var newCache = cache.WithFolderRemoved(prefix, out bool anythingRemoved);
+                if (!anythingRemoved)
+                {
+                    errorMsg = "nothing matched the removed folder";
+                    return false;
+                }
+
+                SharedFileService.SharedFileCache = newCache;
+
+                TrimPresentableDirList(UploadDirectoryManager.PresentableNameLockedDirectories, prefix);
+                TrimPresentableDirList(UploadDirectoryManager.PresentableNameHiddenDirectories, prefix);
+
+                StoreCachedParseResults(SeekerState.ActiveActivityRef, newCache.ToCachedParseResults());
+                UploadDirectoryManager.SaveToSharedPreferences(SeekerState.SharedPreferences);
+
+                SharedFileCache_Refreshed(null, (newCache.DirectoryCount, newCache.GetNonHiddenFileCountForServer()));
+                SharingStatusChangedEvent?.Invoke(null, new EventArgs());
+                return true;
+            }
+            catch (Exception e)
+            {
+                errorMsg = e.Message;
+                Logger.Firebase("TryRemoveSharedFolderInMemory failed, falling back to rescan: " + e.Message + e.StackTrace);
+                return false;
+            }
         }
 
-        private static Dictionary<int, string> GenerateFileKeyToPresentableNameIndex(Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfo)
+        private static void TrimPresentableDirList(List<string> list, string prefix)
         {
-            var fileKeyToPresentableName = new Dictionary<int, string>();
-            int fileKey = 0;
-            foreach (string presentableName in presentableNameToFullFileInfo.Keys)
+            if (list == null)
             {
-                fileKeyToPresentableName[fileKey] = presentableName;
-                fileKey++;
+                return;
             }
-
-            return fileKeyToPresentableName;
+            string subPrefix = prefix + "\\";
+            list.RemoveAll(name => name == prefix || name.StartsWith(subPrefix, StringComparison.Ordinal));
         }
 
         public static CachedParseResults GetCachedParseResults(Context c)

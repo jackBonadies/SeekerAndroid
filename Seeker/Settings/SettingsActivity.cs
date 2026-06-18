@@ -640,8 +640,21 @@ namespace Seeker
             else
             {
                 UploadDirectoryManager.UploadDirectories.Remove(uploadDirEntry);
-                RefreshModernSharingRows(false);
-                Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
+
+                // remove purely in memory, no disk walk; on failure fall back to a full rescan like before
+                if (SharedFileService.TryRemoveSharedFolderInMemory(uploadDirEntry, out var removalErr))
+                {
+                    RefreshModernSharingRows(false);
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(removalErr))
+                    {
+                        Logger.Debug("Shared-folder removal fell back to rescan: " + removalErr);
+                    }
+                    RefreshModernSharingRows(false);
+                    Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
+                }
             }
         }
 
