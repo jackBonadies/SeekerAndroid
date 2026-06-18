@@ -1224,16 +1224,16 @@ namespace Seeker
             switch (item.ItemId)
             {
                 case Resource.Id.navigation_home:
-                    pager.SetCurrentItem(0, true);
+                    pager.SetCurrentItem(0, false);
                     break;
                 case Resource.Id.navigation_search:
-                    pager.SetCurrentItem(1, true);
+                    pager.SetCurrentItem(1, false);
                     break;
                 case Resource.Id.navigation_transfers:
-                    pager.SetCurrentItem(2, true);
+                    pager.SetCurrentItem(2, false);
                     break;
                 case Resource.Id.navigation_browse:
-                    pager.SetCurrentItem(3, true);
+                    pager.SetCurrentItem(3, false);
                     break;
             }
             return true;
