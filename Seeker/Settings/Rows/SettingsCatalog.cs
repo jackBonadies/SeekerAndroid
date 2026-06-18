@@ -424,10 +424,6 @@ namespace Seeker.Settings.Rows
             {
                 foreach (var entry in UploadDirectoryManager.UploadDirectories)
                 {
-                    if (entry.IsSubdir)
-                    {
-                        continue;
-                    }
                     var captured = entry;
                     rows.Add(new SharedFolderRow
                     {
