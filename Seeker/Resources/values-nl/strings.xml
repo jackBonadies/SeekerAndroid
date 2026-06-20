@@ -20,11 +20,11 @@
     <string name="new_results">nieuwe resultaten</string>
     <string name="stop_service">Service beëindigen</string>
     <string name="start_service">Service starten</string>
-    <string name="saerch_user_list">Zoek Gebruikerslijst</string>
+    <string name="saerch_user_list">Zoek gebruikerslijst</string>
     <string name="search_room">Zoek kamer</string>
     <string name="search_room_">Zoek kamer {0}</string>
     <string name="search_user_">Zoek gebruiker {0}</string>
-    <string name="wishlist_search">Verlanglijst Zoeken</string>
+    <string name="wishlist_search">Verlanglijst zoeken</string>
     <string name="no_account">Heb je nog geen account? Vul simpelweg een unieke gebruikersnaam in en een account word voor je aangemaakt.</string>
     <string name="keep_alive_service_subtitle">Staat Seeker toe op zoek-opvraging te reageren (delen), chatberichten te ontvangen en verlanglijst zoekopdrachten uit te voeren op de achtergrond</string>
     <string name="privileges_more_info">Privileges help support the Soulseek Network and the central server this app depends on.\n\nThey also let you skip ahead of non-privileged users in download queues.\n\nNote: donations do not go to the creator of this unofficial Android client (Seeker). I do not currently accept donations.</string>
@@ -67,7 +67,7 @@
     <string name="requesting_user_info">Verzoek om gebruikersinfo</string>
     <string name="room_list_received">Kamerlijst ontvangen</string>
     <string name="room_list_request_failed">Failed to fetch chat room list</string>
-    <string name="kilobytes_per_second">kbs</string>
+    <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Verlanglijst</string>
     <string name="user_info_bio"><b>User bio</b></string>
@@ -81,20 +81,20 @@
     <string name="stat_files">Files</string>
     <string name="stat_directories">Directories</string>
     <string name="stat_free_upload">Free upload</string>
-    <string name="add_user">Gebruiker Toevoegen</string>
+    <string name="add_user">Gebruiker toevoegen</string>
     <string name="get_user_info">Gebruikerinfo ophalen</string>
-    <string name="quick_info">Beknopte Info</string>
+    <string name="quick_info">Beknopte info</string>
     <string name="filter">Filter</string>
     <!--
   These are search targets
   -->
-    <string name="all_target">Alle Gebruikers</string>
-    <string name="target_user_list">Gebruiker Lijst</string>
+    <string name="all_target">Alle gebruikers</string>
+    <string name="target_user_list">Gebruiker lijst</string>
     <string name="target_room">Kamer</string>
-    <string name="target_room_name">Kamer Naam</string>
+    <string name="target_room_name">Kamer naam</string>
     <string name="target_choose_user">Kies gebruiker</string>
     <string name="username">Gebruikersnaam</string>
-    <string name="search_target_">Zoek Doel:</string>
+    <string name="search_target_">Zoek doel</string>
     <string name="friends">Vrienden</string>
     <string name="ignored">Genegeerd</string>
     <string name="chatroom_disconnected">De verbinding is verbroken...</string>
@@ -110,9 +110,9 @@
     <string name="chatroom_enter_message">Schrijf een bericht</string>
     <string name="send_message">Verzenden</string>
     <string name="filter_chatrooms_here">Hier filteren</string>
-    <string name="enter_listening_port">Voer Poort om te luisteren in</string>
+    <string name="enter_listening_port">Voer poort om te luisteren in</string>
     <string name="create_chatroom_private">Privé maken</string>
-    <string name="search_here">Zoek Hier</string>
+    <string name="search_here">Zoek hier</string>
     <string name="seeker_needs_dl_dir">Choose download location</string>
     <string name="seeker_needs_dl_dir_content">Select a folder where Seeker will save downloaded files</string>
     <string name="seeker_needs_dl_dir_error">A download folder is required to save files</string>
@@ -129,21 +129,21 @@
     <string name="download_selected">Download geselecteerde</string>
     <string name="close_download_diag">Sluiten</string>
     <string name="add_about_me">Tik, om een \"over mij\" toe te voegen</string>
-    <string name="select_image">Selecteer Afbeelding</string>
-    <string name="clear_image">Verwijder Afbeelding</string>
+    <string name="select_image">Selecteer afbeelding</string>
+    <string name="clear_image">Verwijder afbeelding</string>
     <string name="no_image_chosen">Geen</string>
     <string name="inviteuser">Nodig gebruiker uit</string>
-    <string name="give_up_room">Geef Kamer op</string>
+    <string name="give_up_room">Geef kamer op</string>
     <string name="give_up_membership">Lidmaatschap opgeven</string>
     <string name="logout">Uitloggen</string>
     <string name="login">Aanmelden</string>
     <string name="password">Wachtwoord</string>
-    <string name="ConnectingToServer">Verbinden met Server</string>
+    <string name="ConnectingToServer">Verbinden met server</string>
     <string name="PleaseWait_">Even geduld aub...</string>
     <string name="choose_a_download_folder">Selecteer downloadmap</string>
     <string name="settings">Instellingen</string>
     <!--Search Result Styles-->
-    <string name="search_result_style">Zoekresultaten vormgeving:</string>
+    <string name="search_result_style">Zoekresultaten vormgeving</string>
     <string name="search_result_style_style_label">Style</string>
     <string name="search_result_style_simple">Simple</string>
     <string name="search_result_style_modern">Modern</string>
@@ -156,18 +156,18 @@
     <string name="search_result_style_on">On</string>
     <string name="expand_all">Expand all</string>
     <string name="collapse_all">Collapse all</string>
-    <string name="new_search_tab">Nieuwe Zoekopdracht</string>
+    <string name="new_search_tab">Nieuwe zoekopdracht</string>
     <string name="search_tabs_header">SEARCH TABS</string>
     <string name="wishlist_header">WISHLIST</string>
     <string name="wishlist_empty_header">WISHLIST (EMPTY)</string>
-    <string name="filter_search_results_here">Hier Resultaten Filteren</string>
+    <string name="filter_search_results_here">Hier resultaten filteren</string>
     <string name="persist_it">Vastgeplakt (sticky)</string>
     <string name="filter_format_label">Format</string>
     <string name="filter_any">Any</string>
     <string name="filter_format_lossless">Lossless</string>
     <string name="filter_format_lossy">Lossy</string>
     <string name="filter_min_bitrate_label">Min bitrate</string>
-    <string name="type_chatroom_ticker_message">Voer Ticker Bericht In</string>
+    <string name="type_chatroom_ticker_message">Ticker bericht</string>
     <string name="section_downloads">Downloads</string>
     <string name="section_search">Search</string>
     <string name="section_general">General</string>
@@ -175,7 +175,7 @@
     <string name="section_sharing">Sharing</string>
     <string name="section_network">Network</string>
     <string name="section_account">Account</string>
-    <string name="max_search_results">Max. aantal zoekresultaten: </string>
+    <string name="max_search_results">Max. aantal zoekresultaten</string>
     <string name="only_show_free_slots">Only show results of users with free slots</string>
     <string name="start_service_on_startup">Start Seeker tijdens het opstarten</string>
     <string name="allow_private_room_invitations">Allow private room invitations</string>
@@ -184,7 +184,7 @@
     <string name="remember_search_history">Zoekgeschiedenis onthouden</string>
     <string name="clear_search_history">Verwijder zoekgeschiedenis</string>
     <string name="file_backed_downloads">Bestandsondersteuning downloads</string>
-    <string name="night_mode_options">Nachtmodus optie: </string>
+    <string name="night_mode_options">Nachtmodus optie</string>
     <string name="enable_sharing">Delen inschakelen</string>
     <string name="browse_yourself">Zelf doorzoeken</string>
     <string name="enable_listening">Luisteren inschakelen</string>
@@ -220,7 +220,7 @@
     <!--Toasts-->
     <string name="we_are_already_logging_in">U bent al aangemeld</string>
     <string name="nothing_to_download">Niets om te downloaden</string>
-    <string name="download_is_starting">Download wordt Gestart...</string>
+    <string name="download_is_starting">Download wordt gestart...</string>
     <string name="directory_is_empty">Deze map is leeg</string>
     <string name="nothing_selected">Niets geselecteerd</string>
     <string name="nothing_selected_extra">"Nothing selected - tap to select"</string>
@@ -229,12 +229,12 @@
     <string name="must_type_a_username_to_browse">Must type user to browse</string>
     <string name="must_type_a_username_to_message">Must type user to message</string>
     <string name="must_type_a_username_to_invite">Must type user to invite</string>
-    <string name="must_type_a_username_to_add">Gebruiker moet User typen om toe te voegen</string>
+    <string name="must_type_a_username_to_add">Gebruiker moet user typen om toe te voegen</string>
     <string name="must_type_ticker_text">Moet ticker tekst typen</string>
     <string name="must_type_chatroom_name">Moet een chatroom naam typen</string>
     <string name="must_type_text_to_send">Moet tekst invoeren om te verzenden</string>
     <string name="error">Fout</string>
-    <string name="error_">Fout: </string>
+    <string name="error_">Fout:</string>
     <string name="error_duplicate">Fout: Dubbel verzoek gedetecteerd</string>
     <string name="error_browse_at_location">Error getting user directories at specified location</string>
     <string name="room_data_still_loading">Too fast! Still retrieving room data...</string>
