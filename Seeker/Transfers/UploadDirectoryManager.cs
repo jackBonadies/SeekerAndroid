@@ -362,9 +362,15 @@ namespace Seeker
                         }
                     }
 
-                    // TODO: ourTopLevelParent can be null here (a subdir whose only container is itself a subdir),
-                    // which would NPE on the HasError() check below
-                    if (!entry.Info.HasError() && !ourTopLevelParent.Info.HasError())
+                    if (entry.Info.HasError())
+                    {
+                        // error adding dir
+                    }
+                    else if (ourTopLevelParent == null)
+                    {
+                        Logger.Firebase("RebuildLockedAndHiddenPrefixLists: subdir has no non-subdir parent: " + entry.Info.UploadDataDirectoryUri);
+                    }
+                    else if (!ourTopLevelParent.Info.HasError())
                     {
                         if (entry.Info.IsLocked)
                         {

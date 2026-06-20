@@ -642,22 +642,27 @@ namespace Seeker
             }
             else
             {
-                UploadDirectoryManager.UploadDirectories.Remove(uploadDirEntry);
+                System.Threading.ThreadPool.QueueUserWorkItem((object o) =>
+                {
+                    UploadDirectoryManager.UploadDirectories.Remove(uploadDirEntry);
 
-                // remove purely in memory, no disk walk; on failure fall back to a full rescan like before
-                if (SharedFileService.TryRemoveSharedFolderInMemory(uploadDirEntry, out var removalErr))
-                {
-                    RefreshModernSharingRows(false);
-                }
-                else
-                {
-                    if (!string.IsNullOrEmpty(removalErr))
+                    // remove purely in memory, no disk walk; on failure fall back to a full rescan like before
+                    bool removed = SharedFileService.TryRemoveSharedFolderInMemory(uploadDirEntry, out var removalErr);
+                    if (!removed && !string.IsNullOrEmpty(removalErr))
                     {
                         Logger.Debug("Shared-folder removal fell back to rescan: " + removalErr);
                     }
-                    RefreshModernSharingRows(false);
-                    Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
-                }
+
+                    this.RunOnUiThread(new Action(() =>
+                    {
+                        RefreshModernSharingRows(false);
+                    }));
+
+                    if (!removed)
+                    {
+                        Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
+                    }
+                });
             }
         }
 
