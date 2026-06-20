@@ -8,7 +8,7 @@
     <string name="account_tab">Compte</string>
     <string name="searches_tab">Recherches</string>
     <string name="searches_tab2">Rechercher</string>
-    <string name="signin">Se Connecter</string>
+    <string name="signin">Se connecter</string>
     <string name="signin_or_create_account">Connectez-vous ou créez votre compte</string>
     <string name="set_up_sharing">Configurer le partage</string>
     <string name="manage_user_list">Gérer la liste d\'utilisateur</string>
@@ -47,12 +47,12 @@
     <string name="loading_wishlist_label">Chargement de la liste de souhaits</string>
     <string name="no_results_title">Aucun résultat trouvé</string>
     <string name="no_results_subtitle">Rien trouvé pour \"{0}\"</string>
-    <string name="results_hidden_title">{0} Résultats masqués par les filtres</string>
+    <string name="results_hidden_title">{0} résultats masqués par les filtres</string>
     <string name="results_hidden_subtitle">Ouvrir les filtres à ajuster</string>
     <string name="search_results_count_none">Aucun résultat</string>
-    <string name="search_results_count">{0} Résultats</string>
+    <string name="search_results_count">{0} résultats</string>
     <string name="search_results_count_filtered">Affichage des résultats {0} de {1}</string>
-    <string name="wishlist_results_count">{0} Résultats</string>
+    <string name="wishlist_results_count">{0} résultats</string>
     <string name="wishlist_never_run">Ne jamais lancer</string>
     <string name="category_file_type">Type de fichier</string>
     <string name="category_keyword">Mot-clé</string>
@@ -75,7 +75,7 @@
     <string name="user_info_bio"><b>Biographie</b></string>
     <string name="user_info_picture"><b>Photo</b></string>
     <string name="unsaved_changes_title">Ignorer les modifications?</string>
-    <string name="unsaved_changes_body">Il y a des modifications non enregistrées. Es-tu sûr de vouloir les abandonner ?</string>
+    <string name="unsaved_changes_body">Il y a des modifications non enregistrées. Êtes-vous sûr de vouloir les abandonner ?</string>
     <string name="statistics_header">Statistiques</string>
     <string name="stat_upload_slots">Emplacements de téléchargement</string>
     <string name="stat_queued">En file d\'attente</string>
@@ -151,7 +151,7 @@
     <string name="search_result_style_modern">Moderne</string>
     <string name="search_result_style_compact">Compacte</string>
     <string name="search_result_style_filetype_position_label">Position du type de fichier</string>
-    <string name="search_result_style_filetype_bottom">En Bas</string>
+    <string name="search_result_style_filetype_bottom">En bas</string>
     <string name="search_result_style_filetype_top">En haut</string>
     <string name="search_result_style_expandable">Extensible</string>
     <string name="search_result_style_off">Désactivé</string>
@@ -169,7 +169,7 @@
     <string name="filter_format_lossless">Sans pertes</string>
     <string name="filter_format_lossy">Avec perte</string>
     <string name="filter_min_bitrate_label">Débit binaire</string>
-    <string name="type_chatroom_ticker_message">Poster sur le Salon</string>
+    <string name="type_chatroom_ticker_message">Message du ticker</string>
     <string name="section_downloads">Téléchargements</string>
     <string name="section_search">Chercher</string>
     <string name="section_general">Général</string>
@@ -225,7 +225,7 @@
     <string name="download_is_starting">Démarrage du téléchargement...</string>
     <string name="directory_is_empty">Ce dossier est vide</string>
     <string name="nothing_selected">Rien de sélectionné</string>
-    <string name="nothing_selected_extra">"Rien sélectionné - Appuyez pour sélectionner"</string>
+    <string name="nothing_selected_extra">"Rien sélectionné - appuyez pour sélectionner"</string>
     <string name="failed_to_connect">Échec de la connexion</string>
     <string name="cannot_download_from_self">Impossible de télécharger de vous-même</string>
     <string name="must_type_a_username_to_browse">Vous devez taper l\'utilisateur à parcourir</string>
@@ -324,7 +324,7 @@
     <string name="failed_remove_mod">Échec de suppression du modérateur</string>
     <string name="success_removed_user">Utilisateur enlevé avec succès</string>
     <string name="failed_removed_user">Échec de la suppression de l\'utilisateur</string>
-    <string name="wishlist_tab_error">L\'onglet Liste de souhaits n\'existe plus</string>
+    <string name="wishlist_tab_error">L'onglet liste de souhaits n'existe plus</string>
     <string name="wishlist_next_run_hours_minutes">prochaine exécution en {0} h {1} min</string>
     <string name="wishlist_next_run_minutes">prochaine exécution en {0} min</string>
     <string name="wishlist_next_run_imminent">prochaine exécution à tout moment</string>
@@ -349,7 +349,7 @@
     <string name="browse_user_contacting">Contacter l\'utilisateur pour la liste des répertoires. Apparaîtra dans l\'onglet de navigation une fois terminé.</string>
     <string name="browse_user_timeout">Demande de dossier utilisateur a pris trop longtemps</string>
     <string name="browse_user_nodirectconnection">La demande de dossier utilisateur a échoué - Échec de la connexion au pair</string>
-    <string name="browse_user_wefailedtoparse">Impossible d\'analyser la réponse du navigateur</string>
+    <string name="browse_user_wefailedtoparse">Impossible d'analyser la réponse de navigation</string>
     <string name="browse_response_received">Réponse parcourir reçue</string>
     <string name="browse_none">L\'utilisateur ne partage pas de dossiers</string>
     <string name="browse_onlylocked">L\'utilisateur ne partage que des dossiers verrouillés</string>
@@ -518,7 +518,7 @@
     <string name="error_insufficient_days">Vous n\'avez pas {0} jours à donner.</string>
     <string name="give_to_">Donner à {0}</string>
     <string name="error_give_priv">Impossible de donner des permissions</string>
-    <string name="give_priv_success">Réussi à donner{0} jours à {1}.</string>
+    <string name="give_priv_success">Réussi à donner {0} jours à {1}.</string>
     <string name="sending__">Envoi en cours...</string>
     <string name="give_hint">nombre de jours</string>
     <string name="user_note">Note de l\'utilisateur</string>
@@ -537,9 +537,7 @@
     <string name="subfolders_warning_queue_paused">Ce dossier contient des sous-dossiers, voulez-vous mettre en file d\'attente tous les fichiers dans ce sous-dossier ({0}) ou seulement les fichiers dans le dossier courant ({1}) ?</string>
     <string name="current_folder_only">Dossier actuel uniquement</string>
     <string name="must_be_logged_in_to_give_privileges">Doit être connecté pour donner des privilèges</string>
-    <string name="about_body">Seeker est un client Soulseek gratuit et open-source pour Android. Il n\'aura jamais de pub ou de fonctions payantes. &lt;br&gt;&lt;br&gt;Aidez à traduire Seeker &lt;a href="https://crwd.in/seeker"&gt;ici&lt;/a&gt;.
-&lt;br&gt;&lt;br&gt;Le code source est &lt;a href="https://github.com/jackBonadies/SeekerAndroid"&gt;ici&lt;/a&gt;.
-&lt;br&gt;&lt;br&gt;Version: {0}.</string>
+    <string name="about_body">Seeker est un client Soulseek gratuit et open-source pour Android. Il n'aura jamais de pub ou de fonctions payantes.</string>
     <string name="about_link_source_title">Code source</string>
     <string name="about_link_translate_title">Contribuer à la traduction</string>
     <string name="must_be_logged_in_to_get_dir_contents">Vous devez être connecté pour voir le contenu des dossiers</string>
@@ -548,7 +546,7 @@
     <string name="removed_user">Utilisateur supprimé : \"{0}\"</string>
     <string name="successfully_changed_incomplete_dir">Changement du dossier incomplet vers \"{0}\" réussi</string>
     <string name="auto_clear_complete">Efface automatiquement les téléchargements complets</string>
-    <string name="auto_clear_complete_uploads">Efface automatiquement les téléchargements Complets</string>
+    <string name="auto_clear_complete_uploads">Efface automatiquement les téléversements complets</string>
     <string name="download_remaining">{0} téléchargements restants</string>
     <string name="downloads_remaining">{0} téléchargements restants</string>
     <string name="upload_remaining">{0} téléversements restants</string>
@@ -641,7 +639,7 @@
     <string name="OnlineStatus">Status de connexion</string>
     <string name="NoUsersFound">Aucun utilisateur trouvé</string>
     <string name="UsingThisWizardLong">En utilisant cet assistant, il est possible d\'importer des données client depuis SoulseekQT ou Nicotine+.\n\nPour obtenir les données client depuis SoulseekQT veuillez aller dans Options &gt; Extras &gt; \'Exporter les données de configuration client\',  l\'extension du fichier devrait être .scd1. Pour Nicotine+, veuillez aller dans Préférences &gt; Exporter, l\'extension du fichier peut être .tar.bz2 ou un fichier configuration intact.\n\nSeeker importera les Listes d\'Utilisateurs, Listes d\'Ignorés / sans partage, Liste de vœux, et Notes Utilisateur. Vous pourrez choisir qu\'importer via les écrans suivants.\n\nAppuyez sur \'Importer\' pour commencer.</string>
-    <string name="CurrentDownloadFolder_">Dossier de Téléchargement Courant: </string>
+    <string name="CurrentDownloadFolder_">Dossier de téléchargement</string>
     <string name="CreateCompleteAndIncomplete">Création des dossiers Soulseek complet et incomplet</string>
     <string name="CreateUsernameSubfolders">Créer des sous-dossiers pour les noms d\'utilisateur</string>
     <string name="DoNotCreateSubfoldersForSingleDownloads">Ignorer les sous-dossiers pour les fichiers uniques</string>
@@ -673,7 +671,7 @@
     <string name="Save">Sauvegarder</string>
     <string name="SortOrder">Tri dans l\'ordre</string>
     <string name="AddUserToIgnored">Ajouter utilisateur à la liste d\'ignorés</string>
-    <string name="ClearAllCompleteAndAborted">Nettoyage des Complétés et Annulés</string>
+    <string name="ClearAllCompleteAndAborted">Nettoyage des complétés et annulés</string>
     <string name="AbortAll">Tout annuler</string>
     <string name="BatchSelect">Sélection par lot</string>
     <string name="ShowSize">Afficher taille</string>
@@ -683,7 +681,7 @@
     <string name="RetryFailed">Échec de tentative</string>
     <string name="InvertSelection">Inverser sélection</string>
     <string name="SelectAll">Tout sélectionner</string>
-    <string name="ConfigureSmartFilters">Paramètres des Filtres Intelligents</string>
+    <string name="ConfigureSmartFilters">Paramètres des filtres intelligents</string>
     <string name="NotSet">Non défini</string>
     <string name="AppLocalStorage">Stockage local de l\'application</string>
     <string name="NotInUse">N\'est pas utilisé</string>
@@ -695,14 +693,14 @@
     <string name="CannotChangeNameNotUnique">Impossible de changer le nom. Pas unique.</string>
     <string name="AlreadyParsing">Analyse déjà en cours</string>
     <string name="DirectoryNotSet">Répertoire invalide</string>
-    <string name="FailedGettingAccess">Impossible d\'accéder le dossier</string>
+    <string name="FailedGettingAccess">Impossible d'accéder au dossier</string>
     <string name="AdditionalFiles">{0} nouveaux fichiers depuis le dernier scan.</string>
     <string name="OneAdditionalFile">1 nouveau fichier après le dernier scan.</string>
     <string name="NoMediaStore">Aucun accès à la banque de médias. L\'analyse ne sera pas optimisée.</string>
     <string name="NoPermissionsForDir">Impossible de définir le répertoire sans les autorisations appropriées</string>
     <string name="No">Non</string>
     <string name="MustBeLoggedInToImport">Vous devez être connecté avec votre compte pour importer des données.</string>
-    <string name="MustBeLoggedInToRetryDL">Vous devez être connecté avec votre compte pour réessayer de téléchargement.</string>
+    <string name="MustBeLoggedInToRetryDL">Vous devez être connecté avec votre compte pour réessayer le téléchargement.</string>
     <string name="FailedDownloadDirectoryNotSet">Erreur : Le répertoire de téléchargements n\'a pas bien été indiqué.</string>
     <string name="CopyLink">Copier le lien</string>
     <string name="DownloadFile">Télécharger le fichier</string>
@@ -714,7 +712,7 @@
     <string name="AbortUploads">Annuler le téléversement</string>
     <string name="AbortandClearUpload">Annule et efface le téléversement</string>
     <string name="AbortandClearUploads">Annule et efface les téléversements</string>
-    <string name="HideSmartFilters">Cache les Filtres Intelligents</string>
+    <string name="HideSmartFilters">Cache les filtres intelligents</string>
     <string name="UserIsOffline">Utilisateur déconnecté</string>
     <string name="Cancelled">Annulé</string>
     <string name="TimedOut">Délai expiré</string>
@@ -723,7 +721,7 @@
     <string name="SetLanguage">Langue</string>
     <string name="Automatic">Automatique</string>
     <string name="ManuallySetIncompleteFolder">Remplacer l\'emplacement incomplet du dossier</string>
-    <string name="CurrentIncompleteFolder">Dossier Incomplet Actuel:</string>
+    <string name="CurrentIncompleteFolder">Dossier incomplet</string>
     <string name="ClearFolder">Nettoyer dossier</string>
     <string name="HideSize">Cacher taille</string>
     <string name="HideSpeed">Cacher vitesse</string>
@@ -764,7 +762,7 @@
     <string name="speed_limit_kbs_per_transfer">{0} Ko/s · par transfert</string>
     <string name="folder_file_count_one">1 fichier</string>
     <string name="folder_file_count">{0} fichiers</string>
-    <string name="shared_summary_folders_files">{0} Dossiers · {1} Fichiers</string>
+    <string name="shared_summary_folders_files">{0} dossiers · {1} fichiers</string>
     <string name="edit_folder">Modifier le dossier</string>
     <string name="folder_hidden">Caché</string>
     <string name="folder_locked">Verrouillé</string>
