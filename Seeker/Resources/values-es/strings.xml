@@ -18,12 +18,15 @@
     <string name="section_caps_account">CUENTA</string>
     <string name="new_result">nuevo resultado</string>
     <string name="new_results">nuevos resultados</string>
+    <string name="stop_service">Detener servicio</string>
+    <string name="start_service">Iniciar servicio</string>
     <string name="saerch_user_list">Buscar lista de usuarios</string>
     <string name="search_room">Buscar sala</string>
     <string name="search_room_">Buscar sala {0}</string>
     <string name="search_user_">Buscar usuario {0}</string>
     <string name="wishlist_search">Buscar lista de deseos</string>
     <string name="no_account">¿No tienes cuenta? Simplemente ingresa un nombre de usuario único y crearemos una para ti</string>
+    <string name="keep_alive_service_subtitle">Permite a Seeker responder a las solicitudes de búsqueda (compartir), recibir mensajes de chat y ejecutar búsquedas de lista de deseos en segundo plano</string>
     <string name="privileges_more_info">Los privilegios permiten apoyar al creador de Soulseek (Nir) y al servidor central del que depende esta aplicación.
 \n\nTambién permite una posicion privilegiada en la cola de descargas.
 \n\nNota: cualquier donación no va al creador de este cliente no oficial de android, Seeker. Actualmente no acepto donaciones.</string>
@@ -192,6 +195,11 @@
     <string name="use_pnp_for_port_forwarding">Usar UPnP para reenvío de puertos</string>
     <string name="edit_your_user_info">Editar la información del usuario</string>
     <string name="restore_default_settings">Restaurar valores predeterminados</string>
+    <string name="restore_default_settings_body">Esto restablecerá todos los ajustes a sus valores predeterminados. No se puede deshacer.</string>
+    <string name="restore_defaults_subtitle">Reestablece ajustes a estado predeterminado</string>
+    <string name="force_filesystem_subtitle">Los permisos de la carpeta estándar de Android no siempre persisten. Si Seeker sigue solicitando de nuevo el acceso a la carpeta de descarga o compartida, esto concederá acceso al almacenamiento completo persistente a través de la configuración del sistema.\n\nLa versión de Play Store no puede solicitar este permiso — requiere la versión de lanzamiento de F-droid (IzzyOnDroid) o GitHub.</string>
+    <string name="get_fdroid_build">Obtener la versión de F-Droid (IzzyOnDroid)</string>
+    <string name="get_github_build">Obtener la versión de GitHub Release</string>
     <string name="user_has_no_bio">El usuario no tiene biografía.</string>
     <string name="user_has_no_pic">El usuario no tiene imagen.</string>
     <string name="user_picture_failed_to_load">Error al cargar imagen de perfil del usuario.</string>
@@ -267,7 +275,8 @@
     <string name="follow_system">Igual que el sistema</string>
     <string name="always_light">Siempre claro</string>
     <string name="always_dark">Siempre oscuro</string>
-    <string name="theme_purple">Morado</string>
+    <!-- theme variant color names (AMOLED variants are composed in code as "AMOLED - <color>") -->
+    <string name="theme_purple">Púrpura</string>
     <string name="theme_grey">Gris</string>
     <string name="theme_blue">Azul</string>
     <string name="theme_red">Rojo</string>
@@ -286,7 +295,7 @@
     <string name="ownership">propiedad</string>
     <string name="membership">membresía</string>
     <!--For someone translating, position {0} is a placeholder for the roomname-->
-    <string name="startup_room_off">{0} ya no está establecido para unirse al inicio</string>
+    <string name="startup_room_off">{0} ya no está configurado para unirse al inicio</string>
     <string name="startup_room_on">{0} ahora está configurado para unirse al inicio</string>
     <string name="notif_room_off">Las notificaciones se han desactivado durante: {0}</string>
     <string name="notif_room_on">Las notificaciones se han activado durante: {0}</string>
@@ -301,8 +310,8 @@
     <string name="error_adding_user_not_found">Error al añadir usuario: usuario no encontrado</string>
     <!--For someone translating, position {0} is a placeholder for the allowed/denied-->
     <string name="failed_setting_priv_invites">Error al configurar permitir invitaciones privadas a: {0}</string>
-    <string name="network_error_setting_listener">Error de red estableciendo escucha a {0}</string>
-    <string name="network_error_setting_listener_port">Error de red cambiando escucha a {0}</string>
+    <string name="network_error_setting_listener">Error de red estableciendo el oyente a {0}</string>
+    <string name="network_error_setting_listener_port">Error de red cambiando el oyente a {0}</string>
     <string name="allowed">Permitido</string>
     <string name="denied">Denegado</string>
     <string name="get_folder">Obtener carpeta</string>
@@ -319,7 +328,7 @@
     <string name="wishlist_next_run_hours_minutes">próxima ejecución en {0} h {1} min</string>
     <string name="wishlist_next_run_minutes">próxima ejecución en {0} min</string>
     <string name="wishlist_next_run_imminent">próxima ejecución en cualquier momento</string>
-    <string name="wishlist_max_results_reached">máximo de resultados alcanzado</string>
+    <string name="wishlist_max_results_reached">máximos resultados alcanzados</string>
     <string name="perform_search_first">Debe realizar una búsqueda primero para agregar a la lista de deseos</string>
     <string name="added_to_wishlist">Se añadió la consulta de búsqueda\"{0}\" a la lista de deseos</string>
     <string name="wishlist_tab_target">No se puede cambiar el objetivo de la búsqueda en la lista de deseos</string>
@@ -339,7 +348,7 @@
     <string name="empty_message_error">No se puede enviar un mensaje vacío</string>
     <string name="browse_user_contacting">Contactar con el usuario para la lista de directorios. Aparecerá en la pestaña de navegación cuando se complete.</string>
     <string name="browse_user_timeout">La solicitud de directorio de usuario expiró</string>
-    <string name="browse_user_nodirectconnection">Falló la solicitud de directorio de usuarios - No se puede establecer conexión directa con el par</string>
+    <string name="browse_user_nodirectconnection">Falló la solicitud de directorio de usuarios - No se puede establecer conexión directa con el par (Peer)</string>
     <string name="browse_user_wefailedtoparse">Error al analizar la respuesta de navegación</string>
     <string name="browse_response_received">Respuesta de navegación recibida</string>
     <string name="browse_none">El usuario no está compartiendo ningún directorio</string>
@@ -355,7 +364,7 @@
     <string name="network_unreachable">Red inaccesible</string>
     <string name="cannot_login">No se puede iniciar sesión</string>
     <string name="no_empty_user_pass">El nombre de usuario o la contraseña no pueden estar vacíos</string>
-    <string name="dns_failed_2">Error al resolver la dirección Ip del servidor soulseek.</string>
+    <string name="dns_failed_2">Error al resolver la dirección IP del servidor de Soulseek.</string>
     <!--In this case the placeholder {0} is for the username-->
     <string name="added_to_ignore">Añadido usuario \"{0}\" a lista de ignorados</string>
     <string name="already_added_to_ignore">Usuario \"{0}\" ya ha sido añadido a la lista de ignorados</string>
@@ -529,6 +538,8 @@
     <string name="current_folder_only">Sólo la carpeta actual</string>
     <string name="must_be_logged_in_to_give_privileges">Debe iniciar sesión para dar permisos</string>
     <string name="about_body">Seeker es un cliente de Soulseek gratuito y de código abierto para Android. Nunca tendrá anuncios ni características de pago.</string>
+    <string name="about_link_source_title">Código fuente</string>
+    <string name="about_link_translate_title">Ayuda a traducir</string>
     <string name="must_be_logged_in_to_get_dir_contents">Debe iniciar sesión para obtener contenido del directorio</string>
     <string name="note">Nota</string>
     <string name="removed_user_from_ignored_list">Se eliminó el usuario \"{0}\" de la lista de ignorados</string>
@@ -551,6 +562,7 @@
     <string name="re_requesting">Volviendo a solicitar</string>
     <string name="diagnostics_more_info">Esto guardará la información de diagnóstico en un archivo de texto llamado \"seeker_diagnostics.txt\" que se ubicará en la raíz de la carpeta de descarga seleccionada. \n\nEsto puede ser útil para enviarlo al desarrollador con el fin de solucionar problemas. Si los problemas son de naturaleza de red, es posible que deba reiniciar la aplicación después de activar esta opción para obtener resultados completos.</string>
     <string name="folder_X_from_user_Y_finished">{0} de {1} completado con éxito</string>
+    <string name="takes_effect_on_next_startup">Esto tendrá efecto en el próximo inicio</string>
     <string name="sort_results_by">Ordenar por</string>
     <string name="next">Siguiente</string>
     <string name="prev">Anterior</string>
@@ -626,6 +638,7 @@
     <string name="Name">Nombre</string>
     <string name="OnlineStatus">Estado en línea</string>
     <string name="NoUsersFound">No se encontraron usuarios</string>
+    <string name="UsingThisWizardLong">Usando este asistente es posible importar datos del cliente de SoulseekQT o Nicotine+.\n\nPara obtener datos del cliente de SoulseekQT vaya a Opciones &gt; Extras &gt; \'Exportar datos de configuración del cliente\', el tipo de archivo debe ser .scd1. Para Nicotine+ vaya a Preferencias &gt; Exportar, el tipo de archivo puede ser .tar.bz2 o el archivo de configuración crudo.\n\nEl Buscador importará Lista de Usuarios, Ignorada / No compartida, Lista de deseos y notas de usuario. Uno podrá elegir y elegir qué exportar en las siguientes pantallas.\n\nToque en \"importar\" para empezar.</string>
     <string name="CurrentDownloadFolder_">Carpeta de descarga actual</string>
     <string name="CreateCompleteAndIncomplete">Crear directorios de completos e incompletos para Soulseek</string>
     <string name="CreateUsernameSubfolders">Crear subcarpetas de nombre de usuario</string>
@@ -641,6 +654,7 @@
     <string name="NightVarient_">Variante nocturna</string>
     <string name="NoSharedAdd">No hay carpetas compartidas. Pulse \'Añadir\' para empezar</string>
     <string name="RescanShares">Volver a escanear archivos compartidos</string>
+    <string name="add_folder">Añadir carpeta</string>
     <string name="PauseSharingIfMetered">Pausar el uso compartido si se encuentra en conexión medida (móvil)</string>
     <string name="LimitDownloadSpeed">Limitar velocidad de descarga</string>
     <string name="LimitUploadSpeed">Limitar velocidad de subida</string>
@@ -735,4 +749,58 @@
     <string name="hr_ago">horas atrás</string>
     <string name="yesterday">ayer</string>
     <string name="days_ago">días atrás</string>
+    <!-- Modern settings screen -->
+    <string name="Privileges">Permisos</string>
+    <string name="search_settings">Ajustes de búsqueda</string>
+    <string name="no_matching_settings">No hay configuraciones coincidentes</string>
+    <string name="invalid_number">Introduce un número válido</string>
+    <string name="value_must_be_between">Value must be between {0} and {1}</string>
+    <string name="speed_limit_enable">Enable limit</string>
+    <string name="speed_limit_per_transfer">Per transfer</string>
+    <string name="speed_limit_off">Off</string>
+    <string name="speed_limit_kbs_total">{0} KB/s · total</string>
+    <string name="speed_limit_kbs_per_transfer">{0} KB/s · per transfer</string>
+    <string name="folder_file_count_one">1 file</string>
+    <string name="folder_file_count">{0} files</string>
+    <string name="shared_summary_folders_files">{0} folders · {1} files</string>
+    <string name="edit_folder">Edit folder</string>
+    <string name="folder_hidden">Hidden</string>
+    <string name="folder_locked">Locked</string>
+    <string name="Donate">Donate</string>
+    <string name="sharing_parsing_count">Currently parsing ({0} files)</string>
+    <string name="sharing_parsing_finishing">Currently parsing (finishing up)</string>
+    <string name="setting_subtitle_username_subfolders">Group downloads by sharer</string>
+    <string name="setting_subtitle_file_backed">Recommended · allows pausing / resuming downloads · less memory intensive</string>
+    <string name="setting_subtitle_import_client_data">Import data from SoulseekQT, Nicotine+</string>
+    <string name="setting_subtitle_export_client_data">Export user list, ignore list, wishlist to xml · for backup or migration</string>
+    <string name="setting_subtitle_listening">Allows connecting to users with closed ports</string>
+    <!-- Search keyword synonyms -->
+    <string name="keywords_download_folder">location directory save destination</string>
+    <string name="keywords_incomplete_folder">location directory partial</string>
+    <string name="keywords_override_incomplete">location directory partial</string>
+    <string name="keywords_auto_clear_downloads">remove delete transfers</string>
+    <string name="keywords_max_results">results limit count</string>
+    <string name="keywords_locked_search">private hide files</string>
+    <string name="keywords_locked_browse">private hide files</string>
+    <string name="keywords_remember_search_history">recent past</string>
+    <string name="keywords_notif_folder_complete">notification download</string>
+    <string name="keywords_notif_toast">notification download</string>
+    <string name="keywords_remember_recent_users">history past</string>
+    <string name="keywords_auto_away">inactive idle</string>
+    <string name="keywords_night_mode">dark light theme night day</string>
+    <string name="keywords_day_variant">theme color appearance</string>
+    <string name="keywords_night_variant">theme color appearance</string>
+    <string name="keywords_enable_sharing">upload share</string>
+    <string name="keywords_auto_clear_uploads">remove delete transfers</string>
+    <string name="keywords_manage_shared">folders directories upload sharing</string>
+    <string name="keywords_port">listening</string>
+    <string name="keywords_upnp">router port forwarding nat</string>
+    <string name="keywords_download_speed">limit bandwidth throttle</string>
+    <string name="keywords_upload_speed">limit bandwidth throttle</string>
+    <string name="keywords_max_concurrent">throttle bandwidth parallel limit</string>
+    <string name="keywords_privileges">donate</string>
+    <string name="keywords_diagnostics">log debug bug</string>
+    <string name="keywords_force_filesystem">storage permission</string>
+    <string name="keywords_edit_user_info">profile bio</string>
+    <string name="keywords_restore_defaults">reset factory</string>
 </resources>
