@@ -25,7 +25,7 @@
     <string name="search_room_">Zoek kamer {0}</string>
     <string name="search_user_">Zoek gebruiker {0}</string>
     <string name="wishlist_search">Verlanglijst zoeken</string>
-    <string name="no_account">Heb je nog geen account? Vul simpelweg een unieke gebruikersnaam in en een account word voor je aangemaakt.</string>
+    <string name="no_account">Heb je nog geen account? Vul simpelweg een unieke gebruikersnaam in en een account wordt voor je aangemaakt.</string>
     <string name="keep_alive_service_subtitle">Staat Seeker toe op zoek-opvraging te reageren (delen), chatberichten te ontvangen en verlanglijst zoekopdrachten uit te voeren op de achtergrond</string>
     <string name="privileges_more_info">Privileges help support the Soulseek Network and the central server this app depends on.\n\nThey also let you skip ahead of non-privileged users in download queues.\n\nNote: donations do not go to the creator of this unofficial Android client (Seeker). I do not currently accept donations.</string>
     <string name="no_messages">Geen berichten. Druk op \"+\" om te beginnen.</string>
@@ -71,9 +71,9 @@
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Verlanglijst</string>
     <string name="user_info_bio"><b>User bio</b></string>
-    <string name="user_info_picture"><b>Picture</b></string>
+    <string name="user_info_picture"><b>Afbeelding</b></string>
     <string name="unsaved_changes_title">Wijzigingen niet opslaan?</string>
-    <string name="unsaved_changes_body">You have unsaved changes, are you sure you want to discard them?</string>
+    <string name="unsaved_changes_body">Je hebt niet opgeslagen wijzigingen, weet je zeker dat je deze wilt verwijderen?</string>
     <string name="statistics_header">Statistics</string>
     <string name="stat_upload_slots">Upload slots</string>
     <string name="stat_queued">Queued</string>
@@ -116,8 +116,8 @@
     <string name="seeker_needs_dl_dir">Choose download location</string>
     <string name="seeker_needs_dl_dir_content">Select a folder where Seeker will save downloaded files</string>
     <string name="seeker_needs_dl_dir_error">A download folder is required to save files</string>
-    <string name="seeker_needs_dl_dir_choose_settings">Please set a download directory in Settings.</string>
-    <string name="seeker_cannot_access_files">Cannot access filesystem.  You must select a download directory, either in the login page or in settings.</string>
+    <string name="seeker_needs_dl_dir_choose_settings">Stel een downloadmap in bij instellingen.</string>
+    <string name="seeker_cannot_access_files">Kan geen toegang krijgen tot het bestandssysteem. U moet een downloadmap selecteren,  in de inlogpagina of anders in de instellingen.</string>
     <!--
   Download Dialog Columns
   -->
@@ -176,11 +176,11 @@
     <string name="section_network">Network</string>
     <string name="section_account">Account</string>
     <string name="max_search_results">Max. aantal zoekresultaten</string>
-    <string name="only_show_free_slots">Only show results of users with free slots</string>
+    <string name="only_show_free_slots">Toon alleen resultaten van gebruikers met vrije slots</string>
     <string name="start_service_on_startup">Start Seeker tijdens het opstarten</string>
-    <string name="allow_private_room_invitations">Allow private room invitations</string>
-    <string name="show_bottom_notifs_complete">Notify on file complete</string>
-    <string name="show_notifs_on_folder_complete">Notify on folder complete</string>
+    <string name="allow_private_room_invitations">Privéuitnodigingen voor chatkamers toestaan</string>
+    <string name="show_bottom_notifs_complete">Toon notificaties voor voltooide bestanden</string>
+    <string name="show_notifs_on_folder_complete">Toon meldingen van voltooide map</string>
     <string name="remember_search_history">Zoekgeschiedenis onthouden</string>
     <string name="clear_search_history">Verwijder zoekgeschiedenis</string>
     <string name="file_backed_downloads">Bestandsondersteuning downloads</string>
@@ -190,7 +190,7 @@
     <string name="enable_listening">Luisteren inschakelen</string>
     <string name="change_port">Poort wijzigen</string>
     <string name="check_your_port_status">Controleer de status</string>
-    <string name="use_pnp_for_port_forwarding">UPnP port forwarding</string>
+    <string name="use_pnp_for_port_forwarding">Gebruik UPnP voor poort doorsturen</string>
     <string name="edit_your_user_info">Gebruikersgegevens bewerken</string>
     <string name="restore_default_settings">Herstel standaardwaarden</string>
     <string name="restore_default_settings_body">This will reset all settings to their defaults. This can\'t be undone.</string>
@@ -204,13 +204,13 @@
     <string name="no_pic_set">Er is geen afbeelding ingesteld</string>
     <string name="select_pic">Afbeelding selecteren</string>
     <string name="success_set_pic">Afbeelding succesvol ingesteld</string>
-    <string name="error_no_file_manager_image">ERROR - No file manager installed that is capable of choosing an image. Please install one.</string>
-    <string name="error_no_file_manager_dir">ERROR - No file manager installed that is capable of choosing a directory. Please install one.</string>
-    <string name="error_no_file_manager_dir_manage_storage">ERROR - No file manager installed that is capable of choosing a directory. Please install one. If your device does not implement OPEN_DOCUMENT_TREE intent, please install Seeker from Fdroid (IzzyOnDroid Repo) which has the Manage External Storage permission.</string>
+    <string name="error_no_file_manager_image">FOUT - Geen bestandsbeheerder geïnstalleerd die in staat is om een afbeelding te kiezen. Installeer er een alstublieft.</string>
+    <string name="error_no_file_manager_dir">FOUT - Geen bestandsbeheerder geïnstalleerd die in staat is een map te kiezen. Installeer er een alstublieft.</string>
+    <string name="error_no_file_manager_dir_manage_storage">FOUT - Er is geen bestandsbeheerder geïnstalleerd die een map kan kiezen. Installeer er alstublieft een. Als uw apparaat de intentie OPEN_DOCUMENT_TREE niet implementeert, installeer dan Seeker van Fdroid (IzzyOnDroid Repo) die de toestemming heeft om externe opslag te beheren.</string>
     <string name="error_image_doesnt_exist">Afbeelding bestaat niet</string>
-    <string name="error_image_too_large">Image is too large. Please choose a smaller image. ( &lt; 5MB).</string>
+    <string name="error_image_too_large">Afbeelding is te groot. Kies een kleinere afbeelding alstublieft. (&lt;5MB).</string>
     <string name="no_room_tickers">Nog geen chatkamer tickers...</string>
-    <string name="user_list_empty">User list is empty. Please add a user to user list.</string>
+    <string name="user_list_empty">Gebruikerslijst is leeg. Voeg een gebruiker toe aan de lijst met gebruikers.</string>
     <string name="no_user">Geen gebruiker geselecteerd</string>
     <string name="no_room">Er is geen chatkamer geselecteerd</string>
     <string name="no_search_results">Geen resultaten gevonden</string>
@@ -223,12 +223,12 @@
     <string name="download_is_starting">Download wordt gestart...</string>
     <string name="directory_is_empty">Deze map is leeg</string>
     <string name="nothing_selected">Niets geselecteerd</string>
-    <string name="nothing_selected_extra">"Nothing selected - tap to select"</string>
+    <string name="nothing_selected_extra">"Niets geselecteerd - tik om te selecteren"</string>
     <string name="failed_to_connect">Verbinding maken mislukt</string>
-    <string name="cannot_download_from_self">Cannot download from yourself</string>
-    <string name="must_type_a_username_to_browse">Must type user to browse</string>
-    <string name="must_type_a_username_to_message">Must type user to message</string>
-    <string name="must_type_a_username_to_invite">Must type user to invite</string>
+    <string name="cannot_download_from_self">Kan niet downloaden van jezelf</string>
+    <string name="must_type_a_username_to_browse">Gebruiker moet user typen om te bladeren</string>
+    <string name="must_type_a_username_to_message">Gebruiker moet user typen om bericht te sturen</string>
+    <string name="must_type_a_username_to_invite">Gebruiker moet user typen om uit te nodigen</string>
     <string name="must_type_a_username_to_add">Gebruiker moet user typen om toe te voegen</string>
     <string name="must_type_ticker_text">Moet ticker tekst typen</string>
     <string name="must_type_chatroom_name">Moet een chatroom naam typen</string>
@@ -236,9 +236,9 @@
     <string name="error">Fout</string>
     <string name="error_">Fout:</string>
     <string name="error_duplicate">Fout: Dubbel verzoek gedetecteerd</string>
-    <string name="error_browse_at_location">Error getting user directories at specified location</string>
-    <string name="room_data_still_loading">Too fast! Still retrieving room data...</string>
-    <string name="must_be_logged_to_browse">Must be logged in to browse a user</string>
+    <string name="error_browse_at_location">Fout bij het ophalen van gebruikers mappen op de opgegeven locatie</string>
+    <string name="room_data_still_loading">Te snel! Nog bezig met het ophalen van kamer gegevens...</string>
+    <string name="must_be_logged_to_browse">Je moet ingelogd zijn om een gebruiker te bladeren</string>
     <string name="must_be_logged_to_get_room_list">Must be logged in to get chatroom list</string>
     <string name="must_be_logged_to_request_user_info">Must be logged in to request user info</string>
     <string name="must_be_logged_to_create_room">Must be logged in to create chatroom</string>
