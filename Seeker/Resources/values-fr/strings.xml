@@ -324,7 +324,7 @@
     <string name="failed_remove_mod">Échec de suppression du modérateur</string>
     <string name="success_removed_user">Utilisateur enlevé avec succès</string>
     <string name="failed_removed_user">Échec de la suppression de l\'utilisateur</string>
-    <string name="wishlist_tab_error">L'onglet liste de souhaits n'existe plus</string>
+    <string name="wishlist_tab_error">L\'onglet liste de souhaits n\'existe plus</string>
     <string name="wishlist_next_run_hours_minutes">prochaine exécution en {0} h {1} min</string>
     <string name="wishlist_next_run_minutes">prochaine exécution en {0} min</string>
     <string name="wishlist_next_run_imminent">prochaine exécution à tout moment</string>
@@ -349,7 +349,7 @@
     <string name="browse_user_contacting">Contacter l\'utilisateur pour la liste des répertoires. Apparaîtra dans l\'onglet de navigation une fois terminé.</string>
     <string name="browse_user_timeout">Demande de dossier utilisateur a pris trop longtemps</string>
     <string name="browse_user_nodirectconnection">La demande de dossier utilisateur a échoué - Échec de la connexion au pair</string>
-    <string name="browse_user_wefailedtoparse">Impossible d'analyser la réponse de navigation</string>
+    <string name="browse_user_wefailedtoparse">Impossible d\'analyser la réponse de navigation</string>
     <string name="browse_response_received">Réponse parcourir reçue</string>
     <string name="browse_none">L\'utilisateur ne partage pas de dossiers</string>
     <string name="browse_onlylocked">L\'utilisateur ne partage que des dossiers verrouillés</string>
@@ -537,7 +537,7 @@
     <string name="subfolders_warning_queue_paused">Ce dossier contient des sous-dossiers, voulez-vous mettre en file d\'attente tous les fichiers dans ce sous-dossier ({0}) ou seulement les fichiers dans le dossier courant ({1}) ?</string>
     <string name="current_folder_only">Dossier actuel uniquement</string>
     <string name="must_be_logged_in_to_give_privileges">Doit être connecté pour donner des privilèges</string>
-    <string name="about_body">Seeker est un client Soulseek gratuit et open-source pour Android. Il n'aura jamais de pub ou de fonctions payantes.</string>
+    <string name="about_body">Seeker est un client Soulseek gratuit et open-source pour Android. Il n\'aura jamais de pub ou de fonctions payantes.</string>
     <string name="about_link_source_title">Code source</string>
     <string name="about_link_translate_title">Contribuer à la traduction</string>
     <string name="must_be_logged_in_to_get_dir_contents">Vous devez être connecté pour voir le contenu des dossiers</string>
@@ -693,7 +693,7 @@
     <string name="CannotChangeNameNotUnique">Impossible de changer le nom. Pas unique.</string>
     <string name="AlreadyParsing">Analyse déjà en cours</string>
     <string name="DirectoryNotSet">Répertoire invalide</string>
-    <string name="FailedGettingAccess">Impossible d'accéder au dossier</string>
+    <string name="FailedGettingAccess">Impossible d\'accéder au dossier</string>
     <string name="AdditionalFiles">{0} nouveaux fichiers depuis le dernier scan.</string>
     <string name="OneAdditionalFile">1 nouveau fichier après le dernier scan.</string>
     <string name="NoMediaStore">Aucun accès à la banque de médias. L\'analyse ne sera pas optimisée.</string>
