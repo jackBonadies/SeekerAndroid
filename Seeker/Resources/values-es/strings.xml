@@ -199,7 +199,7 @@
     <string name="restore_defaults_subtitle">Reestablece ajustes a estado predeterminado</string>
     <string name="force_filesystem_subtitle">Los permisos de la carpeta estándar de Android no siempre persisten. Si Seeker sigue solicitando de nuevo el acceso a la carpeta de descarga o compartida, esto concederá acceso al almacenamiento completo persistente a través de la configuración del sistema.\n\nLa versión de Play Store no puede solicitar este permiso — requiere la versión de lanzamiento de F-droid (IzzyOnDroid) o GitHub.</string>
     <string name="get_fdroid_build">Obtener la versión de F-Droid (IzzyOnDroid)</string>
-    <string name="get_github_build">Obtener la version de GitHub Release</string>
+    <string name="get_github_build">Obtener la versión de GitHub Release</string>
     <string name="user_has_no_bio">El usuario no tiene biografía.</string>
     <string name="user_has_no_pic">El usuario no tiene imagen.</string>
     <string name="user_picture_failed_to_load">Error al cargar imagen de perfil del usuario.</string>
@@ -325,8 +325,8 @@
     <string name="success_removed_user">Usuario eliminado correctamente</string>
     <string name="failed_removed_user">Error al eliminar el usuario</string>
     <string name="wishlist_tab_error">La pestaña de lista de deseos ya no existe</string>
-    <string name="wishlist_next_run_hours_minutes">siguiente ejecución en {0} horas {1} min</string>
-    <string name="wishlist_next_run_minutes">siguiente ejecución en {0} min</string>
+    <string name="wishlist_next_run_hours_minutes">próxima ejecución en {0} h {1} min</string>
+    <string name="wishlist_next_run_minutes">próxima ejecución en {0} min</string>
     <string name="wishlist_next_run_imminent">próxima ejecución en cualquier momento</string>
     <string name="wishlist_max_results_reached">máximos resultados alcanzados</string>
     <string name="perform_search_first">Debe realizar una búsqueda primero para agregar a la lista de deseos</string>
