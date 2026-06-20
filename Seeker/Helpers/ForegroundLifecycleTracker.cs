@@ -52,6 +52,15 @@ namespace Seeker
                 HasAppEverStarted = true;
                 try
                 {
+                    SharingService.TrySetUpSharingOnAppForeground();
+                }
+                catch (Exception e)
+                {
+                    Logger.Firebase("TrySetUpSharingOnAppForeground failed: " + e.Message + e.StackTrace);
+                }
+
+                try
+                {
                     if (PreferencesState.StartServiceOnStartup)
                     {
                         Intent seekerKeepAliveService = new Intent(activity, typeof(SeekerKeepAliveService));

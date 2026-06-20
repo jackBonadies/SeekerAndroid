@@ -38,7 +38,7 @@ using AndroidX.Core.Content;
 using AndroidX.DocumentFile.Provider;
 using AndroidX.Fragment.App;
 using AndroidX.Lifecycle;
-using AndroidX.ViewPager.Widget;
+using AndroidX.ViewPager2.Widget;
 using Common;
 using Google.Android.Material.BottomNavigation;
 using Google.Android.Material.Snackbar;
@@ -135,9 +135,8 @@ namespace Seeker
         }
 
         public const string SETTINGS_INTENT = "com.example.seeker.SETTINGS";
-        public const int SETTINGS_EXTERNAL = 0x430;
-        public const int DEFAULT_SEARCH_RESULTS = 250;
-        private const int WRITE_EXTERNAL = 9999;
+
+        private const int WRITE_EXTERNAL_LEGACY = 0x427;
         private const int NEW_WRITE_EXTERNAL = 0x428;
         private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL = 0x429;
         private const int NEW_WRITE_EXTERNAL_VIA_LEGACY = 0x42A;
@@ -145,12 +144,12 @@ namespace Seeker
         private const int NEW_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42C;
         private const int MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY_Settings_Screen = 0x42D;
         private const int POST_NOTIFICATION_PERMISSION = 0x42E;
+        public const int SETTINGS_EXTERNAL = 0x430;
 
-        private AndroidX.ViewPager.Widget.ViewPager pager = null;
+        private AndroidX.ViewPager2.Widget.ViewPager2 pager = null;
 
 
 
-        private ISharedPreferences sharedPreferences;
         private GenericOnBackPressedCallback backPressedCallback;
 
         /// <summary>
@@ -163,7 +162,7 @@ namespace Seeker
             {
                 return;
             }
-            var pager = FindViewById<AndroidX.ViewPager.Widget.ViewPager>(Resource.Id.pager);
+            var pager = FindViewById<AndroidX.ViewPager2.Widget.ViewPager2>(Resource.Id.pager);
             bool consumable = false;
             if (pager != null)
             {
@@ -182,16 +181,9 @@ namespace Seeker
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
-            bool reborn = false;
-            if (savedInstanceState == null)
-            {
-                Logger.Debug("Main Activity On Create NEW");
-            }
-            else
-            {
-                reborn = true;
-                Logger.Debug("Main Activity On Create REBORN");
-            }
+            bool reborn = savedInstanceState != null;
+            Logger.Debug($"Main Activity On Create reborn? {reborn}");
+
             base.OnCreate(savedInstanceState);
             //System.Threading.Thread.CurrentThread.Name = "Main Activity Thread";
             Xamarin.Essentials.Platform.Init(this, savedInstanceState); //this is what you are supposed to do.
@@ -203,49 +195,32 @@ namespace Seeker
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.toolbar);
             myToolbar.Title = this.GetString(Resource.String.home_tab);
-            myToolbar.InflateMenu(Resource.Menu.account_menu);
             SetSupportActionBar(myToolbar);
-            myToolbar.InflateMenu(Resource.Menu.account_menu); //twice??
-
 
             backPressedCallback = new GenericOnBackPressedCallback(false, onBackPressedAction);
             OnBackPressedDispatcher.AddCallback(backPressedCallback);
 
             System.Console.WriteLine("Testing.....");
 
-            sharedPreferences = this.GetSharedPreferences(Constants.SharedPrefFile, 0);
+            //set the activity refs BEFORE the adapter, because ViewPager2 with OffscreenPageLimit=3
+            //eagerly creates all four tab fragments, whose OnCreateView read SeekerState.MainActivityRef.
+            SeekerState.MainActivityRef = this;
+            SeekerState.ActiveActivityRef = this;
 
-            TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
+            pager = (AndroidX.ViewPager2.Widget.ViewPager2)FindViewById(Resource.Id.pager);
+            TabsPagerAdapter adapter = new TabsPagerAdapter(this);
 
-            pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
-            pager.PageSelected += Pager_PageSelected;
-            TabsPagerAdapter adapter = new TabsPagerAdapter(SupportFragmentManager);
-
-            tabs.TabSelected += Tabs_TabSelected;
             pager.Adapter = adapter;
-            pager.AddOnPageChangeListener(new OnPageChangeLister1());
-            //tabs.SetupWithViewPager(pager);
+            //keep all four tab fragments resident (FragmentPagerAdapter never destroyed them); the app
+            //relies on long-lived fragments via SearchFragment.Instance / BrowseFragment.Instance etc.
+            pager.OffscreenPageLimit = 3;
+            pager.RegisterOnPageChangeCallback(new OnPageChangeLister1());
             //this is a relatively safe way that prevents rotates from redoing the intent.
             bool alreadyHandled = Intent.GetBooleanExtra("ALREADY_HANDLED", false);
             Intent = Intent.PutExtra("ALREADY_HANDLED", true);
 
-            SeekerState.MainActivityRef = this;
-            SeekerState.ActiveActivityRef = this;
-
-            //Intent = i;
             if (Intent != null)
             {
-                //if(Intent.Flags == (ActivityFlags.LaunchedFromHistory | ActivityFlags.NewTask))
-                //{
-                //    //FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY | FLAG_ACTIVITY_NEW_TASK
-                //    //-back button then resumed from history
-                //    //FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
-                //    //-home button then resumed from history
-                //    //FLAG_ACTIVITY_NEW_TASK
-                //    //-clicking app icon or intent filter
-                //    Logger.Debug("new task | launched from history");
-                //}
-
                 if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
                 {
                     pager.SetCurrentItem(2, false);
@@ -327,20 +302,12 @@ namespace Seeker
                 }
             }
 
-            //TODO2026 - need to think about this
-            //if we have all the conditions to share, then set sharing up.
-            if (SharedFileService.MeetsSharingConditions() && !SharedFileService.ParseStatus.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
-            {
-                Seeker.Services.SharingService.SetUpSharing();
-            }
-            else if (SharedFileService.NumberOfSharedDirectoriesIsStale)
-            {
-                SharedFileService.InformServerOfSharedFiles();
-                SharedFileService.AttemptedToSetUpSharing = true;
-            }
+            //Sync the chrome to the landed tab once the pager is laid out. Needed (a) because a deep
+            //link above may have moved off home via SetCurrentItem before layout, which ViewPager2
+            //doesn't dispatch OnPageSelected for, and (b) so the initial page's menu visibility is
+            //gated from the start (otherwise every resident fragment's menu shows until the first swipe).
+            pager.Post(() => SyncToPage(pager.CurrentItem));
 
-            SeekerState.SharedPreferences = sharedPreferences;
-            UpdateForScreenSize();
 
             // Document files are initialized once per process in SeekerApplication.OnCreate.
             // Here we only handle the things that require an Activity context.
@@ -348,7 +315,7 @@ namespace Seeker
             {
                 if (ContextCompat.CheckSelfPermission(this, Manifest.Permission.WriteExternalStorage) == Android.Content.PM.Permission.Denied)
                 {
-                    ActivityCompat.RequestPermissions(this, new string[] { Manifest.Permission.WriteExternalStorage }, WRITE_EXTERNAL);
+                    ActivityCompat.RequestPermissions(this, new string[] { Manifest.Permission.WriteExternalStorage }, WRITE_EXTERNAL_LEGACY);
                 }
             }
             else if (StorageState.RootDocumentFile == null)
@@ -358,9 +325,9 @@ namespace Seeker
                 Android.Net.Uri res = string.IsNullOrEmpty(PreferencesState.SaveDataDirectoryUri)
                     ? Android.Net.Uri.Parse(StorageState.DefaultMusicUri)
                     : Android.Net.Uri.Parse(PreferencesState.SaveDataDirectoryUri);
-                var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
-                b.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
-                b.SetMessage(this.GetString(Resource.String.seeker_needs_dl_dir_content));
+                var dialogBuilder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
+                dialogBuilder.SetTitle(this.GetString(Resource.String.seeker_needs_dl_dir));
+                dialogBuilder.SetMessage(this.GetString(Resource.String.seeker_needs_dl_dir_content));
                 EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
                     var storageManager = Android.OS.Storage.StorageManager.FromContext(this);
@@ -383,9 +350,9 @@ namespace Seeker
                         }
                     }
                 });
-                b.SetPositiveButton(Resource.String.okay, eventHandler);
-                b.SetCancelable(false);
-                b.Show();
+                dialogBuilder.SetPositiveButton(Resource.String.okay, eventHandler);
+                dialogBuilder.SetCancelable(false);
+                dialogBuilder.Show();
             }
         }
 
@@ -696,7 +663,7 @@ namespace Seeker
         {
             try
             {
-                var pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
+                var pager = (AndroidX.ViewPager2.Widget.ViewPager2)FindViewById(Resource.Id.pager);
                 return pager.CurrentItem == 3;
             }
             catch
@@ -714,7 +681,7 @@ namespace Seeker
         {
             try
             {
-                var pager = (AndroidX.ViewPager.Widget.ViewPager)FindViewById(Resource.Id.pager);
+                var pager = (AndroidX.ViewPager2.Widget.ViewPager2)FindViewById(Resource.Id.pager);
                 if (pager.CurrentItem == 3) //browse tab
                 {
                     BrowseFragment.Instance?.BackButton();
@@ -746,34 +713,6 @@ namespace Seeker
             RefreshBackCallbackState();
         }
 
-
-        private void UpdateForScreenSize()
-        {
-            if (!PlatformInfo.IsLowDpi()) return;
-            try
-            {
-                TabLayout tabs = (TabLayout)FindViewById(Resource.Id.tabs);
-                LinearLayout vg = (LinearLayout)tabs.GetChildAt(0);
-                int tabsCount = vg.ChildCount;
-                for (int j = 0; j < tabsCount; j++)
-                {
-                    ViewGroup vgTab = (ViewGroup)vg.GetChildAt(j);
-                    int tabChildsCount = vgTab.ChildCount;
-                    for (int i = 0; i < tabChildsCount; i++)
-                    {
-                        View tabViewChild = vgTab.GetChildAt(i);
-                        if (tabViewChild is TextView)
-                        {
-                            ((TextView)tabViewChild).SetAllCaps(false);
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                //not worth throwing over..
-            }
-        }
 
         public void RecreateFragment(AndroidX.Fragment.App.Fragment f)
         {
@@ -838,7 +777,12 @@ namespace Seeker
                 }
 
 
-                if (resultCode == Result.Ok)
+                if (resultCode == Result.Ok && data?.Data == null)
+                {
+                    Logger.Firebase("OnActivityResult Result.Ok but data?.Data is null (NEW_WRITE_EXTERNAL)");
+                }
+
+                if (resultCode == Result.Ok && data?.Data != null)
                 {
                     if (NEW_WRITE_EXTERNAL == requestCode)
                     {
@@ -904,7 +848,12 @@ namespace Seeker
                 }
 
 
-                if (resultCode == Result.Ok)
+                if (resultCode == Result.Ok && data?.Data == null)
+                {
+                    Logger.Firebase("OnActivityResult Result.Ok but data?.Data is null (MUST_SELECT_A_DIRECTORY)");
+                }
+
+                if (resultCode == Result.Ok && data?.Data != null)
                 {
                     if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
                     {
@@ -1060,24 +1009,32 @@ namespace Seeker
             base.OnSaveInstanceState(outState);
         }
 
-        private void Tabs_TabSelected(object sender, TabLayout.TabSelectedEventArgs e)
-        {
-            System.Console.WriteLine(e.Tab.Position);
-            if (e.Tab.Position != 1) //i.e. if we are not the search tab
-            {
-                try
-                {
-                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)this.GetSystemService(Context.InputMethodService);
-                    imm.HideSoftInputFromWindow((sender as View).WindowToken, 0);
-                }
-                catch
-                {
-                    //not worth throwing over
-                }
-            }
-        }
         public static int goToSearchTab = int.MaxValue;
-        private void Pager_PageSelected(object sender, ViewPager.PageSelectedEventArgs e)
+        public void SyncToPage(int position)
+        {
+            if (position < 0)
+            {
+                return;
+            }
+            var navigator = FindViewById<BottomNavigationView>(Resource.Id.navigation);
+            if (navigator != null)
+            {
+                navigator.Menu.GetItem(position).SetCheckable(true); //necessary if side scrolling...
+                navigator.Menu.GetItem(position).SetChecked(true);
+            }
+            //Gate options-menu visibility to the current tab. FragmentStateAdapter (unlike
+            //FragmentPagerAdapter) does not call setMenuVisibility per primary item, so without this
+            //every resident tab fragment contributes its OnCreateOptionsMenu to the action bar at once.
+            int tabCount = pager?.Adapter?.ItemCount ?? 0;
+            for (int i = 0; i < tabCount; i++)
+            {
+                SupportFragmentManager.FindFragmentByTag("f" + i)?.SetMenuVisibility(i == position);
+            }
+            InvalidateOptionsMenu();
+            OnPagerPageSelected(position);
+        }
+
+        public void OnPagerPageSelected(int position)
         {
             //if we are changing modes and the transfers action mode is not null (i.e. is active)
             //then we need to get out of it.
@@ -1090,7 +1047,7 @@ namespace Seeker
                 BrowseFragment.BrowseActionMode.Finish();
             }
             // Hide download dialog when leaving search tab (i.e. clicking browse user -> go to browse response), show when returning
-            if (e.Position != 1)
+            if (position != 1)
             {
                 if (SearchFragment.dlDialogShown)
                 {
@@ -1107,7 +1064,7 @@ namespace Seeker
                 }
             }
             //in addition each fragment is responsible for expanding their menu...
-            switch (e.Position)
+            switch (position)
             {
                 case 0:
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
@@ -1117,7 +1074,6 @@ namespace Seeker
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
                     this.SupportActionBar.Title = this.GetString(Resource.String.home_tab);
                     this.SupportActionBar.SubtitleFormatted = null;
-                    this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
                     break;
                 case 1:
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
@@ -1127,7 +1083,6 @@ namespace Seeker
                     this.SupportActionBar.SetDisplayShowTitleEnabled(false);
                     this.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);
                     SearchFragment.ConfigureSupportCustomView(this.SupportActionBar.CustomView/*, this*/);
-                    this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.account_menu);
                     if (goToSearchTab != int.MaxValue)
                     {
                         if (SearchFragment.Instance?.Activity == null || !(SearchFragment.Instance.Activity.Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Started))) //this happens if we come from settings activity. Main Activity has NOT been started. SearchFragment has the .Actvity ref of an OLD activity.  so we are not ready yet. 
@@ -1149,8 +1104,6 @@ namespace Seeker
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
 
                     SetTransferSupportActionBarState();
-
-                    this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.browse_menu_empty);  //todo remove?
                     break;
                 case 3:
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
@@ -1159,7 +1112,6 @@ namespace Seeker
                     this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
                     BrowseFragment.SetActionBarTitle();
-                    this.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar).InflateMenu(Resource.Menu.transfers_menu);
                     break;
             }
             RefreshBackCallbackState();
@@ -1228,13 +1180,9 @@ namespace Seeker
                 case POST_NOTIFICATION_PERMISSION:
                     break;
                 default:
-                    if (grantResults.Length > 0 && grantResults[0] == Permission.Granted)
+                    if (!(grantResults.Length > 0 && grantResults[0] == Permission.Granted))
                     {
-                        return;
-                    }
-                    else
-                    {
-                        FinishAndRemoveTask(); //TODO - why?? this was added in initial commit. kills process if permission not granted?
+                        Logger.Debug("Permission denied for request code " + requestCode + "; continuing.");
                     }
                     break;
             }
@@ -1246,16 +1194,16 @@ namespace Seeker
             switch (item.ItemId)
             {
                 case Resource.Id.navigation_home:
-                    pager.CurrentItem = 0;
+                    pager.SetCurrentItem(0, false);
                     break;
                 case Resource.Id.navigation_search:
-                    pager.CurrentItem = 1;
+                    pager.SetCurrentItem(1, false);
                     break;
                 case Resource.Id.navigation_transfers:
-                    pager.CurrentItem = 2;
+                    pager.SetCurrentItem(2, false);
                     break;
                 case Resource.Id.navigation_browse:
-                    pager.CurrentItem = 3;
+                    pager.SetCurrentItem(3, false);
                     break;
             }
             return true;

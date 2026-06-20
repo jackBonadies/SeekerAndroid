@@ -113,19 +113,28 @@ namespace Seeker
 
 
 
-        public override void SetMenuVisibility(bool menuVisible)
+        /// <summary>
+        /// Keeps a horizontally-scrolling child RecyclerView's drags from being intercepted by an
+        /// enclosing ViewPager2 (which would change tabs). Requests disallow-intercept on touch down.
+        /// </summary>
+        private sealed class DisallowParentHorizontalInterceptListener : Java.Lang.Object, RecyclerView.IOnItemTouchListener
         {
-            //this is necessary if programmatically moving to a tab from another activity..
-            if (menuVisible)
+            public bool OnInterceptTouchEvent(RecyclerView rv, MotionEvent e)
             {
-                var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
-                if (navigator != null)
+                if (e.Action == MotionEventActions.Down)
                 {
-                    navigator.Menu.GetItem(1).SetCheckable(true);
-                    navigator.Menu.GetItem(1).SetChecked(true);
+                    rv.Parent?.RequestDisallowInterceptTouchEvent(true);
                 }
+                return false;
             }
-            base.SetMenuVisibility(menuVisible);
+
+            public void OnTouchEvent(RecyclerView rv, MotionEvent e)
+            {
+            }
+
+            public void OnRequestDisallowInterceptTouchEvent(bool disallowIntercept)
+            {
+            }
         }
 
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
@@ -909,6 +918,9 @@ namespace Seeker
             var manager = new LinearLayoutManager(this.Context, LinearLayoutManager.Horizontal, false);
             recyclerViewChips.SetItemAnimator(null);
             recyclerViewChips.SetLayoutManager(manager);
+            //ViewPager2 (unlike the old ViewPager) steals horizontal drags from nested horizontal
+            //scrollers, so a swipe on the chip row would flip tabs. Keep the gesture on the chips.
+            recyclerViewChips.AddOnItemTouchListener(new DisallowParentHorizontalInterceptListener());
             recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
             recyclerViewChips.SetAdapter(SearchFragment.Instance.recyclerChipsAdapter);
 

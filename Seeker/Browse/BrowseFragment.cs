@@ -221,20 +221,6 @@ namespace Seeker
             return base.OnOptionsItemSelected(item);
         }
 
-        public override void SetMenuVisibility(bool menuVisible)
-        {
-            //this is necessary if programmatically moving to a tab from another activity..
-            if (menuVisible)
-            {
-                var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
-                if (navigator != null)
-                {
-                    navigator.Menu.GetItem(BROWSE_TAB_INDEX).SetCheckable(true);
-                    navigator.Menu.GetItem(BROWSE_TAB_INDEX).SetChecked(true);
-                }
-            }
-            base.SetMenuVisibility(menuVisible);
-        }
 
         public override void OnDestroyView()
         {
@@ -451,7 +437,7 @@ namespace Seeker
                         BrowseFragment.Instance.RefreshOnRecieved();
                     }
                 }
-                var pager = (AndroidX.ViewPager.Widget.ViewPager)SeekerState.MainActivityRef?.FindViewById(Resource.Id.pager);
+                var pager = (AndroidX.ViewPager2.Widget.ViewPager2)SeekerState.MainActivityRef?.FindViewById(Resource.Id.pager);
                 if (pager != null && pager.CurrentItem == BROWSE_TAB_INDEX)
                 {
                     SetActionBarTitle();
@@ -1213,7 +1199,7 @@ namespace Seeker
 
             Action<View> goSnackBarAction = new Action<View>((View v) =>
             {
-                ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(BROWSE_TAB_INDEX, true);
+                ((AndroidX.ViewPager2.Widget.ViewPager2)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(BROWSE_TAB_INDEX, true);
             });
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>

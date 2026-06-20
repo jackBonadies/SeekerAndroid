@@ -43,6 +43,140 @@ namespace Common.Share
         }
 
         /// <summary>
+        /// Builds the file-key -> presentable-name index. The key is simply the file's iteration position in
+        /// <paramref name="presentableNameToFullFileInfo"/>.
+        /// </summary>
+        public static Dictionary<int, string> GenerateFileKeyToPresentableNameIndex(
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfo)
+        {
+            var fileKeyToPresentableName = new Dictionary<int, string>();
+            int fileKey = 0;
+            foreach (string presentableName in presentableNameToFullFileInfo.Keys)
+            {
+                fileKeyToPresentableName[fileKey] = presentableName;
+                fileKey++;
+            }
+
+            return fileKeyToPresentableName;
+        }
+
+        /// <summary>
+        /// Builds the search-token -> file-keys index from the file dictionary.
+        /// </summary>
+        public static Dictionary<string, List<int>> GenerateSearchTermTokenToFileKeysIndex(
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfo,
+            Dictionary<int, string> fileKeyToPresentableName)
+        {
+            Dictionary<string, List<int>> searchTermTokenToListOfFileKeys = new Dictionary<string, List<int>>();
+            var presentableNameToFileKey = fileKeyToPresentableName.ToDictionary(x => x.Value, x => x.Key);
+            foreach (string presentableName in presentableNameToFullFileInfo.Keys)
+            {
+                string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(SimpleHelpers.GetFileNameFromFile(presentableName));
+                searchableName = SharedFileCache.MatchSpecialCharAgnostic(searchableName);
+                int code = presentableNameToFileKey[presentableName];
+                foreach (string token in searchableName.ToLower().Split(null)) //null means whitespace
+                {
+                    if (token == string.Empty)
+                    {
+                        continue;
+                    }
+                    if (searchTermTokenToListOfFileKeys.ContainsKey(token))
+                    {
+                        searchTermTokenToListOfFileKeys[token].Add(code);
+                    }
+                    else
+                    {
+                        searchTermTokenToListOfFileKeys[token] = new List<int>();
+                        searchTermTokenToListOfFileKeys[token].Add(code);
+                    }
+                }
+            }
+
+            return searchTermTokenToListOfFileKeys;
+        }
+
+        /// <summary>
+        /// Remove folder and regenerate derived search indices (token/helper).
+        /// </summary>
+        /// <param name="presentablePrefix">The shared root's presentable name (e.g. "Music"), as returned by
+        /// UploadDirectoryEntry.GetPresentableName().</param>
+        /// <param name="anythingRemoved">True if at least one file key OR directory entry matched the prefix.</param>
+        public SharedFileCache WithFolderRemoved(string presentablePrefix, out bool anythingRemoved)
+        {
+            string subPrefix = presentablePrefix + "\\";
+
+            bool FileMatches(string key) => key.StartsWith(subPrefix, StringComparison.Ordinal);
+            bool DirMatches(string name) => name == presentablePrefix || name.StartsWith(subPrefix, StringComparison.Ordinal);
+
+            int removedFileCount = 0;
+            var newFullInfo = new Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>>();
+            foreach (var kvp in PresentableNameToFullFileInfo)
+            {
+                if (FileMatches(kvp.Key))
+                {
+                    removedFileCount++;
+                }
+                else
+                {
+                    newFullInfo.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            int removedDirCount = 0;
+            List<Soulseek.Directory> FilterDirs(IEnumerable<Soulseek.Directory> dirs)
+            {
+                var kept = new List<Soulseek.Directory>();
+                if (dirs == null)
+                {
+                    return kept;
+                }
+                foreach (var dir in dirs)
+                {
+                    if (DirMatches(dir.Name))
+                    {
+                        removedDirCount++;
+                    }
+                    else
+                    {
+                        kept.Add(dir);
+                    }
+                }
+                return kept;
+            }
+
+            var newDirs = FilterDirs(BrowseResponse?.Directories);
+            var newLockedDirs = FilterDirs(BrowseResponse?.LockedDirectories);
+            var newHiddenDirs = FilterDirs(BrowseResponseHiddenPortion);
+            var newMapping = FriendlyDirNameToUriMapping.Where(t => !DirMatches(t.Item1)).ToList();
+
+            anythingRemoved = removedFileCount > 0 || removedDirCount > 0;
+
+            var newHelperIndex = GenerateFileKeyToPresentableNameIndex(newFullInfo);
+            var newTokenIndex = GenerateSearchTermTokenToFileKeysIndex(newFullInfo, newHelperIndex);
+
+            int newNonHiddenCountForServer = newFullInfo.Count(pair => !pair.Value.Item5);
+            var newBrowseResponse = new BrowseResponse(newDirs, newLockedDirs);
+
+            var newCache = new SharedFileCache(newFullInfo, newBrowseResponse.DirectoryCount, newBrowseResponse,
+                newMapping, newTokenIndex, newHelperIndex, newHiddenDirs, newNonHiddenCountForServer);
+            newCache.SuccessfullyInitialized = true;
+            return newCache;
+        }
+
+        public CachedParseResults ToCachedParseResults()
+        {
+            return new CachedParseResults(
+                PresentableNameToFullFileInfo,
+                BrowseResponse?.DirectoryCount ?? 0,
+                BrowseResponse,
+                BrowseResponseHiddenPortion,
+                FriendlyDirNameToUriMapping,
+                TokenIndex,
+                HelperIndex,
+                nonHiddenFileCountForServer);
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="keyFilename"></param>
@@ -363,7 +497,7 @@ namespace Common.Share
                     string excludeTermAgnostic = SharedFileCache.MatchSpecialCharAgnostic(excludeTerm);
                     if (TokenIndex.ContainsKey(excludeTermAgnostic))
                     {
-                        matches.Except(TokenIndex[excludeTermAgnostic]);
+                        matches = matches.Except(TokenIndex[excludeTermAgnostic]);
                     }
                 }
 

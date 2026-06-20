@@ -148,7 +148,7 @@ namespace Seeker.Browse
                         }
                         return;
                     }
-                    if (SeekerState.MainActivityRef != null && ((AndroidX.ViewPager.Widget.ViewPager)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).CurrentItem == 3) //AND it is our current activity...
+                    if (SeekerState.MainActivityRef != null && ((AndroidX.ViewPager2.Widget.ViewPager2)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).CurrentItem == 3) //AND it is our current activity...
                     {
                         if (SeekerState.MainActivityRef.Lifecycle.CurrentState.IsAtLeast(AndroidX.Lifecycle.Lifecycle.State.Started))
                         {

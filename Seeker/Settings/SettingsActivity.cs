@@ -199,6 +199,9 @@ namespace Seeker
 
         private void ClearAllFolders()
         {
+            // If a parse is in flight, cancel it FIRST so it can't finish and clobber the cleared state by
+            // committing / persisting its (now-stale) cache. No-op when nothing is parsing.
+            SharedFileService.CancelOngoingParse();
             UploadDirectoryManager.UploadDirectories.Clear();
             UploadDirectoryManager.SaveToSharedPreferences(SeekerState.SharedPreferences);
             SharedFileService.ClearFileCache();
@@ -276,9 +279,8 @@ namespace Seeker
 
         private void RescanShares()
         {
-            //for rescan=true, we use the previous parse to get metadata if there is a match...
-            //so that we do not have to read the file again to get things like bitrate, samples, etc.
-            //if the presentable name is in the last parse, and the size matches, then use those attributes we previously had to read the file to get..
+            //for Rescan, we use the previous parse to get metadata if there is a match (i.e. if the presentable name and size matches)
+            //  that way we do not have to read the file again to get things like bitrate, samples, duration, bitdepth
             Rescan(null, -1, false, true);
         }
 
@@ -640,9 +642,27 @@ namespace Seeker
             }
             else
             {
-                UploadDirectoryManager.UploadDirectories.Remove(uploadDirEntry);
-                RefreshModernSharingRows(false);
-                Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
+                System.Threading.ThreadPool.QueueUserWorkItem((object o) =>
+                {
+                    UploadDirectoryManager.UploadDirectories.Remove(uploadDirEntry);
+
+                    // remove purely in memory, no disk walk; on failure fall back to a full rescan like before
+                    bool removed = SharedFileService.TryRemoveSharedFolderInMemory(uploadDirEntry, out var removalErr);
+                    if (!removed && !string.IsNullOrEmpty(removalErr))
+                    {
+                        Logger.Debug("Shared-folder removal fell back to rescan: " + removalErr);
+                    }
+
+                    this.RunOnUiThread(new Action(() =>
+                    {
+                        RefreshModernSharingRows(false);
+                    }));
+
+                    if (!removed)
+                    {
+                        Rescan(null, -1, UploadDirectoryManager.AreAnyFromLegacy(), false);
+                    }
+                });
             }
         }
 
@@ -1093,7 +1113,7 @@ namespace Seeker
                 UploadDirectoryManager.UploadDirectories.Add(newlyAddedDirectory);
             }
 
-            UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
+            UploadDirectoryManager.RecomputeDirectoryState();
             if (UploadDirectoryManager.AreAllFailed())
             {
                 throw new DirectoryAccessFailure("All Failed");
@@ -1122,6 +1142,7 @@ namespace Seeker
                 Logger.Debug("Parsing now......");
 
                 SharedFileService.SetParsing(true);
+                var parseCancellationToken = SharedFileService.BeginNewParseCancellation();
                 int prevFiles = -1;
                 bool success = false;
                 if (rescanClicked && SharedFileService.SharedFileCache != null)
@@ -1136,12 +1157,24 @@ namespace Seeker
                 try
                 {
 
-                    success = SharedFileService.InitializeDatabase(null, false, out string errorMessage);
+                    success = SharedFileService.InitializeDatabase(null, false, parseCancellationToken, out string errorMessage);
                     if (!success)
                     {
                         throw new Exception("Failed to parse shared files: " + errorMessage);
                     }
                     SharedFileService.SetParsing(false);
+                }
+                catch (System.OperationCanceledException)
+                {
+                    // All folders were removed mid-parse (the only cancel trigger). This is a clean cancel,
+                    // NOT a failure: do not clear caches or show an error toast. ClearAllFolders has already
+                    // reset the sharing state; just stop parsing and refresh the rows.
+                    SharedFileService.SetParsing(false);
+                    this.RunOnUiThread(new Action(() =>
+                    {
+                        RefreshModernSharingRows(false);
+                    }));
+                    return;
                 }
                 catch (Exception e)
                 {

@@ -1,7 +1,7 @@
 using Android.Animation;
 using Android.OS;
 using Android.Views;
-using AndroidX.ViewPager.Widget;
+using AndroidX.ViewPager2.Widget;
 using Google.Android.Material.BottomNavigation;
 using Seeker.Helpers;
 using System;
@@ -65,26 +65,11 @@ namespace Seeker
             }
         }
 
-        public class OnPageChangeLister1 : Java.Lang.Object, ViewPager.IOnPageChangeListener
+        public class OnPageChangeLister1 : ViewPager2.OnPageChangeCallback
         {
-            public void OnPageScrolled(int position, float positionOffset, int positionOffsetPixels)
+            public override void OnPageSelected(int position)
             {
-                //throw new NotImplementedException();
-            }
-
-            public void OnPageScrollStateChanged(int state)
-            {
-                //throw new NotImplementedException();
-            }
-
-            public void OnPageSelected(int position)
-            {
-                BottomNavigationView navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
-                if (position != -1 && navigator != null)
-                {
-                    navigator.Menu.GetItem(position).SetCheckable(true); //this is necessary if side scrolling...
-                    navigator.Menu.GetItem(position).SetChecked(true);
-                }
+                (SeekerState.MainActivityRef as MainActivity)?.SyncToPage(position);
             }
         }
     }

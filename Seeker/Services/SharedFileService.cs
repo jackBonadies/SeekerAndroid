@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading;
 using static Android.Provider.DocumentsContract;
 
 namespace Seeker.Services
@@ -30,6 +31,45 @@ namespace Seeker.Services
         /// For external callers.</summary>
         public static void SetParsing(bool value) => _parseStatus.IsParsing = value;
 
+        // Cancellation for the in-flight parse. Only one parse runs at a time (rescans are guarded by
+        // IsParsing; startup parse is once), so a single source suffices.
+        private static CancellationTokenSource _parseCts;
+
+        /// <summary>Begin a fresh cancellation scope for a parse and return its token. Disposes the
+        /// previous source (safe — the prior parse has finished by the time a new one begins).</summary>
+        public static CancellationToken BeginNewParseCancellation()
+        {
+            var old = _parseCts;
+            _parseCts = new CancellationTokenSource();
+            try
+            {
+                old?.Dispose();
+            }
+            catch
+            {
+                // ignore — defensive against a disposed/in-use source
+            }
+            return _parseCts.Token;
+        }
+
+        /// <summary>Request cancellation of the in-flight parse, if any. No-op when nothing is parsing.</summary>
+        public static void CancelOngoingParse()
+        {
+            var cts = _parseCts;
+            if (cts == null)
+            {
+                return;
+            }
+            try
+            {
+                cts.Cancel();
+            }
+            catch
+            {
+                // ignore ObjectDisposedException etc.
+            }
+        }
+
         public class FullFileInfosResult
         {
             public Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> PresentableNameToFullFileInfo { get; set; }
@@ -40,7 +80,7 @@ namespace Seeker.Services
         }
 
         private static FullFileInfosResult GetFullFileInfoFromSharedDirectory(
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse)
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, CancellationToken ct)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
             //so the presentablename should be FolderSelected/path to rest
@@ -53,12 +93,6 @@ namespace Seeker.Services
             var dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
             int directoryCount = 0;
 
-            //UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
-            //if (UploadDirectoryManager.AreAllFailed()) //the newly added one is always good.
-            //{
-            //    throw new DirectoryAccessFailure("All Failed");
-            //}
-
             HashSet<string> volNames = UploadDirectoryManager.GetInterestedVolNames();
 
             Dictionary<string, List<Tuple<string, int, int>>> allMediaStoreInfo = new Dictionary<string, List<Tuple<string, int, int>>>();
@@ -68,6 +102,7 @@ namespace Seeker.Services
             var uploadDirectories = UploadDirectoryManager.UploadDirectories.ToList(); //avoid race conditions and enumeration modified exceptions.
             foreach (var uploadDirEntry in uploadDirectories)
             {
+                ct.ThrowIfCancellationRequested();
                 if (uploadDirEntry.IsSubdir || uploadDirEntry.Info.HasError())
                 {
                     continue;
@@ -79,7 +114,7 @@ namespace Seeker.Services
                 _parseStatus.BeginRoot(uploadDirEntry.Info.UploadDataDirectoryUri, presentableNameToFullFileInfos.Count);
                 traverseDirectoriesGatherFullFileInfos(SeekerState.ActiveActivityRef.ContentResolver, uploadDirectory.Uri, DocumentsContract.GetTreeDocumentId(uploadDirectory.Uri), uploadDirectory.Uri,
                     presentableNameToFullFileInfos, allDirs, allLockedDirs, allHiddenDirs, dirMappingFriendlyNameToUri, allMediaStoreInfo, previousFileInfoToUse, rootFolderDisplayName,
-                    ref directoryCount);
+                    ref directoryCount, ct);
                 _parseStatus.EndRoot(uploadDirEntry.Info.UploadDataDirectoryUri, presentableNameToFullFileInfos.Count); // final count + mark complete
             }
 
@@ -226,7 +261,7 @@ namespace Seeker.Services
         }
 
         private static FullFileInfosResult GetFullFileInfoFromSharedDirectoryLegacy(
-            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse)
+            Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse, CancellationToken ct)
         {
             //searchable name (just folder/song), uri.ToString (to actually get it), size (for ID purposes and to send), presentablename (to send - this is the name that is supposed to show up as the folder that the QT and nicotine clients send)
             //so the presentablename should be FolderSelected/path to rest
@@ -239,24 +274,10 @@ namespace Seeker.Services
             var dirMappingFriendlyNameToUri = new List<Tuple<string, string>>();
             int directoryCount = 0;
 
-            //UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
-            //if(UploadDirectoryManager.AreAllFailed())
-            //{
-            //    throw new DirectoryAccessFailure("All Failed");
-            //}
-
-
-            //string lastPathSegment = dir.Uri.Path.Replace('/', '\\');
-            //string toStrip = string.Empty;
-            //if (lastPathSegment.Contains('\\'))
-            //{
-            //    int stripIndex = lastPathSegment.LastIndexOf('\\');
-            //    toStrip = lastPathSegment.Substring(0, stripIndex + 1);
-            //}
-
             var tmpUploadDirs = UploadDirectoryManager.UploadDirectories.ToList(); //avoid race conditions and enumeration modified exceptions.
             foreach (var uploadDirEntry in tmpUploadDirs)
             {
+                ct.ThrowIfCancellationRequested();
                 if (uploadDirEntry.IsSubdir || uploadDirEntry.Info.HasError())
                 {
                     continue;
@@ -269,7 +290,7 @@ namespace Seeker.Services
                 traverseDirectoryEntriesLegacy(dir, pairs, allDirs, allLockedDirs,
                     allHiddenDirs, dirMappingFriendlyNameToUri,
                     previousFileInfoToUse, rootFolderDisplayName,
-                    ref directoryCount);
+                    ref directoryCount, ct);
                 _parseStatus.EndRoot(uploadDirEntry.Info.UploadDataDirectoryUri, pairs.Count);
             }
 
@@ -295,22 +316,6 @@ namespace Seeker.Services
         {
             string directoryPath = dirFile.Uri.LastPathSegment; //on the emulator this is /tree/downloads/document/docwonlowds but the dirToStrip is uppercase Downloads
             directoryPath = directoryPath.Replace("/", @"\");
-            //try
-            //{
-            //    directoryPath = directoryPath.Substring(directoryPath.ToLower().IndexOf(dirToStrip.ToLower()));
-            //    directoryPath = directoryPath.Replace("/", @"\"); //probably strip out the root shared dir...
-            //}
-            //catch(Exception e)
-            //{
-            //    //Non-fatal Exception: java.lang.Throwable: directoryPath: False\tree\msd:824\document\msd:825MusicStartIndex cannot be less than zero.
-            //    //its possible for dirToStrip to be null
-            //    //True\tree\0000-0000:Musica iTunes\document\0000-0000:Musica iTunesObject reference not set to an instance of an object 
-            //    //Non-fatal Exception: java.lang.Throwable: directoryPath: True\tree\3061-6232:Musica\document\3061-6232:MusicaObject reference not set to an instance of an object  at AndriodApp1.MainActivity.SlskDirFromDocumentFile (AndroidX.DocumentFile.Provider.DocumentFile dirFile, System.String dirToStrip) [0x00024] in <778faaf2e13641b38ae2700aacc789af>:0 
-            //    Logger.Firebase("directoryPath: " + (dirToStrip==null).ToString() + directoryPath + " from directory resolver: "+ diagFromDirectoryResolver+" toStrip: " + dirToStrip + e.Message + e.StackTrace);
-            //}
-            //friendlyDirNameToUriMapping.Add(new Tuple<string, string>(directoryPath, dirFile.Uri.ToString()));
-            //strip out the shared root dir
-            //directoryPath.Substring(directoryPath.IndexOf(dir.Name))
 
             List<Soulseek.File> files = new List<Soulseek.File>();
             foreach (DocumentFile f in dirFile.ListFiles())
@@ -679,7 +684,7 @@ namespace Seeker.Services
             Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfos, List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs,
             List<Tuple<string, string>> dirMappingFriendlyNameToUri,
             Dictionary<string, List<Tuple<string, int, int>>> allMediaInfoDict, Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
-            string parentDisplayName, ref int totalDirectoryCount)
+            string parentDisplayName, ref int totalDirectoryCount, CancellationToken ct)
         {
             //this should be the folder before the selected to strip away..
             Android.Net.Uri listChildrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(rootUri, parentDoc);
@@ -707,6 +712,7 @@ namespace Seeker.Services
             {
                 while (c.MoveToNext())
                 {
+                    ct.ThrowIfCancellationRequested();
                     string docId = c.GetString(0);
                     string name = c.GetString(1);
                     string mime = c.GetString(2);
@@ -718,7 +724,7 @@ namespace Seeker.Services
                         totalDirectoryCount++;
                         traverseDirectoriesGatherFullFileInfos(contentResolver, rootUri, docId, childUri, presentableNameToFullFileInfos, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
                             dirMappingFriendlyNameToUri, allMediaInfoDict, previousFileInfoToUse,
-                            parentDisplayName + '\\' + name, ref totalDirectoryCount);
+                            parentDisplayName + '\\' + name, ref totalDirectoryCount, ct);
                     }
                     else
                     {
@@ -779,18 +785,19 @@ namespace Seeker.Services
             List<Directory> listOfDirs, List<Directory> listOfLockedDirs, List<Directory> listOfHiddenDirs, List<Tuple<string, string>> dirMappingFriendlyNameToUri,
             Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> previousFileInfoToUse,
             string parentDisplayName,
-            ref int totalDirectoryCount)
+            ref int totalDirectoryCount, CancellationToken ct)
         {
             //this should be the folder before the selected to strip away..
             List<Soulseek.File> files = new List<Soulseek.File>();
             foreach (var childDocFile in parentDocFile.ListFiles())
             {
+                ct.ThrowIfCancellationRequested();
                 if (childDocFile.IsDirectory)
                 {
                     totalDirectoryCount++;
                     traverseDirectoryEntriesLegacy(childDocFile, pairs, listOfDirs, listOfLockedDirs, listOfHiddenDirs,
                         dirMappingFriendlyNameToUri, previousFileInfoToUse,
-                        parentDisplayName + '\\' + childDocFile.Name, ref totalDirectoryCount);
+                        parentDisplayName + '\\' + childDocFile.Name, ref totalDirectoryCount, ct);
                 }
                 else
                 {
@@ -869,10 +876,11 @@ namespace Seeker.Services
         /// </summary>
         /// <param name="dir"></param>
         /// <param name="checkCache"></param>
-        public static bool InitializeDatabase(UploadDirectoryEntry newlyAddedDirectoryIfApplicable, bool checkCache, out string errorMsg)
+        public static bool InitializeDatabase(UploadDirectoryEntry newlyAddedDirectoryIfApplicable, bool checkCache, CancellationToken ct, out string errorMsg)
         {
             errorMsg = string.Empty;
             bool success = false;
+            bool cancelled = false;
             try
             {
                 CachedParseResults cachedParseResults = null;
@@ -885,7 +893,7 @@ namespace Seeker.Services
                 {
                     //optimization - if new directory is a subdir we can skip this part. !!!! but we still have things to do like make all files that start with said presentableDir to be locked / hidden. etc.
 
-                    UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
+                    UploadDirectoryManager.RecomputeDirectoryState();
                     if (UploadDirectoryManager.AreAllFailed())
                     {
                         throw new DirectoryAccessFailure("All Failed");
@@ -894,12 +902,16 @@ namespace Seeker.Services
                     FullFileInfosResult result;
                     if (UploadDirectoryManager.AreAnyFromLegacy())
                     {
-                        result = GetFullFileInfoFromSharedDirectoryLegacy(SharedFileService.SharedFileCache?.PresentableNameToFullFileInfo);
+                        result = GetFullFileInfoFromSharedDirectoryLegacy(SharedFileService.SharedFileCache?.PresentableNameToFullFileInfo, ct);
                     }
                     else
                     {
-                        result = GetFullFileInfoFromSharedDirectory(SharedFileService.SharedFileCache?.PresentableNameToFullFileInfo);
+                        result = GetFullFileInfoFromSharedDirectory(SharedFileService.SharedFileCache?.PresentableNameToFullFileInfo, ct);
                     }
+
+                    // Final guard: abort before we commit / persist so a cancel landing right as the walk
+                    // finishes never overwrites or persists the (now-stale) cache.
+                    ct.ThrowIfCancellationRequested();
 
                     var presentableNameToFullFileInfo = result.PresentableNameToFullFileInfo;
                     var browseResponse = result.BrowseResponse;
@@ -912,8 +924,8 @@ namespace Seeker.Services
 
                     _parseStatus.NumberParsed = ParsingStatusState.FinishingUpSentinel; //our signal that we are finishing up...
 
-                    Dictionary<int, string> fileKeyToPresentableName = GenerateFileKeyToPresentableNameIndex(presentableNameToFullFileInfo);
-                    Dictionary<string, List<int>> searchTermTokenToListOfFileKeys = GenerateSearchTermTokenToFileKeysIndex(presentableNameToFullFileInfo, fileKeyToPresentableName);
+                    Dictionary<int, string> fileKeyToPresentableName = SharedFileCache.GenerateFileKeyToPresentableNameIndex(presentableNameToFullFileInfo);
+                    Dictionary<string, List<int>> searchTermTokenToListOfFileKeys = SharedFileCache.GenerateSearchTermTokenToFileKeysIndex(presentableNameToFullFileInfo, fileKeyToPresentableName);
 
                     var newCachedResults = new CachedParseResults(
                         presentableNameToFullFileInfo,
@@ -938,7 +950,7 @@ namespace Seeker.Services
                 else
                 {
                     Logger.Debug("Using cached results");
-                    UploadDirectoryManager.UpdateWithDocumentFileAndErrorStates();
+                    UploadDirectoryManager.RecomputeDirectoryState();
                     if (UploadDirectoryManager.AreAllFailed())
                     {
                         throw new DirectoryAccessFailure("All Failed");
@@ -955,8 +967,18 @@ namespace Seeker.Services
                     }
                 }
                 success = true;
-                _parseStatus.FailedShareParse = false;
+                _parseStatus.LastParseResult = ParseResultFlags.None;
                 SharedFileService.SharedFileCache.SuccessfullyInitialized = true;
+            }
+            catch (OperationCanceledException)
+            {
+                // User removed all folders mid-parse (or other cancellation). NOT a failure — leave the
+                // previous/empty cache intact and let callers handle it quietly. Rethrow so the caller can
+                // distinguish a cancel from a real failure.
+                cancelled = true;
+                _parseStatus.LastParseResult = ParseResultFlags.Cancelled;
+                Logger.Debug("Parse cancelled.");
+                throw;
             }
             catch (Exception e)
             {
@@ -999,7 +1021,7 @@ namespace Seeker.Services
             }
             finally
             {
-                if (!success)
+                if (!success && !cancelled)
                 {
                     //if(newlyAddedDirectoryIfApplicable!=null)
                     //{
@@ -1008,7 +1030,7 @@ namespace Seeker.Services
                     //}
                     //SeekerState.UploadDataDirectoryUri = null;
                     //SeekerState.UploadDataDirectoryUriIsFromTree = true;
-                    _parseStatus.FailedShareParse = true;
+                    _parseStatus.LastParseResult = ParseResultFlags.Failed;
                     //if success if false then SharedFileService.SharedFileCache might be null still causing a crash!
                     if (SharedFileService.SharedFileCache != null)
                     {
@@ -1021,47 +1043,83 @@ namespace Seeker.Services
             //SeekerState.SoulseekClient.SearchResponseDeliveryFailed += SoulseekClient_SearchResponseDeliveryFailed;
         }
 
-        private static Dictionary<string, List<int>> GenerateSearchTermTokenToFileKeysIndex(Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfo, Dictionary<int, string> fileKeyToPresentableName)
+        /// <summary>
+        /// Remove a single shared folder WITHOUT re-walking disk. Remove folder from shared file cache, 
+        /// regenerates the derived search indices, re-persists, and re-informs the server. 
+        /// Returns false (caller should fall back to a full Rescan) when the removal needs metadata re-derivation 
+        /// that only a disk walk can do safely
+        /// </summary>
+        public static bool TryRemoveSharedFolderInMemory(UploadDirectoryEntry removedEntry, out string errorMsg)
         {
-            Dictionary<string, List<int>> searchTermTokenToListOfFileKeys = new Dictionary<string, List<int>>();
-            var presentableNameToFileKey = fileKeyToPresentableName.ToDictionary(x => x.Value, x => x.Key);
-            foreach (string presentableName in presentableNameToFullFileInfo.Keys)
+            errorMsg = string.Empty;
+            try
             {
-                string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(SimpleHelpers.GetFileNameFromFile(presentableName));
-                searchableName = SharedFileCache.MatchSpecialCharAgnostic(searchableName);
-                int code = presentableNameToFileKey[presentableName];
-                foreach (string token in searchableName.ToLower().Split(null)) //null means whitespace
+                var cache = SharedFileService.SharedFileCache;
+                if (cache == null || !cache.SuccessfullyInitialized)
                 {
-                    if (token == string.Empty)
+                    errorMsg = "cache not initialized";
+                    return false;
+                }
+                if (ParseStatus.IsParsing)
+                {
+                    errorMsg = "parse in progress";
+                    return false;
+                }
+                if (removedEntry.IsSubdir)
+                {
+                    errorMsg = "removed entry is a subdir";
+                    return false;
+                }
+
+                // A remaining entry nested under the removed root needs to be re-keyed/promoted from a subdir back
+                // to a root, which the in-memory WithFolderRemoved can't do. Defer to a full rescan, which
+                // recomputes IsSubdir in RecomputeDirectoryState and promotes the orphan correctly.
+                var removedUri = Android.Net.Uri.Parse(removedEntry.Info.UploadDataDirectoryUri);
+                foreach (var remaining in UploadDirectoryManager.UploadDirectories)
+                {
+                    if (UploadDirectoryManager.IsNestedUnder(Android.Net.Uri.Parse(remaining.Info.UploadDataDirectoryUri), removedUri))
                     {
-                        continue;
-                    }
-                    if (searchTermTokenToListOfFileKeys.ContainsKey(token))
-                    {
-                        searchTermTokenToListOfFileKeys[token].Add(code);
-                    }
-                    else
-                    {
-                        searchTermTokenToListOfFileKeys[token] = new List<int>();
-                        searchTermTokenToListOfFileKeys[token].Add(code);
+                        errorMsg = "a remaining folder is nested under the removed one";
+                        return false;
                     }
                 }
-            }
 
-            return searchTermTokenToListOfFileKeys;
+                string prefix = removedEntry.GetPresentableName();
+                var newCache = cache.WithFolderRemoved(prefix, out bool anythingRemoved);
+                if (!anythingRemoved)
+                {
+                    errorMsg = "nothing matched the removed folder";
+                    return false;
+                }
+
+                SharedFileService.SharedFileCache = newCache;
+
+                TrimPresentableDirList(UploadDirectoryManager.PresentableNameLockedDirectories, prefix);
+                TrimPresentableDirList(UploadDirectoryManager.PresentableNameHiddenDirectories, prefix);
+
+                StoreCachedParseResults(SeekerState.ActiveActivityRef, newCache.ToCachedParseResults());
+                UploadDirectoryManager.SaveToSharedPreferences(SeekerState.SharedPreferences);
+
+                SharedFileCache_Refreshed(null, (newCache.DirectoryCount, newCache.GetNonHiddenFileCountForServer()));
+                SharingStatusChangedEvent?.Invoke(null, new EventArgs());
+                return true;
+            }
+            catch (Exception e)
+            {
+                errorMsg = e.Message;
+                Logger.Firebase("TryRemoveSharedFolderInMemory failed, falling back to rescan: " + e.Message + e.StackTrace);
+                return false;
+            }
         }
 
-        private static Dictionary<int, string> GenerateFileKeyToPresentableNameIndex(Dictionary<string, Tuple<long, string, Tuple<int, int, int, int>, bool, bool>> presentableNameToFullFileInfo)
+        private static void TrimPresentableDirList(List<string> list, string prefix)
         {
-            var fileKeyToPresentableName = new Dictionary<int, string>();
-            int fileKey = 0;
-            foreach (string presentableName in presentableNameToFullFileInfo.Keys)
+            if (list == null)
             {
-                fileKeyToPresentableName[fileKey] = presentableName;
-                fileKey++;
+                return;
             }
-
-            return fileKeyToPresentableName;
+            string subPrefix = prefix + "\\";
+            list.RemoveAll(name => name == prefix || name.StartsWith(subPrefix, StringComparison.Ordinal));
         }
 
         public static CachedParseResults GetCachedParseResults(Context c)

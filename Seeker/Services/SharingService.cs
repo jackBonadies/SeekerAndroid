@@ -175,7 +175,13 @@ namespace Seeker.Services
                 Logger.Debug("We meet sharing conditions, lets set up the sharedFileCache for 1st time.");
                 try
                 {
-                    success = SharedFileService.InitializeDatabase(null, true, out errorMessage); //we check the cache which has ALL of the parsed results in it. much different from rescanning.
+                    success = SharedFileService.InitializeDatabase(null, true, SharedFileService.BeginNewParseCancellation(), out errorMessage); //we check the cache which has ALL of the parsed results in it. much different from rescanning.
+                }
+                catch (OperationCanceledException)
+                {
+                    Logger.Debug("Set up sharing parse cancelled.");
+                    SharedFileService.AttemptedToSetUpSharing = true;
+                    return;
                 }
                 catch (Exception e)
                 {
@@ -221,6 +227,19 @@ namespace Seeker.Services
                 SharedFileService.AttemptedToSetUpSharing = true;
             });
             System.Threading.ThreadPool.QueueUserWorkItem((object o) => { setUpSharedFileCache(); });
+        }
+
+        public static void TrySetUpSharingOnAppForeground()
+        {
+            if (SharedFileService.MeetsSharingConditions() && !SharedFileService.ParseStatus.IsParsing && !SharedFileService.IsSharingSetUpSuccessfully())
+            {
+                SetUpSharing();
+            }
+            else if (SharedFileService.NumberOfSharedDirectoriesIsStale)
+            {
+                SharedFileService.InformServerOfSharedFiles();
+                SharedFileService.AttemptedToSetUpSharing = true;
+            }
         }
 
         /// <summary>

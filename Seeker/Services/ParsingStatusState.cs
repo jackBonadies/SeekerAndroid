@@ -1,7 +1,20 @@
+using System;
 using System.Collections.Concurrent;
 
 namespace Seeker.Services
 {
+    /// <summary>
+    /// Outcome of the most recent share parse. Bitwise so a single field can carry distinct
+    /// failed / cancelled states (None == success or idle).
+    /// </summary>
+    [Flags]
+    public enum ParseResultFlags
+    {
+        None = 0,
+        Failed = 1,
+        Cancelled = 2,
+    }
+
     /// <summary>
     /// Read-only view of the in-progress share parse. To be used outside of SharedFileService.
     /// </summary>
@@ -12,8 +25,14 @@ namespace Seeker.Services
         /// <summary>Global files parsed so far</summary>
         int NumberParsed { get; }
 
-        /// <summary>True if the most recent parse failed.</summary>
+        /// <summary>Outcome of the most recent parse (source of truth for failed / cancelled).</summary>
+        ParseResultFlags LastParseResult { get; }
+
+        /// <summary>True if the most recent parse failed (not the same as cancelled).</summary>
         bool FailedShareParse { get; }
+
+        /// <summary>True if the most recent parse was cancelled.</summary>
+        bool WasCancelled { get; }
 
         /// <summary>True once the file scan is done and the token index is being built.</summary>
         bool IsFinishingUp { get; }
@@ -53,7 +72,12 @@ namespace Seeker.Services
 
         public int NumberParsed { get; set; } = 0;
 
-        public bool FailedShareParse { get; set; } = false;
+        /// <summary>Source of truth for the most recent parse outcome.</summary>
+        public ParseResultFlags LastParseResult { get; set; } = ParseResultFlags.None;
+
+        public bool FailedShareParse => (LastParseResult & ParseResultFlags.Failed) != 0;
+
+        public bool WasCancelled => (LastParseResult & ParseResultFlags.Cancelled) != 0;
 
         public bool IsFinishingUp => NumberParsed == FinishingUpSentinel;
 

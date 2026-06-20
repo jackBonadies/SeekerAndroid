@@ -707,6 +707,14 @@ namespace Seeker
                     {
                         specialSuffix = "_timeout";
                     }
+                    else if (roll < 45)
+                    {
+                        specialSuffix = "_slowtickers";
+                    }
+                    else if (roll < 50)
+                    {
+                        specialSuffix = "_notickers";
+                    }
 
                 }
 
@@ -1971,6 +1979,8 @@ namespace Seeker
 
             bool longTickers = roomName.IndexOf("ticker", StringComparison.OrdinalIgnoreCase) >= 0;
             int tickerCount = longTickers ? _random.Next(20, 40) : _random.Next(0, 5);
+            tickerCount = roomName.Contains("_notickers") ? 0 : tickerCount;
+
             string[] tickerPool = longTickers ? _mockLongTickers : _mockMessages;
             var tickers = Enumerable.Range(0, tickerCount)
                 .Select(_ => new RoomTicker(
@@ -1980,7 +1990,8 @@ namespace Seeker
 
             _ = Task.Run(async () =>
             {
-                await Task.Delay(50).ConfigureAwait(false);
+                int delay = roomName.Contains("_slowtickers") ? 10_000 : 50;
+                await Task.Delay(delay).ConfigureAwait(false);
                 RaiseRoomTickerListReceived(new RoomTickerListReceivedEventArgs(roomName, tickers));
             });
 
