@@ -777,7 +777,12 @@ namespace Seeker
                 }
 
 
-                if (resultCode == Result.Ok)
+                if (resultCode == Result.Ok && data?.Data == null)
+                {
+                    Logger.Firebase("OnActivityResult Result.Ok but data?.Data is null (NEW_WRITE_EXTERNAL)");
+                }
+
+                if (resultCode == Result.Ok && data?.Data != null)
                 {
                     if (NEW_WRITE_EXTERNAL == requestCode)
                     {
@@ -843,7 +848,12 @@ namespace Seeker
                 }
 
 
-                if (resultCode == Result.Ok)
+                if (resultCode == Result.Ok && data?.Data == null)
+                {
+                    Logger.Firebase("OnActivityResult Result.Ok but data?.Data is null (MUST_SELECT_A_DIRECTORY)");
+                }
+
+                if (resultCode == Result.Ok && data?.Data != null)
                 {
                     if (MUST_SELECT_A_DIRECTORY_WRITE_EXTERNAL_VIA_LEGACY == requestCode)
                     {
