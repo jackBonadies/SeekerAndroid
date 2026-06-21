@@ -148,6 +148,7 @@ namespace Seeker.Settings.Rows
         public UploadDirectoryEntry Entry { get; init; }
         public Action<ISettingsHost, SharedFolderRow> OnEdit { get; init; }
         public Action<ISettingsHost, SharedFolderRow> OnRemove { get; init; }
+        public bool IndentAsSubdir { get; init; }
     }
 
     public sealed class NavigationRow : SettingRow

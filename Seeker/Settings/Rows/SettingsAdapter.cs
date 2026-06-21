@@ -803,6 +803,7 @@ namespace Seeker.Settings.Rows
     {
         private readonly View _root;
         private readonly View _content;
+        private readonly ImageView _subdirElbow;
         private readonly ImageView _statusIcon;
         private readonly ProgressBar _statusSpinner;
         private readonly TextView _title, _subtitle;
@@ -815,6 +816,7 @@ namespace Seeker.Settings.Rows
             _adapter = adapter;
             _root = v.FindViewById<View>(Resource.Id.rowRoot);
             _content = v.FindViewById<View>(Resource.Id.rowContent);
+            _subdirElbow = v.FindViewById<ImageView>(Resource.Id.folderSubdirElbow);
             _statusIcon = v.FindViewById<ImageView>(Resource.Id.folderStatusIcon);
             _statusSpinner = v.FindViewById<ProgressBar>(Resource.Id.folderStatusSpinner);
             _title = v.FindViewById<TextView>(Resource.Id.rowTitle);
@@ -838,6 +840,8 @@ namespace Seeker.Settings.Rows
         {
             _row = row;
             var entry = row.Entry;
+
+            _subdirElbow.Visibility = row.IndentAsSubdir ? ViewStates.Visible : ViewStates.Gone;
 
             string name = entry.GetLastPathSegment();
             if (!string.IsNullOrEmpty(entry.Info.DisplayNameOverride))
