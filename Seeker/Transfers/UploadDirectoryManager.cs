@@ -78,8 +78,7 @@ namespace Seeker
                 if (!string.IsNullOrEmpty(legacyUploadDataDirectory))
                 {
                     var uploadDir = new UploadDirectoryEntry(new UploadDirectoryInfo(legacyUploadDataDirectory, fromTree, false, false, null));
-                    UploadDirectories = new List<UploadDirectoryEntry>();
-                    UploadDirectories.Add(uploadDir);
+                    SetDirectories(new List<UploadDirectoryEntry> { uploadDir });
 
                     SaveToSharedPreferences(sharedPreferences);
                     var editor = sharedPreferences.Edit();
@@ -88,13 +87,13 @@ namespace Seeker
                 }
                 else
                 {
-                    UploadDirectories = new List<UploadDirectoryEntry>();
+                    SetDirectories(null);
                 }
             }
             else
             {
                 var infos = SerializationHelper.DeserializeFromString<List<UploadDirectoryInfo>>(sharedDirInfo);
-                UploadDirectories = infos.Select(info => new UploadDirectoryEntry(info)).ToList();
+                SetDirectories(infos.Select(info => new UploadDirectoryEntry(info)));
             }
         }
 
@@ -112,7 +111,73 @@ namespace Seeker
             }
         }
 
-        public static List<UploadDirectoryEntry> UploadDirectories { get; private set; }
+        // Copy-on-write: UploadDirectories is shared across the UI thread and multiple ThreadPool
+        // background threads (folder add/remove, parse/rescan).
+        private static volatile List<UploadDirectoryEntry> _uploadDirectories = new List<UploadDirectoryEntry>();
+        private static readonly object _uploadDirectoriesWriteLock = new object();
+
+        public static List<UploadDirectoryEntry> UploadDirectories => _uploadDirectories;
+
+        /// <summary>
+        /// Replace the whole directory list (used on restore). Snapshots the source so the caller
+        /// can't mutate it out from under readers afterwards.
+        /// </summary>
+        public static void SetDirectories(IEnumerable<UploadDirectoryEntry> entries)
+        {
+            lock (_uploadDirectoriesWriteLock)
+            {
+                _uploadDirectories = entries == null
+                    ? new List<UploadDirectoryEntry>()
+                    : new List<UploadDirectoryEntry>(entries);
+            }
+        }
+
+        public static void AddDirectory(UploadDirectoryEntry entry)
+        {
+            lock (_uploadDirectoriesWriteLock)
+            {
+                var copy = new List<UploadDirectoryEntry>(_uploadDirectories);
+                copy.Add(entry);
+                _uploadDirectories = copy;
+            }
+        }
+
+        public static bool RemoveDirectory(UploadDirectoryEntry entry)
+        {
+            lock (_uploadDirectoriesWriteLock)
+            {
+                var copy = new List<UploadDirectoryEntry>(_uploadDirectories);
+                bool removed = copy.Remove(entry);
+                if (removed)
+                {
+                    _uploadDirectories = copy;
+                }
+                return removed;
+            }
+        }
+
+        public static void ClearDirectories()
+        {
+            lock (_uploadDirectoriesWriteLock)
+            {
+                _uploadDirectories = new List<UploadDirectoryEntry>();
+            }
+        }
+
+        /// <summary>
+        /// Atomically remove <paramref name="oldEntry"/> and add <paramref name="newEntry"/> in a
+        /// single swap (the reselect case), so readers never observe an intermediate state.
+        /// </summary>
+        public static void ReplaceDirectory(UploadDirectoryEntry oldEntry, UploadDirectoryEntry newEntry)
+        {
+            lock (_uploadDirectoriesWriteLock)
+            {
+                var copy = new List<UploadDirectoryEntry>(_uploadDirectories);
+                copy.Remove(oldEntry);
+                copy.Add(newEntry);
+                _uploadDirectories = copy;
+            }
+        }
 
         public static bool IsFromTree(string presentablePath)
         {
@@ -247,9 +312,11 @@ namespace Seeker
 
         private static void ResolveDocumentFilesAndErrorStates()
         {
-            for (int i = 0; i < UploadDirectories.Count; i++)
+            // Snapshot once so a concurrent copy-on-write swap can't tear Count vs. [i].
+            var dirs = _uploadDirectories;
+            for (int i = 0; i < dirs.Count; i++)
             {
-                UploadDirectoryEntry entry = UploadDirectories[i];
+                UploadDirectoryEntry entry = dirs[i];
 
                 Android.Net.Uri uploadDirUri = Android.Net.Uri.Parse(entry.Info.UploadDataDirectoryUri);
                 try
@@ -301,17 +368,19 @@ namespace Seeker
 
         private static void RecomputeSubdirFlags()
         {
-            for (int i = 0; i < UploadDirectories.Count; i++)
+            // Snapshot once so a concurrent copy-on-write swap can't tear Count vs. [i].
+            var dirs = _uploadDirectories;
+            for (int i = 0; i < dirs.Count; i++)
             {
-                UploadDirectoryEntry entry = UploadDirectories[i];
+                UploadDirectoryEntry entry = dirs[i];
                 var ourUri = Android.Net.Uri.Parse(entry.Info.UploadDataDirectoryUri);
 
                 entry.IsSubdir = false;
-                for (int j = 0; j < UploadDirectories.Count; j++)
+                for (int j = 0; j < dirs.Count; j++)
                 {
                     if (i != j)
                     {
-                        if (IsNestedUnder(ourUri, Android.Net.Uri.Parse(UploadDirectories[j].Info.UploadDataDirectoryUri)))
+                        if (IsNestedUnder(ourUri, Android.Net.Uri.Parse(dirs[j].Info.UploadDataDirectoryUri)))
                         {
                             entry.IsSubdir = true;
                         }
@@ -324,9 +393,11 @@ namespace Seeker
         {
             PresentableNameLockedDirectories.Clear();
             PresentableNameHiddenDirectories.Clear();
-            for (int i = 0; i < UploadDirectories.Count; i++)
+            // Snapshot once so a concurrent copy-on-write swap can't tear Count vs. [i].
+            var dirs = _uploadDirectories;
+            for (int i = 0; i < dirs.Count; i++)
             {
-                UploadDirectoryEntry entry = UploadDirectories[i];
+                UploadDirectoryEntry entry = dirs[i];
                 if (!entry.Info.IsLocked && !entry.Info.IsHidden)
                 {
                     continue;
@@ -350,13 +421,13 @@ namespace Seeker
 
                     UploadDirectoryEntry ourTopLevelParent = null;
 
-                    for (int j = 0; j < UploadDirectories.Count; j++)
+                    for (int j = 0; j < dirs.Count; j++)
                     {
                         if (i != j)
                         {
-                            if (!UploadDirectories[j].IsSubdir && IsNestedUnder(ourUri, Android.Net.Uri.Parse(UploadDirectories[j].Info.UploadDataDirectoryUri)))
+                            if (!dirs[j].IsSubdir && IsNestedUnder(ourUri, Android.Net.Uri.Parse(dirs[j].Info.UploadDataDirectoryUri)))
                             {
-                                ourTopLevelParent = UploadDirectories[j];
+                                ourTopLevelParent = dirs[j];
                                 break;
                             }
                         }

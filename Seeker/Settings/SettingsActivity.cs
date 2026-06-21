@@ -202,7 +202,7 @@ namespace Seeker
             // If a parse is in flight, cancel it FIRST so it can't finish and clobber the cleared state by
             // committing / persisting its (now-stale) cache. No-op when nothing is parsing.
             SharedFileService.CancelOngoingParse();
-            UploadDirectoryManager.UploadDirectories.Clear();
+            UploadDirectoryManager.ClearDirectories();
             UploadDirectoryManager.SaveToSharedPreferences(SeekerState.SharedPreferences);
             SharedFileService.ClearFileCache();
         }
@@ -644,7 +644,7 @@ namespace Seeker
             {
                 System.Threading.ThreadPool.QueueUserWorkItem((object o) =>
                 {
-                    UploadDirectoryManager.UploadDirectories.Remove(uploadDirEntry);
+                    UploadDirectoryManager.RemoveDirectory(uploadDirEntry);
 
                     // remove purely in memory, no disk walk; on failure fall back to a full rescan like before
                     bool removed = SharedFileService.TryRemoveSharedFolderInMemory(uploadDirEntry, out var removalErr);
@@ -1092,7 +1092,6 @@ namespace Seeker
                 {
                     newlyAddedDirectory = new UploadDirectoryEntry(new UploadDirectoryInfo(newlyAddedUriIfApplicable.ToString(), !fromLegacyPicker, UploadDirToReplaceOnReselect.Info.IsLocked, UploadDirToReplaceOnReselect.Info.IsHidden, UploadDirToReplaceOnReselect.Info.DisplayNameOverride));
                     newlyAddedDirectory.UploadDirectory = fromLegacyPicker ? DocumentFile.FromFile(new Java.IO.File(newlyAddedUriIfApplicable.Path)) : DocumentFile.FromTreeUri(this, newlyAddedUriIfApplicable);
-                    UploadDirectoryManager.UploadDirectories.Remove(UploadDirToReplaceOnReselect);
                 }
                 else
                 {
@@ -1102,7 +1101,7 @@ namespace Seeker
 
 
 
-                if (UploadDirectoryManager.UploadDirectories.Where(up => up.Info.UploadDataDirectoryUri == newlyAddedUriIfApplicable.ToString()).Count() != 0)
+                if (UploadDirectoryManager.UploadDirectories.Where(up => up.Info.UploadDataDirectoryUri == newlyAddedUriIfApplicable.ToString() && (!reselectCase || up != UploadDirToReplaceOnReselect)).Count() != 0)
                 {
                     //error!!
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.ErrorAlreadyAdded), ToastLength.Long);
@@ -1110,7 +1109,14 @@ namespace Seeker
                     //throw new Exception("Directory is already added!");
                 }
 
-                UploadDirectoryManager.UploadDirectories.Add(newlyAddedDirectory);
+                if (reselectCase)
+                {
+                    UploadDirectoryManager.ReplaceDirectory(UploadDirToReplaceOnReselect, newlyAddedDirectory);
+                }
+                else
+                {
+                    UploadDirectoryManager.AddDirectory(newlyAddedDirectory);
+                }
             }
 
             UploadDirectoryManager.RecomputeDirectoryState();
