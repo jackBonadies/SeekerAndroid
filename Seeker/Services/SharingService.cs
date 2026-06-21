@@ -34,6 +34,12 @@ namespace Seeker.Services
 
         public static void TurnOnSharing()
         {
+            if (SeekerState.SoulseekClient == null)
+            {
+                // A network callback can fire before SeekerState.SoulseekClient is constructed
+                // in SeekerApplication.OnCreate. Sharing is (re)configured once the client exists.
+                return;
+            }
             SeekerState.SoulseekClient.ReconfigureOptionsAsync(new SoulseekClientOptionsPatch(
                 searchResponseResolver: SearchResponseResolver,
                 browseResponseResolver: BrowseResponseResolver,
@@ -44,6 +50,12 @@ namespace Seeker.Services
 
         public static void TurnOffSharing()
         {
+            if (SeekerState.SoulseekClient == null)
+            {
+                // A network callback can fire before SeekerState.SoulseekClient is constructed
+                // in SeekerApplication.OnCreate. Sharing is (re)configured once the client exists.
+                return;
+            }
             SeekerState.SoulseekClient.ReconfigureOptionsAsync(new SoulseekClientOptionsPatch(
                 searchResponseResolver: NoOpSearchResolver,
                 browseResponseResolver: NoOpBrowseResolver,
