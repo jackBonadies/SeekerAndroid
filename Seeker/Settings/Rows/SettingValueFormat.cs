@@ -171,10 +171,13 @@ namespace Seeker.Settings.Rows
             int files = 0;
             try
             {
-                var dirs = UploadDirectoryManager.UploadDirectories;
-                if (dirs != null) folders = dirs.Count;
                 var cache = Seeker.Services.SharedFileService.SharedFileCache;
-                if (cache != null) files = cache.FileCount;
+                if (cache != null) 
+                {
+                    folders = cache.DirectoryCount;
+                    files = cache.FileCount; 
+                }
+
             }
             catch (Exception ex)
             {
@@ -189,7 +192,11 @@ namespace Seeker.Settings.Rows
         {
             int count = SharedFolderFileCount(entry);
             string text;
-            if (count < 0)
+            if (entry.IsSubdir)
+            {
+                text = ctx.GetString(Resource.String.subfolder);
+            }
+            else if (count < 0)
             {
                 text = string.Empty;
             }
