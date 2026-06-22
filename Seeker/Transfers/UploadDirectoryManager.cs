@@ -126,9 +126,11 @@ namespace Seeker
         {
             lock (_uploadDirectoriesWriteLock)
             {
-                _uploadDirectories = entries == null
+                var list = entries == null
                     ? new List<UploadDirectoryEntry>()
                     : new List<UploadDirectoryEntry>(entries);
+                RecomputeSubdirFlags(list);
+                _uploadDirectories = list;
             }
         }
 
@@ -138,6 +140,7 @@ namespace Seeker
             {
                 var copy = new List<UploadDirectoryEntry>(_uploadDirectories);
                 copy.Add(entry);
+                RecomputeSubdirFlags(copy);
                 _uploadDirectories = copy;
             }
         }
@@ -150,6 +153,7 @@ namespace Seeker
                 bool removed = copy.Remove(entry);
                 if (removed)
                 {
+                    RecomputeSubdirFlags(copy);
                     _uploadDirectories = copy;
                 }
                 return removed;
@@ -175,6 +179,7 @@ namespace Seeker
                 var copy = new List<UploadDirectoryEntry>(_uploadDirectories);
                 copy.Remove(oldEntry);
                 copy.Add(newEntry);
+                RecomputeSubdirFlags(copy);
                 _uploadDirectories = copy;
             }
         }
@@ -306,7 +311,6 @@ namespace Seeker
         public static void RecomputeDirectoryState()
         {
             ResolveDocumentFilesAndErrorStates();
-            RecomputeSubdirFlags();
             RebuildLockedAndHiddenPrefixLists();
         }
 
@@ -366,10 +370,61 @@ namespace Seeker
             return boundary == '/' || parent.EndsWith(":", StringComparison.Ordinal);
         }
 
-        private static void RecomputeSubdirFlags()
+        public static List<UploadDirectoryEntry> GetDirectoriesGroupedForDisplay()
         {
-            // Snapshot once so a concurrent copy-on-write swap can't tear Count vs. [i].
             var dirs = _uploadDirectories;
+            var ordered = new List<UploadDirectoryEntry>(dirs.Count);
+            var included = new HashSet<UploadDirectoryEntry>();
+
+            // iterate over roots
+            foreach (var root in dirs)
+            {
+                if (root.IsSubdir)
+                {
+                    continue;
+                }
+
+                var rootUri = Android.Net.Uri.Parse(root.Info.UploadDataDirectoryUri);
+                ordered.Add(root);
+                included.Add(root);
+
+                // grab children of root
+                var descendants = new List<UploadDirectoryEntry>();
+                foreach (var candidate in dirs)
+                {
+                    if (!ReferenceEquals(candidate, root)
+                        && IsNestedUnder(Android.Net.Uri.Parse(candidate.Info.UploadDataDirectoryUri), rootUri))
+                    {
+                        descendants.Add(candidate);
+                    }
+                }
+
+                // Order descendants by their document-id path so a parent always precedes its own children
+                descendants.Sort((a, b) => string.CompareOrdinal(
+                    Android.Net.Uri.Parse(a.Info.UploadDataDirectoryUri).LastPathSegment,
+                    Android.Net.Uri.Parse(b.Info.UploadDataDirectoryUri).LastPathSegment));
+
+                foreach (var descendant in descendants)
+                {
+                    ordered.Add(descendant);
+                    included.Add(descendant);
+                }
+            }
+
+            // just in case we missed anything
+            foreach (var entry in dirs)
+            {
+                if (!included.Contains(entry))
+                {
+                    ordered.Add(entry);
+                }
+            }
+
+            return ordered;
+        }
+
+        private static void RecomputeSubdirFlags(List<UploadDirectoryEntry> dirs)
+        {
             for (int i = 0; i < dirs.Count; i++)
             {
                 UploadDirectoryEntry entry = dirs[i];

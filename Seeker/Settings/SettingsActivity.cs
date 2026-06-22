@@ -1140,6 +1140,11 @@ namespace Seeker
             {
                 Logger.Debug("We are already parsing!!! so after this parse, lets parse again with our cached results to pick up our new changes");
                 MoreChangesHaveBeenMadeSoRescanWhenDone = true;
+                this.RunOnUiThread(new Action(() =>
+                {
+                    // otherwise we wont see the entry we just added
+                    RefreshModernSharingRows(false); 
+                }));
                 return;
             }
 

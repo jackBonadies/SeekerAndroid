@@ -420,23 +420,21 @@ namespace Seeker.Settings.Rows
             });
 
             // One row per shared folder. Rebuilt via RefreshSharingFolders().
-            if (UploadDirectoryManager.UploadDirectories != null)
+            foreach (var item in UploadDirectoryManager.GetDirectoriesGroupedForDisplay())
             {
-                foreach (var entry in UploadDirectoryManager.UploadDirectories)
+                bool isSubdir = item.IsSubdir;
+                rows.Add(new SharedFolderRow
                 {
-                    var captured = entry;
-                    rows.Add(new SharedFolderRow
-                    {
-                        Id = "sharing.folder." + captured.Info.UploadDataDirectoryUri,
-                        ParentId = "sharing.enable",
-                        KeywordsRes = Resource.String.keywords_manage_shared,
-                        TitleProvider = c => captured.GetLastPathSegment(),
-                        Entry = captured,
-                        OnEdit = (h, r) => h.EditSharedFolder(r.Entry),
-                        OnRemove = (h, r) => h.RemoveSharedFolder(r.Entry),
-                        Indent = false,
-                    });
-                }
+                    Id = "sharing.folder." + item.Info.UploadDataDirectoryUri,
+                    ParentId = "sharing.enable",
+                    KeywordsRes = Resource.String.keywords_manage_shared,
+                    TitleProvider = c => item.GetLastPathSegment(),
+                    Entry = item,
+                    OnEdit = (h, r) => h.EditSharedFolder(r.Entry),
+                    OnRemove = (h, r) => h.RemoveSharedFolder(r.Entry),
+                    Indent = false,
+                    IndentAsSubdir = isSubdir,
+                });
             }
 
             rows.Add(new ButtonRow

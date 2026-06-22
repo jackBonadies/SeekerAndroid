@@ -925,6 +925,7 @@
     <string name="folder_file_count">{0} files</string>
     <string name="shared_summary_folders_files">{0} folders · {1} files</string>
     <string name="edit_folder">Edit folder</string>
+    <string name="subfolder">Subfolder</string>
     <string name="folder_hidden">Hidden</string>
     <string name="folder_locked">Locked</string>
     <string name="Donate">Donate</string>

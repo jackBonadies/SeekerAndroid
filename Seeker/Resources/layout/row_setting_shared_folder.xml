@@ -26,6 +26,17 @@
         android:paddingTop="10dp"
         android:paddingBottom="10dp">
 
+        <ImageView
+            android:id="@+id/folderSubdirElbow"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="10dp"
+            android:src="@drawable/subdir_elbow"
+            android:tint="?attr/normalTextColor"
+            android:alpha="0.5"
+            android:importantForAccessibility="no"
+            android:visibility="gone" />
+
         <FrameLayout
             android:layout_width="24dp"
             android:layout_height="24dp"
