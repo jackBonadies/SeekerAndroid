@@ -586,15 +586,7 @@ namespace Seeker.Chatroom
                 }
             }
 
-            if (ChatroomController.JoinedRoomMessages.ContainsKey(OurRoomInfo.Name))
-            {
-                Logger.Debug("we have the room messages");
-                messagesInternal = ChatroomController.JoinedRoomMessages[OurRoomInfo.Name].ToList();
-            }
-            else
-            {
-                messagesInternal = new List<Message>();
-            }
+            messagesInternal = ChatroomController.GetMessagesSnapshot(OurRoomInfo.Name);
 
             if (ChatroomController.JoinedRoomTickers.ContainsKey(OurRoomInfo.Name) && ChatroomController.JoinedRoomTickers[OurRoomInfo.Name].Count > 0)
             {
@@ -869,7 +861,7 @@ namespace Seeker.Chatroom
                 //}
                 try
                 {
-                    messagesInternal = ChatroomController.JoinedRoomMessages[OurRoomInfo.Name].ToList();
+                    messagesInternal = ChatroomController.GetMessagesSnapshot(OurRoomInfo.Name);
                     recyclerAdapter = new ChatroomInnerRecyclerAdapter(messagesInternal); //this depends tightly on MessageController... since these are just strings..
                     recyclerViewInner.SetAdapter(recyclerAdapter);
                     if (messagesInternal.Count != 0)

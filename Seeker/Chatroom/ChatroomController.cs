@@ -88,6 +88,7 @@ namespace Seeker.Chatroom
         public static System.Collections.Concurrent.ConcurrentDictionary<string, Queue<StatusMessageUpdate>> JoinedRoomStatusUpdateMessages = new System.Collections.Concurrent.ConcurrentDictionary<string, Queue<StatusMessageUpdate>>();
 
         private static readonly object _statusMessagesLock = new object();
+        private static readonly object _chatMessagesLock = new object();
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, Queue<Message>> JoinedRoomMessages = new System.Collections.Concurrent.ConcurrentDictionary<string, Queue<Message>>();
 
@@ -634,25 +635,7 @@ namespace Seeker.Chatroom
                 ShowNotification(msg, roomName);
             }
             FlagLastUsernameViaHelper(roomName, msg);
-            if (JoinedRoomMessages.ContainsKey(roomName))
-            {
-                //check last name structure
-                //if last name is this then set msg.SpecialSameUserFlag = true;
-                JoinedRoomMessages[roomName].Enqueue(msg);
-                if (JoinedRoomMessages[roomName].Count > 100)
-                {
-                    JoinedRoomMessages[roomName].Dequeue();
-                }
-            }
-            else
-            {
-                JoinedRoomMessages[roomName] = new Queue<Message>();
-                JoinedRoomMessages[roomName].Enqueue(msg);
-                if (JoinedRoomMessages[roomName].Count > 100)
-                {
-                    JoinedRoomMessages[roomName].Dequeue();
-                }
-            }
+            EnqueueCapped(JoinedRoomMessages, _chatMessagesLock, roomName, msg);
             if (ChatroomController.currentlyInsideRoomName != roomName
                 && msg.SpecialCode == SpecialMessageCode.None) //i.e. do not set to unread if just disconnect or reconnect messages.
             {
@@ -669,30 +652,45 @@ namespace Seeker.Chatroom
 
         public static void AddStatusMessage(string roomName, StatusMessageUpdate statusMessageUpdate)
         {
-            lock (_statusMessagesLock)
+            EnqueueCapped(JoinedRoomStatusUpdateMessages, _statusMessagesLock, roomName, statusMessageUpdate);
+        }
+
+        public static List<StatusMessageUpdate> GetStatusMessagesSnapshot(string roomName)
+        {
+            return GetQueueSnapshot(JoinedRoomStatusUpdateMessages, _statusMessagesLock, roomName);
+        }
+
+        public static List<Message> GetMessagesSnapshot(string roomName)
+        {
+            return GetQueueSnapshot(JoinedRoomMessages, _chatMessagesLock, roomName);
+        }
+
+        private static void EnqueueCapped<T>(System.Collections.Concurrent.ConcurrentDictionary<string, Queue<T>> queues, object queuesLock, string roomName, T item, int cap = 100)
+        {
+            lock (queuesLock)
             {
-                if (!JoinedRoomStatusUpdateMessages.TryGetValue(roomName, out var queue))
+                if (!queues.TryGetValue(roomName, out var queue))
                 {
-                    queue = new Queue<StatusMessageUpdate>();
-                    JoinedRoomStatusUpdateMessages[roomName] = queue;
+                    queue = new Queue<T>();
+                    queues[roomName] = queue;
                 }
-                queue.Enqueue(statusMessageUpdate);
-                while (queue.Count > 100)
+                queue.Enqueue(item);
+                while (queue.Count > cap)
                 {
                     queue.Dequeue();
                 }
             }
         }
 
-        public static List<StatusMessageUpdate> GetStatusMessagesSnapshot(string roomName)
+        private static List<T> GetQueueSnapshot<T>(System.Collections.Concurrent.ConcurrentDictionary<string, Queue<T>> queues, object queuesLock, string roomName)
         {
-            lock (_statusMessagesLock)
+            lock (queuesLock)
             {
-                if (JoinedRoomStatusUpdateMessages.TryGetValue(roomName, out var queue))
+                if (queues.TryGetValue(roomName, out var queue))
                 {
                     return queue.ToList();
                 }
-                return new List<StatusMessageUpdate>();
+                return new List<T>();
             }
         }
 
