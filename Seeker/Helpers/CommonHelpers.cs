@@ -353,54 +353,27 @@ namespace Seeker
 
         public static Notification CreateNotification(Context context, PendingIntent pendingIntent, string channelID, string titleText, string contentText, bool setOnlyAlertOnce = true, bool forForegroundService = false, bool shutdownAction = false)
         {
-            //no such method takes args CHANNEL_ID in API 25. API 26 = 8.0 which requires channel ID.
-            //a "channel" is a category in the UI to the end user.
-
-
-            //here we use the non compat notif builder as we want the special SetForegroundServiceBehavior method to prevent the new 10 second foreground notification delay.
-            Notification notification = null;
+            var builder = new NotificationCompat.Builder(context, channelID)
+                      .SetContentTitle(titleText)
+                      .SetContentText(contentText)
+                      .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
+                      .SetContentIntent(pendingIntent)
+                      .SetOnlyAlertOnce(setOnlyAlertOnce)
+                      .SetTicker(titleText);
             if (OperatingSystem.IsAndroidVersionAtLeast(31) && forForegroundService)
             {
-                var builder = new Notification.Builder(context, channelID)
-                          .SetContentTitle(titleText)
-                          .SetContentText(contentText)
-                          .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
-                          .SetContentIntent(pendingIntent)
-                          .SetOnlyAlertOnce(setOnlyAlertOnce) //maybe
-                          .SetForegroundServiceBehavior((int)(Android.App.NotificationForegroundService.Immediate)) //new for api 31+
-                          .SetTicker(titleText);
-                if (shutdownAction)
-                {
-                    Intent intent3 = new Intent(context, typeof(CloseActivity));
-                    intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
-                    var pi = PendingIntent.GetActivity(context, 7618, intent3, PendingIntentFlags.Immutable);
-
-                    Notification.Action replyAction = new Notification.Action.Builder(Resource.Drawable.ic_cancel_black_24dp, "Shutdown", pi).Build();
-                    builder.AddAction(replyAction);
-                }
-                notification = builder.Build();
+                builder.SetForegroundServiceBehavior((int)(Android.App.NotificationForegroundService.Immediate)); //new for api 31+
             }
-            else
+            if (shutdownAction)
             {
-                var builder = new NotificationCompat.Builder(context, channelID)
-                          .SetContentTitle(titleText)
-                          .SetContentText(contentText)
-                          .SetSmallIcon(Resource.Drawable.ic_stat_soulseekicontransparent)
-                          .SetContentIntent(pendingIntent)
-                          .SetOnlyAlertOnce(setOnlyAlertOnce) //maybe
-                          .SetTicker(titleText);
-                if (shutdownAction)
-                {
-                    Intent intent3 = new Intent(context, typeof(CloseActivity));
-                    intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
-                    var pi = PendingIntent.GetActivity(context, 7618, intent3, PendingIntentFlags.Immutable);
-                    NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(Resource.Drawable.ic_cancel_black_24dp, "Shutdown", pi).Build();
-                    builder.AddAction(replyAction);
-                }
-                notification = builder.Build();
-            }
-            return notification;
+                Intent intent3 = new Intent(context, typeof(CloseActivity));
+                intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
+                var pi = PendingIntent.GetActivity(context, 7618, intent3, PendingIntentFlags.Immutable);
 
+                NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(Resource.Drawable.ic_cancel_black_24dp, "Shutdown", pi).Build();
+                builder.AddAction(replyAction);
+            }
+            return builder.Build();
         }
 
         public static void ChangePasswordLogic(string newPassword)
