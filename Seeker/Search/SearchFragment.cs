@@ -321,7 +321,11 @@ namespace Seeker
         {
             var searchTab = SearchTabHelper.SearchTabCollection[tabToGoTo];
 
-            GetCustomViewSearchHere().Text = searchTab.LastSearchTerm;
+            var searchHereEditText = GetCustomViewSearchHere();
+            if (searchHereEditText != null)
+            {
+                searchHereEditText.Text = searchTab.LastSearchTerm;
+            }
             SetSearchHintTarget(searchTab.SearchTarget);
             if (!fromIntent)
             {

@@ -376,7 +376,7 @@ namespace Seeker
                 }
                 else
                 {
-                    if (SearchFragment.Instance?.Activity == null || (SearchFragment.Instance?.IsResumed ?? false))
+                    if (SearchFragment.Instance?.Activity == null || !(SearchFragment.Instance?.IsResumed ?? false))
                     {
                         Logger.Debug("we are on the search page but we need to wait for OnResume search frag");
                         goToSearchTab = tabID; //we read this we resume
