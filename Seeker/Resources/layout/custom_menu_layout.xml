@@ -37,7 +37,7 @@
             android:text=""
         />
     </FrameLayout>
-    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+    <Seeker.SafeMaterialAutoCompleteTextView
         android:layout_toEndOf="@id/search_tabs"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

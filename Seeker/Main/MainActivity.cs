@@ -186,7 +186,6 @@ namespace Seeker
 
             base.OnCreate(savedInstanceState);
             //System.Threading.Thread.CurrentThread.Name = "Main Activity Thread";
-            Xamarin.Essentials.Platform.Init(this, savedInstanceState); //this is what you are supposed to do.
             SetContentView(Resource.Layout.activity_main);
 
             BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
@@ -377,7 +376,7 @@ namespace Seeker
                 }
                 else
                 {
-                    if (SearchFragment.Instance?.Activity == null || (SearchFragment.Instance?.IsResumed ?? false))
+                    if (SearchFragment.Instance?.Activity == null || !(SearchFragment.Instance?.IsResumed ?? false))
                     {
                         Logger.Debug("we are on the search page but we need to wait for OnResume search frag");
                         goToSearchTab = tabID; //we read this we resume
@@ -1174,7 +1173,6 @@ namespace Seeker
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
-            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             switch (requestCode)
             {
                 case POST_NOTIFICATION_PERMISSION:
