@@ -393,7 +393,7 @@ namespace Seeker
                 {
                     Intent intent3 = new Intent(context, typeof(CloseActivity));
                     intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
-                    var pi = PendingIntent.GetActivity(context, 7618, intent3, 0);
+                    var pi = PendingIntent.GetActivity(context, 7618, intent3, PendingIntentFlags.Immutable);
                     NotificationCompat.Action replyAction = new NotificationCompat.Action.Builder(Resource.Drawable.ic_cancel_black_24dp, "Shutdown", pi).Build();
                     builder.AddAction(replyAction);
                 }
