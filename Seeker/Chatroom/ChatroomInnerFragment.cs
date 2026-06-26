@@ -487,15 +487,7 @@ namespace Seeker.Chatroom
                 return;
             }
 
-            if (ChatroomController.JoinedRoomStatusUpdateMessages.ContainsKey(OurRoomInfo.Name))
-            {
-                Logger.Debug("we have the room messages");
-                UI_statusMessagesInternal = ChatroomController.JoinedRoomStatusUpdateMessages[OurRoomInfo.Name].ToList();
-            }
-            else
-            {
-                UI_statusMessagesInternal = new List<StatusMessageUpdate>();
-            }
+            UI_statusMessagesInternal = ChatroomController.GetStatusMessagesSnapshot(OurRoomInfo.Name);
 
             //Logger.Debug("SetStatusView Count: " + UI_statusMessagesInternal.Count);
 

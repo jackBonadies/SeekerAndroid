@@ -87,6 +87,8 @@ namespace Seeker.Chatroom
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, Queue<StatusMessageUpdate>> JoinedRoomStatusUpdateMessages = new System.Collections.Concurrent.ConcurrentDictionary<string, Queue<StatusMessageUpdate>>();
 
+        private static readonly object _statusMessagesLock = new object();
+
         public static System.Collections.Concurrent.ConcurrentDictionary<string, Queue<Message>> JoinedRoomMessages = new System.Collections.Concurrent.ConcurrentDictionary<string, Queue<Message>>();
 
         public static System.Collections.Concurrent.ConcurrentDictionary<string, string> JoinedRoomMessagesLastUserHelper = new System.Collections.Concurrent.ConcurrentDictionary<string, string>();
@@ -667,24 +669,30 @@ namespace Seeker.Chatroom
 
         public static void AddStatusMessage(string roomName, StatusMessageUpdate statusMessageUpdate)
         {
-            if (JoinedRoomStatusUpdateMessages.ContainsKey(roomName))
+            lock (_statusMessagesLock)
             {
-                //check last name structure
-                //if last name is this then set msg.SpecialSameUserFlag = true;
-                JoinedRoomStatusUpdateMessages[roomName].Enqueue(statusMessageUpdate);
-                if (JoinedRoomStatusUpdateMessages[roomName].Count > 100)
+                if (!JoinedRoomStatusUpdateMessages.TryGetValue(roomName, out var queue))
                 {
-                    JoinedRoomStatusUpdateMessages[roomName].Dequeue();
+                    queue = new Queue<StatusMessageUpdate>();
+                    JoinedRoomStatusUpdateMessages[roomName] = queue;
+                }
+                queue.Enqueue(statusMessageUpdate);
+                while (queue.Count > 100)
+                {
+                    queue.Dequeue();
                 }
             }
-            else
+        }
+
+        public static List<StatusMessageUpdate> GetStatusMessagesSnapshot(string roomName)
+        {
+            lock (_statusMessagesLock)
             {
-                JoinedRoomStatusUpdateMessages[roomName] = new Queue<StatusMessageUpdate>();
-                JoinedRoomStatusUpdateMessages[roomName].Enqueue(statusMessageUpdate);
-                if (JoinedRoomStatusUpdateMessages[roomName].Count > 100)
+                if (JoinedRoomStatusUpdateMessages.TryGetValue(roomName, out var queue))
                 {
-                    JoinedRoomStatusUpdateMessages[roomName].Dequeue();
+                    return queue.ToList();
                 }
+                return new List<StatusMessageUpdate>();
             }
         }
 
