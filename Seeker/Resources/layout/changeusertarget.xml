@@ -40,7 +40,7 @@
             android:layout_marginBottom="10dp"
             android:hint="@string/target_room_name"
         >
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            <Seeker.SafeMaterialAutoCompleteTextView
                 android:id="@+id/targetRoomInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -68,7 +68,7 @@
         android:hint="@string/username"
         app:endIconMode="none"
     >
-        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+        <Seeker.SafeMaterialAutoCompleteTextView
             android:id="@+id/chosenUserInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
