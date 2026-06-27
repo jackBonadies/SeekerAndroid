@@ -41,9 +41,9 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
     <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
-    <RunAOTCompilation>false</RunAOTCompilation>
-    <EnableLLVM>false</EnableLLVM>
-    <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+    <RunAOTCompilation>true</RunAOTCompilation>
+    <EnableLLVM>true</EnableLLVM>
+    <AndroidEnableProfiledAot>true</AndroidEnableProfiledAot>
     <AndroidUseAapt2>true</AndroidUseAapt2>
     <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
     <MonoSymbolArchive>True</MonoSymbolArchive>
@@ -53,36 +53,36 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Mock|AnyCPU' ">
     <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
     <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
-    <RunAOTCompilation>false</RunAOTCompilation>
-    <EnableLLVM>false</EnableLLVM>
-    <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+    <RunAOTCompilation>true</RunAOTCompilation>
+    <EnableLLVM>true</EnableLLVM>
+    <AndroidEnableProfiledAot>true</AndroidEnableProfiledAot>
     <AndroidUseAapt2>true</AndroidUseAapt2>
     <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
     <MonoSymbolArchive>True</MonoSymbolArchive>
     <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
     <DefineConstants>MOCK</DefineConstants>
   </PropertyGroup>
-	<PropertyGroup>
-		<AndroidKeyStore>true</AndroidKeyStore>
-		<AndroidSigningKeyStore>$(AndroidSigningKeyStore)</AndroidSigningKeyStore>
-		<AndroidSigningKeyAlias>$(AndroidSigningKeyAlias)</AndroidSigningKeyAlias>
-		<AndroidSigningKeyPass>$(AndroidSigningKeyPass)</AndroidSigningKeyPass>
-		<AndroidSigningStorePass>$(AndroidSigningStorePass)</AndroidSigningStorePass>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release IzzySoft|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release IzzySoft|AnyCPU'">
 	  <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
 	  <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
 	  <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
 	  <PublishTrimmed>true</PublishTrimmed>
 	  <AndroidLinkMode>SdkOnly</AndroidLinkMode>
-	  <RunAOTCompilation>false</RunAOTCompilation>
-	  <EnableLLVM>false</EnableLLVM>
-	  <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+	  <EnableLLVM>true</EnableLLVM>
+	  <AndroidEnableProfiledAot>true</AndroidEnableProfiledAot>
+	  <AndroidUseAapt2>true</AndroidUseAapt2>
 	  <AndroidUseAapt2>true</AndroidUseAapt2>
 	  <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
 	  <MonoSymbolArchive>True</MonoSymbolArchive>
 	  <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
 	  <DefineConstants>IzzySoft</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+	<AndroidKeyStore>true</AndroidKeyStore>
+	<AndroidSigningKeyStore>$(AndroidSigningKeyStore)</AndroidSigningKeyStore>
+	<AndroidSigningKeyAlias>$(AndroidSigningKeyAlias)</AndroidSigningKeyAlias>
+	<AndroidSigningKeyPass>$(AndroidSigningKeyPass)</AndroidSigningKeyPass>
+    <AndroidSigningStorePass>$(AndroidSigningStorePass)</AndroidSigningStorePass>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.StartsWith('Release'))">
 	<AndroidKeyStore>true</AndroidKeyStore>
@@ -151,8 +151,7 @@
 	<Exec Condition=" '$(OS)' == 'Windows_NT' " Command="powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File &quot;$(ProjectDir)preBuild.ps1&quot; &quot;$(ProjectDir)Properties\AndroidManifest.xml&quot; &quot;$(ConfigurationName)&quot;" />
 	<Exec Condition=" '$(OS)' != 'Windows_NT' " Command="pwsh -ExecutionPolicy Bypass -NoProfile -NonInteractive -File &quot;$(ProjectDir)preBuild.ps1&quot; &quot;$(ProjectDir)Properties/AndroidManifest.xml&quot; &quot;$(ConfigurationName)&quot;" />
   </Target>
-  <Target Name="GenerateDebugSecrets" BeforeTargets="CoreCompile"
-          Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug Mock'">
+  <Target Name="GenerateDebugSecrets" BeforeTargets="CoreCompile" Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug Mock'">
     <PropertyGroup>
       <_SeekerDebugCaptureKey>$([System.Environment]::GetEnvironmentVariable('SeekerEncryptKey'))</_SeekerDebugCaptureKey>
       <_DebugSecretsFile>$(IntermediateOutputPath)DebugSecrets.g.cs</_DebugSecretsFile>
