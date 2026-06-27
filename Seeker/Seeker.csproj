@@ -37,40 +37,63 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
+<<<<<<< HEAD
     <RunAOTCompilation>false</RunAOTCompilation>
     <EnableLLVM>false</EnableLLVM>
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+=======
+    <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
+    <RunAOTCompilation>true</RunAOTCompilation>
+    <EnableLLVM>true</EnableLLVM>
+    <AndroidEnableProfiledAot>true</AndroidEnableProfiledAot>
+    <AndroidUseAapt2>true</AndroidUseAapt2>
+>>>>>>> f672fa8b (enable AOT (default for .net android) for faster app startup)
     <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
     <AndroidNativeDebugSymbolCompressionFormat>zip</AndroidNativeDebugSymbolCompressionFormat>
     <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Mock|AnyCPU' ">
     <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
+<<<<<<< HEAD
     <RunAOTCompilation>false</RunAOTCompilation>
     <EnableLLVM>false</EnableLLVM>
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+=======
+    <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
+    <RunAOTCompilation>true</RunAOTCompilation>
+    <EnableLLVM>true</EnableLLVM>
+    <AndroidEnableProfiledAot>true</AndroidEnableProfiledAot>
+    <AndroidUseAapt2>true</AndroidUseAapt2>
+>>>>>>> f672fa8b (enable AOT (default for .net android) for faster app startup)
     <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
     <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
     <DefineConstants>MOCK</DefineConstants>
   </PropertyGroup>
-	<PropertyGroup>
-		<AndroidKeyStore>true</AndroidKeyStore>
-		<AndroidSigningKeyStore>$(AndroidSigningKeyStore)</AndroidSigningKeyStore>
-		<AndroidSigningKeyAlias>$(AndroidSigningKeyAlias)</AndroidSigningKeyAlias>
-		<AndroidSigningKeyPass>$(AndroidSigningKeyPass)</AndroidSigningKeyPass>
-		<AndroidSigningStorePass>$(AndroidSigningStorePass)</AndroidSigningStorePass>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release IzzySoft|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release IzzySoft|AnyCPU'">
 	  <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
 	  <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
 	  <PublishTrimmed>true</PublishTrimmed>
 	  <AndroidLinkMode>SdkOnly</AndroidLinkMode>
+<<<<<<< HEAD
 	  <RunAOTCompilation>false</RunAOTCompilation>
 	  <EnableLLVM>false</EnableLLVM>
 	  <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
+=======
+	  <EnableLLVM>true</EnableLLVM>
+	  <AndroidEnableProfiledAot>true</AndroidEnableProfiledAot>
+	  <AndroidUseAapt2>true</AndroidUseAapt2>
+	  <AndroidUseAapt2>true</AndroidUseAapt2>
+>>>>>>> f672fa8b (enable AOT (default for .net android) for faster app startup)
 	  <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
 	  <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
 	  <DefineConstants>IzzySoft</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+	<AndroidKeyStore>true</AndroidKeyStore>
+	<AndroidSigningKeyStore>$(AndroidSigningKeyStore)</AndroidSigningKeyStore>
+	<AndroidSigningKeyAlias>$(AndroidSigningKeyAlias)</AndroidSigningKeyAlias>
+	<AndroidSigningKeyPass>$(AndroidSigningKeyPass)</AndroidSigningKeyPass>
+    <AndroidSigningStorePass>$(AndroidSigningStorePass)</AndroidSigningStorePass>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.StartsWith('Release'))">
 	<AndroidKeyStore>true</AndroidKeyStore>
@@ -135,12 +158,20 @@
     <Compile Remove="Soulseek.NET-master\**" />
   </ItemGroup>
   <PropertyGroup />
+<<<<<<< HEAD
   <!-- Adds MANAGE_EXTERNAL_STORAGE for non Playstore -->
   <ItemGroup Condition="'$(Configuration)' == 'Release IzzySoft'">
     <AndroidManifestOverlay Include="Properties\AndroidManifest.IzzySoft.xml" />
   </ItemGroup>
   <Target Name="GenerateDebugSecrets" BeforeTargets="CoreCompile"
           Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug Mock'">
+=======
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+	<Exec Condition=" '$(OS)' == 'Windows_NT' " Command="powershell.exe -ExecutionPolicy Bypass -NoProfile -NonInteractive -File &quot;$(ProjectDir)preBuild.ps1&quot; &quot;$(ProjectDir)Properties\AndroidManifest.xml&quot; &quot;$(ConfigurationName)&quot;" />
+	<Exec Condition=" '$(OS)' != 'Windows_NT' " Command="pwsh -ExecutionPolicy Bypass -NoProfile -NonInteractive -File &quot;$(ProjectDir)preBuild.ps1&quot; &quot;$(ProjectDir)Properties/AndroidManifest.xml&quot; &quot;$(ConfigurationName)&quot;" />
+  </Target>
+  <Target Name="GenerateDebugSecrets" BeforeTargets="CoreCompile" Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug Mock'">
+>>>>>>> f672fa8b (enable AOT (default for .net android) for faster app startup)
     <PropertyGroup>
       <_SeekerDebugCaptureKey>$([System.Environment]::GetEnvironmentVariable('SeekerEncryptKey'))</_SeekerDebugCaptureKey>
       <_DebugSecretsFile>$(IntermediateOutputPath)DebugSecrets.g.cs</_DebugSecretsFile>
