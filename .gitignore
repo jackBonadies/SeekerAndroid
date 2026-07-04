@@ -358,3 +358,6 @@ healthchecksdb
 # QT import test data: ignore raw
 /UnitTestCommon/TestData/QT/*.scd1
 !/UnitTestCommon/TestData/QT/*_Encrypted.scd1
+
+#dont ignore Common/Debug which contains important utilities
+!/Common/Debug/
