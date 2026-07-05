@@ -12,7 +12,7 @@ CLI equivalents:
 dotnet build .\Seeker\Seeker.csproj -p:AndroidKeyStore=false -c "Debug Mock" -t:Install
 
 # build + fast-deploy + launch
-dotnet build .\Seeker\Seeker.csproj  -p:AndroidKeyStore=false -c "Debug Mock" -t:Run
+dotnet build .\Seeker\Seeker.csproj -p:AndroidKeyStore=false -c "Debug Mock" -t:Run
 
 # build standalone + deploy
 dotnet build .\Seeker\Seeker.csproj -p:AndroidKeyStore=false -p:EmbedAssembliesIntoApk=true -c "Debug Mock" -t:Run
