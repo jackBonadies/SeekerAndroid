@@ -15,7 +15,7 @@ dotnet build .\Seeker\Seeker.csproj -p:AndroidKeyStore=false -c "Debug Mock" -t:
 dotnet build .\Seeker\Seeker.csproj -p:AndroidKeyStore=false -c "Debug Mock" -t:Run
 
 # build standalone + deploy
-dotnet build .\Seeker\Seeker.csproj -p:AndroidKeyStore=false -p:EmbedAssembliesIntoApk=true -c "Debug Mock" -t:Run
+dotnet publish .\Seeker\Seeker.csproj -p:AndroidKeyStore=false -p:EmbedAssembliesIntoApk=true -c "Debug Mock" -f net9.0-android
 
 # view app logs
 adb logcat --pid=(adb shell pidof com.companyname.andriodapp1)
