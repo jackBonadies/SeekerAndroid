@@ -81,8 +81,8 @@
   </PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release IzzySoft|AnyCPU'">
 	<AndroidKeyStore>true</AndroidKeyStore>
-	<AndroidSigningKeyStore>C:\Users\jack\AppData\Local\Xamarin\Mono for Android\Keystore\Jack\Jack.keystore</AndroidSigningKeyStore>
-	<AndroidSigningKeyAlias>jack</AndroidSigningKeyAlias>
+	<AndroidSigningKeyStore Condition="'$(AndroidSigningKeyStore)' == '' And Exists('C:\Users\jack\AppData\Local\Xamarin\Mono for Android\Keystore\Jack\Jack.keystore')">C:\Users\jack\AppData\Local\Xamarin\Mono for Android\Keystore\Jack\Jack.keystore</AndroidSigningKeyStore>
+	<AndroidSigningKeyAlias Condition="'$(AndroidSigningKeyAlias)' == ''">jack</AndroidSigningKeyAlias>
   </PropertyGroup>
 	<ItemGroup>
     <GoogleServicesJson Include="google-services.json" Condition="Exists('google-services.json') And '$(Configuration)|$(Platform)' != 'Release IzzySoft|AnyCPU'" />

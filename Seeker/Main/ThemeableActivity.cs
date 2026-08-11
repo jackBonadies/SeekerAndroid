@@ -37,8 +37,13 @@ namespace Seeker
             
             // the equivalent to calling edgeToEdge = true so api < 35 behaves the same
             WindowCompat.SetDecorFitsSystemWindows(Window!, false);
-            Window!.SetStatusBarColor(Android.Graphics.Color.Transparent);
-            Window!.SetNavigationBarColor(Android.Graphics.Color.Transparent);
+            if (!OperatingSystem.IsAndroidVersionAtLeast(35))
+            {
+#pragma warning disable CA1422 // deprecated on 35+
+                Window!.SetStatusBarColor(Android.Graphics.Color.Transparent);
+                Window!.SetNavigationBarColor(Android.Graphics.Color.Transparent);
+#pragma warning restore CA1422
+            }
             base.OnCreate(savedInstanceState);
         }
 

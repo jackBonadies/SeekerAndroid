@@ -239,13 +239,20 @@ namespace Seeker
             Intent intent = new Intent();
             intent.SetType("*/*");
             intent.SetAction(Intent.ActionOpenDocument);
-            if (intent.ResolveActivity(this.PackageManager) != null)
+            //this will open default file browser and allow user to select anything.  This is preferable to Intent.ActionGetContent as ActionGetContent pulled up image gallery, contacts, etc.
+            //however, if the default file browser is disabled then this fails.  So as backup do ActionGetContent.
+            bool launched = false;
+            try
             {
-                //this will open default file browser and allow user to select anything.  This is preferable to Intent.ActionGetContent as ActionGetContent pulled up image gallery, contacts, etc.
-                //however, if the default file browser is disabled then this fails.  So as backup do ActionGetContent.
                 this.StartActivityForResult(intent, IMPORT_FILE_SELECTED);
+                launched = true;
             }
-            else
+            catch (Android.Content.ActivityNotFoundException)
+            {
+                //fall through to ActionGetContent below
+            }
+
+            if (!launched)
             {
                 Intent backUpIntent = new Intent();
                 backUpIntent.SetType("*/*");

@@ -166,7 +166,11 @@ namespace Seeker
 #endif
 
             this.RegisterActivityLifecycleCallbacks(new ForegroundLifecycleTracker());
-            this.RegisterReceiver(new ConnectionReceiver(), new IntentFilter(ConnectivityManager.ConnectivityAction));
+            AndroidX.Core.Content.ContextCompat.RegisterReceiver(
+                this,
+                new ConnectionReceiver(),
+                new IntentFilter(ConnectivityManager.ConnectivityAction),
+                AndroidX.Core.Content.ContextCompat.ReceiverNotExported);
             var sharedPrefs = this.GetSharedPreferences(Constants.SharedPrefFile, 0);
             SeekerState.SharedPreferences = sharedPrefs;
 
