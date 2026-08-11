@@ -110,7 +110,9 @@ namespace Seeker
             }
             //runs indefinitely until stop.
 
-            return StartCommandResult.Sticky;
+            // If we get killed there is no point in restarting automatically, instead when the 
+            // other user re-requests the transfer we will start up again as usual.
+            return StartCommandResult.NotSticky;
         }
 
         public override void OnDestroy()

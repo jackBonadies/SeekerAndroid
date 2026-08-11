@@ -110,7 +110,9 @@ namespace Seeker
             }
             //runs indefinitely until stop.
 
-            return StartCommandResult.Sticky;
+            // If we get killed there is no point in restarting automatically, instead on startup
+            // TransfersController.InitializeService will requeue any pending transfers after login.
+            return StartCommandResult.NotSticky;
         }
 
         public override void OnDestroy()
