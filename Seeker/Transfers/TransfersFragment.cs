@@ -188,8 +188,7 @@ namespace Seeker
             switch (item.ItemId)
             {
                 case Android.Resource.Id.Home:
-                    // TODO2026: obsolete on android 33?
-                    SeekerState.MainActivityRef.OnBackPressed();
+                    SeekerState.MainActivityRef.OnBackPressedDispatcher.OnBackPressed();
                     return true;
                 case Resource.Id.action_clear_all_complete: //clear all complete
                     Logger.InfoFirebase("Clear All Complete Pressed");
