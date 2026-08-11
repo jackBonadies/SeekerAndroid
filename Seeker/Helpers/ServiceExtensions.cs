@@ -11,7 +11,7 @@ namespace Seeker.Helpers
 {
     public static class ServiceExtensions
     {
-        public static void StartForegroundSafe(this Service service, int notificationId, Notification notification)
+        public static void StartForegroundWrapper(this Service service, int notificationId, Notification notification)
         {
             if (OperatingSystem.IsAndroidVersionAtLeast(34))
             {

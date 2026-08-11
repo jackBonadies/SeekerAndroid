@@ -62,16 +62,12 @@ namespace Seeker
 
             //System.Threading.Thread.Sleep(4000); // bug exposer - does help reproduce on samsung galaxy
 
-            //if (foreground)
-            //{
             try
             {
-                this.StartForegroundSafe(NOTIF_ID, notification); // this can crash if started in background... (and firebase does say they started in background)
+                this.StartForegroundWrapper(NOTIF_ID, notification);
             }
             catch (Exception e)
             {
-                // this exception is in fact catchable.. though "startForegroundService() did not then call Service.startForeground()" is supposed to cause issues
-                //   in my case it did not.
                 ServiceLifecycle.IsStartUpServiceCurrentlyRunning = false;
                 bool? foreground = SeekerState.ActiveActivityRef?.IsResumed();
                 Logger.Firebase($"StartForeground issue: is foreground: {foreground} {e.Message} {e.StackTrace}");

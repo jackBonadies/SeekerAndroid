@@ -430,6 +430,47 @@ namespace Seeker
         internal static int _activeDownloadCount = 0;
         public static int ActiveDownloadCount => _activeDownloadCount;
 
+        /// <summary>
+        /// A transfer can start while we are backgrounded (a peer requesting a file, a queued
+        /// download resuming), where API 26+ forbids StartService. OnUpload/DownloadCountChanged
+        /// skip the start in that case, so the transfer would otherwise run for the rest of the
+        /// session with no foreground service — no wake lock, no process priority, killable
+        /// mid-transfer. Called from ForegroundLifecycleTracker once an activity resumes.
+        /// </summary>
+        public static void RetryStartTransferServicesIfNeeded(Context context)
+        {
+            if (context == null)
+            {
+                return;
+            }
+
+            try
+            {
+                if (ActiveUploadCount > 0 && !ServiceLifecycle.UploadKeepAliveServiceRunning)
+                {
+                    Logger.Debug("Retrying upload service start on foreground");
+                    context.StartService(new Intent(context, typeof(UploadForegroundService)));
+                }
+            }
+            catch (System.Exception e)
+            {
+                Logger.FirebaseError("Retry upload service start failed", e);
+            }
+
+            try
+            {
+                if (ActiveDownloadCount > 0 && !ServiceLifecycle.DownloadKeepAliveServiceRunning)
+                {
+                    Logger.Debug("Retrying download service start on foreground");
+                    context.StartService(new Intent(context, typeof(DownloadForegroundService)));
+                }
+            }
+            catch (System.Exception e)
+            {
+                Logger.FirebaseError("Retry download service start failed", e);
+            }
+        }
+
         internal static void NotifyUploadCountChanged(int count)
         {
             if (Android.App.Application.Context is SeekerApplication app)
@@ -484,7 +525,6 @@ namespace Seeker
                 {
                     this.StartService(uploadServiceIntent);
                 }
-                ServiceLifecycle.UploadKeepAliveServiceRunning = true;
             }
             else
             {
@@ -522,7 +562,6 @@ namespace Seeker
                 {
                     this.StartService(downloadServiceIntent);
                 }
-                ServiceLifecycle.DownloadKeepAliveServiceRunning = true;
             }
             else
             {

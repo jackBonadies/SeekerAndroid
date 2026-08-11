@@ -98,7 +98,16 @@ namespace Seeker
             {
                 Logger.Firebase("timer issue: " + e.Message + e.StackTrace);
             }
-            this.StartForegroundSafe(NOTIF_ID, notification);
+            try
+            {
+                this.StartForegroundWrapper(NOTIF_ID, notification);
+            }
+            catch (System.Exception e)
+            {
+                // its okay to just not promote this service to foreground.
+                // next time it gets hit, it can get promoted then
+                Logger.FirebaseError($"Upload service failed promoting to foreground. background: {ForegroundLifecycleTracker.IsBackground()}", e);
+            }
             //runs indefinitely until stop.
 
             return StartCommandResult.Sticky;
