@@ -10,11 +10,6 @@
 	</style>-->
 
     <style name="DefaultLight" parent="AppTheme.NoActionBar">
-        <!--looks fine in light case-->
-        <item name="android:navigationBarColor" tools:targetApi="21">
-            #FF000000
-        </item>
-        <!--<item name="colorPrimary">#3598D8</item>-->
         <item name="colorOnPrimary">#ffffff</item>
         <item name="colorSurface">#FEF7FF</item>
         <item name="colorSurfaceLogin">#FEF7FF</item>
@@ -204,11 +199,6 @@
 		<!-- this will be shown on opposite color background so use the colorPrimary light variant for it-->
         <item name="snackbarActionColor">#4f58c4</item>
 
-        <!--this was added bc some samsung devices have the nav bar as a bright white for seeker, but not for other apps.
-			I assume this is because other apps were setting it, and we werent. so remedy this here.-->
-        <item name="android:navigationBarColor" tools:targetApi="21">
-            #FF000000
-        </item>
 
         <item name="floating_action_bar_to_bottom_icon">#d4d4d4</item>
         <item name="floating_action_bar_to_bottom_background">#202020</item>

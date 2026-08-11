@@ -188,6 +188,10 @@ namespace Seeker
             //System.Threading.Thread.CurrentThread.Name = "Main Activity Thread";
             SetContentView(Resource.Layout.activity_main);
 
+            // in horizontal mode this prevents content under the 3-button navigation bar
+            AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(
+                FindViewById(Resource.Id.main_root), new HorizontalInsetsListener());
+
             BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
             navigation.SetOnNavigationItemSelectedListener(this);
 

@@ -92,7 +92,7 @@ namespace Seeker
         {
             (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
             force = true;
-            this.OnBackPressed();
+            this.OnBackPressedDispatcher.OnBackPressed();
         }
 
         private void OnCancelClick(object sender, DialogClickEventArgs e)

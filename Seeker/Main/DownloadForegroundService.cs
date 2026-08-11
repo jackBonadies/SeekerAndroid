@@ -96,30 +96,23 @@ namespace Seeker
             {
                 Logger.Firebase("timer issue: " + e.Message + e.StackTrace);
             }
-            //.setContentTitle(getText(R.string.notification_title))
-            //.setContentText(getText(R.string.notification_message))
-            //.setSmallIcon(R.drawable.icon)
-            //.setContentIntent(pendingIntent)
-            //.setTicker(getText(R.string.ticker_text))
-            //.build();
 
             try
             {
-                // can throw ForegroundServiceStartNotAllowedException
-                this.StartForegroundSafe(NOTIF_ID, notification);
+                this.StartForegroundWrapper(NOTIF_ID, notification);
             }
             catch(System.Exception e)
             {
                 // its okay to just not promote this service to foreground.
-                // you will still get notifications, it will just be a lower priority process
-                // also, next time this gets hit (i.e. if a user starts another set of downloads)
-                // the service can then maybe successfully get promoted.
+                // next time it gets hit, it can get promoted then
                 Logger.FirebaseError($"Download service failed promoting to foreground. background: {ForegroundLifecycleTracker.IsBackground()}", e);
 
             }
             //runs indefinitely until stop.
 
-            return StartCommandResult.Sticky;
+            // If we get killed there is no point in restarting automatically, instead on startup
+            // TransfersController.InitializeService will requeue any pending transfers after login.
+            return StartCommandResult.NotSticky;
         }
 
         public override void OnDestroy()

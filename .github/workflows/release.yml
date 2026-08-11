@@ -39,8 +39,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up .NET (honors global.json -> 9.0.201)
+      - name: Set up .NET
         uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.300'
 
       - name: Install android workload
         run: dotnet workload install android
@@ -121,9 +123,11 @@ jobs:
           AndroidSigningKeyPass: ${{ secrets.ANDROID_KEY_PASSWORD }}
           AndroidSigningStorePass: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
+          TFM=$(dotnet msbuild Seeker/Seeker.csproj -getProperty:TargetFramework -v:q | tr -d '[:space:]')
+          echo "TFM=$TFM" >> "$GITHUB_ENV"
           dotnet publish Seeker/Seeker.csproj \
             -c Release \
-            -f net9.0-android \
+            -f "$TFM" \
             -p:AndroidSigningKeyStore="$KEYSTORE_PATH" \
             -p:AndroidSigningKeyAlias="$AndroidSigningKeyAlias" \
             -p:AndroidSigningKeyPass="$AndroidSigningKeyPass" \
@@ -134,9 +138,9 @@ jobs:
 
       - name: Stage AAB for upload
         run: |
-          AAB=$(find Seeker/bin/Release/net9.0-android -name "*-Signed.aab" -type f 2>/dev/null | head -n1)
+          AAB=$(find "Seeker/bin/Release/$TFM" -name "*-Signed.aab" -type f 2>/dev/null | head -n1)
           if [ -z "$AAB" ]; then
-            echo "::error::No signed AAB found under Seeker/bin/Release/net9.0-android"
+            echo "::error::No signed AAB found under Seeker/bin/Release/$TFM"
             find Seeker/bin/Release -name "*.aab" -type f || true
             exit 1
           fi

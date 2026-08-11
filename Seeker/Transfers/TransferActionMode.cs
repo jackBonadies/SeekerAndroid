@@ -19,12 +19,7 @@ namespace Seeker
             public bool OnCreateActionMode(ActionMode mode, IMenu menu)
             {
                 mode.MenuInflater.Inflate(Resource.Menu.transfers_menu_batch, menu);
-                var activity = SeekerState.ActiveActivityRef;
-                if (activity != null)
-                {
-                    var color = UiHelpers.GetColorFromAttribute(activity, Resource.Attribute.colorPrimary);
-                    activity.Window?.SetStatusBarColor(color);
-                }
+                UiHelpers.ApplyActionModeStatusBarInset(SeekerState.ActiveActivityRef);
                 return true;
             }
 

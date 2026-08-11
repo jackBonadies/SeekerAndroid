@@ -27,7 +27,10 @@ if ([string]::IsNullOrWhiteSpace($Version)) {
 $pkg     = "com.companyname.andriodapp1"
 $csproj  = "./Seeker/Seeker.csproj"
 $config  = "Release IzzySoft"
-$base    = "./Seeker/bin/$config/net9.0-android"
+$tfm     = (dotnet msbuild $csproj -getProperty:TargetFramework -v:q).Trim()
+if ([string]::IsNullOrWhiteSpace($tfm)) { throw "Could not resolve TargetFramework from $csproj." }
+Write-Host "TargetFramework=$tfm"
+$base    = "./Seeker/bin/$config/$tfm"
 $out     = "./release-apks"
 
 $rids = @("android-arm64", "android-arm", "android-x64", "android-x86")
@@ -79,7 +82,7 @@ if ($StorePass)    { $commonArgs += "-p:AndroidSigningStorePass=$StorePass" }
 New-Item -ItemType Directory -Force $out | Out-Null
 
 Write-Host "==> Publishing universal APK" -ForegroundColor Cyan
-dotnet publish -c $config -f net9.0-android @commonArgs $csproj
+dotnet publish -c $config -f $tfm @commonArgs $csproj
 if ($LASTEXITCODE -ne 0) { throw "Universal publish failed." }
 
 foreach ($rid in $rids) {
@@ -93,7 +96,7 @@ foreach ($rid in $rids) {
     # -p:RuntimeIdentifiers= clears the plural value set in Seeker.csproj so
     # -r actually narrows the build to a single ABI; otherwise every per-ABI
     # APK ends up containing native libs for all four ABIs.
-    dotnet publish -c $config -f net9.0-android -r $rid -p:RuntimeIdentifiers= @commonArgs $csproj
+    dotnet publish -c $config -f $tfm -r $rid -p:RuntimeIdentifiers= @commonArgs $csproj
     if ($LASTEXITCODE -ne 0) { throw "Publish failed for $rid." }
 }
 

@@ -22,6 +22,79 @@ namespace Seeker
 {
     public static class UiHelpers
     {
+        /// <summary>
+        /// Tints the status bar strip behind the contextual action bar.
+        /// </summary>
+        public static void ApplyActionModeStatusBarInset(Activity activity)
+        {
+            var decor = activity?.Window?.DecorView;
+            if (decor == null)
+            {
+                return;
+            }
+
+            decor.Post(() => TintActionModeChrome(activity, decor));
+            // this is a hack
+            decor.PostDelayed(() => TintActionModeChrome(activity, decor), 300);
+        }
+
+        private static void TintActionModeChrome(Activity activity, View decor)
+        {
+            try
+            {
+                var insets = AndroidX.Core.View.ViewCompat.GetRootWindowInsets(decor);
+                int top = insets?.GetInsets(
+                    AndroidX.Core.View.WindowInsetsCompat.Type.StatusBars())?.Top ?? 0;
+                if (top <= 0)
+                {
+                    return;
+                }
+
+                RecolorStatusGuard(decor, top, GetColorFromAttribute(activity, Resource.Attribute.mainPurple));
+            }
+            catch (System.Exception e)
+            {
+                Logger.Debug("TintActionModeChrome failed: " + e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Finds AppCompat's status guard and repaints it
+        /// </summary>
+        private static void RecolorStatusGuard(View v, int statusBarHeight, Color color)
+        {
+            if (v == null)
+            {
+                return;
+            }
+
+            if (v is ViewGroup vg)
+            {
+                for (int i = 0; i < vg.ChildCount; i++)
+                {
+                    RecolorStatusGuard(vg.GetChildAt(i), statusBarHeight, color);
+                }
+                return;
+            }
+
+            if (v.Id != View.NoId || v.Height != statusBarHeight || v.Visibility != ViewStates.Visible)
+            {
+                return;
+            }
+
+            if (!(v.Background is Android.Graphics.Drawables.ColorDrawable))
+            {
+                return;
+            }
+
+            int[] loc = new int[2];
+            v.GetLocationInWindow(loc);
+            if (loc[1] == 0)
+            {
+                v.SetBackgroundColor(color);
+            }
+        }
+
         public static Color GetColorFromAttribute(Context c, int attr, Resources.Theme overrideTheme = null)
         {
             var typedValue = new TypedValue();

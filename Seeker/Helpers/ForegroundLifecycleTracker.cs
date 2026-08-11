@@ -47,6 +47,10 @@ namespace Seeker
 
         void Application.IActivityLifecycleCallbacks.OnActivityResumed(Activity activity)
         {
+            // A transfer that began while we were backgrounded could not start its foreground
+            // service (API 26+ forbids it). Now that we are foreground again, retry.
+            SeekerApplication.RetryStartTransferServicesIfNeeded(activity?.ApplicationContext);
+
             if (!HasAppEverStarted)
             {
                 HasAppEverStarted = true;

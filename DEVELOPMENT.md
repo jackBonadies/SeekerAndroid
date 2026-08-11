@@ -15,7 +15,7 @@ dotnet build .\Seeker\Seeker.csproj -p:AndroidKeyStore=false -c "Debug Mock" -t:
 dotnet build .\Seeker\Seeker.csproj -p:AndroidKeyStore=false -c "Debug Mock" -t:Run
 
 # build standalone + deploy
-dotnet publish .\Seeker\Seeker.csproj -p:AndroidKeyStore=false -p:EmbedAssembliesIntoApk=true -c "Debug Mock" -f net9.0-android
+dotnet publish .\Seeker\Seeker.csproj -p:AndroidKeyStore=false -p:EmbedAssembliesIntoApk=true -c "Debug Mock" -f net10.0-android36.0
 
 # view app logs
 adb logcat --pid=(adb shell pidof com.companyname.andriodapp1)
@@ -46,6 +46,6 @@ Builds the universal + all four per-ABI IzzySoft APKs and stages them in
 ### Universal APK (all ABIs in one file)
 
 ```powershell
-dotnet publish -c Release -f net9.0-android .\Seeker\Seeker.csproj
-dotnet publish -c "Release IzzySoft" -f net9.0-android .\Seeker\Seeker.csproj
+dotnet publish -c Release -f net10.0-android36.0 .\Seeker\Seeker.csproj
+dotnet publish -c "Release IzzySoft" -f net10.0-android36.0 .\Seeker\Seeker.csproj
 ```
