@@ -23,12 +23,7 @@ namespace Seeker
             public bool OnCreateActionMode(ActionMode mode, IMenu menu)
             {
                 mode.MenuInflater.Inflate(Resource.Menu.browse_menu_batch, menu);
-                var activity = SeekerState.ActiveActivityRef;
-                if (activity != null)
-                {
-                    var color = UiHelpers.GetColorFromAttribute(activity, Resource.Attribute.colorPrimary);
-                    activity.Window?.SetStatusBarColor(color);
-                }
+                UiHelpers.ApplyActionModeStatusBarInset(SeekerState.ActiveActivityRef);
                 return true;
             }
 
@@ -97,6 +92,7 @@ namespace Seeker
                 SeekerState.ActiveActivityRef?.Window?.SetStatusBarColor(Android.Graphics.Color.Transparent);
 
                 BrowseActionMode = null;
+                BrowseActionModeCallbackInstance = null;
                 Adapter.SelectedPositions.Clear();
                 Adapter.IsInBatchSelectMode = false;
                 Adapter.NotifyDataSetChanged();
