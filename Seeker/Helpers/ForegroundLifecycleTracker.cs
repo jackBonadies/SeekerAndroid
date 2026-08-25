@@ -152,15 +152,8 @@ namespace Seeker
 
                 //snapshot state that is not saved at mutation time (e.g. transient user list
                 //status / data fields from Server)
-                string userListSerialized = null;
-                if (CommonState.UserList != null)
-                {
-                    lock (CommonState.UserList)
-                    {
-                        userListSerialized = SerializationHelper.SaveUserListToString(CommonState.UserList);
-                    }
-                }
-                PreferencesManager.SaveOnPauseState(userListSerialized);
+                PreferencesManager.SaveBulkState();
+                TransferPersistenceWrapper.SaveTransferItems();
             }
 
             if (NumberOfActiveActivities == 0 && PreferencesState.AutoAwayOnInactivity)

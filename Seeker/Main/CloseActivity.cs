@@ -3,7 +3,6 @@ using Android.Content;
 using Android.OS;
 using AndroidX.AppCompat.App;
 using Seeker.Helpers;
-using System;
 
 namespace Seeker
 {
@@ -28,21 +27,24 @@ namespace Seeker
                 SeekerState.SoulseekClient = null;
             }
 
-            //stop the 3 potential foreground services.
-            Intent intent = new Intent(this, typeof(UploadForegroundService));
-            intent.SetAction(SeekerApplication.ACTION_SHUTDOWN);
-            StartService(intent);
-
-            intent = new Intent(this, typeof(DownloadForegroundService));
-            intent.SetAction(SeekerApplication.ACTION_SHUTDOWN);
-            StartService(intent);
-
-            intent = new Intent(this, typeof(SeekerKeepAliveService));
-            intent.SetAction(SeekerApplication.ACTION_SHUTDOWN);
-            StartService(intent);
+            StopService(new Intent(this, typeof(UploadForegroundService)));
+            StopService(new Intent(this, typeof(DownloadForegroundService)));
+            StopService(new Intent(this, typeof(SeekerKeepAliveService)));
 
             //remove this final "closing" activity from task list.
             this.FinishAndRemoveTask();
+
+            //JavaSystem.Exit runs before the looper drains,
+            //so pending main-looper work - service callbacks, activity OnDestroy (and the
+            //saves they would do) - never executes. must be a synchronous Commit - queued Apply()
+            //disk writes die with the process.
+            //This fixes the (user reported and reproduced) issue where if you have finished transfers,
+            //and then hit Clear All Complete which will mark them dirty but not save them,
+            //and then hit Shutdown, they will reappear.
+            //SaveBulkState also drains any Apply() writes still queued from the OnPause
+            //transition (QueuedWork delays them ~100ms), which would otherwise be lost.
+            PreferencesManager.SaveBulkState(commit: true);
+            TransferPersistenceWrapper.SaveTransferItems(force: false, commit: true);
 
             //actually unload all classes, statics, etc from JVM.
             //the process will still be a "cached background process" that is fine.

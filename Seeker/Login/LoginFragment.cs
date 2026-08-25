@@ -587,6 +587,7 @@ namespace Seeker
                 {
                     PreferencesState.CurrentlyLoggedIn = false;
                 }
+                PreferencesManager.SaveCredentials();
                 ShowLoginForm(prefill: !clearCreds);
             });
             SeekerState.MainActivityRef.RunOnUiThread(action);
@@ -596,6 +597,7 @@ namespace Seeker
         {
             Logger.Debug("Login succeeded");
             PreferencesState.CurrentlyLoggedIn = true;
+            PreferencesManager.SaveCredentials();
             s_loginInFlight = false;
             ShowLoggedIn();
         }
@@ -610,6 +612,7 @@ namespace Seeker
             {
             }
             PreferencesState.ClearCredentials();
+            PreferencesManager.SaveCredentials();
             ShowLoginForm(prefill: false);
         }
 
@@ -663,7 +666,12 @@ namespace Seeker
                     ShowLoading();
                 }
                 PreferencesState.SetCredentials(usernameTextEdit.Text, passwordTextEdit.Text);
-                if (!alreadyConnected)
+                if (alreadyConnected)
+                {
+                    //normal path saves in OnLoginSucceeded, but that already ran for this session.
+                    PreferencesManager.SaveCredentials();
+                }
+                else
                 {
                     s_loginInFlight = true;
                 }

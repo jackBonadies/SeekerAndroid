@@ -250,6 +250,26 @@ namespace Seeker
             }
         }
 
+        public static void SaveTransferViewShowSizes()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_TransfersShowSizes, PreferencesState.TransferViewShowSizes);
+                editor.Apply();
+            }
+        }
+
+        public static void SaveTransferViewShowSpeed()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_TransfersShowSpeed, PreferencesState.TransferViewShowSpeed);
+                editor.Apply();
+            }
+        }
+
         public static void SaveTransferViewInUploadsMode()
         {
             lock (SharedPrefLock)
@@ -295,6 +315,18 @@ namespace Seeker
             lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_Password, PreferencesState.Password);
+                editor.Apply();
+            }
+        }
+
+        public static void SaveCredentials()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_CurrentlyLoggedIn, PreferencesState.CurrentlyLoggedIn);
+                editor.PutString(KeyConsts.M_Username, PreferencesState.Username);
                 editor.PutString(KeyConsts.M_Password, PreferencesState.Password);
                 editor.Apply();
             }
@@ -507,6 +539,17 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_LegacyLanguageMigrated, PreferencesState.LegacyLanguageMigrated);
+                editor.Apply();
+            }
+        }
+
+        public static void SaveDownloadDirectoryUri()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_SaveDataDirectoryUri, PreferencesState.SaveDataDirectoryUri);
+                editor.PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, PreferencesState.SaveDataDirectoryUriIsFromTree);
                 editor.Apply();
             }
         }
@@ -831,10 +874,27 @@ namespace Seeker
         }
 
         /// <summary>
-        /// Saves the bulk state from MainActivity.OnPause — all PreferencesState fields
-        /// plus a pre-serialized user list string (null to skip).
+        /// Snapshots and saves the bulk not-saved-at-mutation-time state (SaveOnPauseState
+        /// fields + the user list).
         /// </summary>
-        public static void SaveOnPauseState(string userListSerialized)
+        public static void SaveBulkState(bool commit = false)
+        {
+            string userListSerialized = null;
+            if (CommonState.UserList != null)
+            {
+                lock (CommonState.UserList)
+                {
+                    userListSerialized = SerializationHelper.SaveUserListToString(CommonState.UserList);
+                }
+            }
+            SaveOnPauseState(userListSerialized, commit);
+        }
+
+        /// <summary>
+        /// Saves the bulk state — all PreferencesState fields not saved at mutation time
+        /// + a pre-serialized user list string (null to skip).
+        /// </summary>
+        public static void SaveOnPauseState(string userListSerialized, bool commit = false)
         {
             lock (SharedPrefLock)
             {
@@ -872,7 +932,14 @@ namespace Seeker
                     editor.PutString(KeyConsts.M_UserList, userListSerialized);
                 }
 
-                editor.Apply();
+                if (commit)
+                {
+                    editor.Commit();
+                }
+                else
+                {
+                    editor.Apply();
+                }
             }
         }
 
@@ -897,8 +964,10 @@ namespace Seeker
 
         /// <summary>
         /// Saves serialized transfer items, acquiring both SharedPrefLock and TransferStateSaveLock.
+        /// Pass commit=true when the process is about to exit - Apply()'s disk write is queued
+        /// and does not survive JavaSystem.Exit, Commit() blocks until the write hits disk.
         /// </summary>
-        public static void SaveTransferItems(string downloads, string uploads)
+        public static void SaveTransferItems(string downloads, string uploads, bool commit = false)
         {
             lock (SharedPrefLock)
                 lock (TransferStateSaveLock)
@@ -906,7 +975,14 @@ namespace Seeker
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_TransferList, downloads);
                     editor.PutString(KeyConsts.M_TransferListUpload, uploads);
-                    editor.Apply();
+                    if (commit)
+                    {
+                        editor.Commit();
+                    }
+                    else
+                    {
+                        editor.Apply();
+                    }
                 }
         }
 

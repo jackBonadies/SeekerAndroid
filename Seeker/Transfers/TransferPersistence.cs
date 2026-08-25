@@ -24,12 +24,12 @@ namespace Seeker
             TransferPersistence.RestoreUploadTransferItems(transferListLegacy, transferListV2);
         }
 
-        public static void SaveTransferItems(bool force = false, int maxSecondsUpdate = 0)
+        public static void SaveTransferItems(bool force = false, int maxSecondsUpdate = 0, bool commit = false)
         {
             var result = TransferPersistence.SaveTransferItems(force, maxSecondsUpdate);
             if (result.HasValue)
             {
-                PreferencesManager.SaveTransferItems(result.Value.downloads, result.Value.uploads);
+                PreferencesManager.SaveTransferItems(result.Value.downloads, result.Value.uploads, commit);
             }
         }
     }
