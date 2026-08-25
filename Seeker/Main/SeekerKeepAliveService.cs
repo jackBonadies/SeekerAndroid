@@ -48,11 +48,6 @@ namespace Seeker
         [return: GeneratedEnum]
         public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
         {
-            if (SeekerApplication.IsShuttingDown(intent))
-            {
-                this.StopSelf();
-                return StartCommandResult.NotSticky;
-            }
             Logger.InfoFirebase("keep alive service started...");
             ServiceLifecycle.IsStartUpServiceCurrentlyRunning = true;
 
