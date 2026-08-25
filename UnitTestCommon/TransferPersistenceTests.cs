@@ -48,7 +48,7 @@ namespace UnitTestCommon
         [Test]
         public void RestoreDownloadTransferItems_EmptyStrings_CreatesEmptyManager()
         {
-            TransferPersistence.RestoreDownloadTransferItems(string.Empty, string.Empty);
+            TransferPersistence.RestoreDownloadTransferItems(string.Empty);
 
             Assert.IsNotNull(TransferItems.TransferItemManagerDL);
             Assert.AreEqual(0, TransferItems.TransferItemManagerDL.AllTransferItems.Count);
@@ -64,7 +64,7 @@ namespace UnitTestCommon
             };
             string xml = SerializeTransferItems(items);
 
-            TransferPersistence.RestoreDownloadTransferItems(xml, string.Empty);
+            TransferPersistence.RestoreDownloadTransferItems(xml);
 
             Assert.IsNotNull(TransferItems.TransferItemManagerDL);
             Assert.AreEqual(2, TransferItems.TransferItemManagerDL.AllTransferItems.Count);
@@ -81,7 +81,7 @@ namespace UnitTestCommon
             };
             string xml = SerializeTransferItems(items);
 
-            TransferPersistence.RestoreDownloadTransferItems(xml, string.Empty);
+            TransferPersistence.RestoreDownloadTransferItems(xml);
 
             var restored = TransferItems.TransferItemManagerDL.AllTransferItems[0];
             Assert.AreEqual("\\dir\\folder1\\song.mp3", restored.FullFilename);
@@ -99,7 +99,7 @@ namespace UnitTestCommon
             items[0].State = TransferStates.InProgress;
             string xml = SerializeTransferItems(items);
 
-            TransferPersistence.RestoreDownloadTransferItems(xml, string.Empty);
+            TransferPersistence.RestoreDownloadTransferItems(xml);
 
             Assert.AreEqual(TransferStates.Cancelled, TransferItems.TransferItemManagerDL.AllTransferItems[0].State);
         }
@@ -113,7 +113,7 @@ namespace UnitTestCommon
             };
             string xml = SerializeTransferItems(items);
 
-            TransferPersistence.RestoreDownloadTransferItems(xml, string.Empty);
+            TransferPersistence.RestoreDownloadTransferItems(xml);
 
             Assert.AreEqual(54321, TransferItems.TransferItemManagerDL.AllTransferItems[0].Size);
         }
@@ -123,7 +123,7 @@ namespace UnitTestCommon
         [Test]
         public void RestoreUploadTransferItems_EmptyStrings_CreatesEmptyManager()
         {
-            TransferPersistence.RestoreUploadTransferItems(string.Empty, string.Empty);
+            TransferPersistence.RestoreUploadTransferItems(string.Empty);
 
             Assert.IsNotNull(TransferItems.TransferItemManagerUploads);
             Assert.AreEqual(0, TransferItems.TransferItemManagerUploads.AllTransferItems.Count);
@@ -138,7 +138,7 @@ namespace UnitTestCommon
             };
             string xml = SerializeTransferItems(items);
 
-            TransferPersistence.RestoreUploadTransferItems(xml, string.Empty);
+            TransferPersistence.RestoreUploadTransferItems(xml);
 
             Assert.AreEqual(1, TransferItems.TransferItemManagerUploads.AllTransferItems.Count);
             Assert.AreEqual("upUser1", TransferItems.TransferItemManagerUploads.AllTransferItems[0].Username);
@@ -154,7 +154,7 @@ namespace UnitTestCommon
             items[0].State = TransferStates.InProgress;
             string xml = SerializeTransferItems(items);
 
-            TransferPersistence.RestoreUploadTransferItems(xml, string.Empty);
+            TransferPersistence.RestoreUploadTransferItems(xml);
 
             Assert.AreEqual(TransferStates.Cancelled, TransferItems.TransferItemManagerUploads.AllTransferItems[0].State);
         }
@@ -177,7 +177,7 @@ namespace UnitTestCommon
             items[4].State = TransferStates.Aborted;
             string xml = SerializeTransferItems(items);
 
-            TransferPersistence.RestoreDownloadTransferItems(xml, string.Empty);
+            TransferPersistence.RestoreDownloadTransferItems(xml);
 
             Assert.AreEqual(true, TransferItems.TransferItemManagerDL.AllTransferItems.All(t=>t.State == TransferStates.Cancelled));
         }
@@ -283,7 +283,7 @@ namespace UnitTestCommon
 
             // Now restore from saved data
             TransferItems.TransferItemManagerDL = null;
-            TransferPersistence.RestoreDownloadTransferItems(saved.Value.downloads, string.Empty);
+            TransferPersistence.RestoreDownloadTransferItems(saved.Value.downloads);
 
             Assert.AreEqual(2, TransferItems.TransferItemManagerDL.AllTransferItems.Count);
 
@@ -313,7 +313,7 @@ namespace UnitTestCommon
             Assert.IsNotNull(saved);
 
             TransferItems.TransferItemManagerUploads = null;
-            TransferPersistence.RestoreUploadTransferItems(saved.Value.uploads, string.Empty);
+            TransferPersistence.RestoreUploadTransferItems(saved.Value.uploads);
 
             Assert.AreEqual(1, TransferItems.TransferItemManagerUploads.AllTransferItems.Count);
             var restored = TransferItems.TransferItemManagerUploads.AllTransferItems[0];
@@ -334,8 +334,8 @@ namespace UnitTestCommon
             TransferItems.TransferItemManagerDL = null;
             TransferItems.TransferItemManagerUploads = null;
 
-            TransferPersistence.RestoreDownloadTransferItems(saved.Value.downloads, string.Empty);
-            TransferPersistence.RestoreUploadTransferItems(saved.Value.uploads, string.Empty);
+            TransferPersistence.RestoreDownloadTransferItems(saved.Value.downloads);
+            TransferPersistence.RestoreUploadTransferItems(saved.Value.uploads);
 
             Assert.AreEqual(0, TransferItems.TransferItemManagerDL.AllTransferItems.Count);
             Assert.AreEqual(0, TransferItems.TransferItemManagerUploads.AllTransferItems.Count);
@@ -356,7 +356,7 @@ namespace UnitTestCommon
             var saved = TransferPersistence.SaveTransferItems(force: true);
 
             TransferItems.TransferItemManagerDL = null;
-            TransferPersistence.RestoreDownloadTransferItems(saved.Value.downloads, string.Empty);
+            TransferPersistence.RestoreDownloadTransferItems(saved.Value.downloads);
 
             var restored = TransferItems.TransferItemManagerDL.AllTransferItems[0];
             Assert.IsTrue(restored.State.HasFlag(TransferStates.Succeeded));
@@ -378,7 +378,7 @@ namespace UnitTestCommon
             var saved = TransferPersistence.SaveTransferItems(force: true);
 
             TransferItems.TransferItemManagerDL = null;
-            TransferPersistence.RestoreDownloadTransferItems(saved.Value.downloads, string.Empty);
+            TransferPersistence.RestoreDownloadTransferItems(saved.Value.downloads);
 
             var restored = TransferItems.TransferItemManagerDL.AllTransferItems[0];
             Assert.IsTrue(restored.WasFilenameLatin1Decoded);
@@ -398,7 +398,7 @@ namespace UnitTestCommon
             var saved = TransferPersistence.SaveTransferItems(force: true);
 
             TransferItems.TransferItemManagerDL = null;
-            TransferPersistence.RestoreDownloadTransferItems(saved.Value.downloads, string.Empty);
+            TransferPersistence.RestoreDownloadTransferItems(saved.Value.downloads);
 
             var restored = TransferItems.TransferItemManagerDL.AllTransferItems[0];
             // XmlIgnore fields should be default values after deserialization
@@ -434,7 +434,7 @@ namespace UnitTestCommon
             Assert.IsNotNull(saved);
 
             TransferItems.TransferItemManagerDL = null;
-            TransferPersistence.RestoreDownloadTransferItems(saved.Value.downloads, string.Empty);
+            TransferPersistence.RestoreDownloadTransferItems(saved.Value.downloads);
 
             await Verifier.Verify(TransferItems.TransferItemManagerDL.AllTransferItems.Select(t => new
             {
@@ -459,7 +459,7 @@ namespace UnitTestCommon
             };
             string xml = SerializeTransferItems(items);
 
-            TransferPersistence.RestoreDownloadTransferItems(xml, string.Empty);
+            TransferPersistence.RestoreDownloadTransferItems(xml);
 
             Assert.AreEqual(3, TransferItems.TransferItemManagerDL.AllTransferItems.Count);
             Assert.AreEqual(2, TransferItems.TransferItemManagerDL.AllFolderItems.Count);

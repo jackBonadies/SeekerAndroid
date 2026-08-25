@@ -12,16 +12,14 @@ namespace Seeker
     {
         public static void RestoreDownloadTransferItems(ISharedPreferences sharedPreferences)
         {
-            string transferListV2 = string.Empty; //sharedPreferences.GetString(KeyConsts.M_TransferList_v2, string.Empty);
-            string transferListLegacy = sharedPreferences.GetString(KeyConsts.M_TransferList, string.Empty);
-            TransferPersistence.RestoreDownloadTransferItems(transferListLegacy, transferListV2);
+            string transferList = sharedPreferences.GetString(KeyConsts.M_TransferList, string.Empty);
+            TransferPersistence.RestoreDownloadTransferItems(transferList);
         }
 
         public static void RestoreUploadTransferItems(ISharedPreferences sharedPreferences)
         {
-            string transferListV2 = string.Empty; //sharedPreferences.GetString(KeyConsts.M_Upload_TransferList_v2, string.Empty); //TODO !!! replace !!!
-            string transferListLegacy = sharedPreferences.GetString(KeyConsts.M_TransferListUpload, string.Empty);
-            TransferPersistence.RestoreUploadTransferItems(transferListLegacy, transferListV2);
+            string transferList = sharedPreferences.GetString(KeyConsts.M_TransferListUpload, string.Empty);
+            TransferPersistence.RestoreUploadTransferItems(transferList);
         }
 
         public static void SaveTransferItems(bool force = false, int maxSecondsUpdate = 0, bool commit = false)
