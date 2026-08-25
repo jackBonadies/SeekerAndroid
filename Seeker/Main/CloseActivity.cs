@@ -41,6 +41,9 @@ namespace Seeker
             //This fixes the (user reported and reproduced) issue where if you have finished transfers,
             //and then hit Clear All Complete which will mark them dirty but not save them,
             //and then hit Shutdown, they will reappear.
+            //SaveBulkState also drains any Apply() writes still queued from the OnPause
+            //transition (QueuedWork delays them ~100ms), which would otherwise be lost.
+            PreferencesManager.SaveBulkState(commit: true);
             TransferPersistenceWrapper.SaveTransferItems(force: false, commit: true);
 
             //actually unload all classes, statics, etc from JVM.

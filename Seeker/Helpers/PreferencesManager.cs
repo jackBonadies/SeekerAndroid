@@ -250,6 +250,26 @@ namespace Seeker
             }
         }
 
+        public static void SaveTransferViewShowSizes()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_TransfersShowSizes, PreferencesState.TransferViewShowSizes);
+                editor.Apply();
+            }
+        }
+
+        public static void SaveTransferViewShowSpeed()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_TransfersShowSpeed, PreferencesState.TransferViewShowSpeed);
+                editor.Apply();
+            }
+        }
+
         public static void SaveTransferViewInUploadsMode()
         {
             lock (SharedPrefLock)
@@ -519,6 +539,17 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_LegacyLanguageMigrated, PreferencesState.LegacyLanguageMigrated);
+                editor.Apply();
+            }
+        }
+
+        public static void SaveDownloadDirectoryUri()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutString(KeyConsts.M_SaveDataDirectoryUri, PreferencesState.SaveDataDirectoryUri);
+                editor.PutBoolean(KeyConsts.M_SaveDataDirectoryUriIsFromTree, PreferencesState.SaveDataDirectoryUriIsFromTree);
                 editor.Apply();
             }
         }
@@ -843,10 +874,27 @@ namespace Seeker
         }
 
         /// <summary>
-        /// Saves the bulk state from MainActivity.OnPause — all PreferencesState fields
-        /// plus a pre-serialized user list string (null to skip).
+        /// Snapshots and saves the bulk not-saved-at-mutation-time state (SaveOnPauseState
+        /// fields + the user list).
         /// </summary>
-        public static void SaveOnPauseState(string userListSerialized)
+        public static void SaveBulkState(bool commit = false)
+        {
+            string userListSerialized = null;
+            if (CommonState.UserList != null)
+            {
+                lock (CommonState.UserList)
+                {
+                    userListSerialized = SerializationHelper.SaveUserListToString(CommonState.UserList);
+                }
+            }
+            SaveOnPauseState(userListSerialized, commit);
+        }
+
+        /// <summary>
+        /// Saves the bulk state — all PreferencesState fields not saved at mutation time
+        /// + a pre-serialized user list string (null to skip).
+        /// </summary>
+        public static void SaveOnPauseState(string userListSerialized, bool commit = false)
         {
             lock (SharedPrefLock)
             {
@@ -884,7 +932,14 @@ namespace Seeker
                     editor.PutString(KeyConsts.M_UserList, userListSerialized);
                 }
 
-                editor.Apply();
+                if (commit)
+                {
+                    editor.Commit();
+                }
+                else
+                {
+                    editor.Apply();
+                }
             }
         }
 

@@ -210,10 +210,12 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_show_size:
                     PreferencesState.TransferViewShowSizes = !PreferencesState.TransferViewShowSizes;
+                    PreferencesManager.SaveTransferViewShowSizes();
                     SetRecyclerAdapter(true);
                     return true;
                 case Resource.Id.action_show_speed:
                     PreferencesState.TransferViewShowSpeed = !PreferencesState.TransferViewShowSpeed;
+                    PreferencesManager.SaveTransferViewShowSpeed();
                     SetRecyclerAdapter(true);
                     return true;
                 case Resource.Id.action_clear_all_complete_and_aborted:

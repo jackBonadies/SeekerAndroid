@@ -34,6 +34,7 @@ namespace Seeker.Services
             {
                 context.ContentResolver.TakePersistableUriPermission(uri, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
             }
+            PreferencesManager.SaveDownloadDirectoryUri();
             if (raiseUpdatedEvent)
             {
                 DirectoryUpdatedEvent?.Invoke(null, EventArgs.Empty);
@@ -49,6 +50,7 @@ namespace Seeker.Services
             {
                 context.ContentResolver.TakePersistableUriPermission(uri, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
             }
+            PreferencesManager.SaveManualIncompleteDir();
             if (raiseUpdatedEvent)
             {
                 DirectoryUpdatedEvent?.Invoke(null, EventArgs.Empty);
