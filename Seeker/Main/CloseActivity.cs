@@ -44,6 +44,15 @@ namespace Seeker
             //remove this final "closing" activity from task list.
             this.FinishAndRemoveTask();
 
+            //JavaSystem.Exit runs before the looper drains,
+            //so the ACTION_SHUTDOWN service intents and any pending activity OnDestroy (and the
+            //saves they would do) never execute. must be a synchronous Commit - queued Apply()
+            //disk writes die with the process.
+            //This fixes the (user reported and reproduced) issue where if you have finished transfers,
+            //and then hit Clear All Complete which will mark them dirty but not save them,
+            //and then hit Shutdown, they will reappear.
+            TransferPersistenceWrapper.SaveTransferItems(force: false, commit: true);
+
             //actually unload all classes, statics, etc from JVM.
             //the process will still be a "cached background process" that is fine.
             Java.Lang.JavaSystem.Exit(0);

@@ -897,8 +897,10 @@ namespace Seeker
 
         /// <summary>
         /// Saves serialized transfer items, acquiring both SharedPrefLock and TransferStateSaveLock.
+        /// Pass commit=true when the process is about to exit - Apply()'s disk write is queued
+        /// and does not survive JavaSystem.Exit, Commit() blocks until the write hits disk.
         /// </summary>
-        public static void SaveTransferItems(string downloads, string uploads)
+        public static void SaveTransferItems(string downloads, string uploads, bool commit = false)
         {
             lock (SharedPrefLock)
                 lock (TransferStateSaveLock)
@@ -906,7 +908,14 @@ namespace Seeker
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_TransferList, downloads);
                     editor.PutString(KeyConsts.M_TransferListUpload, uploads);
-                    editor.Apply();
+                    if (commit)
+                    {
+                        editor.Commit();
+                    }
+                    else
+                    {
+                        editor.Apply();
+                    }
                 }
         }
 

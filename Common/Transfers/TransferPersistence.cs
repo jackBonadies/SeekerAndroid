@@ -98,7 +98,7 @@ namespace Seeker
         /// </summary>
         public static (string downloads, string uploads)? SaveTransferItems(bool force = false, int maxSecondsUpdate = 0)
         {
-            if (force || (TransferItemManager.TransfersDirty && DateTime.UtcNow.Subtract(transfersLastSavedTime).TotalSeconds > maxSecondsUpdate))
+            if (force || (TransferItemManager.TransfersDirty && DateTime.UtcNow.Subtract(transfersLastSavedTime).TotalSeconds >= maxSecondsUpdate))
             {
                 if (TransferItems.TransferItemManagerDL?.AllTransferItems == null)
                 {
