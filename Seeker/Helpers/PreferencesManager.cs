@@ -300,6 +300,18 @@ namespace Seeker
             }
         }
 
+        public static void SaveCredentials()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_CurrentlyLoggedIn, PreferencesState.CurrentlyLoggedIn);
+                editor.PutString(KeyConsts.M_Username, PreferencesState.Username);
+                editor.PutString(KeyConsts.M_Password, PreferencesState.Password);
+                editor.Apply();
+            }
+        }
+
         public static void SaveDefaultSearchResultSortAlgorithm()
         {
             lock (SharedPrefLock)
