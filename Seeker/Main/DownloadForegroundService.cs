@@ -61,11 +61,6 @@ namespace Seeker
         [return: GeneratedEnum]
         public override StartCommandResult OnStartCommand(Intent intent, [GeneratedEnum] StartCommandFlags flags, int startId)
         {
-            if (SeekerApplication.IsShuttingDown(intent))
-            {
-                this.StopSelf();
-                return StartCommandResult.NotSticky;
-            }
             ServiceLifecycle.DownloadKeepAliveServiceRunning = true;
 
             CommonHelpers.CreateNotificationChannel(this, AppNotifications.CHANNEL_ID_DOWNLOAD_FOREGROUND, AppNotifications.CHANNEL_NAME_DOWNLOAD_FOREGROUND);//in android 8.1 and later must create a notif channel else get Bad Notification for startForeground error.
