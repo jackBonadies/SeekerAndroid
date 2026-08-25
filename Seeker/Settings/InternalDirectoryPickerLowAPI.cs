@@ -221,10 +221,10 @@ namespace Seeker
 
             });
             dialogBuilder.SetNegativeButton(Resource.String.cancel, (sender, args) => { });
-            var backListener = new DialogBackListener();
-            backListener.FileDialog = this;
-            dialogBuilder.SetOnKeyListener(backListener);
             _dirsDialog = dialogBuilder.Create();
+
+            _dirsDialog.OnBackPressedDispatcher.AddCallback(
+                new Seeker.Helpers.GenericOnBackPressedCallback(true, OnDialogBackPressed));
 
             _dirsDialog.CancelEvent += (sender, args) => { _autoResetEvent.Set(); };
             _dirsDialog.DismissEvent += (sender, args) => { _autoResetEvent.Set(); };
@@ -262,23 +262,21 @@ namespace Seeker
         }
 
 
-        public class DialogBackListener : Java.Lang.Object, IDialogInterfaceOnKeyListener
+        /// <summary>
+        /// back goes up one directory, unless we are already at the root, in which case
+        /// we let it fall through to the dialog (which cancels it).
+        /// </summary>
+        private void OnDialogBackPressed(AndroidX.Activity.OnBackPressedCallback callback)
         {
-            public SimpleFileDialog FileDialog = null;
-            public bool OnKey(IDialogInterface dialog, [GeneratedEnum] Keycode keyCode, KeyEvent e)
+            if (AtRoot())
             {
-                if (keyCode == Keycode.Back && e.Action == KeyEventActions.Up)
-                {
-                    if (this.FileDialog.AtRoot())
-                    {
-                        return false;
-                    }
-                    this.FileDialog.GoToSubDir(UpDir, string.Empty);
-                    this.FileDialog.UpdateDirectory();
-                    return true;
-                }
-                return false;
+                callback.Enabled = false;
+                _dirsDialog.OnBackPressedDispatcher.OnBackPressed();
+                callback.Enabled = true;
+                return;
             }
+            GoToSubDir(UpDir, string.Empty);
+            UpdateDirectory();
         }
 
 
