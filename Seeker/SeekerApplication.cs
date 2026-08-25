@@ -411,23 +411,6 @@ namespace Seeker
             }
         }
 
-        public const string ACTION_SHUTDOWN = "SeekerApplication_AppShutDown";
-
-        public static bool IsShuttingDown(Intent intent)
-        {
-            if (intent?.Action == null)
-            {
-                return false;
-            }
-            if (intent.Action == ACTION_SHUTDOWN)
-            {
-                return true;
-            }
-            return false;
-        }
-
-
-
         internal static int _activeUploadCount = 0;
         public static int ActiveUploadCount => _activeUploadCount;
 
