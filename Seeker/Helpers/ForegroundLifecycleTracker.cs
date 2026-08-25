@@ -161,6 +161,7 @@ namespace Seeker
                     }
                 }
                 PreferencesManager.SaveOnPauseState(userListSerialized);
+                TransferPersistenceWrapper.SaveTransferItems();
             }
 
             if (NumberOfActiveActivities == 0 && PreferencesState.AutoAwayOnInactivity)
