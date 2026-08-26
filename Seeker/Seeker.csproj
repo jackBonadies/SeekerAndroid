@@ -35,7 +35,6 @@
     <DefineConstants>DEBUG;MOCK;TRACE;ADB_LOGCAT</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-	<Optimize>true</Optimize>
     <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
     <RunAOTCompilation>false</RunAOTCompilation>
     <EnableLLVM>false</EnableLLVM>
@@ -45,9 +44,6 @@
     <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Mock|AnyCPU' ">
-	<Optimize>true</Optimize>
-	<PublishTrimmed>true</PublishTrimmed>
-	<AndroidLinkMode>SdkOnly</AndroidLinkMode>
     <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
     <RunAOTCompilation>false</RunAOTCompilation>
     <EnableLLVM>false</EnableLLVM>
@@ -64,13 +60,8 @@
 		<AndroidSigningStorePass>$(AndroidSigningStorePass)</AndroidSigningStorePass>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release IzzySoft|AnyCPU'">
-	  <Optimize>true</Optimize>
-	  <PublishTrimmed>true</PublishTrimmed>
-	  <AndroidLinkMode>SdkOnly</AndroidLinkMode>
 	  <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
 	  <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
-	  <PublishTrimmed>true</PublishTrimmed>
-	  <AndroidLinkMode>SdkOnly</AndroidLinkMode>
 	  <RunAOTCompilation>false</RunAOTCompilation>
 	  <EnableLLVM>false</EnableLLVM>
 	  <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
@@ -79,7 +70,10 @@
 	  <DefineConstants>IzzySoft</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.StartsWith('Release'))">
-	<AndroidKeyStore>true</AndroidKeyStore>
+	<Optimize>true</Optimize>
+	<PublishTrimmed>true</PublishTrimmed>
+	<AndroidLinkMode>SdkOnly</AndroidLinkMode>
+    <AndroidKeyStore>true</AndroidKeyStore>
 	<AndroidSigningKeyStore>$(AndroidSigningKeyStore)</AndroidSigningKeyStore>
 	<AndroidSigningKeyAlias>$(AndroidSigningKeyAlias)</AndroidSigningKeyAlias>
 	<AndroidSigningKeyPass>$(AndroidSigningKeyPass)</AndroidSigningKeyPass>
