@@ -130,6 +130,7 @@ namespace Seeker
                 }
                 catch (InvalidOperationException)
                 {
+                    login = SeekerApplication.OurCurrentLoginTask;
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.we_are_already_logging_in), ToastLength.Short);
                     Logger.Firebase("We are already logging in");
                 }
