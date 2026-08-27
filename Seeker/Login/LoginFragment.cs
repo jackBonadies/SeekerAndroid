@@ -177,12 +177,6 @@ namespace Seeker
             {
                 ShowLoggedIn();
             }
-
-            string loginError = SessionService.TakePendingLoginError();
-            if (loginError != null)
-            {
-                SeekerApplication.Toaster.ShowToast(loginError, ToastLength.Long);
-            }
         }
 
         public override void OnViewCreated(View view, Bundle savedInstanceState)

@@ -47,7 +47,6 @@ namespace Seeker.Services
         private static readonly object loginPhaseSyncRoot = new object();
         private static LoginOrigin? inFlightOrigin;
         private static Task inFlightLogin;
-        private static string pendingLoginError;
 
         /// <summary>
         /// Origin of the login currently in flight, or null when none is.
@@ -64,20 +63,6 @@ namespace Seeker.Services
         }
 
         public static event EventHandler<LoginCompletedEventArgs> LoginCompleted;
-
-        /// <summary>
-        /// Returns the error from the last login that is worth showing the user, and clears it, so
-        /// it is shown once no matter how many times the UI re-renders. Null when there is none.
-        /// </summary>
-        public static string TakePendingLoginError()
-        {
-            lock (loginPhaseSyncRoot)
-            {
-                string error = pendingLoginError;
-                pendingLoginError = null;
-                return error;
-            }
-        }
 
         /// <summary>
         /// The single entry point for logging in. Records the origin, applies the credential and
@@ -233,18 +218,7 @@ namespace Seeker.Services
 
             if (clearCreds || origin == LoginOrigin.Interactive)
             {
-                // if we are in background then show them the toast when they return
-                if (ForegroundLifecycleTracker.IsBackground())
-                {
-                    lock (loginPhaseSyncRoot)
-                    {
-                        pendingLoginError = msg;
-                    }
-                }
-                else
-                {
-                    SeekerApplication.Toaster.ShowToast(msg, ToastLength.Long);
-                }
+                SeekerApplication.Toaster.ShowToast(msg, ToastLength.Long);
             }
 
             FinishLogin(success: false);
