@@ -1,4 +1,4 @@
-#if MOCK
+﻿#if MOCK
 namespace Seeker
 {
     using Soulseek;
@@ -424,43 +424,148 @@ namespace Seeker
         public void RaiseRoomTickerListReceived(RoomTickerListReceivedEventArgs args) => RoomTickerListReceived?.Invoke(this, args);
         public void RaiseOperatorInPrivateRoomAddedRemoved(OperatorAddedRemovedEventArgs args) => OperatorInPrivateRoomAddedRemoved?.Invoke(this, args);
 
-        // --- Private helper mirroring SoulseekClient's ChangeState ---
+        private const string MockDefaultAddress = "mock.server";
+        private const int MockDefaultPort = 2242;
+
+        private SemaphoreSlim StateSyncRoot { get; } = new SemaphoreSlim(1, 1);
+
         private void ChangeState(SoulseekClientStates newState, string message = null, Exception exception = null)
         {
-            var prev = State;
+            var previousState = State;
             State = newState;
-            StateChanged?.Invoke(this, new SoulseekClientStateChangedEventArgs(prev, newState, message, exception));
-            if (newState == SoulseekClientStates.Connected)
+
+            StateChanged?.Invoke(this, new SoulseekClientStateChangedEventArgs(previousState, State, message, exception));
+
+            if (State == SoulseekClientStates.Connected)
+            {
                 Connected?.Invoke(this, EventArgs.Empty);
-            if (newState == (SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn))
+            }
+            else if (State == (SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn))
+            {
                 LoggedIn?.Invoke(this, EventArgs.Empty);
-            if (newState == SoulseekClientStates.Disconnected)
+            }
+            else if (State == SoulseekClientStates.Disconnected)
+            {
                 Disconnected?.Invoke(this, new SoulseekClientDisconnectedEventArgs(message, exception));
+            }
         }
 
-        // --- Method implementations (used by Seeker) ---
-
-        public async Task ConnectAsync(string username, string password, CancellationToken? cancellationToken = null)
+        public Task ConnectAsync(string username, string password, CancellationToken? cancellationToken = null)
         {
-            if (ConnectAsyncHandler != null) { await ConnectAsyncHandler(username, password, cancellationToken); return; }
-            ChangeState(SoulseekClientStates.Connecting, "Connecting");
-            if (username.Contains("slow"))
+            if (ConnectAsyncHandler != null) { return ConnectAsyncHandler(username, password, cancellationToken); }
+
+            return ConnectAsync(MockDefaultAddress, MockDefaultPort, username, password, cancellationToken ?? CancellationToken.None);
+        }
+
+        public Task ConnectAsync(string address, int port, string username, string password, CancellationToken? cancellationToken = null)
+        {
+            if (ConnectWithAddressAsyncHandler != null) { return ConnectWithAddressAsyncHandler(address, port, username, password, cancellationToken); }
+
+            if (string.IsNullOrWhiteSpace(address))
             {
-                await Task.Delay(4000).ConfigureAwait(false);
+                throw new ArgumentException("Address must not be a null or empty string, or one consisting only of whitespace", nameof(address));
             }
-            await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
-            if (username.Contains("reject"))
+
+            if (port < System.Net.IPEndPoint.MinPort || port > System.Net.IPEndPoint.MaxPort)
             {
-                ChangeState(SoulseekClientStates.Disconnected, "Failed");
-                throw new LoginRejectedException($"The server rejected login attempt:");
+                throw new ArgumentOutOfRangeException(nameof(port), $"The port must be within the range {System.Net.IPEndPoint.MinPort}-{System.Net.IPEndPoint.MaxPort} (specified: {port})");
             }
-            ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggingIn, "Logging in");
-            await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
-            Username = username;
-            Address = Address ?? "mock.server";
-            ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn, "Logged in");
-            ServerInfoReceived?.Invoke(this, new ServerInfo(parentMinSpeed: 1, parentSpeedRatio: 1, wishlistInterval: 120));
-            RaisePrivilegedUserList();
+
+            if (string.IsNullOrEmpty(username))
+            {
+                throw new ArgumentException("Username may not be null or an empty string", nameof(username));
+            }
+
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ArgumentException("Password may not be null or an empty string", nameof(password));
+            }
+
+            if (State.HasFlag(SoulseekClientStates.Connecting) || State.HasFlag(SoulseekClientStates.LoggingIn))
+            {
+                throw new InvalidOperationException($"A connection is already in the process of being established");
+            }
+
+            if (State.HasFlag(SoulseekClientStates.Connected))
+            {
+                throw new InvalidOperationException($"The client is already connected");
+            }
+
+            var ipEndPoint = new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, port);
+
+            return ConnectInternalAsync(address, ipEndPoint, username, password, cancellationToken ?? CancellationToken.None);
+        }
+
+        private async Task ConnectInternalAsync(string address, IPEndPoint ipEndPoint, string username, string password, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await StateSyncRoot.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+                try
+                {
+                    // if another thread somehow managed to get queued behind the semaphore while a previous thread was
+                    // connecting, drop it and do not establish a new connection. it should not be possible for this method to
+                    // exit in states other than Disconnected or Connected | LoggedIn, and if the previous attempt resulted in a
+                    // Disconnected state, we want to proceed.
+                    if (State.HasFlag(SoulseekClientStates.Connected) && State.HasFlag(SoulseekClientStates.LoggedIn))
+                    {
+                        return;
+                    }
+
+                    ChangeState(SoulseekClientStates.Connecting, $"Connecting");
+
+                    if (username.Contains("slow"))
+                    {
+                        await Task.Delay(4000, cancellationToken).ConfigureAwait(false);
+                    }
+
+                    await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+
+                    Address = address;
+                    IPEndPoint = ipEndPoint;
+                    IPAddress = ipEndPoint.Address;
+                    Port = ipEndPoint.Port;
+
+                    // the real client reaches this state from ServerConnection_Connected, raised while the
+                    // server connection is being established, i.e. before the login request is written.
+                    ChangeState(SoulseekClientStates.Connected, $"Connected to {IPEndPoint}");
+
+                    ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggingIn, $"Logging in");
+
+                    await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+
+                    // stands in for a LoginResponse with Succeeded == false. note that the real client is in
+                    // Connected | LoggingIn at this point, and unwinds to Disconnected through Disconnect().
+                    if (username.Contains("reject"))
+                    {
+                        throw new LoginRejectedException($"The server rejected login attempt: mock rejection for {username}");
+                    }
+
+                    ServerInfo = new ServerInfo(parentMinSpeed: 1, parentSpeedRatio: 1, wishlistInterval: 120);
+                    ServerInfoReceived?.Invoke(this, ServerInfo);
+
+                    Username = username;
+
+                    ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn, "Logged in");
+
+                    // stands in for SendConfigurationMessagesAsync
+                    RaisePrivilegedUserList();
+                }
+                catch (Exception ex) when (!(ex is LoginRejectedException) && !(ex is OperationCanceledException) && !(ex is TimeoutException))
+                {
+                    throw new SoulseekClientException($"Failed to connect: {ex.Message}", ex);
+                }
+                finally
+                {
+                    StateSyncRoot.Release();
+                }
+            }
+            catch (Exception ex)
+            {
+                Disconnect(ex.Message, exception: ex);
+                throw;
+            }
         }
 
         private void RaisePrivilegedUserList()
@@ -468,42 +573,27 @@ namespace Seeker
             if (_random.Next(0, 3) == 0)
             {
                 RaisePrivilegedUserListReceived(new[] { Username, "test" });
-            } 
+            }
             else
             {
                 RaisePrivilegedUserListReceived(new[] { "test" });
             }
         }
 
-        public async Task ConnectAsync(string address, int port, string username, string password, CancellationToken? cancellationToken = null)
-        {
-            if (ConnectWithAddressAsyncHandler != null) { await ConnectWithAddressAsyncHandler(address, port, username, password, cancellationToken); return; }
-            Address = address;
-            Port = port;
-            if (username.Contains("slow"))
-            {
-                await Task.Delay(4000).ConfigureAwait(false);
-            }
-            ChangeState(SoulseekClientStates.Connecting, "Connecting");
-            await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
-            if (username.Contains("reject"))
-            {
-                ChangeState(SoulseekClientStates.Disconnected, "Failed");
-                throw new LoginRejectedException($"The server rejected login attempt:");
-            }
-            ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggingIn, "Logging in");
-            await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
-            Username = username;
-            ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn, "Logged in");
-            ServerInfoReceived?.Invoke(this, new ServerInfo(parentMinSpeed: 1, parentSpeedRatio: 1, wishlistInterval: 120));
-        }
-
         public void Disconnect(string? message = null, Exception? exception = null)
         {
             if (DisconnectHandler != null) { DisconnectHandler(message, exception); return; }
-            ChangeState(SoulseekClientStates.Disconnecting, message);
-            Username = null;
-            ChangeState(SoulseekClientStates.Disconnected, message, exception);
+
+            if (State != SoulseekClientStates.Disconnected && State != SoulseekClientStates.Disconnecting)
+            {
+                ChangeState(SoulseekClientStates.Disconnecting, message, exception);
+
+                message ??= exception?.Message ?? "Client disconnected";
+
+                Username = null;
+
+                ChangeState(SoulseekClientStates.Disconnected, message, exception);
+            }
         }
 
         public async Task<BrowseResponse> BrowseAsync(string username, BrowseOptions options = null, CancellationToken? cancellationToken = null)
