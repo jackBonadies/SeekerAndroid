@@ -38,8 +38,6 @@ namespace Seeker
     {
         public const string LogoutMessage = "UserLogout";
 
-        private static bool s_loginInFlight;
-
         private ViewFlipper viewFlipper;
         private View rootView;
 
@@ -84,6 +82,9 @@ namespace Seeker
             MessageController.MessageReceived += OnMessageReceivedUpdateBadge;
             MessagesBroadcastReceiver.MarkAsReadFromNotification += OnMarkAsReadUpdateBadge;
             UpdateUnreadBadge();
+
+            SessionService.LoginCompleted += OnLoginCompleted;
+            RenderFromState();
         }
 
         public override void OnPause()
@@ -92,6 +93,15 @@ namespace Seeker
             SeekerState.SoulseekClient.StateChanged -= SoulseekClient_StateChanged;
             MessageController.MessageReceived -= OnMessageReceivedUpdateBadge;
             MessagesBroadcastReceiver.MarkAsReadFromNotification -= OnMarkAsReadUpdateBadge;
+            SessionService.LoginCompleted -= OnLoginCompleted;
+        }
+
+        private void OnLoginCompleted(object sender, LoginCompletedEventArgs e)
+        {
+            this.Activity?.RunOnUiThread(() =>
+            {
+                RenderFromState();
+            });
         }
 
         private void SoulseekClient_StateChanged(object sender, SoulseekClientStateChangedEventArgs e)
@@ -114,40 +124,65 @@ namespace Seeker
             SetUpLoginFormViews();
             SetUpLoggedInViews();
 
+            ReconnectIfNeeded();
+            RenderFromState();
+
+            return rootView;
+        }
+
+        /// <summary>
+        /// If we are supposed to be logged in but we are not currently either connected 
+        ///   or logging in then trigger login here. This is a "background" log in
+        /// </summary>
+        private void ReconnectIfNeeded()
+        {
             if (SessionService.Instance.IsNotLoggedIn())
             {
-                PreferencesState.CurrentlyLoggedIn = false;
-                viewFlipper.DisplayedChild = ChildLoginForm;
+                return;
             }
-            else if (!SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn) && !s_loginInFlight)
+            if (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn)
+                || SessionService.InFlightLoginOrigin != null)
+            {
+                return;
+            }
+
+            SeekerState.ManualResetEvent.Reset();
+            Task login = SessionService.BeginLogin(
+                LoginOrigin.Background, PreferencesState.Username, PreferencesState.Password);
+            login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
+            SeekerApplication.SetUpLoginContinueWith(login);
+        }
+
+        /// <summary>
+        /// Determines ViewFlipper
+        /// If Interactive (i.e. user clicked login and we have never logged in b4) then 
+        ///   show the loading viewflipper ELSE always show logged in but with "connecting"
+        /// </summary>
+        private void RenderFromState()
+        {
+            if (SessionService.InFlightLoginOrigin == LoginOrigin.Interactive)
             {
                 viewFlipper.DisplayedChild = ChildLoading;
-                SeekerState.ManualResetEvent.Reset();
-                Task login = null;
-                try
-                {
-                    login = SeekerApplication.ConnectAndPerformPostConnectTasks(PreferencesState.Username, PreferencesState.Password);
-                }
-                catch (InvalidOperationException)
-                {
-                    login = SeekerApplication.OurCurrentLoginTask;
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.we_are_already_logging_in), ToastLength.Short);
-                    Logger.Firebase("We are already logging in");
-                }
-                login?.ContinueWith(new Action<Task>((task) => { UpdateLoginUI(task); }));
-                login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
-                SeekerApplication.SetUpLoginContinueWith(login);
             }
-            else if (PreferencesState.CurrentlyLoggedIn)
+            else if (SessionService.Instance.IsNotLoggedIn())
             {
-                ShowLoggedIn();
+                if (string.IsNullOrEmpty(usernameTextEdit.Text) && !string.IsNullOrEmpty(PreferencesState.Username))
+                {
+                    usernameTextEdit.Text = PreferencesState.Username;
+                    passwordTextEdit.Text = PreferencesState.Password;
+                }
+                viewFlipper.DisplayedChild = ChildLoginForm;
             }
             else
             {
-                viewFlipper.DisplayedChild = ChildLoading;
+                ShowLoggedIn();
             }
 
-            return rootView;
+            string loginError = SessionService.TakePendingLoginError();
+            if (loginError != null)
+            {
+                SeekerApplication.Toaster.ShowToast(loginError, ToastLength.Long);
+            }
         }
 
         public override void OnViewCreated(View view, Bundle savedInstanceState)
@@ -232,22 +267,6 @@ namespace Seeker
                 SeekerState.MainActivityRef.RunOnUiThread(action);
             }
         }
-        public void ShowLoading()
-        {
-            var action = new Action(() =>
-            {
-                viewFlipper.DisplayedChild = ChildLoading;
-            });
-            if (MainActivity.OnUIthread())
-            {
-                action();
-            }
-            else
-            {
-                SeekerState.MainActivityRef.RunOnUiThread(action);
-            }
-        }
-
         public void ShowLoggedIn()
         {
             var action = new Action(() =>
@@ -473,136 +492,6 @@ namespace Seeker
             SeekerState.MainActivityRef.StartActivityForResult(intent, 140);
         }
 
-        private void UpdateLoginUI(Task t)
-        {
-            if (SeekerApplication.DnsLookupFailed && (t != null && t.Status == TaskStatus.Faulted))
-            {
-                // DNS failed and task also faulted — fall through to error handling below
-            }
-            else if (SeekerApplication.DnsLookupFailed)
-            {
-                var action = new Action(() =>
-                {
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.dns_failed), ToastLength.Long);
-                    Logger.Firebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.");
-                });
-                SeekerState.MainActivityRef.RunOnUiThread(action);
-                SeekerApplication.DnsLookupFailed = false;
-            }
-
-            Logger.Debug("Update Login UI");
-
-            if (t != null && t.Status == TaskStatus.Faulted)
-            {
-                var (msg, clearCreds) = ClassifyLoginError(t);
-                OnLoginFailed(msg, clearCreds);
-            }
-            else
-            {
-                OnLoginSucceeded();
-            }
-        }
-
-        private (string message, bool clearCredentials) ClassifyLoginError(Task t)
-        {
-            string msg;
-            string msgToLog = string.Empty;
-            bool clearCreds = true;
-
-            if (t.Exception != null && t.Exception.InnerExceptions != null && t.Exception.InnerExceptions.Count != 0)
-            {
-                Console.WriteLine(t.Exception.ToString());
-                if (t.Exception.InnerExceptions[0] is LoginRejectedException lre)
-                {
-                    string loginRejectedMessage = lre.Message;
-                    if (loginRejectedMessage != null && loginRejectedMessage.Contains("INVALIDUSERNAME"))
-                    {
-                        msg = SeekerState.ActiveActivityRef.GetString(Resource.String.invalid_username);
-                    }
-                    else if (loginRejectedMessage != null && loginRejectedMessage.Contains("INVALIDPASS"))
-                    {
-                        msg = SeekerState.ActiveActivityRef.GetString(Resource.String.invalid_password);
-                    }
-                    else
-                    {
-                        msg = SeekerState.ActiveActivityRef.GetString(Resource.String.bad_user_pass);
-                    }
-                }
-                else if (t.Exception.InnerExceptions[0] is SoulseekClientException)
-                {
-                    clearCreds = false;
-                    if (t.Exception.InnerExceptions[0].Message.Contains("Network is unreachable") ||
-                        t.Exception.InnerExceptions[0].Message.Contains("Connection refused"))
-                    {
-                        msg = SeekerState.ActiveActivityRef.GetString(Resource.String.network_unreachable);
-                    }
-                    else
-                    {
-                        msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login);
-                        msgToLog = t.Exception.InnerExceptions[0].Message + t.Exception.InnerExceptions[0].StackTrace;
-                    }
-                }
-                else if (t.Exception.InnerExceptions[0].Message != null &&
-                    (t.Exception.InnerExceptions[0].Message.Contains("wait timed out") || t.Exception.InnerExceptions[0].Message.ToLower().Contains("operation timed out")))
-                {
-                    clearCreds = false;
-                    msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login) + " - Time Out Waiting for Server Response.";
-                }
-                else
-                {
-                    msgToLog = t.Exception.InnerExceptions[0].Message + t.Exception.InnerExceptions[0].StackTrace;
-                    clearCreds = false;
-                    msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login);
-                }
-            }
-            else
-            {
-                if (t.Exception != null)
-                {
-                    msgToLog = t.Exception.Message + t.Exception.StackTrace;
-                }
-                msg = SeekerState.ActiveActivityRef.GetString(Resource.String.cannot_login);
-            }
-
-            if (msgToLog != string.Empty)
-            {
-                Logger.Debug(msgToLog);
-                Logger.Firebase(msgToLog);
-            }
-
-            return (msg, clearCreds);
-        }
-
-        private void OnLoginFailed(string msg, bool clearCreds)
-        {
-            Logger.Debug("Login failed: " + msg);
-            s_loginInFlight = false;
-            var action = new Action(() =>
-            {
-                SeekerApplication.Toaster.ShowToast(msg, ToastLength.Long);
-                if (clearCreds)
-                {
-                    PreferencesState.ClearCredentials();
-                }
-                else
-                {
-                    PreferencesState.CurrentlyLoggedIn = false;
-                }
-                PreferencesManager.SaveCredentials();
-                ShowLoginForm(prefill: !clearCreds);
-            });
-            SeekerState.MainActivityRef.RunOnUiThread(action);
-        }
-
-        private void OnLoginSucceeded()
-        {
-            Logger.Debug("Login succeeded");
-            PreferencesState.CurrentlyLoggedIn = true;
-            PreferencesManager.SaveCredentials();
-            s_loginInFlight = false;
-            ShowLoggedIn();
-        }
-
         private void LogoutClick(object sender, EventArgs e)
         {
             try
@@ -619,84 +508,29 @@ namespace Seeker
 
         public void LogInClick(object sender, EventArgs e)
         {
-            bool alreadyConnected = false;
-            Task login = null;
-            try
+            if (string.IsNullOrEmpty(usernameTextEdit.Text) || string.IsNullOrEmpty(passwordTextEdit.Text))
             {
-                if (string.IsNullOrEmpty(usernameTextEdit.Text) || string.IsNullOrEmpty(passwordTextEdit.Text))
-                {
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_empty_user_pass), ToastLength.Long);
-                    return;
-                }
-                login = SeekerApplication.ConnectAndPerformPostConnectTasks(usernameTextEdit.Text, passwordTextEdit.Text);
-                login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
-                try
-                {
-                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)(this.Activity).GetSystemService(Context.InputMethodService);
-                    imm.HideSoftInputFromWindow(usernameTextEdit.WindowToken, 0);
-                }
-                catch (System.Exception)
-                {
-                }
-            }
-            catch (AddressException)
-            {
-                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.dns_failed_2), ToastLength.Long);
-                PreferencesState.CurrentlyLoggedIn = false;
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_empty_user_pass), ToastLength.Long);
                 return;
             }
-            catch (InvalidOperationException err)
-            {
-                if (err.Message.Equals("The client is already connected"))
-                {
-                    alreadyConnected = true;
-                    PreferencesState.CurrentlyLoggedIn = true;
-                    ShowLoggedIn();
-                }
-                else
-                {
-                    SeekerApplication.Toaster.ShowToast(err.Message, ToastLength.Long);
-                    PreferencesState.CurrentlyLoggedIn = false;
-                    return;
-                }
-            }
+
             try
             {
-                if (!alreadyConnected)
-                {
-                    ShowLoading();
-                }
-                PreferencesState.SetCredentials(usernameTextEdit.Text, passwordTextEdit.Text);
-                if (alreadyConnected)
-                {
-                    //normal path saves in OnLoginSucceeded, but that already ran for this session.
-                    PreferencesManager.SaveCredentials();
-                }
-                else
-                {
-                    s_loginInFlight = true;
-                }
-                SeekerState.ManualResetEvent.Reset();
-                if (login == null)
-                {
-                    return;
-                }
-                login.ContinueWith(new Action<Task>((task) => { UpdateLoginUI(task); }));
+                Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)(this.Activity).GetSystemService(Context.InputMethodService);
+                imm.HideSoftInputFromWindow(usernameTextEdit.WindowToken, 0);
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
-                string message;
-                if (ex?.InnerException is LoginRejectedException)
-                {
-                    message = SeekerState.ActiveActivityRef.GetString(Resource.String.bad_user_pass);
-                }
-                else
-                {
-                    message = ex.Message;
-                }
-                SeekerApplication.Toaster.ShowToast(message, ToastLength.Long);
-                PreferencesState.CurrentlyLoggedIn = false;
             }
+
+            PreferencesState.SetCredentials(usernameTextEdit.Text, passwordTextEdit.Text);
+            SeekerState.ManualResetEvent.Reset();
+
+            Task login = SessionService.BeginLogin(
+                LoginOrigin.Interactive, usernameTextEdit.Text, passwordTextEdit.Text);
+            login?.ContinueWith(MainActivity.GetPostNotifPermissionTask());
+
+            RenderFromState();
         }
     }
 }
