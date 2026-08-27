@@ -172,6 +172,16 @@ namespace Seeker.Services
 
         private static void OnLoginTaskCompleted(Task t)
         {
+            lock (loginPhaseSyncRoot)
+            {
+                if (!ReferenceEquals(t, inFlightLogin))
+                {
+                    // A newer login already took over
+                    Logger.Debug("Ignoring the result of a superseded login");
+                    return;
+                }
+            }
+
             ReportDnsFallbackIfNeeded(t);
 
             if (t.IsFaulted)
@@ -223,9 +233,17 @@ namespace Seeker.Services
 
             if (clearCreds || origin == LoginOrigin.Interactive)
             {
-                lock (loginPhaseSyncRoot)
+                // if we are in background then show them the toast when they return
+                if (ForegroundLifecycleTracker.IsBackground())
                 {
-                    pendingLoginError = msg;
+                    lock (loginPhaseSyncRoot)
+                    {
+                        pendingLoginError = msg;
+                    }
+                }
+                else
+                {
+                    SeekerApplication.Toaster.ShowToast(msg, ToastLength.Long);
                 }
             }
 
