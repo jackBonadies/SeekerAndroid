@@ -49,3 +49,26 @@ Builds the universal + all four per-ABI IzzySoft APKs and stages them in
 dotnet publish -c Release -f net10.0-android36.0 .\Seeker\Seeker.csproj
 dotnet publish -c "Release IzzySoft" -f net10.0-android36.0 .\Seeker\Seeker.csproj
 ```
+
+## AOT Profiles
+
+To speed up startup time for Release builds we use AOT compilation of methods based on a custom profile.
+To generate this profile:
+```powershell
+dotnet build .\Seeker\Seeker.csproj -c Release -t:BuildAndStartAotProfiling -p:Device=R5CW7238Q0D -p:RunAOTCompilation=false -p:CustomAfterMicrosoftCommonTargets=C:\Users\jack\.aotprof\profile.target
+# Login, Perform Search and Browse
+dotnet build .\Seeker\Seeker.csproj -c Release -t:FinishAotProfiling -p:Device=R5CW7238Q0D -p:CustomAfterMicrosoftCommonTargets=C:\Users\jack\.aotprof\profile.targets
+```
+
+This will generate the custom.aprof file in Seeker\custom.aproj with a list of methods that should be AOT compiled during the build step.  To inspect the file run:
+```powershell
+~\.aotprof\tools\aprofutil.exe Seeker\custom.aprof
+```
+
+Reset device state with:
+```
+adb -s R5CW7238Q0D shell setprop debug.mono.profile ""
+```
+
+
+To measure speedup

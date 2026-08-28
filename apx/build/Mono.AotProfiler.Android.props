@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <MonoAotProfilerAndroidToolsPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\'))</MonoAotProfilerAndroidToolsPath>
+    <AotProfileToolPath>$(MonoAotProfilerAndroidToolsPath)aotprofile-tool.dll</AotProfileToolPath>
+  </PropertyGroup>
+</Project>
