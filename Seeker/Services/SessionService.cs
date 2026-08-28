@@ -279,6 +279,26 @@ namespace Seeker.Services
                     {
                         msg = SeekerApplication.GetString(Resource.String.invalid_password);
                     }
+                    else if (loginRejectedMessage != null && loginRejectedMessage.Contains("EMPTYPASS"))
+                    {
+                        Logger.Firebase("EmptyPass - this is unexpected");
+                        msg = SeekerApplication.GetString(Resource.String.invalid_password);
+                    }
+                    else if (loginRejectedMessage != null && loginRejectedMessage.Contains("INVALIDVERSION"))
+                    {
+                        Logger.Firebase("InvalidVersion - this is unexpected");
+                        msg = SeekerApplication.GetString(Resource.String.invalid_password);
+                    }
+                    else if (loginRejectedMessage != null && loginRejectedMessage.Contains("SVRFULL"))
+                    {
+                        Logger.Firebase("SVRFULL - this is unexpected");
+                        msg = SeekerApplication.GetString(Resource.String.invalid_server_full);
+                    }
+                    else if (loginRejectedMessage != null && loginRejectedMessage.Contains("SVRPRIVATE"))
+                    {
+                        Logger.Firebase("SVRPRIVATE - this is unexpected");
+                        msg = SeekerApplication.GetString(Resource.String.invalid_server_private);
+                    }
                     else
                     {
                         msg = SeekerApplication.GetString(Resource.String.bad_user_pass);
