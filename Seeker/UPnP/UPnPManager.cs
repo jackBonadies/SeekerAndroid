@@ -424,10 +424,10 @@ namespace Seeker.UPnP
                     {
                         LastSetLifeTime = 4 * 3600;
                     }
-                    else if (LastSetLifeTime < 2 * 3600)
+                    else if (LastSetLifeTime < 20 * 60) // 20 minutes is about the lowest we see in practice
                     {
-                        Logger.Firebase("less than 2 hours: " + LastSetLifeTime); //20 mins
-                        LastSetLifeTime = 2 * 3600;
+                        Logger.Firebase("less than 20 mins: " + LastSetLifeTime); //20 mins
+                        LastSetLifeTime = 2 * 60;
                     }
 
                     LastSetLocalIP = LocalIP;
