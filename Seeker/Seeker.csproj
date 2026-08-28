@@ -84,10 +84,10 @@
 	<ItemGroup>
     <GoogleServicesJson Include="google-services.json" Condition="Exists('google-services.json') And '$(Configuration)|$(Platform)' != 'Release IzzySoft|AnyCPU'" />
   </ItemGroup>
-  <ItemGroup>
-    <AndroidAotProfile Include="$(MSBuildThisFileDirectory)custom.aprof" />
+  <ItemGroup Condition=" '$(AndroidEnableProfiledAot)' == 'true' and '$(AndroidUseCustomAotProfile)' != 'false' ">
+    <AndroidAotProfile Include="$(MSBuildProjectDirectory)\custom.aprof" />
   </ItemGroup>
-  <Choose>
+	<Choose>
     <When Condition=" '$(Configuration)'!='Release IzzySoft' ">
       <ItemGroup>
         <PackageReference Include="Xamarin.Firebase.Crashlytics" Version="120.0.6" />
