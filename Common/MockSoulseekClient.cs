@@ -11,6 +11,7 @@ namespace Seeker
     using System.IO;
     using System.Linq;
     using System.Net;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -29,6 +30,8 @@ namespace Seeker
         public int UserStatusIntervalSec { get; set; } = 10;
         public int RoomActivityIntervalSec { get; set; } = 8;
 
+        // defaults for a "spotty" username; both are overridden by numbers in the username itself,
+        // i.e. spotty_30 drops every 30s, spotty_30_4 drops every 30s and fails 4 reconnects first.
         public int SpottyDropIntervalSec { get; set; } = 60;
 
         public int SpottyFailedReconnectAttempts { get; set; } = 1;
@@ -594,17 +597,53 @@ namespace Seeker
             }
         }
 
+        // spotty, spotty_<seconds>, spotty_<seconds>_<failedAttempts>. a non-numeric part ends the match,
+        // so spotty_30_xyz is just spotty_30 and spotty_30_4_test is spotty_30_4.
+        private static readonly Regex SpottyUsernamePattern = new Regex(
+            @"spotty(?:_(?<seconds>\d+))?(?:_(?<attempts>\d+))?",
+            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+        private bool TryParseSpottyUsername(string username, out int dropIntervalSec, out int failedAttempts)
+        {
+            dropIntervalSec = SpottyDropIntervalSec;
+            failedAttempts = SpottyFailedReconnectAttempts;
+
+            if (string.IsNullOrEmpty(username))
+            {
+                return false;
+            }
+
+            var match = SpottyUsernamePattern.Match(username);
+            if (!match.Success)
+            {
+                return false;
+            }
+
+            // a number too large to parse falls back to the property default.
+            if (match.Groups["seconds"].Success && int.TryParse(match.Groups["seconds"].Value, out int seconds))
+            {
+                dropIntervalSec = seconds;
+            }
+
+            if (match.Groups["attempts"].Success && int.TryParse(match.Groups["attempts"].Value, out int attempts))
+            {
+                failedAttempts = attempts;
+            }
+
+            return true;
+        }
+
         private void StartSpottyDropTimerIfNeeded(string username)
         {
             StopSpottyDropTimer();
 
-            if (!username.Contains("spotty") || SpottyDropIntervalSec <= 0)
+            if (!TryParseSpottyUsername(username, out int dropIntervalSec, out int failedAttempts) || dropIntervalSec <= 0)
             {
                 return;
             }
 
             _spottyDropCts = new CancellationTokenSource();
-            _ = RunSpottyDropLoop(_spottyDropCts.Token);
+            _ = RunSpottyDropLoop(dropIntervalSec, failedAttempts, _spottyDropCts.Token);
         }
 
         private void StopSpottyDropTimer()
@@ -614,11 +653,11 @@ namespace Seeker
             cts?.Dispose();
         }
 
-        private async Task RunSpottyDropLoop(CancellationToken ct)
+        private async Task RunSpottyDropLoop(int dropIntervalSec, int failedAttempts, CancellationToken ct)
         {
             try
             {
-                await Task.Delay(SpottyDropIntervalSec * 1000, ct).ConfigureAwait(false);
+                await Task.Delay(dropIntervalSec * 1000, ct).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -630,7 +669,7 @@ namespace Seeker
                 return;
             }
 
-            Interlocked.Exchange(ref _spottyConnectFailuresRemaining, Math.Max(0, SpottyFailedReconnectAttempts));
+            Interlocked.Exchange(ref _spottyConnectFailuresRemaining, Math.Max(0, failedAttempts));
 
             Disconnect("Read timed out", new ConnectionException("The server connection was closed unexpectedly (mock spotty connection)"));
         }
@@ -640,7 +679,7 @@ namespace Seeker
         /// </summary>
         private bool ConsumeSpottyConnectFailure(string username)
         {
-            if (!username.Contains("spotty"))
+            if (!TryParseSpottyUsername(username, out _, out _))
             {
                 return false;
             }
