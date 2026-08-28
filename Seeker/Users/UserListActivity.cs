@@ -354,23 +354,24 @@ namespace Seeker
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
             {
+                string enteredUsername = UiHelpers.GetEnteredUsername(input);
                 if (toIgnored)
                 {
-                    if (string.IsNullOrEmpty(input.Text))
+                    if (string.IsNullOrEmpty(enteredUsername))
                     {
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_a_username_to_add), ToastLength.Short);
                         return;
                     }
 
-                    UserListService.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, input.Text.ToString());
+                    UserListService.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, enteredUsername);
                 }
                 else
                 {
-                    if (input.Text != String.Empty)
+                    if (enteredUsername != String.Empty)
                     {
-                        UserMetadataService.RecentUsersManager.AddUserToTop(input.Text, true);
+                        UserMetadataService.RecentUsersManager.AddUserToTop(enteredUsername, true);
                     }
-                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, input.Text, null);
+                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, enteredUsername, null);
                 }
             });
             EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>

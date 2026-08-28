@@ -1205,7 +1205,7 @@ namespace Seeker
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
             {
                 //Do the Browse Logic...
-                string usernameToBrowse = input.Text;
+                string usernameToBrowse = UiHelpers.GetEnteredUsername(input);
                 if (string.IsNullOrWhiteSpace(usernameToBrowse))
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerState.MainActivityRef.Resources.GetString(Resource.String.must_type_a_username_to_browse), ToastLength.Short);

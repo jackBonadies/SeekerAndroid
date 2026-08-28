@@ -1042,7 +1042,7 @@ namespace Seeker.Chatroom
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
             {
                 //Do the Browse Logic...
-                string userToAdd = input.Text;
+                string userToAdd = UiHelpers.GetEnteredUsername(input);
                 if (userToAdd == null || userToAdd == string.Empty)
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_a_username_to_invite), ToastLength.Short);

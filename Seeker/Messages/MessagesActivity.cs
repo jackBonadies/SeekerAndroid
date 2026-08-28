@@ -151,8 +151,7 @@ namespace Seeker
 
             EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
             {
-                //Do the Browse Logic...
-                string userToMessage = input.Text;
+                string userToMessage = UiHelpers.GetEnteredUsername(input);
                 if (userToMessage == null || userToMessage == string.Empty)
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_a_username_to_message), ToastLength.Short);
