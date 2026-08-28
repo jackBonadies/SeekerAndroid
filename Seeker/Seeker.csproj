@@ -36,18 +36,14 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
-    <RunAOTCompilation>false</RunAOTCompilation>
     <EnableLLVM>false</EnableLLVM>
-    <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
     <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
     <AndroidNativeDebugSymbolCompressionFormat>zip</AndroidNativeDebugSymbolCompressionFormat>
     <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Mock|AnyCPU' ">
     <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
-    <RunAOTCompilation>false</RunAOTCompilation>
     <EnableLLVM>false</EnableLLVM>
-    <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
     <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
     <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
     <DefineConstants>MOCK</DefineConstants>
@@ -62,14 +58,15 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release IzzySoft|AnyCPU'">
 	  <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
 	  <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
-	  <RunAOTCompilation>false</RunAOTCompilation>
 	  <EnableLLVM>false</EnableLLVM>
-	  <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
 	  <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
 	  <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
 	  <DefineConstants>IzzySoft</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.StartsWith('Release'))">
+	<RunAOTCompilation>true</RunAOTCompilation>
+	<AndroidEnableProfiledAot>true</AndroidEnableProfiledAot>
+	<AndroidUseDefaultAotProfile>false</AndroidUseDefaultAotProfile>
 	<Optimize>true</Optimize>
 	<PublishTrimmed>true</PublishTrimmed>
 	<AndroidLinkMode>SdkOnly</AndroidLinkMode>
@@ -86,6 +83,9 @@
   </PropertyGroup>
 	<ItemGroup>
     <GoogleServicesJson Include="google-services.json" Condition="Exists('google-services.json') And '$(Configuration)|$(Platform)' != 'Release IzzySoft|AnyCPU'" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidAotProfile Include="$(MSBuildThisFileDirectory)custom.aprof" />
   </ItemGroup>
   <Choose>
     <When Condition=" '$(Configuration)'!='Release IzzySoft' ">
@@ -139,8 +139,7 @@
   <ItemGroup Condition="'$(Configuration)' == 'Release IzzySoft'">
     <AndroidManifestOverlay Include="Properties\AndroidManifest.IzzySoft.xml" />
   </ItemGroup>
-  <Target Name="GenerateDebugSecrets" BeforeTargets="CoreCompile"
-          Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug Mock'">
+  <Target Name="GenerateDebugSecrets" BeforeTargets="CoreCompile" Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug Mock'">
     <PropertyGroup>
       <_SeekerDebugCaptureKey>$([System.Environment]::GetEnvironmentVariable('SeekerEncryptKey'))</_SeekerDebugCaptureKey>
       <_DebugSecretsFile>$(IntermediateOutputPath)DebugSecrets.g.cs</_DebugSecretsFile>
