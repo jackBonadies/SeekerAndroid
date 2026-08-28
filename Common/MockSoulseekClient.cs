@@ -29,7 +29,14 @@ namespace Seeker
         public int UserStatusIntervalSec { get; set; } = 10;
         public int RoomActivityIntervalSec { get; set; } = 8;
 
+        public int SpottyDropIntervalSec { get; set; } = 60;
+
+        public int SpottyFailedReconnectAttempts { get; set; } = 1;
+
         private CancellationTokenSource? _backgroundTimersCts;
+
+        private CancellationTokenSource? _spottyDropCts;
+        private int _spottyConnectFailuresRemaining;
 
         private readonly ConcurrentDictionary<string, List<string>> _mockJoinedRoomUsers = new ConcurrentDictionary<string, List<string>>();
         private readonly ConcurrentDictionary<string, UserPresence> _mockRoomUserPresence = new ConcurrentDictionary<string, UserPresence>();
@@ -522,6 +529,11 @@ namespace Seeker
 
                     await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
 
+                    if (ConsumeSpottyConnectFailure(username))
+                    {
+                        throw new ConnectionException($"Failed to connect to {ipEndPoint}: mock spotty connection");
+                    }
+
                     Address = address;
                     IPEndPoint = ipEndPoint;
                     IPAddress = ipEndPoint.Address;
@@ -551,6 +563,8 @@ namespace Seeker
 
                     // stands in for SendConfigurationMessagesAsync
                     RaisePrivilegedUserList();
+
+                    StartSpottyDropTimerIfNeeded(username);
                 }
                 catch (Exception ex) when (!(ex is LoginRejectedException) && !(ex is OperationCanceledException) && !(ex is TimeoutException))
                 {
@@ -580,12 +594,80 @@ namespace Seeker
             }
         }
 
+        private void StartSpottyDropTimerIfNeeded(string username)
+        {
+            StopSpottyDropTimer();
+
+            if (!username.Contains("spotty") || SpottyDropIntervalSec <= 0)
+            {
+                return;
+            }
+
+            _spottyDropCts = new CancellationTokenSource();
+            _ = RunSpottyDropLoop(_spottyDropCts.Token);
+        }
+
+        private void StopSpottyDropTimer()
+        {
+            var cts = Interlocked.Exchange(ref _spottyDropCts, null);
+            cts?.Cancel();
+            cts?.Dispose();
+        }
+
+        private async Task RunSpottyDropLoop(CancellationToken ct)
+        {
+            try
+            {
+                await Task.Delay(SpottyDropIntervalSec * 1000, ct).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            if (ct.IsCancellationRequested || !State.HasFlag(SoulseekClientStates.LoggedIn))
+            {
+                return;
+            }
+
+            Interlocked.Exchange(ref _spottyConnectFailuresRemaining, Math.Max(0, SpottyFailedReconnectAttempts));
+
+            Disconnect("Read timed out", new ConnectionException("The server connection was closed unexpectedly (mock spotty connection)"));
+        }
+
+        /// <summary>
+        ///     Returns true (and consumes one) if this connection attempt should fail because of a prior spotty drop.
+        /// </summary>
+        private bool ConsumeSpottyConnectFailure(string username)
+        {
+            if (!username.Contains("spotty"))
+            {
+                return false;
+            }
+
+            while (true)
+            {
+                int remaining = _spottyConnectFailuresRemaining;
+                if (remaining <= 0)
+                {
+                    return false;
+                }
+
+                if (Interlocked.CompareExchange(ref _spottyConnectFailuresRemaining, remaining - 1, remaining) == remaining)
+                {
+                    return true;
+                }
+            }
+        }
+
         public void Disconnect(string? message = null, Exception? exception = null)
         {
             if (DisconnectHandler != null) { DisconnectHandler(message, exception); return; }
 
             if (State != SoulseekClientStates.Disconnected && State != SoulseekClientStates.Disconnecting)
             {
+                StopSpottyDropTimer();
+
                 ChangeState(SoulseekClientStates.Disconnecting, message, exception);
 
                 message ??= exception?.Message ?? "Client disconnected";
@@ -2373,6 +2455,7 @@ namespace Seeker
         public void Dispose()
         {
             StopBackgroundTimers();
+            StopSpottyDropTimer();
         }
     }
 }
