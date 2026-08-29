@@ -128,7 +128,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="Mono.Nat-master\Mono.Nat\Mono.Nat.csproj" />
-    <ProjectReference Include="Soulseek.NET-master\src\Soulseek_Source.csproj" />
+    <ProjectReference Include="Soulseek.NET-master\src\Soulseek.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Mono.Nat-master\**" />

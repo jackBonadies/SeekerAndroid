@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Seeker\Soulseek.NET-master\src\Soulseek_Source.csproj" />
+    <ProjectReference Include="..\Seeker\Soulseek.NET-master\src\Soulseek.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="$(Configuration.Contains('Mock'))">
