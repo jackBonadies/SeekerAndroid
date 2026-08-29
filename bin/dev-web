@@ -1,0 +1,4 @@
+#!/bin/bash
+
+yarn --cwd examples/Web/web install
+yarn --cwd examples/Web/web start
