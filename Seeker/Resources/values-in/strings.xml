@@ -223,8 +223,7 @@
     <string name="download_is_starting">Memulai Mengunduh...</string>
     <string name="directory_is_empty">Direktori ini kosong</string>
     <string name="nothing_selected">Tidak ada yang dipilih</string>
-    <string name="nothing_selected_extra">"        \"Tidak Ada yang Dipilih - Ketuk untuk memilih\"
-    "</string>
+    <string name="nothing_selected_extra">"Tidak ada yang dipilih - ketuk untuk memilih"</string>
     <string name="failed_to_connect">Gagal terhubung</string>
     <string name="cannot_download_from_self">Tidak dapat mengunduh dari diri sendiri</string>
     <string name="must_type_a_username_to_browse">Harus mengetik Pengguna untuk Menelusuri</string>
@@ -536,7 +535,7 @@
     <string name="subfolders_warning_queue_paused">Folder ini berisi subfolder, apakah anda ingin memasukkan semua berkas di dalam subfolder tersebut ke antrean juga ({0}) atau hanya berkas di folder saat ini ({1})?</string>
     <string name="current_folder_only">Hanya Folder Saat Ini</string>
     <string name="must_be_logged_in_to_give_privileges">Harus masuk log terlebih dahulu untuk memberikan hak istimewa</string>
-    <string name="about_body">Seeker adalah klien Soulseek gratis dan sumber terbuka (open source) untuk Android. Aplikasi ini tidak akan pernah memiliki iklan atau fitur berbayar. &lt;br&gt;&lt;br&gt;Silakan bantu menerjemahkan Seeker &lt;a href="https://crwd.in/seeker"&gt;di sini&lt;/a&gt;. &lt;br&gt;&lt;br&gt;Kode sumber tersedia &lt;a href="https://github.com/jackBonadies/SeekerAndroid"&gt;di sini&lt;/a&gt;. &lt;br&gt;&lt;br&gt;Versi: {0}.</string>
+    <string name="about_body">Seeker adalah klien Soulseek gratis dan sumber terbuka (open source) untuk Android. Aplikasi ini tidak akan pernah memiliki iklan atau fitur berbayar.</string>
     <string name="about_link_source_title">Kode sumber</string>
     <string name="about_link_translate_title">Bantu menerjemahkan</string>
     <string name="must_be_logged_in_to_get_dir_contents">Harus masuk log terlebih dahulu untuk mendapatkan konten direktori</string>

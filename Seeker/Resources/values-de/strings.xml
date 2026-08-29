@@ -535,7 +535,7 @@
     <string name="subfolders_warning_queue_paused">This folder contains subfolders, would you like to queue all files in those subfolders as well ({0}) or only the files in the current folder ({1})?</string>
     <string name="current_folder_only">Current folder only</string>
     <string name="must_be_logged_in_to_give_privileges">Must be logged in to give privileges</string>
-    <string name="about_body">Seeker ist ein kostenloser und quelloffener Soulseek-Client für Android. Niemals wird er Werbung oder kostenpflichtige Funktionen enthalten. &lt;br&gt;&lt;br&gt;Bitte hilft mir, Seeker &lt;a href="https://crwd.in/seeker"&gt;hier&lt;/a&gt; zu übersetzen. Der Quellcode ist &lt;a href="https://github.com/jackBonadies/SeekerAndroid"&gt;hier&lt;/a&gt;. &lt;br&gt;&lt;br&gt;Version: {0}.</string>
+    <string name="about_body">Seeker ist ein kostenloser und quelloffener Soulseek-Client für Android. Niemals wird er Werbung oder kostenpflichtige Funktionen enthalten.</string>
     <string name="about_link_source_title">Source code</string>
     <string name="about_link_translate_title">Help translate</string>
     <string name="must_be_logged_in_to_get_dir_contents">Must be logged in to get directory contents</string>
