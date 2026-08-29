@@ -259,7 +259,10 @@ namespace Seeker.Services
                         size: size,
                         startOffset: partialLength,
                         options: new TransferOptions(disposeOutputStreamOnCompletion: true,
-                            governor: SpeedLimitHelper.OurDownloadGovernor, stateChanged: updateForEnqueue),
+                            governor: SpeedLimitHelper.OurDownloadGovernor, stateChanged: updateForEnqueue,
+                            // we are not seekable, however, we already set our streams to start writing
+                            // at partialLength/startOffset.  This way we tell the library we are handling it.
+                            seekOutputStreamAutomatically: false),
                         cancellationToken: cts.Token);
                 }, TaskContinuationOptions.ExecuteSynchronously).Unwrap();
             }
