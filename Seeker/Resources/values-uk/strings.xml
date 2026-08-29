@@ -797,9 +797,6 @@
         Дані клієнта успішно імпортовано
     </string>
 
-    <string name="SelectUserNotes">
-        Виберіть наступні примітки користувача, щоб додати
-    </string>
     <string name="FolderFinishedDownloading">
         Завантаження папки завершено
     </string>

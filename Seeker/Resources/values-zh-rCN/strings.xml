@@ -619,7 +619,6 @@
     <string name="FailedToParseReasonContactDev">Failed to parse file. {0}. Contact developer for more help.</string>
     <string name="NoSuitableFileManager">No suitable file manager found</string>
     <string name="SuccessfullyImported">Successfully imported client data</string>
-    <string name="SelectUserNotes">Select the following user notes to add</string>
     <string name="FolderFinishedDownloading">文件夹已下载完成</string>
     <string name="FinishedDownloading">下载完成</string>
     <string name="PermissionsIssueShared">Permissions issue opening shared folder. Please go into settings and reselect shared folder.</string>
@@ -636,7 +635,6 @@
     <string name="Name">名称</string>
     <string name="OnlineStatus">在线状态</string>
     <string name="NoUsersFound">未找到用户</string>
-    <string name="UsingThisWizardLong">Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options &gt; Extras &gt; \'Export Client Configuration Data\', the file type should be .scd1. For Nicotine+ go to Preferences &gt; Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes. One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.</string>
     <string name="CurrentDownloadFolder_">当前下载文件夹</string>
     <string name="CreateCompleteAndIncomplete">Create Soulseek Complete and Soulseek Incomplete directories</string>
     <string name="CreateUsernameSubfolders">Create username subfolders</string>
