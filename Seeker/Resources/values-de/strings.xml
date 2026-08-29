@@ -94,7 +94,7 @@
     <string name="target_room_name">Raumname</string>
     <string name="target_choose_user">Benutzer aussuchen</string>
     <string name="username">Benutzername</string>
-    <string name="search_target_">Ziel suchen:</string>
+    <string name="search_target_">Ziel suchen</string>
     <string name="friends">Freunde</string>
     <string name="ignored">Ignoriert</string>
     <string name="chatroom_disconnected">Die Verbindung wurde getrennt…</string>
@@ -263,8 +263,8 @@
     <string name="request_user_error_empty">Benutzername darf nicht leer sein</string>
     <string name="temporary_disconnected">We got temporarily disconnected.. reconnecting now</string>
     <string name="failed_to_undo">Rückgängig fehlgeschlagen</string>
-    <string name="add_user_title">Benutzer hinzufügen:</string>
-    <string name="ignore_user_title">Benutzer ignorieren:</string>
+    <string name="add_user_title">Benutzer hinzufügen</string>
+    <string name="ignore_user_title">Benutzer ignorieren</string>
     <string name="not_sharing">Keine freigegebenen Dateien gefunden</string>
     <string name="failed_to_parse_shares_post">Your shares were not successfully parsed</string>
     <string name="error_reading_dir">Fehler beim Lesen des Verzeichnisses</string>
@@ -401,7 +401,7 @@
     <string name="set_ticker">Set ticker</string>
     <string name="setticker">Set ticker</string>
     <string name="chatrooms">Chatrooms</string>
-    <string name="create_chatroom_">Chatroom erstellen:</string>
+    <string name="create_chatroom_">Chatroom erstellen</string>
     <string name="edit_info">Information bearbeiten</string>
     <!--Dialog Action-->
     <string name="okay">Okay</string>
@@ -555,7 +555,7 @@
     <string name="remove_online_alert">Online-Alarm entfernen</string>
     <string name="user_X_is_now_online">Benutzer {0} ist nun online</string>
     <string name="publicRoomCreation">Requesting public room creation</string>
-    <string name="failed_user_offline">Fehler - Benutzer Offline</string>
+    <string name="failed_user_offline">Fehler - Benutzer offline</string>
     <string name="failed_denied">Failed - denied</string>
     <string name="re_requesting">Re-requesting</string>
     <string name="diagnostics_more_info">This will save diagnostic information to a text file named \"seeker_diagnostics.txt\" which will be located in the root of the selected download folder.\n\nThis can be useful to send to the dev for the purposes of troubleshooting issues. If the issues are of a networking nature, one may have to restart the app after turning this option on for full results.</string>
@@ -716,7 +716,7 @@
     <string name="TimedOut">Zeitüberschreitung</string>
     <string name="CannotConnect">Keine Verbindung möglich</string>
     <string name="Aborted">Abgebrochen</string>
-    <string name="SetLanguage">Sprache:</string>
+    <string name="SetLanguage">Sprache</string>
     <string name="Automatic">Automatisch</string>
     <string name="ManuallySetIncompleteFolder">Override incomplete folder location</string>
     <string name="CurrentIncompleteFolder">Incomplete folder</string>

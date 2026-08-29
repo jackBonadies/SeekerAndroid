@@ -175,7 +175,7 @@
     <string name="section_sharing">Sharing</string>
     <string name="section_network">Network</string>
     <string name="section_account">Account</string>
-    <string name="max_search_results">最大搜索结果：</string>
+    <string name="max_search_results">最大搜索结果</string>
     <string name="only_show_free_slots">Only show results of users with free slots</string>
     <string name="start_service_on_startup">启动时启动服务</string>
     <string name="allow_private_room_invitations">Allow private room invitations</string>
@@ -263,8 +263,8 @@
     <string name="request_user_error_empty">用户名不能为空</string>
     <string name="temporary_disconnected">我们暂时断开了连接... 立即重新连接</string>
     <string name="failed_to_undo">撤销失败</string>
-    <string name="add_user_title">添加用户：</string>
-    <string name="ignore_user_title">忽略用户：</string>
+    <string name="add_user_title">添加用户</string>
+    <string name="ignore_user_title">忽略用户</string>
     <string name="not_sharing">您没有共享任何文件</string>
     <string name="failed_to_parse_shares_post">Your shares were not successfully parsed</string>
     <string name="error_reading_dir">读取目录时出错</string>
@@ -279,7 +279,7 @@
     <string name="theme_blue">蓝色</string>
     <string name="theme_red">红色</string>
     <!-- info -->
-    <string name="queue_length_">队列长度：</string>
+    <string name="queue_length_">队列长度</string>
     <string name="upload_slots_">Free upload slots</string>
     <string name="today">今天</string>
     <string name="pending_">等待中……</string>
@@ -637,7 +637,7 @@
     <string name="OnlineStatus">在线状态</string>
     <string name="NoUsersFound">未找到用户</string>
     <string name="UsingThisWizardLong">Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options &gt; Extras &gt; \'Export Client Configuration Data\', the file type should be .scd1. For Nicotine+ go to Preferences &gt; Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes. One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.</string>
-    <string name="CurrentDownloadFolder_">当前下载文件夹：</string>
+    <string name="CurrentDownloadFolder_">当前下载文件夹</string>
     <string name="CreateCompleteAndIncomplete">Create Soulseek Complete and Soulseek Incomplete directories</string>
     <string name="CreateUsernameSubfolders">Create username subfolders</string>
     <string name="DoNotCreateSubfoldersForSingleDownloads">Skip subfolders for single files</string>

@@ -12,7 +12,7 @@
     <string name="signin_or_create_account">Registrarse o crear nueva cuenta</string>
     <string name="set_up_sharing">Comenzar a compartir</string>
     <string name="manage_user_list">Administrar lista de usuario</string>
-    <string name="unread_count">{0} No leídos</string>
+    <string name="unread_count">{0} no leídos</string>
     <string name="section_caps_setup">CONFIGURAR</string>
     <string name="section_caps_communication">COMUNICACIÓN</string>
     <string name="section_caps_account">CUENTA</string>
@@ -529,8 +529,8 @@
     <string name="filter_is_on_body">¿Desea descargar la carpeta completa o solo ciertos los elementos?</string>
     <string name="all">Todo</string>
     <string name="just_filtered">Solo lo filtrado</string>
-    <string name="item_total_singular">{0} Elemento(s) en total</string>
-    <string name="item_total_plural">{0} Elemento(s) en total</string>
+    <string name="item_total_singular">{0} elemento(s) en total</string>
+    <string name="item_total_plural">{0} elemento(s) en total</string>
     <string name="subfolders_warning">Esta carpeta contiene sub carpetas, ¿Le gustaría descargar también todos los archivos en esas sub carpetas ({0}) o solo los archivos de la carpeta actual ({1})?</string>
     <string name="subfolders_warning_queue_paused">Esta carpeta contiene sub carpetas, ¿Le gustaría agregar a la cola todos los archivos en esas sub carpetas también ({0}) o solo los archivos de la carpeta actual ({1})?</string>
     <string name="current_folder_only">Sólo la carpeta actual</string>
