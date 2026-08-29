@@ -342,6 +342,9 @@ namespace Seeker
         public IReadOnlyCollection<Transfer> Downloads => DownloadDictionary.Values.Select(t => new Transfer(t)).ToList().AsReadOnly();
         public IReadOnlyCollection<Transfer> Uploads => UploadDictionary.Values.Select(t => new Transfer(t)).ToList().AsReadOnly();
 
+        public int MajorVersion { get; } = 170;
+        public int MinorVersion { get; set; } = 128;
+
         // Explicit interface implementations for read-only properties
         string ISoulseekClient.Address => Address;
         string ISoulseekClient.Username => Username;
@@ -370,6 +373,7 @@ namespace Seeker
         public event EventHandler<DownloadFailedEventArgs>? DownloadFailed;
         public event EventHandler<IReadOnlyCollection<string>>? ExcludedSearchPhrasesReceived;
         public event EventHandler<string>? GlobalMessageReceived;
+        public event EventHandler? KickedFromServer;
         public event EventHandler? LoggedIn;
         public event EventHandler<PrivateMessageReceivedEventArgs>? PrivateMessageReceived;
         public event EventHandler<string>? PrivateRoomMembershipAdded;
@@ -409,6 +413,13 @@ namespace Seeker
         public void RaiseDisconnected(SoulseekClientDisconnectedEventArgs args) => Disconnected?.Invoke(this, args);
         public void RaiseStateChanged(SoulseekClientStateChangedEventArgs args) => StateChanged?.Invoke(this, args);
         public void RaiseLoggedIn() => LoggedIn?.Invoke(this, EventArgs.Empty);
+
+        public void RaiseKickedFromServer()
+        {
+            KickedFromServer?.Invoke(this, EventArgs.Empty);
+            Disconnect("Kicked from server", new KickedFromServerException());
+        }
+
         public void RaiseServerInfoReceived(ServerInfo args) => ServerInfoReceived?.Invoke(this, args);
         public void RaiseTransferStateChanged(TransferStateChangedEventArgs args) => TransferStateChanged?.Invoke(this, args);
         public void RaiseTransferProgressUpdated(TransferProgressUpdatedEventArgs args) => TransferProgressUpdated?.Invoke(this, args);
