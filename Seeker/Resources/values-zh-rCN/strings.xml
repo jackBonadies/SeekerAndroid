@@ -117,7 +117,7 @@
     <string name="seeker_needs_dl_dir_content">Select a folder where Seeker will save downloaded files</string>
     <string name="seeker_needs_dl_dir_error">A download folder is required to save files</string>
     <string name="seeker_needs_dl_dir_choose_settings">Please set a download directory in Settings.</string>
-    <string name="seeker_cannot_access_files">Cannot access filesystem.  You must select a download directory, either in the login page or in settings.</string>
+    <string name="seeker_cannot_access_files">Cannot access filesystem. You must select a download directory, either in the login page or in settings.</string>
     <!--
   Download Dialog Columns
   -->
@@ -175,7 +175,7 @@
     <string name="section_sharing">Sharing</string>
     <string name="section_network">Network</string>
     <string name="section_account">Account</string>
-    <string name="max_search_results">最大搜索结果： </string>
+    <string name="max_search_results">最大搜索结果：</string>
     <string name="only_show_free_slots">Only show results of users with free slots</string>
     <string name="start_service_on_startup">启动时启动服务</string>
     <string name="allow_private_room_invitations">Allow private room invitations</string>
@@ -234,7 +234,7 @@
     <string name="must_type_chatroom_name">Must type a chatroom name</string>
     <string name="must_type_text_to_send">Must type text to send</string>
     <string name="error">错误</string>
-    <string name="error_">错误: </string>
+    <string name="error_">错误:</string>
     <string name="error_duplicate">错误：检测到重复请求</string>
     <string name="error_browse_at_location">Error getting user directories at specified location</string>
     <string name="room_data_still_loading">Too fast! Still retrieving room data...</string>
@@ -279,7 +279,7 @@
     <string name="theme_blue">Blue</string>
     <string name="theme_red">Red</string>
     <!-- info -->
-    <string name="queue_length_">队列长度： </string>
+    <string name="queue_length_">队列长度：</string>
     <string name="upload_slots_">Free upload slots</string>
     <string name="today">今天</string>
     <string name="pending_">等待中……</string>
@@ -368,9 +368,9 @@
     <string name="already_added_to_ignore">User \"{0}\" already added to ignore list</string>
     <string name="failed_to_establish_connection_to_peer">Failed to establish connection to {0}</string>
     <string name="user_info_received">User info from {0} received</string>
-    <string name="user_info_failed_conn">Failed to get info for user: {0}.  Could not establish connection.</string>
-    <string name="user_info_failed_offline">Failed to get info for user: {0}.  User is offline.</string>
-    <string name="user_info_failed_timeout">Failed to get info for user: {0}.  Connection timed out.</string>
+    <string name="user_info_failed_conn">Failed to get info for user: {0}. Could not establish connection.</string>
+    <string name="user_info_failed_offline">Failed to get info for user: {0}. User is offline.</string>
+    <string name="user_info_failed_timeout">Failed to get info for user: {0}. Connection timed out.</string>
     <string name="deleted_message_history_with">Deleted message history with {0}</string>
     <string name="logged_in_as">Logged in as</string>
     <string name="status_connected">Connected</string>
@@ -558,7 +558,7 @@
     <string name="failed_user_offline">失败 - 用户已离线</string>
     <string name="failed_denied">失败 - 被拒绝</string>
     <string name="re_requesting">正在重新请求</string>
-    <string name="diagnostics_more_info">This will save diagnostic information to a text file named \"seeker_diagnostics.txt\" which will be located in the root of the selected download folder.\n\nThis can be useful to send to the dev for the purposes of troubleshooting issues.  If the issues are of a networking nature, one may have to restart the app after turning this option on for full results.</string>
+    <string name="diagnostics_more_info">This will save diagnostic information to a text file named \"seeker_diagnostics.txt\" which will be located in the root of the selected download folder.\n\nThis can be useful to send to the dev for the purposes of troubleshooting issues. If the issues are of a networking nature, one may have to restart the app after turning this option on for full results.</string>
     <string name="folder_X_from_user_Y_finished">{0} from {1} successfully completed.</string>
     <string name="takes_effect_on_next_startup">This will take effect on next startup</string>
     <string name="sort_results_by">排序</string>
@@ -579,7 +579,7 @@
     <string name="Reselect">重新选择</string>
     <string name="RemoveFolder">删除文件夹</string>
     <string name="FolderError">文件夹错误</string>
-    <string name="ErrorForFolder">文件夹错误： </string>
+    <string name="ErrorForFolder">文件夹错误：</string>
     <string name="ErrorDownloadDirNotProperlySet">Error: the download directory is not properly set.</string>
     <string name="CopySelectedURLs">复制选中的链接</string>
     <string name="CopyURL">复制链接</string>
@@ -611,7 +611,7 @@
     <string name="CannotBrowseUsernameOffline">Cannot browse {0}, user is offline.</string>
     <string name="FailedToBrowseUsernameUnspecifiedError">Failed to browse {0} due to unspecified error.</string>
     <string name="BrowseOnlyEmptyDir">User, {0}, is sharing only an empty directory.</string>
-    <string name="GetFolderDoesntWorkForLockedShares">Get folder does not work for locked shares.  Must use Browse or Browse at location instead.</string>
+    <string name="GetFolderDoesntWorkForLockedShares">Get folder does not work for locked shares. Must use Browse or Browse at location instead.</string>
     <string name="ImportWizard">导入向导</string>
     <string name="Import">导入</string>
     <string name="SuccessfullyParsed">Successfully parsed! Tap next to proceed</string>
@@ -622,7 +622,7 @@
     <string name="SelectUserNotes">Select the following user notes to add</string>
     <string name="FolderFinishedDownloading">Folder finished downloading</string>
     <string name="FinishedDownloading">下载完成</string>
-    <string name="PermissionsIssueShared">Permissions issue opening shared folder.  Please go into settings and reselect shared folder.</string>
+    <string name="PermissionsIssueShared">Permissions issue opening shared folder. Please go into settings and reselect shared folder.</string>
     <string name="SharedFolderIssuesAllFailed">Issue accessing shared folders. Tap folders for more info.</string>
     <string name="UserXIsOffline">用户 {0} 已离线</string>
     <string name="CannotConnectUserX">无法连接到用户 {0}</string>
@@ -636,8 +636,8 @@
     <string name="Name">名称</string>
     <string name="OnlineStatus">在线状态</string>
     <string name="NoUsersFound">未找到用户</string>
-    <string name="UsingThisWizardLong">Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options &gt; Extras &gt; \'Export Client Configuration Data\', the file type should be .scd1.  For Nicotine+ go to Preferences &gt; Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes.  One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.</string>
-    <string name="CurrentDownloadFolder_">当前下载文件夹： </string>
+    <string name="UsingThisWizardLong">Using this wizard one can import client data from SoulseekQT or Nicotine+.\n\nTo obtain client data from SoulseekQT go to Options &gt; Extras &gt; \'Export Client Configuration Data\', the file type should be .scd1. For Nicotine+ go to Preferences &gt; Export, the file type can be .tar.bz2 or the raw config file.\n\nSeeker will import User List, Ignored / Unshared List, Wishlist, and User Notes. One will be able to pick and choose what to export in the following screens.\n\nTap \'Import\' to get started.</string>
+    <string name="CurrentDownloadFolder_">当前下载文件夹：</string>
     <string name="CreateCompleteAndIncomplete">Create Soulseek Complete and Soulseek Incomplete directories</string>
     <string name="CreateUsernameSubfolders">Create username subfolders</string>
     <string name="DoNotCreateSubfoldersForSingleDownloads">Skip subfolders for single files</string>
@@ -740,7 +740,7 @@
     <string name="must_be_logged_in_to_change_password">Must be logged in to change password</string>
     <string name="failed_to_change_password">Failed to change password</string>
     <string name="password_successfully_updated">Password successfully updated</string>
-    <string name="error_dialog_content">Seeker has encountered an issue.  \n\nPlease consider sending a report to the developer.  \n\nAny information about the steps / conditions leading up to the issue is much appreciated.</string>
+    <string name="error_dialog_content">Seeker has encountered an issue. \n\nPlease consider sending a report to the developer. \n\nAny information about the steps / conditions leading up to the issue is much appreciated.</string>
     <string name="folder_request_user_returned_empty_response">User returned an empty response for this folder</string>
     <string name="just_now">just now</string>
     <string name="min_ago">min ago</string>

@@ -25,8 +25,7 @@
     <string name="search_room_">Cari Ruangan {0}</string>
     <string name="search_user_">Cari pengguna {0}</string>
     <string name="wishlist_search">Cari Keinginan</string>
-    <string name="no_account">Belum memiliki akun? Cukup masukkan nama pengguna unik dan akun akan dibuatkan untuk Anda.
-    </string>
+    <string name="no_account">Belum memiliki akun? Cukup masukkan nama pengguna unik dan akun akan dibuatkan untuk Anda.</string>
     <string name="keep_alive_service_subtitle">Mengizinkan Seeker untuk merespon permintaan pencarian (share), menerima pesan, dan menjalankan pencarian keinginan (wishlist) di latar belakang</string>
     <string name="privileges_more_info">Hak akses khusus (Privileges) memungkinkan anda mendukung Jaringan Soulseek (Nir) dan server pusat yang dibutuhkan aplikasi ini. \n\nHak ini juga memungkinkan anda untuk melewati antrean unduhan mendahului pengguna yang tidak memiliki hak akses khusus tersebut. \n\nCatatan: donasi tidak disalurkan kepada pencipta klien Android tidak resmi ini (Seeker). Saat ini saya tidak menerima donasi.</string>
     <string name="no_messages">Tidak ada pesan</string>
@@ -74,8 +73,7 @@
     <string name="user_info_bio"><b>Bio Pengguna</b></string>
     <string name="user_info_picture"><b>Gambar</b></string>
     <string name="unsaved_changes_title">Buang perubahan yang belum disimpan?</string>
-    <string name="unsaved_changes_body">Ada perubahan yang belum disimpan, apakah anda yakin untuk membuang?
-    </string>
+    <string name="unsaved_changes_body">Ada perubahan yang belum disimpan, apakah anda yakin untuk membuang?</string>
     <string name="statistics_header">Statistik</string>
     <string name="stat_upload_slots">Slot unggah</string>
     <string name="stat_queued">Dalam antrian</string>
@@ -115,16 +113,11 @@
     <string name="enter_listening_port">Masukkan Port Mendengar</string>
     <string name="create_chatroom_private">Buat privat</string>
     <string name="search_here">Cari di sini</string>
-    <string name="seeker_needs_dl_dir">Pilih lokasi unduhan
-    </string>
-    <string name="seeker_needs_dl_dir_content">Pilih folder tempat Seeker akan menyimpan file yang diunduh
-    </string>
-    <string name="seeker_needs_dl_dir_error">Folder unduhan diperlukan untuk menyimpan berkas
-    </string>
-    <string name="seeker_needs_dl_dir_choose_settings">Silakan atur direktori unduhan di Pengaturan.
-    </string>
-    <string name="seeker_cannot_access_files">Tidak dapat mengakses sistem file. Anda harus memilih direktori unduhan, baik di halaman login atau di pengaturan.
-    </string>
+    <string name="seeker_needs_dl_dir">Pilih lokasi unduhan</string>
+    <string name="seeker_needs_dl_dir_content">Pilih folder tempat Seeker akan menyimpan file yang diunduh</string>
+    <string name="seeker_needs_dl_dir_error">Folder unduhan diperlukan untuk menyimpan berkas</string>
+    <string name="seeker_needs_dl_dir_choose_settings">Silakan atur direktori unduhan di Pengaturan.</string>
+    <string name="seeker_cannot_access_files">Tidak dapat mengakses sistem file. Anda harus memilih direktori unduhan, baik di halaman login atau di pengaturan.</string>
     <!--
   Download Dialog Columns
   -->
@@ -183,14 +176,11 @@
     <string name="section_network">Jaringan</string>
     <string name="section_account">Akun</string>
     <string name="max_search_results">Hasil pencarian maks</string>
-    <string name="only_show_free_slots">Hanya tampilkan hasil dari pengguna dengan slot kosong
-    </string>
+    <string name="only_show_free_slots">Hanya tampilkan hasil dari pengguna dengan slot kosong</string>
     <string name="start_service_on_startup">Jalankan saat mulai</string>
-    <string name="allow_private_room_invitations">Izinkan undangan ruang privat
-    </string>
-    <string name="show_bottom_notifs_complete">Tampilkan notifikasi saat berkas selesai
-    </string>
-    <string name="show_notifs_on_folder_complete">Tampilkan notifikasi saat folder selesai    </string>
+    <string name="allow_private_room_invitations">Izinkan undangan ruang privat</string>
+    <string name="show_bottom_notifs_complete">Tampilkan notifikasi saat berkas selesai</string>
+    <string name="show_notifs_on_folder_complete">Tampilkan notifikasi saat folder selesai</string>
     <string name="remember_search_history">Ingat riwayat pencarian</string>
     <string name="clear_search_history">Hapus riwayat pencarian</string>
     <string name="file_backed_downloads">Unduhan berbasis berkas</string>
@@ -200,8 +190,7 @@
     <string name="enable_listening">Aktifkan Listening</string>
     <string name="change_port">Ubah Port</string>
     <string name="check_your_port_status">Cek Status</string>
-    <string name="use_pnp_for_port_forwarding">Gunakan UPnP untuk Port Forwarding
-    </string>
+    <string name="use_pnp_for_port_forwarding">Gunakan UPnP untuk Port Forwarding</string>
     <string name="edit_your_user_info">Edit Info Pengguna</string>
     <string name="restore_default_settings">Atur Ulang ke Default</string>
     <string name="restore_default_settings_body">Opsi ini akan mengubah semua pengaturan ke kondisi awal. Tindakan ini tidak dapat dibatalkan.</string>
@@ -215,18 +204,13 @@
     <string name="no_pic_set">Foto belum diatur</string>
     <string name="select_pic">Pilih Foto</string>
     <string name="success_set_pic">Foto berhasil diatur</string>
-    <string name="error_no_file_manager_image">ERROR - Tidak ada pengelola berkas yang terinstal untuk memilih gambar. Mohon menginstal terlebih dahulu.
-    </string>
-    <string name="error_no_file_manager_dir">ERROR - Tidak ada pengelola berkas yang terinstal untuk memilih direktori. Mohon menginstal terlebih dahulu.
-    </string>
-    <string name="error_no_file_manager_dir_manage_storage">ERROR - Tidak ada pengelola berkas yang terinstal untuk memilih direktori. Mohon menginstal terlebih dahulu. Jika perangkat Anda tidak mendukung intent OPEN_DOCUMENT_TREE, silakan instal Seeker dari Fdroid (IzzyOnDroid Repo) yang memiliki izin Kelola Penyimpanan Eksternal.
-    </string>
+    <string name="error_no_file_manager_image">ERROR - Tidak ada pengelola berkas yang terinstal untuk memilih gambar. Mohon menginstal terlebih dahulu.</string>
+    <string name="error_no_file_manager_dir">ERROR - Tidak ada pengelola berkas yang terinstal untuk memilih direktori. Mohon menginstal terlebih dahulu.</string>
+    <string name="error_no_file_manager_dir_manage_storage">ERROR - Tidak ada pengelola berkas yang terinstal untuk memilih direktori. Mohon menginstal terlebih dahulu. Jika perangkat Anda tidak mendukung intent OPEN_DOCUMENT_TREE, silakan instal Seeker dari Fdroid (IzzyOnDroid Repo) yang memiliki izin Kelola Penyimpanan Eksternal.</string>
     <string name="error_image_doesnt_exist">Gambar tidak ditemukan</string>
-    <string name="error_image_too_large">        Gambar terlalu besar. Silakan pilih gambar yang lebih kecil ( &lt; 5MB).
-    </string>
+    <string name="error_image_too_large">Gambar terlalu besar. Silakan pilih gambar yang lebih kecil ( &lt; 5MB).</string>
     <string name="no_room_tickers">Belum Ada Ticker Ruangan...</string>
-    <string name="user_list_empty">        Daftar Pengguna kosong. Silakan tambahkan pengguna ke Daftar Pengguna.
-    </string>
+    <string name="user_list_empty">Daftar Pengguna kosong. Silakan tambahkan pengguna ke Daftar Pengguna.</string>
     <string name="no_user">Tidak ada Pengguna yang dipilih</string>
     <string name="no_room">Tidak ada Ruangan yang dipilih</string>
     <string name="no_search_results">Hasil tidak ditemukan</string>
@@ -242,14 +226,10 @@
     <string name="nothing_selected_extra">"        \"Tidak Ada yang Dipilih - Ketuk untuk memilih\"
     "</string>
     <string name="failed_to_connect">Gagal terhubung</string>
-    <string name="cannot_download_from_self">        Tidak dapat mengunduh dari diri sendiri
-    </string>
-    <string name="must_type_a_username_to_browse">        Harus mengetik Pengguna untuk Menelusuri
-    </string>
-    <string name="must_type_a_username_to_message">        Harus mengetik Pengguna untuk Mengirim Pesan
-    </string>
-    <string name="must_type_a_username_to_invite">        Harus mengetik Pengguna untuk Mengundang
-    </string>
+    <string name="cannot_download_from_self">Tidak dapat mengunduh dari diri sendiri</string>
+    <string name="must_type_a_username_to_browse">Harus mengetik Pengguna untuk Menelusuri</string>
+    <string name="must_type_a_username_to_message">Harus mengetik Pengguna untuk Mengirim Pesan</string>
+    <string name="must_type_a_username_to_invite">Harus mengetik Pengguna untuk Mengundang</string>
     <string name="must_type_a_username_to_add">Harus mengetik Pengguna untuk Menambahkan</string>
     <string name="must_type_ticker_text">Harus mengetik teks ticker</string>
     <string name="must_type_chatroom_name">Harus mengetik nama ruang obrolan</string>
@@ -257,58 +237,40 @@
     <string name="error">Error</string>
     <string name="error_">Error:</string>
     <string name="error_duplicate">Error: Terdeteksi permintaan duplikat</string>
-    <string name="error_browse_at_location">        Gagal mendapatkan direktori pengguna di lokasi yang ditentukan
-    </string>
-    <string name="room_data_still_loading">        Terlalu cepat! Masih memuat data ruangan...
-    </string>
-    <string name="must_be_logged_to_browse">        Harus masuk log terlebih dahulu untuk menjelajah pengguna
-    </string>
-    <string name="must_be_logged_to_get_room_list">        Harus masuk log terlebih dahulu untuk mendapatkan daftar ruang obrolan
-    </string>
-    <string name="must_be_logged_to_request_user_info">        Harus masuk log terlebih dahulu untuk meminta info pengguna
-    </string>
-    <string name="must_be_logged_to_create_room">        Harus masuk log terlebih dahulu untuk membuat ruang obrolan
-    </string>
-    <string name="must_be_logged_to_add_or_remove_user">        Harus masuk log terlebih dahulu untuk menambah atau menghapus pengguna
-    </string>
-    <string name="must_be_logged_to_set_ticker">        Harus masuk log terlebih dahulu untuk mengatur ticker
-    </string>
-    <string name="must_be_logged_to_send_message">        Harus masuk log terlebih dahulu untuk mengirim pesan
-    </string>
-    <string name="must_be_logged_to_toggle_priv_invites">        Harus masuk log terlebih dahulu untuk mengubah izin undangan privat
-    </string>
-    <string name="must_be_logged_in_to_check_privileges">        Harus masuk log terlebih dahulu untuk memeriksa hak istimewa
-    </string>
-    <string name="must_be_logged_in_to_get_privileges">        Harus masuk log terlebih dahulu untuk mendapatkan hak istimewa
-    </string>
+    <string name="error_browse_at_location">Gagal mendapatkan direktori pengguna di lokasi yang ditentukan</string>
+    <string name="room_data_still_loading">Terlalu cepat! Masih memuat data ruangan...</string>
+    <string name="must_be_logged_to_browse">Harus masuk log terlebih dahulu untuk menjelajah pengguna</string>
+    <string name="must_be_logged_to_get_room_list">Harus masuk log terlebih dahulu untuk mendapatkan daftar ruang obrolan</string>
+    <string name="must_be_logged_to_request_user_info">Harus masuk log terlebih dahulu untuk meminta info pengguna</string>
+    <string name="must_be_logged_to_create_room">Harus masuk log terlebih dahulu untuk membuat ruang obrolan</string>
+    <string name="must_be_logged_to_add_or_remove_user">Harus masuk log terlebih dahulu untuk menambah atau menghapus pengguna</string>
+    <string name="must_be_logged_to_set_ticker">Harus masuk log terlebih dahulu untuk mengatur ticker</string>
+    <string name="must_be_logged_to_send_message">Harus masuk log terlebih dahulu untuk mengirim pesan</string>
+    <string name="must_be_logged_to_toggle_priv_invites">Harus masuk log terlebih dahulu untuk mengubah izin undangan privat</string>
+    <string name="must_be_logged_in_to_check_privileges">Harus masuk log terlebih dahulu untuk memeriksa hak istimewa</string>
+    <string name="must_be_logged_in_to_get_privileges">Harus masuk log terlebih dahulu untuk mendapatkan hak istimewa</string>
     <string name="checking_priv_">Memeriksa hak istimewa...</string>
     <string name="already_added_user_">Sudah menambahkan pengguna: {0}</string>
-    <string name="must_be_logged_to_search">        Harus masuk log sebelum melakukan pencarian
-    </string>
-    <string name="create_and_refresh">        Ruangan berhasil dibuat, sedang memperbarui daftar ruangan
-    </string>
+    <string name="must_be_logged_to_search">Harus masuk log sebelum melakukan pencarian</string>
+    <string name="create_and_refresh">Ruangan berhasil dibuat, sedang memperbarui daftar ruangan</string>
     <string name="setting_ticker">Mengatur ticker...</string>
     <string name="failed_to_set_ticker">Gagal mengatur ticker</string>
     <string name="successfully_set_ticker">Berhasil mengatur ticker</string>
     <string name="folder_request_timed_out">Permintaan Folder Habis Waktu (Timed Out)</string>
     <string name="folder_request_failed">Permintaan Folder Gagal</string>
-    <string name="folder_request_already_have">        Anda sudah memiliki folder tersebut secara lengkap
-    </string>
+    <string name="folder_request_already_have">Anda sudah memiliki folder tersebut secara lengkap</string>
     <string name="saved">Disimpan</string>
     <string name="no_changes_to_save">Tidak ada perubahan untuk disimpan</string>
     <string name="request_user_error_empty">Nama pengguna tidak boleh kosong</string>
-    <string name="temporary_disconnected">        Koneksi terputus sementara.. sedang menyambungkan kembali
-    </string>
+    <string name="temporary_disconnected">Koneksi terputus sementara.. sedang menyambungkan kembali</string>
     <string name="failed_to_undo">Gagal Membatalkan (Undo)</string>
     <string name="add_user_title">Tambah Pengguna</string>
     <string name="ignore_user_title">Abaikan Pengguna</string>
     <string name="not_sharing">Anda tidak sedang membagikan berkas apa pun</string>
-    <string name="failed_to_parse_shares_post">Berkas yang Anda bagikan gagal diurai
-    </string>
+    <string name="failed_to_parse_shares_post">Berkas yang Anda bagikan gagal diurai</string>
     <string name="error_reading_dir">Error membaca direktori</string>
     <string name="error_not_a_dir">Error: Bukan Sebuah Direktori</string>
-    <string name="successfully_changed_dl_dir">        Berhasil mengubah Direktori Unduhan menjadi \"{0}\"
-    </string>
+    <string name="successfully_changed_dl_dir">Berhasil mengubah Direktori Unduhan menjadi \"{0}\"</string>
     <string name="follow_system">Ikuti Sistem</string>
     <string name="always_light">Selalu Terang</string>
     <string name="always_dark">Selalu Gelap</string>
@@ -324,8 +286,7 @@
     <string name="pending_">Tertunda...</string>
     <string name="failed">Gagal</string>
     <!--For someone translating, position {0} to where the words membership or ownership will occur -->
-    <string name="must_be_logged_to_drop_private">        Harus masuk log terlebih dahulu untuk melepas {0} ruang privat
-    </string>
+    <string name="must_be_logged_to_drop_private">Harus masuk log terlebih dahulu untuk melepas {0} ruang privat</string>
     <string name="failed_to_remove">Gagal menghapus {0}</string>
     <string name="successfully_removed">Berhasil menghapus {0}</string>
     <!--For someone translating, position {0} to where the words membership or ownership will occur and {1} is where the roomanme will occur -->
@@ -333,8 +294,7 @@
     <string name="ownership">kepemilikan</string>
     <string name="membership">keanggotaan</string>
     <!--For someone translating, position {0} is a placeholder for the roomname-->
-    <string name="startup_room_off">        {0} tidak lagi diatur untuk bergabung saat mulai
-    </string>
+    <string name="startup_room_off">{0} tidak lagi diatur untuk bergabung saat mulai</string>
     <string name="startup_room_on">{0} sekarang diatur untuk bergabung saat mulai (startup)</string>
     <string name="notif_room_off">Notifikasi dimatikan untuk: {0}</string>
     <string name="notif_room_on">Notifikasi dinyalakan untuk: {0}</string>
@@ -348,12 +308,9 @@
     <string name="error_adding_user_timeout">Gagal menambahkan pengguna: waktu habis</string>
     <string name="error_adding_user_not_found">Gagal menambahkan pengguna: pengguna tidak ditemukan</string>
     <!--For someone translating, position {0} is a placeholder for the allowed/denied-->
-    <string name="failed_setting_priv_invites">        Gagal mengatur Izinkan Undangan Privat ke: {0}
-    </string>
-    <string name="network_error_setting_listener">        Kesalahan jaringan saat mengatur listener ke {0}
-    </string>
-    <string name="network_error_setting_listener_port">        Kesalahan jaringan saat mengubah listener ke {0}
-    </string>
+    <string name="failed_setting_priv_invites">Gagal mengatur Izinkan Undangan Privat ke: {0}</string>
+    <string name="network_error_setting_listener">Kesalahan jaringan saat mengatur listener ke {0}</string>
+    <string name="network_error_setting_listener_port">Kesalahan jaringan saat mengubah listener ke {0}</string>
     <string name="allowed">Diizinkan</string>
     <string name="denied">Ditolak</string>
     <string name="get_folder">Ambil Folder</string>
@@ -366,28 +323,21 @@
     <string name="failed_remove_mod">Gagal Menghapus Moderator</string>
     <string name="success_removed_user">Pengguna Berhasil Dihapus</string>
     <string name="failed_removed_user">Gagal Menghapus Pengguna</string>
-    <string name="wishlist_tab_error">        Tab Wishlist yang diinginkan sudah tidak ada
-    </string>
+    <string name="wishlist_tab_error">Tab Wishlist yang diinginkan sudah tidak ada</string>
     <string name="wishlist_next_run_hours_minutes">pencarian berikutnya dalam {0} jam {1} menit</string>
     <string name="wishlist_next_run_minutes">pencarian berikutnya dalam {0} menit</string>
     <string name="wishlist_next_run_imminent">pencarian berikutnya segera dimulai</string>
     <string name="wishlist_max_results_reached">hasil maksimal telah tercapai</string>
-    <string name="perform_search_first">        Harus melakukan pencarian terlebih dahulu untuk menambahkan ke wishlist
-    </string>
-    <string name="added_to_wishlist">        Berhasil menambahkan kueri pencarian \"{0}\" ke wishlist
-    </string>
-    <string name="wishlist_tab_target">        Tidak dapat mengubah target untuk pencarian wishlist
-    </string>
+    <string name="perform_search_first">Harus melakukan pencarian terlebih dahulu untuk menambahkan ke wishlist</string>
+    <string name="added_to_wishlist">Berhasil menambahkan kueri pencarian \"{0}\" ke wishlist</string>
+    <string name="wishlist_tab_target">Tidak dapat mengubah target untuk pencarian wishlist</string>
     <string name="search_tab_error">Tab Pencarian yang diinginkan sudah tidak ada</string>
-    <string name="error_sharing">Error saat mengurai berkas, tidak dapat mengatur Direktori Bersama
-    </string>
+    <string name="error_sharing">Error saat mengurai berkas, tidak dapat mengatur Direktori Bersama</string>
     <string name="success_sharing">Pengaturan berbagi berkas berhasil diterapkan</string>
     <string name="sharing_off">Fitur berbagi dinonaktifkan</string>
     <string name="sharing_currently_parsing">Sedang mengurai berkas...</string>
-    <string name="sharing_disabled_failure_parsing">Berbagi dinonaktifkan. Gagal mengurai berkas yang dibagikan.
-    </string>
-    <string name="sharing_disabled_share_not_set">        Berbagi dinonaktifkan. Direktori Bersama belum diatur.
-    </string>
+    <string name="sharing_disabled_failure_parsing">Berbagi dinonaktifkan. Gagal mengurai berkas yang dibagikan.</string>
+    <string name="sharing_disabled_share_not_set">Berbagi dinonaktifkan. Direktori Bersama belum diatur.</string>
     <string name="sharing_disabled_error">Error: Fitur berbagi dinonaktifkan.</string>
     <string name="change_target">Ubah Target</string>
     <string name="change_result_style">Ubah Gaya Hasil</string>
@@ -395,71 +345,48 @@
     <string name="remove_from_ignored">Hapus dari Daftar Abaikan</string>
     <string name="failed_to_send_message">Gagal mengirim pesan</string>
     <string name="empty_message_error">Tidak dapat mengirim pesan kosong</string>
-    <string name="browse_user_contacting">        Menghubungi pengguna untuk daftar direktori. Hasil akan muncul di tab jelajah setelah
-        selesai.
-    </string>
+    <string name="browse_user_contacting">Menghubungi pengguna untuk daftar direktori. Hasil akan muncul di tab jelajah setelah selesai.</string>
     <string name="browse_user_timeout">Permintaan direktori pengguna habis waktu</string>
-    <string name="browse_user_nodirectconnection">        Permintaan direktori pengguna gagal - Tidak dapat membuat koneksi langsung ke
-        peer
-    </string>
-    <string name="browse_user_wefailedtoparse">        Gagal mengurai respons jelajah
-    </string>
+    <string name="browse_user_nodirectconnection">Permintaan direktori pengguna gagal - Tidak dapat membuat koneksi langsung ke peer</string>
+    <string name="browse_user_wefailedtoparse">Gagal mengurai respons jelajah</string>
     <string name="browse_response_received">Respons jelajah diterima</string>
     <string name="browse_none">Pengguna tidak membagikan direktori apa pun</string>
-    <string name="browse_onlylocked">        Pengguna hanya membagikan direktori yang terkunci
-    </string>
-    <string name="kicked_due_to_other_client">        Memutuskan koneksi... apakah ada klien lain yang menggunakan nama pengguna ini?
-    </string>
-    <string name="port_already_in_use">        Gagal menyiapkan listener. Port kemungkinan besar sudah digunakan.
-    </string>
-    <string name="dns_failed">        Pencarian DNS Server Gagal. Berhasil beralih menggunakan IP hardcoded.
-    </string>
+    <string name="browse_onlylocked">Pengguna hanya membagikan direktori yang terkunci</string>
+    <string name="kicked_due_to_other_client">Memutuskan koneksi... apakah ada klien lain yang menggunakan nama pengguna ini?</string>
+    <string name="port_already_in_use">Gagal menyiapkan listener. Port kemungkinan besar sudah digunakan.</string>
+    <string name="dns_failed">Pencarian DNS Server Gagal. Berhasil beralih menggunakan IP hardcoded.</string>
     <string name="bad_user_pass">Nama pengguna atau kata sandi salah</string>
     <string name="invalid_username">Nama Pengguna Tidak Valid</string>
     <string name="invalid_password">Kata Sandi Tidak Valid</string>
     <string name="user_too_long">Nama pengguna harus di bawah 30 karakter</string>
-    <string name="user_invalid_char">        Nama pengguna tidak boleh mengandung karakter khusus
-    </string>
+    <string name="user_invalid_char">Nama pengguna tidak boleh mengandung karakter khusus</string>
     <string name="network_unreachable">Jaringan tidak dapat dijangkau</string>
     <string name="cannot_login">Tidak Dapat Masuk</string>
-    <string name="no_empty_user_pass">        Nama pengguna dan Kata Sandi tidak boleh kosong
-    </string>
-    <string name="dns_failed_2">        Gagal melacak alamat IP server soulseek.
-    </string>
+    <string name="no_empty_user_pass">Nama pengguna dan Kata Sandi tidak boleh kosong</string>
+    <string name="dns_failed_2">Gagal melacak alamat IP server soulseek.</string>
     <!--In this case the placeholder {0} is for the username-->
     <string name="added_to_ignore">Berhasil menambahkan pengguna \"{0}\" ke Daftar Abaikan</string>
-    <string name="already_added_to_ignore">        Pengguna \"{0}\" sudah ada di Daftar Abaikan
-    </string>
-    <string name="failed_to_establish_connection_to_peer">        Gagal membuat koneksi ke {0}
-    </string>
+    <string name="already_added_to_ignore">Pengguna \"{0}\" sudah ada di Daftar Abaikan</string>
+    <string name="failed_to_establish_connection_to_peer">Gagal membuat koneksi ke {0}</string>
     <string name="user_info_received">Info Pengguna dari {0} diterima</string>
-    <string name="user_info_failed_conn">        Gagal mendapatkan info pengguna: {0}. Tidak dapat membuat koneksi.
-    </string>
-    <string name="user_info_failed_offline">        Gagal mendapatkan info pengguna: {0}. Pengguna sedang luring.
-    </string>
-    <string name="user_info_failed_timeout">        Gagal mendapatkan info pengguna: {0}. Koneksi habis waktu.
-    </string>
-    <string name="deleted_message_history_with">        Riwayat Pesan dengan {0} telah dihapus
-    </string>
+    <string name="user_info_failed_conn">Gagal mendapatkan info pengguna: {0}. Tidak dapat membuat koneksi.</string>
+    <string name="user_info_failed_offline">Gagal mendapatkan info pengguna: {0}. Pengguna sedang luring.</string>
+    <string name="user_info_failed_timeout">Gagal mendapatkan info pengguna: {0}. Koneksi habis waktu.</string>
+    <string name="deleted_message_history_with">Riwayat Pesan dengan {0} telah dihapus</string>
     <string name="logged_in_as">Masuk sebagai</string>
     <string name="status_connected">Terhubung</string>
     <string name="status_connecting">Menghubungkan</string>
     <string name="status_disconnected">Terputus</string>
     <string name="status_disconnecting">Memutuskan sambungan</string>
-    <string name="failed_to_establish_direct_or_indirect">        Gagal membuat koneksi pesan langsung atau tidak langsung ke pengguna
-    </string>
-    <string name="remote_conn_closed">        Error Membaca: Koneksi Jarak Jauh Ditutup
-    </string>
+    <string name="failed_to_establish_direct_or_indirect">Gagal membuat koneksi pesan langsung atau tidak langsung ke pengguna</string>
+    <string name="remote_conn_closed">Error Membaca: Koneksi Jarak Jauh Ditutup</string>
     <string name="network_down">Subsistem Jaringan Mati</string>
-    <string name="reported_as_failed">        Error: Transfer dilaporkan gagal oleh pengunggah
-    </string>
+    <string name="reported_as_failed">Error: Transfer dilaporkan gagal oleh pengunggah</string>
     <string name="error_no_space">Error: Ruang penyimpanan perangkat penuh.</string>
-    <string name="error_unspecified">        Tugas tidak selesai karena adanya pengecualian (exception) yang tidak ditangani
-    </string>
+    <string name="error_unspecified">Tugas tidak selesai karena adanya pengecualian (exception) yang tidak ditangani</string>
     <string name="timeout_peer">Waktu habis saat berkomunikasi dengan peer</string>
     <string name="transfer_rejected">Permintaan Transfer Ditolak</string>
-    <string name="transfer_rejected_file_not_shared">Permintaan transfer ditolak. Alasan: berkas tidak dibagikan
-    </string>
+    <string name="transfer_rejected_file_not_shared">Permintaan transfer ditolak. Alasan: berkas tidak dibagikan</string>
     <string name="delete_messages">Hapus Pesan</string>
     <string name="delete_all_messages">Hapus Semua Pesan</string>
     <string name="deleted_all_messages">Semua riwayat pesan telah dihapus</string>
@@ -521,15 +448,13 @@
     <string name="listener_off">Listener mati</string>
     <string name="upnp_not_ran">UPnP belum dijalankan</string>
     <string name="upnp_currently_running">UPnP sedang berjalan</string>
-    <string name="no_upnp_devices_found">        Tidak ada perangkat yang kompatibel dengan UPnP ditemukan
-    </string>
+    <string name="no_upnp_devices_found">Tidak ada perangkat yang kompatibel dengan UPnP ditemukan</string>
     <string name="upnp_wifi_only">UPnP hanya untuk jaringan Wi-Fi</string>
     <string name="upnp_no_wifi_conn">Tidak ada koneksi Wi-Fi</string>
     <string name="failed_to_set">Gagal mengatur pemetaan pada perangkat UPnP</string>
     <string name="upnp_success">UPnP berhasil meneruskan port</string>
     <string name="upnp_last_success">UPnP terakhir kali berhasil dijalankan</string>
-    <string name="attempting_to_find_and_open">        Mencoba mencari dan membuka port melalui UPnP
-    </string>
+    <string name="attempting_to_find_and_open">Mencoba mencari dan membuka port melalui UPnP</string>
     <string name="upnp_search_finished">Pencarian UPnP selesai</string>
     <!--Sharing-->
     <!--Transfer States-->
@@ -545,16 +470,14 @@
     <string name="resume_dl">Lanjutkan Unduhan</string>
     <string name="refresh_queue_pos">Perbarui Posisi Antrean</string>
     <string name="play_file">Buka berkas</string>
-    <string name="chosen_transfer_doesnt_exist">        Item Transfer yang dipilih sudah tidak ada.
-    </string>
+    <string name="chosen_transfer_doesnt_exist">Item Transfer yang dipilih sudah tidak ada.</string>
     <string name="position_is_still_">Posisi dalam Antrean masih: {0}</string>
     <string name="failed_to_play">Gagal memutar berkas di pemutar default</string>
     <!--Notification-->
     <string name="download_in_progress">Unduhan Sedang Berjalan</string>
     <string name="transfers_in_progress">Transfer sedang berjalan...</string>
     <string name="seeker_running">Seeker Sedang Berjalan</string>
-    <string name="seeker_running_content">        Seeker saat ini berjalan di latar belakang
-    </string>
+    <string name="seeker_running_content">Seeker saat ini berjalan di latar belakang</string>
     <!--Privileges-->
     <string name="yes">Ya</string>
     <string name="seconds_left">{0} detik</string>
@@ -589,16 +512,12 @@
     <string name="upload_f_string">Berhasil mengunggah {0} {1} ke pengguna: {2}</string>
     <string name="about_title">Tentang</string>
     <string name="give_privileges">Berikan Hak Istimewa</string>
-    <string name="error_days_entered_no_parse">        Jumlah hari yang dimasukkan harus berupa bilangan bulat.
-    </string>
-    <string name="error_days_entered_not_positive">        Jumlah hari yang dimasukkan harus bernilai positif.
-    </string>
-    <string name="error_insufficient_days">        Anda tidak memiliki cukup {0} hari untuk diberikan.
-    </string>
+    <string name="error_days_entered_no_parse">Jumlah hari yang dimasukkan harus berupa bilangan bulat.</string>
+    <string name="error_days_entered_not_positive">Jumlah hari yang dimasukkan harus bernilai positif.</string>
+    <string name="error_insufficient_days">Anda tidak memiliki cukup {0} hari untuk diberikan.</string>
     <string name="give_to_">Berikan kepada {0}</string>
     <string name="error_give_priv">Gagal Memberikan Hak Istimewa</string>
-    <string name="give_priv_success">        Berhasil memberikan {0} hari hak istimewa kepada {1}.
-    </string>
+    <string name="give_priv_success">Berhasil memberikan {0} hari hak istimewa kepada {1}.</string>
     <string name="sending__">Mengirim...</string>
     <string name="give_hint">jumlah hari</string>
     <string name="user_note">Catatan Pengguna</string>
@@ -608,36 +527,25 @@
     <string name="more_options">Opsi Lainnya</string>
     <string name="remove_from_user_list">Hapus dari Daftar Pengguna</string>
     <string name="filter_is_on">Filter aktif</string>
-    <string name="filter_is_on_body">        Apakah Anda ingin mengunduh seluruh folder atau hanya item yang difilter?
-    </string>
+    <string name="filter_is_on_body">Apakah Anda ingin mengunduh seluruh folder atau hanya item yang difilter?</string>
     <string name="all">Semua</string>
     <string name="just_filtered">Hanya yang Difilter</string>
     <string name="item_total_singular">Total {0} item</string>
     <string name="item_total_plural">Total {0} item</string>
-    <string name="subfolders_warning">Folder ini berisi subfolder, apakah anda ingin mengunduh semua berkas di dalam subfolder tersebut juga ({0}) atau hanya berkas di folder saat ini ({1})?
-    </string>
-    <string name="subfolders_warning_queue_paused">Folder ini berisi subfolder, apakah anda ingin memasukkan semua berkas di dalam subfolder tersebut ke antrean juga ({0}) atau hanya berkas di folder saat ini ({1})?
-    </string>
+    <string name="subfolders_warning">Folder ini berisi subfolder, apakah anda ingin mengunduh semua berkas di dalam subfolder tersebut juga ({0}) atau hanya berkas di folder saat ini ({1})?</string>
+    <string name="subfolders_warning_queue_paused">Folder ini berisi subfolder, apakah anda ingin memasukkan semua berkas di dalam subfolder tersebut ke antrean juga ({0}) atau hanya berkas di folder saat ini ({1})?</string>
     <string name="current_folder_only">Hanya Folder Saat Ini</string>
-    <string name="must_be_logged_in_to_give_privileges">        Harus masuk log terlebih dahulu untuk memberikan hak istimewa
-    </string>
-    <string name="about_body">Seeker adalah klien Soulseek gratis dan sumber terbuka (open source) untuk Android. Aplikasi ini tidak akan pernah memiliki iklan atau fitur berbayar.
-&lt;br&gt;&lt;br&gt;Silakan bantu menerjemahkan Seeker &lt;a href="https://crwd.in/seeker"&gt;di sini&lt;/a&gt;.
-&lt;br&gt;&lt;br&gt;Kode sumber tersedia &lt;a href="https://github.com/jackBonadies/SeekerAndroid"&gt;di sini&lt;/a&gt;.
-&lt;br&gt;&lt;br&gt;Versi: {0}.</string>
+    <string name="must_be_logged_in_to_give_privileges">Harus masuk log terlebih dahulu untuk memberikan hak istimewa</string>
+    <string name="about_body">Seeker adalah klien Soulseek gratis dan sumber terbuka (open source) untuk Android. Aplikasi ini tidak akan pernah memiliki iklan atau fitur berbayar. &lt;br&gt;&lt;br&gt;Silakan bantu menerjemahkan Seeker &lt;a href="https://crwd.in/seeker"&gt;di sini&lt;/a&gt;. &lt;br&gt;&lt;br&gt;Kode sumber tersedia &lt;a href="https://github.com/jackBonadies/SeekerAndroid"&gt;di sini&lt;/a&gt;. &lt;br&gt;&lt;br&gt;Versi: {0}.</string>
     <string name="about_link_source_title">Kode sumber</string>
     <string name="about_link_translate_title">Bantu menerjemahkan</string>
-    <string name="must_be_logged_in_to_get_dir_contents">        Harus masuk log terlebih dahulu untuk mendapatkan konten direktori
-    </string>
+    <string name="must_be_logged_in_to_get_dir_contents">Harus masuk log terlebih dahulu untuk mendapatkan konten direktori</string>
     <string name="note">Catatan</string>
-    <string name="removed_user_from_ignored_list">        Berhasil menghapus pengguna \"{0}\" dari Daftar Abaikan
-    </string>
+    <string name="removed_user_from_ignored_list">Berhasil menghapus pengguna \"{0}\" dari Daftar Abaikan</string>
     <string name="removed_user">Berhasil menghapus pengguna: \"{0}\"</string>
-    <string name="successfully_changed_incomplete_dir">        Berhasil mengubah Direktori Belum Selesai (Incomplete) menjadi \"{0}\"
-    </string>
+    <string name="successfully_changed_incomplete_dir">Berhasil mengubah Direktori Belum Selesai (Incomplete) menjadi \"{0}\"</string>
     <string name="auto_clear_complete">Bersihkan Otomatis Unduhan Selesai</string>
-    <string name="auto_clear_complete_uploads">        Bersihkan Otomatis Unggahan Selesai
-    </string>
+    <string name="auto_clear_complete_uploads">Bersihkan Otomatis Unggahan Selesai</string>
     <string name="download_remaining">{0} unduhan tersisa</string>
     <string name="downloads_remaining">{0} unduhan tersisa</string>
     <string name="upload_remaining">{0} unggahan tersisa</string>
@@ -651,10 +559,8 @@
     <string name="failed_user_offline">Gagal - Pengguna Luring</string>
     <string name="failed_denied">Gagal - Ditolak</string>
     <string name="re_requesting">Meminta Kembali</string>
-    <string name="diagnostics_more_info">Ini akan menyimpan informasi diagnostik ke dalam berkas teks bernama \"seeker_diagnostics.txt\" yang akan ditempatkan di root  folder unduhan yang dipilih.\n\nBerkas ini sangat berguna untuk dikirim ke developer guna tujuan perbaikan masalah. Jika kendala yang dialami berkaitan dengan masalah jaringan, anda mungkin perlu memulai ulang aplikasi setelah mengaktifkan opsi ini untuk mendapatkan hasil pelacakan yang lengkap.
-    </string>
-    <string name="folder_X_from_user_Y_finished">        {0} dari {1} berhasil diselesaikan.
-    </string>
+    <string name="diagnostics_more_info">Ini akan menyimpan informasi diagnostik ke dalam berkas teks bernama \"seeker_diagnostics.txt\" yang akan ditempatkan di root folder unduhan yang dipilih.\n\nBerkas ini sangat berguna untuk dikirim ke developer guna tujuan perbaikan masalah. Jika kendala yang dialami berkaitan dengan masalah jaringan, anda mungkin perlu memulai ulang aplikasi setelah mengaktifkan opsi ini untuk mendapatkan hasil pelacakan yang lengkap.</string>
+    <string name="folder_X_from_user_Y_finished">{0} dari {1} berhasil diselesaikan.</string>
     <string name="takes_effect_on_next_startup">Akan diterapkan pada penjalanan selanjutnya aplikasi</string>
     <string name="sort_results_by">Urutkan Berdasarkan</string>
     <string name="next">Berikutnya</string>
@@ -675,8 +581,7 @@
     <string name="RemoveFolder">Hapus Folder</string>
     <string name="FolderError">Folder Error</string>
     <string name="ErrorForFolder">Error untuk folder:</string>
-    <string name="ErrorDownloadDirNotProperlySet">        Error: Direktori Unduhan belum diatur dengan benar.
-    </string>
+    <string name="ErrorDownloadDirNotProperlySet">Error: Direktori Unduhan belum diatur dengan benar.</string>
     <string name="CopySelectedURLs">Salin URL yang Dipilih</string>
     <string name="CopyURL">Salin URL</string>
     <string name="CopyFolderURL">Salin URL Folder</string>
@@ -685,8 +590,7 @@
     <string name="ShowFolderInfo">Tampilkan Info Folder</string>
     <string name="ShowSelectedInfo">Tampilkan Info yang Dipilih</string>
     <string name="NothingToCopy">Tidak ada yang Bisa Disalin</string>
-    <string name="ThisFolderContainsSubfolders">        Folder ini berisi Subfolder
-    </string>
+    <string name="ThisFolderContainsSubfolders">Folder ini berisi Subfolder</string>
     <string name="QueuedForDownload">Dimasukkan ke Antrean Unduhan</string>
     <string name="QueueFolderAsPaused">Masukkan Folder ke Antrean sebagai Ditangguhkan</string>
     <!--meaning duration of song / songs-->
@@ -868,14 +772,14 @@
     <string name="setting_subtitle_file_backed">Rekomendasi · izinkan jeda / lanjutkan pengunduhan · penggunaan lebih ringan memori</string>
     <string name="setting_subtitle_import_client_data">Impor data dari SoulseekQT, Nicotine+</string>
     <string name="setting_subtitle_export_client_data">Ekspor data pengguna, daftar diabaikan, daftar wishlist ke xml · untuk cadangan atau migrasi</string>
-    <string name="setting_subtitle_listening">Izinkan hubungan </string>
+    <string name="setting_subtitle_listening">Izinkan hubungan</string>
     <!-- Search keyword synonyms -->
     <string name="keywords_download_folder">Lokasi direktori tujuan penyimpanan</string>
     <string name="keywords_incomplete_folder">lokasi direktori parsial</string>
     <string name="keywords_override_incomplete">lokasi direktori parsial</string>
     <string name="keywords_auto_clear_downloads">hapus bersihkan transfer</string>
     <string name="keywords_max_results">hasil batasan jumlah</string>
-    <string name="keywords_locked_search">berkas tersembunyi privat </string>
+    <string name="keywords_locked_search">berkas tersembunyi privat</string>
     <string name="keywords_locked_browse">berkas tersembunyi privat</string>
     <string name="keywords_remember_search_history">riwayat terbaru</string>
     <string name="keywords_notif_folder_complete">notifikasi unduhan</string>
