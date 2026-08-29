@@ -27,11 +27,29 @@ namespace Soulseek.Tests.Integration
         /// <summary>
         ///     Gets the username to use when logging in.
         /// </summary>
-        public static string Username => Environment.GetEnvironmentVariable("SLSK_INTEGRATION_USERNAME");
+        public static string Username => GetRequiredEnvironmentVariable("SLSK_INTEGRATION_USERNAME");
 
         /// <summary>
         ///     Gets the password to use when logging in.
         /// </summary>
-        public static string Password => Environment.GetEnvironmentVariable("SLSK_INTEGRATION_PASSWORD");
+        public static string Password => GetRequiredEnvironmentVariable("SLSK_INTEGRATION_PASSWORD");
+
+        private static string GetRequiredEnvironmentVariable(string name)
+        {
+            var value = Environment.GetEnvironmentVariable(name);
+            var trimmed = value?.Trim();
+
+            if (string.IsNullOrWhiteSpace(trimmed))
+            {
+                throw new InvalidOperationException($"Environment variable '{name}' is required to run integration tests, but it was not set or was blank.");
+            }
+
+            if (trimmed != value)
+            {
+                throw new InvalidOperationException($"Environment variable '{name}' has leading or trailing whitespace (e.g. a stray newline from copy/paste). Re-set it with the exact value and no extra characters.");
+            }
+
+            return value;
+        }
     }
 }

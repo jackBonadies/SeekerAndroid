@@ -43,7 +43,7 @@ namespace Soulseek.Tests.Unit.Client
         [InlineData(null, null)]
         public async Task Throws_ArgumentException_On_Bad_Credentials(string username, string password)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var ex = await Record.ExceptionAsync(() => s.ConnectAsync(username, password));
 
@@ -56,7 +56,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "Address throws AddressException on bad address"), AutoData]
         public async Task Address_Throws_ArgumentException_On_Bad_Address(string address)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var ex = await Record.ExceptionAsync(() => s.ConnectAsync(address, 1, "u", "p"));
 
@@ -71,7 +71,7 @@ namespace Soulseek.Tests.Unit.Client
         {
             var port = Mocks.Port;
 
-            using (var s = new SoulseekClient(new SoulseekClientOptions(enableListener: true, listenPort: port)))
+            using (var s = new SoulseekClient(minorVersion: 9999, new SoulseekClientOptions(enableListener: true, listenPort: port)))
             {
                 Listener listener = null;
 
@@ -93,12 +93,31 @@ namespace Soulseek.Tests.Unit.Client
         }
 
         [Trait("Category", "Connect")]
+        [Theory(DisplayName = "Assigns a handler to Listener.Error when EnableListener is true"), AutoData]
+        public async Task Assigns_A_Handler_To_Listener_Error_When_EnableListener_Is_True(string username, string password)
+        {
+            var (client, mocks) = GetFixture(new SoulseekClientOptions(enableListener: true, listenPort: Mocks.Port));
+
+            using (client)
+            {
+                await client.ConnectAsync(username, password);
+
+                Assert.NotNull(client.Listener);
+
+                var raisedException = new Exception("error raised for test");
+                client.Listener.RaiseEvent(typeof(Listener), "Error", raisedException);
+
+                mocks.ListenerHandler.Verify(m => m.HandleError(client.Listener, raisedException), Times.Once);
+            }
+        }
+
+        [Trait("Category", "Connect")]
         [Theory(DisplayName = "Address throws ArgumentOutOfRangeException on bad port")]
         [InlineData(-1)]
         [InlineData(65536)]
         public async Task Address_Throws_ArgumentException_On_Bad_Port(int port)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var ex = await Record.ExceptionAsync(() => s.ConnectAsync("127.0.0.01", port, "u", "p"));
 
@@ -120,7 +139,7 @@ namespace Soulseek.Tests.Unit.Client
         [InlineData(" ", 1, "user", "pass")]
         public async Task Address_Throws_ArgumentException_On_Bad_Input(string address, int port, string username, string password)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var ex = await Record.ExceptionAsync(() => s.ConnectAsync(address, port, username, password));
 
@@ -133,7 +152,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "Throws InvalidOperationException if connected"), AutoData]
         public async Task Throws_InvalidOperationException_When_Already_Connected(string username, string password)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected);
 
@@ -318,7 +337,7 @@ namespace Soulseek.Tests.Unit.Client
 
             mocks.ServerConnection.Verify(m => m.ConnectAsync(It.IsAny<CancellationToken>()));
 
-            var expectedBytes = new LoginRequest(username, password).ToByteArray()
+            var expectedBytes = new LoginRequest(minorVersion: 9999, username, password).ToByteArray()
                 .Concat(new SetListenPortCommand(client.Options.ListenPort).ToByteArray())
                 .ToArray();
 
@@ -376,7 +395,7 @@ namespace Soulseek.Tests.Unit.Client
         {
             SoulseekClientStateChangedEventArgs args = null;
 
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.StateChanged += (sender, e) => args = e;
 
@@ -393,7 +412,7 @@ namespace Soulseek.Tests.Unit.Client
         {
             var fired = false;
 
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.StateChanged += (sender, e) => fired = true;
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
@@ -592,9 +611,11 @@ namespace Soulseek.Tests.Unit.Client
         {
             var mocks = new Mocks();
             var client = new SoulseekClient(
+                minorVersion: 9999,
                 distributedConnectionManager: mocks.DistributedConnectionManager.Object,
                 connectionFactory: mocks.ConnectionFactory.Object,
                 waiter: mocks.Waiter.Object,
+                listenerHandler: mocks.ListenerHandler.Object,
                 options: clientOptions ?? new SoulseekClientOptions(enableListener: false));
 
             return (client, mocks);
@@ -630,6 +651,7 @@ namespace Soulseek.Tests.Unit.Client
             public Mock<IWaiter> Waiter { get; } = new Mock<IWaiter>();
             public Mock<IConnectionFactory> ConnectionFactory { get; }
             public Mock<IDistributedConnectionManager> DistributedConnectionManager { get; }
+            public Mock<IListenerHandler> ListenerHandler { get; } = new Mock<IListenerHandler>();
         }
     }
 }

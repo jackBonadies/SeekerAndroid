@@ -280,7 +280,7 @@ namespace WebAPI
                 searchResponseCache: searchResponseCache,
                 raiseEventsAsynchronously: true);
 
-            Client = new SoulseekClient(options: clientOptions);
+            Client = new SoulseekClient(minorVersion: 9999, options: clientOptions);
             SharedCounts = (Directories: 0, Files: 0);
 
             SharedFileCache.Refreshed += (e, args) =>

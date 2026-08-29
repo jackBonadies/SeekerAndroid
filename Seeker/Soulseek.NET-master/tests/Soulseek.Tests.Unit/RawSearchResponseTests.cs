@@ -61,5 +61,28 @@ namespace Soulseek.Tests.Unit
             Assert.NotNull(ex);
             Assert.IsType<ArgumentNullException>(ex);
         }
+
+        [Trait("Category", "Instantiation")]
+        [Theory(DisplayName = "Throws if the given stream can not be read"), AutoData]
+        public void Throws_If_The_Given_Stream_Can_Not_Be_Read(long length)
+        {
+            using (var stream = new UnreadableStream(Array.Empty<byte>()))
+            {
+                var ex = Record.Exception(() => new RawSearchResponse(length, stream));
+
+                Assert.NotNull(ex);
+                Assert.IsType<ArgumentException>(ex);
+            }
+        }
+
+        private class UnreadableStream : MemoryStream
+        {
+            public UnreadableStream(byte[] buffer)
+                : base(buffer)
+            {
+            }
+
+            public override bool CanRead => false;
+        }
     }
 }

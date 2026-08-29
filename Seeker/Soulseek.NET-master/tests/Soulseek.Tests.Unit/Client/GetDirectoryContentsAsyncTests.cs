@@ -38,7 +38,7 @@ namespace Soulseek.Tests.Unit.Client
         [InlineData("")]
         public async Task GetDirectoryContentsAsync_Throws_ArgumentException_On_Bad_Username(string username)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -57,7 +57,7 @@ namespace Soulseek.Tests.Unit.Client
         [InlineData("")]
         public async Task GetDirectoryContentsAsync_Throws_ArgumentException_On_Bad_Directory(string directory)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -76,7 +76,7 @@ namespace Soulseek.Tests.Unit.Client
         [InlineData(SoulseekClientStates.LoggedIn)]
         public async Task GetDirectoryContentsAsync_Throws_InvalidOperationException_If_Logged_In(SoulseekClientStates state)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", state);
 
@@ -111,7 +111,7 @@ namespace Soulseek.Tests.Unit.Client
             connManager.Setup(m => m.GetOrAddMessageConnectionAsync(username, It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(conn.Object));
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -147,7 +147,7 @@ namespace Soulseek.Tests.Unit.Client
             connManager.Setup(m => m.GetOrAddMessageConnectionAsync(username, It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(conn.Object));
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -170,7 +170,7 @@ namespace Soulseek.Tests.Unit.Client
             var serverConn = new Mock<IMessageConnection>();
             var connManager = new Mock<IPeerConnectionManager>();
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -206,7 +206,7 @@ namespace Soulseek.Tests.Unit.Client
             connManager.Setup(m => m.GetOrAddMessageConnectionAsync(username, It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(conn.Object));
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -241,7 +241,7 @@ namespace Soulseek.Tests.Unit.Client
             connManager.Setup(m => m.GetOrAddMessageConnectionAsync(username, It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(conn.Object));
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -273,7 +273,7 @@ namespace Soulseek.Tests.Unit.Client
             connManager.Setup(m => m.GetOrAddMessageConnectionAsync(username, It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(conn.Object));
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -312,7 +312,7 @@ namespace Soulseek.Tests.Unit.Client
             connManager.Setup(m => m.GetOrAddMessageConnectionAsync(username, It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(conn.Object));
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 

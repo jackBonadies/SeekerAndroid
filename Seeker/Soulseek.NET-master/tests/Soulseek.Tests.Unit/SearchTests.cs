@@ -45,7 +45,7 @@ namespace Soulseek.Tests.Unit
         {
             var i = new SearchInternal(SearchQuery.FromText(searchText), SearchScope.Network, token);
             i.SetState(SearchStates.Completed);
-            i.TryAddResponse(new SearchResponse("foo", 42, false, 420, 24, new List<File>()
+            i.TryAddResponse(new SearchResponse("foo", token, false, 420, 24, new List<File>()
             {
                 new File(1, "foo.bar", 2323, "bar", null),
             }));

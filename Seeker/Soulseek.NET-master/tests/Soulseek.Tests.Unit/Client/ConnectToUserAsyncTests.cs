@@ -38,7 +38,7 @@ namespace Soulseek.Tests.Unit.Client
         [InlineData("")]
         public async Task Throws_ArgumentException_On_Bad_Username(string username)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var ex = await Record.ExceptionAsync(() => s.ConnectToUserAsync(username));
 
@@ -55,7 +55,7 @@ namespace Soulseek.Tests.Unit.Client
         [InlineData(SoulseekClientStates.LoggedIn)]
         public async Task ConnectToUserAsync_Throws_InvalidOperationException_If_Logged_In(SoulseekClientStates state)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", state);
 
@@ -234,6 +234,7 @@ namespace Soulseek.Tests.Unit.Client
         {
             var mocks = new Mocks();
             var client = new SoulseekClient(
+                minorVersion: 9999,
                 serverConnection: mocks.ServerConnection.Object,
                 peerConnectionManager: mocks.PeerConnectionManager.Object,
                 waiter: mocks.Waiter.Object,

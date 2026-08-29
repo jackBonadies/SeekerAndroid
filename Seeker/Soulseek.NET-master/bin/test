@@ -1,5 +1,96 @@
 #!/bin/bash
 set -e
 
-dotnet test --verbosity minimal --no-build --configuration Release --blame -p:CollectCoverage=true -p:CoverletOutput="../coverage.json" tests/Soulseek.Tests.Unit -p:Include="[Soulseek]*"
-dotnet test --verbosity minimal --no-build --configuration Release --blame -p:CollectCoverage=true -p:MergeWith="../coverage.json" -p:CoverletOutput="../opencover.xml" -p:CoverletOutputFormat=opencover tests/Soulseek.Tests.Integration -p:Include="[Soulseek]*"
+run_unit=true
+run_integration=true
+extra_args=()
+
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      echo 'options:'
+      echo '-h, --help              show help'
+      echo '--all                   run unit and integration tests (default)'
+      echo '--unit-only             run only unit tests'
+      echo '--integration-only      run only integration tests'
+      echo 'builds first if source has changed since the last build, unless --no-build is passed'
+      echo 'any other arguments are passed through to dotnet test'
+      exit 0
+      ;;
+    --all)
+      shift
+      ;;
+    --unit-only)
+      run_integration=false
+      shift
+      ;;
+    --integration-only)
+      run_unit=false
+      shift
+      ;;
+    *)
+      extra_args+=("$1")
+      shift
+      ;;
+  esac
+done
+
+if [ "$run_unit" == false ] && [ "$run_integration" == false ]; then
+  echo '--unit-only and --integration-only are mutually exclusive'
+  exit 1
+fi
+
+# if the caller passed --no-build through, trust them and skip our own staleness check
+no_build=false
+for arg in "${extra_args[@]}"; do
+  if [ "$arg" == "--no-build" ]; then
+    no_build=true
+    break
+  fi
+done
+
+# true if $dll is missing, or any .cs/.csproj file under the given directories (excluding
+# bin/obj) is newer than $dll
+needs_build() {
+  local dll="$1"
+  shift
+
+  if [ ! -f "$dll" ]; then
+    return 0
+  fi
+
+  find "$@" \( -name bin -o -name obj \) -prune -o \( -name '*.cs' -o -name '*.csproj' \) -newer "$dll" -print -quit | grep -q .
+}
+
+# check to see if any files or projects have changed since the last time the binaries
+# were built, and force an incremental build if so
+if [ "$no_build" == false ]; then
+  build_needed=false
+
+  if [ "$run_unit" == true ] && needs_build tests/Soulseek.Tests.Unit/bin/Release/net8.0/Soulseek.Tests.Unit.dll src tests/Soulseek.Tests.Unit; then
+    build_needed=true
+  fi
+
+  if [ "$run_integration" == true ] && needs_build tests/Soulseek.Tests.Integration/bin/Release/net8.0/Soulseek.Tests.Integration.dll src tests/Soulseek.Tests.Integration; then
+    build_needed=true
+  fi
+
+  if [ "$build_needed" == true ]; then
+    echo 'source changed since last build; building...'
+    dotnet restore
+    dotnet build --no-restore --no-incremental --configuration Release
+  fi
+fi
+
+if [ "$run_unit" == true ]; then
+  dotnet test --verbosity minimal --configuration Release --blame -p:CollectCoverage=true -p:CoverletOutput="../coverage.json" tests/Soulseek.Tests.Unit -p:Include="[Soulseek]*" "${extra_args[@]}"
+fi
+
+if [ "$run_integration" == true ]; then
+  # coverlet output needs to be merged if both unit and integration are run
+  if [ "$run_unit" == true ]; then
+    dotnet test --verbosity minimal --configuration Release --blame -p:CollectCoverage=true -p:MergeWith="../coverage.json" -p:CoverletOutput="../opencover.xml" -p:CoverletOutputFormat=opencover tests/Soulseek.Tests.Integration -p:Include="[Soulseek]*" "${extra_args[@]}"
+  else
+    dotnet test --verbosity minimal --configuration Release --blame -p:CollectCoverage=true -p:CoverletOutput="../opencover.xml" -p:CoverletOutputFormat=opencover tests/Soulseek.Tests.Integration -p:Include="[Soulseek]*" "${extra_args[@]}"
+  fi
+fi

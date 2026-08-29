@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "dotnet-affected": {
+      "version": "6.2.0",
+      "commands": [
+        "dotnet-affected"
+      ],
+      "rollForward": false
+    },
+    "dotnet-outdated-tool": {
+      "version": "4.8.1",
+      "commands": [
+        "dotnet-outdated"
+      ],
+      "rollForward": false
+    },
+    "dotnet-stryker": {
+      "version": "4.16.0",
+      "commands": [
+        "dotnet-stryker"
+      ],
+      "rollForward": false
+    }
+  }
+}

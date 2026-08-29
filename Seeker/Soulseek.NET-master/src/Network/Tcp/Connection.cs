@@ -1,10 +1,9 @@
 ﻿// <copyright file="Connection.cs" company="JP Dillingham">
-//     Copyright (c) JP Dillingham. All rights reserved.
+//     Copyright (c) JP Dillingham.
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
+//     the Free Software Foundation, version 3.
 //
 //     This program is distributed in the hope that it will be useful,
 //     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,6 +12,13 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
+//
+//     This program is distributed with Additional Terms pursuant to Section 7
+//     of the GPLv3.  See the LICENSE file in the root directory of this
+//     project for the complete terms and conditions.
+//
+//     SPDX-FileCopyrightText: JP Dillingham
+//     SPDX-License-Identifier: GPL-3.0-only
 // </copyright>
 
 namespace Soulseek.Network.Tcp
@@ -594,10 +600,11 @@ namespace Soulseek.Network.Tcp
                     InactivityTimer?.Dispose();
                     WatchdogTimer.Dispose();
                     Stream?.Dispose();
-                    TcpClient?.Dispose();
 
                     WriteSemaphore?.Dispose();
                     WriteQueueSemaphore?.Dispose();
+
+                    TcpClient?.Dispose();
                 }
 
                 Disposed = true;
@@ -721,7 +728,7 @@ namespace Soulseek.Network.Tcp
         {
             // a failure to allocate memory will throw, so we need to do it within the try/catch
             // declare and initialize it here so it's available in the finally block
-            byte[] buffer = Array.Empty<byte>();
+            byte[] buffer = default;
 
             // in the case of a bad (or failing) connection, it is possible for us to continue to write data, particularly
             // distributed search requests, to the connection for quite a while before the underlying socket figures out that it

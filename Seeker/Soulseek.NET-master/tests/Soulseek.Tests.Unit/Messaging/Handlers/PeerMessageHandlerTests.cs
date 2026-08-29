@@ -72,7 +72,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         [Theory(DisplayName = "Raises DiagnosticGenerated on diagnostic"), AutoData]
         public void Raises_DiagnosticGenerated_On_Diagnostic(string message)
         {
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 DiagnosticEventArgs args = default;
 
@@ -92,7 +92,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         {
             var (_, mocks) = GetFixture(username);
 
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 DownloadDeniedEventArgs args = default;
 
@@ -114,7 +114,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         {
             var (_, mocks) = GetFixture(username);
 
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 DownloadFailedEventArgs args = default;
 
@@ -133,7 +133,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         [Theory(DisplayName = "Does not throw raising DiagnosticGenerated if no handlers bound"), AutoData]
         public void Does_Not_Throw_Raising_DiagnosticGenerated_If_No_Handlers_Bound(string message)
         {
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 PeerMessageHandler l = new PeerMessageHandler(client);
 
@@ -169,7 +169,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
         [Trait("Category", "Message")]
         [Theory(DisplayName = "Throws TransferRequest wait on PeerUploadFailed message"), AutoData]
-        public void Throws_TransferRequest_Wait_On_PeerUploadFailed_Message(string username, IPEndPoint endpoint, string filename)
+        public void Throws_TransferReRequest_Wait_On_PeerUploadFailed_Message(string username, IPEndPoint endpoint, string filename)
         {
             var (handler, mocks) = GetFixture(username, endpoint);
 
@@ -189,7 +189,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
             handler.HandleMessageRead(mocks.PeerConnection.Object, message);
 
-            mocks.Waiter.Verify(m => m.Throw(new WaitKey(MessageCode.Peer.TransferRequest, username, filename), It.IsAny<TransferException>()), Times.Once);
+            mocks.Waiter.Verify(m => m.Throw(new WaitKey(MessageCode.Peer.TransferRequest, username, filename), It.IsAny<TransferReportedFailedException>()), Times.Once);
         }
 
         [Trait("Category", "Message")]
@@ -1152,7 +1152,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         {
             public Mocks(SoulseekClientOptions clientOptions = null)
             {
-                Client = new Mock<SoulseekClient>(clientOptions)
+                Client = new Mock<SoulseekClient>(9999, clientOptions)
                 {
                     CallBase = true,
                 };

@@ -545,7 +545,7 @@ namespace Soulseek.Tests.Unit.Messaging
 
             var reader = new MessageReader<MessageCode.Peer>(msg);
 
-            var ex = Record.Exception(() => reader.InvokeMethod("Decompress", BindingFlags.NonPublic | BindingFlags.Instance, null, null));
+            var ex = Record.Exception(() => reader.InvokeMethod("Decompress", BindingFlags.NonPublic | BindingFlags.Static, null, null));
 
             Assert.NotNull(ex);
             Assert.NotNull(ex.InnerException);
