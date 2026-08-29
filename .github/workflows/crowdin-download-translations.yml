@@ -1,0 +1,43 @@
+name: Crowdin Download Translations
+
+# Opens a PR with new translations from crowdin
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  download:
+    name: Open a PR with new translations
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download translations
+        uses: crowdin/github-action@v3
+        with:
+          config: crowdin.yml
+          upload_sources: false
+          upload_translations: false
+          download_translations: true
+          # Dont ship verbatim English copies (hard to clean)
+          skip_untranslated_strings: true
+          create_pull_request: true
+          localization_branch_name: l10n_crowdin
+          pull_request_base_branch_name: master
+          pull_request_title: 'New Crowdin translations'
+          pull_request_body: |
+            Automated export from https://crowdin.com/project/seeker.
+
+          commit_message: 'download strings from crowdin'
+          github_user_name: 'github-actions[bot]'
+          github_user_email: '41898282+github-actions[bot]@users.noreply.github.com'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}

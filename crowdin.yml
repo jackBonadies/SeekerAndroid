@@ -1,0 +1,59 @@
+# Crowdin configuration - https://crowdin.com/project/seeker
+#
+#   npx @crowdin/cli config lint            # validate this file
+#   npx @crowdin/cli config translations    # check the values-* mapping
+#   npx @crowdin/cli file list              # what the project actually holds
+#   npx @crowdin/cli upload sources
+#   npx @crowdin/cli upload translations -l de --dryrun
+
+project_id: "507474"
+api_token_env: CROWDIN_PERSONAL_TOKEN
+
+# Two are Android's legacy codes and are NOT the Crowdin/ISO ones:
+#   id -> in   (Indonesian)
+#   he -> iw   (Hebrew)
+files:
+  - source: /Seeker/Resources/values/strings.xml
+    translation: /Seeker/Resources/values-%android_code%/strings.xml
+    # So that on updating english we dont throw away translations
+    update_option: update_as_unapproved
+    languages_mapping:
+      android_code:
+        "af": "af"
+        "ar": "ar"
+        "bg": "bg"
+        "bn": "bn"
+        "ca": "ca"
+        "cs": "cs"
+        "da": "da"
+        "de": "de"
+        "el": "el"
+        "es-ES": "es"
+        "fa": "fa"
+        "fi": "fi"
+        "fr": "fr"
+        "he": "iw"
+        "hr": "hr"
+        "hu": "hu"
+        "id": "in"
+        "it": "it"
+        "ja": "ja"
+        "ko": "ko"
+        "lt": "lt"
+        "nl": "nl"
+        "no": "no"
+        "pl": "pl"
+        "pt-BR": "pt-rBR"
+        "pt-PT": "pt-rPT"
+        "ro": "ro"
+        "ru": "ru"
+        "sk": "sk"
+        "sl": "sl"
+        "sr": "sr"
+        "sv-SE": "sv"
+        "th": "th"
+        "tr": "tr"
+        "uk": "uk"
+        "vi": "vi"
+        "zh-CN": "zh-rCN"
+        "zh-TW": "zh-rTW"
