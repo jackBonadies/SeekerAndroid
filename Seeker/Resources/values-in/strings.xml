@@ -69,7 +69,7 @@
     <string name="room_list_request_failed">Gagal mengambil daftar ruang obrolan</string>
     <string name="kilobytes_per_second">kb/s</string>
     <string name="kilohertz">kHz</string>
-    <string name="wishlist">Wishlist</string>
+    <string name="wishlist">Daftar Keinginan</string>
     <string name="user_info_bio"><b>Bio Pengguna</b></string>
     <string name="user_info_picture"><b>Gambar</b></string>
     <string name="unsaved_changes_title">Buang perubahan yang belum disimpan?</string>
@@ -158,7 +158,7 @@
     <string name="collapse_all">Tutup semua</string>
     <string name="new_search_tab">Pencarian baru</string>
     <string name="search_tabs_header">TAB PENCARIAN</string>
-    <string name="wishlist_header">WISHLIST</string>
+    <string name="wishlist_header">DAFTAR KEINGINAN</string>
     <string name="wishlist_empty_header">WISHLIST (KOSONG)</string>
     <string name="filter_search_results_here">Filter hasil</string>
     <string name="persist_it">Sticky</string>
@@ -172,7 +172,7 @@
     <string name="section_search">Cari</string>
     <string name="section_general">Umum</string>
     <string name="section_appearance">Tampilan</string>
-    <string name="section_sharing">Sharing</string>
+    <string name="section_sharing">Berbagi</string>
     <string name="section_network">Jaringan</string>
     <string name="section_account">Akun</string>
     <string name="max_search_results">Hasil pencarian maks</string>
