@@ -121,7 +121,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         [Theory(DisplayName = "Raises DiagnosticGenerated on diagnostic"), AutoData]
         public void Raises_DiagnosticGenerated_On_Diagnostic(string message)
         {
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 DiagnosticEventArgs args = default;
 
@@ -139,7 +139,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         [Theory(DisplayName = "Does not throw raising DiagnosticGenerated if no handlers bound"), AutoData]
         public void Does_Not_Throw_Raising_DiagnosticGenerated_If_No_Handlers_Bound(string message)
         {
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 DistributedMessageHandler l = new DistributedMessageHandler(client);
 
@@ -570,8 +570,8 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         }
 
         [Trait("Category", "HandleEmbeddedMessage")]
-        [Theory(DisplayName = "HandleEmbeddedMessage broadcasts search request unchanged"), AutoData]
-        public void HandleEmbeddedMessage_Broadcasts_Search_Request_Unchanged(string username, int token, string query)
+        [Theory(DisplayName = "HandleEmbeddedMessage broadcasts unwrapped search request"), AutoData]
+        public void HandleEmbeddedMessage_Broadcasts_Unwrapped_Search_Request(string username, int token, string query)
         {
             var (handler, mocks) = GetFixture();
 
@@ -584,9 +584,11 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
                 .WriteString(query)
                 .Build();
 
+            var expected = EmbeddedMessage.FromByteArray(message).DistributedMessage;
+
             handler.HandleEmbeddedMessage(message);
 
-            mocks.DistributedConnectionManager.Verify(m => m.BroadcastMessageAsync(message, It.IsAny<CancellationToken?>()), Times.Once);
+            mocks.DistributedConnectionManager.Verify(m => m.BroadcastMessageAsync(expected, It.IsAny<CancellationToken?>()), Times.Once);
         }
 
         [Trait("Category", "HandleEmbeddedMessage")]
@@ -658,7 +660,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         {
             public Mocks(SoulseekClientOptions clientOptions = null)
             {
-                Client = new Mock<SoulseekClient>(clientOptions)
+                Client = new Mock<SoulseekClient>(9999, clientOptions)
                 {
                     CallBase = true,
                 };

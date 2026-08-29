@@ -188,7 +188,7 @@ namespace Soulseek.Tests.Unit.Messaging
         public void Compress_Throws_MessageCompressionException_On_Zlib_Exception()
         {
             var builder = new MessageBuilder();
-            var ex = Record.Exception(() => builder.InvokeMethod("Compress", BindingFlags.NonPublic | BindingFlags.Instance, null, null));
+            var ex = Record.Exception(() => builder.InvokeMethod("Compress", BindingFlags.NonPublic | BindingFlags.Static, null, null));
 
             Assert.NotNull(ex);
             Assert.NotNull(ex.InnerException);

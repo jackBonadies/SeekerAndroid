@@ -351,3 +351,4 @@ examples/Web/web/src/data.js
 
 /tests/coverage.*
 /tests/opencover.*
+**/coverage/*

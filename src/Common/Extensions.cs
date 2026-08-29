@@ -1,10 +1,9 @@
 ﻿// <copyright file="Extensions.cs" company="JP Dillingham">
-//     Copyright (c) JP Dillingham. All rights reserved.
+//     Copyright (c) JP Dillingham.
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
+//     the Free Software Foundation, version 3.
 //
 //     This program is distributed in the hope that it will be useful,
 //     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,6 +12,13 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
+//
+//     This program is distributed with Additional Terms pursuant to Section 7
+//     of the GPLv3.  See the LICENSE file in the root directory of this
+//     project for the complete terms and conditions.
+//
+//     SPDX-FileCopyrightText: JP Dillingham
+//     SPDX-License-Identifier: GPL-3.0-only
 // </copyright>
 
 namespace Soulseek
@@ -51,21 +57,17 @@ namespace Soulseek
         /// <summary>
         ///     Continue a task and swallow any Exceptions.
         /// </summary>
+        /// <remarks>
+        ///     The continuation touches the Task <see cref="Task.Exception"/> (if one exists)
+        ///     to avoid an <see cref="TaskScheduler.UnobservedTaskException"/>.
+        /// </remarks>
         /// <param name="task">The task to continue.</param>
-        public static void Forget(this Task task)
+        /// <param name="options">Optional continuation options.</param>
+        public static void Forget(this Task task, TaskContinuationOptions? options = null)
         {
-            task.ContinueWith(t => { }, TaskContinuationOptions.RunContinuationsAsynchronously);
-        }
-
-        /// <summary>
-        ///     Continue a task and report an Exception if one is raised.
-        /// </summary>
-        /// <typeparam name="T">The type of Exception to throw.</typeparam>
-        /// <param name="task">The task to continue.</param>
-        public static void ForgetButThrowWhenFaulted<T>(this Task task)
-            where T : Exception
-        {
-            task.ContinueWith(t => { throw (T)Activator.CreateInstance(typeof(T), t.Exception.Message, t.Exception); }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.RunContinuationsAsynchronously);
+            task.ContinueWith(
+                continuationAction: t => _ = t.Exception, // this is a no-op, but it marks the Exception as having been observed so it won't throw
+                continuationOptions: TaskContinuationOptions.OnlyOnFaulted | (options ?? TaskContinuationOptions.RunContinuationsAsynchronously));
         }
 
         /// <summary>
@@ -110,7 +112,11 @@ namespace Soulseek
         /// <returns>The MD5 hash of the input string.</returns>
         public static string ToMD5Hash(this string str)
         {
+#pragma warning disable S4790 // Weak hashing algorithms should not be used
+
             using MD5 md5Hash = MD5.Create();
+#pragma warning restore S4790 // Weak hashing algorithms should not be used
+
             byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(str));
 
             StringBuilder sBuilder = new StringBuilder();
@@ -121,6 +127,24 @@ namespace Soulseek
             }
 
             return sBuilder.ToString();
+        }
+
+        /// <summary>
+        ///     Safely disposes an <see cref="IDisposable"/> instance.
+        /// </summary>
+        /// <param name="obj">The IDisposable instance to dispose.</param>
+        /// <returns>A value indicating whether the disposal succeeded.</returns>
+        public static bool TryDispose(this IDisposable obj)
+        {
+            try
+            {
+                obj.Dispose();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

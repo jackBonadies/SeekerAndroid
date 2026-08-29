@@ -32,7 +32,7 @@ namespace Soulseek.Tests.Unit.Client
         [Fact(DisplayName = "Upload exits if semaphore is held")]
         public async Task Upload_Exits_If_Semaphore_Is_Held()
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var sem = s.GetProperty<SemaphoreSlim>("UploadSemaphoreSyncRoot");
                 await sem.WaitAsync();
@@ -47,7 +47,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "Upload removes record if semaphore is not held"), AutoData]
         public async Task Upload_Removes_Record_If_Semaphore_Is_Not_Held(string username)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var dict = s.GetProperty<ConcurrentDictionary<string, SemaphoreSlim>>("UploadSemaphores");
 
@@ -66,7 +66,7 @@ namespace Soulseek.Tests.Unit.Client
         {
             var diag = new Mock<IDiagnosticFactory>();
 
-            using (var s = new SoulseekClient(diagnosticFactory: diag.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, diagnosticFactory: diag.Object))
             {
                 var dict = s.GetProperty<ConcurrentDictionary<string, SemaphoreSlim>>("UploadSemaphores");
 
@@ -83,7 +83,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "Upload does not remove record if semaphore is held"), AutoData]
         public async Task Upload_Does_Not_Remove_Record_If_Semaphore_Is_Held(string username)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var dict = s.GetProperty<ConcurrentDictionary<string, SemaphoreSlim>>("UploadSemaphores");
 
@@ -103,7 +103,7 @@ namespace Soulseek.Tests.Unit.Client
         [Fact(DisplayName = "UserEndPoint exits if semaphore is held")]
         public async Task UserEndPoint_Exits_If_Semaphore_Is_Held()
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var sem = s.GetProperty<SemaphoreSlim>("UserEndPointSemaphoreSyncRoot");
                 await sem.WaitAsync();
@@ -118,7 +118,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "UserEndPoint removes record if semaphore is not held"), AutoData]
         public async Task UserEndPoint_Removes_Record_If_Semaphore_Is_Not_Held(string username)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var dict = s.GetProperty<ConcurrentDictionary<string, SemaphoreSlim>>("UserEndPointSemaphores");
 
@@ -137,7 +137,7 @@ namespace Soulseek.Tests.Unit.Client
         {
             var diag = new Mock<IDiagnosticFactory>();
 
-            using (var s = new SoulseekClient(diagnosticFactory: diag.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, diagnosticFactory: diag.Object))
             {
                 var dict = s.GetProperty<ConcurrentDictionary<string, SemaphoreSlim>>("UserEndPointSemaphores");
 
@@ -154,7 +154,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "UserEndPoint does not remove record if semaphore is held"), AutoData]
         public async Task UserEndPoint_Does_Not_Remove_Record_If_Semaphore_Is_Held(string username)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var dict = s.GetProperty<ConcurrentDictionary<string, SemaphoreSlim>>("UserEndPointSemaphores");
 

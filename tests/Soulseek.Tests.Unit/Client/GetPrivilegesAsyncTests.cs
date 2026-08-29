@@ -36,7 +36,7 @@ namespace Soulseek.Tests.Unit.Client
         [InlineData(SoulseekClientStates.LoggedIn)]
         public async Task GetPrivilegesAsync_Throws_InvalidOperationException_If_Logged_In(SoulseekClientStates state)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", state);
 
@@ -55,7 +55,7 @@ namespace Soulseek.Tests.Unit.Client
             waiter.Setup(m => m.Wait<int>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken?>()))
                 .Throws(new OperationCanceledException());
 
-            using (var s = new SoulseekClient(waiter: waiter.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -74,7 +74,7 @@ namespace Soulseek.Tests.Unit.Client
             waiter.Setup(m => m.Wait<int>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken?>()))
                 .Throws(new TimeoutException());
 
-            using (var s = new SoulseekClient(waiter: waiter.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -93,7 +93,7 @@ namespace Soulseek.Tests.Unit.Client
             waiter.Setup(m => m.Wait<int>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
                 .Throws(new Exception());
 
-            using (var s = new SoulseekClient(waiter: waiter.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -116,7 +116,7 @@ namespace Soulseek.Tests.Unit.Client
             conn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken?>()))
                 .Returns(Task.CompletedTask);
 
-            using (var s = new SoulseekClient(serverConnection: conn.Object, waiter: waiter.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 

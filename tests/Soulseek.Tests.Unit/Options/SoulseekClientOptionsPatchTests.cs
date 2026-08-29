@@ -60,11 +60,13 @@ namespace Soulseek.Tests.Unit.Options
             var rnd = new Random();
             var listenAddress = IPAddress.Parse(string.Join(".", rnd.Next(0, 254).ToString(), rnd.Next(0, 254).ToString(), rnd.Next(0, 254).ToString(), rnd.Next(0, 254).ToString()));
             var listenPort = rnd.Next(1024, 65535);
+            var listenBacklog = rnd.Next(128, int.MaxValue);
 
             var o = new SoulseekClientOptionsPatch(
                 enableListener,
                 listenAddress,
                 listenPort,
+                listenBacklog: listenBacklog,
                 enableDistributedNetwork: enableDistributedNetwork,
                 acceptDistributedChildren: acceptDistributedChildren,
                 distributedChildLimit: distributedChildLimit,
@@ -91,6 +93,7 @@ namespace Soulseek.Tests.Unit.Options
             Assert.Equal(enableListener, o.EnableListener);
             Assert.Equal(listenAddress, o.ListenIPAddress);
             Assert.Equal(listenPort, o.ListenPort);
+            Assert.Equal(listenBacklog, o.ListenBacklog);
             Assert.Equal(enableDistributedNetwork, o.EnableDistributedNetwork);
             Assert.Equal(acceptDistributedChildren, o.AcceptDistributedChildren);
             Assert.Equal(distributedChildLimit, o.DistributedChildLimit);
@@ -192,6 +195,36 @@ namespace Soulseek.Tests.Unit.Options
 
             Assert.NotNull(ex);
             Assert.IsType<ArgumentOutOfRangeException>(ex);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Defaults ListenBacklog to null")]
+        public void Defaults_ListenBacklog_To_Null()
+        {
+            var o = new SoulseekClientOptionsPatch();
+
+            Assert.Null(o.ListenBacklog);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Throws if listen backlog is less than 128")]
+        public void Throws_If_Listen_Backlog_Is_Less_Than_128()
+        {
+            SoulseekClientOptionsPatch x;
+            var ex = Record.Exception(() => x = new SoulseekClientOptionsPatch(listenBacklog: 127));
+
+            Assert.NotNull(ex);
+            Assert.IsType<ArgumentOutOfRangeException>(ex);
+            Assert.Equal("listenBacklog", ((ArgumentOutOfRangeException)ex).ParamName);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Does not throw if listen backlog is exactly 128")]
+        public void Does_Not_Throw_If_Listen_Backlog_Is_Exactly_128()
+        {
+            var ex = Record.Exception(() => new SoulseekClientOptionsPatch(listenBacklog: 128));
+
+            Assert.Null(ex);
         }
     }
 }

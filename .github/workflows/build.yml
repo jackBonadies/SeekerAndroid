@@ -1,0 +1,42 @@
+name: build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install dotnet-sonarscanner
+        run: dotnet tool install --global dotnet-sonarscanner --version 11.2.1
+
+      - name: Run CI
+        env:
+          TOKEN_SONARCLOUD: ${{ secrets.TOKEN_SONARCLOUD }}
+          SLSK_INTEGRATION_USERNAME: ${{ secrets.SLSK_INTEGRATION_USERNAME }}
+          SLSK_INTEGRATION_PASSWORD: ${{ secrets.SLSK_INTEGRATION_PASSWORD }}
+        run: |
+          export PATH="$HOME/.dotnet/tools:$PATH"
+          bash ./bin/ci
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # 7.0.0
+        with:
+          token: ${{ secrets.TOKEN_CODECOV_SOULSEEKNET }}
+          files: tests/opencover.xml
+          fail_ci_if_error: true

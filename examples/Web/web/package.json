@@ -4,7 +4,7 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
-    "axios": "^1.8.2",
+    "axios": "^1.18.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-router-dom": "^5.3.0",
@@ -12,7 +12,7 @@
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^2.0.4",
     "signalr": "^2.4.1",
-    "uuid": "^8.3.0"
+    "uuid": "^14.0.0"
   },
   "scripts": {
     "start": "react-scripts start",

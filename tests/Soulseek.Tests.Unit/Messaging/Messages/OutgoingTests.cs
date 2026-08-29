@@ -173,7 +173,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         {
             var name = Guid.NewGuid().ToString();
             var password = Guid.NewGuid().ToString();
-            var a = new LoginRequest(name, password);
+            var a = new LoginRequest(minorVersion: 9999, name, password);
 
             Assert.Equal(name, a.Username);
             Assert.Equal(password, a.Password);
@@ -189,7 +189,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         {
             var name = Guid.NewGuid().ToString();
             var password = Guid.NewGuid().ToString();
-            var a = new LoginRequest(name, password);
+            var a = new LoginRequest(minorVersion: 9999, name, password);
             var msg = a.ToByteArray();
 
             var reader = new MessageReader<MessageCode.Server>(msg);

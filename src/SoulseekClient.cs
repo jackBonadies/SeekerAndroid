@@ -1,10 +1,9 @@
 ﻿// <copyright file="SoulseekClient.cs" company="JP Dillingham">
-//     Copyright (c) JP Dillingham. All rights reserved.
+//     Copyright (c) JP Dillingham.
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
+//     the Free Software Foundation, version 3.
 //
 //     This program is distributed in the hope that it will be useful,
 //     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,6 +12,13 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
+//
+//     This program is distributed with Additional Terms pursuant to Section 7
+//     of the GPLv3.  See the LICENSE file in the root directory of this
+//     project for the complete terms and conditions.
+//
+//     SPDX-FileCopyrightText: JP Dillingham
+//     SPDX-License-Identifier: GPL-3.0-only
 // </copyright>
 
 namespace Soulseek
@@ -39,29 +45,32 @@ namespace Soulseek
     /// </summary>
     public class SoulseekClient : ISoulseekClient
     {
-        private const string DefaultAddress = "vps.slsknet.org";
+        private const string DefaultAddress = "server.slsknet.org";
         private const int DefaultPort = 2271;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SoulseekClient"/> class.
         /// </summary>
-        public SoulseekClient()
-            : this(options: new SoulseekClientOptions())
+        /// <param name="minorVersion">The minor version of the client.</param>
+        public SoulseekClient(int minorVersion)
+            : this(minorVersion, options: new SoulseekClientOptions())
         {
         }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SoulseekClient"/> class.
         /// </summary>
+        /// <param name="minorVersion">The minor version of the client.</param>
         /// <param name="options">The client options.</param>
-        public SoulseekClient(SoulseekClientOptions options)
-            : this(options, serverConnection: null)
+        public SoulseekClient(int minorVersion, SoulseekClientOptions options)
+            : this(minorVersion, options, serverConnection: null)
         {
         }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SoulseekClient"/> class.
         /// </summary>
+        /// <param name="minorVersion">The minor version of the client.</param>
         /// <param name="options">The client options.</param>
         /// <param name="serverConnection">The IMessageConnection instance to use.</param>
         /// <param name="connectionFactory">The IConnectionFactory instance to use.</param>
@@ -81,6 +90,7 @@ namespace Soulseek
         /// <param name="downloadTokenBucket">The ITokenBucket instance to use for downloads.</param>
 #pragma warning disable S3427 // Method overloads with default parameter values should not overlap
         internal SoulseekClient(
+            int minorVersion,
             SoulseekClientOptions options = null,
             IMessageConnection serverConnection = null,
             IConnectionFactory connectionFactory = null,
@@ -99,6 +109,13 @@ namespace Soulseek
             ITokenBucket uploadTokenBucket = null,
             ITokenBucket downloadTokenBucket = null)
         {
+            if (minorVersion <= 100)
+            {
+                throw new ArgumentOutOfRangeException(nameof(minorVersion), "The minor version must be greater than 100");
+            }
+
+            MinorVersion = minorVersion;
+
 #pragma warning restore S3427 // Method overloads with default parameter values should not overlap
             Options = options ?? new SoulseekClientOptions();
 
@@ -156,7 +173,7 @@ namespace Soulseek
 
                     foreach (var download in downloads)
                     {
-                        download.RemoteTaskCompletionSource.TrySetException(new TransferException("Download reported as failed by remote client"));
+                        download.RemoteTaskCompletionSource.TrySetException(new TransferReportedFailedException("Download reported as failed by remote client"));
                         Diagnostic.Debug($"Download of {download.Filename} from {download.Username} reported as failed by remote client (token: {download.Token})");
                     }
                 }
@@ -254,8 +271,8 @@ namespace Soulseek
             ServerMessageHandler.KickedFromServer += (sender, e) =>
             {
                 Diagnostic.Info($"Kicked from server.");
-                Disconnect("Kicked from server", new KickedFromServerException());
                 KickedFromServer?.Invoke(this, e);
+                Disconnect("Kicked from server", new KickedFromServerException());
             };
         }
 
@@ -555,6 +572,16 @@ namespace Soulseek
         ///     Gets the name of the currently signed in user.
         /// </summary>
         public virtual string Username { get; private set; }
+
+        /// <summary>
+        ///     Gets the major version of the library.
+        /// </summary>
+        public int MajorVersion { get; } = Constants.MajorVersion;
+
+        /// <summary>
+        ///     Gets the configured minor version of the client.
+        /// </summary>
+        public int MinorVersion { get; private set; }
 
 #pragma warning disable SA1600 // Elements should be documented
         internal virtual IDistributedConnectionManager DistributedConnectionManager { get; }
@@ -3066,7 +3093,8 @@ namespace Soulseek
                     {
                         Listener = new Listener(Options.ListenIPAddress, Options.ListenPort, connectionOptions: Options.IncomingConnectionOptions);
                         Listener.Accepted += ListenerHandler.HandleConnection;
-                        Listener.Start();
+                        Listener.Error += ListenerHandler.HandleError;
+                        Listener.Start(Options.ListenBacklog);
                     }
 
                     ServerConnection = ConnectionFactory.GetServerConnection(
@@ -3093,7 +3121,7 @@ namespace Soulseek
                     // users are notified of the login but the listen port is not yet set, resulting in the server reporting a
                     // port of 0 if the notified users attempt to connect (e.g. to re-request uploads). this is still possible,
                     // but much less likely. the server will not accept a listen port command prior to login.
-                    var loginBytes = new LoginRequest(username, password).ToByteArray()
+                    var loginBytes = new LoginRequest(MinorVersion, username, password).ToByteArray()
                         .Concat(new SetListenPortCommand(Options.ListenPort).ToByteArray())
                         .ToArray();
 
@@ -3178,7 +3206,7 @@ namespace Soulseek
             };
 
             // we can't allow more than one concurrent transfer for the same file from the same user. we're already checking for this
-            // in the public-scoped methods, by checking the contents of the Download/UploadDictionary, but that's not thread safe;
+            // in the public-scoped methods, by checking the contents of the Download/UploadDictionary, but that's not thread safe,
             // a caller can spam calls and get downloads through concurrently. this check is the last line of defense; if we make
             // it past here this unique combination is "locked" until the transfer is complete (as long as we remove it in the finally block!)
             var uniqueKey = $"{TransferDirection.Download}:{username}:{remoteFilename}";
@@ -3345,6 +3373,18 @@ namespace Soulseek
                 using var linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 var linkedCancellationToken = linkedCancellationTokenSource.Token;
 
+                /*
+                    report `BytesTransferred` as Starting offset + sum of bytes read via read loop, which is "safe" to do because
+                    the `DataRead` event is fired after the read logic has written the bytes to the output stream, and the `CurrentLength`
+                    is a fair representation of how much data has actually been moved successfully.
+
+                    this will cause issues, though, in cases where we are supplied a stream that's not positioned correctly at the specified
+                    StartOffset. updates outside of this handler will potentially write different values because we have to rely on the
+                    position of the output stream in those cases.
+
+                    for this reason we must check that start offset = stream position and throw if not, after we obtain
+                    the output stream.
+                */
                 download.Connection.DataRead += (sender, e) => UpdateProgress(download.StartOffset + e.CurrentLength);
                 download.Connection.Disconnected += (sender, e) =>
                 {
@@ -3359,8 +3399,30 @@ namespace Soulseek
 
                 outputStream = await outputStreamFactory().ConfigureAwait(false);
 
-                Diagnostic.Debug($"Seeking download of {Path.GetFileName(download.Filename)} from {username} to starting offset of {startOffset} bytes");
-                var startOffsetBytes = BitConverter.GetBytes(startOffset);
+                /*
+                    see the documentation above for the `DataRead` event handler for rationale
+
+                    tl;dr, we have to use the stream position to determine how much data has been successfully written to the output stream
+                    if the caller gives us a stream that can't be positioned and they haven't explicitly told us to bypass
+                    the seek, throw and abort; progress math will be incorrect and it'll look like a bug
+
+                    anyone that sets SeekOutputStreamAutomatically to false and passes a stream positioned at anything
+                    other than the starting offset should expect the final status update to report an incorrect number,
+                    and they must compensate on their side
+                */
+                if (download.StartOffset > 0 && options.SeekOutputStreamAutomatically)
+                {
+                    if (!outputStream.CanSeek)
+                    {
+                        throw new TransferStreamException($"Requested non-zero start offset but output stream does not support seeking");
+                    }
+
+                    Diagnostic.Debug($"Seeking output stream for download of {Path.GetFileName(download.Filename)} from {username} to starting offset of {download.StartOffset} bytes");
+                    outputStream.Seek(download.StartOffset, SeekOrigin.Begin);
+                }
+
+                Diagnostic.Debug($"Seeking download of {Path.GetFileName(download.Filename)} from {username} to starting offset of {download.StartOffset} bytes");
+                var startOffsetBytes = BitConverter.GetBytes(download.StartOffset);
                 await download.Connection.WriteAsync(startOffsetBytes, linkedCancellationToken).ConfigureAwait(false);
 
                 UpdateState(TransferStates.InProgress);
@@ -3369,7 +3431,7 @@ namespace Soulseek
                 var tokenBucket = DownloadTokenBucket;
 
                 var readTask = download.Connection.ReadAsync(
-                    length: download.Size.Value - startOffset,
+                    length: download.Size.Value - download.StartOffset,
                     outputStream: outputStream,
                     governor: async (requestedBytes, cancelToken) =>
                     {
@@ -3383,6 +3445,11 @@ namespace Soulseek
                     },
                     cancellationToken: linkedCancellationToken);
 
+                // ensure the losing tasks don't raise an unbserved exception by attaching a continuation that will observe them with Forget()
+                readTask.Forget();
+                disconnectedTaskCancellationSource.Task.Forget();
+                download.RemoteTaskCompletionSource.Task.Forget();
+
                 var firstTask = await Task.WhenAny(
                     readTask, // we successfully read all of the data
                     disconnectedTaskCancellationSource.Task, // the connection is disconnected
@@ -3393,7 +3460,7 @@ namespace Soulseek
 
                 if (firstTask == download.RemoteTaskCompletionSource.Task)
                 {
-                    // the remote client sent either UploadFailed (almost certain) or UploadDenied (not sure if possible);
+                    // the remote client sent either UploadFailed (almost certain) or UploadDenied (not sure if possible),
                     // and we set either a TransferException (failed) or TransferRejectedException (denied) on this TCS
                     // in the event handlers above. await to force the exception to bubble up
                     await download.RemoteTaskCompletionSource.Task.ConfigureAwait(false);
@@ -3408,10 +3475,10 @@ namespace Soulseek
                 await readTask.ConfigureAwait(false);
 
                 // update the state 'manually' so the final UpdateProgress() captures the Transfer in the terminal state
-                UpdateProgress(download.StartOffset + (outputStream?.Position ?? 0));
+                UpdateProgress(outputStream.Position);
                 UpdateState(TransferStates.Completed | TransferStates.Succeeded);
 
-                Diagnostic.Info($"Download of {Path.GetFileName(download.Filename)} from {username} complete ({startOffset + outputStream.Position} of {download.Size} bytes).");
+                Diagnostic.Info($"Download of {Path.GetFileName(download.Filename)} from {username} complete ({outputStream.Position} of {download.Size} bytes).");
 
                 download.Connection.Disconnect("Transfer complete");
 
@@ -3436,7 +3503,7 @@ namespace Soulseek
                 download.Connection?.Disconnect("Transfer cancelled", ex);
 
                 download.Exception = ex;
-                UpdateProgress(download.StartOffset + (outputStream?.Position ?? 0));
+                UpdateProgress(outputStream?.Position ?? 0);
                 UpdateState(TransferStates.Completed | TransferStates.Cancelled);
 
                 Diagnostic.Debug(ex.ToString());
@@ -3450,7 +3517,7 @@ namespace Soulseek
                 download.Connection?.Disconnect("Transfer timed out", ex);
 
                 download.Exception = ex;
-                UpdateProgress(download.StartOffset + (outputStream?.Position ?? 0));
+                UpdateProgress(outputStream?.Position ?? 0);
                 UpdateState(TransferStates.Completed | TransferStates.TimedOut);
 
                 Diagnostic.Debug(ex.ToString());
@@ -3462,7 +3529,7 @@ namespace Soulseek
                 download.Connection?.Disconnect("Transfer error", ex);
 
                 download.Exception = ex;
-                UpdateProgress(download.StartOffset + (outputStream?.Position ?? 0));
+                UpdateProgress(outputStream?.Position ?? 0);
                 UpdateState(TransferStates.Completed | TransferStates.Errored);
 
                 Diagnostic.Debug(ex.ToString());
@@ -3500,20 +3567,6 @@ namespace Soulseek
                     catch (Exception ex)
                     {
                         Diagnostic.Warning($"Failed to dispose transfer connection for file {remoteFilename} from user {username}: {ex.Message}");
-                    }
-
-                    long finalStreamPosition = 0;
-
-                    // attempt to get the actual final position of the stream for accurate record keeping. if something goes wrong,
-                    // which can happen depending on the stream type (e.g. FileStream.Position can throw if the file is closed),
-                    // set it to zero and let the consumer figure it out
-                    try
-                    {
-                        finalStreamPosition = outputStream?.Position ?? 0;
-                    }
-                    catch (Exception ex)
-                    {
-                        Diagnostic.Warning($"Failed to determine final position of output stream for file {Path.GetFileName(download.Filename)} from {username}: {ex.Message}", ex);
                     }
 
                     if (options.DisposeOutputStreamOnCompletion && outputStream != null)
@@ -3910,9 +3963,10 @@ namespace Soulseek
                 var enableListenerChanged = patch.EnableListener.HasValue && patch.EnableListener.Value != Options.EnableListener;
                 var listenAddressChanged = patch.ListenIPAddress != null && !patch.ListenIPAddress.Equals(Options.ListenIPAddress);
                 var listenPortChanged = patch.ListenPort.HasValue && patch.ListenPort.Value != Options.ListenPort;
+                var listenBacklogChanged = patch.ListenBacklog.HasValue && patch.ListenBacklog.Value != Options.ListenBacklog;
                 var incomingConnectionOptionsChanged = patch.IncomingConnectionOptions != null && patch.IncomingConnectionOptions != Options.IncomingConnectionOptions;
 
-                if (enableListenerChanged || listenAddressChanged || listenPortChanged || incomingConnectionOptionsChanged)
+                if (enableListenerChanged || listenAddressChanged || listenPortChanged || listenBacklogChanged || incomingConnectionOptionsChanged)
                 {
                     var wasListening = Listener?.Listening ?? false;
 
@@ -3923,13 +3977,15 @@ namespace Soulseek
                         enableListener: patch.EnableListener,
                         listenIPAddress: patch.ListenIPAddress,
                         listenPort: patch.ListenPort,
+                        listenBacklog: patch.ListenBacklog,
                         incomingConnectionOptions: patch.IncomingConnectionOptions);
 
                     if (wasListening && Options.EnableListener)
                     {
                         Listener = new Listener(Options.ListenIPAddress, Options.ListenPort, Options.IncomingConnectionOptions);
                         Listener.Accepted += ListenerHandler.HandleConnection;
-                        Listener.Start();
+                        Listener.Error += ListenerHandler.HandleError;
+                        Listener.Start(Options.ListenBacklog);
                     }
                 }
 
@@ -4224,7 +4280,7 @@ namespace Soulseek
             };
 
             // we can't allow more than one concurrent transfer for the same file from the same user. we're already checking for this
-            // in the public-scoped methods, by checking the contents of the Download/UploadDictionary, but that's not thread safe;
+            // in the public-scoped methods, by checking the contents of the Download/UploadDictionary, but that's not thread safe,
             // a caller can spam calls and get transfers through concurrently. this check is the last line of defense; if we make
             // it past here this unique combination is "locked" until the transfer is complete (as long as we remove it in the finally block!)
             var uniqueKey = $"{TransferDirection.Upload}:{username}:{remoteFilename}";
@@ -4353,14 +4409,14 @@ namespace Soulseek
                     .ConfigureAwait(false);
                 Diagnostic.Debug($"Fetched transfer connection for upload of {Path.GetFileName(upload.Filename)} to {username} (id: {upload.Connection.Id}, state: {upload.Connection.State})");
 
-                // create a task completion source that represents the disconnect of the transfer connection. this is one of two tasks that will 'race'
-                // to determine the outcome of the upload.
-                var disconnectedTaskCancellationSource = new TaskCompletionSource<Exception>(cancellationToken);
-
                 // once we have a 'winner' of the task race, we want to stop the loser as quickly as possible.
                 // we'll do that with a cancellation token that we bind to the one that was passed into the method.
                 using var linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 var linkedCancellationToken = linkedCancellationTokenSource.Token;
+
+                // create a task completion source that represents the disconnect of the transfer connection. this is one of two tasks that will 'race'
+                // to determine the outcome of the upload.
+                var disconnectedTaskCancellationSource = new TaskCompletionSource<Exception>(linkedCancellationToken);
 
                 upload.Connection.DataWritten += (sender, e) => UpdateProgress(upload.StartOffset + e.CurrentLength);
                 upload.Connection.Disconnected += (sender, e) =>
@@ -4397,10 +4453,10 @@ namespace Soulseek
                 {
                     if (!inputStream.CanSeek)
                     {
-                        throw new TransferException($"Requested non-zero start offset but input stream does not support seeking");
+                        throw new TransferStreamException($"Requested non-zero start offset but input stream does not support seeking");
                     }
 
-                    Diagnostic.Debug($"Seeking upload of {Path.GetFileName(upload.Filename)} to {username} to starting offset of {upload.StartOffset} bytes");
+                    Diagnostic.Debug($"Seeking input stream for upload of {Path.GetFileName(upload.Filename)} to {username} to starting offset of {upload.StartOffset} bytes");
                     inputStream.Seek(upload.StartOffset, SeekOrigin.Begin);
                 }
 
@@ -4427,12 +4483,16 @@ namespace Soulseek
                             options.Reporter?.Invoke(new Transfer(upload), attemptedBytes, grantedBytes, actualBytes);
                             tokenBucket.Return(grantedBytes - actualBytes);
                         },
-                        cancellationToken: cancellationToken);
+                        cancellationToken: linkedCancellationToken);
                 }
                 else
                 {
                     writeTask = Task.CompletedTask;
                 }
+
+                // ensure the losing tasks don't raise an unobserved exception by attaching a continuation that will observe them with Forget()
+                writeTask.Forget();
+                disconnectedTaskCancellationSource.Task.Forget();
 
                 var firstTask = await Task.WhenAny(
                     writeTask,
@@ -4457,27 +4517,43 @@ namespace Soulseek
                 // comes to this, so linger time shouldn't be less than a couple of seconds.
                 try
                 {
-                    var lingerStartTime = DateTime.UtcNow;
+                    var lingerDeadline = DateTime.UtcNow.AddMilliseconds(options.MaximumLingerTime);
 
                     while (!cancellationToken.IsCancellationRequested)
                     {
-                        if (lingerStartTime.AddMilliseconds(options.MaximumLingerTime) <= DateTime.UtcNow)
+                        if (lingerDeadline <= DateTime.UtcNow)
                         {
                             upload.Connection.Disconnect("Transfer complete, maximum linger time exceeded");
                             Diagnostic.Warning($"Transfer connection for upload of {Path.GetFileName(upload.Filename)} to {username} forcibly closed after exceeding maximum linger time of {options.MaximumLingerTime}ms.");
                             break;
                         }
 
-                        await upload.Connection.ReadAsync(1, cancellationToken).ConfigureAwait(false);
+                        // sometimes attempting this read will block instead of throwing immediately; in those cases we
+                        // need to make sure it doesn't block until the connection is closed due to inactivity by racing
+                        // it against a Task.Delay()
+                        var readTask = upload.Connection.ReadAsync(1, cancellationToken);
+
+                        // ensure the read doesn't raise an unobserved exception if the Delay wins the race
+                        readTask.Forget();
+
+                        await (await Task.WhenAny(
+                            readTask,
+                            Task.Delay(lingerDeadline - DateTime.UtcNow, cancellationToken)).ConfigureAwait(false)).ConfigureAwait(false);
+
                         await Task.Delay(100, cancellationToken).ConfigureAwait(false);
                     }
                 }
-                catch (ConnectionReadException)
+                catch (OperationCanceledException)
                 {
-                    // swallow this specific exception; we're expecting it when the connection closes.
+                    // caller (of UploadAsync) requested cancellation; we have to throw to cancel even if we were lingering
+                    throw;
+                }
+                catch (Exception ex) when (ex is TimeoutException || ex is ConnectionReadException)
+                {
+                    // noop; either a timeout or a read exception was thrown, which is what we were waiting for
                 }
 
-                UpdateProgress(inputStream?.Position ?? 0);
+                UpdateProgress(inputStream.Position);
                 UpdateState(TransferStates.Completed | TransferStates.Succeeded);
 
                 Diagnostic.Info($"Upload of {Path.GetFileName(upload.Filename)} to {username} complete ({inputStream.Position} of {upload.Size} bytes).");
@@ -4552,20 +4628,6 @@ namespace Soulseek
                         Diagnostic.Warning($"Failed to dispose transfer connection for file {remoteFilename} to user {username}: {ex.Message}");
                     }
 
-                    long finalStreamPosition = 0;
-
-                    // attempt to get the actual final position of the stream for accurate record keeping. if something goes wrong,
-                    // which can happen depending on the stream type (e.g. FileStream.Position can throw if the file is closed),
-                    // set it to zero and let the consumer figure it out
-                    try
-                    {
-                        finalStreamPosition = inputStream?.Position ?? 0;
-                    }
-                    catch (Exception ex)
-                    {
-                        Diagnostic.Warning($"Failed to determine final position of input stream for file {Path.GetFileName(upload.Filename)} to {username}: {ex.Message}", ex);
-                    }
-
                     if (options.DisposeInputStreamOnCompletion && inputStream != null)
                     {
                         try
@@ -4589,7 +4651,7 @@ namespace Soulseek
                         {
                             // fetch the endpoint again, in case it failed or was never fetched because the semaphore wasn't obtained.
                             // this allows us to send UploadDenied for cancelled queued files
-                            endpoint = await GetUserEndPointAsync(username).ConfigureAwait(false);
+                            endpoint = await GetUserEndPointAsync(username, CancellationToken.None).ConfigureAwait(false);
                             var messageConnection = await PeerConnectionManager
                                 .GetOrAddMessageConnectionAsync(username, endpoint, CancellationToken.None)
                                 .ConfigureAwait(false);
@@ -4597,11 +4659,11 @@ namespace Soulseek
                             // send UploadDenied if we cancelled the transfer. this should prevent the remote client from re-enqueuing
                             if (upload.State.HasFlag(TransferStates.Cancelled))
                             {
-                                await messageConnection.WriteAsync(new UploadDenied(remoteFilename, "Cancelled")).ConfigureAwait(false);
+                                await messageConnection.WriteAsync(new UploadDenied(remoteFilename, "Cancelled"), CancellationToken.None).ConfigureAwait(false);
                             }
                             else
                             {
-                                await messageConnection.WriteAsync(new UploadFailed(remoteFilename)).ConfigureAwait(false);
+                                await messageConnection.WriteAsync(new UploadFailed(remoteFilename), CancellationToken.None).ConfigureAwait(false);
                             }
                         }
                         catch

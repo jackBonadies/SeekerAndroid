@@ -30,7 +30,7 @@
         [EnvironmentVariable("SLSK_PASSWORD")]
         private static string Password { get; set; }
 
-        private static ConcurrentDictionary<(string Username, string Filename, int Token), (TransferStates State, Spinner Spinner, ProgressBar ProgressBar)> Downloads { get; set; } 
+        private static ConcurrentDictionary<(string Username, string Filename, int Token), (TransferStates State, Spinner Spinner, ProgressBar ProgressBar)> Downloads { get; set; }
             = new ConcurrentDictionary<(string Username, string Filename, int Token), (TransferStates State, Spinner Spinner, ProgressBar ProgressBar)>();
 
         [Argument('s', "search")]
@@ -50,7 +50,7 @@
         public static async Task Main()
         {
             Console.OutputEncoding = Encoding.UTF8;
-            
+
             EnvironmentVariables.Populate();
             Arguments.Populate(clearExistingValues: false);
 
@@ -60,7 +60,7 @@
                 transferConnectionOptions: new ConnectionOptions(connectTimeout: 30000, inactivityTimeout: 15000)
             );
 
-            using (var client = new SoulseekClient(options))
+            using (var client = new SoulseekClient(minorVersion: 9999, options))
             {
                 client.StateChanged += Client_ServerStateChanged;
 
@@ -99,7 +99,7 @@
                         .ThenByDescending(r => r.UploadSpeed);
 
                     var response = SelectSearchResponse(responses);
-                    
+
                     o($"\nDownloading {response.Files.Count()} file{(response.Files.Count() > 1 ? "s" : string.Empty)} from {response.Username}...\n");
 
                     await DownloadFilesAsync(client, response.Username, response.Files.Select(f => f.Filename).ToList()).ConfigureAwait(false);
@@ -115,7 +115,7 @@
         {
             if (e.State == SoulseekClientStates.Disconnected)
             {
-                o("\n×  Disconnected from server" + (!string.IsNullOrEmpty(e.Message) ? $": {e.Message}" : "." ));
+                o("\n×  Disconnected from server" + (!string.IsNullOrEmpty(e.Message) ? $": {e.Message}" : "."));
             }
         }
 
@@ -137,7 +137,7 @@
                         progress.State = e.Transfer.State;
                         progress.ProgressBar = new ProgressBar(10, format: new ProgressBarFormat(left: "[", right: "]", full: '=', tip: '>', empty: ' ', emptyWhen: () => Downloads[key].State.HasFlag(TransferStates.Completed)));
                         progress.Spinner = new Spinner("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏", format: new SpinnerFormat(completeWhen: () => Downloads[key].State.HasFlag(TransferStates.Completed)));
-                        
+
                         Downloads.AddOrUpdate(key, progress, (k, v) => progress);
 
                         if (progress.State.HasFlag(TransferStates.Completed))
@@ -166,7 +166,7 @@
                         var remaining = e.Transfer.RemainingTime.HasValue ? e.Transfer.RemainingTime.Value.ToString(@"m\:ss") : "--:--";
 
                         Console.Write($"\r {progress.Spinner}  {fn}  {size}  {percent}  [{status}]  {progress.ProgressBar} {e.Transfer.AverageSpeed.ToMB()}/s {elapsed} / {remaining}");
- 
+
                     })).ConfigureAwait(false);
 
                     // GetDirectoryName() and GetFileName() only work when the path separator is the same as the current OS' DirectorySeparatorChar.
@@ -253,13 +253,13 @@
                         {
                             totalResponses++;
                             totalFiles += e.Response.FileCount;
-                        }, 
+                        },
                         fileFilter: (file) => Path.GetExtension(file.Filename) == ".mp3"));
 
                 timer.Stop();
                 complete = true;
                 updateStatus();
-                
+
                 return responses;
             }
         }

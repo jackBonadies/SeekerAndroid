@@ -2,22 +2,40 @@
 set -e
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+required_vars=(
+    TOKEN_SONARCLOUD
+    SLSK_INTEGRATION_USERNAME
+    SLSK_INTEGRATION_PASSWORD
+)
+
+missing_vars=()
+for var in "${required_vars[@]}"; do
+    if [ -z "${!var}" ]; then
+        missing_vars+=("${var}")
+    fi
+done
+
+if [ ${#missing_vars[@]} -ne 0 ]; then
+    echo "Missing required environment variable(s): ${missing_vars[*]}"
+    exit 1
+fi
+
 # get the current git branch and set options for a non-PR analysis
 branch=$(git rev-parse --abbrev-ref HEAD)
 options="/d:sonar.branch.name="${branch}""
 
-# if running in CircleCI, use the provided environment variables to set analysis options
-if [ ! -z "${CIRCLECI}" ]; then
-    branch="${CIRCLE_BRANCH}"
+# if running in GitHub Actions, use the provided environment variables to set analysis options
+if [ ! -z "${GITHUB_ACTIONS}" ]; then
+    branch="${GITHUB_REF_NAME}"
     options="/d:sonar.branch.name="${branch}""
 
-    # if building a PR, fetch the PR info from GitHub to determine the base and branch, then set options for PR analysis
-    if [ ! -z "${CIRCLE_PULL_REQUEST}" ]; then
-        echo "Fetching PR to determine base and branch"
-        pr_json="$(curl -s https://api.github.com/repos/jpdillingham/Soulseek.NET/pulls/${CIRCLE_PULL_REQUEST##*/})"
-        base="$(echo "${pr_json}" | jq -r ".base.ref")"
-        branch="$(echo "${pr_json}" | jq -r ".head.ref")"
-        options="/d:sonar.pullrequest.base="${base}" /d:sonar.pullrequest.branch="${branch}" /d:sonar.pullrequest.key="${CIRCLE_PULL_REQUEST##*/}""
+    # if building a PR, GitHub Actions already provides the base and head branches, so set options for PR analysis
+    if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+        base="${GITHUB_BASE_REF}"
+        branch="${GITHUB_HEAD_REF}"
+        pr_number="${GITHUB_REF#refs/pull/}"
+        pr_number="${pr_number%/merge}"
+        options="/d:sonar.pullrequest.base="${base}" /d:sonar.pullrequest.branch="${branch}" /d:sonar.pullrequest.key="${pr_number}""
     fi
 fi
 
@@ -34,11 +52,9 @@ dotnet-sonarscanner begin \
     /d:sonar.github.repository="jpdillingham/Soulseek.NET" \
     /d:sonar.exclusions="**/*examples*/**" \
     /d:sonar.cs.opencover.reportsPaths="tests/opencover.xml" \
-    /d:sonar.login="${TOKEN_SONARCLOUD}" \
+    /d:sonar.token="${TOKEN_SONARCLOUD}"
 
 . "${dir}/build"
-. "${dir}/test"
+. "${dir}/test" --all --no-build
 
-dotnet-sonarscanner end /d:sonar.login="${TOKEN_SONARCLOUD}"
-
-bash <(curl -s https://codecov.io/bash) -f tests/opencover.xml -t ${TOKEN_CODECOV_SOULSEEKNET}
+dotnet-sonarscanner end /d:sonar.token="${TOKEN_SONARCLOUD}"

@@ -20,6 +20,7 @@ namespace Soulseek.Tests.Unit
     using System;
     using System.Collections.Concurrent;
     using System.Timers;
+    using Moq;
     using Xunit;
 
     public class ExtensionsTests
@@ -60,6 +61,41 @@ namespace Soulseek.Tests.Unit
             var ex = Record.Exception(() => timer.Reset());
 
             Assert.Null(ex);
+        }
+
+        [Trait("Category", "Extension")]
+        [Fact(DisplayName = "TryDispose does not throw if Dispose throws")]
+        public void TryDispose_Does_Not_Throw_If_Dispose_Throws()
+        {
+            var obj = new Mock<IDisposable>();
+            obj.Setup(m => m.Dispose()).Throws(new Exception());
+
+            var ex1 = Record.Exception(() => obj.Object.Dispose());
+
+            Assert.NotNull(ex1);
+
+            var ex2 = Record.Exception(() => obj.Object.TryDispose());
+
+            Assert.Null(ex2);
+        }
+
+        [Trait("Category", "Extension")]
+        [Fact(DisplayName = "TryDispose returns false if Dispose throws")]
+        public void TryDispose_Returns_False_If_Dispose_Throws()
+        {
+            var obj = new Mock<IDisposable>();
+            obj.Setup(m => m.Dispose()).Throws(new Exception());
+
+            Assert.False(obj.Object.TryDispose());
+        }
+
+        [Trait("Category", "Extension")]
+        [Fact(DisplayName = "TryDispose returns true if Dispose does not throw")]
+        public void TryDispose_Returns_True_If_Dispose_Does_Not_Throw()
+        {
+            var obj = new Mock<IDisposable>();
+
+            Assert.True(obj.Object.TryDispose());
         }
     }
 }

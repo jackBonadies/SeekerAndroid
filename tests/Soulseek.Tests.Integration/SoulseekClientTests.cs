@@ -27,7 +27,7 @@ namespace Soulseek.Tests.Integration
         [Fact(DisplayName = "Client connects")]
         public async Task Client_Connects()
         {
-            using (var client = new SoulseekClient())
+            using (var client = new SoulseekClient(minorVersion: 9999))
             {
                 var ex = await Record.ExceptionAsync(() => client.ConnectAsync(Settings.Username, Settings.Password));
 
@@ -40,7 +40,7 @@ namespace Soulseek.Tests.Integration
         [Fact(DisplayName = "Client connect raises StateChanged event")]
         public async Task Client_Connect_Raises_StateChanged_Event()
         {
-            using (var client = new SoulseekClient())
+            using (var client = new SoulseekClient(minorVersion: 9999))
             {
                 var events = new List<SoulseekClientStateChangedEventArgs>();
 
@@ -62,7 +62,7 @@ namespace Soulseek.Tests.Integration
         [Fact(DisplayName = "Client disconnects")]
         public async Task Client_Disconnects()
         {
-            using (var client = new SoulseekClient())
+            using (var client = new SoulseekClient(minorVersion: 9999))
             {
                 await client.ConnectAsync(Settings.Username, Settings.Password);
 
@@ -79,7 +79,7 @@ namespace Soulseek.Tests.Integration
         {
             SoulseekClientStateChangedEventArgs args = null;
 
-            using (var client = new SoulseekClient())
+            using (var client = new SoulseekClient(minorVersion: 9999))
             {
                 await client.ConnectAsync(Settings.Username, Settings.Password);
 
@@ -97,7 +97,7 @@ namespace Soulseek.Tests.Integration
         [Fact(DisplayName = "GetNextToken returns sequential tokens")]
         public void GetNextToken_Returns_Sequential_Tokens()
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var t1 = s.GetNextToken();
                 var t2 = s.GetNextToken();
@@ -111,6 +111,7 @@ namespace Soulseek.Tests.Integration
         public void GetNextToken_Rolls_Over_At_Int_MaxValue()
         {
             using (var s = new SoulseekClient(
+                minorVersion: 9999,
                 new SoulseekClientOptions(startingToken: int.MaxValue)))
             {
                 var t1 = s.GetNextToken();

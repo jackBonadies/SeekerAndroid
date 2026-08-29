@@ -48,7 +48,7 @@ namespace Soulseek.Tests.Unit.Network
         [Fact(DisplayName = "Ensures Diagnostic given null")]
         public void Ensures_Diagnostic_Given_Null()
         {
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 ListenerHandler l = default;
 
@@ -63,7 +63,7 @@ namespace Soulseek.Tests.Unit.Network
         [Theory(DisplayName = "Raises DiagnosticGenerated on diagnostic"), AutoData]
         public void Raises_DiagnosticGenerated_On_Diagnostic(string message)
         {
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 DiagnosticEventArgs args = default;
 
@@ -81,7 +81,7 @@ namespace Soulseek.Tests.Unit.Network
         [Theory(DisplayName = "Does not throw raising DiagnosticGenerated if no handlers bound"), AutoData]
         public void Does_Not_Throw_Raising_DiagnosticGenerated_If_No_Handlers_Bound(string message)
         {
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 ListenerHandler l = new ListenerHandler(client);
 
@@ -104,6 +104,25 @@ namespace Soulseek.Tests.Unit.Network
             handler.HandleConnection(null, mocks.Connection.Object);
 
             mocks.Diagnostic.Verify(m => m.Debug(It.Is<string>(s => s.Contains("Accepted incoming connection", StringComparison.InvariantCultureIgnoreCase))), Times.Once);
+        }
+
+        [Trait("Category", "Diagnostic")]
+        [Theory(DisplayName = "Creates diagnostic on error"), AutoData]
+        public void Creates_Diagnostic_On_Error(IPEndPoint endpoint, string message)
+        {
+            var (handler, mocks) = GetFixture(endpoint);
+
+            mocks.Diagnostic.Setup(m => m.Warning(It.IsAny<string>(), It.IsAny<Exception>()));
+
+            var exception = new Exception(message);
+
+            handler.HandleError(null, exception);
+
+            mocks.Diagnostic.Verify(
+                m => m.Warning(
+                    It.Is<string>(s => s.Contains("Failed to establish an incoming connection", StringComparison.InvariantCultureIgnoreCase) && s.Contains(message, StringComparison.InvariantCultureIgnoreCase)),
+                    exception),
+                Times.Once);
         }
 
         [Trait("Category", "Diagnostic")]
@@ -481,7 +500,7 @@ namespace Soulseek.Tests.Unit.Network
         {
             public Mocks(SoulseekClientOptions clientOptions = null)
             {
-                Client = new Mock<SoulseekClient>(clientOptions)
+                Client = new Mock<SoulseekClient>(9999, clientOptions)
                 {
                     CallBase = true,
                 };

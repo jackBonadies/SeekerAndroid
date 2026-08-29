@@ -29,6 +29,7 @@ namespace Soulseek.Tests.Unit.Options
         [Theory(DisplayName = "Instantiates with given data"), AutoData]
         public void Instantiates_Given_Data(
             bool seekInput,
+            bool seekOutput,
             bool disposeInput,
             bool disposeOutput,
             Func<Transfer, int, CancellationToken, Task<int>> governor,
@@ -48,10 +49,12 @@ namespace Soulseek.Tests.Unit.Options
                 reporter,
                 maximumLingerTime,
                 seekInput,
+                seekOutput,
                 disposeInput,
                 disposeOutput);
 
             Assert.Equal(seekInput, o.SeekInputStreamAutomatically);
+            Assert.Equal(seekOutput, o.SeekOutputStreamAutomatically);
             Assert.Equal(disposeInput, o.DisposeInputStreamOnCompletion);
             Assert.Equal(disposeOutput, o.DisposeOutputStreamOnCompletion);
             Assert.Equal(governor, o.Governor);
@@ -69,6 +72,7 @@ namespace Soulseek.Tests.Unit.Options
         {
             var o = new TransferOptions();
 
+            Assert.True(o.SeekOutputStreamAutomatically);
             Assert.True(o.DisposeInputStreamOnCompletion);
             Assert.True(o.DisposeOutputStreamOnCompletion);
 

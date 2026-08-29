@@ -28,16 +28,18 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </AdditionalFiles>
     <None Include="..\README.md" Pack="true" PackagePath="\" Link="Properties\README.md" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="\" Link="Properties\LICENSE" />
+    <None Include="..\NOTICE" Pack="true" PackagePath="\" Link="Properties\NOTICE" />
   </ItemGroup>
 
   <PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>8.5.0</Version>
+    <Version>10.0.2</Version>
     <Authors>JP Dillingham</Authors>
     <Product>Soulseek.NET</Product>
     <PackageProjectUrl>https://github.com/jpdillingham/Soulseek.NET</PackageProjectUrl>
     <PackageLicense>https://github.com/jpdillingham/Soulseek.NET/blob/master/LICENSE</PackageLicense>
-    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
     <Description>A .NET Standard client library for the Soulseek network.</Description>
     <Copyright>Copyright (c) JP Dillingham</Copyright>
     <RepositoryUrl>https://github.com/jpdillingham/Soulseek.NET</RepositoryUrl>
@@ -58,6 +60,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.31.0.145097">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

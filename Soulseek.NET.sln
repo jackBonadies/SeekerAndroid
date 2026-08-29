@@ -36,9 +36,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "bin", "bin", "{725D726B-742
 		bin\test = bin\test
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".circleci", ".circleci", "{213D18D2-C5A3-4ECA-BEF4-1588580881BE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{213D18D2-C5A3-4ECA-BEF4-1588580881BE}"
 	ProjectSection(SolutionItems) = preProject
-		.circleci\config.yml = .circleci\config.yml
+		.github\workflows\build.yml = .github\workflows\build.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI", "examples\Web\api\WebAPI.csproj", "{6BEA125D-D28D-405A-B1D5-38672E726125}"

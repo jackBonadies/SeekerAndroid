@@ -22,8 +22,38 @@ namespace Soulseek.Tests.Unit
     using Soulseek.Diagnostics;
     using Xunit;
 
+    [Collection(nameof(GlobalDiagnosticTests))]
     public class GlobalDiagnosticTests
     {
+        [Trait("Category", "GlobalDiagnostic")]
+        [Fact]
+        public void Does_Not_Throw_ArgumentNullException_Given_Null_Factory()
+        {
+            var ex = Record.Exception(() => GlobalDiagnostic.Init(null));
+
+            Assert.Null(ex);
+        }
+
+        [Trait("Category", "GlobalDiagnostic")]
+        [Fact]
+        public void Does_Not_Throw_When_Called_After_Init_With_Null_Factory()
+        {
+            GlobalDiagnostic.Init(null);
+
+            var ex = Record.Exception(() =>
+            {
+                GlobalDiagnostic.Trace("test");
+                GlobalDiagnostic.Trace("test", new Exception("test"));
+                GlobalDiagnostic.Debug("test");
+                GlobalDiagnostic.Debug("test", new Exception("test"));
+                GlobalDiagnostic.Info("test");
+                GlobalDiagnostic.Warning("test");
+                GlobalDiagnostic.Warning("test", new Exception("test"));
+            });
+
+            Assert.Null(ex);
+        }
+
         [Trait("Category", "GlobalDiagnostic")]
         [Fact]
         public void Behaves_As_Expected()
@@ -32,7 +62,8 @@ namespace Soulseek.Tests.Unit
             // in which these tests can run, test *everything* serially in this one test
             // this is shitty, as is the need for GlobalDiagnostic in the first place
             // but it works and the behavior correct, so ¯\_(ツ)_/¯
-            GlobalDiagnostic.Init(null);
+            // note: force the minimum level to the lowest for all of the tests to work properly
+            GlobalDiagnostic.Init(new DiagnosticFactory(minimumLevel: DiagnosticLevel.Trace, eventHandler: (e) => { }));
 
             var ex = Record.Exception(() =>
             {
@@ -50,6 +81,7 @@ namespace Soulseek.Tests.Unit
             var f = new Mock<IDiagnosticFactory>();
             ex = new Exception();
 
+            // replace the factory with the mocked one
             GlobalDiagnostic.Init(f.Object);
 
             GlobalDiagnostic.Trace("asdf");
