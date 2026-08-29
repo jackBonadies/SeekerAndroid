@@ -187,6 +187,11 @@ namespace Soulseek
         event EventHandler<RoomTickerAddedEventArgs> RoomTickerAdded;
 
         /// <summary>
+        ///     Occurs when an operator is added
+        /// </summary>
+        public event EventHandler<OperatorAddedRemovedEventArgs> OperatorInPrivateRoomAddedRemoved;
+
+        /// <summary>
         ///     Occurs when the server sends a list of tickers for a chat room.
         /// </summary>
         event EventHandler<RoomTickerListReceivedEventArgs> RoomTickerListReceived;
@@ -256,6 +261,7 @@ namespace Soulseek
         /// </summary>
         /// <remarks>Add a user to the server watch list with <see cref="WatchUserAsync(string, CancellationToken?)"/>.</remarks>
         event EventHandler<UserStatus> UserStatusChanged;
+
 
         /// <summary>
         ///     Gets the unresolved server address.
@@ -830,7 +836,7 @@ namespace Soulseek
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        Task<IReadOnlyCollection<Directory>> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null);
+        Task<IReadOnlyCollection<Directory>> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null, bool isLegacy = false);
 
         /// <summary>
         ///     Asynchronously fetches the current place of the specified <paramref name="filename"/> in the queue of the
@@ -849,7 +855,7 @@ namespace Soulseek
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null);
+        Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool wasFileLatin1Decoded = false, bool wasFolderLatin1Decoded = false);
 
         /// <summary>
         ///     Gets the next token for use in client operations.
@@ -1386,5 +1392,15 @@ namespace Soulseek
         /// <exception cref="UserNotFoundException">Thrown when the specified user is not registered.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
         Task<UserData> WatchUserAsync(string username, CancellationToken? cancellationToken = null);
+
+        /// <summary>
+        /// Is Transfer In Downloads. If so we need to cancel it before retrying it.
+        /// </summary>
+        bool IsTransferInDownloads(string username, string filename);
+
+        /// <summary>
+        /// If we are successfully listening.
+        /// </summary>
+        bool GetListeningState();
     }
 }

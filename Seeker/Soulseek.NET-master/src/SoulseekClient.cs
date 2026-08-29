@@ -34,34 +34,39 @@ namespace Soulseek
     using Soulseek.Network;
     using Soulseek.Network.Tcp;
 
+    
+
     /// <summary>
     ///     A client for the Soulseek file sharing network.
     /// </summary>
     public class SoulseekClient : ISoulseekClient
     {
-        private const string DefaultAddress = "vps.slsknet.org";
+    	private const string DefaultAddress = "server.slsknet.org";
         private const int DefaultPort = 2271;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SoulseekClient"/> class.
         /// </summary>
-        public SoulseekClient()
-            : this(options: new SoulseekClientOptions())
+        /// <param name="minorVersion">The minor version of the client.</param>
+        public SoulseekClient(int minorVersion)
+            : this(minorVersion, options: new SoulseekClientOptions())
         {
         }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SoulseekClient"/> class.
         /// </summary>
+        /// <param name="minorVersion">The minor version of the client.</param>
         /// <param name="options">The client options.</param>
-        public SoulseekClient(SoulseekClientOptions options)
-            : this(options, serverConnection: null)
+        public SoulseekClient(int minorVersion, SoulseekClientOptions options)
+            : this(minorVersion, options, serverConnection: null)
         {
         }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SoulseekClient"/> class.
         /// </summary>
+        /// <param name="minorVersion">The minor version of the client.</param>
         /// <param name="options">The client options.</param>
         /// <param name="serverConnection">The IMessageConnection instance to use.</param>
         /// <param name="connectionFactory">The IConnectionFactory instance to use.</param>
@@ -81,6 +86,7 @@ namespace Soulseek
         /// <param name="downloadTokenBucket">The ITokenBucket instance to use for downloads.</param>
 #pragma warning disable S3427 // Method overloads with default parameter values should not overlap
         internal SoulseekClient(
+            int minorVersion,
             SoulseekClientOptions options = null,
             IMessageConnection serverConnection = null,
             IConnectionFactory connectionFactory = null,
@@ -99,6 +105,13 @@ namespace Soulseek
             ITokenBucket uploadTokenBucket = null,
             ITokenBucket downloadTokenBucket = null)
         {
+            if (minorVersion < 100)
+            {
+                throw new ArgumentOutOfRangeException(nameof(minorVersion), "The minor version must be greater than 100");
+            }
+
+            MinorVersion = minorVersion;
+
 #pragma warning restore S3427 // Method overloads with default parameter values should not overlap
             Options = options ?? new SoulseekClientOptions();
 
@@ -230,6 +243,7 @@ namespace Soulseek
             ServerMessageHandler.RoomMessageReceived += (sender, e) => RoomMessageReceived?.Invoke(this, e);
             ServerMessageHandler.RoomTickerListReceived += (sender, e) => RoomTickerListReceived?.Invoke(this, e);
             ServerMessageHandler.RoomTickerAdded += (sender, e) => RoomTickerAdded?.Invoke(this, e);
+            ServerMessageHandler.OperatorInPrivateRoomAddedRemoved += (sender, e) => OperatorInPrivateRoomAddedRemoved?.Invoke(this, e);
             ServerMessageHandler.RoomTickerRemoved += (sender, e) => RoomTickerRemoved?.Invoke(this, e);
             ServerMessageHandler.PublicChatMessageReceived += (sender, e) => PublicChatMessageReceived?.Invoke(this, e);
             ServerMessageHandler.RoomJoined += (sender, e) => RoomJoined?.Invoke(this, e);
@@ -426,6 +440,11 @@ namespace Soulseek
         public event EventHandler<RoomTickerAddedEventArgs> RoomTickerAdded;
 
         /// <summary>
+        ///     Occurs when a user in a private room that we are in, has moderator privileges added or revoked.
+        /// </summary>
+        public event EventHandler<OperatorAddedRemovedEventArgs> OperatorInPrivateRoomAddedRemoved;
+
+        /// <summary>
         ///     Occurs when the server sends a list of tickers for a chat room.
         /// </summary>
         public event EventHandler<RoomTickerListReceivedEventArgs> RoomTickerListReceived;
@@ -454,6 +473,96 @@ namespace Soulseek
         ///     Occurs when a new search result is received.
         /// </summary>
         public event EventHandler<SearchResponseReceivedEventArgs> SearchResponseReceived;
+
+
+		// TODO2026 is this necessary?
+        public class ErrorLogEventArgs : EventArgs
+        {
+            public string Message;
+            public ErrorLogEventArgs(string msg)
+            {
+                Message = msg;
+            }
+        }
+
+        public static void InvokeErrorLogHandler(string msg)
+        {
+            ErrorLogHandler?.Invoke(null, new ErrorLogEventArgs(msg));
+        }
+
+        public static void InvokeDebugLogHandler(string msg)
+        {
+            DebugLogHandler?.Invoke(null, new ErrorLogEventArgs(msg));
+        }
+
+        public const string FailedToEstablishDirectOrIndirectStringLower = "failed to establish a direct or indirect";
+
+        public static event EventHandler<ErrorLogEventArgs> ErrorLogHandler;
+        public static event EventHandler<ErrorLogEventArgs> DebugLogHandler;
+
+        public static void ClearErrorLogHandler(object target)
+        {
+            if (ErrorLogHandler == null)
+            {
+                return;
+            }
+            else
+            {
+                foreach (Delegate d in ErrorLogHandler.GetInvocationList())
+                {
+                    if (d.Target.GetType() == target.GetType())
+                    {
+                        ErrorLogHandler -= (EventHandler<ErrorLogEventArgs>)d;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Is Transfer In Downloads.  If so we need to cancel it before retrying it.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        public bool IsTransferInDownloads(string username, string filename)
+        {
+            return Downloads.Any(d => d.Username == username && d.Filename == filename);
+        }
+
+        /// <summary>
+        /// If we are successfully listening
+        /// </summary>
+        /// <remarks>
+        /// This is useful because even if listening is enabled, a known failure is a "Address already in use" SocketException
+        /// </remarks>
+        /// <returns></returns>
+        public bool GetListeningState()
+        {
+            if(Listener==null)
+            {
+                return false;
+            }
+            return Listener.Listening;
+        }
+
+        /// <summary>
+        /// To stop listening
+        /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
+        /// <returns></returns>
+        public void StopListening()
+        {
+            if (Listener == null)
+            {
+                return;
+            }
+            if(Listener.Listening)
+            {
+                Listener.Stop();
+            }
+        }
 
         /// <summary>
         ///     Occurs when a search changes state.
@@ -556,6 +665,16 @@ namespace Soulseek
         /// </summary>
         public virtual string Username { get; private set; }
 
+        /// <summary>
+        ///     Gets the major version of the library.
+        /// </summary>
+        public int MajorVersion { get; } = Constants.MajorVersion;
+
+        /// <summary>
+        ///     Gets the configured minor version of the client.
+        /// </summary>
+        public int MinorVersion { get; private set; }
+
 #pragma warning disable SA1600 // Elements should be documented
         internal virtual IDistributedConnectionManager DistributedConnectionManager { get; }
         internal virtual IDistributedMessageHandler DistributedMessageHandler { get; }
@@ -609,9 +728,9 @@ namespace Soulseek
                 throw new ArgumentException("The private message ID must be greater than zero", nameof(privateMessageId));
             }
 
-            if (!State.HasFlag(SoulseekClientStates.Connected) || !State.HasFlag(SoulseekClientStates.LoggedIn))
+            if (!State.HasFlag(SoulseekClientStates.Connected) || (!State.HasFlag(SoulseekClientStates.LoggedIn)&& !State.HasFlag(SoulseekClientStates.LoggingIn)))
             {
-                throw new InvalidOperationException($"The server connection must be connected and logged in to acknowledge private messages (currently: {State})");
+                throw new InvalidOperationException($"The server connection must be connected and (logged in / logging in) to acknowledge private messages (currently: {State})");
             }
 
             return AcknowledgePrivateMessageInternalAsync(privateMessageId, cancellationToken ?? CancellationToken.None);
@@ -864,9 +983,16 @@ namespace Soulseek
             {
                 try
                 {
-                    ipAddress = Dns.GetHostEntry(address).AddressList[0];
+                    if (Options.AddressResolver != null)
+                    {
+                        ipAddress = Options.AddressResolver(address).Result;
+                    }
+                    else
+                    {
+                        ipAddress = Dns.GetHostEntry(address).AddressList[0];
+                    }
                 }
-                catch (SocketException ex)
+                catch (Exception ex) when (ex is SocketException || ex is OperationCanceledException)
                 {
                     throw new AddressException($"Failed to resolve address '{address}': {ex.Message}", ex);
                 }
@@ -883,9 +1009,9 @@ namespace Soulseek
                     listener = new Listener(Options.ListenIPAddress, Options.ListenPort, Options.IncomingConnectionOptions);
                     listener.Start();
                 }
-                catch (Exception)
+                catch (SocketException ex)
                 {
-                    throw new ListenException($"Failed to start listening on {Options.ListenIPAddress}:{Options.ListenPort}; the IP and/or port may be in use or are otherwise unavailable");
+                    InvokeErrorLogHandler("Socket Listener - precheck " + ex.Message + ex.StackTrace + Options.ListenPort);
                 }
                 finally
                 {
@@ -959,7 +1085,16 @@ namespace Soulseek
                     search.Cancel();
                 });
 
-                Searches.RemoveAndDisposeAll();
+                try
+                {
+                    Searches.RemoveAndDisposeAll();
+                }
+                catch(Exception)
+                {
+                    // Concurrency issue where key is removed between IsEmpty and Keys.First() causing exception.
+                    // if the exception occurs that means that we already disposed all searches and so it can be
+                    // safely ignored.
+                }
 
                 Username = null;
 
@@ -1557,7 +1692,7 @@ namespace Soulseek
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        public Task<IReadOnlyCollection<Directory>> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null)
+        public Task<IReadOnlyCollection<Directory>> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null, bool isLegacy = false)
         {
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -1576,7 +1711,7 @@ namespace Soulseek
 
             token ??= GetNextToken();
 
-            return GetDirectoryContentsInternalAsync(username, directoryName, token.Value, cancellationToken ?? CancellationToken.None);
+            return GetDirectoryContentsInternalAsync(username, directoryName, token.Value, cancellationToken ?? CancellationToken.None, isLegacy);
         }
 
         /// <summary>
@@ -1596,7 +1731,7 @@ namespace Soulseek
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="UserOfflineException">Thrown when the specified user is offline.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
-        public Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null)
+        public Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool wasFileLatin1Decoded = false, bool wasFolderLatin1Decoded = false)
         {
             if (string.IsNullOrWhiteSpace(username))
             {
@@ -1618,7 +1753,7 @@ namespace Soulseek
                 throw new TransferNotFoundException($"A download of {filename} from user {username} is not active");
             }
 
-            return GetDownloadPlaceInQueueInternalAsync(username, filename, cancellationToken ?? CancellationToken.None);
+            return GetDownloadPlaceInQueueInternalAsync(username, filename, cancellationToken ?? CancellationToken.None, wasFileLatin1Decoded, wasFolderLatin1Decoded);
         }
 
         /// <summary>
@@ -3064,9 +3199,18 @@ namespace Soulseek
 
                     if (Options.EnableListener)
                     {
-                        Listener = new Listener(Options.ListenIPAddress, Options.ListenPort, connectionOptions: Options.IncomingConnectionOptions);
-                        Listener.Accepted += ListenerHandler.HandleConnection;
-                        Listener.Start();
+                        try
+                        {
+                            Listener = new Listener(Options.ListenIPAddress, Options.ListenPort, connectionOptions: Options.IncomingConnectionOptions);
+                            Listener.Accepted += ListenerHandler.HandleConnection;
+                            Listener.Start();
+                        }
+                        catch (SocketException ex)
+                        {
+                            InvokeErrorLogHandler("Socket Listener " + ex.Message + ex.StackTrace + Options.ListenPort);
+                            Listener?.Stop();
+                            Listener = null;
+                        }
                     }
 
                     ServerConnection = ConnectionFactory.GetServerConnection(
@@ -3093,7 +3237,7 @@ namespace Soulseek
                     // users are notified of the login but the listen port is not yet set, resulting in the server reporting a
                     // port of 0 if the notified users attempt to connect (e.g. to re-request uploads). this is still possible,
                     // but much less likely. the server will not accept a listen port command prior to login.
-                    var loginBytes = new LoginRequest(username, password).ToByteArray()
+                    var loginBytes = new LoginRequest(MinorVersion, username, password).ToByteArray()
                         .Concat(new SetListenPortCommand(Options.ListenPort).ToByteArray())
                         .ToArray();
 
@@ -3257,7 +3401,7 @@ namespace Soulseek
                 if (transferRequestAcknowledgement.IsAllowed)
                 {
                     // the size of the remote file may have changed since it was sent in a search or browse response
-                    if (download.Size.HasValue && download.Size.Value != transferRequestAcknowledgement.FileSize)
+                    if (download.Size.HasValue && download.Size.Value != transferRequestAcknowledgement.FileSize && transferRequestAcknowledgement.FileSize > 0)
                     {
                         throw new TransferSizeMismatchException($"Transfer aborted: the remote size of {transferRequestAcknowledgement.FileSize} does not match expected size {download.Size}", download.Size.Value, transferRequestAcknowledgement.FileSize);
                     }
@@ -3598,7 +3742,7 @@ namespace Soulseek
             }
         }
 
-        private async Task<IReadOnlyCollection<Directory>> GetDirectoryContentsInternalAsync(string username, string directoryName, int token, CancellationToken cancellationToken)
+        private async Task<IReadOnlyCollection<Directory>> GetDirectoryContentsInternalAsync(string username, string directoryName, int token, CancellationToken cancellationToken, bool isLegacy = false)
         {
             try
             {
@@ -3608,7 +3752,7 @@ namespace Soulseek
                 var endpoint = await GetUserEndPointAsync(username, cancellationToken).ConfigureAwait(false);
 
                 var connection = await PeerConnectionManager.GetOrAddMessageConnectionAsync(username, endpoint, cancellationToken).ConfigureAwait(false);
-                await connection.WriteAsync(new FolderContentsRequest(token, directoryName), cancellationToken).ConfigureAwait(false);
+                await connection.WriteAsync(new FolderContentsRequest(token, directoryName, isLegacy), cancellationToken).ConfigureAwait(false);
 
                 var response = await contentsWait.ConfigureAwait(false);
 
@@ -3620,7 +3764,7 @@ namespace Soulseek
             }
         }
 
-        private async Task<int> GetDownloadPlaceInQueueInternalAsync(string username, string filename, CancellationToken cancellationToken)
+        private async Task<int> GetDownloadPlaceInQueueInternalAsync(string username, string filename, CancellationToken cancellationToken, bool isLegacy, bool wasFolderLatin1Decoded)
         {
             try
             {
@@ -3629,7 +3773,7 @@ namespace Soulseek
 
                 var endpoint = await GetUserEndPointAsync(username, cancellationToken).ConfigureAwait(false);
                 var connection = await PeerConnectionManager.GetOrAddMessageConnectionAsync(username, endpoint, cancellationToken).ConfigureAwait(false);
-                await connection.WriteAsync(new PlaceInQueueRequest(filename), cancellationToken).ConfigureAwait(false);
+                await connection.WriteAsync(new PlaceInQueueRequest(filename, isLegacy, wasFolderLatin1Decoded), cancellationToken).ConfigureAwait(false);
 
                 var response = await responseWait.ConfigureAwait(false);
 
@@ -3927,9 +4071,18 @@ namespace Soulseek
 
                     if (wasListening && Options.EnableListener)
                     {
-                        Listener = new Listener(Options.ListenIPAddress, Options.ListenPort, Options.IncomingConnectionOptions);
-                        Listener.Accepted += ListenerHandler.HandleConnection;
-                        Listener.Start();
+                        try
+                        {
+                            Listener = new Listener(Options.ListenIPAddress, Options.ListenPort, Options.IncomingConnectionOptions);
+                            Listener.Accepted += ListenerHandler.HandleConnection;
+                            Listener.Start();
+                        }
+                        catch (SocketException ex)
+                        {
+                            InvokeErrorLogHandler("Socket Listener - ReconfigureOptionsAsync " + ex.Message + ex.StackTrace + Options.ListenPort);
+                            Listener?.Stop();
+                            Listener = null;
+                        }
                     }
                 }
 

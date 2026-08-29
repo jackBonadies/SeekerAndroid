@@ -33,6 +33,7 @@ namespace Soulseek
         private DateTime? lastProgressTime = null;
         private bool speedInitialized = false;
         private TransferStates state = TransferStates.None;
+        public double currentSpeed;
         private long startOffset = 0;
 
         /// <summary>
@@ -271,7 +272,7 @@ namespace Soulseek
 
             if (ts.TotalMilliseconds >= progressUpdateLimit)
             {
-                var currentSpeed = (BytesTransferred - lastProgressBytes) / (ts.TotalMilliseconds / 1000d);
+                currentSpeed = (BytesTransferred - lastProgressBytes) / (ts.TotalMilliseconds / 1000d);
                 AverageSpeed = !speedInitialized ? currentSpeed : ((currentSpeed - AverageSpeed) * speedAlpha) + AverageSpeed;
                 speedInitialized = true;
                 lastProgressTime = DateTime.UtcNow;

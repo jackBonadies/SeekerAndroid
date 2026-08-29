@@ -21,6 +21,7 @@ namespace Soulseek
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Xml.Serialization;
     using Soulseek.Messaging.Messages;
 
     /// <summary>
@@ -53,6 +54,30 @@ namespace Soulseek
             LockedFiles = (lockedFileList?.ToList() ?? new List<File>()).AsReadOnly();
             LockedFileCount = LockedFiles.Count;
         }
+
+        public override bool Equals(object obj)
+        {
+            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+            {
+                return false;
+            }
+            if (this.Username  != ((SearchResponse)(obj)).Username)
+            {
+                return false;
+            }
+            if(this.Files.Count != 0 && ((SearchResponse)(obj)).Files.Count != 0)
+            {
+                return this.Files.First().Filename == ((SearchResponse)(obj)).Files.First().Filename;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public string cachedDominantFileType = null;
+        public double cachedCalcBitRate = double.NaN;
+
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SearchResponse"/> class.

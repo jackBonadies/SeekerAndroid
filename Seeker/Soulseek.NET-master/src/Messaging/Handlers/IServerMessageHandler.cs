@@ -117,6 +117,11 @@ namespace Soulseek.Messaging.Handlers
         event EventHandler<RoomMessageReceivedEventArgs> RoomMessageReceived;
 
         /// <summary>
+        ///     Occurs when an operator in a private room we are in is added or removed...
+        /// </summary>
+        event EventHandler<OperatorAddedRemovedEventArgs> OperatorInPrivateRoomAddedRemoved;
+
+        /// <summary>
         ///     Occurs when a chat room ticker is added.
         /// </summary>
         event EventHandler<RoomTickerAddedEventArgs> RoomTickerAdded;

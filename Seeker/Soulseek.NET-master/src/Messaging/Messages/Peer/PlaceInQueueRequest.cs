@@ -26,15 +26,28 @@ namespace Soulseek.Messaging.Messages
         ///     Initializes a new instance of the <see cref="PlaceInQueueRequest"/> class.
         /// </summary>
         /// <param name="filename">The filename to check.</param>
-        public PlaceInQueueRequest(string filename)
+        public PlaceInQueueRequest(string filename, bool isLegacy = false, bool isFolderNameLatin1Decoded = false)
         {
             Filename = filename;
+            IsLegacy = isLegacy;
+            IsFolderNameLatin1Decoded = isFolderNameLatin1Decoded;
         }
 
         /// <summary>
         ///     Gets the filename to check.
         /// </summary>
         public string Filename { get; }
+
+        /// <summary>
+        ///     Gets the filename to check.
+        /// </summary>
+        public bool IsLegacy { get; }
+
+        /// <summary>
+        ///     Gets the filename to check.
+        /// </summary>
+        public bool IsFolderNameLatin1Decoded { get; }
+
 
         /// <summary>
         ///     Creates a new instance of <see cref="PlaceInQueueRequest"/> from the specified <paramref name="bytes"/>.
@@ -64,7 +77,7 @@ namespace Soulseek.Messaging.Messages
         {
             return new MessageBuilder()
                 .WriteCode(MessageCode.Peer.PlaceInQueueRequest)
-                .WriteString(Filename)
+                .WriteString(Filename, this.IsLegacy, this.IsFolderNameLatin1Decoded)
                 .Build();
         }
     }

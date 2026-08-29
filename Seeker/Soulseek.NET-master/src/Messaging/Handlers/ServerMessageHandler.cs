@@ -147,6 +147,11 @@ namespace Soulseek.Messaging.Handlers
         public event EventHandler<RoomTickerAddedEventArgs> RoomTickerAdded;
 
         /// <summary>
+        ///     Occurs when a user in a private room that we are in, has moderator privileges added or revoked.
+        /// </summary>
+        public event EventHandler<OperatorAddedRemovedEventArgs> OperatorInPrivateRoomAddedRemoved;
+
+        /// <summary>
         ///     Occurs when the server sends a list of tickers for a chat room.
         /// </summary>
         public event EventHandler<RoomTickerListReceivedEventArgs> RoomTickerListReceived;
@@ -510,11 +515,13 @@ namespace Soulseek.Messaging.Handlers
                     case MessageCode.Server.PrivateRoomAddOperator:
                         var privateRoomAddOperatorResponse = PrivateRoomAddOperator.FromByteArray(message);
                         SoulseekClient.Waiter.Complete(new WaitKey(code, privateRoomAddOperatorResponse.RoomName, privateRoomAddOperatorResponse.Username));
+                        OperatorInPrivateRoomAddedRemoved?.Invoke(this, new Soulseek.OperatorAddedRemovedEventArgs(privateRoomAddOperatorResponse.RoomName, privateRoomAddOperatorResponse.Username, true));
                         break;
 
                     case MessageCode.Server.PrivateRoomRemoveOperator:
                         var privateRoomRemoveOperatorResponse = PrivateRoomRemoveOperator.FromByteArray(message);
                         SoulseekClient.Waiter.Complete(new WaitKey(code, privateRoomRemoveOperatorResponse.RoomName, privateRoomRemoveOperatorResponse.Username));
+                        OperatorInPrivateRoomAddedRemoved?.Invoke(this, new Soulseek.OperatorAddedRemovedEventArgs(privateRoomRemoveOperatorResponse.RoomName, privateRoomRemoveOperatorResponse.Username, false));
                         break;
 
                     case MessageCode.Server.KickedFromServer:

@@ -25,10 +25,13 @@ namespace Soulseek.Messaging.Messages
         /// <summary>
         ///     Initializes a new instance of the <see cref="LoginRequest"/> class.
         /// </summary>
+        /// <param name="minorVersion">The minor version of the client.</param>
         /// <param name="username">The username.</param>
         /// <param name="password">The password.</param>
-        public LoginRequest(string username, string password)
+        public LoginRequest(int minorVersion, string username, string password)
         {
+            MinorVersion = minorVersion;
+
             Username = username;
             Password = password;
 
@@ -43,7 +46,7 @@ namespace Soulseek.Messaging.Messages
         /// <summary>
         ///     Gets the minor client version.
         /// </summary>
-        public int MinorVersion { get; } = 100;
+        public int MinorVersion { get; }
 
         /// <summary>
         ///     Gets the password.
@@ -58,7 +61,7 @@ namespace Soulseek.Messaging.Messages
         /// <summary>
         ///     Gets the client version.
         /// </summary>
-        public int Version { get; } = 170;
+        public int Version { get; } = Constants.MajorVersion;
 
         /// <summary>
         ///     Constructs a <see cref="byte"/> array from this message.

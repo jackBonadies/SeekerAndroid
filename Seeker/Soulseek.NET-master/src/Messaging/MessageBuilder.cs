@@ -193,28 +193,81 @@ namespace Soulseek.Messaging
         ///     falling back to <see cref="CharacterEncoding.ISO88591"/> if encoding fails.
         /// </remarks>
         /// <param name="value">The value to write.</param>
+        /// <param name="attemptLatin1File">Whether to attempt Latin1 (necessary if SoulseekNS) or to use UTF8 (prevents string appearing incorrectly if any special characters like accents)</param>
+        /// <param name="attemptLatin1Folder">Whether to attempt Latin1 for folder portion.</param>
         /// <param name="encoding">The optional character encoding to use.</param>
         /// <returns>This MessageBuilder.</returns>
         /// <exception cref="InvalidOperationException">
         ///     Thrown when attempting to write additional data to a message that has been compressed.
         /// </exception>
-        public MessageBuilder WriteString(string value, CharacterEncoding encoding = null)
+        public MessageBuilder WriteString(string value, bool attemptLatin1File = false, bool attemptLatin1Folder = false, CharacterEncoding encoding = null)
         {
             encoding ??= CharacterEncoding.UTF8;
             byte[] bytes;
 
-            try
+            if(attemptLatin1File || attemptLatin1Folder)
             {
-                bytes = Encoding.GetEncoding(encoding, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetBytes(value);
+                // if when reading the filename, we failed to decode it as UTF-8 (which means the client sent a Latin1 string).
+                // then make sure to encode it the way we decoded it, so that they get the same byte sequence back.
+
+                try
+                {
+                    if(attemptLatin1File && attemptLatin1Folder)
+                    {
+                        bytes = Encoding.GetEncoding("ISO-8859-1", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetBytes(value);
+                    }
+                    else
+                    {
+                        int split = value.LastIndexOf('\\');
+                        string folderNameWithSlash = value.Substring(0, split + 1);
+                        string fileName = value.Substring(split + 1);
+                        if (attemptLatin1Folder)
+                        {
+                            bytes = Encoding.GetEncoding("ISO-8859-1", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetBytes(folderNameWithSlash);
+                        }
+                        else
+                        {
+                            bytes = Encoding.GetEncoding("UTF-8").GetBytes(folderNameWithSlash);
+                        }
+
+                        var previous = bytes.ToList();
+                        if (attemptLatin1File)
+                        {
+                            bytes = Encoding.GetEncoding("ISO-8859-1", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetBytes(fileName);
+                        }
+                        else
+                        {
+                            bytes = Encoding.GetEncoding("UTF-8").GetBytes(fileName);
+                        }
+
+                        foreach(byte b in bytes)
+                        {
+                            previous.Add(b);
+                        }
+
+                        bytes = previous.ToArray();
+                    }
+                }
+                catch (Exception)
+                {
+                    bytes = Encoding.GetEncoding("UTF-8").GetBytes(value);
+                }
             }
-            catch (Exception ex)
+            else
             {
-                // this should only happen if we attempt to write ISO-8859-1 and it fails, which in turn should only
-                // happen if there's an application error somewhere else (probably in whatever is calling this library)
-                // in this case we'll fail 'up' to UTF-8, instead of encoding to ISO-8859-1 while allowing replacements,
-                // which is almost certainly wrong.
-                bytes = Encoding.GetEncoding(CharacterEncoding.UTF8).GetBytes(value);
-                GlobalDiagnostic.Trace($"Failed to encode {encoding} for string {value}; resorted to fallback encoding {CharacterEncoding.UTF8} (base64: {Convert.ToBase64String(bytes)})", ex);
+                try
+                {
+                    bytes = Encoding.GetEncoding(encoding, EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetBytes(value);
+                }
+                catch (Exception ex)
+                {
+                    // this should only happen if we attempt to write ISO-8859-1 and it fails, which in turn should only
+                    // happen if there's an application error somewhere else (probably in whatever is calling this library)
+                    // in this case we'll fail 'up' to UTF-8, instead of encoding to ISO-8859-1 while allowing replacements,
+                    // which is almost certainly wrong.
+                    bytes = Encoding.GetEncoding(CharacterEncoding.UTF8).GetBytes(value);
+                    GlobalDiagnostic.Trace($"Failed to encode {encoding} for string {value}; resorted to fallback encoding {CharacterEncoding.UTF8} (base64: {Convert.ToBase64String(bytes)})", ex);
+                }
             }
 
             return WriteBytes(BitConverter.GetBytes(bytes.Length))

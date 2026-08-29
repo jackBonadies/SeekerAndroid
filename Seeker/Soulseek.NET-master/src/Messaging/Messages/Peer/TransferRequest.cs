@@ -29,12 +29,14 @@ namespace Soulseek.Messaging.Messages
         /// <param name="token">The unique token for the transfer.</param>
         /// <param name="filename">The name of the file being transferred.</param>
         /// <param name="fileSize">The size of the file being transferred.</param>
-        public TransferRequest(TransferDirection direction, int token, string filename, long fileSize = 0)
+        public TransferRequest(TransferDirection direction, int token, string filename, long fileSize = 0, bool isFileDecodedLatin1 = false, bool isFolderDecodedLatin1 = false)
         {
             Direction = direction;
             Token = token;
             Filename = filename;
             FileSize = fileSize;
+            IsFileDecodedLatin1 = isFileDecodedLatin1;
+            IsFolderDecodedLatin1 = isFolderDecodedLatin1;
         }
 
         /// <summary>
@@ -56,6 +58,13 @@ namespace Soulseek.Messaging.Messages
         ///     Gets the unique token for the transfer.
         /// </summary>
         public int Token { get; }
+
+        /// <summary>
+        ///     Gets whether it is legacy
+        /// </summary>
+        public bool IsFileDecodedLatin1 { get; }
+
+        public bool IsFolderDecodedLatin1 { get; }
 
         /// <summary>
         ///     Creates a new instance of <see cref="TransferRequest"/> from the specified <paramref name="bytes"/>.
@@ -96,7 +105,7 @@ namespace Soulseek.Messaging.Messages
                 .WriteCode(MessageCode.Peer.TransferRequest)
                 .WriteInteger((int)Direction)
                 .WriteInteger(Token)
-                .WriteString(Filename)
+                .WriteString(Filename, this.IsFileDecodedLatin1, this.IsFolderDecodedLatin1)
                 .WriteLong(FileSize)
                 .Build();
         }
