@@ -1,9 +1,6 @@
 ﻿// <copyright file="NewPassword.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham.
 //
-//     Copyright (c) 2021-2026 Jack Bonadies
-//     Modified: added GetUserStatsCommand message
-//
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
 //     the Free Software Foundation, version 3.
@@ -77,62 +74,4 @@ namespace Soulseek.Messaging.Messages
                 .Build();
         }
     }
-
-    /// <summary>
-    ///     The command and response to a password change.
-    /// </summary>
-    internal sealed class GetUserStatsCommand : IIncomingMessage, IOutgoingMessage
-    {
-        /// <summary>
-        ///     Initializes a new instance of the <see cref="GetUserStatsCommand"/> class.
-        /// </summary>
-        /// <param name="username">The new password.</param>
-        public GetUserStatsCommand(string username)
-        {
-            Username = username;
-        }
-
-        /// <summary>
-        ///     Gets the new password.
-        /// </summary>
-        public string Username { get; }
-
-        /// <summary>
-        ///     Creates a new instance of <see cref="NewPassword"/> from the specified <paramref name="bytes"/>.
-        /// </summary>
-        /// <param name="bytes">The byte array from which to parse.</param>
-        /// <returns>The parsed instance.</returns>
-        public static UserData FromByteArray(byte[] bytes)
-        {
-            var reader = new MessageReader<MessageCode.Server>(bytes);
-            var code = reader.ReadCode();
-
-            if (code != MessageCode.Server.GetUserStats)
-            {
-                throw new MessageException($"Message Code mismatch creating {nameof(MessageCode.Server.GetUserStats)} (expected: {(int)MessageCode.Server.GetUserStats}, received: {(int)code})");
-            }
-
-            var usrname = reader.ReadString();
-            var speed = reader.ReadInteger();
-            var uploadnum = reader.ReadLong();
-            var files = reader.ReadInteger();
-            var dirs = reader.ReadInteger();
-
-            return new UserData(usrname,UserPresence.Online,speed,uploadnum, files,dirs,"");
-        }
-
-        /// <summary>
-        ///     Constructs a <see cref="byte"/> array from this message.
-        /// </summary>
-        /// <returns>The constructed byte array.</returns>
-        public byte[] ToByteArray()
-        {
-            return new MessageBuilder()
-                .WriteCode(MessageCode.Server.GetUserStats)
-                .WriteString(Username)
-                .Build();
-        }
-    }
-
-
 }
