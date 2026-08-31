@@ -2,7 +2,7 @@
 //     Copyright (c) JP Dillingham.
 //
 //     Copyright (c) 2021-2026 Jack Bonadies
-//     Modified: added AddressResolver option and ADB_LOGCAT diagnostic level override
+//     Modified: added AddressResolver option
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
@@ -205,9 +205,6 @@ namespace Soulseek
             AutoAcknowledgePrivateMessages = autoAcknowledgePrivateMessages;
             AutoAcknowledgePrivilegeNotifications = autoAcknowledgePrivilegeNotifications;
             AcceptPrivateRoomInvitations = acceptPrivateRoomInvitations;
-#if ADB_LOGCAT
-            minimumDiagnosticLevel = DiagnosticLevel.Debug;
-#endif
             MinimumDiagnosticLevel = minimumDiagnosticLevel;
             StartingToken = startingToken;
 

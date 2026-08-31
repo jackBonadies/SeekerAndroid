@@ -29,10 +29,6 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
-    <DefineConstants>TRACE;ADB_LOGCAT</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <AdditionalFiles Include=".\.CodeAnalysis\stylecop.json" Link="Properties\stylecop.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>

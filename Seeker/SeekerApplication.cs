@@ -264,7 +264,11 @@ namespace Seeker
                 SeekerState.SoulseekClient = new SoulseekClient(
                     128,
                     new SoulseekClientOptions(
+#if ADB_LOGCAT
+                        minimumDiagnosticLevel: Soulseek.Diagnostics.DiagnosticLevel.Debug,
+#else
                         minimumDiagnosticLevel: PreferencesState.LogDiagnostics ? Soulseek.Diagnostics.DiagnosticLevel.Debug : Soulseek.Diagnostics.DiagnosticLevel.Info,
+#endif
                         messageTimeout: 30000,
                         enableListener: PreferencesState.ListenerEnabled,
                         autoAcknowledgePrivateMessages: false,
