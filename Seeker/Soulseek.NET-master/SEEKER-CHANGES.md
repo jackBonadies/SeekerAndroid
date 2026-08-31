@@ -38,7 +38,7 @@ By theme:
   hook (Android cannot always use `Dns.GetHostEntry`), and `SocketException` handling plus
   listener state/stop methods on `SoulseekClient`.
 - **Diagnostics and transfer state**: static error/debug log handlers on `SoulseekClient`, an
-  `ADB_LOGCAT` diagnostic-level override, exposed current transfer speed, and the additional
+  `ADB_LOGCAT` diagnostic-level override, and the additional
   `TransferStates` values (`UserOffline`, `CannotConnect`, `FallenFromQueue`, `SizeMismatch`).
 - **Project file**: `Release IzzySoft` configuration, the `ADB_LOGCAT` define, and
   `InternalsVisibleTo("Common")`.

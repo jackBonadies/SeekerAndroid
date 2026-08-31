@@ -1,9 +1,6 @@
 ﻿// <copyright file="TransferInternal.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham.
 //
-//     Copyright (c) 2021-2026 Jack Bonadies
-//     Modified: expose the current transfer speed
-//
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
 //     the Free Software Foundation, version 3.
@@ -42,7 +39,6 @@ namespace Soulseek
         private DateTime? lastProgressTime = null;
         private bool speedInitialized = false;
         private TransferStates state = TransferStates.None;
-        public double currentSpeed;
         private long startOffset = 0;
 
         /// <summary>
@@ -281,7 +277,7 @@ namespace Soulseek
 
             if (ts.TotalMilliseconds >= progressUpdateLimit)
             {
-                currentSpeed = (BytesTransferred - lastProgressBytes) / (ts.TotalMilliseconds / 1000d);
+                var currentSpeed = (BytesTransferred - lastProgressBytes) / (ts.TotalMilliseconds / 1000d);
                 AverageSpeed = !speedInitialized ? currentSpeed : ((currentSpeed - AverageSpeed) * speedAlpha) + AverageSpeed;
                 speedInitialized = true;
                 lastProgressTime = DateTime.UtcNow;
