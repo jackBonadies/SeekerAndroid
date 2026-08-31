@@ -1,6 +1,9 @@
 ﻿// <copyright file="ServerMessageHandler.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham.
 //
+//     Copyright (c) 2021-2026 Jack Bonadies
+//     Modified: added private room operator added/removed event and raised it from the operator message handlers
+//
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
 //     the Free Software Foundation, version 3.

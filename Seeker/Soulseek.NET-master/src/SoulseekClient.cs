@@ -1,6 +1,9 @@
 ﻿// <copyright file="SoulseekClient.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham.
 //
+//     Copyright (c) 2021-2026 Jack Bonadies
+//     Modified: added error and debug log handlers, address resolver support, listener state and stop methods, Latin-1 encoding parameters, and socket exception handling around the listener
+//
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
 //     the Free Software Foundation, version 3.

@@ -61,6 +61,7 @@ namespace Soulseek
             InactivityTimeout = inactivityTimeout;
 
             ProxyOptions = proxyOptions;
+
             ConfigureSocket = configureSocket ?? defaultConfigureSocket;
         }
 
