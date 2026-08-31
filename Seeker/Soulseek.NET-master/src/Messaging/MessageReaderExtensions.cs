@@ -2,7 +2,8 @@
 //     Copyright (c) JP Dillingham.
 //
 //     Copyright (c) 2021-2026 Jack Bonadies
-//     Modified: propagated Latin-1 decoding flags when reading files
+//     Modified: propagated Latin-1 decoding flags through the files and directories read
+//     from search responses and folder contents
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
@@ -46,7 +47,8 @@ namespace Soulseek.Messaging
         internal static File ReadFile(this MessageReader<MessageCode.Peer> reader, bool fileIsFullfilename = false, bool isDirectoryDecodedViaLatin1 = false)
         {
             var code = reader.ReadByte();
-            var filename = reader.ReadStringAndNoteEncoding(out bool isLatin1);
+            var (filename, filenameEncoding) = reader.ReadStringAndEncoding();
+            var isLatin1 = filenameEncoding == CharacterEncoding.ISO88591;
             var size = reader.ReadLong();
             var extension = reader.ReadString();
 
@@ -61,15 +63,6 @@ namespace Soulseek.Messaging
                     size = BitConverter.ToUInt32(sizeBytes.Take(4).ToArray(), 0);
                 }
             }
-
-            #if DEBUG
-
-            if(isLatin1)
-            {
-                
-            }
-
-            #endif
 
             var attributeCount = reader.ReadInteger();
             var attributeList = new List<FileAttribute>();
@@ -119,16 +112,8 @@ namespace Soulseek.Messaging
         /// <returns>The directory.</returns>
         internal static Directory ReadDirectory(this MessageReader<MessageCode.Peer> reader)
         {
-            var directoryName = reader.ReadStringAndNoteEncoding(out bool isDirectoryDecodedViaLatin1);
-
-            #if DEBUG
-
-            if(isDirectoryDecodedViaLatin1)
-            {
-
-            }
-
-            #endif
+            var (directoryName, directoryEncoding) = reader.ReadStringAndEncoding();
+            var isDirectoryDecodedViaLatin1 = directoryEncoding == CharacterEncoding.ISO88591;
 
             var fileCount = reader.ReadInteger();
 

@@ -1,9 +1,6 @@
 ﻿// <copyright file="MessageReader.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham.
 //
-//     Copyright (c) 2021-2026 Jack Bonadies
-//     Modified: added ReadStringAndNoteEncoding, which reports whether a string fell back to Latin-1
-//
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
 //     the Free Software Foundation, version 3.
@@ -248,37 +245,6 @@ namespace Soulseek.Messaging
 
             Position += length;
             return (retVal, encoding);
-        }
-
-        /// <summary>
-        ///     Reads a string at the head of the reader.
-        /// </summary>
-        /// <returns>The read string.</returns>
-        public string ReadStringAndNoteEncoding(out bool isDecodedViaLatin1)
-        {
-            var length = ReadInteger();
-
-            if (length > Payload.Length - Position)
-            {
-                throw new MessageReadException("Specified string length extends beyond the length of the message payload");
-            }
-
-            var bytes = Payload.Slice(Position, length).ToArray();
-            string retVal;
-
-            try
-            {
-                retVal = Encoding.GetEncoding("UTF-8", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetString(bytes);
-                isDecodedViaLatin1 = false;
-            }
-            catch (Exception)
-            {
-                retVal = Encoding.GetEncoding("ISO-8859-1").GetString(bytes);
-                isDecodedViaLatin1 = true;
-            }
-
-            Position += length;
-            return retVal;
         }
 
         /// <summary>

@@ -29,8 +29,8 @@ By theme:
 - **Latin-1 / mojibake handling** (the largest group): strings are decoded as UTF-8 with a
   Latin-1 fallback, and the flags recording which encoding was used are carried through
   `File`, `Directory` and `SearchResponse` so that outgoing messages re-encode filenames the
-  same way the peer sent them.  Touches `MessageBuilder`, `MessageReader`,
-  `MessageReaderExtensions`, the peer request messages, and the four search request messages.
+  same way the peer sent them.  Touches `MessageBuilder`, `MessageReaderExtensions` and the
+  peer request messages.
 - **Private room operators**: `OperatorAddedRemovedEventArgs` plus the
   `OperatorInPrivateRoomAddedRemoved` event on `ISoulseekClient` / `IServerMessageHandler` /
   `ServerMessageHandler`.
