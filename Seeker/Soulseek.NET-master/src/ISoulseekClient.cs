@@ -277,7 +277,6 @@ namespace Soulseek
         /// <remarks>Add a user to the server watch list with <see cref="WatchUserAsync(string, CancellationToken?)"/>.</remarks>
         event EventHandler<UserStatus> UserStatusChanged;
 
-
         /// <summary>
         ///     Gets the unresolved server address.
         /// </summary>
@@ -851,6 +850,7 @@ namespace Soulseek
         /// <param name="directoryName">The name of the directory to fetch.</param>
         /// <param name="token">The unique token for the operation.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <param name="isLegacy">Whether the directory name should be written as ISO-8859-1 rather than UTF-8.</param>
         /// <returns>The Task representing the asynchronous operation, including the directory contents.</returns>
         /// <exception cref="ArgumentException">
         ///     Thrown when the <paramref name="username"/> or <paramref name="directoryName"/> is null, empty, or consists only
@@ -870,6 +870,8 @@ namespace Soulseek
         /// <param name="username">The user whose queue to check.</param>
         /// <param name="filename">The file to check.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <param name="wasFileLatin1Decoded">Whether the filename should be written as ISO-8859-1 rather than UTF-8.</param>
+        /// <param name="wasFolderLatin1Decoded">Whether the directory portion should be written as ISO-8859-1.</param>
         /// <returns>The Task representing the asynchronous operation, including the current place of the file in the queue.</returns>
         /// <exception cref="ArgumentException">
         ///     Thrown when the <paramref name="username"/> or <paramref name="filename"/> is null, empty, or consists only of whitespace.
@@ -1419,13 +1421,18 @@ namespace Soulseek
         Task<UserData> WatchUserAsync(string username, CancellationToken? cancellationToken = null);
 
         /// <summary>
-        /// Is Transfer In Downloads. If so we need to cancel it before retrying it.
+        ///     Gets a value indicating whether a download of <paramref name="filename"/> from
+        ///     <paramref name="username"/> is tracked.  If so it must be cancelled before it can be retried.
         /// </summary>
+        /// <param name="username">The username of the peer.</param>
+        /// <param name="filename">The name of the file.</param>
+        /// <returns>A value indicating whether the transfer is tracked.</returns>
         bool IsTransferInDownloads(string username, string filename);
 
         /// <summary>
-        /// If we are successfully listening.
+        ///     Gets a value indicating whether the listener is running.
         /// </summary>
+        /// <returns>A value indicating whether the listener is running.</returns>
         bool GetListeningState();
     }
 }

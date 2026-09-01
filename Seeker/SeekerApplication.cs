@@ -302,11 +302,6 @@ namespace Seeker
             ChatroomController.Initialize();
 
 
-            #if DEBUG
-            SoulseekClient.ErrorLogHandler += SoulseekClient_ErrorLogHandler;
-            SoulseekClient.DebugLogHandler += DebugLogHandler;
-            #endif
-
 
             UPnpManager.Context = this;
             UPnpManager.Instance.SearchAndSetMappingIfRequired();
@@ -334,24 +329,6 @@ namespace Seeker
                 DiagnosticFileWriter.Unsubscribe();
                 AndroidEnvironment.UnhandledExceptionRaiser -= AndroidEnvironment_UnhandledExceptionRaiser;
             }
-        }
-
-        public static void DebugLogHandler(object sender, SoulseekClient.ErrorLogEventArgs e)
-        {
-            Logger.Debug(e.Message);
-        }
-
-        public static void SoulseekClient_ErrorLogHandler(object sender, SoulseekClient.ErrorLogEventArgs e)
-        {
-            if (e?.Message != null)
-            {
-                if (e.Message.Contains("Operation timed out"))
-                {
-                    //this happens to me all the time and it is literally fine
-                    return;
-                }
-            }
-            Logger.Firebase(e.Message);
         }
 
         private static void AndroidEnvironment_UnhandledExceptionRaiser(object sender, RaiseThrowableEventArgs e)

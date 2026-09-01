@@ -2,7 +2,7 @@
 //     Copyright (c) JP Dillingham.
 //
 //     Copyright (c) 2021-2026 Jack Bonadies
-//     Modified: added Latin-1 decoding flags for filename and folder, and a serialization constructor
+//     Modified: added Latin-1 decoding flags for filename and folder
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
@@ -42,6 +42,8 @@ namespace Soulseek
         /// <param name="size">The file size in bytes.</param>
         /// <param name="extension">The file extension.</param>
         /// <param name="attributeList">The optional list of <see cref="FileAttribute"/> s.</param>
+        /// <param name="isLatin1Decoded">Whether the filename was decoded as ISO-8859-1 rather than UTF-8.</param>
+        /// <param name="isDirectoryLatin1Decoded">Whether the directory portion of the name was decoded as ISO-8859-1.</param>
         public File(int code, string filename, long size, string extension, IEnumerable<FileAttribute> attributeList = null, bool isLatin1Decoded = false, bool isDirectoryLatin1Decoded = false)
         {
             Code = code;
@@ -79,12 +81,6 @@ namespace Soulseek
             }
         }
 
-        //for serializer
-        private File()
-        {
-
-        }
-
         /// <summary>
         ///     Gets the number of file <see cref="FileAttribute"/> s.
         /// </summary>
@@ -105,17 +101,15 @@ namespace Soulseek
         /// </summary>
         public int? BitRate { get; }
 
-
         /// <summary>
-        ///     Gets the file code.
+        ///     Gets a value indicating whether the filename was decoded as ISO-8859-1 rather than UTF-8.
         /// </summary>
-        [field: System.NonSerialized]
         public bool IsLatin1Decoded { get; }
 
         /// <summary>
-        ///     Gets the file code. If True it is.  If False, either no or do not know (consult Directory).
+        ///     Gets a value indicating whether the directory portion of the name was decoded as ISO-8859-1.  If false,
+        ///     either it was not, or it is not known here and <see cref="Directory.DecodedViaLatin1"/> must be consulted.
         /// </summary>
-        [field: System.NonSerialized]
         public bool IsDirectoryLatin1Decoded { get; }
 
         /// <summary>
@@ -129,7 +123,7 @@ namespace Soulseek
         public string Extension { get; }
 
         /// <summary>
-        ///     Gets the file name. 
+        ///     Gets the file name.
         ///     This will be decoded as the fullname including directory if from search response.
         ///     This will be decoded as just the filename if from browse response.
         /// </summary>

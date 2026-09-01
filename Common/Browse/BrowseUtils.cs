@@ -309,7 +309,7 @@ namespace Common.Browse
             }
             if (node.Data != null && node.Data.FileCount != 0)
             {
-                foreach (Soulseek.File f in node.Data.OrderedFiles)
+                foreach (Soulseek.File f in node.Data.Files.OrderBy(x => x.Filename))
                 {
                     items.Add(new DataItem(f, node));
                 }

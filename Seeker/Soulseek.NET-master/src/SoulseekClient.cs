@@ -2,7 +2,8 @@
 //     Copyright (c) JP Dillingham.
 //
 //     Copyright (c) 2021-2026 Jack Bonadies
-//     Modified: added error and debug log handlers, address resolver support, listener state and stop methods, Latin-1 encoding parameters, and socket exception handling around the listener
+//     Modified: added address resolver support, listener state and transfer lookup methods, Latin-1 encoding
+//     parameters, and socket exception handling around the listener
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
@@ -42,8 +43,6 @@ namespace Soulseek
     using Soulseek.Messaging.Messages;
     using Soulseek.Network;
     using Soulseek.Network.Tcp;
-
-    
 
     /// <summary>
     ///     A client for the Soulseek file sharing network.
@@ -484,67 +483,26 @@ namespace Soulseek
         public event EventHandler<SearchResponseReceivedEventArgs> SearchResponseReceived;
 
 
-		// TODO2026 is this necessary?
-        public class ErrorLogEventArgs : EventArgs
-        {
-            public string Message;
-            public ErrorLogEventArgs(string msg)
-            {
-                Message = msg;
-            }
-        }
-
-        public static void InvokeErrorLogHandler(string msg)
-        {
-            ErrorLogHandler?.Invoke(null, new ErrorLogEventArgs(msg));
-        }
-
-        public static void InvokeDebugLogHandler(string msg)
-        {
-            DebugLogHandler?.Invoke(null, new ErrorLogEventArgs(msg));
-        }
-
-        public const string FailedToEstablishDirectOrIndirectStringLower = "failed to establish a direct or indirect";
-
-        public static event EventHandler<ErrorLogEventArgs> ErrorLogHandler;
-        public static event EventHandler<ErrorLogEventArgs> DebugLogHandler;
-
-        public static void ClearErrorLogHandler(object target)
-        {
-            if (ErrorLogHandler == null)
-            {
-                return;
-            }
-            else
-            {
-                foreach (Delegate d in ErrorLogHandler.GetInvocationList())
-                {
-                    if (d.Target.GetType() == target.GetType())
-                    {
-                        ErrorLogHandler -= (EventHandler<ErrorLogEventArgs>)d;
-                    }
-                }
-            }
-        }
-
         /// <summary>
-        /// Is Transfer In Downloads.  If so we need to cancel it before retrying it.
+        ///     Gets a value indicating whether a download of <paramref name="filename"/> from
+        ///     <paramref name="username"/> is tracked.  If so it must be cancelled before it can be retried.
         /// </summary>
-        /// <param name="username"></param>
-        /// <param name="filename"></param>
-        /// <returns></returns>
+        /// <param name="username">The username of the peer.</param>
+        /// <param name="filename">The name of the file.</param>
+        /// <returns>A value indicating whether the transfer is tracked.</returns>
         public bool IsTransferInDownloads(string username, string filename)
         {
             return Downloads.Any(d => d.Username == username && d.Filename == filename);
         }
 
         /// <summary>
-        /// If we are successfully listening
+        ///     Gets a value indicating whether the listener is running.
         /// </summary>
         /// <remarks>
-        /// This is useful because even if listening is enabled, a known failure is a "Address already in use" SocketException
+        ///     This is useful because even when listening is enabled, a known failure is an "Address already in use"
+        ///     <see cref="System.Net.Sockets.SocketException"/>.
         /// </remarks>
-        /// <returns></returns>
+        /// <returns>A value indicating whether the listener is running.</returns>
         public bool GetListeningState()
         {
             if(Listener==null)
@@ -552,25 +510,6 @@ namespace Soulseek
                 return false;
             }
             return Listener.Listening;
-        }
-
-        /// <summary>
-        /// To stop listening
-        /// </summary>
-        /// <remarks>
-        /// 
-        /// </remarks>
-        /// <returns></returns>
-        public void StopListening()
-        {
-            if (Listener == null)
-            {
-                return;
-            }
-            if(Listener.Listening)
-            {
-                Listener.Stop();
-            }
         }
 
         /// <summary>
@@ -1020,7 +959,7 @@ namespace Soulseek
                 }
                 catch (SocketException ex)
                 {
-                    InvokeErrorLogHandler("Socket Listener - precheck " + ex.Message + ex.StackTrace + Options.ListenPort);
+                    Diagnostic.Warning($"Failed to start listening on {Options.ListenIPAddress}:{Options.ListenPort}; the IP and/or port may be in use or are otherwise unavailable: {ex.Message}", ex);
                 }
                 finally
                 {
@@ -1691,6 +1630,7 @@ namespace Soulseek
         /// <param name="directoryName">The name of the directory to fetch.</param>
         /// <param name="token">The unique token for the operation.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <param name="isLegacy">Whether the directory name should be written as ISO-8859-1 rather than UTF-8.</param>
         /// <returns>The Task representing the asynchronous operation, including the directory contents.</returns>
         /// <exception cref="ArgumentException">
         ///     Thrown when the <paramref name="username"/> or <paramref name="directoryName"/> is null, empty, or consists only
@@ -1730,6 +1670,8 @@ namespace Soulseek
         /// <param name="username">The user whose queue to check.</param>
         /// <param name="filename">The file to check.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <param name="wasFileLatin1Decoded">Whether the filename should be written as ISO-8859-1 rather than UTF-8.</param>
+        /// <param name="wasFolderLatin1Decoded">Whether the directory portion should be written as ISO-8859-1.</param>
         /// <returns>The Task representing the asynchronous operation, including the current place of the file in the queue.</returns>
         /// <exception cref="ArgumentException">
         ///     Thrown when the <paramref name="username"/> or <paramref name="filename"/> is null, empty, or consists only of whitespace.
@@ -3217,7 +3159,7 @@ namespace Soulseek
                         }
                         catch (SocketException ex)
                         {
-                            InvokeErrorLogHandler("Socket Listener " + ex.Message + ex.StackTrace + Options.ListenPort);
+                            Diagnostic.Warning($"Failed to start listening on {Options.ListenIPAddress}:{Options.ListenPort}; the IP and/or port may be in use or are otherwise unavailable: {ex.Message}", ex);
                             Listener?.Stop();
                             Listener = null;
                         }
@@ -4117,7 +4059,7 @@ namespace Soulseek
                         }
                         catch (SocketException ex)
                         {
-                            InvokeErrorLogHandler("Socket Listener - ReconfigureOptionsAsync " + ex.Message + ex.StackTrace + Options.ListenPort);
+                            Diagnostic.Warning($"Failed to resume listening on {Options.ListenIPAddress}:{Options.ListenPort} after reconfiguring options; the IP and/or port may be in use or are otherwise unavailable: {ex.Message}", ex);
                             Listener?.Stop();
                             Listener = null;
                         }

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2021 Seeker
  *
  * This file is part of Seeker
@@ -118,7 +118,7 @@ namespace Seeker
                     {
                         Exception e = userInfoTask.Exception;
 
-                        if (e.InnerException is SoulseekClientException && e.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
+                        if (e.InnerException is SoulseekClientException && e.InnerException.Message.ToLower().Contains(Common.Helpers.FailedToEstablishDirectOrIndirectStringLower))
                         {
                             SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.user_info_failed_conn), uname), ToastLength.Long);
                         }

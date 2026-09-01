@@ -36,6 +36,7 @@ namespace Soulseek.Messaging.Messages
         /// </summary>
         /// <param name="token">The unique token for the request.</param>
         /// <param name="directoryName">The directory to fetch.</param>
+        /// <param name="isLegacy">Whether the directory name should be written as ISO-8859-1 rather than UTF-8.</param>
         public FolderContentsRequest(int token, string directoryName, bool isLegacy)
         {
             DirectoryName = directoryName;
@@ -53,6 +54,9 @@ namespace Soulseek.Messaging.Messages
         /// </summary>
         public int Token { get; }
 
+        /// <summary>
+        ///     Gets a value indicating whether the directory name should be written as ISO-8859-1.
+        /// </summary>
         public bool IsLegacy { get; }
 
         /// <summary>

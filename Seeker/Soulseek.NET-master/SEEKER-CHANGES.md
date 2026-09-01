@@ -36,11 +36,22 @@ By theme:
   `ServerMessageHandler`.
 - **Android networking**: dual-mode IPv6 sockets in `Connection`, a `SoulseekClientOptions.AddressResolver`
   hook (Android cannot always use `Dns.GetHostEntry`), and `SocketException` handling plus
-  listener state/stop methods on `SoulseekClient`.
-- **Diagnostics and transfer state**: static error/debug log handlers on `SoulseekClient` and
-  the additional `TransferStates` values (`UserOffline`, `CannotConnect`, `FallenFromQueue`,
-  `SizeMismatch`).
+  `GetListeningState()` on `SoulseekClient` — a failed listener is reported through upstream's
+  own `Diagnostic` rather than throwing `ListenException` out of `ConnectAsync`.
+- **Transfer state**: the additional `TransferStates` values (`UserOffline`, `CannotConnect`,
+  `FallenFromQueue`, `SizeMismatch`), a `TransferSizeMismatchException` only when the peer
+  reports a non-zero size, and `IsTransferInDownloads()`.
+- **Search results**: `SearchResponse.cachedDominantFileType` / `cachedCalcBitRate`, a per-response
+  cache the app fills in.  This belongs in Seeker, not here — see the note below.
 - **Project file**: `Release IzzySoft` configuration and `InternalsVisibleTo("Common")`.
+
+### Known wart
+
+`SearchResponse.cachedDominantFileType` / `cachedCalcBitRate` are public mutable fields bolted
+onto an otherwise immutable upstream model, with 27 call sites in the app.  They are not
+persisted (`CustomMessagePackFormatters` ignores them), so moving them out is an app-side change
+only — a `ConditionalWeakTable<SearchResponse, …>` in `Common` would remove them from the fork
+entirely.
 
 ## Client version identifier
 

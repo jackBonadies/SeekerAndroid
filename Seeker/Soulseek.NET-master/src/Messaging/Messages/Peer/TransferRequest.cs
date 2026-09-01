@@ -38,6 +38,8 @@ namespace Soulseek.Messaging.Messages
         /// <param name="token">The unique token for the transfer.</param>
         /// <param name="filename">The name of the file being transferred.</param>
         /// <param name="fileSize">The size of the file being transferred.</param>
+        /// <param name="isFileDecodedLatin1">Whether the filename should be written as ISO-8859-1 rather than UTF-8.</param>
+        /// <param name="isFolderDecodedLatin1">Whether the directory portion should be written as ISO-8859-1.</param>
         public TransferRequest(TransferDirection direction, int token, string filename, long fileSize = 0, bool isFileDecodedLatin1 = false, bool isFolderDecodedLatin1 = false)
         {
             Direction = direction;
@@ -69,10 +71,13 @@ namespace Soulseek.Messaging.Messages
         public int Token { get; }
 
         /// <summary>
-        ///     Gets whether it is legacy
+        ///     Gets a value indicating whether the filename should be written as ISO-8859-1.
         /// </summary>
         public bool IsFileDecodedLatin1 { get; }
 
+        /// <summary>
+        ///     Gets a value indicating whether the directory portion of the filename should be written as ISO-8859-1.
+        /// </summary>
         public bool IsFolderDecodedLatin1 { get; }
 
         /// <summary>

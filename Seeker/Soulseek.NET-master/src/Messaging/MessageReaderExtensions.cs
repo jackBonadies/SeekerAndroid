@@ -43,6 +43,8 @@ namespace Soulseek.Messaging
         ///     Reads a file from the <paramref name="reader"/>.
         /// </summary>
         /// <param name="reader">The reader from which to read the file.</param>
+        /// <param name="fileIsFullfilename">Whether the filename read includes the directory.</param>
+        /// <param name="isDirectoryDecodedViaLatin1">Whether the enclosing directory name was decoded as ISO-8859-1.</param>
         /// <returns>The file.</returns>
         internal static File ReadFile(this MessageReader<MessageCode.Peer> reader, bool fileIsFullfilename = false, bool isDirectoryDecodedViaLatin1 = false)
         {

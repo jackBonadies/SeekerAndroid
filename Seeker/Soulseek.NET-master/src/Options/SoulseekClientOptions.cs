@@ -105,6 +105,7 @@ namespace Soulseek
         /// <param name="placeInQueueResolver">
         ///     The delegate used to resolve the <see cref="int"/> response for an incoming request.
         /// </param>
+        /// <param name="addressResolver">The delegate used to resolve an <see cref="IPAddress"/> from a hostname.</param>
         /// <param name="raiseEventsAsynchronously">(Experimental!) Raise events asynchronously to improve parallelism.</param>
         /// <exception cref="ArgumentOutOfRangeException">
         ///     Thrown when the value supplied for <paramref name="listenPort"/> is not between 1024 and 65535.
@@ -503,6 +504,7 @@ namespace Soulseek
         /// <param name="placeInQueueResolver">
         ///     The delegate used to resolve the <see cref="int"/> response for an incoming request.
         /// </param>
+        /// <param name="addressResolver">The delegate used to resolve an <see cref="IPAddress"/> from a hostname.</param>
         /// <returns>The cloned instance.</returns>
         internal SoulseekClientOptions With(
             bool? enableListener = null,

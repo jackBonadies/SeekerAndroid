@@ -9,6 +9,12 @@ namespace Common
     public class Helpers
     {
         /// <summary>
+        /// Fragment of the message Soulseek.NET puts on the SoulseekClientException it throws when
+        /// neither a direct nor an indirect connection to a peer could be established.
+        /// </summary>
+        public const string FailedToEstablishDirectOrIndirectStringLower = "failed to establish a direct or indirect";
+
+        /// <summary>
         /// Replaces d.Name.Contains(prevDirName) which fails for Mu, Music
         /// </summary>
         /// <param name="possibleChild"></param>
