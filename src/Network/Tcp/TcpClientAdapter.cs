@@ -300,7 +300,7 @@ namespace Soulseek.Network.Tcp
 
                 await WriteAsync(stream, connection.ToArray(), cancellationToken).ConfigureAwait(false);
 
-                var connectionResponse = await ReadAsync(stream, 4, CancellationToken.None).ConfigureAwait(false);
+                var connectionResponse = await ReadAsync(stream, 4, cancellationToken).ConfigureAwait(false);
 
                 if (connectionResponse[0] != SOCKS_5)
                 {
@@ -333,24 +333,24 @@ namespace Soulseek.Network.Tcp
                     switch (connectionResponse[3])
                     {
                         case IPV4:
-                            var boundIPBytes = await ReadAsync(stream, 4, CancellationToken.None).ConfigureAwait(false);
+                            var boundIPBytes = await ReadAsync(stream, 4, cancellationToken).ConfigureAwait(false);
                             boundAddress = new IPAddress(BitConverter.ToUInt32(boundIPBytes, 0)).ToString();
                             break;
 
                         case DOMAIN:
-                            var lengthBytes = await ReadAsync(stream, 1, CancellationToken.None).ConfigureAwait(false);
+                            var lengthBytes = await ReadAsync(stream, 1, cancellationToken).ConfigureAwait(false);
 
                             if (lengthBytes[0] == ERROR)
                             {
                                 throw new ProxyException("Invalid domain name");
                             }
 
-                            var boundDomainBytes = await ReadAsync(stream, lengthBytes[0], CancellationToken.None).ConfigureAwait(false);
+                            var boundDomainBytes = await ReadAsync(stream, lengthBytes[0], cancellationToken).ConfigureAwait(false);
                             boundAddress = Encoding.ASCII.GetString(boundDomainBytes);
                             break;
 
                         case IPV6:
-                            var boundIPv6Bytes = await ReadAsync(stream, 16, CancellationToken.None).ConfigureAwait(false);
+                            var boundIPv6Bytes = await ReadAsync(stream, 16, cancellationToken).ConfigureAwait(false);
                             boundAddress = new IPAddress(boundIPv6Bytes).ToString();
                             break;
 
@@ -363,7 +363,7 @@ namespace Soulseek.Network.Tcp
                     throw new ProxyException($"Invalid address response from server: {ex.Message}");
                 }
 
-                var boundPortBytes = await ReadAsync(stream, 2, CancellationToken.None).ConfigureAwait(false);
+                var boundPortBytes = await ReadAsync(stream, 2, cancellationToken).ConfigureAwait(false);
                 boundPort = (ushort)IPAddress.NetworkToHostOrder((short)BitConverter.ToUInt16(boundPortBytes, 0));
 
                 return (boundAddress, boundPort);

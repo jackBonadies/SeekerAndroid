@@ -2035,6 +2035,76 @@ namespace Soulseek.Tests.Unit.Client
             }
         }
 
+        [Trait("Category", "UploadFromStreamAsync")]
+        [Theory(DisplayName = "UploadFromStreamAsync passes governor CancellationToken to UploadTokenBucket"), AutoData]
+        public async Task UploadFromStreamAsync_Passes_Governor_CancellationToken_To_UploadTokenBucket(string username, IPEndPoint endpoint, string filename, int token)
+        {
+            // fix transfer size to 42.  this is less than the default buffer, so any request to the governor will be strictly 42.
+            var size = 42;
+
+            var options = new SoulseekClientOptions(messageTimeout: 5);
+
+            var response = new TransferResponse(token, size);
+            var responseWaitKey = new WaitKey(MessageCode.Peer.TransferResponse, username, token);
+
+            var waiter = new Mock<IWaiter>();
+            waiter.Setup(m => m.Wait<TransferResponse>(It.Is<WaitKey>(w => w.Equals(responseWaitKey)), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(response));
+            waiter.Setup(m => m.Wait<UserAddressResponse>(It.IsAny<WaitKey>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(new UserAddressResponse(username, endpoint.Address, endpoint.Port)));
+
+            var conn = new Mock<IMessageConnection>();
+            conn.Setup(m => m.State)
+                .Returns(ConnectionState.Connected);
+
+            // the connection invokes the governor with the token it was handed, which is not the token given to the
+            // transfer; stand in for it with a distinct token to ensure that's the one passed down to the bucket.
+            using (var governorTokenSource = new CancellationTokenSource())
+            {
+                var governorToken = governorTokenSource.Token;
+
+                var transferConn = new Mock<IConnection>();
+                transferConn.Setup(m => m.ReadAsync(8, It.IsAny<CancellationToken?>()))
+                    .Returns(Task.FromResult(BitConverter.GetBytes(0L)));
+                transferConn.Setup(m => m.WriteAsync(It.IsAny<long>(), It.IsAny<Stream>(), It.IsAny<Func<int, CancellationToken, Task<int>>>(), It.IsAny<Action<int, int, int>>(), It.IsAny<CancellationToken?>()))
+                    .Callback<long, Stream, Func<int, CancellationToken, Task<int>>, Action<int, int, int>, CancellationToken?>(async (length, inputStream, governor, reporter, cancellationToken) =>
+                    {
+                        await governor(size, governorToken);
+                    });
+
+                var connManager = new Mock<IPeerConnectionManager>();
+                connManager.Setup(m => m.GetOrAddMessageConnectionAsync(username, endpoint, It.IsAny<CancellationToken>()))
+                    .Returns(Task.FromResult(conn.Object));
+                connManager.Setup(m => m.GetTransferConnectionAsync(username, endpoint, token, It.IsAny<CancellationToken>()))
+                    .Returns(Task.FromResult(transferConn.Object));
+
+                var bucket = new Mock<ITokenBucket>();
+
+                using (var stream = new MemoryStream(new byte[size]))
+                using (var s = new SoulseekClient(minorVersion: 9999, options: options, waiter: waiter.Object, serverConnection: conn.Object, peerConnectionManager: connManager.Object, uploadTokenBucket: bucket.Object))
+                {
+                    s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+                    var tokenPassedToOptionsGovernor = default(CancellationToken);
+
+                    var txoptions = new TransferOptions(disposeInputStreamOnCompletion: false, maximumLingerTime: 0, governor: (tx, a, c) =>
+                    {
+                        tokenPassedToOptionsGovernor = c;
+                        return Task.FromResult(21);
+                    });
+
+                    var ex = await Record.ExceptionAsync(() => s.InvokeMethod<Task>("UploadFromStreamAsync", username, filename, size, new Func<long, Task<Stream>>((_) => Task.FromResult((Stream)stream)), token, txoptions, null));
+
+                    Assert.Null(ex);
+
+                    // both the governor supplied in options and the token bucket must be given the token with which the
+                    // governor was invoked, and not the token given to the transfer.
+                    Assert.Equal(governorToken, tokenPassedToOptionsGovernor);
+                    bucket.Verify(m => m.GetAsync(Math.Min(size, 21), governorToken), Times.Once);
+                }
+            }
+        }
+
         [Trait("Category", "UploadFromFileAsync")]
         [Theory(DisplayName = "UploadFromFileAsync throws TransferRejectedException when acknowledgement is disallowed and message contains 'File not shared'"), AutoData]
         public async Task UploadFromFileAsync_Throws_TransferRejectedException_When_Acknowledgement_Is_Disallowed_And_File_Not_Shared(string username, IPEndPoint endpoint, string filename, int token)

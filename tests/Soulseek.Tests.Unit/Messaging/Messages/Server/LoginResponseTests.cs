@@ -94,6 +94,65 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         }
 
         [Trait("Category", "Parse")]
+        [Fact(DisplayName = "Parse appends rejection detail to message on failure with detail")]
+        public void Parse_Appends_Rejection_Detail_To_Message_On_Failure_With_Detail()
+        {
+            var detail = RandomGuid;
+
+            var msg = new MessageBuilder()
+                .WriteCode(MessageCode.Server.Login)
+                .WriteByte(0)
+                .WriteString("INVALIDUSERNAME")
+                .WriteString(detail)
+                .Build();
+
+            var response = LoginResponse.FromByteArray(msg);
+
+            Assert.False(response.Succeeded);
+            Assert.Equal($"INVALIDUSERNAME: {detail}", response.Message);
+        }
+
+        [Trait("Category", "Parse")]
+        [Fact(DisplayName = "Parse does not throw on INVALIDUSERNAME failure without detail")]
+        public void Parse_Does_Not_Throw_On_Invalid_Username_Failure_Without_Detail()
+        {
+            var msg = new MessageBuilder()
+                .WriteCode(MessageCode.Server.Login)
+                .WriteByte(0)
+                .WriteString("INVALIDUSERNAME")
+                .Build();
+
+            LoginResponse response = null;
+
+            var ex = Record.Exception(() => response = LoginResponse.FromByteArray(msg));
+
+            Assert.Null(ex);
+
+            Assert.False(response.Succeeded);
+            Assert.Equal("INVALIDUSERNAME", response.Message);
+        }
+
+        [Trait("Category", "Parse")]
+        [Theory(DisplayName = "Parse does not append rejection detail to message on failure with blank detail")]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData("	")]
+        public void Parse_Does_Not_Append_Rejection_Detail_To_Message_On_Failure_With_Blank_Detail(string detail)
+        {
+            var msg = new MessageBuilder()
+                .WriteCode(MessageCode.Server.Login)
+                .WriteByte(0)
+                .WriteString("INVALIDUSERNAME")
+                .WriteString(detail)
+                .Build();
+
+            var response = LoginResponse.FromByteArray(msg);
+
+            Assert.False(response.Succeeded);
+            Assert.Equal("INVALIDUSERNAME", response.Message);
+        }
+
+        [Trait("Category", "Parse")]
         [Fact(DisplayName = "Parse returns expected data on success")]
         public void Parse_Returns_Expected_Data_On_Success()
         {

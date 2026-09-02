@@ -673,6 +673,62 @@ namespace Soulseek
         }
 
         /// <summary>
+        ///     Asynchronously adds the specified <paramref name="interest"/> to the list of the user's hated interests.
+        /// </summary>
+        /// <param name="interest">The interest to add.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous operation.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="interest"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        public Task AddHatedInterestAsync(string interest, CancellationToken? cancellationToken = null)
+        {
+            if (string.IsNullOrWhiteSpace(interest))
+            {
+                throw new ArgumentException("The interest must not be a null or empty string, or one consisting of only whitespace", nameof(interest));
+            }
+
+            if (!State.HasFlag(SoulseekClientStates.Connected) || !State.HasFlag(SoulseekClientStates.LoggedIn))
+            {
+                throw new InvalidOperationException($"The server connection must be connected and logged in to add a hated interest (currently: {State})");
+            }
+
+            return AddHatedInterestInternalAsync(interest, cancellationToken ?? CancellationToken.None);
+        }
+
+        /// <summary>
+        ///     Asynchronously adds the specified <paramref name="interest"/> to the list of the user's liked interests.
+        /// </summary>
+        /// <param name="interest">The interest to add.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous operation.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="interest"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        public Task AddLikedInterestAsync(string interest, CancellationToken? cancellationToken = null)
+        {
+            if (string.IsNullOrWhiteSpace(interest))
+            {
+                throw new ArgumentException("The interest must not be a null or empty string, or one consisting of only whitespace", nameof(interest));
+            }
+
+            if (!State.HasFlag(SoulseekClientStates.Connected) || !State.HasFlag(SoulseekClientStates.LoggedIn))
+            {
+                throw new InvalidOperationException($"The server connection must be connected and logged in to add a liked interest (currently: {State})");
+            }
+
+            return AddLikedInterestInternalAsync(interest, cancellationToken ?? CancellationToken.None);
+        }
+
+        /// <summary>
         ///     Asynchronously adds the specified <paramref name="username"/> to the list of members in the specified private <paramref name="roomName"/>.
         /// </summary>
         /// <param name="roomName">The room to which to add the user.</param>
@@ -2095,6 +2151,62 @@ namespace Soulseek
         }
 
         /// <summary>
+        ///     Asynchronously removes the specified <paramref name="interest"/> from the list of the user's hated interests.
+        /// </summary>
+        /// <param name="interest">The interest to remove.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous operation.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="interest"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        public Task RemoveHatedInterestAsync(string interest, CancellationToken? cancellationToken = null)
+        {
+            if (string.IsNullOrWhiteSpace(interest))
+            {
+                throw new ArgumentException("The interest must not be a null or empty string, or one consisting of only whitespace", nameof(interest));
+            }
+
+            if (!State.HasFlag(SoulseekClientStates.Connected) || !State.HasFlag(SoulseekClientStates.LoggedIn))
+            {
+                throw new InvalidOperationException($"The server connection must be connected and logged in to remove a hated interest (currently: {State})");
+            }
+
+            return RemoveHatedInterestInternalAsync(interest, cancellationToken ?? CancellationToken.None);
+        }
+
+        /// <summary>
+        ///     Asynchronously removes the specified <paramref name="interest"/> from the list of the user's liked interests.
+        /// </summary>
+        /// <param name="interest">The interest to remove.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous operation.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="interest"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        public Task RemoveLikedInterestAsync(string interest, CancellationToken? cancellationToken = null)
+        {
+            if (string.IsNullOrWhiteSpace(interest))
+            {
+                throw new ArgumentException("The interest must not be a null or empty string, or one consisting of only whitespace", nameof(interest));
+            }
+
+            if (!State.HasFlag(SoulseekClientStates.Connected) || !State.HasFlag(SoulseekClientStates.LoggedIn))
+            {
+                throw new InvalidOperationException($"The server connection must be connected and logged in to remove a liked interest (currently: {State})");
+            }
+
+            return RemoveLikedInterestInternalAsync(interest, cancellationToken ?? CancellationToken.None);
+        }
+
+        /// <summary>
         ///     Asynchronously removes the specified <paramref name="username"/> from the list of members in the specified private <paramref name="roomName"/>.
         /// </summary>
         /// <param name="roomName">The room from which to remove the user.</param>
@@ -2859,6 +2971,30 @@ namespace Soulseek
             catch (Exception ex) when (!(ex is TimeoutException) && !(ex is OperationCanceledException))
             {
                 throw new SoulseekClientException($"Failed to acknowledge privilege notification with ID {privilegeNotificationId}: {ex.Message}", ex);
+            }
+        }
+
+        private async Task AddHatedInterestInternalAsync(string interest, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await ServerConnection.WriteAsync(new HatedInterestAddCommand(interest), cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (!(ex is TimeoutException) && !(ex is OperationCanceledException))
+            {
+                throw new SoulseekClientException($"Failed to add hated interest {interest}: {ex.Message}", ex);
+            }
+        }
+
+        private async Task AddLikedInterestInternalAsync(string interest, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await ServerConnection.WriteAsync(new LikedInterestAddCommand(interest), cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (!(ex is TimeoutException) && !(ex is OperationCanceledException))
+            {
+                throw new SoulseekClientException($"Failed to add liked interest {interest}: {ex.Message}", ex);
             }
         }
 
@@ -4053,6 +4189,30 @@ namespace Soulseek
             }
         }
 
+        private async Task RemoveHatedInterestInternalAsync(string interest, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await ServerConnection.WriteAsync(new HatedInterestRemoveCommand(interest), cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (!(ex is TimeoutException) && !(ex is OperationCanceledException))
+            {
+                throw new SoulseekClientException($"Failed to remove hated interest {interest}: {ex.Message}", ex);
+            }
+        }
+
+        private async Task RemoveLikedInterestInternalAsync(string interest, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await ServerConnection.WriteAsync(new LikedInterestRemoveCommand(interest), cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (!(ex is TimeoutException) && !(ex is OperationCanceledException))
+            {
+                throw new SoulseekClientException($"Failed to remove liked interest {interest}: {ex.Message}", ex);
+            }
+        }
+
         private async Task RemovePrivateRoomMemberInternalAsync(string roomName, string username, CancellationToken cancellationToken)
         {
             try
@@ -4476,7 +4636,7 @@ namespace Soulseek
                         governor: async (requestedBytes, cancelToken) =>
                         {
                             var bytesGrantedByCaller = await options.Governor(new Transfer(upload), requestedBytes, cancelToken).ConfigureAwait(false);
-                            return await tokenBucket.GetAsync(Math.Min(requestedBytes, bytesGrantedByCaller), cancellationToken).ConfigureAwait(false);
+                            return await tokenBucket.GetAsync(Math.Min(requestedBytes, bytesGrantedByCaller), cancelToken).ConfigureAwait(false);
                         },
                         reporter: (attemptedBytes, grantedBytes, actualBytes) =>
                         {

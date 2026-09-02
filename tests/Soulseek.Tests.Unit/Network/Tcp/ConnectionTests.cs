@@ -516,6 +516,83 @@ namespace Soulseek.Tests.Unit.Network.Tcp
         }
 
         [Trait("Category", "Connect")]
+        [Theory(DisplayName = "Connect through proxy cancels pending CONNECT response reads when the given token is cancelled")]
+        [InlineData(new byte[] { })] // stall on the 4 byte connection response
+        [InlineData(new byte[] { 0x05, 0x00, 0x00, 0x01 })] // stall on the 4 byte IPv4 bound address
+        [InlineData(new byte[] { 0x05, 0x00, 0x00, 0x03 })] // stall on the 1 byte bound domain length
+        [InlineData(new byte[] { 0x05, 0x00, 0x00, 0x03, 0x04 })] // stall on the 4 byte bound domain
+        [InlineData(new byte[] { 0x05, 0x00, 0x00, 0x04 })] // stall on the 16 byte IPv6 bound address
+        [InlineData(new byte[] { 0x05, 0x00, 0x00, 0x01, 0x7F, 0x00, 0x00, 0x01 })] // stall on the 2 byte bound port
+        public async Task Connect_Through_Proxy_Cancels_Pending_Connect_Response_Reads(byte[] partialResponse)
+        {
+            var listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+
+            var proxyPort = ((IPEndPoint)listener.LocalEndpoint).Port;
+            var partialResponseSent = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            using (var proxyCancellationTokenSource = new CancellationTokenSource())
+            {
+                // a proxy that completes the SOCKS 5 handshake, sends a partial (or empty) CONNECT response, then stalls
+                var proxy = Task.Run(async () =>
+                {
+                    using (var server = await listener.AcceptTcpClientAsync())
+                    {
+                        var stream = server.GetStream();
+                        var buffer = new byte[1024];
+
+                        await stream.ReadAsync(buffer, 0, 3); // auth greeting
+                        await stream.WriteAsync(new byte[] { 0x05, 0x00 }, 0, 2); // anonymous auth accepted
+
+                        await stream.ReadAsync(buffer, 0, 10); // connect request
+
+                        if (partialResponse.Length > 0)
+                        {
+                            await stream.WriteAsync(partialResponse, 0, partialResponse.Length);
+                        }
+
+                        partialResponseSent.SetResult(true);
+
+                        await Task.Delay(Timeout.Infinite, proxyCancellationTokenSource.Token);
+                    }
+                });
+
+                try
+                {
+                    using (var cancellationTokenSource = new CancellationTokenSource())
+                    using (var adapter = new TcpClientAdapter())
+                    {
+                        var connect = adapter.ConnectThroughProxyAsync(IPAddress.Loopback, proxyPort, IPAddress.Loopback, 1, cancellationToken: cancellationTokenSource.Token);
+
+                        // wait for the proxy to stall, give the adapter a moment to consume what was sent and block on the
+                        // next read, then cancel
+                        await partialResponseSent.Task;
+                        await Task.Delay(500);
+
+                        await cancellationTokenSource.CancelAsync();
+
+                        // the read must be released by the cancellation; if the token isn't passed to it, this never completes
+                        var completed = await Task.WhenAny(connect, Task.Delay(10000));
+
+                        Assert.Same(connect, completed);
+
+                        var ex = await Record.ExceptionAsync(() => connect);
+
+                        Assert.NotNull(ex);
+                        Assert.IsType<ProxyException>(ex);
+                    }
+                }
+                finally
+                {
+                    await proxyCancellationTokenSource.CancelAsync();
+                    listener.Stop();
+
+                    await Record.ExceptionAsync(() => proxy);
+                }
+            }
+        }
+
+        [Trait("Category", "Connect")]
         [Theory(DisplayName = "Connect raises Connected event"), AutoData]
         public async Task Connect_Raises_Connected_Event(IPEndPoint endpoint)
         {

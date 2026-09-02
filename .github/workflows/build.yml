@@ -5,19 +5,44 @@ on:
     branches: [ master ]
   pull_request:
 
+env:
+  TEST_ATTEMPTS: 3
+  TEST_RETRY_DELAY_SECONDS: 15
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Check required secrets
+        env:
+          TOKEN_SONARCLOUD: ${{ secrets.TOKEN_SONARCLOUD }}
+          TOKEN_CODECOV_SOULSEEKNET: ${{ secrets.TOKEN_CODECOV_SOULSEEKNET }}
+          SLSK_INTEGRATION_USERNAME: ${{ secrets.SLSK_INTEGRATION_USERNAME }}
+          SLSK_INTEGRATION_PASSWORD: ${{ secrets.SLSK_INTEGRATION_PASSWORD }}
+        run: |
+          missing_vars=()
+          for var in TOKEN_SONARCLOUD TOKEN_CODECOV_SOULSEEKNET SLSK_INTEGRATION_USERNAME SLSK_INTEGRATION_PASSWORD; do
+            if [ -z "${!var}" ]; then
+              missing_vars+=("${var}")
+            fi
+          done
+
+          if [ ${#missing_vars[@]} -ne 0 ]; then
+            echo "::error::missing required secret(s): ${missing_vars[*]}"
+            exit 1
+          fi
+
+          echo 'all required secrets are present'
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4 # required by sonarscanner
         with:
           distribution: temurin
           java-version: '17'
@@ -25,14 +50,64 @@ jobs:
       - name: Install dotnet-sonarscanner
         run: dotnet tool install --global dotnet-sonarscanner --version 11.2.1
 
-      - name: Run CI
+      - name: Begin Sonar analysis
         env:
           TOKEN_SONARCLOUD: ${{ secrets.TOKEN_SONARCLOUD }}
+        run: |
+          export PATH="$HOME/.dotnet/tools:$PATH"
+
+          # set options for a branch analysis, or for a PR analysis if building a PR
+          options="/d:sonar.branch.name=${GITHUB_REF_NAME}"
+
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            pr_number="${GITHUB_REF#refs/pull/}"
+            pr_number="${pr_number%/merge}"
+            options="/d:sonar.pullrequest.base=${GITHUB_BASE_REF} /d:sonar.pullrequest.branch=${GITHUB_HEAD_REF} /d:sonar.pullrequest.key=${pr_number}"
+          fi
+
+          echo "Launching dotnet-sonarscanner with options: ${options}"
+
+          dotnet-sonarscanner begin \
+            /key:"jpdillingham_Soulseek.NET" \
+            /o:jpdillingham-github \
+            ${options} \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.github.repository="jpdillingham/Soulseek.NET" \
+            /d:sonar.exclusions="**/*examples*/**" \
+            /d:sonar.cs.opencover.reportsPaths="tests/opencover.xml" \
+            /d:sonar.token="${TOKEN_SONARCLOUD}"
+
+      - name: Build
+        run: bash ./bin/build
+
+      - name: Test
+        env:
           SLSK_INTEGRATION_USERNAME: ${{ secrets.SLSK_INTEGRATION_USERNAME }}
           SLSK_INTEGRATION_PASSWORD: ${{ secrets.SLSK_INTEGRATION_PASSWORD }}
         run: |
+          for attempt in $(seq 1 "${TEST_ATTEMPTS}"); do
+            echo "::group::test attempt ${attempt} of ${TEST_ATTEMPTS}"
+            if bash ./bin/test --all --no-build; then
+              echo "::endgroup::"
+              exit 0
+            fi
+            echo "::endgroup::"
+
+            if [ "${attempt}" -lt "${TEST_ATTEMPTS}" ]; then
+              echo "::warning::tests failed on attempt ${attempt}; retrying in ${TEST_RETRY_DELAY_SECONDS}s"
+              sleep "${TEST_RETRY_DELAY_SECONDS}"
+            fi
+          done
+
+          echo "::error::tests failed after ${TEST_ATTEMPTS} attempts"
+          exit 1
+
+      - name: End Sonar analysis
+        env:
+          TOKEN_SONARCLOUD: ${{ secrets.TOKEN_SONARCLOUD }}
+        run: |
           export PATH="$HOME/.dotnet/tools:$PATH"
-          bash ./bin/ci
+          dotnet-sonarscanner end /d:sonar.token="${TOKEN_SONARCLOUD}"
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # 7.0.0

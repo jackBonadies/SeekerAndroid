@@ -823,5 +823,65 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             Assert.Equal(username, reader.ReadString());
             Assert.False(reader.HasMoreData);
         }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "LikedInterestAddCommand")]
+        [Theory(DisplayName = "LikedInterestAddCommand constructs the correct message"), AutoData]
+        public void LikedInterestAddCommand_Constructs_The_Correct_Message(string interest)
+        {
+            var a = new LikedInterestAddCommand(interest);
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.LikedInterestAdd, code);
+            Assert.Equal(interest, reader.ReadString());
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "LikedInterestRemoveCommand")]
+        [Theory(DisplayName = "LikedInterestRemoveCommand constructs the correct message"), AutoData]
+        public void LikedInterestRemoveCommand_Constructs_The_Correct_Message(string interest)
+        {
+            var a = new LikedInterestRemoveCommand(interest);
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.LikedInterestRemove, code);
+            Assert.Equal(interest, reader.ReadString());
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "HatedInterestAddCommand")]
+        [Theory(DisplayName = "HatedInterestAddCommand constructs the correct message"), AutoData]
+        public void HatedInterestAddCommand_Constructs_The_Correct_Message(string interest)
+        {
+            var a = new HatedInterestAddCommand(interest);
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.HatedInterestAdd, code);
+            Assert.Equal(interest, reader.ReadString());
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "HatedInterestRemoveCommand")]
+        [Theory(DisplayName = "HatedInterestRemoveCommand constructs the correct message"), AutoData]
+        public void HatedInterestRemoveCommand_Constructs_The_Correct_Message(string interest)
+        {
+            var a = new HatedInterestRemoveCommand(interest);
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.HatedInterestRemove, code);
+            Assert.Equal(interest, reader.ReadString());
+        }
     }
 }
