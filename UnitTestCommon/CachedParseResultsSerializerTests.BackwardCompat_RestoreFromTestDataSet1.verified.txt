@@ -67,24 +67,6 @@
             Filename: file 2.txt,
             Size: 15
           }
-        ],
-        OrderedFiles: [
-          {
-            IsLatin1Decoded: false,
-            IsDirectoryLatin1Decoded: false,
-            Code: 1,
-            Extension: .txt,
-            Filename: file 1.txt,
-            Size: 13
-          },
-          {
-            IsLatin1Decoded: false,
-            IsDirectoryLatin1Decoded: false,
-            Code: 1,
-            Extension: .txt,
-            Filename: file 2.txt,
-            Size: 15
-          }
         ]
       },
       {
@@ -108,30 +90,11 @@
             Filename: file2 2.txt,
             Size: 20
           }
-        ],
-        OrderedFiles: [
-          {
-            IsLatin1Decoded: false,
-            IsDirectoryLatin1Decoded: false,
-            Code: 1,
-            Extension: .txt,
-            Filename: file2 1.txt,
-            Size: 17
-          },
-          {
-            IsLatin1Decoded: false,
-            IsDirectoryLatin1Decoded: false,
-            Code: 1,
-            Extension: .txt,
-            Filename: file2 2.txt,
-            Size: 20
-          }
         ]
       },
       {
         Name: mainFolder,
-        DecodedViaLatin1: false,
-        OrderedFiles: []
+        DecodedViaLatin1: false
       }
     ],
     DirectoryCount: 3
@@ -142,16 +105,6 @@
       DecodedViaLatin1: false,
       FileCount: 1,
       Files: [
-        {
-          IsLatin1Decoded: false,
-          IsDirectoryLatin1Decoded: false,
-          Code: 1,
-          Extension: .txt,
-          Filename: hidden_file_testing.txt,
-          Size: 20
-        }
-      ],
-      OrderedFiles: [
         {
           IsLatin1Decoded: false,
           IsDirectoryLatin1Decoded: false,
@@ -183,30 +136,11 @@
           Filename: hiddenfile2.txt,
           Size: 19
         }
-      ],
-      OrderedFiles: [
-        {
-          IsLatin1Decoded: false,
-          IsDirectoryLatin1Decoded: false,
-          Code: 1,
-          Extension: .txt,
-          Filename: hiddenfile1.txt,
-          Size: 18
-        },
-        {
-          IsLatin1Decoded: false,
-          IsDirectoryLatin1Decoded: false,
-          Code: 1,
-          Extension: .txt,
-          Filename: hiddenfile2.txt,
-          Size: 19
-        }
       ]
     },
     {
       Name: hiddenFolder,
-      DecodedViaLatin1: false,
-      OrderedFiles: []
+      DecodedViaLatin1: false
     }
   ],
   PresentableDirectoryNameToDirectoryUriMappings: [
