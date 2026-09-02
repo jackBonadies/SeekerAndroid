@@ -408,6 +408,7 @@
     <string name="invalid_username">Invalid username</string>
     <string name="invalid_password">Invalid password</string>
     <string name="user_too_long">Username must be under 30 characters</string>
+    <string name="user_no_leading_trailing_space">Username cannot have leading/trailing spaces</string>
     <string name="user_invalid_char">Username cannot contain special characters</string>
     <string name="network_unreachable">Network is unreachable</string>
     <string name="cannot_login">Cannot login</string>

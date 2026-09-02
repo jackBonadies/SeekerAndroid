@@ -271,9 +271,58 @@ namespace Seeker.Services
                 if (t.Exception.InnerExceptions[0] is LoginRejectedException lre)
                 {
                     string loginRejectedMessage = lre.Message;
-                    if (loginRejectedMessage != null && loginRejectedMessage.Contains("INVALIDUSERNAME"))
+                    string invalidUsername = "INVALIDUSERNAME";
+                    if (loginRejectedMessage != null && loginRejectedMessage.Contains(invalidUsername))
                     {
-                        msg = SeekerApplication.GetString(Resource.String.invalid_username);
+                        // Soulseek.NET bakes in "The server rejected login attempt: {msg}" so we strip it
+                        //   since Toasts must be short
+                        string soulseekNetPrefix = "The server rejected login attempt: ";
+                        if (loginRejectedMessage.StartsWith(soulseekNetPrefix))
+                        {
+                            msg = loginRejectedMessage.Substring(soulseekNetPrefix.Length);
+                        }
+                        else
+                        {
+                            msg = loginRejectedMessage;
+                        }
+
+                        // here we "localize" the English soulseek message for the end users locale
+                        // if not in this list then it might be a future message (not yet documented here:
+                        // https://nicotine-plus.org/doc/SLSKPROTOCOL.html#login-rejection-details) so 
+                        // just pass the server message along (will show as INVALIDUSERNAME: reason)
+                        if (msg.Contains("No leading and trailing spaces allowed in nick."))
+                        {
+                            msg = SeekerApplication.GetString(Resource.String.user_no_leading_trailing_space);
+                        } 
+                        else if (msg.Contains("Nick too long"))
+                        {
+                            // this msg is shared with frontend validation (we dont expect to get here)
+                            msg = SeekerApplication.GetString(Resource.String.user_too_long);
+                        }
+                        else if (msg.Contains("Invalid characters in nick"))
+                        {
+                            // this msg is shared with frontend validation (we dont expect to get here)
+                            msg = SeekerApplication.GetString(Resource.String.user_invalid_char);
+                        }
+                        else if (msg.Contains("Nick empty"))
+                        {
+                            // we shouldnt get here
+                            Logger.FirebaseError("Nick empty - this is unexpected", lre);
+                            msg = SeekerApplication.GetString(Resource.String.invalid_username);
+                        } 
+                        else
+                        {
+                            Logger.FirebaseError("INVALIDUSERNAME - unexpected message", lre);
+                            string invalidUsernamePrefix = invalidUsername + ": ";
+
+                            if (msg.StartsWith(invalidUsernamePrefix))
+                            {
+                                msg = msg.Substring(invalidUsernamePrefix.Length);
+                            }
+                            // results in "Invalid Username: {reason}" where Invalid Username is localized
+                            msg = SeekerApplication.GetString(Resource.String.invalid_username) + ": " + msg;
+                        }
+
                     }
                     else if (loginRejectedMessage != null && loginRejectedMessage.Contains("INVALIDPASS"))
                     {
