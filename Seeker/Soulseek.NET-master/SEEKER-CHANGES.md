@@ -31,4 +31,3 @@ Changes:
   reports a non-zero size, and `IsTransferInDownloads()`.
 - **Search results**: `SearchResponse.cachedDominantFileType` / `cachedCalcBitRate`, a per-response
   cache the app fills in for performance.
-- **Project file**: `InternalsVisibleTo("Common")`.

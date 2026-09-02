@@ -11,4 +11,17 @@
     <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
   </PropertyGroup>
 
+
+  <!--
+    Grants Soulseek.NET's internals to Common, for Common/MockSoulseekClient.cs only, since to effectively
+	Mock Soulseek.NET we need to access some internal members (i.e. create domain EventArgs)
+  -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'Soulseek'">
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Common</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+
+
 </Project>
