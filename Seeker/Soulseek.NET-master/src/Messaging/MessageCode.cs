@@ -350,12 +350,12 @@ namespace Soulseek.Messaging
             /// <summary>
             ///     51
             /// </summary>
-            InterestAdd = 51,
+            LikedInterestAdd = 51,
 
             /// <summary>
             ///     52
             /// </summary>
-            InterestRemove = 52,
+            LikedInterestRemove = 52,
 
             /// <summary>
             ///     54
@@ -671,11 +671,6 @@ namespace Soulseek.Messaging
             ///     1001
             /// </summary>
             CannotConnect = 1001,
-
-            /// <summary>
-            ///     1002
-            /// </summary>
-            CannotCreateRoom = 1002,
 
             /// <summary>
             ///     1003

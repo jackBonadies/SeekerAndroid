@@ -38,7 +38,6 @@ namespace Soulseek.Tests.Unit.Options
             bool enableDistributedNetwork,
             bool acceptDistributedChildren,
             int distributedChildLimit,
-            bool enableUploadQueue,
             int maximumConcurrentSearches,
             int maximumConcurrentUploads,
             int maximumUploadSpeed,
@@ -50,7 +49,8 @@ namespace Soulseek.Tests.Unit.Options
             bool autoAcknowledgePrivilegeNotifications,
             bool acceptPrivateRoomInvitations,
             DiagnosticLevel minimumDiagnosticLevel,
-            int startingToken)
+            int startingToken,
+            bool raiseEventsAsynchronously)
         {
             var serverConnectionOptions = new ConnectionOptions();
             var peerConnectionOptions = new ConnectionOptions();
@@ -105,7 +105,8 @@ namespace Soulseek.Tests.Unit.Options
                 directoryContentsResolver: directoryContentsResponseResolver,
                 userInfoResolver: userInfoResponseResolver,
                 enqueueDownload: enqueueDownloadAction,
-                placeInQueueResolver: placeInQueueResponseResolver);
+                placeInQueueResolver: placeInQueueResponseResolver,
+                raiseEventsAsynchronously: raiseEventsAsynchronously);
 
             Assert.Equal(enableListener, o.EnableListener);
             Assert.Equal(listenAddress, o.ListenIPAddress);
@@ -114,7 +115,6 @@ namespace Soulseek.Tests.Unit.Options
             Assert.Equal(enableDistributedNetwork, o.EnableDistributedNetwork);
             Assert.Equal(acceptDistributedChildren, o.AcceptDistributedChildren);
             Assert.Equal(distributedChildLimit, o.DistributedChildLimit);
-            Assert.Equal(enableUploadQueue, o.EnableDistributedNetwork);
             Assert.Equal(maximumConcurrentSearches, o.MaximumConcurrentSearches);
             Assert.Equal(maximumConcurrentUploads, o.MaximumConcurrentUploads);
             Assert.Equal(maximumUploadSpeed, o.MaximumUploadSpeed);
@@ -149,6 +149,8 @@ namespace Soulseek.Tests.Unit.Options
             Assert.Equal(userInfoResponseResolver, o.UserInfoResolver);
             Assert.Equal(enqueueDownloadAction, o.EnqueueDownload);
             Assert.Equal(placeInQueueResponseResolver, o.PlaceInQueueResolver);
+
+            Assert.Equal(raiseEventsAsynchronously, o.RaiseEventsAsynchronously);
 
             Assert.Equal(1, o.MaximumConcurrentUploadsPerUser);
         }
@@ -433,16 +435,25 @@ namespace Soulseek.Tests.Unit.Options
                 placeInQueueResolver: placeInQueueResponseResolver);
 
             var original = new SoulseekClientOptions(
+                maximumConcurrentSearches: 41,
                 maximumConcurrentUploads: 42,
                 maximumConcurrentDownloads: 24,
-                minimumDiagnosticLevel: DiagnosticLevel.None);
+                messageTimeout: 45,
+                minimumDiagnosticLevel: DiagnosticLevel.None,
+                startingToken: 47,
+                raiseEventsAsynchronously: true);
 
             var o = original.With(patch);
 
             // make sure the options that can't be patched did not change
+            Assert.Equal(41, o.MaximumConcurrentSearches);
             Assert.Equal(42, o.MaximumConcurrentUploads);
             Assert.Equal(24, o.MaximumConcurrentDownloads);
+            Assert.Equal(45, o.MessageTimeout);
             Assert.Equal(DiagnosticLevel.None, o.MinimumDiagnosticLevel);
+            Assert.Equal(47, o.StartingToken);
+            Assert.True(o.RaiseEventsAsynchronously);
+            Assert.Equal(1, o.MaximumConcurrentUploadsPerUser);
 
             Assert.Equal(enableListener, o.EnableListener);
             Assert.Equal(listenAddress, o.ListenIPAddress);
@@ -516,7 +527,16 @@ namespace Soulseek.Tests.Unit.Options
             var listenPort = rnd.Next(1024, 65535);
             var listenBacklog = rnd.Next(128, int.MaxValue);
 
-            var o = new SoulseekClientOptions().With(
+            var original = new SoulseekClientOptions(
+                maximumConcurrentSearches: 41,
+                maximumConcurrentUploads: 42,
+                maximumConcurrentDownloads: 24,
+                messageTimeout: 45,
+                minimumDiagnosticLevel: DiagnosticLevel.None,
+                startingToken: 47,
+                raiseEventsAsynchronously: true);
+
+            var o = original.With(
                 enableListener,
                 listenAddress,
                 listenPort,
@@ -579,6 +599,16 @@ namespace Soulseek.Tests.Unit.Options
             Assert.Equal(userInfoResponseResolver, o.UserInfoResolver);
             Assert.Equal(enqueueDownloadAction, o.EnqueueDownload);
             Assert.Equal(placeInQueueResponseResolver, o.PlaceInQueueResolver);
+
+            // make sure the options that can't be substituted did not change
+            Assert.Equal(41, o.MaximumConcurrentSearches);
+            Assert.Equal(42, o.MaximumConcurrentUploads);
+            Assert.Equal(24, o.MaximumConcurrentDownloads);
+            Assert.Equal(45, o.MessageTimeout);
+            Assert.Equal(DiagnosticLevel.None, o.MinimumDiagnosticLevel);
+            Assert.Equal(47, o.StartingToken);
+            Assert.True(o.RaiseEventsAsynchronously);
+            Assert.Equal(1, o.MaximumConcurrentUploadsPerUser);
         }
 
         [Trait("Category", "With")]

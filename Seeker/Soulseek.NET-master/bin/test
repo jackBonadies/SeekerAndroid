@@ -40,6 +40,28 @@ if [ "$run_unit" == false ] && [ "$run_integration" == false ]; then
   exit 1
 fi
 
+# integration tests sign in to the live network; if credentials are missing, warn and skip
+# them rather than failing, so that unit tests can still run
+if [ "$run_integration" == true ]; then
+  missing_vars=()
+  for var in SLSK_INTEGRATION_USERNAME SLSK_INTEGRATION_PASSWORD; do
+    if [ -z "${!var}" ]; then
+      missing_vars+=("${var}")
+    fi
+  done
+
+  if [ ${#missing_vars[@]} -ne 0 ]; then
+    echo "WARNING: skipping integration tests; missing environment variable(s): ${missing_vars[*]}"
+    run_integration=false
+
+    # nothing left to run, so don't exit 0 having tested nothing
+    if [ "$run_unit" == false ]; then
+      echo 'no tests left to run'
+      exit 1
+    fi
+  fi
+fi
+
 # if the caller passed --no-build through, trust them and skip our own staleness check
 no_build=false
 for arg in "${extra_args[@]}"; do

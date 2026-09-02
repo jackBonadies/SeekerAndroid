@@ -543,6 +543,7 @@ namespace Soulseek
                 enableDistributedNetwork: enableDistributedNetwork ?? EnableDistributedNetwork,
                 acceptDistributedChildren: acceptDistributedChildren ?? AcceptDistributedChildren,
                 distributedChildLimit: distributedChildLimit ?? DistributedChildLimit,
+                maximumConcurrentSearches: MaximumConcurrentSearches,
                 maximumConcurrentUploads: MaximumConcurrentUploads,
                 maximumUploadSpeed: maximumUploadSpeed ?? MaximumUploadSpeed,
                 maximumConcurrentDownloads: MaximumConcurrentDownloads,
@@ -567,7 +568,8 @@ namespace Soulseek
                 userInfoResolver: userInfoResolver ?? UserInfoResolver,
                 enqueueDownload: enqueueDownload ?? EnqueueDownload,
                 placeInQueueResolver: placeInQueueResolver ?? PlaceInQueueResolver,
-                addressResolver: addressResolver ?? AddressResolver);
+                addressResolver: addressResolver ?? AddressResolver,
+                raiseEventsAsynchronously: RaiseEventsAsynchronously);
         }
     }
 }
