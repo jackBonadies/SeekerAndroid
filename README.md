@@ -11,7 +11,7 @@
 
 Seeker is a [Soulseek](https://en.wikipedia.org/wiki/Soulseek) client for Android written in C# supporting downloading, searching (including wishlist and filters), sharing, messages, chatrooms, port forwarding, user info, privileges, and more.
 
-This work uses the [Soulseek.NET](https://github.com/jpdillingham/Soulseek.NET) library for communicating with Soulseek server and network peers.  It also references the unofficial [Soulseek Protocol Documentation](https://nicotine-plus.github.io/nicotine-plus/doc/SLSKPROTOCOL.html) implemented by the developers of the [Nicotine+](https://github.com/nicotine-plus/nicotine-plus) client.
+This work uses a modified version of the [Soulseek.NET](https://github.com/jpdillingham/Soulseek.NET) library for communicating with Soulseek server and network peers.  It also references the unofficial [Soulseek Protocol Documentation](https://nicotine-plus.github.io/nicotine-plus/doc/SLSKPROTOCOL.html) implemented by the developers of the [Nicotine+](https://github.com/nicotine-plus/nicotine-plus) client.
 
 - The Soulseek server, which makes this app possible, relies on donations. Donate: [here](https://www.slsknet.org/donate.php)
 
@@ -38,3 +38,6 @@ This app will always be completely free and open source software, no ads, no 'pr
 
 ---
 
+## License
+
+Seeker is licensed under the [GNU General Public License v3.0 only](LICENSE) (`GPL-3.0-only`), with Additional Terms pursuant to Section 7 of the GPLv3.
