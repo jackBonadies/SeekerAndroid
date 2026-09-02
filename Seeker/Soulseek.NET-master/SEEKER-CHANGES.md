@@ -31,4 +31,4 @@ Changes:
   reports a non-zero size, and `IsTransferInDownloads()`.
 - **Search results**: `SearchResponse.cachedDominantFileType` / `cachedCalcBitRate`, a per-response
   cache the app fills in for performance.
-- **Project file**: `Release IzzySoft` configuration and `InternalsVisibleTo("Common")`.
+- **Project file**: `InternalsVisibleTo("Common")`.

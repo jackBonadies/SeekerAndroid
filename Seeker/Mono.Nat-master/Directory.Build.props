@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
 
+  <!-- MSBuild imports only the nearest Directory.Build.props; chain up to the repo root. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
   <PropertyGroup>
     <Deterministic>true</Deterministic>
     <SignAssembly>true</SignAssembly>
