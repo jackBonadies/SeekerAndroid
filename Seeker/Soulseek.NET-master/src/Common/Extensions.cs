@@ -1,6 +1,9 @@
 ﻿// <copyright file="Extensions.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham.
 //
+//     Copyright (c) 2021-2026 Jack Bonadies
+//     Modified: fixed a race in RemoveAndDisposeAll
+//
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
 //     the Free Software Foundation, version 3.
@@ -81,9 +84,13 @@ namespace Soulseek
         {
             while (!concurrentDictionary.IsEmpty)
             {
-                if (concurrentDictionary.TryRemove(concurrentDictionary.Keys.First(), out var value))
+                // Keys returns a snapshot
+                foreach (var key in concurrentDictionary.Keys)
                 {
-                    value.Dispose();
+                    if (concurrentDictionary.TryRemove(key, out var value))
+                    {
+                        value.Dispose();
+                    }
                 }
             }
         }
