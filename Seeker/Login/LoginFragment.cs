@@ -194,9 +194,10 @@ namespace Seeker
             usernameInputLayout = rootView.FindViewById<TextInputLayout>(Resource.Id.usernameTextInputLayout);
             usernameTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
             usernameTextEdit.FocusChange += UiHelpers.OnFocusAdjustNothing;
+            usernameTextEdit.FocusChange += UsernameTextEdit_FocusChange;
             passwordTextEdit.TextChanged += UsernamePasswordTextEdit_TextChanged;
             passwordTextEdit.FocusChange += UiHelpers.OnFocusAdjustNothing;
-            bool hasError = ValidateUsername();
+            bool hasError = ValidateUsername(true);
             EnableDisableLoginButton(usernameTextEdit, passwordTextEdit, loginButton, hasError);
         }
 
@@ -440,13 +441,25 @@ namespace Seeker
 
         private readonly int[] All_Ascii = Enumerable.Range('\x1', 127).ToArray();
 
-        private void UsernamePasswordTextEdit_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
+        private void UsernameTextEdit_FocusChange(object sender, View.FocusChangeEventArgs e)
         {
-            bool hasError = ValidateUsername();
+            bool hasError = ValidateUsername(true);
             EnableDisableLoginButton(usernameTextEdit, passwordTextEdit, loginButton, hasError);
         }
 
-        private bool ValidateUsername()
+        private void UsernamePasswordTextEdit_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
+        {
+            // if typing in username do not validate trailing spaces (bc we dont want to flash errors while typing)
+            bool hasError = ValidateUsername(passwordTextEdit == sender);
+            EnableDisableLoginButton(usernameTextEdit, passwordTextEdit, loginButton, hasError);
+        }
+
+        /// <summary>
+        /// We dont check trailing space when text is changing (i.e. actively typing) to avoid flashing errors
+        /// </summary>
+        /// <param name="checkTrailingSpace"></param>
+        /// <returns></returns>
+        private bool ValidateUsername(bool checkTrailingSpace)
         {
             bool hasError = false;
             if (!string.IsNullOrEmpty(usernameTextEdit.Text))
@@ -455,6 +468,12 @@ namespace Seeker
                 if (uname.Length > 30)
                 {
                     usernameInputLayout.Error = this.GetString(Resource.String.user_too_long);
+                    hasError = true;
+                }
+                else if (uname.StartsWith(' ') || (checkTrailingSpace && uname.EndsWith(' ')))
+                {
+                    // https://nicotine-plus.org/doc/SLSKPROTOCOL.html#invalidusername
+                    usernameInputLayout.Error = this.GetString(Resource.String.user_no_leading_trailing_space);
                     hasError = true;
                 }
                 else
@@ -502,6 +521,12 @@ namespace Seeker
 
         public void LogInClick(object sender, EventArgs e)
         {
+            if (ValidateUsername(true))
+            {
+                EnableDisableLoginButton(usernameTextEdit, passwordTextEdit, loginButton, hasError: true);
+                return;
+            }
+
             if (string.IsNullOrEmpty(usernameTextEdit.Text) || string.IsNullOrEmpty(passwordTextEdit.Text))
             {
                 SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_empty_user_pass), ToastLength.Long);
