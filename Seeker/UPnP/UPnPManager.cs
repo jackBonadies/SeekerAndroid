@@ -21,20 +21,21 @@ namespace Seeker.UPnP
         public bool Feedback = false;
 
         public static DateTime LastSetTime = DateTime.MinValue;
-        public static int LastSetLifeTime = -1; //sec
+        public static int LastSetLifeTimeSeconds = -1; //sec
+        public const int MinimumLifetimeSeconds = 20 * 60; //sec
         public static int LastSetPort = -1;
         public static string LastSetLocalIP = string.Empty;
 
         public static void SaveUpnpState()
         {
-            PreferencesManager.SaveUPnPState(LastSetTime.Ticks, LastSetLifeTime, LastSetPort, LastSetLocalIP);
+            PreferencesManager.SaveUPnPState(LastSetTime.Ticks, LastSetLifeTimeSeconds, LastSetPort, LastSetLocalIP);
         }
 
         public static void RestoreUpnpState()
         {
             PreferencesManager.RestoreUPnPState(out long ticks, out int lifetime, out int port, out string localIP);
             LastSetTime = new DateTime(ticks);
-            LastSetLifeTime = lifetime;
+            LastSetLifeTimeSeconds = lifetime;
             LastSetPort = port;
             LastSetLocalIP = localIP;
         }
@@ -190,7 +191,7 @@ namespace Seeker.UPnP
                     Feedback = false;
                     return;
                 }
-                if (LastSetLifeTime != -1 && LastSetTime.AddSeconds(LastSetLifeTime / 2.0) > DateTime.UtcNow && LastSetPort == PreferencesState.ListenerPort && IsLocalIPsame())
+                if (LastSetLifeTimeSeconds != -1 && LastSetTime.AddSeconds(LastSetLifeTimeSeconds / 2.0) > DateTime.UtcNow && LastSetPort == PreferencesState.ListenerPort && IsLocalIPsame())
                 {
                     Logger.Debug("Renew Mapping Later... we already have a good one..");
                     RunningStatus = UPnPRunningStatus.AlreadyMapped;
@@ -218,7 +219,7 @@ namespace Seeker.UPnP
             Logger.Debug("renewing mapping");
             try
             {
-                if (LastSetLifeTime != -1 && LastSetPort != -1 && LastSetTime != DateTime.MinValue)
+                if (LastSetLifeTimeSeconds != -1 && LastSetPort != -1 && LastSetTime != DateTime.MinValue)
                 {
                     if (RenewMappingTimer == null)
                     {
@@ -226,7 +227,7 @@ namespace Seeker.UPnP
                         RenewMappingTimer.AutoReset = false;//since this function will get called again anyway.
                         RenewMappingTimer.Elapsed += RenewMappingTimer_Elapsed;
                     }
-                    RenewMappingTimer.Interval = Math.Max(LastSetLifeTime * 1000 / 2, 3600 * 1000 * 2); //at least two hours (for now).  divided by 2!
+                    RenewMappingTimer.Interval = Math.Max(LastSetLifeTimeSeconds * 1000 / 2, MinimumLifetimeSeconds * 1000); // at least 20 mins (for now).  divided by 2!
                     RenewMappingTimer.Start();
                 }
             }
@@ -416,18 +417,18 @@ namespace Seeker.UPnP
 
                     //set lifetime and last set.
                     LastSetTime = DateTime.UtcNow;
-                    LastSetLifeTime = actualMapping.Lifetime; //TODO: if two devices found get the min...
+                    LastSetLifeTimeSeconds = actualMapping.Lifetime; //TODO: if two devices found get the min...
 
                     //since we use the lifetime value to make decisions and schedule remapping we need to deal with very low values or 0.
                     //0 means indeterminate, but still may want to remap occasionally...
-                    if (LastSetLifeTime == 0)
+                    if (LastSetLifeTimeSeconds == 0)
                     {
-                        LastSetLifeTime = 4 * 3600;
+                        LastSetLifeTimeSeconds = 4 * 3600;
                     }
-                    else if (LastSetLifeTime < 20 * 60) // 20 minutes is about the lowest we see in practice
+                    else if (LastSetLifeTimeSeconds < MinimumLifetimeSeconds) // 20 minutes is about the lowest we see in practice
                     {
-                        Logger.Firebase("less than 20 mins: " + LastSetLifeTime); //20 mins
-                        LastSetLifeTime = 2 * 60;
+                        Logger.Firebase("less than 20 mins: " + LastSetLifeTimeSeconds);
+                        LastSetLifeTimeSeconds = MinimumLifetimeSeconds;
                     }
 
                     LastSetLocalIP = LocalIP;
