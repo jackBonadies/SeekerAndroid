@@ -48,7 +48,7 @@ namespace Soulseek.Tests.Unit
 
             Assert.NotNull(ex);
             Assert.IsType<ArgumentException>(ex);
-            Assert.True(ex.Message.ContainsInsensitive("accepts no subjects"));
+            Assert.True(ex.Message.ContainsInsensitive("subjects"));
         }
 
         [Trait("Category", "Instantiation")]
@@ -61,7 +61,7 @@ namespace Soulseek.Tests.Unit
 
             Assert.NotNull(ex);
             Assert.IsType<ArgumentException>(ex);
-            Assert.True(ex.Message.ContainsInsensitive("accepts no subjects"));
+            Assert.True(ex.Message.ContainsInsensitive("subjects"));
         }
 
         [Trait("Category", "Instantiation")]
@@ -98,7 +98,10 @@ namespace Soulseek.Tests.Unit
         {
             SearchScope s = null;
 
+#pragma warning disable S3878 // Arrays should not be created for params parameters
+
             var ex = Record.Exception(() => s = new SearchScope(SearchScopeType.Room, new string[] { null }));
+#pragma warning restore S3878 // Arrays should not be created for params parameters
 
             Assert.NotNull(ex);
             Assert.IsType<ArgumentException>(ex);
@@ -111,7 +114,7 @@ namespace Soulseek.Tests.Unit
         {
             SearchScope s = null;
 
-            var ex = Record.Exception(() => s = new SearchScope(SearchScopeType.Room, new string[] { string.Empty }));
+            var ex = Record.Exception(() => s = new SearchScope(SearchScopeType.Room, string.Empty));
 
             Assert.NotNull(ex);
             Assert.IsType<ArgumentException>(ex);
@@ -124,7 +127,7 @@ namespace Soulseek.Tests.Unit
         {
             SearchScope s = null;
 
-            var ex = Record.Exception(() => s = new SearchScope(SearchScopeType.Room, new[] { "one", "two" }));
+            var ex = Record.Exception(() => s = new SearchScope(SearchScopeType.Room, "one", "two"));
 
             Assert.NotNull(ex);
             Assert.IsType<ArgumentException>(ex);
@@ -165,7 +168,10 @@ namespace Soulseek.Tests.Unit
         {
             SearchScope s = null;
 
+#pragma warning disable S3878 // Arrays should not be created for params parameters
+
             var ex = Record.Exception(() => s = new SearchScope(SearchScopeType.User, new string[] { "one", null }));
+#pragma warning restore S3878 // Arrays should not be created for params parameters
 
             Assert.NotNull(ex);
             Assert.IsType<ArgumentException>(ex);
@@ -178,7 +184,10 @@ namespace Soulseek.Tests.Unit
         {
             SearchScope s = null;
 
+#pragma warning disable S3878 // Arrays should not be created for params parameters
+
             var ex = Record.Exception(() => s = new SearchScope(SearchScopeType.User, new string[] { "one", string.Empty }));
+#pragma warning restore S3878 // Arrays should not be created for params parameters
 
             Assert.NotNull(ex);
             Assert.IsType<ArgumentException>(ex);

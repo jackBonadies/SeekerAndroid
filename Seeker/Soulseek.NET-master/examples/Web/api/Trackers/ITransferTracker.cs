@@ -17,9 +17,9 @@
         /// <summary>
         ///     Adds or updates a tracked transfer.
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="transfer"></param>
         /// <param name="cancellationTokenSource"></param>
-        void AddOrUpdate(TransferEventArgs args, CancellationTokenSource cancellationTokenSource);
+        void AddOrUpdate(Transfer transfer, CancellationTokenSource cancellationTokenSource);
 
         /// <summary>
         ///     Removes a tracked transfer.

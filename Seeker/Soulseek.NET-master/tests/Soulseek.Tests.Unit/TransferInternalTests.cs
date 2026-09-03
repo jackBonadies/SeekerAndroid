@@ -19,6 +19,8 @@ namespace Soulseek.Tests.Unit
 {
     using System;
     using System.Net;
+    using System.Threading;
+
     using AutoFixture.Xunit2;
     using Moq;
     using Soulseek.Network.Tcp;
@@ -59,6 +61,8 @@ namespace Soulseek.Tests.Unit
             Assert.Null(d.RemoteToken);
             Assert.Equal(options, d.Options);
             Assert.Equal(0, d.StartOffset);
+            Assert.Null(d.Exception);
+            Assert.NotNull(d.RemoteTaskCompletionSource);
         }
 
         [Trait("Category", "Properties")]
@@ -122,6 +126,107 @@ namespace Soulseek.Tests.Unit
         }
 
         [Trait("Category", "State")]
+        [Fact(DisplayName = "State transition into InProgress sets StartTime")]
+        internal void State_Transition_Into_InProgress_Sets_StartTime()
+        {
+            var d = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0);
+
+            Assert.Null(d.StartTime);
+
+            d.State = TransferStates.InProgress;
+
+            Assert.NotNull(d.StartTime);
+        }
+
+        [Trait("Category", "State")]
+        [Fact(DisplayName = "Subsequent state transition into InProgress does not change StartTime")]
+        internal void Subsequent_State_Transition_Into_InProgress_Does_Not_Change_StartTime()
+        {
+            var d = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0);
+
+            d.State = TransferStates.InProgress;
+            var first = d.StartTime;
+
+#pragma warning disable S2925 // "Thread.Sleep" should not be used in tests
+            Thread.Sleep(1);
+#pragma warning restore S2925 // "Thread.Sleep" should not be used in tests
+
+            d.State = TransferStates.InProgress;
+
+            Assert.Equal(first, d.StartTime);
+        }
+
+        [Trait("Category", "State")]
+        [Fact(DisplayName = "State transition into Completed sets EndTime")]
+        internal void State_Transition_Into_Completed_Sets_EndTime()
+        {
+            var d = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0);
+            d.State = TransferStates.InProgress;
+
+            Assert.Null(d.EndTime);
+
+            d.State = TransferStates.Completed | TransferStates.Succeeded;
+
+            Assert.NotNull(d.EndTime);
+        }
+
+        [Trait("Category", "State")]
+        [Fact(DisplayName = "Subsequent state transition into Completed does not change EndTime")]
+        internal void Subsequent_State_Transition_Into_Completed_Does_Not_Change_EndTime()
+        {
+            var d = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0);
+
+            d.State = TransferStates.Completed;
+            var first = d.EndTime;
+
+#pragma warning disable S2925 // "Thread.Sleep" should not be used in tests
+            Thread.Sleep(1);
+#pragma warning restore S2925 // "Thread.Sleep" should not be used in tests
+
+            d.State = TransferStates.Completed;
+
+            Assert.Equal(first, d.EndTime);
+        }
+
+        [Trait("Category", "State")]
+        [Fact(DisplayName = "State transition into Completed sets StartTime if transfer never went InProgress")]
+        internal void State_Transition_Into_Completed_Sets_StartTime_If_Transfer_Never_Went_InProgress()
+        {
+            var d = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0);
+
+            Assert.Null(d.StartTime);
+
+            d.State = TransferStates.Completed | TransferStates.Succeeded;
+
+            Assert.NotNull(d.EndTime);
+            Assert.NotNull(d.StartTime);
+            Assert.Equal(d.StartTime, d.EndTime);
+        }
+
+        [Trait("Category", "State")]
+        [Fact(DisplayName = "State transition into Completed updates progress")]
+        internal void State_Transition_Into_Completed_Updates_Progress()
+        {
+            var d = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0)
+            {
+                Size = 9000,
+            };
+
+            // set BytesTransferred with a 'backdoor' to avoid calling UpdateProgress
+            d.SetProperty(nameof(d.BytesTransferred), 4500);
+
+            // hack in a start time to make the average math produce something greater than 0
+            d.SetProperty(nameof(d.StartTime), DateTime.UtcNow.AddSeconds(-1));
+
+            // ensure average speed has not been set yet
+            Assert.Equal(0, d.AverageSpeed);
+
+            d.State = TransferStates.Completed | TransferStates.Succeeded;
+
+            Assert.True(d.AverageSpeed > 0);
+        }
+
+        [Trait("Category", "State")]
         [Fact(DisplayName = "ElapsedTime returns null if StartTime is null")]
         internal void ElapsedTime_Returns_Null_If_StartTime_Is_Null()
         {
@@ -136,7 +241,7 @@ namespace Soulseek.Tests.Unit
         {
             var d = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0);
 
-            var s = new DateTime(2019, 4, 25);
+            var s = new DateTime(2019, 4, 25, 0, 0, 0, DateTimeKind.Utc);
 
             d.SetProperty("StartTime", s);
 
@@ -149,8 +254,8 @@ namespace Soulseek.Tests.Unit
         {
             var d = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0);
 
-            var s = new DateTime(2019, 4, 25);
-            var e = new DateTime(2019, 4, 26);
+            var s = new DateTime(2019, 4, 25, 0, 0, 0, DateTimeKind.Utc);
+            var e = new DateTime(2019, 4, 26, 0, 0, 0, DateTimeKind.Utc);
 
             d.SetProperty("StartTime", s);
             d.SetProperty("EndTime", e);
@@ -185,6 +290,36 @@ namespace Soulseek.Tests.Unit
             d.SetProperty("BytesTransferred", 50);
 
             Assert.Equal(50, d.PercentComplete);
+        }
+
+        [Trait("Category", "State")]
+        [Fact(DisplayName = "Exception works")]
+        internal void Exception_Works()
+        {
+            var d = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0);
+
+            Assert.Null(d.Exception);
+
+            var ex = new Exception("foo");
+            d.SetProperty("Exception", ex);
+
+            Assert.Equal(ex, d.Exception);
+        }
+
+        [Trait("Category", "StartOffset")]
+        [Theory(DisplayName = "StartOffset setter sets BytesTransferred and other vars"), AutoData]
+        internal void StartOffset_Setter_Sets_BytesTransferred_And_Other_Vars(long startOffset)
+        {
+            var d = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0);
+
+            Assert.Equal(0, d.StartOffset);
+            Assert.Equal(0, d.BytesTransferred);
+
+            d.StartOffset = startOffset;
+
+            Assert.Equal(startOffset, d.BytesTransferred);
+            Assert.Equal(startOffset, d.GetField<long>("startOffset"));
+            Assert.Equal(startOffset, d.GetField<double>("lastProgressBytes"));
         }
 
         [Trait("Category", "UpdateProgress")]
@@ -233,6 +368,47 @@ namespace Soulseek.Tests.Unit
             d.InvokeMethod("UpdateProgress", 100000);
 
             Assert.Equal(0, d.AverageSpeed);
+        }
+
+        [Trait("Category", "UpdateProgress")]
+        [Theory(DisplayName = "UpdateProgress calculates final speed when BytesTransferred equals Size without Completed state"), AutoData]
+        internal void UpdateProgress_Calculates_Final_Speed_When_BytesTransferred_Equals_Size_Without_Completed_State(long size)
+        {
+            var d = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0)
+            {
+                Size = size,
+            };
+
+            d.State = TransferStates.InProgress;
+
+            // force StartTime back 1 second so the math works
+            d.SetProperty(nameof(d.StartTime), DateTime.UtcNow.AddSeconds(-1));
+
+            Assert.Equal(0, d.AverageSpeed);
+
+            d.InvokeMethod("UpdateProgress", 10000L);
+            d.UpdateProgress(10000L);
+
+            Assert.True(d.AverageSpeed > 0);
+        }
+
+        [Trait("Category", "UpdateProgress")]
+        [Fact(DisplayName = "UpdateProgress does not throw if size is null")]
+        internal void UpdateProgress_Does_Not_Throw_If_Size_Is_Null()
+        {
+            var d = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0);
+
+            d.State = TransferStates.InProgress;
+
+            // force StartTime back 1 second so the math works
+            d.SetProperty(nameof(d.StartTime), DateTime.UtcNow.AddSeconds(-1));
+
+            Assert.Equal(0, d.AverageSpeed);
+
+            d.InvokeMethod("UpdateProgress", 10000L);
+            d.UpdateProgress(10000L);
+
+            Assert.True(d.AverageSpeed > 0);
         }
     }
 }

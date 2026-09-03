@@ -19,10 +19,10 @@
         ///     Adds or updates a tracked search.
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="args"></param>
-        public void AddOrUpdate(Guid id, SearchEventArgs args)
+        /// <param name="search"></param>
+        public void AddOrUpdate(Guid id, Search search)
         {
-            Searches.AddOrUpdate(id, args.Search, (token, search) => args.Search);
+            Searches.AddOrUpdate(id, search, (token, search) => search);
         }
 
         /// <summary>

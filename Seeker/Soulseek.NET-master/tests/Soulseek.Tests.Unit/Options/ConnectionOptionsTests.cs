@@ -15,7 +15,7 @@
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
 // </copyright>
 
-namespace Soulseek.Tests.Unit
+namespace Soulseek.Tests.Unit.Options
 {
     using AutoFixture.Xunit2;
     using Xunit;
@@ -24,19 +24,31 @@ namespace Soulseek.Tests.Unit
     {
         [Trait("Category", "Instantiation")]
         [Theory(DisplayName = "Instantiates properly"), AutoData]
-        public void Instantiates_Properly(int read, int write, int timeout, int inactivity)
+        public void Instantiates_Properly(int read, int write, int depth, int timeout, int inactivity)
         {
             ConnectionOptions o = null;
 
-            var ex = Record.Exception(() => o = new ConnectionOptions(read, write, timeout, inactivity));
+            var ex = Record.Exception(() => o = new ConnectionOptions(read, write, depth, timeout, inactivity));
 
             Assert.Null(ex);
             Assert.NotNull(o);
 
             Assert.Equal(read, o.ReadBufferSize);
             Assert.Equal(write, o.WriteBufferSize);
+            Assert.Equal(depth, o.WriteQueueSize);
             Assert.Equal(timeout, o.ConnectTimeout);
             Assert.Equal(inactivity, o.InactivityTimeout);
+        }
+
+        [Trait("Category", "WithoutInactivityTimeout")]
+        [Fact(DisplayName = "WithoutInactivityTimeout forces InactivityTimeout to -1")]
+        public void WithoutInactivityTimeout()
+        {
+            var o = new ConnectionOptions(inactivityTimeout: 5000);
+
+            var o2 = o.WithoutInactivityTimeout();
+
+            Assert.Equal(-1, o2.InactivityTimeout);
         }
     }
 }

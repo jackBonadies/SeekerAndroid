@@ -18,8 +18,8 @@
         ///     Adds or updates a tracked search.
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="args"></param>
-        void AddOrUpdate(Guid id, SearchEventArgs args);
+        /// <param name="search"></param>
+        void AddOrUpdate(Guid id, Search search);
 
         /// <summary>
         ///     Removes all tracked searches.

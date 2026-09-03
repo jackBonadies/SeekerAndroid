@@ -1,10 +1,9 @@
 ﻿// <copyright file="DistributedMessageHandler.cs" company="JP Dillingham">
-//     Copyright (c) JP Dillingham. All rights reserved.
+//     Copyright (c) JP Dillingham.
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
+//     the Free Software Foundation, version 3.
 //
 //     This program is distributed in the hope that it will be useful,
 //     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,6 +12,13 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
+//
+//     This program is distributed with Additional Terms pursuant to Section 7
+//     of the GPLv3.  See the LICENSE file in the root directory of this
+//     project for the complete terms and conditions.
+//
+//     SPDX-FileCopyrightText: JP Dillingham
+//     SPDX-License-Identifier: GPL-3.0-only
 // </copyright>
 
 namespace Soulseek.Messaging.Handlers
@@ -163,6 +169,9 @@ namespace Soulseek.Messaging.Handlers
                             // convert this message to a normal DistributedSearchRequest before forwarding.  this functionality is based
                             // on the observation that branch roots send embedded messages to children, while parents that are not a branch root
                             // send a plain SearchRequest/3.
+                            // since this was originally written we've learned that when we receive embedded messages from a parent, it is in error.
+                            // branch roots are intended to 'unwrap' the message and forward only the wrapped message to peers. when we get one of these,
+                            // it is from older clients that either have a bug, or misunderstood the intent. this includes slskd prior to this commit.
                             case MessageCode.Distributed.SearchRequest:
                                 var embeddedSearchRequest = DistributedSearchRequest.FromByteArray(embeddedMessage.DistributedMessage);
 
@@ -274,7 +283,10 @@ namespace Soulseek.Messaging.Handlers
 
                         var searchRequest = DistributedSearchRequest.FromByteArray(distributedMessage);
 
-                        _ = SoulseekClient.DistributedConnectionManager.BroadcastMessageAsync(message).ConfigureAwait(false);
+                        // *always* unwrap the received message and distribute only the wrapped message to children
+                        // in the past some clients (including slskd, prior to this commit) were incorrectly forwarding the
+                        // distributed message to children, who would then unwrap it properly.
+                        _ = SoulseekClient.DistributedConnectionManager.BroadcastMessageAsync(distributedMessage).ConfigureAwait(false);
 
                         await SoulseekClient.SearchResponder.TryRespondAsync(searchRequest.Username, searchRequest.Token, searchRequest.Query).ConfigureAwait(false);
 

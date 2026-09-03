@@ -43,7 +43,7 @@
         [Authorize]
         [ProducesResponseType(typeof(UserAddress), 200)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> Address([FromRoute, Required]string username)
+        public async Task<IActionResult> Address([FromRoute, Required] string username)
         {
             try
             {
@@ -65,7 +65,7 @@
         [Authorize]
         [ProducesResponseType(typeof(IEnumerable<Directory>), 200)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> Browse([FromRoute, Required]string username)
+        public async Task<IActionResult> Browse([FromRoute, Required] string username)
         {
             try
             {
@@ -86,6 +86,34 @@
         }
 
         /// <summary>
+        ///     Retrieves the specified folder contents from the specified <paramref name="username"/>.
+        /// </summary>
+        /// <param name="username">The username of the user.</param>
+        /// <param name="folderName">The name of the folder.</param>
+        /// <returns></returns>
+        [HttpGet("{username}/folder/{folderName}")]
+        // [Authorize]
+        [ProducesResponseType(typeof(IEnumerable<Directory>), 200)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> FolderContents([FromRoute, Required] string username, [FromRoute, Required] string folderName)
+        {
+            try
+            {
+                var result = await Client.GetDirectoryContentsAsync(username, folderName);
+                return Ok(result);
+            }
+            catch (UserOfflineException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (System.Exception ex)
+            {
+                System.Console.WriteLine(ex);
+                throw;
+            }
+        }
+
+        /// <summary>
         ///     Retrieves the status of the current browse operation for the specified <paramref name="username"/>, if any.
         /// </summary>
         /// <param name="username">The username of the user.</param>
@@ -94,7 +122,7 @@
         [Authorize]
         [ProducesResponseType(typeof(decimal), 200)]
         [ProducesResponseType(404)]
-        public IActionResult BrowseStatus([FromRoute, Required]string username)
+        public IActionResult BrowseStatus([FromRoute, Required] string username)
         {
             if (BrowseTracker.TryGet(username, out var progress))
             {
@@ -113,7 +141,7 @@
         [Authorize]
         [ProducesResponseType(typeof(UserInfo), 200)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> Info([FromRoute, Required]string username)
+        public async Task<IActionResult> Info([FromRoute, Required] string username)
         {
             try
             {
@@ -135,11 +163,33 @@
         [Authorize]
         [ProducesResponseType(typeof(UserStatus), 200)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> Status([FromRoute, Required]string username)
+        public async Task<IActionResult> Status([FromRoute, Required] string username)
         {
             try
             {
                 var response = await Client.GetUserStatusAsync(username);
+                return Ok(response);
+            }
+            catch (UserOfflineException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        /// <summary>
+        ///     Retrieves statistics for the specified <paramref name="username"/>.
+        /// </summary>
+        /// <param name="username">The username of the user.</param>
+        /// <returns></returns>
+        [HttpGet("{username}/statistics")]
+        [Authorize]
+        [ProducesResponseType(typeof(UserStatus), 200)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> Statistics([FromRoute, Required] string username)
+        {
+            try
+            {
+                var response = await Client.GetUserStatisticsAsync(username);
                 return Ok(response);
             }
             catch (UserOfflineException ex)

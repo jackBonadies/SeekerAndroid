@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
     <AndroidHttpClientHandlerType>Xamarin.Android.Net.AndroidMessageHandler</AndroidHttpClientHandlerType>
     <AndroidAapt2LinkExtraArgs>--no-version-vectors</AndroidAapt2LinkExtraArgs>
     <AndroidManagedSymbols>true</AndroidManagedSymbols>
@@ -37,18 +36,14 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
-    <RunAOTCompilation>false</RunAOTCompilation>
     <EnableLLVM>false</EnableLLVM>
-    <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
     <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
     <AndroidNativeDebugSymbolCompressionFormat>zip</AndroidNativeDebugSymbolCompressionFormat>
     <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release Mock|AnyCPU' ">
     <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
-    <RunAOTCompilation>false</RunAOTCompilation>
     <EnableLLVM>false</EnableLLVM>
-    <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
     <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
     <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
     <DefineConstants>MOCK</DefineConstants>
@@ -63,17 +58,19 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release IzzySoft|AnyCPU'">
 	  <AndroidProguardMappingFile>$(OutputPath)mapping.txt</AndroidProguardMappingFile>
 	  <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
-	  <PublishTrimmed>true</PublishTrimmed>
-	  <AndroidLinkMode>SdkOnly</AndroidLinkMode>
-	  <RunAOTCompilation>false</RunAOTCompilation>
 	  <EnableLLVM>false</EnableLLVM>
-	  <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
 	  <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
 	  <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
 	  <DefineConstants>IzzySoft</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.StartsWith('Release'))">
-	<AndroidKeyStore>true</AndroidKeyStore>
+	<RunAOTCompilation>true</RunAOTCompilation>
+	<AndroidEnableProfiledAot>true</AndroidEnableProfiledAot>
+	<AndroidUseDefaultAotProfile>false</AndroidUseDefaultAotProfile>
+	<Optimize>true</Optimize>
+	<PublishTrimmed>true</PublishTrimmed>
+	<AndroidLinkMode>SdkOnly</AndroidLinkMode>
+    <AndroidKeyStore>true</AndroidKeyStore>
 	<AndroidSigningKeyStore>$(AndroidSigningKeyStore)</AndroidSigningKeyStore>
 	<AndroidSigningKeyAlias>$(AndroidSigningKeyAlias)</AndroidSigningKeyAlias>
 	<AndroidSigningKeyPass>$(AndroidSigningKeyPass)</AndroidSigningKeyPass>
@@ -87,7 +84,10 @@
 	<ItemGroup>
     <GoogleServicesJson Include="google-services.json" Condition="Exists('google-services.json') And '$(Configuration)|$(Platform)' != 'Release IzzySoft|AnyCPU'" />
   </ItemGroup>
-  <Choose>
+  <ItemGroup Condition=" '$(AndroidEnableProfiledAot)' == 'true' and '$(AndroidUseCustomAotProfile)' != 'false' ">
+    <AndroidAotProfile Include="$(MSBuildProjectDirectory)\custom.aprof" />
+  </ItemGroup>
+	<Choose>
     <When Condition=" '$(Configuration)'!='Release IzzySoft' ">
       <ItemGroup>
         <PackageReference Include="Xamarin.Firebase.Crashlytics" Version="120.0.6" />
@@ -128,7 +128,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="Mono.Nat-master\Mono.Nat\Mono.Nat.csproj" />
-    <ProjectReference Include="Soulseek.NET-master\src\Soulseek_Source.csproj" />
+    <ProjectReference Include="Soulseek.NET-master\src\Soulseek.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Mono.Nat-master\**" />
@@ -139,8 +139,7 @@
   <ItemGroup Condition="'$(Configuration)' == 'Release IzzySoft'">
     <AndroidManifestOverlay Include="Properties\AndroidManifest.IzzySoft.xml" />
   </ItemGroup>
-  <Target Name="GenerateDebugSecrets" BeforeTargets="CoreCompile"
-          Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug Mock'">
+  <Target Name="GenerateDebugSecrets" BeforeTargets="CoreCompile" Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='Debug Mock'">
     <PropertyGroup>
       <_SeekerDebugCaptureKey>$([System.Environment]::GetEnvironmentVariable('SeekerEncryptKey'))</_SeekerDebugCaptureKey>
       <_DebugSecretsFile>$(IntermediateOutputPath)DebugSecrets.g.cs</_DebugSecretsFile>

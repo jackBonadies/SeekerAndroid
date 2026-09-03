@@ -14,16 +14,20 @@
 
     public class PassthroughAuthenticationHandler : AuthenticationHandler<PassthroughAuthenticationOptions>
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         public PassthroughAuthenticationHandler(IOptionsMonitor<PassthroughAuthenticationOptions> optionsMonitor, ILoggerFactory logger, UrlEncoder urlEncoder, ISystemClock systemClock)
+
             : base(optionsMonitor, logger, urlEncoder, systemClock)
-        {            
+#pragma warning restore CS0618 // Type or member is obsolete
+
+        {
         }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             var identity = new GenericIdentity(Options.Username);
             var principal = new GenericPrincipal(identity, new[] { "User" });
-            var ticket = new AuthenticationTicket(principal , new AuthenticationProperties(), PassthroughAuthentication.AuthenticationScheme);
+            var ticket = new AuthenticationTicket(principal, new AuthenticationProperties(), PassthroughAuthentication.AuthenticationScheme);
 
             return Task.FromResult(AuthenticateResult.Success(ticket));
         }

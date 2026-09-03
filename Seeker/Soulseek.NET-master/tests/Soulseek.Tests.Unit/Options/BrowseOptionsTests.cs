@@ -15,7 +15,7 @@
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
 // </copyright>
 
-namespace Soulseek.Tests.Unit
+namespace Soulseek.Tests.Unit.Options
 {
     using AutoFixture.Xunit2;
     using Xunit;
@@ -26,7 +26,7 @@ namespace Soulseek.Tests.Unit
         [Theory(DisplayName = "Instantiates properly"), AutoData]
         public void Instantiates_Properly(int timeout)
         {
-            void Action(BrowseProgressUpdatedEventArgs args)
+            void Action((string Username, long BytesTransferred, long BytesRemaining, double PercentComplete, long Size) args)
             {
                 // noop
             }

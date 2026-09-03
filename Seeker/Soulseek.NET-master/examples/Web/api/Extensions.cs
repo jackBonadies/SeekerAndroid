@@ -40,7 +40,11 @@
         /// <returns></returns>
         public static string Sha1(this string str)
         {
+#pragma warning disable SYSLIB0021 // Type or member is obsolete
+
             using var sha1 = new SHA1Managed();
+#pragma warning restore SYSLIB0021 // Type or member is obsolete
+
             return BitConverter.ToString(sha1.ComputeHash(Encoding.UTF8.GetBytes(str))).Replace("-", "");
         }
 

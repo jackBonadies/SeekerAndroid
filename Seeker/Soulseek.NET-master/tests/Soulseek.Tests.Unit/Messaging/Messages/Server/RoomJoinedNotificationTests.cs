@@ -63,7 +63,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 .WriteString(username)
                 .WriteInteger((int)data.Status)
                 .WriteInteger(data.AverageSpeed)
-                .WriteLong(data.DownloadCount)
+                .WriteLong(data.UploadCount)
                 .WriteInteger(data.FileCount)
                 .WriteInteger(data.DirectoryCount)
                 .WriteInteger(data.SlotsFree.Value)
@@ -75,7 +75,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             Assert.Equal(username, response.Username);
             Assert.Equal(data.Status, response.UserData.Status);
             Assert.Equal(data.AverageSpeed, response.UserData.AverageSpeed);
-            Assert.Equal(data.DownloadCount, response.UserData.DownloadCount);
+            Assert.Equal(data.UploadCount, response.UserData.UploadCount);
             Assert.Equal(data.FileCount, response.UserData.FileCount);
             Assert.Equal(data.DirectoryCount, response.UserData.DirectoryCount);
             Assert.Equal(data.SlotsFree, response.UserData.SlotsFree);
@@ -92,7 +92,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 .WriteString(username)
                 .WriteInteger((int)data.Status)
                 .WriteInteger(data.AverageSpeed)
-                .WriteLong(data.DownloadCount)
+                .WriteLong(data.UploadCount)
                 .WriteInteger(data.FileCount)
                 .WriteInteger(data.DirectoryCount)
                 .WriteInteger(data.SlotsFree.Value)
@@ -104,7 +104,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             Assert.Equal(username, response.Username);
             Assert.Equal(data.Status, response.UserData.Status);
             Assert.Equal(data.AverageSpeed, response.UserData.AverageSpeed);
-            Assert.Equal(data.DownloadCount, response.UserData.DownloadCount);
+            Assert.Equal(data.UploadCount, response.UserData.UploadCount);
             Assert.Equal(data.FileCount, response.UserData.FileCount);
             Assert.Equal(data.DirectoryCount, response.UserData.DirectoryCount);
             Assert.Equal(data.SlotsFree, response.UserData.SlotsFree);

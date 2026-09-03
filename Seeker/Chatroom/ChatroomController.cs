@@ -227,7 +227,6 @@ namespace Seeker.Chatroom
 
         public static void SendChatroomMessageLogic(string roomName, Message msg) //you can start out with a message...
         {
-
             ChatroomController.AddMessage(roomName, msg); //ui thread.
 
             //MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
@@ -249,7 +248,19 @@ namespace Seeker.Chatroom
                 //MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
                 ChatroomController.MessageReceived?.Invoke(null, new MessageReceivedArgs(roomName, false, true, msg));
             });
-            SeekerState.SoulseekClient.SendRoomMessageAsync(roomName, msg.MessageText).ContinueWith(continueWithAction);
+
+            // otherwise SendRoomMesssageAsync can throw syncronously (on loggedin precheck) which can crash the thread
+            //   now we treat it like any other failure
+            Task sendTask;
+            try
+            {
+                sendTask = SeekerState.SoulseekClient.SendRoomMessageAsync(roomName, msg.MessageText);
+            }
+            catch (Exception e)
+            {
+                sendTask = Task.FromException(e);
+            }
+            sendTask.ContinueWith(continueWithAction);
         }
 
 

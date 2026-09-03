@@ -26,6 +26,7 @@
                         logging.ClearProviders();
                     }
                 })
+                .UseUrls("http://localhost:5000")
                 .UseStartup<Startup>();
     }
 }

@@ -1,10 +1,12 @@
 ﻿// <copyright file="Directory.cs" company="JP Dillingham">
-//     Copyright (c) JP Dillingham. All rights reserved.
+//     Copyright (c) JP Dillingham.
+//
+//     Copyright (c) 2021-2026 Jack Bonadies
+//     Modified: added a Latin-1 decoding flag
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
+//     the Free Software Foundation, version 3.
 //
 //     This program is distributed in the hope that it will be useful,
 //     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,6 +15,13 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
+//
+//     This program is distributed with Additional Terms pursuant to Section 7
+//     of the GPLv3.  See the LICENSE file in the root directory of this
+//     project for the complete terms and conditions.
+//
+//     SPDX-FileCopyrightText: JP Dillingham
+//     SPDX-License-Identifier: GPL-3.0-only
 // </copyright>
 
 namespace Soulseek
@@ -30,6 +39,7 @@ namespace Soulseek
         /// </summary>
         /// <param name="name">The directory name.</param>
         /// <param name="fileList">The optional list of <see cref="File"/> s.</param>
+        /// <param name="decodedViaLatin1">Whether the directory name was decoded as ISO-8859-1 rather than UTF-8.</param>
         public Directory(string name, IEnumerable<File> fileList = null, bool decodedViaLatin1 = false)
         {
             Name = name;
@@ -39,21 +49,14 @@ namespace Soulseek
             DecodedViaLatin1 = decodedViaLatin1;
         }
 
-        //for serializer..
-        private Directory()
-        {
-
-        }
-
         /// <summary>
         ///     Gets the directory name.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        ///     Gets the directory name.
+        ///     Gets a value indicating whether the directory name was decoded as ISO-8859-1 rather than UTF-8.
         /// </summary>
-        [field: System.NonSerialized]
         public bool DecodedViaLatin1 { get; }
 
         /// <summary>
@@ -65,22 +68,5 @@ namespace Soulseek
         ///     Gets the collection of files contained within the directory.
         /// </summary>
         public IReadOnlyCollection<File> Files { get; }
-
-        /// <summary>
-        ///     Gets the collection of files in alphabetical order.
-        /// </summary>
-        public IEnumerable<File> OrderedFiles
-        {
-            get
-            {
-                return this.Files.OrderBy(x => x.Filename);
-            }
-        }
-
-        public Directory DeepCopy()
-        {
-            Directory d = new Directory(this.Name,this.Files.ToList(), this.DecodedViaLatin1); //this creates a new list.. you can add or remove without affecting original...
-            return d;
-        }
     }
 }

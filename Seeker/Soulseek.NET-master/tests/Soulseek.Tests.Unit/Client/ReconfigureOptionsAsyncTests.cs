@@ -19,6 +19,7 @@ namespace Soulseek.Tests.Unit.Client
 {
     using System;
     using System.Collections.Generic;
+
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
@@ -48,10 +49,10 @@ namespace Soulseek.Tests.Unit.Client
         }
 
         [Trait("Category", "ReconfigureOptions")]
-        [Fact(DisplayName = "Throws ListenPortException given listen port which can not be bound")]
-        public async Task Throws_ListenPortException_Given_Listen_Port_Which_Can_Not_Be_Bound()
+        [Fact(DisplayName = "Throws ListenException given listen port which can not be bound")]
+        public async Task Throws_ListenException_Given_Listen_Port_Which_Can_Not_Be_Bound()
         {
-            var (client, mocks) = GetFixture();
+            var (client, _) = GetFixture();
 
             var port = Mocks.Port;
             var patch = new SoulseekClientOptionsPatch(listenPort: port);
@@ -61,7 +62,7 @@ namespace Soulseek.Tests.Unit.Client
             try
             {
                 // listen on the port to bind it
-                listener = new Listener(port, new ConnectionOptions());
+                listener = new Listener(IPAddress.Any, port, new ConnectionOptions());
                 listener.Start();
 
                 using (client)
@@ -69,8 +70,8 @@ namespace Soulseek.Tests.Unit.Client
                     var ex = await Record.ExceptionAsync(() => client.ReconfigureOptionsAsync(patch));
 
                     Assert.NotNull(ex);
-                    Assert.IsType<ListenPortException>(ex);
-                    Assert.True(ex.Message.ContainsInsensitive($"failed to start listening on port {port}"));
+                    Assert.IsType<ListenException>(ex);
+                    Assert.True(ex.Message.ContainsInsensitive($"failed to start listening"));
                 }
             }
             finally
@@ -114,12 +115,48 @@ namespace Soulseek.Tests.Unit.Client
         }
 
         [Trait("Category", "ReconfigureOptions")]
+        [Fact(DisplayName = "Returns true if client connected and AcceptDistributedChildren changed to false")]
+        public async Task Returns_True_If_Client_Connected_And_AcceptDistributedChildren_Changed_To_False()
+        {
+            var (client, _) = GetFixture(new SoulseekClientOptions(acceptDistributedChildren: true));
+
+            var patch = new SoulseekClientOptionsPatch(acceptDistributedChildren: false);
+
+            using (client)
+            {
+                client.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+                var reconnectRequired = await client.ReconfigureOptionsAsync(patch);
+
+                Assert.True(reconnectRequired);
+            }
+        }
+
+        [Trait("Category", "ReconfigureOptions")]
         [Fact(DisplayName = "Returns false if client connected and EnableDistributedNetwork changed to true")]
         public async Task Returns_False_If_Client_Connected_And_EnableDistributedNetwork_Changed_To_True()
         {
             var (client, _) = GetFixture(new SoulseekClientOptions(enableDistributedNetwork: false));
 
             var patch = new SoulseekClientOptionsPatch(enableDistributedNetwork: true);
+
+            using (client)
+            {
+                client.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+                var reconnectRequired = await client.ReconfigureOptionsAsync(patch);
+
+                Assert.False(reconnectRequired);
+            }
+        }
+
+        [Trait("Category", "ReconfigureOptions")]
+        [Fact(DisplayName = "Returns false if client connected and AcceptDistributedChildren changed to true")]
+        public async Task Returns_False_If_Client_Connected_And_AcceptDistributedChildren_Changed_To_True()
+        {
+            var (client, _) = GetFixture(new SoulseekClientOptions(acceptDistributedChildren: false));
+
+            var patch = new SoulseekClientOptionsPatch(acceptDistributedChildren: true);
 
             using (client)
             {
@@ -263,7 +300,9 @@ namespace Soulseek.Tests.Unit.Client
         [Fact(DisplayName = "Reconfigures listener if ListenPort changed")]
         public async Task Reconfigures_Listener_If_ListenPort_Changed()
         {
-            var (client, _) = GetFixture(new SoulseekClientOptions(listenPort: Mocks.Port));
+            var (client, mocks) = GetFixture(new SoulseekClientOptions(listenPort: Mocks.Port));
+
+            mocks.Listener.Setup(m => m.Listening).Returns(true);
 
             var patch = new SoulseekClientOptionsPatch(listenPort: Mocks.Port);
 
@@ -278,10 +317,101 @@ namespace Soulseek.Tests.Unit.Client
         }
 
         [Trait("Category", "ReconfigureOptions")]
+        [Fact(DisplayName = "Reconfigures listener if ListenBacklog changed")]
+        public async Task Reconfigures_Listener_If_ListenBacklog_Changed()
+        {
+            var (client, mocks) = GetFixture(new SoulseekClientOptions(listenPort: Mocks.Port, listenBacklog: 128));
+
+            mocks.Listener.Setup(m => m.Listening).Returns(true);
+
+            var patch = new SoulseekClientOptionsPatch(listenBacklog: 129);
+
+            using (client)
+            {
+                client.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+                var ogListener = client.Listener;
+
+                await client.ReconfigureOptionsAsync(patch);
+
+                Assert.Equal(patch.ListenBacklog, client.Options.ListenBacklog);
+                Assert.NotEqual(ogListener, client.Listener);
+            }
+        }
+
+        [Trait("Category", "ReconfigureOptions")]
+        [Fact(DisplayName = "Does not reconfigure listener if ListenBacklog unchanged")]
+        public async Task Does_Not_Reconfigure_Listener_If_ListenBacklog_Unchanged()
+        {
+            var (client, mocks) = GetFixture(new SoulseekClientOptions(listenPort: Mocks.Port, listenBacklog: 128));
+
+            mocks.Listener.Setup(m => m.Listening).Returns(true);
+
+            var patch = new SoulseekClientOptionsPatch(listenBacklog: 128);
+
+            using (client)
+            {
+                client.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+                await client.ReconfigureOptionsAsync(patch);
+
+                Assert.Equal(mocks.Listener.Object, client.Listener);
+
+                mocks.Listener.Verify(m => m.Start(It.IsAny<int>()), Times.Never);
+            }
+        }
+
+        [Trait("Category", "ReconfigureOptions")]
+        [Fact(DisplayName = "Assigns a handler to Listener.Error when a new listener is created")]
+        public async Task Assigns_A_Handler_To_Listener_Error_When_A_New_Listener_Is_Created()
+        {
+            var (client, mocks) = GetFixture(new SoulseekClientOptions(listenPort: Mocks.Port));
+
+            mocks.Listener.Setup(m => m.Listening).Returns(true);
+
+            var patch = new SoulseekClientOptionsPatch(listenPort: Mocks.Port);
+
+            using (client)
+            {
+                client.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+                await client.ReconfigureOptionsAsync(patch);
+
+                Assert.NotNull(client.Listener);
+
+                var raisedException = new Exception("error raised for test");
+                client.Listener.RaiseEvent(typeof(Listener), "Error", raisedException);
+
+                mocks.ListenerHandler.Verify(m => m.HandleError(client.Listener, raisedException), Times.Once);
+            }
+        }
+
+        [Trait("Category", "ReconfigureOptions")]
+        [Fact(DisplayName = "Reconfigures listener if ListenIPAddress changed")]
+        public async Task Reconfigures_Listener_If_ListenIPAddress_Changed()
+        {
+            var (client, mocks) = GetFixture(new SoulseekClientOptions(listenIPAddress: IPAddress.Parse("0.0.0.0")));
+
+            mocks.Listener.Setup(m => m.Listening).Returns(true);
+
+            var patch = new SoulseekClientOptionsPatch(listenIPAddress: IPAddress.Parse("127.0.0.1"));
+
+            using (client)
+            {
+                client.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+                await client.ReconfigureOptionsAsync(patch);
+
+                Assert.Equal(patch.ListenIPAddress, client.Listener.IPAddress);
+            }
+        }
+
+        [Trait("Category", "ReconfigureOptions")]
         [Fact(DisplayName = "Reconfigures listener if IncomingConnectionOptions changed")]
         public async Task Reconfigures_Listener_If_IncomingConnectionOptions_Changed()
         {
-            var (client, _) = GetFixture(new SoulseekClientOptions(incomingConnectionOptions: new ConnectionOptions()));
+            var (client, mocks) = GetFixture(new SoulseekClientOptions(incomingConnectionOptions: new ConnectionOptions()));
+
+            mocks.Listener.Setup(m => m.Listening).Returns(true);
 
             var patch = new SoulseekClientOptionsPatch(incomingConnectionOptions: new ConnectionOptions());
 
@@ -292,6 +422,27 @@ namespace Soulseek.Tests.Unit.Client
                 await client.ReconfigureOptionsAsync(patch);
 
                 Assert.Equal(patch.IncomingConnectionOptions, client.Listener.ConnectionOptions);
+            }
+        }
+
+        [Trait("Category", "ReconfigureOptions")]
+        [Fact(DisplayName = "Does not reconfigure listener if options changed but was not listening")]
+        public async Task Does_Not_Reconfigure_Listener_If_Options_Changed_But_Was_Not_Listening()
+        {
+            var (client, mocks) = GetFixture(new SoulseekClientOptions(incomingConnectionOptions: new ConnectionOptions()));
+
+            mocks.Listener.Setup(m => m.Listening).Returns(false);
+
+            var patch = new SoulseekClientOptionsPatch(incomingConnectionOptions: new ConnectionOptions());
+
+            using (client)
+            {
+                client.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+                await client.ReconfigureOptionsAsync(patch);
+
+                Assert.Equal(patch.IncomingConnectionOptions, client.Options.IncomingConnectionOptions);
+                Assert.Null(client.Listener);
             }
         }
 
@@ -332,12 +483,81 @@ namespace Soulseek.Tests.Unit.Client
         }
 
         [Trait("Category", "ReconfigureOptions")]
+        [Theory(DisplayName = "Sets count on UploadTokenBucket if upload speed changed"), AutoData]
+        public async Task Sets_Count_On_UploadTokenBucket_If_Upload_Speed_Changed(int speed)
+        {
+            var (client, mocks) = GetFixture(new SoulseekClientOptions(maximumUploadSpeed: 5));
+
+            var patch = new SoulseekClientOptionsPatch(maximumUploadSpeed: speed);
+
+            var expected = (speed * 1024L) / 10;
+
+            using (client)
+            {
+                await client.ReconfigureOptionsAsync(patch);
+            }
+
+            mocks.UploadTokenBucket.Verify(m => m.SetCapacity(expected), Times.Once);
+        }
+
+        [Trait("Category", "ReconfigureOptions")]
+        [Theory(DisplayName = "Does not Set count on UploadTokenBucket if upload speed did not change"), AutoData]
+        public async Task Does_Not_Set_Count_On_UploadTokenBucket_If_Upload_Speed_Did_Not_Change(int speed)
+        {
+            var (client, mocks) = GetFixture(new SoulseekClientOptions(maximumUploadSpeed: speed));
+
+            var patch = new SoulseekClientOptionsPatch(maximumUploadSpeed: speed);
+
+            using (client)
+            {
+                await client.ReconfigureOptionsAsync(patch);
+            }
+
+            mocks.UploadTokenBucket.Verify(m => m.SetCapacity(It.IsAny<int>()), Times.Never);
+        }
+
+        [Trait("Category", "ReconfigureOptions")]
+        [Theory(DisplayName = "Sets count on DownloadTokenBucket if download speed changed"), AutoData]
+        public async Task Sets_Count_On_DownloadTokenBucket_If_Download_Speed_Changed(int speed)
+        {
+            var (client, mocks) = GetFixture(new SoulseekClientOptions(maximumDownloadSpeed: 5));
+
+            var patch = new SoulseekClientOptionsPatch(maximumDownloadSpeed: speed);
+
+            var expected = (speed * 1024L) / 10;
+
+            using (client)
+            {
+                await client.ReconfigureOptionsAsync(patch);
+            }
+
+            mocks.DownloadTokenBucket.Verify(m => m.SetCapacity(expected), Times.Once);
+        }
+
+        [Trait("Category", "ReconfigureOptions")]
+        [Theory(DisplayName = "Does not Set count on DownloadTokenBucket if download speed did not change"), AutoData]
+        public async Task Does_Not_Set_Count_On_DownloadTokenBucket_If_Download_Speed_Did_Not_Change(int speed)
+        {
+            var (client, mocks) = GetFixture(new SoulseekClientOptions(maximumDownloadSpeed: speed));
+
+            var patch = new SoulseekClientOptionsPatch(maximumDownloadSpeed: speed);
+
+            using (client)
+            {
+                await client.ReconfigureOptionsAsync(patch);
+            }
+
+            mocks.DownloadTokenBucket.Verify(m => m.SetCapacity(It.IsAny<int>()), Times.Never);
+        }
+
+        [Trait("Category", "ReconfigureOptions")]
         [Fact(DisplayName = "Updates options")]
         public async Task Updates_Options()
         {
-            var (client, mocks) = GetFixture(new SoulseekClientOptions(
+            var (client, _) = GetFixture(new SoulseekClientOptions(
                 enableListener: false,
                 listenPort: Mocks.Port,
+                listenBacklog: 128,
                 enableDistributedNetwork: false,
                 acceptDistributedChildren: false,
                 distributedChildLimit: 5,
@@ -351,9 +571,20 @@ namespace Soulseek.Tests.Unit.Client
                 incomingConnectionOptions: new ConnectionOptions(),
                 distributedConnectionOptions: new ConnectionOptions()));
 
+            var userEndPointCache = new Mock<IUserEndPointCache>();
+            var searchResponseCache = new Mock<ISearchResponseCache>();
+
+            var searchResponseResolver = new Func<string, int, SearchQuery, Task<SearchResponse>>((s, i, q) => Task.FromResult<SearchResponse>(null));
+            var browseResponseResolver = new Func<string, IPEndPoint, Task<BrowseResponse>>((s, i) => Task.FromResult<BrowseResponse>(null));
+            var directoryContentsResponseResolver = new Func<string, IPEndPoint, int, string, Task<IEnumerable<Directory>>>((s, i, ii, ss) => Task.FromResult<IEnumerable<Directory>>(null));
+            var userInfoResponseResolver = new Func<string, IPEndPoint, Task<UserInfo>>((s, i) => Task.FromResult<UserInfo>(null));
+            var enqueueDownloadAction = new Func<string, IPEndPoint, string, Task>((s, i, ss) => Task.CompletedTask);
+            var placeInQueueResponseResolver = new Func<string, IPEndPoint, string, Task<int?>>((s, i, ss) => Task.FromResult<int?>(0));
+
             var patch = new SoulseekClientOptionsPatch(
                 enableListener: true,
                 listenPort: Mocks.Port,
+                listenBacklog: 129,
                 enableDistributedNetwork: true,
                 acceptDistributedChildren: true,
                 distributedChildLimit: 10,
@@ -365,7 +596,15 @@ namespace Soulseek.Tests.Unit.Client
                 peerConnectionOptions: new ConnectionOptions(),
                 transferConnectionOptions: new ConnectionOptions(readBufferSize: 200),
                 incomingConnectionOptions: new ConnectionOptions(),
-                distributedConnectionOptions: new ConnectionOptions());
+                distributedConnectionOptions: new ConnectionOptions(),
+                userEndPointCache: userEndPointCache.Object,
+                searchResponseResolver: searchResponseResolver,
+                searchResponseCache: searchResponseCache.Object,
+                browseResponseResolver: browseResponseResolver,
+                directoryContentsResolver: directoryContentsResponseResolver,
+                userInfoResolver: userInfoResponseResolver,
+                enqueueDownload: enqueueDownloadAction,
+                placeInQueueResolver: placeInQueueResponseResolver);
 
             using (client)
             {
@@ -375,6 +614,7 @@ namespace Soulseek.Tests.Unit.Client
 
                 Assert.Equal(patch.EnableListener, client.Options.EnableListener);
                 Assert.Equal(patch.ListenPort, client.Options.ListenPort);
+                Assert.Equal(patch.ListenBacklog, client.Options.ListenBacklog);
                 Assert.Equal(patch.EnableDistributedNetwork, client.Options.EnableDistributedNetwork);
                 Assert.Equal(patch.AcceptDistributedChildren, client.Options.AcceptDistributedChildren);
                 Assert.Equal(patch.DistributedChildLimit, client.Options.DistributedChildLimit);
@@ -388,6 +628,15 @@ namespace Soulseek.Tests.Unit.Client
 
                 Assert.Equal(patch.ServerConnectionOptions.ReadBufferSize, client.Options.ServerConnectionOptions.ReadBufferSize);
                 Assert.Equal(patch.TransferConnectionOptions.ReadBufferSize, client.Options.TransferConnectionOptions.ReadBufferSize);
+
+                Assert.Equal(patch.UserEndPointCache, client.Options.UserEndPointCache);
+                Assert.Equal(patch.SearchResponseCache, client.Options.SearchResponseCache);
+                Assert.Equal(patch.SearchResponseResolver, client.Options.SearchResponseResolver);
+                Assert.Equal(patch.BrowseResponseResolver, client.Options.BrowseResponseResolver);
+                Assert.Equal(patch.DirectoryContentsResolver, client.Options.DirectoryContentsResolver);
+                Assert.Equal(patch.UserInfoResolver, client.Options.UserInfoResolver);
+                Assert.Equal(patch.EnqueueDownload, client.Options.EnqueueDownload);
+                Assert.Equal(patch.PlaceInQueueResolver, client.Options.PlaceInQueueResolver);
             }
         }
 
@@ -460,14 +709,18 @@ namespace Soulseek.Tests.Unit.Client
             }
         }
 
-        private (SoulseekClient client, Mocks Mocks) GetFixture(SoulseekClientOptions clientOptions = null)
+        private static (SoulseekClient client, Mocks Mocks) GetFixture(SoulseekClientOptions clientOptions = null)
         {
             var mocks = new Mocks();
             var client = new SoulseekClient(
+                minorVersion: 9999,
                 distributedConnectionManager: mocks.DistributedConnectionManager.Object,
                 connectionFactory: mocks.ConnectionFactory.Object,
                 serverConnection: mocks.ServerConnection.Object,
                 listener: mocks.Listener.Object,
+                listenerHandler: mocks.ListenerHandler.Object,
+                uploadTokenBucket: mocks.UploadTokenBucket.Object,
+                downloadTokenBucket: mocks.DownloadTokenBucket.Object,
                 options: clientOptions ?? new SoulseekClientOptions(enableListener: false));
 
             return (client, mocks);
@@ -499,7 +752,10 @@ namespace Soulseek.Tests.Unit.Client
             public Mock<IMessageConnection> ServerConnection { get; } = new Mock<IMessageConnection>();
             public Mock<IConnectionFactory> ConnectionFactory { get; }
             public Mock<IListener> Listener { get; } = new Mock<IListener>();
+            public Mock<IListenerHandler> ListenerHandler { get; } = new Mock<IListenerHandler>();
             public Mock<IDistributedConnectionManager> DistributedConnectionManager { get; }
+            public Mock<ITokenBucket> UploadTokenBucket { get; } = new Mock<ITokenBucket>();
+            public Mock<ITokenBucket> DownloadTokenBucket { get; } = new Mock<ITokenBucket>();
         }
     }
 }

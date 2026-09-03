@@ -408,11 +408,15 @@
     <string name="invalid_username">Invalid username</string>
     <string name="invalid_password">Invalid password</string>
     <string name="user_too_long">Username must be under 30 characters</string>
+    <string name="user_no_leading_trailing_space">Username cannot have leading/trailing spaces</string>
     <string name="user_invalid_char">Username cannot contain special characters</string>
     <string name="network_unreachable">Network is unreachable</string>
     <string name="cannot_login">Cannot login</string>
     <string name="no_empty_user_pass">Username and password cannot be empty</string>
     <string name="dns_failed_2">Failed to resolve soulseek server ip address.</string>
+    <string name="invalid_client_version">Invalid client version</string>
+    <string name="invalid_server_full">Server is temporarily full</string>
+    <string name="invalid_server_private">Server is not accepting new users</string>
 
     <!--In this case the placeholder {0} is for the username-->
     <string name="added_to_ignore">Added user \"{0}\" to ignore list</string>

@@ -1,0 +1,30 @@
+name: Crowdin Upload Sources
+
+# Pushes the English (source) strings to Crowdin whenever they change on main
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'Seeker/Resources/values/strings.xml'
+      - 'crowdin.yml'
+  workflow_dispatch:
+
+jobs:
+  upload:
+    name: Push English strings to Crowdin
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Upload sources
+        uses: crowdin/github-action@71fdb8814261dd703be4ca7c6450d21b1868da4b # v3.0.1
+        with:
+          config: crowdin.yml
+          upload_sources: true
+          upload_translations: false
+          download_translations: false
+          create_pull_request: false
+        env:
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}

@@ -93,6 +93,32 @@ namespace Soulseek.Tests.Unit
             }
         }
 
+        [Trait("Category", "HasWait")]
+        [Fact(DisplayName = "HasWait returns true when waitkey exists")]
+        public void HasWait_Returns_True_When_WaitKey_Exists()
+        {
+            using (var waiter = new Waiter())
+            {
+                var waitKey = new WaitKey("foo");
+
+                waiter.Wait(waitKey);
+
+                Assert.True(waiter.HasWait(waitKey));
+            }
+        }
+
+        [Trait("Category", "HasWait")]
+        [Fact(DisplayName = "HasWait returns false when no waitkey exists")]
+        public void HasWait_Returns_False_When_No_WaitKey_Exists()
+        {
+            using (var waiter = new Waiter())
+            {
+                var waitKey = new WaitKey("foo");
+
+                Assert.False(waiter.HasWait(waitKey));
+            }
+        }
+
         [Trait("Category", "Wait Completion")]
         [Fact(DisplayName = "Complete for missing wait does not throw")]
         public void Complete_For_Missing_Wait_Does_Not_Throw()
@@ -560,6 +586,49 @@ namespace Soulseek.Tests.Unit
                 {
                     wait.Dispose();
                 }
+            }
+        }
+
+        [Trait("Category", "PendingWait")]
+        [Fact(DisplayName = "PendingWait Dispose() does not throw if not Registered")]
+        public void PendingWait_Dispose_Does_Not_Throw_If_Not_Registered()
+        {
+            var p = new PendingWait(new TaskCompletionSource(), 99999, cancelAction: () => { }, timeoutAction: () => { }, CancellationToken.None);
+
+            var ex = Record.Exception(() => p.Dispose());
+
+            Assert.Null(ex);
+        }
+
+        [Trait("Category", "PendingWait")]
+        [Fact(DisplayName = "PendingWait Dispose() does not throw if Registered")]
+        public void PendingWait_Dispose_Does_Not_Throw_If_Registered()
+        {
+            var p = new PendingWait(new TaskCompletionSource(), 99999, cancelAction: () => { }, timeoutAction: () => { }, CancellationToken.None);
+            p.Register();
+
+            var ex = Record.Exception(() => p.Dispose());
+
+            Assert.Null(ex);
+        }
+
+        [Trait("Category", "Exception")]
+        [Fact(DisplayName = "Thorws SoulseekClientException given type mismatch")]
+        public void Throws_SoulseekClientException_Given_Type_Mismatch()
+        {
+            using (var waiter = new Waiter())
+            {
+                var key = new WaitKey(MessageCode.Server.Login);
+
+                // wait for a Guid
+                _ = waiter.Wait<Guid>(key);
+
+                // complete with an int
+                var ex = Record.Exception(() => waiter.Complete<int>(key, 42));
+
+                Assert.NotNull(ex);
+                Assert.IsType<SoulseekClientException>(ex);
+                Assert.Contains("mismatch", ex.Message);
             }
         }
     }

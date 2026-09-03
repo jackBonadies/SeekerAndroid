@@ -35,10 +35,12 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         [Theory(DisplayName = "Instantiates with given data"), AutoData]
         public void Instantiates_With_Given_Data(int token, Directory dir)
         {
-            var a = new FolderContentsResponse(token, dir);
+            var dirList = new List<Directory>() { dir };
+            var a = new FolderContentsResponse(token, directoryName: dir.Name, directories: dirList);
 
             Assert.Equal(token, a.Token);
-            Assert.Equal(dir, a.Directory);
+            Assert.Equal(dir.Name, a.DirectoryName);
+            Assert.Equal(dirList, a.Directories);
         }
 
         [Trait("Category", "Parse")]
@@ -94,8 +96,8 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
 
             Assert.Null(ex);
             Assert.Equal(token, r.Token);
-            Assert.Equal(dirname, r.Directory.Name);
-            Assert.Equal(0, r.Directory.FileCount);
+            Assert.Equal(dirname, r.Directories.First().Name);
+            Assert.Equal(0, r.Directories.First().FileCount);
         }
 
         [Trait("Category", "Parse")]
@@ -145,11 +147,11 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
 
             Assert.Null(ex);
 
-            Assert.Equal(dirname, r.Directory.Name);
-            Assert.Equal(1, r.Directory.FileCount);
-            Assert.Single(r.Directory.Files);
+            Assert.Equal(dirname, r.Directories.First().Name);
+            Assert.Equal(1, r.Directories.First().FileCount);
+            Assert.Single(r.Directories.First().Files);
 
-            var f = r.Directory.Files.ToList();
+            var f = r.Directories.First().Files.ToList();
 
             Assert.Equal(0x0, f[0].Code);
             Assert.Equal("foo", f[0].Filename);
@@ -164,15 +166,17 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         [Theory(DisplayName = "Parse handles a complete response"), AutoData]
         public void Parse_Handles_A_Complete_Response(int token)
         {
-            var dir = GetRandomDirectory(2);
+            var dir1 = GetRandomDirectory(2);
+            var dir2 = GetRandomDirectory(1);
 
             var builder = new MessageBuilder()
                 .WriteCode(MessageCode.Peer.FolderContentsResponse)
                 .WriteInteger(token)
-                .WriteString(dir.Name)
-                .WriteInteger(1);
+                .WriteString(dir1.Name) // name of first directory must go first
+                .WriteInteger(2); // 2 directories
 
-            BuildDirectory(builder, dir);
+            BuildDirectory(builder, dir1);
+            BuildDirectory(builder, dir2);
 
             var msg = builder
                 .Compress()
@@ -184,26 +188,52 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
 
             Assert.Null(ex);
 
-            var d = r.Directory;
+            var d1 = r.Directories.First();
 
-            Assert.Equal(dir.Name, d.Name);
-            Assert.Equal(dir.FileCount, d.FileCount);
+            Assert.Equal(dir1.Name, d1.Name);
+            Assert.Equal(dir1.FileCount, d1.FileCount);
 
-            var files = d.Files.ToList();
-            var msgFiles = d.Files.ToList();
+            var files1 = d1.Files.ToList();
+            var msgFiles1 = d1.Files.ToList();
 
-            for (int j = 0; j < d.FileCount; j++)
+            for (int j = 0; j < d1.FileCount; j++)
             {
-                Assert.Equal(files[j].Code, msgFiles[j].Code);
-                Assert.Equal(files[j].Filename, msgFiles[j].Filename);
-                Assert.Equal(files[j].Size, msgFiles[j].Size);
-                Assert.Equal(files[j].Extension, msgFiles[j].Extension);
-                Assert.Equal(files[j].AttributeCount, msgFiles[j].AttributeCount);
+                Assert.Equal(files1[j].Code, msgFiles1[j].Code);
+                Assert.Equal(files1[j].Filename, msgFiles1[j].Filename);
+                Assert.Equal(files1[j].Size, msgFiles1[j].Size);
+                Assert.Equal(files1[j].Extension, msgFiles1[j].Extension);
+                Assert.Equal(files1[j].AttributeCount, msgFiles1[j].AttributeCount);
 
-                var attr = files[j].Attributes.ToList();
-                var msgAttr = files[j].Attributes.ToList();
+                var attr = files1[j].Attributes.ToList();
+                var msgAttr = files1[j].Attributes.ToList();
 
-                for (int k = 0; k < msgFiles[j].AttributeCount; k++)
+                for (int k = 0; k < msgFiles1[j].AttributeCount; k++)
+                {
+                    Assert.Equal(attr[k].Type, msgAttr[k].Type);
+                    Assert.Equal(attr[k].Value, msgAttr[k].Value);
+                }
+            }
+
+            var d2 = r.Directories.Last();
+
+            Assert.Equal(dir2.Name, d2.Name);
+            Assert.Equal(dir2.FileCount, d2.FileCount);
+
+            var files2 = d2.Files.ToList();
+            var msgFiles2 = d2.Files.ToList();
+
+            for (int j = 0; j < d2.FileCount; j++)
+            {
+                Assert.Equal(files2[j].Code, msgFiles2[j].Code);
+                Assert.Equal(files2[j].Filename, msgFiles2[j].Filename);
+                Assert.Equal(files2[j].Size, msgFiles2[j].Size);
+                Assert.Equal(files2[j].Extension, msgFiles2[j].Extension);
+                Assert.Equal(files2[j].AttributeCount, msgFiles2[j].AttributeCount);
+
+                var attr = files2[j].Attributes.ToList();
+                var msgAttr = files2[j].Attributes.ToList();
+
+                for (int k = 0; k < msgFiles2[j].AttributeCount; k++)
                 {
                     Assert.Equal(attr[k].Type, msgAttr[k].Type);
                     Assert.Equal(attr[k].Value, msgAttr[k].Value);
@@ -213,17 +243,24 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
 
         [Trait("Category", "ToByteArray")]
         [Theory(DisplayName = "ToByteArray returns the expected data"), AutoData]
-        public void ToByteArray_Returns_Expected_Data(int token, string dirname)
+        public void ToByteArray_Returns_Expected_Data(int token, string dirname1, string dirname2)
         {
-            var list = new List<File>()
+            var list1 = new List<File>()
             {
                 new File(1, "1", 1, ".1", new List<FileAttribute>() { new FileAttribute(FileAttributeType.BitDepth, 1) }),
                 new File(2, "2", 2, ".2", new List<FileAttribute>() { new FileAttribute(FileAttributeType.BitRate, 2) }),
             };
 
-            var dir = new Directory(dirname, list);
+            var list2 = new List<File>()
+            {
+                new File(3, "3", 3, ".3", new List<FileAttribute>() { new FileAttribute(FileAttributeType.BitDepth, 3) }),
+                new File(4, "4", 4, ".4", new List<FileAttribute>() { new FileAttribute(FileAttributeType.BitRate, 4) }),
+            };
 
-            var r = new FolderContentsResponse(token, dir);
+            var dir1 = new Directory(dirname1, list1); // "root" directory
+            var dir2 = new Directory(dirname1 + "/" + dirname2, list2); // subdirectory
+
+            var r = new FolderContentsResponse(token, dirname1, new List<Directory>() { dir1, dir2 });
 
             var bytes = r.ToByteArray();
 
@@ -233,10 +270,10 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             Assert.Equal(MessageCode.Peer.FolderContentsResponse, m.ReadCode());
             Assert.Equal(token, m.ReadInteger());
 
-            Assert.Equal(dirname, m.ReadString());
-            Assert.Equal(1, m.ReadInteger());
-            Assert.Equal(dirname, m.ReadString());
-            Assert.Equal(dir.FileCount, m.ReadInteger());
+            Assert.Equal(dirname1, m.ReadString()); // "root" directory
+            Assert.Equal(2, m.ReadInteger()); // count of directories
+            Assert.Equal(dirname1, m.ReadString()); // name of first directory, which is the "root"
+            Assert.Equal(dir1.FileCount, m.ReadInteger());
 
             // file 1
             Assert.Equal(1, m.ReadByte()); // code
@@ -247,9 +284,42 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
 
             Assert.Equal(FileAttributeType.BitDepth, (FileAttributeType)m.ReadInteger());
             Assert.Equal(1, m.ReadInteger());
+
+            // file 2
+            Assert.Equal(2, m.ReadByte()); // code
+            Assert.Equal("2", m.ReadString()); // name
+            Assert.Equal(2, m.ReadLong()); // length
+            Assert.Equal(".2", m.ReadString()); // ext
+            Assert.Equal(1, m.ReadInteger()); // attribute count
+
+            Assert.Equal(FileAttributeType.BitRate, (FileAttributeType)m.ReadInteger());
+            Assert.Equal(2, m.ReadInteger());
+
+            Assert.Equal(dirname1 + "/" + dirname2, m.ReadString()); // name of second directory, which is subdirectory
+            Assert.Equal(dir2.FileCount, m.ReadInteger());
+
+            // file 3
+            Assert.Equal(3, m.ReadByte()); // code
+            Assert.Equal("3", m.ReadString()); // name
+            Assert.Equal(3, m.ReadLong()); // length
+            Assert.Equal(".3", m.ReadString()); // ext
+            Assert.Equal(1, m.ReadInteger()); // attribute count
+
+            Assert.Equal(FileAttributeType.BitDepth, (FileAttributeType)m.ReadInteger());
+            Assert.Equal(3, m.ReadInteger());
+
+            // file 4
+            Assert.Equal(4, m.ReadByte()); // code
+            Assert.Equal("4", m.ReadString()); // name
+            Assert.Equal(4, m.ReadLong()); // length
+            Assert.Equal(".4", m.ReadString()); // ext
+            Assert.Equal(1, m.ReadInteger()); // attribute count
+
+            Assert.Equal(FileAttributeType.BitRate, (FileAttributeType)m.ReadInteger());
+            Assert.Equal(4, m.ReadInteger());
         }
 
-        private MessageBuilder BuildDirectory(MessageBuilder builder, Directory dir)
+        private static MessageBuilder BuildDirectory(MessageBuilder builder, Directory dir)
         {
             builder
                 .WriteString(dir.Name)

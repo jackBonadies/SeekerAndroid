@@ -55,7 +55,7 @@ namespace Soulseek.Tests.Unit.Options
         [Theory(DisplayName = "Throws AddressException on bad address"), AutoData]
         public void Throws_ArgumentException_On_Bad_Address(string address)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 ProxyOptions o = null;
 
@@ -70,7 +70,7 @@ namespace Soulseek.Tests.Unit.Options
         [Fact(DisplayName = "Does not throw on resolveable address")]
         public void Does_Not_Throw_On_Resolveable_Address()
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 ProxyOptions o = null;
 
@@ -88,7 +88,7 @@ namespace Soulseek.Tests.Unit.Options
         [InlineData(65536)]
         public void Throws_ArgumentException_On_Bad_Port(int port)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 ProxyOptions o = null;
 
@@ -108,7 +108,7 @@ namespace Soulseek.Tests.Unit.Options
         [InlineData(" ", 1, "user", "pass")]
         public void Throws_ArgumentException_On_Bad_Input(string address, int port, string username, string password)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 ProxyOptions o = null;
 
@@ -123,7 +123,7 @@ namespace Soulseek.Tests.Unit.Options
         [Fact(DisplayName = "Does not throw if username and password are null")]
         public void Does_Not_Throw_If_Username_And_Password_Are_Null()
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 ProxyOptions o = null;
 
@@ -155,7 +155,7 @@ namespace Soulseek.Tests.Unit.Options
             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
         public void Throws_ArgumentOutOfRangeException_On_Bad_Input(string address, int port, string username, string password)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 ProxyOptions o = null;
 

@@ -49,3 +49,33 @@ Builds the universal + all four per-ABI IzzySoft APKs and stages them in
 dotnet publish -c Release -f net10.0-android36.0 .\Seeker\Seeker.csproj
 dotnet publish -c "Release IzzySoft" -f net10.0-android36.0 .\Seeker\Seeker.csproj
 ```
+
+## AOT Profiles
+
+To speed up startup time for Release builds we use AOT compilation of methods based on a custom profile.
+To generate this profile:
+```powershell
+# Create build with embedded profiler
+dotnet build .\Seeker\Seeker.csproj -c Release -t:BuildAndStartAotProfiling -p:Device=R5CW7238Q0D -p:RunAOTCompilation=false -p:AndroidEnableProfiledAot=false -p:CustomAfterMicrosoftCommonTargets=C:\Users\jack\.aotprof\profile.targets
+# Login, Perform Search and Browse then,
+# Get aot profile from app
+dotnet build .\Seeker\Seeker.csproj -c Release -t:FinishAotProfiling -p:Device=R5CW7238Q0D -p:RunAOTCompilation=false -p:AndroidEnableProfiledAot=false -p:CustomAfterMicrosoftCommonTargets=C:\Users\jack\.aotprof\profile.targets
+# if above fails with 9999 error it means no profile was embedded, try clean rebuild and check CustomAfterMicrosoftCommonTargets location (invalid location fails silently)
+```
+
+This will generate the custom.aprof file in Seeker\custom.aproj with a list of methods that should be AOT compiled during the build step.  To inspect the file run:
+```powershell
+~\.aotprof\tools\aprofutil.exe Seeker\custom.aprof
+```
+
+Reset device state with:
+```
+adb -s R5CW7238Q0D shell setprop debug.mono.profile ""
+```
+
+
+To measure speedup:
+```
+ .\Misc\benchmark-aot-vs-jit.ps1
+ ```
+ This will build and run AOT and JIT versions.  10 runs each.  Running this gave me median startup of 539ms (AOT) vs 783ms (JIT).

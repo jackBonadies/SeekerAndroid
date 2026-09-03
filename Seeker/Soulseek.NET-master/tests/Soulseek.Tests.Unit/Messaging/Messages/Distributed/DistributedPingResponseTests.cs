@@ -63,6 +63,19 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         }
 
         [Trait("Category", "FromByteArray")]
+        [Fact(DisplayName = "FromByteArray does not throw if message is missing token")]
+        public void FromByteArray_Does_Not_Throw_If_Message_Is_Missing_Token()
+        {
+            var msg = new MessageBuilder()
+                .WriteCode(MessageCode.Distributed.Ping)
+                .Build();
+
+            var response = DistributedPingResponse.FromByteArray(msg);
+
+            Assert.Equal(0, response.Token);
+        }
+
+        [Trait("Category", "FromByteArray")]
         [Fact(DisplayName = "FromByteArray throws MessageException on code mismatch")]
         public void FromByteArray_Throws_MessageException_On_Code_Mismatch()
         {

@@ -48,13 +48,13 @@
         [ProducesResponseType(typeof(IEnumerable<SearchResponse>), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(typeof(string), 500)]
-        public async Task<IActionResult> Post([FromBody]SearchRequest request)
+        public async Task<IActionResult> Post([FromBody] SearchRequest request)
         {
             var id = request.Id ?? Guid.NewGuid();
 
             var options = request.ToSearchOptions(
-                responseReceived: (e) => Tracker.AddOrUpdate(id, e),
-                stateChanged: (e) => Tracker.AddOrUpdate(id, e));
+                responseReceived: (e) => Tracker.AddOrUpdate(id, e.Search),
+                stateChanged: (e) => Tracker.AddOrUpdate(id, e.Search));
 
             var results = new ConcurrentBag<SearchResponse>();
 
@@ -63,6 +63,48 @@
             try
             {
                 await Client.SearchAsync(SearchQuery.FromText(searchText), (r) => results.Add(r), SearchScope.Network, request.Token, options);
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Search terminated abnormally: {ex.Message}");
+            }
+            finally
+            {
+                results = null;
+                Tracker.TryRemove(id);
+            }
+        }
+
+        /// <summary>
+        ///     Performs a search for the specified <paramref name="request"/> from the specified <paramref name="username"/>.
+        /// </summary>
+        /// <param name="request">The search request.</param>
+        /// <param name="username">The username to search.</param>
+        /// <returns></returns>
+        /// <response code="200">The search completed successfully.</response>
+        /// <response code="400">The specified <paramref name="request"/> was malformed.</response>
+        /// <response code="500">The search terminated abnormally.</response>
+        [HttpPost("users/{username}")]
+        [Authorize]
+        [ProducesResponseType(typeof(IEnumerable<SearchResponse>), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(typeof(string), 500)]
+        public async Task<IActionResult> PostUsers([FromBody] SearchRequest request, [FromRoute] string username)
+        {
+            var id = request.Id ?? Guid.NewGuid();
+
+            var options = request.ToSearchOptions(
+                responseReceived: (e) => Tracker.AddOrUpdate(id, e.Search),
+                stateChanged: (e) => Tracker.AddOrUpdate(id, e.Search));
+
+            var results = new ConcurrentBag<SearchResponse>();
+
+            var searchText = string.Join(' ', request.SearchText.Split(' ').Where(term => term.Length > 1));
+
+            try
+            {
+                await Client.SearchAsync(SearchQuery.FromText(searchText), (r) => results.Add(r), SearchScope.User(username), request.Token, options);
                 return Ok(results);
             }
             catch (Exception ex)
@@ -87,7 +129,7 @@
         [Authorize]
         [ProducesResponseType(typeof(Search), 200)]
         [ProducesResponseType(404)]
-        public IActionResult GetById([FromRoute]Guid id)
+        public IActionResult GetById([FromRoute] Guid id)
         {
             Tracker.Searches.TryGetValue(id, out var search);
 

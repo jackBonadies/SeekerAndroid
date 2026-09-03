@@ -790,9 +790,6 @@
         Data klienta byla úspěšně importována
     </string>
 
-    <string name="SelectUserNotes">
-        Select the following user notes to add
-    </string>
     <string name="FolderFinishedDownloading">
         Folder finished downloading
     </string>

@@ -1,10 +1,12 @@
 ﻿// <copyright file="ISoulseekClient.cs" company="JP Dillingham">
-//     Copyright (c) JP Dillingham. All rights reserved.
+//     Copyright (c) JP Dillingham.
+//
+//     Copyright (c) 2021-2026 Jack Bonadies
+//     Modified: added private room operator event, Latin-1 encoding parameters, and listener state members
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
+//     the Free Software Foundation, version 3.
 //
 //     This program is distributed in the hope that it will be useful,
 //     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,6 +15,13 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
+//
+//     This program is distributed with Additional Terms pursuant to Section 7
+//     of the GPLv3.  See the LICENSE file in the root directory of this
+//     project for the complete terms and conditions.
+//
+//     SPDX-FileCopyrightText: JP Dillingham
+//     SPDX-License-Identifier: GPL-3.0-only
 // </copyright>
 
 namespace Soulseek
@@ -100,6 +109,12 @@ namespace Soulseek
         ///     Occurs when a global message is received.
         /// </summary>
         event EventHandler<string> GlobalMessageReceived;
+
+        /// <summary>
+        ///     Occurs when the client is forcefully disconnected from the server, probably because another client logged in with
+        ///     the same credentials.
+        /// </summary>
+        public event EventHandler KickedFromServer;
 
         /// <summary>
         ///     Occurs when the client is logged in.
@@ -262,7 +277,6 @@ namespace Soulseek
         /// <remarks>Add a user to the server watch list with <see cref="WatchUserAsync(string, CancellationToken?)"/>.</remarks>
         event EventHandler<UserStatus> UserStatusChanged;
 
-
         /// <summary>
         ///     Gets the unresolved server address.
         /// </summary>
@@ -287,6 +301,16 @@ namespace Soulseek
         ///     Gets the resolved server endpoint.
         /// </summary>
         IPEndPoint IPEndPoint { get; }
+
+        /// <summary>
+        ///     Gets the major version of the library.
+        /// </summary>
+        int MajorVersion { get; }
+
+        /// <summary>
+        ///     Gets the configured minor version of the client.
+        /// </summary>
+        int MinorVersion { get; }
 
         /// <summary>
         ///     Gets the client options.
@@ -345,6 +369,36 @@ namespace Soulseek
         /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
         Task AcknowledgePrivilegeNotificationAsync(int privilegeNotificationId, CancellationToken? cancellationToken = null);
+
+        /// <summary>
+        ///     Asynchronously adds the specified <paramref name="interest"/> to the list of the user's hated interests.
+        /// </summary>
+        /// <param name="interest">The interest to add.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous operation.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="interest"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        Task AddHatedInterestAsync(string interest, CancellationToken? cancellationToken = null);
+
+        /// <summary>
+        ///     Asynchronously adds the specified <paramref name="interest"/> to the list of the user's liked interests.
+        /// </summary>
+        /// <param name="interest">The interest to add.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous operation.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="interest"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        Task AddLikedInterestAsync(string interest, CancellationToken? cancellationToken = null);
 
         /// <summary>
         ///     Asynchronously adds the specified <paramref name="username"/> to the list of members in the specified private <paramref name="roomName"/>.
@@ -826,6 +880,7 @@ namespace Soulseek
         /// <param name="directoryName">The name of the directory to fetch.</param>
         /// <param name="token">The unique token for the operation.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <param name="isLegacy">Whether the directory name should be written as ISO-8859-1 rather than UTF-8.</param>
         /// <returns>The Task representing the asynchronous operation, including the directory contents.</returns>
         /// <exception cref="ArgumentException">
         ///     Thrown when the <paramref name="username"/> or <paramref name="directoryName"/> is null, empty, or consists only
@@ -845,6 +900,8 @@ namespace Soulseek
         /// <param name="username">The user whose queue to check.</param>
         /// <param name="filename">The file to check.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <param name="wasFileLatin1Decoded">Whether the filename should be written as ISO-8859-1 rather than UTF-8.</param>
+        /// <param name="wasFolderLatin1Decoded">Whether the directory portion should be written as ISO-8859-1.</param>
         /// <returns>The Task representing the asynchronous operation, including the current place of the file in the queue.</returns>
         /// <exception cref="ArgumentException">
         ///     Thrown when the <paramref name="username"/> or <paramref name="filename"/> is null, empty, or consists only of whitespace.
@@ -1095,6 +1152,36 @@ namespace Soulseek
         /// <exception cref="ListenException">Thrown when binding a listener to the specified address and/or port fails.</exception>
         /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
         Task<bool> ReconfigureOptionsAsync(SoulseekClientOptionsPatch patch, CancellationToken? cancellationToken = null);
+
+        /// <summary>
+        ///     Asynchronously removes the specified <paramref name="interest"/> from the list of the user's hated interests.
+        /// </summary>
+        /// <param name="interest">The interest to remove.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous operation.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="interest"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        Task RemoveHatedInterestAsync(string interest, CancellationToken? cancellationToken = null);
+
+        /// <summary>
+        ///     Asynchronously removes the specified <paramref name="interest"/> from the list of the user's liked interests.
+        /// </summary>
+        /// <param name="interest">The interest to remove.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>The Task representing the asynchronous operation.</returns>
+        /// <exception cref="ArgumentException">
+        ///     Thrown when the <paramref name="interest"/> is null, empty, or consists only of whitespace.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">Thrown when the client is not connected or logged in.</exception>
+        /// <exception cref="TimeoutException">Thrown when the operation has timed out.</exception>
+        /// <exception cref="OperationCanceledException">Thrown when the operation has been cancelled.</exception>
+        /// <exception cref="SoulseekClientException">Thrown when an exception is encountered during the operation.</exception>
+        Task RemoveLikedInterestAsync(string interest, CancellationToken? cancellationToken = null);
 
         /// <summary>
         ///     Asynchronously removes the specified <paramref name="username"/> from the list of members in the specified private <paramref name="roomName"/>.
@@ -1394,13 +1481,18 @@ namespace Soulseek
         Task<UserData> WatchUserAsync(string username, CancellationToken? cancellationToken = null);
 
         /// <summary>
-        /// Is Transfer In Downloads. If so we need to cancel it before retrying it.
+        ///     Gets a value indicating whether a download of <paramref name="filename"/> from
+        ///     <paramref name="username"/> is tracked.  If so it must be cancelled before it can be retried.
         /// </summary>
+        /// <param name="username">The username of the peer.</param>
+        /// <param name="filename">The name of the file.</param>
+        /// <returns>A value indicating whether the transfer is tracked.</returns>
         bool IsTransferInDownloads(string username, string filename);
 
         /// <summary>
-        /// If we are successfully listening.
+        ///     Gets a value indicating whether the listener is running.
         /// </summary>
+        /// <returns>A value indicating whether the listener is running.</returns>
         bool GetListeningState();
     }
 }

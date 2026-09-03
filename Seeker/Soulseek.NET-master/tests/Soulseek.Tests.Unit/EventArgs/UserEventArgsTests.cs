@@ -23,17 +23,6 @@ namespace Soulseek.Tests.Unit
 
     public class UserEventArgsTests
     {
-        [Trait("Category", "UserStatusChangedEventArgs Instantiation")]
-        [Theory(DisplayName = "UserStatusChangedEventArgs Instantiates with the given data"), AutoData]
-        public void UserStatusChangedEventArgs_Instantiates_With_The_Given_Data(string username, UserPresence status, bool privileged)
-        {
-            var e = new UserStatusChangedEventArgs(new UserStatusResponse(username, status, privileged));
-
-            Assert.Equal(username, e.Username);
-            Assert.Equal(status, e.Status);
-            Assert.Equal(privileged, e.IsPrivileged);
-        }
-
         [Trait("Category", "UserCannotConnectEventArgs Instantiation")]
         [Theory(DisplayName = "UserCannotConnectEventArgs Instantiates with the given data"), AutoData]
         public void UserCannotConnectEventArgs_Instantiates_With_The_Given_Data(int token, string username)
@@ -42,6 +31,27 @@ namespace Soulseek.Tests.Unit
 
             Assert.Equal(username, e.Username);
             Assert.Equal(token, e.Token);
+        }
+
+        [Trait("Category", "DownloadDeniedEventArgs Instantiation")]
+        [Theory(DisplayName = "DownloadDeniedEventArgs Instantiates with the given data"), AutoData]
+        public void DownloadDeniedEventArgs_Instantiates_With_The_Given_Data(string username, string filename, string message)
+        {
+            var e = new DownloadDeniedEventArgs(username, filename, message);
+
+            Assert.Equal(username, e.Username);
+            Assert.Equal(filename, e.Filename);
+            Assert.Equal(message, e.Message);
+        }
+
+        [Trait("Category", "DownloadFailedEventArgs Instantiation")]
+        [Theory(DisplayName = "DownloadFailedEventArgs Instantiates with the given data"), AutoData]
+        public void DownloadFailedEventArgs_Instantiates_With_The_Given_Data(string username, string filename)
+        {
+            var e = new DownloadFailedEventArgs(username, filename);
+
+            Assert.Equal(username, e.Username);
+            Assert.Equal(filename, e.Filename);
         }
     }
 }

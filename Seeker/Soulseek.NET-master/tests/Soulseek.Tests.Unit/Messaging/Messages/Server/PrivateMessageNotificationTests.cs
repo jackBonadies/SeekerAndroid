@@ -74,7 +74,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         [Theory(DisplayName = "Parse returns expected data"), AutoData]
         public void Parse_Returns_Expected_Data(int id, int timeOffset, string username, string message)
         {
-            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            var epoch = DateTime.UnixEpoch;
             var timestamp = epoch.AddSeconds(timeOffset);
 
             var msg = new MessageBuilder()

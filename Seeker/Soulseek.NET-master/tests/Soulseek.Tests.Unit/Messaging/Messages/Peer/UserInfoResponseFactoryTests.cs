@@ -29,7 +29,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         {
             UserInfo response = null;
 
-            var ex = Record.Exception(() => response = new UserInfo(description, picture, uploadSlots, queueLength, hasFreeSlot));
+            var ex = Record.Exception(() => response = new UserInfo(description, uploadSlots, queueLength, hasFreeSlot, picture));
 
             Assert.Null(ex);
 
@@ -121,7 +121,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         [Theory(DisplayName = "ToByteArray returns expected data with picture"), AutoData]
         public void ToByteArray_Returns_Expected_Data_With_Picture(string description, byte[] picture, int uploadSlots, int queueLength, bool hasFreeSlot)
         {
-            var r = new UserInfo(description, picture, uploadSlots, queueLength, hasFreeSlot).ToByteArray();
+            var r = new UserInfo(description, uploadSlots, queueLength, hasFreeSlot, picture).ToByteArray();
 
             var m = new MessageReader<MessageCode.Peer>(r);
             var code = m.ReadCode();

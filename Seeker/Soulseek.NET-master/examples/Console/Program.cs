@@ -30,7 +30,7 @@
         [EnvironmentVariable("SLSK_PASSWORD")]
         private static string Password { get; set; }
 
-        private static ConcurrentDictionary<(string Username, string Filename, int Token), (TransferStates State, Spinner Spinner, ProgressBar ProgressBar)> Downloads { get; set; } 
+        private static ConcurrentDictionary<(string Username, string Filename, int Token), (TransferStates State, Spinner Spinner, ProgressBar ProgressBar)> Downloads { get; set; }
             = new ConcurrentDictionary<(string Username, string Filename, int Token), (TransferStates State, Spinner Spinner, ProgressBar ProgressBar)>();
 
         [Argument('s', "search")]
@@ -50,7 +50,7 @@
         public static async Task Main()
         {
             Console.OutputEncoding = Encoding.UTF8;
-            
+
             EnvironmentVariables.Populate();
             Arguments.Populate(clearExistingValues: false);
 
@@ -60,7 +60,7 @@
                 transferConnectionOptions: new ConnectionOptions(connectTimeout: 30000, inactivityTimeout: 15000)
             );
 
-            using (var client = new SoulseekClient(options))
+            using (var client = new SoulseekClient(minorVersion: 9999, options))
             {
                 client.StateChanged += Client_ServerStateChanged;
 
@@ -71,7 +71,7 @@
                     var responses = await SearchAsync(client, Search, 1);
 
                     responses = responses
-                        .OrderByDescending(r => r.FreeUploadSlots)
+                        .OrderByDescending(r => r.HasFreeUploadSlot)
                         .ThenByDescending(r => r.UploadSpeed);
 
                     var response = SelectSearchResponse(responses);
@@ -95,11 +95,11 @@
                     responses = await SearchAsync(client, searchText, release.TrackCount);
 
                     responses = responses
-                        .OrderByDescending(r => r.FreeUploadSlots)
+                        .OrderByDescending(r => r.HasFreeUploadSlot)
                         .ThenByDescending(r => r.UploadSpeed);
 
                     var response = SelectSearchResponse(responses);
-                    
+
                     o($"\nDownloading {response.Files.Count()} file{(response.Files.Count() > 1 ? "s" : string.Empty)} from {response.Username}...\n");
 
                     await DownloadFilesAsync(client, response.Username, response.Files.Select(f => f.Filename).ToList()).ConfigureAwait(false);
@@ -115,7 +115,7 @@
         {
             if (e.State == SoulseekClientStates.Disconnected)
             {
-                o("\n×  Disconnected from server" + (!string.IsNullOrEmpty(e.Message) ? $": {e.Message}" : "." ));
+                o("\n×  Disconnected from server" + (!string.IsNullOrEmpty(e.Message) ? $": {e.Message}" : "."));
             }
         }
 
@@ -127,14 +127,17 @@
             {
                 try
                 {
-                    var bytes = await client.DownloadAsync(username, file, startOffset: 0, token: index++, options: new TransferOptions(stateChanged: (e) =>
+                    var path = $"{OutputDirectory}{Path.DirectorySeparatorChar}{Path.GetDirectoryName(file).Replace(Path.GetDirectoryName(Path.GetDirectoryName(file)), "")}";
+                    var filename = Path.Combine(path, Path.GetFileName(file));
+
+                    var transfer = await client.DownloadAsync(username, file, filename, startOffset: 0, token: index++, options: new TransferOptions(stateChanged: (e) =>
                     {
                         var key = (e.Transfer.Username, e.Transfer.Filename, e.Transfer.Token);
                         var progress = Downloads.GetOrAdd(key, (e.Transfer.State, null, new ProgressBar(10)));
                         progress.State = e.Transfer.State;
                         progress.ProgressBar = new ProgressBar(10, format: new ProgressBarFormat(left: "[", right: "]", full: '=', tip: '>', empty: ' ', emptyWhen: () => Downloads[key].State.HasFlag(TransferStates.Completed)));
                         progress.Spinner = new Spinner("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏", format: new SpinnerFormat(completeWhen: () => Downloads[key].State.HasFlag(TransferStates.Completed)));
-                        
+
                         Downloads.AddOrUpdate(key, progress, (k, v) => progress);
 
                         if (progress.State.HasFlag(TransferStates.Completed))
@@ -163,23 +166,18 @@
                         var remaining = e.Transfer.RemainingTime.HasValue ? e.Transfer.RemainingTime.Value.ToString(@"m\:ss") : "--:--";
 
                         Console.Write($"\r {progress.Spinner}  {fn}  {size}  {percent}  [{status}]  {progress.ProgressBar} {e.Transfer.AverageSpeed.ToMB()}/s {elapsed} / {remaining}");
- 
+
                     })).ConfigureAwait(false);
 
                     // GetDirectoryName() and GetFileName() only work when the path separator is the same as the current OS' DirectorySeparatorChar.
                     // normalize for both Windows and Linux by replacing / and \ with Path.DirectorySeparatorChar.
                     file = file.ToLocalOSPath();
 
-                    var path = $"{OutputDirectory}{Path.DirectorySeparatorChar}{Path.GetDirectoryName(file).Replace(Path.GetDirectoryName(Path.GetDirectoryName(file)), "")}";
 
                     if (!System.IO.Directory.Exists(path))
                     {
                         System.IO.Directory.CreateDirectory(path);
                     }
-
-                    var filename = Path.Combine(path, Path.GetFileName(file));
-
-                    System.IO.File.WriteAllBytes(filename, bytes);
                 }
                 catch (Exception ex)
                 {
@@ -233,8 +231,6 @@
             var totalFiles = 0;
             var state = SearchStates.None;
 
-            IEnumerable<SearchResponse> responses = Enumerable.Empty<SearchResponse>();
-
             using (var timer = new Timer(100))
             {
 
@@ -247,7 +243,7 @@
 
                 timer.Start();
 
-                responses = await client.SearchAsync(SearchQuery.FromText(searchText),
+                var (search, responses) = await client.SearchAsync(SearchQuery.FromText(searchText),
                     options: new SearchOptions(
                         filterResponses: true,
                         minimumResponseFileCount: minimumFileCount,
@@ -257,15 +253,15 @@
                         {
                             totalResponses++;
                             totalFiles += e.Response.FileCount;
-                        }, 
+                        },
                         fileFilter: (file) => Path.GetExtension(file.Filename) == ".mp3"));
 
                 timer.Stop();
                 complete = true;
                 updateStatus();
-            }
 
-            return responses;
+                return responses;
+            }
         }
 
         private static async Task<Artist> SelectArtist(string artist)
@@ -414,7 +410,7 @@
                 var response = responses.ToList()[index];
 
                 var cnt = $"Response {index + 1}/{responses.Count()}";
-                var res = $"User: {response.Username}, Upload speed: {response.UploadSpeed.ToKB()}/s, Free upload slots: {response.FreeUploadSlots}, Queue length: {response.QueueLength}";
+                var res = $"User: {response.Username}, Upload speed: {response.UploadSpeed.ToKB()}/s, Free upload slot: {response.HasFreeUploadSlot}, Queue length: {response.QueueLength}";
 
                 o($"\n┌{new string('─', res.Length - 29)} ──────── ──      ─ ─");
                 o($"│ {cnt}");

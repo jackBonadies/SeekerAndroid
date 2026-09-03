@@ -19,6 +19,7 @@ namespace Soulseek.Tests.Unit.Client
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
@@ -42,7 +43,7 @@ namespace Soulseek.Tests.Unit.Client
         [InlineData(null, null)]
         public async Task Throws_ArgumentException_On_Bad_Credentials(string username, string password)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var ex = await Record.ExceptionAsync(() => s.ConnectAsync(username, password));
 
@@ -55,7 +56,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "Address throws AddressException on bad address"), AutoData]
         public async Task Address_Throws_ArgumentException_On_Bad_Address(string address)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var ex = await Record.ExceptionAsync(() => s.ConnectAsync(address, 1, "u", "p"));
 
@@ -65,24 +66,24 @@ namespace Soulseek.Tests.Unit.Client
         }
 
         [Trait("Category", "Connect")]
-        [Fact(DisplayName = "Throws ListenPortException on bad listen port")]
-        public async Task Address_Throws_ListenPortException_On_Bad_Listen_Port()
+        [Fact(DisplayName = "Throws ListenException on bad listen port")]
+        public async Task Address_Throws_ListenException_On_Bad_Listen_Port()
         {
             var port = Mocks.Port;
 
-            using (var s = new SoulseekClient(new SoulseekClientOptions(enableListener: true, listenPort: port)))
+            using (var s = new SoulseekClient(minorVersion: 9999, new SoulseekClientOptions(enableListener: true, listenPort: port)))
             {
                 Listener listener = null;
 
                 try
                 {
-                    listener = new Listener(port, new ConnectionOptions());
+                    listener = new Listener(IPAddress.Any, port, new ConnectionOptions());
                     listener.Start();
 
                     var ex = await Record.ExceptionAsync(() => s.ConnectAsync("u", "p"));
 
                     Assert.NotNull(ex);
-                    Assert.IsType<ListenPortException>(ex);
+                    Assert.IsType<ListenException>(ex);
                 }
                 finally
                 {
@@ -92,12 +93,31 @@ namespace Soulseek.Tests.Unit.Client
         }
 
         [Trait("Category", "Connect")]
+        [Theory(DisplayName = "Assigns a handler to Listener.Error when EnableListener is true"), AutoData]
+        public async Task Assigns_A_Handler_To_Listener_Error_When_EnableListener_Is_True(string username, string password)
+        {
+            var (client, mocks) = GetFixture(new SoulseekClientOptions(enableListener: true, listenPort: Mocks.Port));
+
+            using (client)
+            {
+                await client.ConnectAsync(username, password);
+
+                Assert.NotNull(client.Listener);
+
+                var raisedException = new Exception("error raised for test");
+                client.Listener.RaiseEvent(typeof(Listener), "Error", raisedException);
+
+                mocks.ListenerHandler.Verify(m => m.HandleError(client.Listener, raisedException), Times.Once);
+            }
+        }
+
+        [Trait("Category", "Connect")]
         [Theory(DisplayName = "Address throws ArgumentOutOfRangeException on bad port")]
         [InlineData(-1)]
         [InlineData(65536)]
         public async Task Address_Throws_ArgumentException_On_Bad_Port(int port)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var ex = await Record.ExceptionAsync(() => s.ConnectAsync("127.0.0.01", port, "u", "p"));
 
@@ -119,7 +139,7 @@ namespace Soulseek.Tests.Unit.Client
         [InlineData(" ", 1, "user", "pass")]
         public async Task Address_Throws_ArgumentException_On_Bad_Input(string address, int port, string username, string password)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var ex = await Record.ExceptionAsync(() => s.ConnectAsync(address, port, username, password));
 
@@ -132,7 +152,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "Throws InvalidOperationException if connected"), AutoData]
         public async Task Throws_InvalidOperationException_When_Already_Connected(string username, string password)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected);
 
@@ -305,7 +325,7 @@ namespace Soulseek.Tests.Unit.Client
         }
 
         [Trait("Category", "Connect")]
-        [Theory(DisplayName = "Connects and logs in"), AutoData]
+        [Theory(DisplayName = "Connects, logs in, and sets listen port"), AutoData]
         public async Task Connects_And_Logs_In(string username, string password)
         {
             var (client, mocks) = GetFixture();
@@ -317,15 +337,18 @@ namespace Soulseek.Tests.Unit.Client
 
             mocks.ServerConnection.Verify(m => m.ConnectAsync(It.IsAny<CancellationToken>()));
 
-            var expectedBytes = new LoginRequest(username, password).ToByteArray();
-            mocks.ServerConnection.Verify(m => m.WriteAsync(It.Is<IOutgoingMessage>(msg => msg.ToByteArray().Matches(expectedBytes)), It.IsAny<CancellationToken?>()));
+            var expectedBytes = new LoginRequest(minorVersion: 9999, username, password).ToByteArray()
+                .Concat(new SetListenPortCommand(client.Options.ListenPort).ToByteArray())
+                .ToArray();
+
+            mocks.ServerConnection.Verify(m => m.WriteAsync(It.Is<byte[]>(msg => msg.Matches(expectedBytes)), It.IsAny<CancellationToken?>()));
         }
 
         [Trait("Category", "Connect")]
         [Fact(DisplayName = "Sets state to Connected | LoggedIn on success")]
         public async Task Sets_State_To_Connected_LoggedIn_On_Success()
         {
-            var (client, mocks) = GetFixture();
+            var (client, _) = GetFixture();
 
             using (client)
             {
@@ -372,7 +395,7 @@ namespace Soulseek.Tests.Unit.Client
         {
             SoulseekClientStateChangedEventArgs args = null;
 
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.StateChanged += (sender, e) => args = e;
 
@@ -389,7 +412,7 @@ namespace Soulseek.Tests.Unit.Client
         {
             var fired = false;
 
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.StateChanged += (sender, e) => fired = true;
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
@@ -445,7 +468,7 @@ namespace Soulseek.Tests.Unit.Client
         public async Task Starts_Listener_On_Success(string user, string password)
         {
             var port = Mocks.Port;
-            var (client, mocks) = GetFixture(new SoulseekClientOptions(listenPort: port));
+            var (client, _) = GetFixture(new SoulseekClientOptions(listenPort: port));
 
             using (client)
             {
@@ -505,18 +528,12 @@ namespace Soulseek.Tests.Unit.Client
 
         [Trait("Category", "Connect")]
         [Theory(DisplayName = "Raises ServerInfoReceived on login"), AutoData]
-        public async Task Raises_ServerInfoReceived_On_Login(string user, string password, int parentMinSpeed, int parentSpeedRatio, int wishlistInterval)
+        public async Task Raises_ServerInfoReceived_On_Login(string user, string password, bool isSupporter)
         {
             var (client, mocks) = GetFixture();
 
             mocks.Waiter.Setup(m => m.Wait<LoginResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new LoginResponse(true, string.Empty)));
-            mocks.Waiter.Setup(m => m.Wait<int>(It.Is<WaitKey>(w => w == new WaitKey(MessageCode.Server.ParentMinSpeed)), null, It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(parentMinSpeed));
-            mocks.Waiter.Setup(m => m.Wait<int>(It.Is<WaitKey>(w => w == new WaitKey(MessageCode.Server.ParentSpeedRatio)), null, It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(parentSpeedRatio));
-            mocks.Waiter.Setup(m => m.Wait<int>(It.Is<WaitKey>(w => w == new WaitKey(MessageCode.Server.WishlistInterval)), null, It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(wishlistInterval));
+                .Returns(Task.FromResult(new LoginResponse(true, string.Empty, isSupporter: isSupporter)));
 
             using (client)
             {
@@ -527,57 +544,27 @@ namespace Soulseek.Tests.Unit.Client
                 await client.ConnectAsync(user, password);
 
                 Assert.NotNull(args);
-                Assert.Equal(parentMinSpeed, args.ParentMinSpeed);
-                Assert.Equal(parentSpeedRatio, args.ParentSpeedRatio);
-                Assert.Equal(wishlistInterval * 1000, args.WishlistInterval);
+
+                // IsSupporter is the only property we can expect to be set at this stage, the rest are
+                // delivered/set out of band now (originally they were required during login)
+                Assert.Equal(isSupporter, args.IsSupporter);
             }
         }
 
         [Trait("Category", "Connect")]
         [Theory(DisplayName = "Sets ServerInfo on login"), AutoData]
-        public async Task Sets_ServerInfo_On_Login(string user, string password, int parentMinSpeed, int parentSpeedRatio, int wishlistInterval)
+        public async Task Sets_ServerInfo_On_Login(string user, string password, bool isSupporter)
         {
             var (client, mocks) = GetFixture();
 
             mocks.Waiter.Setup(m => m.Wait<LoginResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new LoginResponse(true, string.Empty)));
-            mocks.Waiter.Setup(m => m.Wait<int>(It.Is<WaitKey>(w => w == new WaitKey(MessageCode.Server.ParentMinSpeed)), null, It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(parentMinSpeed));
-            mocks.Waiter.Setup(m => m.Wait<int>(It.Is<WaitKey>(w => w == new WaitKey(MessageCode.Server.ParentSpeedRatio)), null, It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(parentSpeedRatio));
-            mocks.Waiter.Setup(m => m.Wait<int>(It.Is<WaitKey>(w => w == new WaitKey(MessageCode.Server.WishlistInterval)), null, It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(wishlistInterval));
+                .Returns(Task.FromResult(new LoginResponse(true, string.Empty, isSupporter: isSupporter)));
 
             using (client)
             {
                 await client.ConnectAsync(user, password);
 
-                Assert.Equal(parentMinSpeed, client.ServerInfo.ParentMinSpeed);
-                Assert.Equal(parentSpeedRatio, client.ServerInfo.ParentSpeedRatio);
-                Assert.Equal(wishlistInterval * 1000, client.ServerInfo.WishlistInterval);
-            }
-        }
-
-        [Trait("Category", "Connect")]
-        [Theory(DisplayName = "Throws SoulseekClientException if expected login messages are not sent"), AutoData]
-        public async Task Throws_SoulseekClientException_If_Expected_Login_Messages_Are_Not_Sent(string user, string password)
-        {
-            var (client, mocks) = GetFixture();
-
-            mocks.Waiter.Setup(m => m.Wait<LoginResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new LoginResponse(true, string.Empty)));
-            mocks.Waiter.Setup(m => m.Wait<int>(It.Is<WaitKey>(w => w == new WaitKey(MessageCode.Server.WishlistInterval)), null, It.IsAny<CancellationToken>()))
-                .Returns(Task.FromException<int>(new TimeoutException("timed out")));
-
-            using (client)
-            {
-                var ex = await Record.ExceptionAsync(() => client.ConnectAsync(user, password));
-
-                Assert.NotNull(ex);
-                Assert.IsType<SoulseekClientException>(ex);
-                Assert.True(ex.Message.ContainsInsensitive("did not receive one or more expected server messages"));
-                Assert.IsType<ConnectionException>(ex.InnerException);
-                Assert.IsType<TimeoutException>(ex.InnerException.InnerException);
+                Assert.Equal(isSupporter, client.ServerInfo.IsSupporter);
             }
         }
 
@@ -620,13 +607,15 @@ namespace Soulseek.Tests.Unit.Client
             }
         }
 
-        private (SoulseekClient client, Mocks Mocks) GetFixture(SoulseekClientOptions clientOptions = null)
+        private static (SoulseekClient client, Mocks Mocks) GetFixture(SoulseekClientOptions clientOptions = null)
         {
             var mocks = new Mocks();
             var client = new SoulseekClient(
+                minorVersion: 9999,
                 distributedConnectionManager: mocks.DistributedConnectionManager.Object,
                 connectionFactory: mocks.ConnectionFactory.Object,
                 waiter: mocks.Waiter.Object,
+                listenerHandler: mocks.ListenerHandler.Object,
                 options: clientOptions ?? new SoulseekClientOptions(enableListener: false));
 
             return (client, mocks);
@@ -662,6 +651,7 @@ namespace Soulseek.Tests.Unit.Client
             public Mock<IWaiter> Waiter { get; } = new Mock<IWaiter>();
             public Mock<IConnectionFactory> ConnectionFactory { get; }
             public Mock<IDistributedConnectionManager> DistributedConnectionManager { get; }
+            public Mock<IListenerHandler> ListenerHandler { get; } = new Mock<IListenerHandler>();
         }
     }
 }

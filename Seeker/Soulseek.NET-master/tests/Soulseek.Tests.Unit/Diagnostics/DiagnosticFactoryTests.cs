@@ -18,6 +18,8 @@
 namespace Soulseek.Tests.Unit
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using AutoFixture.Xunit2;
     using Soulseek.Diagnostics;
     using Xunit;
@@ -32,6 +34,45 @@ namespace Soulseek.Tests.Unit
 
             Assert.Equal(level, d.GetProperty<DiagnosticLevel>("MinimumLevel"));
             Assert.Equal(handler, d.GetProperty<Action<DiagnosticEventArgs>>("EventHandler"));
+        }
+
+        [Trait("Category", "Trace")]
+        [Theory(DisplayName = "Raises event on trace"), AutoData]
+        public void Raises_Event_On_Trace(string message)
+        {
+            DiagnosticEventArgs e = null;
+
+            var d = new DiagnosticFactory(DiagnosticLevel.Trace, (args) =>
+            {
+                e = args;
+            });
+
+            d.Trace(message);
+
+            Assert.Equal(message, e.Message);
+            Assert.Equal(DiagnosticLevel.Trace, e.Level);
+            Assert.False(e.IncludesException);
+            Assert.Null(e.Exception);
+        }
+
+        [Trait("Category", "Trace")]
+        [Theory(DisplayName = "Raises event on trace with Exception"), AutoData]
+        public void Raises_Event_On_Trace_With_Exception(string message, Exception ex)
+        {
+            DiagnosticEventArgs e = null;
+
+            var d = new DiagnosticFactory(DiagnosticLevel.Trace, (args) =>
+            {
+                e = args;
+            });
+
+            d.Trace(message, ex);
+
+            Assert.Equal(message, e.Message);
+            Assert.Equal(ex, e.Exception);
+            Assert.Equal(DiagnosticLevel.Trace, e.Level);
+            Assert.True(e.IncludesException);
+            Assert.NotNull(e.Exception);
         }
 
         [Trait("Category", "Debug")]
@@ -175,6 +216,111 @@ namespace Soulseek.Tests.Unit
             d.Warning(message);
 
             Assert.Null(e);
+        }
+
+        [Trait("Category", "Filter")]
+        [Theory(DisplayName = "Filters properly"), AutoData]
+        public void Filters_Properly_Debug(string message)
+        {
+            List<DiagnosticEventArgs> x = new List<DiagnosticEventArgs>();
+
+            var d = new DiagnosticFactory(DiagnosticLevel.Debug, (args) =>
+            {
+                x.Add(args);
+            });
+
+            d.Debug(message);
+            d.Info(message);
+            d.Warning(message);
+            d.Trace(message);
+
+            Assert.Equal(3, x.Count);
+            Assert.Single(x, y => y.Level == DiagnosticLevel.Debug);
+            Assert.Single(x, y => y.Level == DiagnosticLevel.Info);
+            Assert.Single(x, y => y.Level == DiagnosticLevel.Warning);
+        }
+
+        [Trait("Category", "Filter")]
+        [Theory(DisplayName = "Filters properly"), AutoData]
+        public void Filters_Properly_Trace(string message)
+        {
+            List<DiagnosticEventArgs> x = new List<DiagnosticEventArgs>();
+
+            var d = new DiagnosticFactory(DiagnosticLevel.Trace, (args) =>
+            {
+                x.Add(args);
+            });
+
+            d.Debug(message);
+            d.Info(message);
+            d.Warning(message);
+            d.Trace(message);
+
+            Assert.Equal(4, x.Count);
+            Assert.Single(x, y => y.Level == DiagnosticLevel.Trace);
+            Assert.Single(x, y => y.Level == DiagnosticLevel.Debug);
+            Assert.Single(x, y => y.Level == DiagnosticLevel.Info);
+            Assert.Single(x, y => y.Level == DiagnosticLevel.Warning);
+        }
+
+        [Trait("Category", "Filter")]
+        [Theory(DisplayName = "Filters properly"), AutoData]
+        public void Filters_Properly_Info(string message)
+        {
+            List<DiagnosticEventArgs> x = new List<DiagnosticEventArgs>();
+
+            var d = new DiagnosticFactory(DiagnosticLevel.Info, (args) =>
+            {
+                x.Add(args);
+            });
+
+            d.Debug(message);
+            d.Info(message);
+            d.Warning(message);
+            d.Trace(message);
+
+            Assert.Equal(2, x.Count);
+            Assert.Single(x, y => y.Level == DiagnosticLevel.Info);
+            Assert.Single(x, y => y.Level == DiagnosticLevel.Warning);
+        }
+
+        [Trait("Category", "Filter")]
+        [Theory(DisplayName = "Filters properly"), AutoData]
+        public void Filters_Properly_Warning(string message)
+        {
+            List<DiagnosticEventArgs> x = new List<DiagnosticEventArgs>();
+
+            var d = new DiagnosticFactory(DiagnosticLevel.Warning, (args) =>
+            {
+                x.Add(args);
+            });
+
+            d.Debug(message);
+            d.Info(message);
+            d.Warning(message);
+            d.Trace(message);
+
+            Assert.Single(x);
+            Assert.Single(x, y => y.Level == DiagnosticLevel.Warning);
+        }
+
+        [Trait("Category", "Filter")]
+        [Theory(DisplayName = "Filters properly"), AutoData]
+        public void Filters_Properly_None(string message)
+        {
+            List<DiagnosticEventArgs> x = new List<DiagnosticEventArgs>();
+
+            var d = new DiagnosticFactory(DiagnosticLevel.None, (args) =>
+            {
+                x.Add(args);
+            });
+
+            d.Debug(message);
+            d.Info(message);
+            d.Warning(message);
+            d.Trace(message);
+
+            Assert.Empty(x);
         }
     }
 }

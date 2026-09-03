@@ -48,7 +48,7 @@ namespace Soulseek.Tests.Unit.Network
         [Fact(DisplayName = "Ensures Diagnostic given null")]
         public void Ensures_Diagnostic_Given_Null()
         {
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 ListenerHandler l = default;
 
@@ -63,7 +63,7 @@ namespace Soulseek.Tests.Unit.Network
         [Theory(DisplayName = "Raises DiagnosticGenerated on diagnostic"), AutoData]
         public void Raises_DiagnosticGenerated_On_Diagnostic(string message)
         {
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 DiagnosticEventArgs args = default;
 
@@ -81,7 +81,7 @@ namespace Soulseek.Tests.Unit.Network
         [Theory(DisplayName = "Does not throw raising DiagnosticGenerated if no handlers bound"), AutoData]
         public void Does_Not_Throw_Raising_DiagnosticGenerated_If_No_Handlers_Bound(string message)
         {
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 ListenerHandler l = new ListenerHandler(client);
 
@@ -104,6 +104,25 @@ namespace Soulseek.Tests.Unit.Network
             handler.HandleConnection(null, mocks.Connection.Object);
 
             mocks.Diagnostic.Verify(m => m.Debug(It.Is<string>(s => s.Contains("Accepted incoming connection", StringComparison.InvariantCultureIgnoreCase))), Times.Once);
+        }
+
+        [Trait("Category", "Diagnostic")]
+        [Theory(DisplayName = "Creates diagnostic on error"), AutoData]
+        public void Creates_Diagnostic_On_Error(IPEndPoint endpoint, string message)
+        {
+            var (handler, mocks) = GetFixture(endpoint);
+
+            mocks.Diagnostic.Setup(m => m.Warning(It.IsAny<string>(), It.IsAny<Exception>()));
+
+            var exception = new Exception(message);
+
+            handler.HandleError(null, exception);
+
+            mocks.Diagnostic.Verify(
+                m => m.Warning(
+                    It.Is<string>(s => s.Contains("Failed to establish an incoming connection", StringComparison.InvariantCultureIgnoreCase) && s.Contains(message, StringComparison.InvariantCultureIgnoreCase)),
+                    exception),
+                Times.Once);
         }
 
         [Trait("Category", "Diagnostic")]
@@ -304,10 +323,44 @@ namespace Soulseek.Tests.Unit.Network
             mocks.PeerConnectionManager.Setup(m => m.GetTransferConnectionAsync(username, token, It.IsAny<IConnection>()))
                 .Returns(Task.FromResult((newTransfer.Object, token)));
 
+            // make it appear as though the wait exists, so the transfer is expected
+            mocks.Waiter.Setup(m => m.HasWait(It.IsAny<WaitKey>())).Returns(true);
+
             handler.HandleConnection(null, mocks.Connection.Object);
 
             var key = new WaitKey(Constants.WaitKey.DirectTransfer, username, token);
             mocks.Waiter.Verify(m => m.Complete(key, newTransfer.Object), Times.Once);
+        }
+
+        [Trait("Category", "PeerInit")]
+        [Theory(DisplayName = "Disconnects DirectTransfer on missing wait"), AutoData]
+        public void Disconnects_DirectTransfer_On_Missing_Wait(IPEndPoint endpoint, string username, int token)
+        {
+            var (handler, mocks) = GetFixture(endpoint);
+
+            var message = new PeerInit(username, Constants.ConnectionType.Transfer, token);
+            var messageBytes = message.ToByteArray().AsSpan().Slice(4).ToArray();
+
+            mocks.Connection.Setup(m => m.ReadAsync(4, It.IsAny<CancellationToken?>()))
+                .Returns(Task.FromResult(BitConverter.GetBytes(messageBytes.Length)));
+
+            mocks.Connection.Setup(m => m.ReadAsync(messageBytes.Length, It.IsAny<CancellationToken?>()))
+                .Returns(Task.FromResult(messageBytes));
+
+            var newTransfer = new Mock<IConnection>();
+
+            mocks.PeerConnectionManager.Setup(m => m.GetTransferConnectionAsync(username, token, It.IsAny<IConnection>()))
+                .Returns(Task.FromResult((newTransfer.Object, token)));
+
+            // make it appear as though the wait does not exist, so the transfer is unexpected
+            mocks.Waiter.Setup(m => m.HasWait(It.IsAny<WaitKey>())).Returns(false);
+
+            handler.HandleConnection(null, mocks.Connection.Object);
+
+            var key = new WaitKey(Constants.WaitKey.DirectTransfer, username, token);
+            mocks.Waiter.Verify(m => m.Complete(key, newTransfer.Object), Times.Never);
+
+            newTransfer.Verify(m => m.Disconnect("Transfer connection rejected: unknown token", null), Times.Once);
         }
 
         [Trait("Category", "PeerInit")]
@@ -430,7 +483,7 @@ namespace Soulseek.Tests.Unit.Network
             mocks.SearchResponder.Verify(m => m.TryRespondAsync(token), Times.Once);
         }
 
-        private (ListenerHandler Handler, Mocks Mocks) GetFixture(IPEndPoint endpoint, SoulseekClientOptions clientOptions = null)
+        private static (ListenerHandler Handler, Mocks Mocks) GetFixture(IPEndPoint endpoint, SoulseekClientOptions clientOptions = null)
         {
             var mocks = new Mocks(clientOptions);
 
@@ -447,7 +500,7 @@ namespace Soulseek.Tests.Unit.Network
         {
             public Mocks(SoulseekClientOptions clientOptions = null)
             {
-                Client = new Mock<SoulseekClient>(clientOptions)
+                Client = new Mock<SoulseekClient>(9999, clientOptions)
                 {
                     CallBase = true,
                 };

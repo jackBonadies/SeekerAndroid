@@ -15,7 +15,7 @@
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
 // </copyright>
 
-namespace Soulseek.Tests.Unit
+namespace Soulseek.Tests.Unit.Options
 {
     using System;
     using AutoFixture.Xunit2;
@@ -30,22 +30,20 @@ namespace Soulseek.Tests.Unit
             int responseLimit,
             bool filterResponses,
             int minimumResponseFileCount,
-            int minimumPeerFreeUploadSlots,
             int maximumPeerQueueLength,
             int minimumPeerUploadSpeed,
             Func<SearchResponse, bool> responseFilter,
             int fileLimit,
             bool removeSingleCharacterSearchTerms,
             Func<File, bool> fileFilter,
-            Action<SearchStateChangedEventArgs> stateChanged,
-            Action<SearchResponseReceivedEventArgs> responseReceived)
+            Action<(SearchStates PreviousState, Search Search)> stateChanged,
+            Action<(Search Search, SearchResponse Response)> responseReceived)
         {
             var o = new SearchOptions(
                 searchTimeout,
                 responseLimit,
                 filterResponses,
                 minimumResponseFileCount,
-                minimumPeerFreeUploadSlots,
                 maximumPeerQueueLength,
                 minimumPeerUploadSpeed,
                 fileLimit,
@@ -59,7 +57,6 @@ namespace Soulseek.Tests.Unit
             Assert.Equal(responseLimit, o.ResponseLimit);
             Assert.Equal(filterResponses, o.FilterResponses);
             Assert.Equal(minimumResponseFileCount, o.MinimumResponseFileCount);
-            Assert.Equal(minimumPeerFreeUploadSlots, o.MinimumPeerFreeUploadSlots);
             Assert.Equal(maximumPeerQueueLength, o.MaximumPeerQueueLength);
             Assert.Equal(minimumPeerUploadSpeed, o.MinimumPeerUploadSpeed);
             Assert.Equal(responseFilter, o.ResponseFilter);

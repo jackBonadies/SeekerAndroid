@@ -39,7 +39,8 @@ namespace Soulseek.Tests.Unit
             DateTime? startTime,
             DateTime? endTime,
             int? remoteToken,
-            IPEndPoint endpoint)
+            IPEndPoint endpoint,
+            Exception exception)
         {
             var t = new Transfer(
                 direction,
@@ -54,7 +55,8 @@ namespace Soulseek.Tests.Unit
                 startTime,
                 endTime,
                 remoteToken,
-                endpoint);
+                endpoint,
+                exception);
 
             Assert.Equal(direction, t.Direction);
             Assert.Equal(username, t.Username);
@@ -69,6 +71,7 @@ namespace Soulseek.Tests.Unit
             Assert.Equal(endTime, t.EndTime);
             Assert.Equal(remoteToken, t.RemoteToken);
             Assert.Equal(endpoint, t.IPEndPoint);
+            Assert.Equal(exception, t.Exception);
 
             Assert.Equal(t.Size - t.BytesTransferred, t.BytesRemaining);
             Assert.Equal(t.EndTime - t.StartTime, t.ElapsedTime);
@@ -80,7 +83,11 @@ namespace Soulseek.Tests.Unit
         [Theory(DisplayName = "Instantiates with expected data given TransferInternal"), AutoData]
         internal void Instantiates_With_Expected_Data_Given_TransferInternal(string username, string filename, int token)
         {
+            var ex = new Exception("foo");
+
             var i = new TransferInternal(TransferDirection.Download, username, filename, token);
+            i.Exception = ex;
+
             var t = new Transfer(i);
 
             Assert.Equal(i.Direction, t.Direction);
@@ -96,6 +103,7 @@ namespace Soulseek.Tests.Unit
             Assert.Equal(i.EndTime, t.EndTime);
             Assert.Equal(i.RemoteToken, t.RemoteToken);
             Assert.Equal(i.IPEndPoint, t.IPEndPoint);
+            Assert.Equal(ex, t.Exception);
         }
 
         [Trait("Category", "State")]
@@ -114,7 +122,7 @@ namespace Soulseek.Tests.Unit
         {
             var i = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0);
 
-            var s = new DateTime(2019, 4, 25);
+            var s = new DateTime(2019, 4, 25, 0, 0, 0, DateTimeKind.Utc);
 
             i.SetProperty("StartTime", s);
 
@@ -129,8 +137,8 @@ namespace Soulseek.Tests.Unit
         {
             var i = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0);
 
-            var s = new DateTime(2019, 4, 25);
-            var e = new DateTime(2019, 4, 26);
+            var s = new DateTime(2019, 4, 25, 0, 0, 0, DateTimeKind.Utc);
+            var e = new DateTime(2019, 4, 26, 0, 0, 0, DateTimeKind.Utc);
 
             i.SetProperty("StartTime", s);
             i.SetProperty("EndTime", e);

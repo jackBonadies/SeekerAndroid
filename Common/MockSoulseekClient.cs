@@ -1,4 +1,4 @@
-#if MOCK
+﻿#if MOCK
 namespace Seeker
 {
     using Soulseek;
@@ -11,6 +11,7 @@ namespace Seeker
     using System.IO;
     using System.Linq;
     using System.Net;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -29,7 +30,16 @@ namespace Seeker
         public int UserStatusIntervalSec { get; set; } = 10;
         public int RoomActivityIntervalSec { get; set; } = 8;
 
+        // defaults for a "spotty" username; both are overridden by numbers in the username itself,
+        // i.e. spotty_30 drops every 30s, spotty_30_4 drops every 30s and fails 4 reconnects first.
+        public int SpottyDropIntervalSec { get; set; } = 60;
+
+        public int SpottyFailedReconnectAttempts { get; set; } = 1;
+
         private CancellationTokenSource? _backgroundTimersCts;
+
+        private CancellationTokenSource? _spottyDropCts;
+        private int _spottyConnectFailuresRemaining;
 
         private readonly ConcurrentDictionary<string, List<string>> _mockJoinedRoomUsers = new ConcurrentDictionary<string, List<string>>();
         private readonly ConcurrentDictionary<string, UserPresence> _mockRoomUserPresence = new ConcurrentDictionary<string, UserPresence>();
@@ -332,6 +342,9 @@ namespace Seeker
         public IReadOnlyCollection<Transfer> Downloads => DownloadDictionary.Values.Select(t => new Transfer(t)).ToList().AsReadOnly();
         public IReadOnlyCollection<Transfer> Uploads => UploadDictionary.Values.Select(t => new Transfer(t)).ToList().AsReadOnly();
 
+        public int MajorVersion { get; } = 170;
+        public int MinorVersion { get; set; } = 128;
+
         // Explicit interface implementations for read-only properties
         string ISoulseekClient.Address => Address;
         string ISoulseekClient.Username => Username;
@@ -360,6 +373,7 @@ namespace Seeker
         public event EventHandler<DownloadFailedEventArgs>? DownloadFailed;
         public event EventHandler<IReadOnlyCollection<string>>? ExcludedSearchPhrasesReceived;
         public event EventHandler<string>? GlobalMessageReceived;
+        public event EventHandler? KickedFromServer;
         public event EventHandler? LoggedIn;
         public event EventHandler<PrivateMessageReceivedEventArgs>? PrivateMessageReceived;
         public event EventHandler<string>? PrivateRoomMembershipAdded;
@@ -399,6 +413,13 @@ namespace Seeker
         public void RaiseDisconnected(SoulseekClientDisconnectedEventArgs args) => Disconnected?.Invoke(this, args);
         public void RaiseStateChanged(SoulseekClientStateChangedEventArgs args) => StateChanged?.Invoke(this, args);
         public void RaiseLoggedIn() => LoggedIn?.Invoke(this, EventArgs.Empty);
+
+        public void RaiseKickedFromServer()
+        {
+            KickedFromServer?.Invoke(this, EventArgs.Empty);
+            Disconnect("Kicked from server", new KickedFromServerException());
+        }
+
         public void RaiseServerInfoReceived(ServerInfo args) => ServerInfoReceived?.Invoke(this, args);
         public void RaiseTransferStateChanged(TransferStateChangedEventArgs args) => TransferStateChanged?.Invoke(this, args);
         public void RaiseTransferProgressUpdated(TransferProgressUpdatedEventArgs args) => TransferProgressUpdated?.Invoke(this, args);
@@ -424,43 +445,163 @@ namespace Seeker
         public void RaiseRoomTickerListReceived(RoomTickerListReceivedEventArgs args) => RoomTickerListReceived?.Invoke(this, args);
         public void RaiseOperatorInPrivateRoomAddedRemoved(OperatorAddedRemovedEventArgs args) => OperatorInPrivateRoomAddedRemoved?.Invoke(this, args);
 
-        // --- Private helper mirroring SoulseekClient's ChangeState ---
+        private const string MockDefaultAddress = "mock.server";
+        private const int MockDefaultPort = 2242;
+
+        private SemaphoreSlim StateSyncRoot { get; } = new SemaphoreSlim(1, 1);
+
         private void ChangeState(SoulseekClientStates newState, string message = null, Exception exception = null)
         {
-            var prev = State;
+            var previousState = State;
             State = newState;
-            StateChanged?.Invoke(this, new SoulseekClientStateChangedEventArgs(prev, newState, message, exception));
-            if (newState == SoulseekClientStates.Connected)
+
+            StateChanged?.Invoke(this, new SoulseekClientStateChangedEventArgs(previousState, State, message, exception));
+
+            if (State == SoulseekClientStates.Connected)
+            {
                 Connected?.Invoke(this, EventArgs.Empty);
-            if (newState == (SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn))
+            }
+            else if (State == (SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn))
+            {
                 LoggedIn?.Invoke(this, EventArgs.Empty);
-            if (newState == SoulseekClientStates.Disconnected)
+            }
+            else if (State == SoulseekClientStates.Disconnected)
+            {
                 Disconnected?.Invoke(this, new SoulseekClientDisconnectedEventArgs(message, exception));
+            }
         }
 
-        // --- Method implementations (used by Seeker) ---
-
-        public async Task ConnectAsync(string username, string password, CancellationToken? cancellationToken = null)
+        public Task ConnectAsync(string username, string password, CancellationToken? cancellationToken = null)
         {
-            if (ConnectAsyncHandler != null) { await ConnectAsyncHandler(username, password, cancellationToken); return; }
-            ChangeState(SoulseekClientStates.Connecting, "Connecting");
-            if (username.Contains("slow"))
+            if (ConnectAsyncHandler != null) { return ConnectAsyncHandler(username, password, cancellationToken); }
+
+            return ConnectAsync(MockDefaultAddress, MockDefaultPort, username, password, cancellationToken ?? CancellationToken.None);
+        }
+
+        public Task ConnectAsync(string address, int port, string username, string password, CancellationToken? cancellationToken = null)
+        {
+            if (ConnectWithAddressAsyncHandler != null) { return ConnectWithAddressAsyncHandler(address, port, username, password, cancellationToken); }
+
+            if (string.IsNullOrWhiteSpace(address))
             {
-                await Task.Delay(4000).ConfigureAwait(false);
+                throw new ArgumentException("Address must not be a null or empty string, or one consisting only of whitespace", nameof(address));
             }
-            await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
-            if (username.Contains("reject"))
+
+            if (port < System.Net.IPEndPoint.MinPort || port > System.Net.IPEndPoint.MaxPort)
             {
-                ChangeState(SoulseekClientStates.Disconnected, "Failed");
-                throw new LoginRejectedException($"The server rejected login attempt:");
+                throw new ArgumentOutOfRangeException(nameof(port), $"The port must be within the range {System.Net.IPEndPoint.MinPort}-{System.Net.IPEndPoint.MaxPort} (specified: {port})");
             }
-            ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggingIn, "Logging in");
-            await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
-            Username = username;
-            Address = Address ?? "mock.server";
-            ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn, "Logged in");
-            ServerInfoReceived?.Invoke(this, new ServerInfo(parentMinSpeed: 1, parentSpeedRatio: 1, wishlistInterval: 120));
-            RaisePrivilegedUserList();
+
+            if (string.IsNullOrEmpty(username))
+            {
+                throw new ArgumentException("Username may not be null or an empty string", nameof(username));
+            }
+
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ArgumentException("Password may not be null or an empty string", nameof(password));
+            }
+
+            if (State.HasFlag(SoulseekClientStates.Connecting) || State.HasFlag(SoulseekClientStates.LoggingIn))
+            {
+                throw new InvalidOperationException($"A connection is already in the process of being established");
+            }
+
+            if (State.HasFlag(SoulseekClientStates.Connected))
+            {
+                throw new InvalidOperationException($"The client is already connected");
+            }
+
+            var ipEndPoint = new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, port);
+
+            return ConnectInternalAsync(address, ipEndPoint, username, password, cancellationToken ?? CancellationToken.None);
+        }
+
+        private async Task ConnectInternalAsync(string address, IPEndPoint ipEndPoint, string username, string password, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await StateSyncRoot.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+                try
+                {
+                    // if another thread somehow managed to get queued behind the semaphore while a previous thread was
+                    // connecting, drop it and do not establish a new connection. it should not be possible for this method to
+                    // exit in states other than Disconnected or Connected | LoggedIn, and if the previous attempt resulted in a
+                    // Disconnected state, we want to proceed.
+                    if (State.HasFlag(SoulseekClientStates.Connected) && State.HasFlag(SoulseekClientStates.LoggedIn))
+                    {
+                        return;
+                    }
+
+                    ChangeState(SoulseekClientStates.Connecting, $"Connecting");
+
+                    if (username.Contains("slow"))
+                    {
+                        await Task.Delay(4000, cancellationToken).ConfigureAwait(false);
+                    }
+
+                    await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+
+                    if (ConsumeSpottyConnectFailure(username))
+                    {
+                        throw new ConnectionException($"Failed to connect to {ipEndPoint}: mock spotty connection");
+                    }
+
+                    Address = address;
+                    IPEndPoint = ipEndPoint;
+                    IPAddress = ipEndPoint.Address;
+                    Port = ipEndPoint.Port;
+
+                    // the real client reaches this state from ServerConnection_Connected, raised while the
+                    // server connection is being established, i.e. before the login request is written.
+                    ChangeState(SoulseekClientStates.Connected, $"Connected to {IPEndPoint}");
+
+                    ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggingIn, $"Logging in");
+
+                    await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+
+                    // stands in for a LoginResponse with Succeeded == false. note that the real client is in
+                    // Connected | LoggingIn at this point, and unwinds to Disconnected through Disconnect().
+                    if (username.Contains("rejectnew")) 
+                    {
+                        throw new LoginRejectedException($"The server rejected login attempt: INVALIDUSERNAME: too short");
+                    }
+                    else if (username.Contains("reject"))
+                    {
+                        throw new LoginRejectedException($"The server rejected login attempt: INVALIDPASS");
+                    } 
+                    else if (username.Contains("serverfull")) 
+                    {
+                        throw new LoginRejectedException($"The server rejected login attempt: SVRFULL");
+                    }
+
+                    ServerInfo = new ServerInfo(parentMinSpeed: 1, parentSpeedRatio: 1, wishlistInterval: 120);
+                    ServerInfoReceived?.Invoke(this, ServerInfo);
+
+                    Username = username;
+
+                    ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn, "Logged in");
+
+                    // stands in for SendConfigurationMessagesAsync
+                    RaisePrivilegedUserList();
+
+                    StartSpottyDropTimerIfNeeded(username);
+                }
+                catch (Exception ex) when (!(ex is LoginRejectedException) && !(ex is OperationCanceledException) && !(ex is TimeoutException))
+                {
+                    throw new SoulseekClientException($"Failed to connect: {ex.Message}", ex);
+                }
+                finally
+                {
+                    StateSyncRoot.Release();
+                }
+            }
+            catch (Exception ex)
+            {
+                Disconnect(ex.Message, exception: ex);
+                throw;
+            }
         }
 
         private void RaisePrivilegedUserList()
@@ -468,45 +609,139 @@ namespace Seeker
             if (_random.Next(0, 3) == 0)
             {
                 RaisePrivilegedUserListReceived(new[] { Username, "test" });
-            } 
+            }
             else
             {
                 RaisePrivilegedUserListReceived(new[] { "test" });
             }
         }
 
-        public async Task ConnectAsync(string address, int port, string username, string password, CancellationToken? cancellationToken = null)
+        // spotty, spotty_<seconds>, spotty_<seconds>_<failedAttempts>. a non-numeric part ends the match,
+        // so spotty_30_xyz is just spotty_30 and spotty_30_4_test is spotty_30_4.
+        private static readonly Regex SpottyUsernamePattern = new Regex(
+            @"spotty(?:_(?<seconds>\d+))?(?:_(?<attempts>\d+))?",
+            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+        private bool TryParseSpottyUsername(string username, out int dropIntervalSec, out int failedAttempts)
         {
-            if (ConnectWithAddressAsyncHandler != null) { await ConnectWithAddressAsyncHandler(address, port, username, password, cancellationToken); return; }
-            Address = address;
-            Port = port;
-            if (username.Contains("slow"))
+            dropIntervalSec = SpottyDropIntervalSec;
+            failedAttempts = SpottyFailedReconnectAttempts;
+
+            if (string.IsNullOrEmpty(username))
             {
-                await Task.Delay(4000).ConfigureAwait(false);
+                return false;
             }
-            ChangeState(SoulseekClientStates.Connecting, "Connecting");
-            await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
-            if (username.Contains("reject"))
+
+            var match = SpottyUsernamePattern.Match(username);
+            if (!match.Success)
             {
-                ChangeState(SoulseekClientStates.Disconnected, "Failed");
-                throw new LoginRejectedException($"The server rejected login attempt:");
+                return false;
             }
-            ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggingIn, "Logging in");
-            await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
-            Username = username;
-            ChangeState(SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn, "Logged in");
-            ServerInfoReceived?.Invoke(this, new ServerInfo(parentMinSpeed: 1, parentSpeedRatio: 1, wishlistInterval: 120));
+
+            if (match.Groups["seconds"].Success && int.TryParse(match.Groups["seconds"].Value, out int seconds))
+            {
+                dropIntervalSec = seconds;
+            }
+
+            if (match.Groups["attempts"].Success && int.TryParse(match.Groups["attempts"].Value, out int attempts))
+            {
+                failedAttempts = attempts;
+            }
+
+            return true;
+        }
+
+        private void StartSpottyDropTimerIfNeeded(string username)
+        {
+            StopSpottyDropTimer();
+
+            if (!TryParseSpottyUsername(username, out int dropIntervalSec, out int failedAttempts) || dropIntervalSec <= 0)
+            {
+                return;
+            }
+
+            _spottyDropCts = new CancellationTokenSource();
+            _ = RunSpottyDropLoop(dropIntervalSec, failedAttempts, _spottyDropCts.Token);
+        }
+
+        private void StopSpottyDropTimer()
+        {
+            var cts = Interlocked.Exchange(ref _spottyDropCts, null);
+            cts?.Cancel();
+            cts?.Dispose();
+        }
+
+        private async Task RunSpottyDropLoop(int dropIntervalSec, int failedAttempts, CancellationToken ct)
+        {
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(dropIntervalSec), ct).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            if (ct.IsCancellationRequested || !State.HasFlag(SoulseekClientStates.LoggedIn))
+            {
+                return;
+            }
+
+            Interlocked.Exchange(ref _spottyConnectFailuresRemaining, Math.Max(0, failedAttempts));
+
+            Disconnect("Read timed out", new ConnectionException("The server connection was closed unexpectedly (mock spotty connection)"));
+        }
+
+        /// <summary>
+        ///     Returns true (and consumes one) if this connection attempt should fail because of a prior spotty drop.
+        /// </summary>
+        private bool ConsumeSpottyConnectFailure(string username)
+        {
+            if (!TryParseSpottyUsername(username, out _, out _))
+            {
+                return false;
+            }
+
+            while (true)
+            {
+                int remaining = _spottyConnectFailuresRemaining;
+                if (remaining <= 0)
+                {
+                    return false;
+                }
+
+                if (Interlocked.CompareExchange(ref _spottyConnectFailuresRemaining, remaining - 1, remaining) == remaining)
+                {
+                    return true;
+                }
+            }
         }
 
         public void Disconnect(string? message = null, Exception? exception = null)
         {
             if (DisconnectHandler != null) { DisconnectHandler(message, exception); return; }
-            ChangeState(SoulseekClientStates.Disconnecting, message);
-            Username = null;
-            ChangeState(SoulseekClientStates.Disconnected, message, exception);
+
+            if (State != SoulseekClientStates.Disconnected && State != SoulseekClientStates.Disconnecting)
+            {
+                StopSpottyDropTimer();
+
+                ChangeState(SoulseekClientStates.Disconnecting, message, exception);
+
+                message ??= exception?.Message ?? "Client disconnected";
+
+                Username = null;
+
+                ChangeState(SoulseekClientStates.Disconnected, message, exception);
+            }
         }
 
-        public async Task<BrowseResponse> BrowseAsync(string username, BrowseOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<BrowseResponse> BrowseAsync(string username, BrowseOptions options = null, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "browse");
+            return BrowseInternalAsync(username, options, cancellationToken);
+        }
+
+        private async Task<BrowseResponse> BrowseInternalAsync(string username, BrowseOptions options, CancellationToken? cancellationToken)
         {
             if (BrowseAsyncHandler != null) return await BrowseAsyncHandler(username, options, cancellationToken);
             int millisecondDelay = 100;
@@ -608,7 +843,13 @@ namespace Seeker
             return browseResponse;
         }
 
-        public async Task<IReadOnlyCollection<Soulseek.Directory>> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null, bool isLegacy = false)
+        public Task<IReadOnlyCollection<Soulseek.Directory>> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null, bool isLegacy = false)
+        {
+            ThrowIfRejectRequested(username, "fetch directory contents");
+            return GetDirectoryContentsInternalAsync(username, directoryName, token, cancellationToken, isLegacy);
+        }
+
+        private async Task<IReadOnlyCollection<Soulseek.Directory>> GetDirectoryContentsInternalAsync(string username, string directoryName, int? token, CancellationToken? cancellationToken, bool isLegacy)
         {
             if (GetDirectoryContentsAsyncHandler != null)
             {
@@ -1338,7 +1579,12 @@ namespace Seeker
 
 
 
-        public async Task<(Soulseek.Search Search, IReadOnlyCollection<SearchResponse> Responses)> SearchAsync(SearchQuery query, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<(Soulseek.Search Search, IReadOnlyCollection<SearchResponse> Responses)> SearchAsync(SearchQuery query, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null)
+        {
+            return SearchToCollectionAsync(query, scope, token, options, cancellationToken);
+        }
+
+        private async Task<(Soulseek.Search Search, IReadOnlyCollection<SearchResponse> Responses)> SearchToCollectionAsync(SearchQuery query, SearchScope scope, int? token, SearchOptions options, CancellationToken? cancellationToken)
         {
             if (SearchAsyncHandler != null) return await SearchAsyncHandler(query, scope, token, options, cancellationToken);
             var resolvedScope = scope ?? new SearchScope(SearchScopeType.Network);
@@ -1537,7 +1783,12 @@ namespace Seeker
             return (searchCompleted, allResponses.AsReadOnly());
         }
 
-        public async Task<Soulseek.Search> SearchAsync(SearchQuery query, Action<SearchResponse> responseHandler, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<Soulseek.Search> SearchAsync(SearchQuery query, Action<SearchResponse> responseHandler, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null)
+        {
+            return SearchToCallbackAsync(query, responseHandler, scope, token, options, cancellationToken);
+        }
+
+        private async Task<Soulseek.Search> SearchToCallbackAsync(SearchQuery query, Action<SearchResponse> responseHandler, SearchScope scope, int? token, SearchOptions options, CancellationToken? cancellationToken)
         {
             if (SearchWithHandlerAsyncHandler != null) return await SearchWithHandlerAsyncHandler(query, responseHandler, scope, token, options, cancellationToken);
             var resolvedScope = scope ?? new SearchScope(SearchScopeType.Network);
@@ -1556,7 +1807,13 @@ namespace Seeker
             return searchCompleted;
         }
 
-        public async Task<Transfer> DownloadAsync(string username, string remoteFilename, string localFilename, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<Transfer> DownloadAsync(string username, string remoteFilename, string localFilename, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "download files");
+            return DownloadToFileAsync(username, remoteFilename, localFilename, size, startOffset, token, options, cancellationToken);
+        }
+
+        private async Task<Transfer> DownloadToFileAsync(string username, string remoteFilename, string localFilename, long? size, long startOffset, int? token, TransferOptions options, CancellationToken? cancellationToken)
         {
             if (DownloadToFileAsyncHandler != null) return await DownloadToFileAsyncHandler(username, remoteFilename, localFilename, size, startOffset, token, options, cancellationToken);
             var fileMode = startOffset > 0 ? FileMode.Append : FileMode.Create;
@@ -1564,19 +1821,37 @@ namespace Seeker
             return await DownloadInternalAsync(username, remoteFilename, size ?? 1024, startOffset, token ?? GetNextToken(), outputStreamFactory, options, cancellationToken ?? CancellationToken.None);
         }
 
-        public async Task<Transfer> DownloadAsync(string username, string remoteFilename, Func<Task<System.IO.Stream>> outputStreamFactory, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<Transfer> DownloadAsync(string username, string remoteFilename, Func<Task<System.IO.Stream>> outputStreamFactory, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "download files");
+            return DownloadToStreamAsync(username, remoteFilename, outputStreamFactory, size, startOffset, token, options, cancellationToken);
+        }
+
+        private async Task<Transfer> DownloadToStreamAsync(string username, string remoteFilename, Func<Task<System.IO.Stream>> outputStreamFactory, long? size, long startOffset, int? token, TransferOptions options, CancellationToken? cancellationToken)
         {
             if (DownloadToStreamAsyncHandler != null) return await DownloadToStreamAsyncHandler(username, remoteFilename, outputStreamFactory, size, startOffset, token, options, cancellationToken);
             return await DownloadInternalAsync(username, remoteFilename, size ?? 1024, startOffset, token ?? GetNextToken(), outputStreamFactory, options, cancellationToken ?? CancellationToken.None);
         }
 
-        public async Task<Transfer> UploadAsync(string username, string remoteFilename, string localFilename, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<Transfer> UploadAsync(string username, string remoteFilename, string localFilename, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "upload files");
+            return UploadFromFileAsync(username, remoteFilename, localFilename, token, options, cancellationToken);
+        }
+
+        private async Task<Transfer> UploadFromFileAsync(string username, string remoteFilename, string localFilename, int? token, TransferOptions options, CancellationToken? cancellationToken)
         {
             if (UploadFromFileAsyncHandler != null) return await UploadFromFileAsyncHandler(username, remoteFilename, localFilename, token, options, cancellationToken);
             return await UploadInternalAsync(username, remoteFilename, 1024, 0, token ?? GetNextToken(), options, cancellationToken ?? CancellationToken.None);
         }
 
-        public async Task<Transfer> UploadAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<Transfer> UploadAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "upload files");
+            return UploadFromStreamAsync(username, remoteFilename, size, inputStreamFactory, token, options, cancellationToken);
+        }
+
+        private async Task<Transfer> UploadFromStreamAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token, TransferOptions options, CancellationToken? cancellationToken)
         {
             if (UploadFromStreamAsyncHandler != null) return await UploadFromStreamAsyncHandler(username, remoteFilename, size, inputStreamFactory, token, options, cancellationToken);
             return await UploadInternalAsync(username, remoteFilename, size, 0, token ?? GetNextToken(), options, cancellationToken ?? CancellationToken.None);
@@ -1937,7 +2212,12 @@ namespace Seeker
             }
         }
 
-        public async Task<RoomData> JoinRoomAsync(string roomName, bool isPrivate = false, CancellationToken? cancellationToken = null)
+        public Task<RoomData> JoinRoomAsync(string roomName, bool isPrivate = false, CancellationToken? cancellationToken = null)
+        {
+            return JoinRoomInternalAsync(roomName, isPrivate, cancellationToken);
+        }
+
+        private async Task<RoomData> JoinRoomInternalAsync(string roomName, bool isPrivate, CancellationToken? cancellationToken)
         {
             if (JoinRoomAsyncHandler != null) return await JoinRoomAsyncHandler(roomName, isPrivate, cancellationToken);
 
@@ -1998,7 +2278,12 @@ namespace Seeker
             return roomData;
         }
 
-        public async Task LeaveRoomAsync(string roomName, CancellationToken? cancellationToken = null)
+        public Task LeaveRoomAsync(string roomName, CancellationToken? cancellationToken = null)
+        {
+            return LeaveRoomInternalAsync(roomName, cancellationToken);
+        }
+
+        private async Task LeaveRoomInternalAsync(string roomName, CancellationToken? cancellationToken)
         {
             if (LeaveRoomAsyncHandler != null) { await LeaveRoomAsyncHandler(roomName, cancellationToken); return; }
 
@@ -2018,19 +2303,60 @@ namespace Seeker
             _mockJoinedRoomUsers.TryRemove(roomName, out _);
         }
 
-        public async Task SendRoomMessageAsync(string roomName, string message, CancellationToken? cancellationToken = null)
+        // Mirrors the real client: every public *Async is a non-async wrapper that has the potential
+        // to throw synchronously (i.e. LoggedIn Exception)
+        private void ThrowIfRejectRequested(string value, string operation)
         {
+            if (value != null && value.Contains("reject"))
+            {
+                throw new InvalidOperationException($"The server connection must be connected and logged in to {operation} (currently: {State})");
+            }
+        }
+
+        private async Task MessageDelay(string message)
+        {
+            if (message.Contains("veryslow"))
+            {
+                await Task.Delay(10_000).ConfigureAwait(false);
+            }
+            else if (message.Contains("slow"))
+            {
+                await Task.Delay(1_000).ConfigureAwait(false);
+            }
+        }
+
+        public Task SendRoomMessageAsync(string roomName, string message, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(message, "send a chat room message");
+            return SendRoomMessageInternalAsync(roomName, message, cancellationToken);
+        }
+
+        private async Task SendRoomMessageInternalAsync(string roomName, string message, CancellationToken? cancellationToken)
+        {
+            await MessageDelay(message);
             if (SendRoomMessageAsyncHandler != null) { await SendRoomMessageAsyncHandler(roomName, message, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public async Task SendPrivateMessageAsync(string username, string message, CancellationToken? cancellationToken = null)
+        public Task SendPrivateMessageAsync(string username, string message, CancellationToken? cancellationToken = null)
         {
+            ThrowIfRejectRequested(message, "send a private message");
+            return SendPrivateMessageInternalAsync(username, message, cancellationToken);
+        }
+
+        private async Task SendPrivateMessageInternalAsync(string username, string message, CancellationToken? cancellationToken)
+        {
+            await MessageDelay(message);
             if (SendPrivateMessageAsyncHandler != null) { await SendPrivateMessageAsyncHandler(username, message, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public async Task SetStatusAsync(UserPresence status, CancellationToken? cancellationToken = null)
+        public Task SetStatusAsync(UserPresence status, CancellationToken? cancellationToken = null)
+        {
+            return SetStatusInternalAsync(status, cancellationToken);
+        }
+
+        private async Task SetStatusInternalAsync(UserPresence status, CancellationToken? cancellationToken)
         {
             if (SetStatusAsyncHandler != null) { await SetStatusAsyncHandler(status, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
@@ -2043,13 +2369,23 @@ namespace Seeker
             return 20L;
         }
 
-        public async Task SetSharedCountsAsync(int directories, int files, CancellationToken? cancellationToken = null)
+        public Task SetSharedCountsAsync(int directories, int files, CancellationToken? cancellationToken = null)
+        {
+            return SetSharedCountsInternalAsync(directories, files, cancellationToken);
+        }
+
+        private async Task SetSharedCountsInternalAsync(int directories, int files, CancellationToken? cancellationToken)
         {
             if (SetSharedCountsAsyncHandler != null) { await SetSharedCountsAsyncHandler(directories, files, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public async Task<bool> ReconfigureOptionsAsync(SoulseekClientOptionsPatch patch, CancellationToken? cancellationToken = null)
+        public Task<bool> ReconfigureOptionsAsync(SoulseekClientOptionsPatch patch, CancellationToken? cancellationToken = null)
+        {
+            return ReconfigureOptionsInternalAsync(patch, cancellationToken);
+        }
+
+        private async Task<bool> ReconfigureOptionsInternalAsync(SoulseekClientOptionsPatch patch, CancellationToken? cancellationToken)
         {
             if (ReconfigureOptionsAsyncHandler != null) return await ReconfigureOptionsAsyncHandler(patch, cancellationToken);
             Options = (Options ?? new SoulseekClientOptions()).With(
@@ -2084,7 +2420,13 @@ namespace Seeker
             return roomList;
         }
 
-        public async Task<UserData> WatchUserAsync(string username, CancellationToken? cancellationToken = null)
+        public Task<UserData> WatchUserAsync(string username, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "add users");
+            return WatchUserInternalAsync(username, cancellationToken);
+        }
+
+        private async Task<UserData> WatchUserInternalAsync(string username, CancellationToken? cancellationToken)
         {
             var delay = getBimodalDelay(100, 5000);
             await Task.Delay(delay).ConfigureAwait(false);
@@ -2106,25 +2448,48 @@ namespace Seeker
             return new UserData(username, userPresence, _random.Next(0, 10000), _random.Next(0, 10000), _random.Next(0, 10000), _random.Next(0, 10000), GenerateMockCountryCode());
         }
 
-        public async Task UnwatchUserAsync(string username, CancellationToken? cancellationToken = null)
+        public Task UnwatchUserAsync(string username, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "add users");
+            return UnwatchUserInternalAsync(username, cancellationToken);
+        }
+
+        private async Task UnwatchUserInternalAsync(string username, CancellationToken? cancellationToken)
         {
             if (UnwatchUserAsyncHandler != null) { await UnwatchUserAsyncHandler(username, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public async Task AcknowledgePrivateMessageAsync(int privateMessageId, CancellationToken? cancellationToken = null)
+        public Task AcknowledgePrivateMessageAsync(int privateMessageId, CancellationToken? cancellationToken = null)
+        {
+            return AcknowledgePrivateMessageInternalAsync(privateMessageId, cancellationToken);
+        }
+
+        private async Task AcknowledgePrivateMessageInternalAsync(int privateMessageId, CancellationToken? cancellationToken)
         {
             if (AcknowledgePrivateMessageAsyncHandler != null) { await AcknowledgePrivateMessageAsyncHandler(privateMessageId, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public async Task ChangePasswordAsync(string password, CancellationToken? cancellationToken = null)
+        public Task ChangePasswordAsync(string password, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(password, "change password");
+            return ChangePasswordInternalAsync(password, cancellationToken);
+        }
+
+        private async Task ChangePasswordInternalAsync(string password, CancellationToken? cancellationToken)
         {
             if (ChangePasswordAsyncHandler != null) { await ChangePasswordAsyncHandler(password, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public async Task GrantUserPrivilegesAsync(string username, int days, CancellationToken? cancellationToken = null)
+        public Task GrantUserPrivilegesAsync(string username, int days, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "grant user privileges");
+            return GrantUserPrivilegesInternalAsync(username, days, cancellationToken);
+        }
+
+        private async Task GrantUserPrivilegesInternalAsync(string username, int days, CancellationToken? cancellationToken)
         {
             if (GrantUserPrivilegesAsyncHandler != null) { await GrantUserPrivilegesAsyncHandler(username, days, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
@@ -2164,7 +2529,13 @@ namespace Seeker
             }
         }
 
-        public async Task<UserStatistics> GetUserStatisticsAsync(string username, CancellationToken? cancellationToken = null)
+        public Task<UserStatistics> GetUserStatisticsAsync(string username, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "fetch user statistics");
+            return GetUserStatisticsInternalAsync(username, cancellationToken);
+        }
+
+        private async Task<UserStatistics> GetUserStatisticsInternalAsync(string username, CancellationToken? cancellationToken)
         {
             if (GetUserStatisticsAsyncHandler != null) return await GetUserStatisticsAsyncHandler(username, cancellationToken);
             // this will either be very slow or very fast to test it coming in before or after UserInfo
@@ -2175,7 +2546,13 @@ namespace Seeker
             return await Task.FromResult<UserStatistics>(userStats);
         }
 
-        public async Task<UserInfo> GetUserInfoAsync(string username, CancellationToken? cancellationToken = null)
+        public Task<UserInfo> GetUserInfoAsync(string username, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "fetch user information");
+            return GetUserInfoInternalAsync(username, cancellationToken);
+        }
+
+        private async Task<UserInfo> GetUserInfoInternalAsync(string username, CancellationToken? cancellationToken)
         {
             if (GetUserInfoAsyncHandler != null) return await GetUserInfoAsyncHandler(username, cancellationToken);
             await Task.Delay(100);
@@ -2198,13 +2575,24 @@ namespace Seeker
             return res;
         }
 
-        public async Task SendUploadSpeedAsync(int speed, CancellationToken? cancellationToken = null)
+        public Task SendUploadSpeedAsync(int speed, CancellationToken? cancellationToken = null)
+        {
+            return SendUploadSpeedInternalAsync(speed, cancellationToken);
+        }
+
+        private async Task SendUploadSpeedInternalAsync(int speed, CancellationToken? cancellationToken)
         {
             if (SendUploadSpeedAsyncHandler != null) { await SendUploadSpeedAsyncHandler(speed, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public async Task SetRoomTickerAsync(string roomName, string message, CancellationToken? cancellationToken = null)
+        public Task SetRoomTickerAsync(string roomName, string message, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(message, "set chat room tickers");
+            return SetRoomTickerInternalAsync(roomName, message, cancellationToken);
+        }
+
+        private async Task SetRoomTickerInternalAsync(string roomName, string message, CancellationToken? cancellationToken)
         {
             if (SetRoomTickerAsyncHandler != null) { await SetRoomTickerAsyncHandler(roomName, message, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
@@ -2252,7 +2640,13 @@ namespace Seeker
         public Task<Task<Transfer>> EnqueueUploadAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
             => throw new NotImplementedException();
 
-        public async Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool wasFileLatin1Decoded = false, bool wasFolderLatin1Decoded = false)
+        public Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool wasFileLatin1Decoded = false, bool wasFolderLatin1Decoded = false)
+        {
+            ThrowIfRejectRequested(username, "check download queue position");
+            return GetDownloadPlaceInQueueInternalAsync(username, filename, cancellationToken, wasFileLatin1Decoded, wasFolderLatin1Decoded);
+        }
+
+        private async Task<int> GetDownloadPlaceInQueueInternalAsync(string username, string filename, CancellationToken? cancellationToken, bool wasFileLatin1Decoded, bool wasFolderLatin1Decoded)
         {
             await Task.Delay(_random.Next(0, 5000));
             return _random.Next(1, 125);
@@ -2279,10 +2673,22 @@ namespace Seeker
         public Task StopPublicChatAsync(CancellationToken? cancellationToken = null)
             => throw new NotImplementedException();
 
+        public Task AddHatedInterestAsync(string interest, CancellationToken? cancellationToken = null)
+            => throw new NotImplementedException();
+
+        public Task RemoveHatedInterestAsync(string interest, CancellationToken? cancellationToken = null)
+            => throw new NotImplementedException();
+
+        public Task AddLikedInterestAsync(string interest, CancellationToken? cancellationToken = null)
+            => throw new NotImplementedException();
+        
+        public Task RemoveLikedInterestAsync(string interest, CancellationToken? cancellationToken = null)
+            => throw new NotImplementedException();
         // --- IDisposable ---
         public void Dispose()
         {
             StopBackgroundTimers();
+            StopSpottyDropTimer();
         }
     }
 }

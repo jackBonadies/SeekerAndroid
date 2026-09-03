@@ -35,7 +35,9 @@
         }
 
         private static readonly HttpClient Http = new HttpClient();
+#pragma warning disable S1075 // URIs should not be hardcoded
         private static readonly Uri API_ROOT = new Uri("https://musicbrainz.org/ws/2");
+#pragma warning restore S1075 // URIs should not be hardcoded
 
         static MusicBrainz()
         {

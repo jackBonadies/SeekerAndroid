@@ -1,4 +1,4 @@
-﻿// <copyright file="CannotJoinRoomTests.cs" company="JP Dillingham">
+﻿// <copyright file="CannotJoinRoomNotificationTests.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham. All rights reserved.
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -22,7 +22,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
     using Soulseek.Messaging.Messages;
     using Xunit;
 
-    public class CannotJoinRoomTests
+    public class CannotJoinRoomNotificationTests
     {
         [Trait("Category", "FromByteArray")]
         [Theory(DisplayName = "FromByteArray returns the expected data"), AutoData]
@@ -33,7 +33,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 .WriteString(roomName)
                 .Build();
 
-            var m = CannotJoinRoom.FromByteArray(msg);
+            var m = CannotJoinRoomNotification.FromByteArray(msg);
 
             Assert.Equal(roomName, m.RoomName);
         }
@@ -47,7 +47,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 .WriteInteger(1)
                 .Build();
 
-            var ex = Record.Exception(() => CannotJoinRoom.FromByteArray(msg));
+            var ex = Record.Exception(() => CannotJoinRoomNotification.FromByteArray(msg));
 
             Assert.NotNull(ex);
             Assert.IsType<MessageException>(ex);

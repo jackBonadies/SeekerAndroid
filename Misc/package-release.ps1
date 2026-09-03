@@ -68,6 +68,7 @@ if ($gitSha) {
 
 # --- Build the shared MSBuild argument list -------------------------------
 $commonArgs = @(
+    "-p:Optimize=true",
     "-p:ContinuousIntegrationBuild=true",
     "-p:Deterministic=true"
 )

@@ -40,7 +40,7 @@ namespace Soulseek.Tests.Unit
             Assert.Equal(options.ReadBufferSize, c.Options.ReadBufferSize);
             Assert.Equal(options.WriteBufferSize, c.Options.WriteBufferSize);
             Assert.Equal(options.ConnectTimeout, c.Options.ConnectTimeout);
-            Assert.Equal(-1, c.Options.InactivityTimeout);
+            Assert.Equal(options.InactivityTimeout, c.Options.InactivityTimeout);
         }
 
         [Trait("Category", "GetTransferConnection")]
@@ -59,7 +59,7 @@ namespace Soulseek.Tests.Unit
             var options = new ConnectionOptions();
 
             bool connect = false;
-            EventHandler connected = (s, a) => { connect = true;  };
+            EventHandler connected = (s, a) => { connect = true; };
 
             bool disconnect = false;
             EventHandler<ConnectionDisconnectedEventArgs> disconnected = (s, a) => { disconnect = true; };

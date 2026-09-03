@@ -101,7 +101,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
                 .Throws(new Exception());
 
             var msg = new MessageBuilder()
-                .WriteCode(MessageCode.Distributed.Ping)
+                .WriteCode(MessageCode.Distributed.BranchLevel)
                 .Build();
 
             var diagnostics = new List<DiagnosticEventArgs>();
@@ -121,7 +121,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         [Theory(DisplayName = "Raises DiagnosticGenerated on diagnostic"), AutoData]
         public void Raises_DiagnosticGenerated_On_Diagnostic(string message)
         {
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 DiagnosticEventArgs args = default;
 
@@ -139,7 +139,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         [Theory(DisplayName = "Does not throw raising DiagnosticGenerated if no handlers bound"), AutoData]
         public void Does_Not_Throw_Raising_DiagnosticGenerated_If_No_Handlers_Bound(string message)
         {
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 DistributedMessageHandler l = new DistributedMessageHandler(client);
 
@@ -384,41 +384,12 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         [Theory(DisplayName = "Doesn't respond to SearchRequest if result contains no files"), AutoData]
         public void Doesnt_Respond_To_SearchRequest_If_Result_Contains_No_Files(string username, int token, string query)
         {
-            var response = new SearchResponse("foo", token, 0, 1, 1, new List<File>());
+            var response = new SearchResponse("foo", token, false, 1, 1, new List<File>());
 #pragma warning disable IDE0039 // Use local function
             Func<string, int, SearchQuery, Task<SearchResponse>> resolver = (u, t, q) => Task.FromResult(response);
 #pragma warning restore IDE0039 // Use local function
 
             var options = new SoulseekClientOptions(searchResponseResolver: resolver);
-            var (handler, mocks) = GetFixture(options);
-
-            var endpoint = new IPEndPoint(IPAddress.None, 0);
-
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
-                .Returns(Task.FromResult(endpoint));
-
-            var peerConn = new Mock<IMessageConnection>();
-            mocks.PeerConnectionManager.Setup(m => m.GetOrAddMessageConnectionAsync(username, endpoint, It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(peerConn.Object));
-
-            var conn = new Mock<IMessageConnection>();
-
-            var message = new DistributedSearchRequest(username, token, query).ToByteArray();
-
-            handler.HandleMessageRead(conn.Object, message);
-
-            mocks.Client.Verify(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()), Times.Never);
-            mocks.PeerConnectionManager.Verify(m => m.GetOrAddMessageConnectionAsync(username, endpoint, It.IsAny<CancellationToken>()), Times.Never);
-
-            peerConn.Verify(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), null), Times.Never);
-        }
-
-        [Trait("Category", "Message")]
-        [Theory(DisplayName = "Doesn't respond to SearchRequest if result contains negative files"), AutoData]
-        public void Doesnt_Respond_To_SearchRequest_If_Result_Contains_Negative_Files(string username, int token, string query)
-        {
-            var response = new SearchResponse("foo", token, -1, 0, 0, new List<File>());
-            var options = new SoulseekClientOptions(searchResponseResolver: (u, t, q) => Task.FromResult(response));
             var (handler, mocks) = GetFixture(options);
 
             var endpoint = new IPEndPoint(IPAddress.None, 0);
@@ -599,8 +570,8 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         }
 
         [Trait("Category", "HandleEmbeddedMessage")]
-        [Theory(DisplayName = "HandleEmbeddedMessage broadcasts search request unchanged"), AutoData]
-        public void HandleEmbeddedMessage_Broadcasts_Search_Request_Unchanged(string username, int token, string query)
+        [Theory(DisplayName = "HandleEmbeddedMessage broadcasts unwrapped search request"), AutoData]
+        public void HandleEmbeddedMessage_Broadcasts_Unwrapped_Search_Request(string username, int token, string query)
         {
             var (handler, mocks) = GetFixture();
 
@@ -613,9 +584,11 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
                 .WriteString(query)
                 .Build();
 
+            var expected = EmbeddedMessage.FromByteArray(message).DistributedMessage;
+
             handler.HandleEmbeddedMessage(message);
 
-            mocks.DistributedConnectionManager.Verify(m => m.BroadcastMessageAsync(message, It.IsAny<CancellationToken?>()), Times.Once);
+            mocks.DistributedConnectionManager.Verify(m => m.BroadcastMessageAsync(expected, It.IsAny<CancellationToken?>()), Times.Once);
         }
 
         [Trait("Category", "HandleEmbeddedMessage")]
@@ -672,7 +645,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
             mocks.Diagnostic.Verify(m => m.Debug(It.Is<string>(s => s.ContainsInsensitive($"Distributed message sent: BranchLevel"))), Times.Once);
         }
 
-        private (DistributedMessageHandler Handler, Mocks Mocks) GetFixture(SoulseekClientOptions clientOptions = null)
+        private static (DistributedMessageHandler Handler, Mocks Mocks) GetFixture(SoulseekClientOptions clientOptions = null)
         {
             var mocks = new Mocks(clientOptions);
 
@@ -687,7 +660,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         {
             public Mocks(SoulseekClientOptions clientOptions = null)
             {
-                Client = new Mock<SoulseekClient>(clientOptions)
+                Client = new Mock<SoulseekClient>(9999, clientOptions)
                 {
                     CallBase = true,
                 };
@@ -696,7 +669,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
                 Client.Setup(m => m.PeerConnectionManager).Returns(PeerConnectionManager.Object);
                 Client.Setup(m => m.DistributedConnectionManager).Returns(DistributedConnectionManager.Object);
                 Client.Setup(m => m.Waiter).Returns(Waiter.Object);
-                Client.Setup(m => m.Downloads).Returns(Downloads);
+                Client.Setup(m => m.DownloadDictionary).Returns(Downloads);
                 Client.Setup(m => m.State).Returns(SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
                 Client.Setup(m => m.Options).Returns(clientOptions ?? new SoulseekClientOptions());
                 Client.Setup(m => m.SearchResponder).Returns(SearchResponder.Object);

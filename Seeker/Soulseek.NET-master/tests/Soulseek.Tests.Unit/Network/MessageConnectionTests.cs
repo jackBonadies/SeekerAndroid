@@ -287,7 +287,7 @@ namespace Soulseek.Tests.Unit.Network
                 {
                     await c.WriteAsync(msg);
 
-                    streamMock.Verify(s => s.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+                    streamMock.Verify(s => s.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()), Times.Once);
                 }
             }
         }
@@ -314,7 +314,7 @@ namespace Soulseek.Tests.Unit.Network
                 {
                     await c.WriteAsync(msg);
 
-                    streamMock.Verify(s => s.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+                    streamMock.Verify(s => s.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()), Times.Once);
                 }
             }
         }
@@ -343,7 +343,7 @@ namespace Soulseek.Tests.Unit.Network
                 {
                     await c.WriteAsync(msg, cancellationToken);
 
-                    streamMock.Verify(s => s.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), cancellationToken), Times.Once);
+                    streamMock.Verify(s => s.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), cancellationToken), Times.Once);
                 }
             }
         }
@@ -383,7 +383,7 @@ namespace Soulseek.Tests.Unit.Network
         public async Task WriteAsync_Bytes_Throws_ConnectionWriteException_When_Stream_WriteAsync_Throws(IPEndPoint endpoint)
         {
             var streamMock = new Mock<INetworkStream>();
-            streamMock.Setup(s => s.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            streamMock.Setup(s => s.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
                 .Throws(new IOException());
             streamMock.Setup(s => s.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.Run(() => 1));
@@ -406,7 +406,7 @@ namespace Soulseek.Tests.Unit.Network
                     Assert.IsType<ConnectionWriteException>(ex);
                     Assert.IsType<IOException>(ex.InnerException);
 
-                    streamMock.Verify(s => s.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+                    streamMock.Verify(s => s.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()), Times.Once);
                 }
             }
         }
@@ -416,7 +416,7 @@ namespace Soulseek.Tests.Unit.Network
         public async Task WriteAsync_Throws_ConnectionWriteException_When_Stream_WriteAsync_Throws(IPEndPoint endpoint)
         {
             var streamMock = new Mock<INetworkStream>();
-            streamMock.Setup(s => s.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            streamMock.Setup(s => s.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
                 .Throws(new IOException());
             streamMock.Setup(s => s.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.Run(() => 1));
@@ -439,35 +439,35 @@ namespace Soulseek.Tests.Unit.Network
                     Assert.IsType<ConnectionWriteException>(ex);
                     Assert.IsType<IOException>(ex.InnerException);
 
-                    streamMock.Verify(s => s.WriteAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+                    streamMock.Verify(s => s.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()), Times.Once);
                 }
             }
         }
 
         [Trait("Category", "ReadContinuously")]
         [Theory(DisplayName = "ReadContinuously raises MessageRead on read"), AutoData]
-        public void ReadContinuously_Raises_MessageRead_On_Read(string username, IPEndPoint endpoint)
+        public async Task ReadContinuously_Raises_MessageRead_On_Read(string username, IPEndPoint endpoint)
         {
             int callCount = 0;
 
             var streamMock = new Mock<INetworkStream>();
-            streamMock.Setup(s => s.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .Callback<byte[], int, int, CancellationToken>((bytes, offset, length, token) =>
+            streamMock.Setup(s => s.ReadAsync(It.IsAny<Memory<byte>>(), It.IsAny<CancellationToken>()))
+                .Callback<Memory<byte>, CancellationToken>((bytes, token) =>
                 {
                     if (callCount % 2 == 0)
                     {
                         var data = BitConverter.GetBytes(4);
-                        Array.Copy(data, bytes, data.Length);
+                        data.AsSpan().CopyTo(bytes.Span);
                     }
                     else if (callCount % 2 == 1)
                     {
                         var data = BitConverter.GetBytes((int)MessageCode.Peer.InfoRequest);
-                        Array.Copy(data, bytes, data.Length);
+                        data.AsSpan().CopyTo(bytes.Span);
                     }
 
                     callCount++;
                 })
-                .Returns(Task.Run(() => 4));
+                .Returns(ValueTask.FromResult(4));
 
             var tcpMock = new Mock<ITcpClient>();
 
@@ -485,7 +485,7 @@ namespace Soulseek.Tests.Unit.Network
 
                     c.MessageRead += (sender, e) => readMessage = e.Message;
 
-                    Thread.Sleep(1000); // ReadContinuouslyAsync() runs in a separate task, so events won't arrive immediately after connect
+                    await Task.Delay(1000); // ReadContinuouslyAsync() runs in a separate task, so events won't arrive immediately after connect
 
                     Assert.Equal(MessageCode.Peer.InfoRequest, new MessageReader<MessageCode.Peer>(readMessage).ReadCode());
                 }
@@ -494,28 +494,28 @@ namespace Soulseek.Tests.Unit.Network
 
         [Trait("Category", "ReadContinuously")]
         [Theory(DisplayName = "ReadContinuously raises MessageDataRead on read"), AutoData]
-        public void ReadContinuously_Raises_MessageDataRead_On_Read(string username, IPEndPoint endpoint, int code)
+        public async Task ReadContinuously_Raises_MessageDataRead_On_Read(string username, IPEndPoint endpoint, int code)
         {
             int callCount = 0;
 
             var streamMock = new Mock<INetworkStream>();
-            streamMock.Setup(s => s.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .Callback<byte[], int, int, CancellationToken>((bytes, offset, length, token) =>
+            streamMock.Setup(s => s.ReadAsync(It.IsAny<Memory<byte>>(), It.IsAny<CancellationToken>()))
+                .Callback<Memory<byte>, CancellationToken>((bytes, token) =>
                 {
                     if (callCount % 2 == 0)
                     {
                         var data = BitConverter.GetBytes(4);
-                        Array.Copy(data, bytes, data.Length);
+                        data.AsSpan().CopyTo(bytes.Span);
                     }
                     else if (callCount % 2 == 1)
                     {
                         var data = BitConverter.GetBytes(code);
-                        Array.Copy(data, bytes, data.Length);
+                        data.AsSpan().CopyTo(bytes.Span);
                     }
 
                     callCount++;
                 })
-                .Returns(Task.Run(() => 4));
+                .Returns(ValueTask.FromResult(4));
 
             var tcpMock = new Mock<ITcpClient>();
 
@@ -538,7 +538,7 @@ namespace Soulseek.Tests.Unit.Network
                     // ReadContinuouslyAsync() runs in a separate task, so events won't arrive immediately after connect
                     do
                     {
-                        Thread.Sleep(100);
+                        await Task.Delay(100);
                     }
                     while (readMessage == null && DateTime.UtcNow <= maxTime);
 
@@ -549,28 +549,28 @@ namespace Soulseek.Tests.Unit.Network
 
         [Trait("Category", "ReadContinuously")]
         [Theory(DisplayName = "ReadContinuously raises MessageReceived on read"), AutoData]
-        public void ReadContinuously_Raises_MessageReceived_On_Read(string username, IPEndPoint endpoint, int code)
+        public async Task ReadContinuously_Raises_MessageReceived_On_Read(string username, IPEndPoint endpoint, int code)
         {
             int callCount = 0;
 
             var streamMock = new Mock<INetworkStream>();
-            streamMock.Setup(s => s.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .Callback<byte[], int, int, CancellationToken>((bytes, offset, length, token) =>
+            streamMock.Setup(s => s.ReadAsync(It.IsAny<Memory<byte>>(), It.IsAny<CancellationToken>()))
+                .Callback<Memory<byte>, CancellationToken>((bytes, token) =>
                 {
                     if (callCount % 2 == 0)
                     {
                         var data = BitConverter.GetBytes(4);
-                        Array.Copy(data, bytes, data.Length);
+                        data.AsSpan().CopyTo(bytes.Span);
                     }
                     else if (callCount % 2 == 1)
                     {
                         var data = BitConverter.GetBytes(code);
-                        Array.Copy(data, bytes, data.Length);
+                        data.AsSpan().CopyTo(bytes.Span);
                     }
 
                     callCount++;
                 })
-                .Returns(Task.Run(() => 4));
+                .Returns(ValueTask.FromResult(4));
 
             var tcpMock = new Mock<ITcpClient>();
 
@@ -588,7 +588,7 @@ namespace Soulseek.Tests.Unit.Network
 
                     c.MessageReceived += (sender, e) => readMessage = e.Code;
 
-                    Thread.Sleep(1000); // ReadContinuouslyAsync() runs in a separate task, so events won't arrive immediately after connect
+                    await Task.Delay(1000); // ReadContinuouslyAsync() runs in a separate task, so events won't arrive immediately after connect
 
                     Assert.Equal(code, BitConverter.ToInt32(readMessage));
                 }
@@ -602,8 +602,8 @@ namespace Soulseek.Tests.Unit.Network
             bool b = false;
 
             var streamMock = new Mock<INetworkStream>();
-            streamMock.Setup(s => s.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
-                .Callback<byte[], int, int, CancellationToken>((bytes, offset, length, token) =>
+            streamMock.Setup(s => s.ReadAsync(It.IsAny<Memory<byte>>(), It.IsAny<CancellationToken>()))
+                .Callback<Memory<byte>, CancellationToken>((bytes, token) =>
                 {
                     b = true;
                 })
@@ -629,7 +629,7 @@ namespace Soulseek.Tests.Unit.Network
                 }
             }
 
-            streamMock.Verify(m => m.ReadAsync(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+            streamMock.Verify(m => m.ReadAsync(It.IsAny<Memory<byte>>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Trait("Category", "ReadContinuously")]

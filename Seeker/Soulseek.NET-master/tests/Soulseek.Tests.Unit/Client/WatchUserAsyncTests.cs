@@ -1,4 +1,4 @@
-﻿// <copyright file="AddUserAsyncTests.cs" company="JP Dillingham">
+﻿// <copyright file="WatchUserAsyncTests.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham. All rights reserved.
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -26,138 +26,138 @@ namespace Soulseek.Tests.Unit.Client
     using Soulseek.Network;
     using Xunit;
 
-    public class AddUserAsyncTests
+    public class WatchUserAsyncTests
     {
-        [Trait("Category", "AddUserAsync")]
-        [Theory(DisplayName = "AddUserAsync throws ArgumentException on bad username")]
+        [Trait("Category", "WatchUserAsync")]
+        [Theory(DisplayName = "WatchUserAsync throws ArgumentException on bad username")]
         [InlineData(null)]
         [InlineData(" ")]
         [InlineData("\t")]
         [InlineData("")]
-        public async Task AddUserAsync_Throws_ArgumentException_On_Null_Username(string username)
+        public async Task WatchUserAsync_Throws_ArgumentException_On_Null_Username(string username)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
-                var ex = await Record.ExceptionAsync(() => s.AddUserAsync(username));
+                var ex = await Record.ExceptionAsync(() => s.WatchUserAsync(username));
 
                 Assert.NotNull(ex);
                 Assert.IsType<ArgumentException>(ex);
             }
         }
 
-        [Trait("Category", "AddUserAsync")]
-        [Theory(DisplayName = "AddUserAsync throws InvalidOperationException if not connected and logged in")]
+        [Trait("Category", "WatchUserAsync")]
+        [Theory(DisplayName = "WatchUserAsync throws InvalidOperationException if not connected and logged in")]
         [InlineData(SoulseekClientStates.None)]
         [InlineData(SoulseekClientStates.Disconnected)]
         [InlineData(SoulseekClientStates.Connected)]
         [InlineData(SoulseekClientStates.LoggedIn)]
-        public async Task AddUserAsync_Throws_InvalidOperationException_If_Logged_In(SoulseekClientStates state)
+        public async Task WatchUserAsync_Throws_InvalidOperationException_If_Logged_In(SoulseekClientStates state)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", state);
 
-                var ex = await Record.ExceptionAsync(() => s.AddUserAsync("a"));
+                var ex = await Record.ExceptionAsync(() => s.WatchUserAsync("a"));
 
                 Assert.NotNull(ex);
                 Assert.IsType<InvalidOperationException>(ex);
             }
         }
 
-        [Trait("Category", "AddUserAsync")]
-        [Theory(DisplayName = "AddUserAsync returns expected info"), AutoData]
-        public async Task AddUserAsync_Returns_Expected_Info(string username, UserData userData)
+        [Trait("Category", "WatchUserAsync")]
+        [Theory(DisplayName = "WatchUserAsync returns expected info"), AutoData]
+        public async Task WatchUserAsync_Returns_Expected_Info(string username, UserData userData)
         {
-            var result = new AddUserResponse(username, true, userData);
+            var result = new WatchUserResponse(username, true, userData);
 
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<AddUserResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
+            waiter.Setup(m => m.Wait<WatchUserResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(result));
 
             var serverConn = new Mock<IMessageConnection>();
             serverConn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
-                var add = await s.AddUserAsync(username);
+                var add = await s.WatchUserAsync(username);
 
                 Assert.Equal(result.UserData, add);
             }
         }
 
-        [Trait("Category", "AddUserAsync")]
-        [Theory(DisplayName = "AddUserAsync uses given CancellationToken"), AutoData]
-        public async Task AddUserAsync_Uses_Given_CancellationToken(string username, UserData userData, CancellationToken cancellationToken)
+        [Trait("Category", "WatchUserAsync")]
+        [Theory(DisplayName = "WatchUserAsync uses given CancellationToken"), AutoData]
+        public async Task WatchUserAsync_Uses_Given_CancellationToken(string username, UserData userData, CancellationToken cancellationToken)
         {
-            var result = new AddUserResponse(username, true, userData);
+            var result = new WatchUserResponse(username, true, userData);
 
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<AddUserResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
+            waiter.Setup(m => m.Wait<WatchUserResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(result));
 
             var serverConn = new Mock<IMessageConnection>();
             serverConn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
-                await s.AddUserAsync(username, cancellationToken);
+                await s.WatchUserAsync(username, cancellationToken);
             }
 
             serverConn.Verify(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), cancellationToken), Times.Once);
         }
 
-        [Trait("Category", "AddUserAsync")]
-        [Theory(DisplayName = "AddUserAsync throws UserNotFoundException when exists is false"), AutoData]
-        public async Task AddUserAsync_Throws_UserNotFoundException_When_Exists_Is_False(string username, UserData userData)
+        [Trait("Category", "WatchUserAsync")]
+        [Theory(DisplayName = "WatchUserAsync throws UserNotFoundException when exists is false"), AutoData]
+        public async Task WatchUserAsync_Throws_UserNotFoundException_When_Exists_Is_False(string username, UserData userData)
         {
-            var result = new AddUserResponse(username, false, userData);
+            var result = new WatchUserResponse(username, false, userData);
 
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<AddUserResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
+            waiter.Setup(m => m.Wait<WatchUserResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(result));
 
             var serverConn = new Mock<IMessageConnection>();
             serverConn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
-                var ex = await Record.ExceptionAsync(() => s.AddUserAsync(username));
+                var ex = await Record.ExceptionAsync(() => s.WatchUserAsync(username));
 
                 Assert.NotNull(ex);
                 Assert.IsType<UserNotFoundException>(ex);
             }
         }
 
-        [Trait("Category", "AddUserAsyncAsync")]
-        [Theory(DisplayName = "AddUserAsyncAsync throws SoulseekClientException on throw"), AutoData]
-        public async Task AddUserAsyncAsync_Throws_SoulseekClientException_On_Throw(string username, bool exists, UserData userData)
+        [Trait("Category", "WatchUserAsyncAsync")]
+        [Theory(DisplayName = "WatchUserAsyncAsync throws SoulseekClientException on throw"), AutoData]
+        public async Task WatchUserAsyncAsync_Throws_SoulseekClientException_On_Throw(string username, bool exists, UserData userData)
         {
-            var result = new AddUserResponse(username, exists, userData);
+            var result = new WatchUserResponse(username, exists, userData);
 
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<AddUserResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
+            waiter.Setup(m => m.Wait<WatchUserResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(result));
 
             var serverConn = new Mock<IMessageConnection>();
             serverConn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Throws(new ConnectionException("foo"));
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
-                var ex = await Record.ExceptionAsync(() => s.AddUserAsync(username));
+                var ex = await Record.ExceptionAsync(() => s.WatchUserAsync(username));
 
                 Assert.NotNull(ex);
                 Assert.IsType<SoulseekClientException>(ex);
@@ -165,50 +165,50 @@ namespace Soulseek.Tests.Unit.Client
             }
         }
 
-        [Trait("Category", "AddUserAsyncAsync")]
-        [Theory(DisplayName = "AddUserAsync throws TimeoutException on timeout"), AutoData]
-        public async Task AddUserAsyncAsync_Throws_TimeoutException_On_Timeout(string username, bool exists, UserData userData)
+        [Trait("Category", "WatchUserAsyncAsync")]
+        [Theory(DisplayName = "WatchUserAsync throws TimeoutException on timeout"), AutoData]
+        public async Task WatchUserAsyncAsync_Throws_TimeoutException_On_Timeout(string username, bool exists, UserData userData)
         {
-            var result = new AddUserResponse(username, exists, userData);
+            var result = new WatchUserResponse(username, exists, userData);
 
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<AddUserResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
+            waiter.Setup(m => m.Wait<WatchUserResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(result));
 
             var serverConn = new Mock<IMessageConnection>();
             serverConn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Throws(new TimeoutException());
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
-                var ex = await Record.ExceptionAsync(() => s.AddUserAsync(username));
+                var ex = await Record.ExceptionAsync(() => s.WatchUserAsync(username));
 
                 Assert.NotNull(ex);
                 Assert.IsType<TimeoutException>(ex);
             }
         }
 
-        [Trait("Category", "AddUserAsync")]
-        [Theory(DisplayName = "AddUserAsync throws OperationCanceledException on cancel"), AutoData]
-        public async Task AddUserAsync_Throws_OperationCanceledException_On_Cancel(string username, bool exists, UserData userData)
+        [Trait("Category", "WatchUserAsync")]
+        [Theory(DisplayName = "WatchUserAsync throws OperationCanceledException on cancel"), AutoData]
+        public async Task WatchUserAsync_Throws_OperationCanceledException_On_Cancel(string username, bool exists, UserData userData)
         {
-            var result = new AddUserResponse(username, exists, userData);
+            var result = new WatchUserResponse(username, exists, userData);
 
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<AddUserResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
+            waiter.Setup(m => m.Wait<WatchUserResponse>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(result));
 
             var serverConn = new Mock<IMessageConnection>();
             serverConn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Throws(new OperationCanceledException());
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
-                var ex = await Record.ExceptionAsync(() => s.AddUserAsync(username));
+                var ex = await Record.ExceptionAsync(() => s.WatchUserAsync(username));
 
                 Assert.NotNull(ex);
                 Assert.IsType<OperationCanceledException>(ex);

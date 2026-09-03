@@ -39,8 +39,8 @@ namespace Soulseek.Tests.Unit.Messaging
         }
 
         [Trait("Category", "Code")]
-        [Fact(DisplayName = "Code sets code bytes")]
-        public void Code_Sets_Code_Bytes()
+        [Fact(DisplayName = "Peer code sets code bytes")]
+        public void Peer_Code_Sets_Code_Bytes()
         {
             var builder = new MessageBuilder();
 
@@ -49,6 +49,19 @@ namespace Soulseek.Tests.Unit.Messaging
             var code = builder.GetProperty<List<byte>>("CodeBytes");
 
             Assert.Equal(BitConverter.GetBytes((int)MessageCode.Peer.BrowseRequest), code);
+        }
+
+        [Trait("Category", "Code")]
+        [Fact(DisplayName = "Server code sets code bytes")]
+        public void Server_Code_Sets_Code_Bytes()
+        {
+            var builder = new MessageBuilder();
+
+            builder.WriteCode(MessageCode.Server.AcceptChildren);
+
+            var code = builder.GetProperty<List<byte>>("CodeBytes");
+
+            Assert.Equal(BitConverter.GetBytes((int)MessageCode.Server.AcceptChildren), code);
         }
 
         [Trait("Category", "Code")]
@@ -175,7 +188,7 @@ namespace Soulseek.Tests.Unit.Messaging
         public void Compress_Throws_MessageCompressionException_On_Zlib_Exception()
         {
             var builder = new MessageBuilder();
-            var ex = Record.Exception(() => builder.InvokeMethod("Compress", BindingFlags.NonPublic | BindingFlags.Instance, null, null));
+            var ex = Record.Exception(() => builder.InvokeMethod("Compress", BindingFlags.NonPublic | BindingFlags.Static, null, null));
 
             Assert.NotNull(ex);
             Assert.NotNull(ex.InnerException);
@@ -332,13 +345,35 @@ namespace Soulseek.Tests.Unit.Messaging
         }
 
         [Trait("Category", "WriteBytes")]
+        [InlineData("UTF-8")]
+        [InlineData("ISO-8859-1")]
+        [Theory(DisplayName = "WriteString obeys specified encoding")]
+        public void WriteString_Obeys_Specified_Encoding(string encoding)
+        {
+            var data = "a";
+
+            var builder = new MessageBuilder();
+            builder.WriteString(data, new CharacterEncoding(encoding));
+
+            var payload = builder.GetProperty<List<byte>>("PayloadBytes");
+
+            var expectedBytes = new List<byte>();
+            var encodedBytes = Encoding.GetEncoding(encoding).GetBytes(data);
+            expectedBytes.AddRange(BitConverter.GetBytes(encodedBytes.Length));
+            expectedBytes.AddRange(encodedBytes);
+
+            Assert.Equal(expectedBytes.Count, payload.Count);
+            Assert.Equal(expectedBytes, payload);
+        }
+
+        [Trait("Category", "WriteBytes")]
         [Fact(DisplayName = "WriteString writes UTF8 if ISO-8859-1 is not supported")]
         public void WriteString_Writes_UTF8_If_ISO_Is_Not_Supported()
         {
             var data = "බ";
 
             var builder = new MessageBuilder();
-            builder.WriteString(data);
+            builder.WriteString(data, CharacterEncoding.ISO88591);
 
             var payload = builder.GetProperty<List<byte>>("PayloadBytes");
 

@@ -71,13 +71,16 @@ namespace Seeker.Services
                         // you have to re-AddUser them. This is what SoulSeekQt does (wireshark message code 5 for each user in list)
                         // and what Nicotine does (userlist.server_login()).
                         // Reconnecting means every single time, including toggling from wifi to data / vice versa.
-                        var t = SeekerApplication.ConnectAndPerformPostConnectTasks(
+                        var t = SessionService.BeginLogin(LoginOrigin.Background,
                             PreferencesState.Username, PreferencesState.Password);
-                        t.Wait();
-                        if (t.IsCompletedSuccessfully)
+                        if (t != null)
                         {
-                            Logger.Debug("RETRY " + i + " SUCCEEDED");
-                            return;
+                            t.Wait();
+                            if (t.IsCompletedSuccessfully)
+                            {
+                                Logger.Debug("RETRY " + i + " SUCCEEDED");
+                                return;
+                            }
                         }
                     }
                     catch (Exception)

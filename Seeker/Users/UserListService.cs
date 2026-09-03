@@ -222,7 +222,18 @@ namespace Seeker
             };
 
             //Add User Logic...
-            SeekerState.SoulseekClient.WatchUserAsync(username).ContinueWith(continueWithAction);
+            // otherwise WatchUserAsync can throw syncronously (on loggedin precheck) which can crash the thread
+            //   now we treat it like any other failure
+            Task<Soulseek.UserData> watchUserTask;
+            try
+            {
+                watchUserTask = SeekerState.SoulseekClient.WatchUserAsync(username);
+            }
+            catch (Exception e)
+            {
+                watchUserTask = Task.FromException<Soulseek.UserData>(e);
+            }
+            watchUserTask.ContinueWith(continueWithAction);
         }
 
         /// <summary>
@@ -243,7 +254,18 @@ namespace Seeker
             }
             if (PreferencesState.CurrentlyLoggedIn)
             {
-                SeekerState.SoulseekClient.WatchUserAsync(username).ContinueWith((task) => SeekerApplication.UpdateUserInfo(task, username));
+                // otherwise WatchUserAsync can throw syncronously (on loggedin precheck) which can crash the thread
+                //   now we treat it like any other failure
+                Task<Soulseek.UserData> watchUserTask;
+                try
+                {
+                    watchUserTask = SeekerState.SoulseekClient.WatchUserAsync(username);
+                }
+                catch (Exception e)
+                {
+                    watchUserTask = Task.FromException<Soulseek.UserData>(e);
+                }
+                watchUserTask.ContinueWith((task) => SeekerApplication.UpdateUserInfo(task, username));
             }
         }
 

@@ -37,7 +37,7 @@ namespace Soulseek.Tests.Unit.Client
         [InlineData("")]
         public async Task GetUserInfoAsync_Throws_ArgumentException_On_Null_Username(string username)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -56,7 +56,7 @@ namespace Soulseek.Tests.Unit.Client
         [InlineData(SoulseekClientStates.LoggedIn)]
         public async Task GetUserInfoAsync_Throws_InvalidOperationException_If_Logged_In(SoulseekClientStates state)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", state);
 
@@ -71,7 +71,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "GetUserInfoAsync returns expected info"), AutoData]
         public async Task GetUserInfoAsync_Returns_Expected_Info(string username, string description, byte[] picture, int uploadSlots, int queueLength, bool hasFreeSlot)
         {
-            var result = new UserInfo(description, picture, uploadSlots, queueLength, hasFreeSlot);
+            var result = new UserInfo(description, uploadSlots, queueLength, hasFreeSlot, picture);
 
             var waiter = new Mock<IWaiter>();
             waiter.Setup(m => m.Wait<UserInfo>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
@@ -91,7 +91,7 @@ namespace Soulseek.Tests.Unit.Client
             connManager.Setup(m => m.GetOrAddMessageConnectionAsync(username, It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(conn.Object));
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -111,7 +111,7 @@ namespace Soulseek.Tests.Unit.Client
         public async Task GetUserInfoAsync_Uses_Given_CancellationToken(string username, string description, byte[] picture, int uploadSlots, int queueLength, bool hasFreeSlot)
         {
             var cancellationToken = new CancellationToken();
-            var result = new UserInfo(description, picture, uploadSlots, queueLength, hasFreeSlot);
+            var result = new UserInfo(description, uploadSlots, queueLength, hasFreeSlot, picture);
 
             var waiter = new Mock<IWaiter>();
             waiter.Setup(m => m.Wait<UserInfo>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
@@ -131,7 +131,7 @@ namespace Soulseek.Tests.Unit.Client
             connManager.Setup(m => m.GetOrAddMessageConnectionAsync(username, It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(conn.Object));
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -145,7 +145,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "GetUserInfoAsync throws TimeoutException on timeout"), AutoData]
         public async Task GetUserInfoAsync_Throws_TimeoutException_On_Timeout(string username, string description, byte[] picture, int uploadSlots, int queueLength, bool hasFreeSlot)
         {
-            var result = new UserInfo(description, picture, uploadSlots, queueLength, hasFreeSlot);
+            var result = new UserInfo(description, uploadSlots, queueLength, hasFreeSlot, picture);
 
             var waiter = new Mock<IWaiter>();
             waiter.Setup(m => m.Wait<UserInfo>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
@@ -165,7 +165,7 @@ namespace Soulseek.Tests.Unit.Client
             connManager.Setup(m => m.GetOrAddMessageConnectionAsync(username, It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(conn.Object));
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -181,7 +181,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "GetUserInfoAsync throws OperationCanceledException on cancellation"), AutoData]
         public async Task GetUserInfoAsync_Throws_OperationCanceledException_On_Cancellation(string username, string description, byte[] picture, int uploadSlots, int queueLength, bool hasFreeSlot)
         {
-            var result = new UserInfo(description, picture, uploadSlots, queueLength, hasFreeSlot);
+            var result = new UserInfo(description, uploadSlots, queueLength, hasFreeSlot, picture);
 
             var waiter = new Mock<IWaiter>();
             waiter.Setup(m => m.Wait<UserInfo>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
@@ -201,7 +201,7 @@ namespace Soulseek.Tests.Unit.Client
             connManager.Setup(m => m.GetOrAddMessageConnectionAsync(username, It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(conn.Object));
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -224,7 +224,7 @@ namespace Soulseek.Tests.Unit.Client
             var serverConn = new Mock<IMessageConnection>();
             var connManager = new Mock<IPeerConnectionManager>();
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -240,7 +240,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "GetUserInfoAsync throws SoulseekClientException on throw"), AutoData]
         public async Task GetUserInfoAsync_Throws_SoulseekClientException_On_Throw(string username, string description, byte[] picture, int uploadSlots, int queueLength, bool hasFreeSlot)
         {
-            var result = new UserInfo(description, picture, uploadSlots, queueLength, hasFreeSlot);
+            var result = new UserInfo(description, uploadSlots, queueLength, hasFreeSlot, picture);
 
             var waiter = new Mock<IWaiter>();
             waiter.Setup(m => m.Wait<UserInfo>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
@@ -260,7 +260,7 @@ namespace Soulseek.Tests.Unit.Client
             connManager.Setup(m => m.GetOrAddMessageConnectionAsync(username, It.IsAny<IPEndPoint>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(conn.Object));
 
-            using (var s = new SoulseekClient(waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object, serverConnection: serverConn.Object, peerConnectionManager: connManager.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 

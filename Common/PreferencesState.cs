@@ -10,6 +10,10 @@ namespace Common
     {
         // Account
         // if user logged in (regardless of connection status)
+        // basically means: should we attempt to log the user in automatically,
+        //  or (if false) then the user has a bad user/pass, never logged in, explicitly logged out
+        // this is used to control login screen - i.e. if we are (currently) connecting and never 
+        //  logged in before then we should show the loading screen, otherwise a logged in screen w yellow dot 
         public static bool CurrentlyLoggedIn = false;
 
         private static string? _username;

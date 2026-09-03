@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
-    <ProjectReference Include="..\Seeker\Soulseek.NET-master\src\Soulseek_Source.csproj" />
+    <ProjectReference Include="..\Seeker\Soulseek.NET-master\src\Soulseek.csproj" />
   </ItemGroup>
 
   <!--

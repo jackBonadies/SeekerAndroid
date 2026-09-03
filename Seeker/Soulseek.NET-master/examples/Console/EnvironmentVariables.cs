@@ -67,6 +67,7 @@
         {
             Dictionary<string, PropertyInfo> properties = new Dictionary<string, PropertyInfo>();
 
+#pragma warning disable S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields
             foreach (PropertyInfo property in type.GetProperties(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static))
             {
                 CustomAttributeData attribute = property.CustomAttributes.FirstOrDefault(a => a.AttributeType.Name == typeof(EnvironmentVariableAttribute).Name);
@@ -81,6 +82,7 @@
                     }
                 }
             }
+#pragma warning restore S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields
 
             return properties;
         }

@@ -1,4 +1,4 @@
-﻿// <copyright file="UserStatusResponseTests.cs" company="JP Dillingham">
+﻿// <copyright file="UserStatusResponseFactoryTests.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham. All rights reserved.
 //
 //     This program is free software: you can redistribute it and/or modify
@@ -22,19 +22,8 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
     using Soulseek.Messaging.Messages;
     using Xunit;
 
-    public class UserStatusResponseTests
+    public class UserStatusResponseFactoryTests
     {
-        [Trait("Category", "Instantiation")]
-        [Theory(DisplayName = "Instantiates with the given data"), AutoData]
-        public void Instantiates_With_The_Given_Data(string username, UserPresence status, bool privileged)
-        {
-            var r = new UserStatusResponse(username, status, privileged);
-
-            Assert.Equal(username, r.Username);
-            Assert.Equal(status, r.Status);
-            Assert.Equal(privileged, r.IsPrivileged);
-        }
-
         [Trait("Category", "Parse")]
         [Fact(DisplayName = "Parse throws MessageExcepton on code mismatch")]
         public void Parse_Throws_MessageException_On_Code_Mismatch()
@@ -43,7 +32,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 .WriteCode(MessageCode.Peer.BrowseRequest)
                 .Build();
 
-            var ex = Record.Exception(() => UserStatusResponse.FromByteArray(msg));
+            var ex = Record.Exception(() => UserStatusResponseFactory.FromByteArray(msg));
 
             Assert.NotNull(ex);
             Assert.IsType<MessageException>(ex);
@@ -57,7 +46,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 .WriteCode(MessageCode.Server.GetStatus)
                 .Build();
 
-            var ex = Record.Exception(() => UserStatusResponse.FromByteArray(msg));
+            var ex = Record.Exception(() => UserStatusResponseFactory.FromByteArray(msg));
 
             Assert.NotNull(ex);
             Assert.IsType<MessageReadException>(ex);
@@ -74,10 +63,10 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 .WriteByte((byte)(privileged ? 1 : 0))
                 .Build();
 
-            var r = UserStatusResponse.FromByteArray(msg);
+            var r = UserStatusResponseFactory.FromByteArray(msg);
 
             Assert.Equal(username, r.Username);
-            Assert.Equal(status, r.Status);
+            Assert.Equal(status, r.Presence);
             Assert.Equal(privileged, r.IsPrivileged);
         }
     }

@@ -108,7 +108,7 @@ namespace Seeker.Browse
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.network_down), ToastLength.Short);
                     return;
                 }
-                else if (br.IsFaulted && br.Exception?.InnerException != null && br.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
+                else if (br.IsFaulted && br.Exception?.InnerException != null && br.Exception.InnerException.Message.ToLower().Contains(Common.Helpers.FailedToEstablishDirectOrIndirectStringLower))
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.browse_user_nodirectconnection), ToastLength.Short);
                     return;
@@ -262,7 +262,7 @@ namespace Seeker.Browse
                     {
                         msgToToast = "Failed to Add Download - Request timed out";
                     }
-                    else if (dirTask.Exception.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
+                    else if (dirTask.Exception.InnerException.Message.ToLower().Contains(Common.Helpers.FailedToEstablishDirectOrIndirectStringLower))
                     {
                         msgToToast = $"Failed to Add Download - Cannot establish connection to user {_uname}";
                     }

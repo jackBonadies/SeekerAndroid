@@ -20,11 +20,6 @@
         public int DirectoryCount { get; set; }
 
         /// <summary>
-        ///     The number of active user downloads.
-        /// </summary>
-        public long DownloadCount { get; set; }
-
-        /// <summary>
         ///     The number of files shared by the user.
         /// </summary>
         public int FileCount { get; set; }
@@ -45,6 +40,11 @@
         public UserPresence Status { get; set; }
 
         /// <summary>
+        ///     The number of uploads tracked by the server for this user.
+        /// </summary>
+        public long UploadCount { get; set; }
+
+        /// <summary>
         ///     The username of the user.
         /// </summary>
         public string Username { get; set; }
@@ -56,7 +56,7 @@
                 AverageSpeed = userData.AverageSpeed,
                 CountryCode = userData.CountryCode,
                 DirectoryCount = userData.DirectoryCount,
-                DownloadCount = userData.DownloadCount,
+                UploadCount = userData.UploadCount,
                 FileCount = userData.FileCount,
                 SlotsFree = userData.SlotsFree,
                 Status = userData.Status,

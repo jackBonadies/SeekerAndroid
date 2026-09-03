@@ -15,13 +15,17 @@
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
 // </copyright>
 
-namespace Soulseek.Tests.Unit
+namespace Soulseek.Tests.Unit.Options
 {
     using System;
+    using System.Collections.Generic;
+
     using System.Linq;
     using System.Net;
+    using System.Net.Sockets;
     using System.Threading.Tasks;
     using AutoFixture.Xunit2;
+    using Moq;
     using Soulseek.Diagnostics;
     using Xunit;
 
@@ -34,13 +38,19 @@ namespace Soulseek.Tests.Unit
             bool enableDistributedNetwork,
             bool acceptDistributedChildren,
             int distributedChildLimit,
+            int maximumConcurrentSearches,
+            int maximumConcurrentUploads,
+            int maximumUploadSpeed,
+            int maximumConcurrentDownloads,
+            int maximumDownloadSpeed,
             bool deduplicateSearchRequests,
             int messageTimeout,
             bool autoAcknowledgePrivateMessages,
             bool autoAcknowledgePrivilegeNotifications,
             bool acceptPrivateRoomInvitations,
             DiagnosticLevel minimumDiagnosticLevel,
-            int startingToken)
+            int startingToken,
+            bool raiseEventsAsynchronously)
         {
             var serverConnectionOptions = new ConnectionOptions();
             var peerConnectionOptions = new ConnectionOptions();
@@ -48,16 +58,34 @@ namespace Soulseek.Tests.Unit
             var incomingConnectionOptions = new ConnectionOptions();
             var distributedConnectionOptions = new ConnectionOptions();
 
+            var userEndPointCache = new Mock<IUserEndPointCache>();
+            var searchResponseCache = new Mock<ISearchResponseCache>();
+
+            var searchResponseResolver = new Func<string, int, SearchQuery, Task<SearchResponse>>((s, i, q) => Task.FromResult<SearchResponse>(null));
+            var browseResponseResolver = new Func<string, IPEndPoint, Task<BrowseResponse>>((s, i) => Task.FromResult<BrowseResponse>(null));
+            var directoryContentsResponseResolver = new Func<string, IPEndPoint, int, string, Task<IEnumerable<Directory>>>((s, i, ii, ss) => Task.FromResult<IEnumerable<Directory>>(null));
+            var userInfoResponseResolver = new Func<string, IPEndPoint, Task<UserInfo>>((s, i) => Task.FromResult<UserInfo>(null));
+            var enqueueDownloadAction = new Func<string, IPEndPoint, string, Task>((s, i, ss) => Task.CompletedTask);
+            var placeInQueueResponseResolver = new Func<string, IPEndPoint, string, Task<int?>>((s, i, ss) => Task.FromResult<int?>(0));
+
             var rnd = new Random();
+            var listenAddress = IPAddress.Parse(string.Join(".", rnd.Next(0, 254).ToString(), rnd.Next(0, 254).ToString(), rnd.Next(0, 254).ToString(), rnd.Next(0, 254).ToString()));
             var listenPort = rnd.Next(1024, 65535);
+            var listenBacklog = rnd.Next(128, int.MaxValue);
 
             var o = new SoulseekClientOptions(
                 enableListener,
+                listenAddress,
                 listenPort,
-                userEndPointCache: null,
+                listenBacklog: listenBacklog,
                 enableDistributedNetwork: enableDistributedNetwork,
                 acceptDistributedChildren: acceptDistributedChildren,
                 distributedChildLimit: distributedChildLimit,
+                maximumConcurrentSearches: maximumConcurrentSearches,
+                maximumConcurrentUploads: maximumConcurrentUploads,
+                maximumUploadSpeed: maximumUploadSpeed,
+                maximumConcurrentDownloads: maximumConcurrentDownloads,
+                maximumDownloadSpeed: maximumDownloadSpeed,
                 deduplicateSearchRequests: deduplicateSearchRequests,
                 messageTimeout: messageTimeout,
                 autoAcknowledgePrivateMessages: autoAcknowledgePrivateMessages,
@@ -69,14 +97,29 @@ namespace Soulseek.Tests.Unit
                 peerConnectionOptions: peerConnectionOptions,
                 transferConnectionOptions: transferConnectionOptions,
                 incomingConnectionOptions: incomingConnectionOptions,
-                distributedConnectionOptions: distributedConnectionOptions);
+                distributedConnectionOptions: distributedConnectionOptions,
+                userEndPointCache: userEndPointCache.Object,
+                searchResponseResolver: searchResponseResolver,
+                searchResponseCache: searchResponseCache.Object,
+                browseResponseResolver: browseResponseResolver,
+                directoryContentsResolver: directoryContentsResponseResolver,
+                userInfoResolver: userInfoResponseResolver,
+                enqueueDownload: enqueueDownloadAction,
+                placeInQueueResolver: placeInQueueResponseResolver,
+                raiseEventsAsynchronously: raiseEventsAsynchronously);
 
             Assert.Equal(enableListener, o.EnableListener);
+            Assert.Equal(listenAddress, o.ListenIPAddress);
             Assert.Equal(listenPort, o.ListenPort);
-            Assert.Null(o.UserEndPointCache);
+            Assert.Equal(listenBacklog, o.ListenBacklog);
             Assert.Equal(enableDistributedNetwork, o.EnableDistributedNetwork);
             Assert.Equal(acceptDistributedChildren, o.AcceptDistributedChildren);
             Assert.Equal(distributedChildLimit, o.DistributedChildLimit);
+            Assert.Equal(maximumConcurrentSearches, o.MaximumConcurrentSearches);
+            Assert.Equal(maximumConcurrentUploads, o.MaximumConcurrentUploads);
+            Assert.Equal(maximumUploadSpeed, o.MaximumUploadSpeed);
+            Assert.Equal(maximumConcurrentDownloads, o.MaximumConcurrentDownloads);
+            Assert.Equal(maximumDownloadSpeed, o.MaximumDownloadSpeed);
             Assert.Equal(deduplicateSearchRequests, o.DeduplicateSearchRequests);
             Assert.Equal(messageTimeout, o.MessageTimeout);
             Assert.Equal(autoAcknowledgePrivateMessages, o.AutoAcknowledgePrivateMessages);
@@ -96,10 +139,29 @@ namespace Soulseek.Tests.Unit
             Assert.Equal(transferConnectionOptions.ReadBufferSize, o.TransferConnectionOptions.ReadBufferSize);
             Assert.Equal(transferConnectionOptions.WriteBufferSize, o.TransferConnectionOptions.WriteBufferSize);
             Assert.Equal(transferConnectionOptions.ConnectTimeout, o.TransferConnectionOptions.ConnectTimeout);
-            Assert.Equal(-1, o.TransferConnectionOptions.InactivityTimeout);
+            Assert.Equal(transferConnectionOptions.InactivityTimeout, o.TransferConnectionOptions.InactivityTimeout);
 
-            Assert.Null(o.UserEndPointCache);
-            Assert.Null(o.SearchResponseCache);
+            Assert.Equal(userEndPointCache.Object, o.UserEndPointCache);
+            Assert.Equal(searchResponseResolver, o.SearchResponseResolver);
+            Assert.Equal(searchResponseCache.Object, o.SearchResponseCache);
+            Assert.Equal(browseResponseResolver, o.BrowseResponseResolver);
+            Assert.Equal(directoryContentsResponseResolver, o.DirectoryContentsResolver);
+            Assert.Equal(userInfoResponseResolver, o.UserInfoResolver);
+            Assert.Equal(enqueueDownloadAction, o.EnqueueDownload);
+            Assert.Equal(placeInQueueResponseResolver, o.PlaceInQueueResolver);
+
+            Assert.Equal(raiseEventsAsynchronously, o.RaiseEventsAsynchronously);
+
+            Assert.Equal(1, o.MaximumConcurrentUploadsPerUser);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Instantiates with UploadSlotsPerUser set to 1")]
+        public void Instantiates_With_UploadSlotsPerUser_1()
+        {
+            var o = new SoulseekClientOptions();
+
+            Assert.Equal(1, o.MaximumConcurrentUploadsPerUser);
         }
 
         [Trait("Category", "Instantiation")]
@@ -141,16 +203,16 @@ namespace Soulseek.Tests.Unit
             Assert.Equal(Enumerable.Empty<Directory>(), (await o.BrowseResponseResolver(string.Empty, ip)).Directories);
             Assert.Equal(Enumerable.Empty<Directory>(), (await o.BrowseResponseResolver(string.Empty, ip)).LockedDirectories);
 
-            var ex = await Record.ExceptionAsync(() => o.EnqueueDownloadAction(string.Empty, ip, string.Empty));
+            var ex = await Record.ExceptionAsync(() => o.EnqueueDownload(string.Empty, ip, string.Empty));
             Assert.Null(ex);
 
-            var placeInQueue = await o.PlaceInQueueResponseResolver(string.Empty, ip, string.Empty);
+            var placeInQueue = await o.PlaceInQueueResolver(string.Empty, ip, string.Empty);
             Assert.Null(placeInQueue);
 
-            Assert.IsType<UserInfo>(await o.UserInfoResponseResolver(string.Empty, ip));
+            Assert.IsType<UserInfo>(await o.UserInfoResolver(string.Empty, ip));
 
             Assert.Null(o.SearchResponseResolver);
-            Assert.Null(o.DirectoryContentsResponseResolver);
+            Assert.Null(o.DirectoryContentsResolver);
         }
 
         [Trait("Category", "Instantiation")]
@@ -178,6 +240,54 @@ namespace Soulseek.Tests.Unit
         }
 
         [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Throws if upload slots are zero")]
+        public void Throws_If_Upload_Slots_Are_Zero()
+        {
+            SoulseekClientOptions x;
+            var ex = Record.Exception(() => x = new SoulseekClientOptions(maximumConcurrentUploads: 0));
+
+            Assert.NotNull(ex);
+            Assert.IsType<ArgumentOutOfRangeException>(ex);
+            Assert.Equal("maximumConcurrentUploads", ((ArgumentOutOfRangeException)ex).ParamName);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Throws if upload slots are negative")]
+        public void Throws_If_Upload_Slots_Are_Negative()
+        {
+            SoulseekClientOptions x;
+            var ex = Record.Exception(() => x = new SoulseekClientOptions(maximumConcurrentUploads: -1));
+
+            Assert.NotNull(ex);
+            Assert.IsType<ArgumentOutOfRangeException>(ex);
+            Assert.Equal("maximumConcurrentUploads", ((ArgumentOutOfRangeException)ex).ParamName);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Throws if download slots are zero")]
+        public void Throws_If_Download_Slots_Are_Zero()
+        {
+            SoulseekClientOptions x;
+            var ex = Record.Exception(() => x = new SoulseekClientOptions(maximumConcurrentDownloads: 0));
+
+            Assert.NotNull(ex);
+            Assert.IsType<ArgumentOutOfRangeException>(ex);
+            Assert.Equal("maximumConcurrentDownloads", ((ArgumentOutOfRangeException)ex).ParamName);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Throws if download slots are negative")]
+        public void Throws_If_Download_Slots_Are_Negative()
+        {
+            SoulseekClientOptions x;
+            var ex = Record.Exception(() => x = new SoulseekClientOptions(maximumConcurrentDownloads: -1));
+
+            Assert.NotNull(ex);
+            Assert.IsType<ArgumentOutOfRangeException>(ex);
+            Assert.Equal("maximumConcurrentDownloads", ((ArgumentOutOfRangeException)ex).ParamName);
+        }
+
+        [Trait("Category", "Instantiation")]
         [Fact(DisplayName = "Throws if listen port is too high")]
         public void Throws_If_Listen_Port_Is_Too_High()
         {
@@ -199,6 +309,58 @@ namespace Soulseek.Tests.Unit
             Assert.IsType<ArgumentOutOfRangeException>(ex);
         }
 
+        [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Instantiates with default ListenBacklog")]
+        public void Instantiates_With_Default_ListenBacklog()
+        {
+            var o = new SoulseekClientOptions();
+
+            Assert.Equal((int)SocketOptionName.MaxConnections, o.ListenBacklog);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Throws if listen backlog is less than 128")]
+        public void Throws_If_Listen_Backlog_Is_Less_Than_128()
+        {
+            SoulseekClientOptions x;
+            var ex = Record.Exception(() => x = new SoulseekClientOptions(listenBacklog: 127));
+
+            Assert.NotNull(ex);
+            Assert.IsType<ArgumentOutOfRangeException>(ex);
+            Assert.Equal("listenBacklog", ((ArgumentOutOfRangeException)ex).ParamName);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Does not throw if listen backlog is exactly 128")]
+        public void Does_Not_Throw_If_Listen_Backlog_Is_Exactly_128()
+        {
+            var ex = Record.Exception(() => new SoulseekClientOptions(listenBacklog: 128));
+
+            Assert.Null(ex);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Throws if MaxConcurrentSearches is negative")]
+        public void Throws_If_MaxConcurrentSearches_Is_Negative()
+        {
+            SoulseekClientOptions x;
+            var ex = Record.Exception(() => x = new SoulseekClientOptions(maximumConcurrentSearches: -1));
+
+            Assert.NotNull(ex);
+            Assert.IsType<ArgumentOutOfRangeException>(ex);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Throws if MaxConcurrentSearches is zero")]
+        public void Throws_If_MaxConcurrentSearches_Is_Zero()
+        {
+            SoulseekClientOptions x;
+            var ex = Record.Exception(() => x = new SoulseekClientOptions(maximumConcurrentSearches: 0));
+
+            Assert.NotNull(ex);
+            Assert.IsType<ArgumentOutOfRangeException>(ex);
+        }
+
         [Trait("Category", "With")]
         [Fact(DisplayName = "Throws if patch is null")]
         public void Throws_If_Patch_Is_Null()
@@ -215,6 +377,8 @@ namespace Soulseek.Tests.Unit
             bool? enableListener,
             bool? enableDistributedNetwork,
             bool? acceptDistributedChildren,
+            int? maximumUploadSpeed,
+            int? maximumDownloadSpeed,
             int? distributedChildLimit,
             bool? deduplicateSearchRequests,
             bool? autoAcknowledgePrivateMessages,
@@ -227,15 +391,31 @@ namespace Soulseek.Tests.Unit
             var incomingConnectionOptions = new ConnectionOptions();
             var distributedConnectionOptions = new ConnectionOptions();
 
+            var userEndPointCache = new Mock<IUserEndPointCache>();
+            var searchResponseCache = new Mock<ISearchResponseCache>();
+
+            var searchResponseResolver = new Func<string, int, SearchQuery, Task<SearchResponse>>((s, i, q) => Task.FromResult<SearchResponse>(null));
+            var browseResponseResolver = new Func<string, IPEndPoint, Task<BrowseResponse>>((s, i) => Task.FromResult<BrowseResponse>(null));
+            var directoryContentsResponseResolver = new Func<string, IPEndPoint, int, string, Task<IEnumerable<Directory>>>((s, i, ii, ss) => Task.FromResult<IEnumerable<Directory>>(null));
+            var userInfoResponseResolver = new Func<string, IPEndPoint, Task<UserInfo>>((s, i) => Task.FromResult<UserInfo>(null));
+            var enqueueDownloadAction = new Func<string, IPEndPoint, string, Task>((s, i, ss) => Task.CompletedTask);
+            var placeInQueueResponseResolver = new Func<string, IPEndPoint, string, Task<int?>>((s, i, ss) => Task.FromResult<int?>(0));
+
             var rnd = new Random();
+            var listenAddress = IPAddress.Parse(string.Join(".", rnd.Next(0, 254).ToString(), rnd.Next(0, 254).ToString(), rnd.Next(0, 254).ToString(), rnd.Next(0, 254).ToString()));
             var listenPort = rnd.Next(1024, 65535);
+            var listenBacklog = rnd.Next(128, int.MaxValue);
 
             var patch = new SoulseekClientOptionsPatch(
                 enableListener,
+                listenAddress,
                 listenPort,
+                listenBacklog: listenBacklog,
                 enableDistributedNetwork: enableDistributedNetwork,
                 acceptDistributedChildren: acceptDistributedChildren,
                 distributedChildLimit: distributedChildLimit,
+                maximumUploadSpeed: maximumUploadSpeed,
+                maximumDownloadSpeed: maximumDownloadSpeed,
                 deduplicateSearchRequests: deduplicateSearchRequests,
                 autoAcknowledgePrivateMessages: autoAcknowledgePrivateMessages,
                 autoAcknowledgePrivilegeNotifications: autoAcknowledgePrivilegeNotifications,
@@ -244,15 +424,46 @@ namespace Soulseek.Tests.Unit
                 peerConnectionOptions: peerConnectionOptions,
                 transferConnectionOptions: transferConnectionOptions,
                 incomingConnectionOptions: incomingConnectionOptions,
-                distributedConnectionOptions: distributedConnectionOptions);
+                distributedConnectionOptions: distributedConnectionOptions,
+                userEndPointCache: userEndPointCache.Object,
+                searchResponseResolver: searchResponseResolver,
+                searchResponseCache: searchResponseCache.Object,
+                browseResponseResolver: browseResponseResolver,
+                directoryContentsResolver: directoryContentsResponseResolver,
+                userInfoResolver: userInfoResponseResolver,
+                enqueueDownload: enqueueDownloadAction,
+                placeInQueueResolver: placeInQueueResponseResolver);
 
-            var o = new SoulseekClientOptions().With(patch);
+            var original = new SoulseekClientOptions(
+                maximumConcurrentSearches: 41,
+                maximumConcurrentUploads: 42,
+                maximumConcurrentDownloads: 24,
+                messageTimeout: 45,
+                minimumDiagnosticLevel: DiagnosticLevel.None,
+                startingToken: 47,
+                raiseEventsAsynchronously: true);
+
+            var o = original.With(patch);
+
+            // make sure the options that can't be patched did not change
+            Assert.Equal(41, o.MaximumConcurrentSearches);
+            Assert.Equal(42, o.MaximumConcurrentUploads);
+            Assert.Equal(24, o.MaximumConcurrentDownloads);
+            Assert.Equal(45, o.MessageTimeout);
+            Assert.Equal(DiagnosticLevel.None, o.MinimumDiagnosticLevel);
+            Assert.Equal(47, o.StartingToken);
+            Assert.True(o.RaiseEventsAsynchronously);
+            Assert.Equal(1, o.MaximumConcurrentUploadsPerUser);
 
             Assert.Equal(enableListener, o.EnableListener);
+            Assert.Equal(listenAddress, o.ListenIPAddress);
             Assert.Equal(listenPort, o.ListenPort);
+            Assert.Equal(listenBacklog, o.ListenBacklog);
             Assert.Equal(enableDistributedNetwork, o.EnableDistributedNetwork);
             Assert.Equal(acceptDistributedChildren, o.AcceptDistributedChildren);
             Assert.Equal(distributedChildLimit, o.DistributedChildLimit);
+            Assert.Equal(maximumUploadSpeed, o.MaximumUploadSpeed);
+            Assert.Equal(maximumDownloadSpeed, o.MaximumDownloadSpeed);
             Assert.Equal(deduplicateSearchRequests, o.DeduplicateSearchRequests);
             Assert.Equal(autoAcknowledgePrivateMessages, o.AutoAcknowledgePrivateMessages);
             Assert.Equal(autoAcknowledgePrivilegeNotifications, o.AutoAcknowledgePrivilegeNotifications);
@@ -269,7 +480,16 @@ namespace Soulseek.Tests.Unit
             Assert.Equal(transferConnectionOptions.ReadBufferSize, o.TransferConnectionOptions.ReadBufferSize);
             Assert.Equal(transferConnectionOptions.WriteBufferSize, o.TransferConnectionOptions.WriteBufferSize);
             Assert.Equal(transferConnectionOptions.ConnectTimeout, o.TransferConnectionOptions.ConnectTimeout);
-            Assert.Equal(-1, o.TransferConnectionOptions.InactivityTimeout);
+            Assert.Equal(transferConnectionOptions.InactivityTimeout, o.TransferConnectionOptions.InactivityTimeout);
+
+            Assert.Equal(userEndPointCache.Object, o.UserEndPointCache);
+            Assert.Equal(searchResponseResolver, o.SearchResponseResolver);
+            Assert.Equal(searchResponseCache.Object, o.SearchResponseCache);
+            Assert.Equal(browseResponseResolver, o.BrowseResponseResolver);
+            Assert.Equal(directoryContentsResponseResolver, o.DirectoryContentsResolver);
+            Assert.Equal(userInfoResponseResolver, o.UserInfoResolver);
+            Assert.Equal(enqueueDownloadAction, o.EnqueueDownload);
+            Assert.Equal(placeInQueueResponseResolver, o.PlaceInQueueResolver);
         }
 
         [Trait("Category", "With")]
@@ -278,6 +498,8 @@ namespace Soulseek.Tests.Unit
             bool? enableListener,
             bool? enableDistributedNetwork,
             bool? acceptDistributedChildren,
+            int? maximumUploadSpeed,
+            int? maximumDownloadSpeed,
             int? distributedChildLimit,
             bool? deduplicateSearchRequests,
             bool? autoAcknowledgePrivateMessages,
@@ -290,15 +512,40 @@ namespace Soulseek.Tests.Unit
             var incomingConnectionOptions = new ConnectionOptions();
             var distributedConnectionOptions = new ConnectionOptions();
 
-            var rnd = new Random();
-            var listenPort = rnd.Next(1024, 65535);
+            var userEndPointCache = new Mock<IUserEndPointCache>();
+            var searchResponseCache = new Mock<ISearchResponseCache>();
 
-            var o = new SoulseekClientOptions().With(
+            var searchResponseResolver = new Func<string, int, SearchQuery, Task<SearchResponse>>((s, i, q) => Task.FromResult<SearchResponse>(null));
+            var browseResponseResolver = new Func<string, IPEndPoint, Task<BrowseResponse>>((s, i) => Task.FromResult<BrowseResponse>(null));
+            var directoryContentsResponseResolver = new Func<string, IPEndPoint, int, string, Task<IEnumerable<Directory>>>((s, i, ii, ss) => Task.FromResult<IEnumerable<Directory>>(null));
+            var userInfoResponseResolver = new Func<string, IPEndPoint, Task<UserInfo>>((s, i) => Task.FromResult<UserInfo>(null));
+            var enqueueDownloadAction = new Func<string, IPEndPoint, string, Task>((s, i, ss) => Task.CompletedTask);
+            var placeInQueueResponseResolver = new Func<string, IPEndPoint, string, Task<int?>>((s, i, ss) => Task.FromResult<int?>(0));
+
+            var rnd = new Random();
+            var listenAddress = IPAddress.Parse(string.Join(".", rnd.Next(0, 254).ToString(), rnd.Next(0, 254).ToString(), rnd.Next(0, 254).ToString(), rnd.Next(0, 254).ToString()));
+            var listenPort = rnd.Next(1024, 65535);
+            var listenBacklog = rnd.Next(128, int.MaxValue);
+
+            var original = new SoulseekClientOptions(
+                maximumConcurrentSearches: 41,
+                maximumConcurrentUploads: 42,
+                maximumConcurrentDownloads: 24,
+                messageTimeout: 45,
+                minimumDiagnosticLevel: DiagnosticLevel.None,
+                startingToken: 47,
+                raiseEventsAsynchronously: true);
+
+            var o = original.With(
                 enableListener,
+                listenAddress,
                 listenPort,
+                listenBacklog: listenBacklog,
                 enableDistributedNetwork: enableDistributedNetwork,
                 acceptDistributedChildren: acceptDistributedChildren,
                 distributedChildLimit: distributedChildLimit,
+                maximumUploadSpeed: maximumUploadSpeed,
+                maximumDownloadSpeed: maximumDownloadSpeed,
                 deduplicateSearchRequests: deduplicateSearchRequests,
                 autoAcknowledgePrivateMessages: autoAcknowledgePrivateMessages,
                 autoAcknowledgePrivilegeNotifications: autoAcknowledgePrivilegeNotifications,
@@ -307,13 +554,25 @@ namespace Soulseek.Tests.Unit
                 peerConnectionOptions: peerConnectionOptions,
                 transferConnectionOptions: transferConnectionOptions,
                 incomingConnectionOptions: incomingConnectionOptions,
-                distributedConnectionOptions: distributedConnectionOptions);
+                distributedConnectionOptions: distributedConnectionOptions,
+                userEndPointCache: userEndPointCache.Object,
+                searchResponseResolver: searchResponseResolver,
+                searchResponseCache: searchResponseCache.Object,
+                browseResponseResolver: browseResponseResolver,
+                directoryContentsResolver: directoryContentsResponseResolver,
+                userInfoResolver: userInfoResponseResolver,
+                enqueueDownload: enqueueDownloadAction,
+                placeInQueueResolver: placeInQueueResponseResolver);
 
             Assert.Equal(enableListener, o.EnableListener);
+            Assert.Equal(listenAddress, o.ListenIPAddress);
             Assert.Equal(listenPort, o.ListenPort);
+            Assert.Equal(listenBacklog, o.ListenBacklog);
             Assert.Equal(enableDistributedNetwork, o.EnableDistributedNetwork);
             Assert.Equal(acceptDistributedChildren, o.AcceptDistributedChildren);
             Assert.Equal(distributedChildLimit, o.DistributedChildLimit);
+            Assert.Equal(maximumUploadSpeed, o.MaximumUploadSpeed);
+            Assert.Equal(maximumDownloadSpeed, o.MaximumDownloadSpeed);
             Assert.Equal(deduplicateSearchRequests, o.DeduplicateSearchRequests);
             Assert.Equal(autoAcknowledgePrivateMessages, o.AutoAcknowledgePrivateMessages);
             Assert.Equal(autoAcknowledgePrivilegeNotifications, o.AutoAcknowledgePrivilegeNotifications);
@@ -330,7 +589,26 @@ namespace Soulseek.Tests.Unit
             Assert.Equal(transferConnectionOptions.ReadBufferSize, o.TransferConnectionOptions.ReadBufferSize);
             Assert.Equal(transferConnectionOptions.WriteBufferSize, o.TransferConnectionOptions.WriteBufferSize);
             Assert.Equal(transferConnectionOptions.ConnectTimeout, o.TransferConnectionOptions.ConnectTimeout);
-            Assert.Equal(-1, o.TransferConnectionOptions.InactivityTimeout);
+            Assert.Equal(transferConnectionOptions.InactivityTimeout, o.TransferConnectionOptions.InactivityTimeout);
+
+            Assert.Equal(userEndPointCache.Object, o.UserEndPointCache);
+            Assert.Equal(searchResponseResolver, o.SearchResponseResolver);
+            Assert.Equal(searchResponseCache.Object, o.SearchResponseCache);
+            Assert.Equal(browseResponseResolver, o.BrowseResponseResolver);
+            Assert.Equal(directoryContentsResponseResolver, o.DirectoryContentsResolver);
+            Assert.Equal(userInfoResponseResolver, o.UserInfoResolver);
+            Assert.Equal(enqueueDownloadAction, o.EnqueueDownload);
+            Assert.Equal(placeInQueueResponseResolver, o.PlaceInQueueResolver);
+
+            // make sure the options that can't be substituted did not change
+            Assert.Equal(41, o.MaximumConcurrentSearches);
+            Assert.Equal(42, o.MaximumConcurrentUploads);
+            Assert.Equal(24, o.MaximumConcurrentDownloads);
+            Assert.Equal(45, o.MessageTimeout);
+            Assert.Equal(DiagnosticLevel.None, o.MinimumDiagnosticLevel);
+            Assert.Equal(47, o.StartingToken);
+            Assert.True(o.RaiseEventsAsynchronously);
+            Assert.Equal(1, o.MaximumConcurrentUploadsPerUser);
         }
 
         [Trait("Category", "With")]

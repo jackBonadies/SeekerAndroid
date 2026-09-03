@@ -1,10 +1,9 @@
 ﻿// <copyright file="MessageReader.cs" company="JP Dillingham">
-//     Copyright (c) JP Dillingham. All rights reserved.
+//     Copyright (c) JP Dillingham.
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
+//     the Free Software Foundation, version 3.
 //
 //     This program is distributed in the hope that it will be useful,
 //     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,6 +12,13 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
+//
+//     This program is distributed with Additional Terms pursuant to Section 7
+//     of the GPLv3.  See the LICENSE file in the root directory of this
+//     project for the complete terms and conditions.
+//
+//     SPDX-FileCopyrightText: JP Dillingham
+//     SPDX-License-Identifier: GPL-3.0-only
 // </copyright>
 
 namespace Soulseek.Messaging
@@ -242,37 +248,6 @@ namespace Soulseek.Messaging
         }
 
         /// <summary>
-        ///     Reads a string at the head of the reader.
-        /// </summary>
-        /// <returns>The read string.</returns>
-        public string ReadStringAndNoteEncoding(out bool isDecodedViaLatin1)
-        {
-            var length = ReadInteger();
-
-            if (length > Payload.Length - Position)
-            {
-                throw new MessageReadException("Specified string length extends beyond the length of the message payload");
-            }
-
-            var bytes = Payload.Slice(Position, length).ToArray();
-            string retVal;
-
-            try
-            {
-                retVal = Encoding.GetEncoding("UTF-8", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback).GetString(bytes);
-                isDecodedViaLatin1 = false;
-            }
-            catch (Exception)
-            {
-                retVal = Encoding.GetEncoding("ISO-8859-1").GetString(bytes);
-                isDecodedViaLatin1 = true;
-            }
-
-            Position += length;
-            return retVal;
-        }
-
-        /// <summary>
         ///     Moves the head of the reader to the specified <paramref name="position"/>.
         /// </summary>
         /// <param name="position">The desired position.</param>
@@ -291,7 +266,7 @@ namespace Soulseek.Messaging
             Position = position;
         }
 
-        private void Decompress(byte[] inData, out byte[] outData)
+        private static void Decompress(byte[] inData, out byte[] outData)
         {
             static void CopyStream(Stream input, Stream output)
             {

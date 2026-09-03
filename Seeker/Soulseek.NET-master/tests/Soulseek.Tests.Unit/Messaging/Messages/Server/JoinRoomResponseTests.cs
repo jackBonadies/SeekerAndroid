@@ -86,7 +86,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 .WriteInteger((int)UserPresence.Online)
                 .WriteInteger(1) // data count
                 .WriteInteger(10) // average speed
-                .WriteLong(11) // download count
+                .WriteLong(11) // upload count
                 .WriteInteger(12) // file count
                 .WriteInteger(13) // directory count
                 .WriteInteger(1) // slots free count
@@ -102,7 +102,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             Assert.Equal("1", users[0].Username);
             Assert.Equal(UserPresence.Online, users[0].Status);
             Assert.Equal(10, users[0].AverageSpeed);
-            Assert.Equal(11, users[0].DownloadCount);
+            Assert.Equal(11, users[0].UploadCount);
             Assert.Equal(12, users[0].FileCount);
             Assert.Equal(13, users[0].DirectoryCount);
             Assert.Equal(14, users[0].SlotsFree);
@@ -128,7 +128,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 .WriteInteger(13) // file count
                 .WriteInteger(14) // directory count
                 .WriteInteger(21) // average speed
-                .WriteLong(22) // download count
+                .WriteLong(22) // upload count
                 .WriteInteger(23) // file count
                 .WriteInteger(24) // directory count
                 .WriteInteger(2) // slots free count
@@ -145,7 +145,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             Assert.Equal(2, res.UserCount);
             Assert.Equal("10", users[0].Username);
             Assert.Equal(11, users[0].AverageSpeed);
-            Assert.Equal(12, users[0].DownloadCount);
+            Assert.Equal(12, users[0].UploadCount);
             Assert.Equal(13, users[0].FileCount);
             Assert.Equal(14, users[0].DirectoryCount);
             Assert.Equal(15, users[0].SlotsFree);
@@ -165,7 +165,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 .WriteInteger((int)UserPresence.Online)
                 .WriteInteger(1) // data count
                 .WriteInteger(10) // average speed
-                .WriteLong(11) // download count
+                .WriteLong(11) // upload count
                 .WriteInteger(12) // file count
                 .WriteInteger(13) // directory count
                 .WriteInteger(1) // slots free count
@@ -185,7 +185,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             Assert.Equal("1", users[0].Username);
             Assert.Equal(UserPresence.Online, users[0].Status);
             Assert.Equal(10, users[0].AverageSpeed);
-            Assert.Equal(11, users[0].DownloadCount);
+            Assert.Equal(11, users[0].UploadCount);
             Assert.Equal(12, users[0].FileCount);
             Assert.Equal(13, users[0].DirectoryCount);
             Assert.Equal(14, users[0].SlotsFree);

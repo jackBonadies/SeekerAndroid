@@ -35,7 +35,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "JoinRoomAsync throws InvalidOperationException when not connected"), AutoData]
         public async Task JoinRoomAsync_Throws_InvalidOperationException_When_Not_Connected(string roomName)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var ex = await Record.ExceptionAsync(() => s.JoinRoomAsync(roomName));
 
@@ -48,7 +48,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "JoinRoomAsync throws InvalidOperationException when not logged in"), AutoData]
         public async Task JoinRoomAsync_Throws_InvalidOperationException_When_Not_Logged_In(string roomName)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected);
 
@@ -66,7 +66,7 @@ namespace Soulseek.Tests.Unit.Client
         [InlineData("")]
         public async Task JoinRoomAsync_Throws_ArgumentException_Given_Bad_Input(string roomName)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected);
 
@@ -92,7 +92,7 @@ namespace Soulseek.Tests.Unit.Client
             waiter.Setup(m => m.Wait<RoomData>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
                 .Returns(Task.FromResult(expectedResponse));
 
-            using (var s = new SoulseekClient(serverConnection: conn.Object, waiter: waiter.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -121,7 +121,7 @@ namespace Soulseek.Tests.Unit.Client
             waiter.Setup(m => m.Wait<RoomData>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
                 .Returns(Task.FromResult(expectedResponse));
 
-            using (var s = new SoulseekClient(serverConnection: conn.Object, waiter: waiter.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -143,7 +143,7 @@ namespace Soulseek.Tests.Unit.Client
             conn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Throws(new ConnectionWriteException());
 
-            using (var s = new SoulseekClient(serverConnection: conn.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -163,7 +163,7 @@ namespace Soulseek.Tests.Unit.Client
             conn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Throws(new TimeoutException());
 
-            using (var s = new SoulseekClient(serverConnection: conn.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -175,6 +175,28 @@ namespace Soulseek.Tests.Unit.Client
         }
 
         [Trait("Category", "JoinRoomAsync")]
+        [Theory(DisplayName = "JoinRoomAsync throws NoResponseException on wait timeout"), AutoData]
+        public async Task JoinRoomAsync_Throws_NoResponseException_On_Wait_Timeout(string roomName)
+        {
+            var conn = new Mock<IMessageConnection>();
+
+            var key = new WaitKey(MessageCode.Server.JoinRoom, roomName);
+            var waiter = new Mock<IWaiter>();
+            waiter.Setup(m => m.Wait<RoomData>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+                .Returns(Task.FromException<RoomData>(new TimeoutException()));
+
+            using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object))
+            {
+                s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+                var ex = await Record.ExceptionAsync(() => s.JoinRoomAsync(roomName));
+
+                Assert.NotNull(ex);
+                Assert.IsType<NoResponseException>(ex);
+            }
+        }
+
+        [Trait("Category", "JoinRoomAsync")]
         [Theory(DisplayName = "JoinRoomAsync throws OperationCanceledException on cancellation"), AutoData]
         public async Task JoinRoomAsync_Throws_OperationCanceledException_On_Cancellation(string roomName)
         {
@@ -182,7 +204,7 @@ namespace Soulseek.Tests.Unit.Client
             conn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Throws(new OperationCanceledException());
 
-            using (var s = new SoulseekClient(serverConnection: conn.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -193,11 +215,35 @@ namespace Soulseek.Tests.Unit.Client
             }
         }
 
+        [Trait("Category", "JoinRoomAsync")]
+        [Theory(DisplayName = "JoinRoomAsync throws RoomJoinForbiddenException when server rejects"), AutoData]
+        public async Task JoinRoomAsync_Throws_RoomJoinForbiddenException_When_Server_Rejects(string roomName)
+        {
+            var conn = new Mock<IMessageConnection>();
+            conn.Setup(m => m.State)
+                .Returns(ConnectionState.Connected);
+
+            var key = new WaitKey(MessageCode.Server.JoinRoom, roomName);
+            var waiter = new Mock<IWaiter>();
+            waiter.Setup(m => m.Wait<RoomData>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+                .Throws(new RoomJoinForbiddenException());
+
+            using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))
+            {
+                s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+                var ex = await Record.ExceptionAsync(() => s.JoinRoomAsync(roomName));
+
+                Assert.NotNull(ex);
+                Assert.IsType<RoomJoinForbiddenException>(ex);
+            }
+        }
+
         [Trait("Category", "LeaveRoomAsync")]
         [Theory(DisplayName = "LeaveRoomAsync throws InvalidOperationException when not connected"), AutoData]
         public async Task LeaveRoomAsync_Throws_InvalidOperationException_When_Not_Connected(string roomName)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 var ex = await Record.ExceptionAsync(() => s.LeaveRoomAsync(roomName));
 
@@ -210,7 +256,7 @@ namespace Soulseek.Tests.Unit.Client
         [Theory(DisplayName = "LeaveRoomAsync throws InvalidOperationException when not logged in"), AutoData]
         public async Task LeaveRoomAsync_Throws_InvalidOperationException_When_Not_Logged_In(string roomName)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected);
 
@@ -228,7 +274,7 @@ namespace Soulseek.Tests.Unit.Client
         [InlineData("")]
         public async Task LeaveRoomAsync_Throws_ArgumentException_Given_Bad_Input(string roomName)
         {
-            using (var s = new SoulseekClient())
+            using (var s = new SoulseekClient(minorVersion: 9999))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected);
 
@@ -252,13 +298,37 @@ namespace Soulseek.Tests.Unit.Client
             waiter.Setup(m => m.Wait(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
                 .Returns(Task.CompletedTask);
 
-            using (var s = new SoulseekClient(serverConnection: conn.Object, waiter: waiter.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
                 var ex = await Record.ExceptionAsync(() => s.LeaveRoomAsync(roomName));
 
                 Assert.Null(ex);
+            }
+        }
+
+        [Trait("Category", "LeaveRoomAsync")]
+        [Theory(DisplayName = "LeaveRoomAsync throws NoResponseException on wait timeout"), AutoData]
+        public async Task LeaveRoomAsync_Throws_NoResponseException_On_Wait_Timeout(string roomName)
+        {
+            var conn = new Mock<IMessageConnection>();
+            conn.Setup(m => m.State)
+                .Returns(ConnectionState.Connected);
+
+            var key = new WaitKey(MessageCode.Server.LeaveRoom, roomName);
+            var waiter = new Mock<IWaiter>();
+            waiter.Setup(m => m.Wait(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+                .Returns(Task.FromException(new TimeoutException()));
+
+            using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))
+            {
+                s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+                var ex = await Record.ExceptionAsync(() => s.LeaveRoomAsync(roomName));
+
+                Assert.NotNull(ex);
+                Assert.IsType<NoResponseException>(ex);
             }
         }
 
@@ -277,7 +347,7 @@ namespace Soulseek.Tests.Unit.Client
             waiter.Setup(m => m.Wait(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
                 .Returns(Task.CompletedTask);
 
-            using (var s = new SoulseekClient(serverConnection: conn.Object, waiter: waiter.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -297,7 +367,7 @@ namespace Soulseek.Tests.Unit.Client
             conn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Throws(new ConnectionWriteException());
 
-            using (var s = new SoulseekClient(serverConnection: conn.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -317,7 +387,7 @@ namespace Soulseek.Tests.Unit.Client
             conn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Throws(new TimeoutException());
 
-            using (var s = new SoulseekClient(serverConnection: conn.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
@@ -336,7 +406,7 @@ namespace Soulseek.Tests.Unit.Client
             conn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Throws(new OperationCanceledException());
 
-            using (var s = new SoulseekClient(serverConnection: conn.Object))
+            using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object))
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 

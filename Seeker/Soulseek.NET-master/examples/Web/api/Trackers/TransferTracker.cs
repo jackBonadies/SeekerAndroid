@@ -105,16 +105,16 @@
         /// <summary>
         ///     Adds or updates a tracked transfer.
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="transfer"></param>
         /// <param name="cancellationTokenSource"></param>
-        public void AddOrUpdate(TransferEventArgs args, CancellationTokenSource cancellationTokenSource)
+        public void AddOrUpdate(Transfer transfer, CancellationTokenSource cancellationTokenSource)
         {
-            Transfers.TryGetValue(args.Transfer.Direction, out var direction);
+            Transfers.TryGetValue(transfer.Direction, out var direction);
 
-            direction.AddOrUpdate(args.Transfer.Username, GetNewDictionaryForUser(args, cancellationTokenSource), (user, dict) =>
+            direction.AddOrUpdate(transfer.Username, GetNewDictionaryForUser(transfer, cancellationTokenSource), (user, dict) =>
             {
-                var transfer = DTO.Transfer.FromSoulseekTransfer(args.Transfer);
-                dict.AddOrUpdate(transfer.Id, (transfer, cancellationTokenSource), (id, record) => (transfer, cancellationTokenSource));
+                var tx = DTO.Transfer.FromSoulseekTransfer(transfer);
+                dict.AddOrUpdate(tx.Id, (tx, cancellationTokenSource), (id, record) => (tx, cancellationTokenSource));
                 return dict;
             });
         }
@@ -169,11 +169,11 @@
             return false;
         }
 
-        private static ConcurrentDictionary<string, (DTO.Transfer Transfer, CancellationTokenSource CancellationTokenSource)> GetNewDictionaryForUser(TransferEventArgs args, CancellationTokenSource cancellationTokenSource)
+        private static ConcurrentDictionary<string, (DTO.Transfer Transfer, CancellationTokenSource CancellationTokenSource)> GetNewDictionaryForUser(Transfer transfer, CancellationTokenSource cancellationTokenSource)
         {
             var r = new ConcurrentDictionary<string, (DTO.Transfer Transfer, CancellationTokenSource CancellationTokenSource)>();
-            var transfer = DTO.Transfer.FromSoulseekTransfer(args.Transfer);
-            r.AddOrUpdate(transfer.Id, (transfer, cancellationTokenSource), (id, record) => (transfer, record.CancellationTokenSource));
+            var tx = DTO.Transfer.FromSoulseekTransfer(transfer);
+            r.AddOrUpdate(tx.Id, (tx, cancellationTokenSource), (id, record) => (tx, record.CancellationTokenSource));
             return r;
         }
     }

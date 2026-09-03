@@ -1,4 +1,4 @@
-<p><i>Seeker</i> is an unofficial client for <a href='https://en.wikipedia.org/wiki/Soulseek'>Soulseek</a>. It uses the <a href='https://github.com/jpdillingham/Soulseek.NET'>Soulseek.NET</a> library for communicating with Soulseek server and peers.</p>
+<p><i>Seeker</i> is an unofficial client for <a href='https://en.wikipedia.org/wiki/Soulseek'>Soulseek</a>. It uses a modified version of the <a href='https://github.com/jpdillingham/Soulseek.NET'>Soulseek.NET</a> library for communicating with Soulseek server and peers.</p>
 <p><br><b>Features:</b></p><ul>
 <li>Searching (including wishlists and filters)</li>
 <li>Browsing User Directories</li>
@@ -9,3 +9,4 @@
 <li>Get and Set User Info</li>
 <li>Privileges</li>
 </ul>
+<p><br><b>License:</b> GNU General Public License v3.0 only (GPL-3.0-only), with Additional Terms pursuant to Section 7 of the GPLv3. Full license text and Additional Terms: <a href='https://github.com/jackBonadies/SeekerAndroid/blob/master/LICENSE'>here</a>. Source code: <a href='https://github.com/jackBonadies/SeekerAndroid'>here</a>.</p>

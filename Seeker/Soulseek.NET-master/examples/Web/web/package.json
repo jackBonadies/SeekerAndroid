@@ -4,21 +4,22 @@
   "private": true,
   "homepage": ".",
   "dependencies": {
-    "axios": "^0.21.1",
+    "axios": "^1.18.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-router-dom": "^5.0.0",
-    "react-scripts": "3.0.1",
+    "react-router-dom": "^5.3.0",
+    "react-scripts": "^5.0.0",
     "semantic-ui-css": "^2.4.1",
-    "semantic-ui-react": "^2.0.0",
+    "semantic-ui-react": "^2.0.4",
     "signalr": "^2.4.1",
-    "uuid": "^8.3.0"
+    "uuid": "^14.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "postinstall": "semantic-ui-css-patch"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -34,5 +35,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@semantic-ui-react/css-patch": "^1.0.0"
   }
 }

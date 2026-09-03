@@ -347,6 +347,39 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             }
         }
 
+        [Trait("Category", "Parse")]
+        [Trait("Response", "BrowseResponse")]
+        [Theory(DisplayName = "Parse handles an overflowed file size from Soulseek NS")]
+        [InlineData(-1, 4294967295)] // https://onlinetoolz.net/unsigned-signed
+        [InlineData(42, 42)]
+        [InlineData(-1180018327, 3114948969)]
+        public void Parse_Handles_An_Overflowed_File_Size_From_Soulseek_NS(long given, long expected)
+        {
+            var msg = new MessageBuilder()
+                .WriteCode(MessageCode.Peer.BrowseResponse)
+                .WriteInteger(1) // directory count
+                .WriteString("dir") // first directory name
+                .WriteInteger(1) // first directory file count
+                .WriteByte(0x0) // file code
+                .WriteString("foo") // name
+                .WriteLong(given) // size
+                .WriteString("bar") // extension
+                .WriteInteger(0) // attribute count
+                .Compress()
+                .Build();
+
+            BrowseResponse r = default;
+
+            var ex = Record.Exception(() => r = BrowseResponseFactory.FromByteArray(msg));
+
+            Assert.Null(ex);
+
+            var d = r.Directories.ToList();
+            var f = d[0].Files.ToList();
+
+            Assert.Equal(expected, f[0].Size);
+        }
+
         [Trait("Category", "ToByteArray")]
         [Fact(DisplayName = "ToByteArray returns the expected data")]
         public void ToByteArray_Returns_Expected_Data()
@@ -450,7 +483,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             Assert.Equal(2, m.ReadInteger());
         }
 
-        private MessageBuilder BuildDirectory(MessageBuilder builder, Directory dir)
+        private static MessageBuilder BuildDirectory(MessageBuilder builder, Directory dir)
         {
             builder
                 .WriteString(dir.Name)

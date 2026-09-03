@@ -33,7 +33,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 .WriteCode(MessageCode.Peer.BrowseRequest)
                 .Build();
 
-            var ex = Record.Exception(() => RoomListResponse.FromByteArray(msg));
+            var ex = Record.Exception(() => RoomListResponseFactory.FromByteArray(msg));
 
             Assert.NotNull(ex);
             Assert.IsType<MessageException>(ex);
@@ -48,7 +48,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 .WriteInteger(1)
                 .Build();
 
-            var ex = Record.Exception(() => RoomListResponse.FromByteArray(msg));
+            var ex = Record.Exception(() => RoomListResponseFactory.FromByteArray(msg));
 
             Assert.NotNull(ex);
             Assert.IsType<MessageReadException>(ex);
@@ -79,7 +79,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             builder.WriteInteger(rooms.Count);
             rooms.ForEach(room => builder.WriteString(room.Name));
 
-            var response = RoomListResponse.FromByteArray(builder.Build());
+            var response = RoomListResponseFactory.FromByteArray(builder.Build());
 
             foreach (var room in rooms)
             {

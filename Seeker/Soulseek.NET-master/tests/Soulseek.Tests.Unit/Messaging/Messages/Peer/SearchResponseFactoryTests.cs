@@ -111,7 +111,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
 
         [Trait("Category", "Parse")]
         [Theory(DisplayName = "Parse returns expected data"), AutoData]
-        public void Parse_Returns_Expected_Data(string username, int token, byte freeUploadSlots, int uploadSpeed, long queueLength)
+        public void Parse_Returns_Expected_Data(string username, int token, bool hasFreeUploadSlot, int uploadSpeed, long queueLength)
         {
             var msg = new MessageBuilder()
                 .WriteCode(MessageCode.Peer.SearchResponse)
@@ -125,7 +125,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 .WriteInteger(1) // attribute count
                 .WriteInteger((int)FileAttributeType.BitDepth) // attribute[0].type
                 .WriteInteger(4) // attribute[0].value
-                .WriteByte(freeUploadSlots)
+                .WriteByte((byte)(hasFreeUploadSlot ? 1 : 0))
                 .WriteInteger(uploadSpeed)
                 .WriteLong(queueLength)
                 .WriteBytes(new byte[4]) // unknown 4 bytes
@@ -137,7 +137,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             Assert.Equal(username, r.Username);
             Assert.Equal(token, r.Token);
             Assert.Equal(1, r.FileCount);
-            Assert.Equal(freeUploadSlots, r.FreeUploadSlots);
+            Assert.Equal(hasFreeUploadSlot, r.HasFreeUploadSlot);
             Assert.Equal(uploadSpeed, r.UploadSpeed);
             Assert.Equal(queueLength, r.QueueLength);
 
@@ -157,7 +157,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
 
         [Trait("Category", "Parse")]
         [Theory(DisplayName = "Parse handles legacy responses with 4 byte queue length"), AutoData]
-        public void Parse_Handles_Legacy_Responses_With_4_Byte_Queue_Length(string username, int token, byte freeUploadSlots, int uploadSpeed, int queueLength)
+        public void Parse_Handles_Legacy_Responses_With_4_Byte_Queue_Length(string username, int token, bool hasFreeUploadSlot, int uploadSpeed, int queueLength)
         {
             var msg = new MessageBuilder()
                 .WriteCode(MessageCode.Peer.SearchResponse)
@@ -171,7 +171,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 .WriteInteger(1) // attribute count
                 .WriteInteger((int)FileAttributeType.BitDepth) // attribute[0].type
                 .WriteInteger(4) // attribute[0].value
-                .WriteByte(freeUploadSlots)
+                .WriteByte((byte)(hasFreeUploadSlot ? 1 : 0))
                 .WriteInteger(uploadSpeed)
                 .WriteInteger(queueLength)
                 .Compress()
@@ -182,7 +182,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             Assert.Equal(username, r.Username);
             Assert.Equal(token, r.Token);
             Assert.Equal(1, r.FileCount);
-            Assert.Equal(freeUploadSlots, r.FreeUploadSlots);
+            Assert.Equal(hasFreeUploadSlot, r.HasFreeUploadSlot);
             Assert.Equal(uploadSpeed, r.UploadSpeed);
             Assert.Equal(queueLength, r.QueueLength);
 
@@ -202,14 +202,14 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
 
         [Trait("Category", "Parse")]
         [Theory(DisplayName = "Parse handles empty responses"), AutoData]
-        public void Parse_Handles_Empty_Responses(string username, int token, byte freeUploadSlots, int uploadSpeed, long queueLength)
+        public void Parse_Handles_Empty_Responses(string username, int token, bool hasFreeUploadSlot, int uploadSpeed, long queueLength)
         {
             var msg = new MessageBuilder()
                 .WriteCode(MessageCode.Peer.SearchResponse)
                 .WriteString(username)
                 .WriteInteger(token)
                 .WriteInteger(0) // file count
-                .WriteByte(freeUploadSlots)
+                .WriteByte((byte)(hasFreeUploadSlot ? 1 : 0))
                 .WriteInteger(uploadSpeed)
                 .WriteLong(queueLength)
                 .WriteBytes(new byte[4]) // unknown 4 bytes
@@ -221,7 +221,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             Assert.Equal(username, r.Username);
             Assert.Equal(token, r.Token);
             Assert.Equal(0, r.FileCount);
-            Assert.Equal(freeUploadSlots, r.FreeUploadSlots);
+            Assert.Equal(hasFreeUploadSlot, r.HasFreeUploadSlot);
             Assert.Equal(uploadSpeed, r.UploadSpeed);
             Assert.Equal(queueLength, r.QueueLength);
 
@@ -423,7 +423,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
 
         [Trait("Category", "ToByteArray")]
         [Theory(DisplayName = "ToByteArray returns expected data"), AutoData]
-        public void ToByteArray_Returns_Expected_Data(string username, int token, byte freeUploadSlots, int uploadSpeed, long queueLength)
+        public void ToByteArray_Returns_Expected_Data(string username, int token, bool hasFreeUploadSlot, int uploadSpeed, int queueLength)
         {
             var list = new List<File>()
             {
@@ -431,7 +431,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 new File(2, "2", 2, ".2", new List<FileAttribute>() { new FileAttribute(FileAttributeType.BitRate, 2) }),
             };
 
-            var s = new SearchResponse(username, token, freeUploadSlots, uploadSpeed, queueLength, list);
+            var s = new SearchResponse(username, token, hasFreeUploadSlot, uploadSpeed, queueLength, list);
             var m = s.ToByteArray();
 
             var reader = new MessageReader<MessageCode.Peer>(m);
@@ -466,8 +466,52 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         }
 
         [Trait("Category", "ToByteArray")]
+        [Theory(DisplayName = "ToByteArray returns expected data when HasFreeUploadSlot = false"), AutoData]
+        public void ToByteArray_Returns_Expected_Data_When_HasFreeUploadSlot_False(string username, int token, int uploadSpeed, int queueLength)
+        {
+            var list = new List<File>();
+
+            var s = new SearchResponse(username, token, hasFreeUploadSlot: false, uploadSpeed, queueLength, list);
+            var m = s.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Peer>(m);
+            reader.Decompress();
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Peer.SearchResponse, code);
+
+            Assert.Equal(username, reader.ReadString());
+            Assert.Equal(token, reader.ReadInteger());
+            Assert.Equal(0, reader.ReadInteger());
+
+            Assert.Equal(0, reader.ReadByte());
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Theory(DisplayName = "ToByteArray returns expected data when HasFreeUploadSlot = true"), AutoData]
+        public void ToByteArray_Returns_Expected_Data_When_HasFreeUploadSlot_True(string username, int token, int uploadSpeed, int queueLength)
+        {
+            var list = new List<File>();
+
+            var s = new SearchResponse(username, token, hasFreeUploadSlot: true, uploadSpeed, queueLength, list);
+            var m = s.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Peer>(m);
+            reader.Decompress();
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Peer.SearchResponse, code);
+
+            Assert.Equal(username, reader.ReadString());
+            Assert.Equal(token, reader.ReadInteger());
+            Assert.Equal(0, reader.ReadInteger());
+
+            Assert.Equal(1, reader.ReadByte());
+        }
+
+        [Trait("Category", "ToByteArray")]
         [Theory(DisplayName = "ToByteArray handles locked files"), AutoData]
-        public void ToByteArray_Handles_Locked_Files(string username, int token, byte freeUploadSlots, int uploadSpeed, long queueLength)
+        public void ToByteArray_Handles_Locked_Files(string username, int token, bool freeUploadSlots, int uploadSpeed, int queueLength)
         {
             var list = new List<File>()
             {
@@ -479,7 +523,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
                 new File(2, "2", 2, ".2", new List<FileAttribute>() { new FileAttribute(FileAttributeType.BitRate, 2) }),
             };
 
-            var s = new SearchResponse(username, token, freeUploadSlots, uploadSpeed, queueLength, list, locked);
+            var s = new SearchResponse(username, token, hasFreeUploadSlot: freeUploadSlots, uploadSpeed, queueLength, list, locked);
             var m = s.ToByteArray();
 
             var reader = new MessageReader<MessageCode.Peer>(m);
@@ -502,7 +546,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             Assert.Equal(FileAttributeType.BitDepth, (FileAttributeType)reader.ReadInteger());
             Assert.Equal(1, reader.ReadInteger());
 
-            Assert.Equal(freeUploadSlots, reader.ReadByte()); // code
+            Assert.Equal(freeUploadSlots, reader.ReadByte() > 0); // code
             Assert.Equal(uploadSpeed, reader.ReadInteger()); // upload speed
             Assert.Equal(queueLength, reader.ReadLong()); // queue length
 

@@ -1,10 +1,13 @@
 ﻿// <copyright file="MessageReaderExtensions.cs" company="JP Dillingham">
-//     Copyright (c) JP Dillingham. All rights reserved.
+//     Copyright (c) JP Dillingham.
+//
+//     Copyright (c) 2021-2026 Jack Bonadies
+//     Modified: propagated Latin-1 decoding flags through the files and directories read
+//     from search responses and folder contents
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
+//     the Free Software Foundation, version 3.
 //
 //     This program is distributed in the hope that it will be useful,
 //     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,6 +16,13 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
+//
+//     This program is distributed with Additional Terms pursuant to Section 7
+//     of the GPLv3.  See the LICENSE file in the root directory of this
+//     project for the complete terms and conditions.
+//
+//     SPDX-FileCopyrightText: JP Dillingham
+//     SPDX-License-Identifier: GPL-3.0-only
 // </copyright>
 
 namespace Soulseek.Messaging
@@ -33,11 +43,14 @@ namespace Soulseek.Messaging
         ///     Reads a file from the <paramref name="reader"/>.
         /// </summary>
         /// <param name="reader">The reader from which to read the file.</param>
+        /// <param name="fileIsFullfilename">Whether the filename read includes the directory.</param>
+        /// <param name="isDirectoryDecodedViaLatin1">Whether the enclosing directory name was decoded as ISO-8859-1.</param>
         /// <returns>The file.</returns>
         internal static File ReadFile(this MessageReader<MessageCode.Peer> reader, bool fileIsFullfilename = false, bool isDirectoryDecodedViaLatin1 = false)
         {
             var code = reader.ReadByte();
-            var filename = reader.ReadStringAndNoteEncoding(out bool isLatin1);
+            var (filename, filenameEncoding) = reader.ReadStringAndEncoding();
+            var isLatin1 = filenameEncoding == CharacterEncoding.ISO88591;
             var size = reader.ReadLong();
             var extension = reader.ReadString();
 
@@ -52,15 +65,6 @@ namespace Soulseek.Messaging
                     size = BitConverter.ToUInt32(sizeBytes.Take(4).ToArray(), 0);
                 }
             }
-
-            #if DEBUG
-
-            if(isLatin1)
-            {
-                
-            }
-
-            #endif
 
             var attributeCount = reader.ReadInteger();
             var attributeList = new List<FileAttribute>();
@@ -110,16 +114,8 @@ namespace Soulseek.Messaging
         /// <returns>The directory.</returns>
         internal static Directory ReadDirectory(this MessageReader<MessageCode.Peer> reader)
         {
-            var directoryName = reader.ReadStringAndNoteEncoding(out bool isDirectoryDecodedViaLatin1);
-
-            #if DEBUG
-
-            if(isDirectoryDecodedViaLatin1)
-            {
-
-            }
-
-            #endif
+            var (directoryName, directoryEncoding) = reader.ReadStringAndEncoding();
+            var isDirectoryDecodedViaLatin1 = directoryEncoding == CharacterEncoding.ISO88591;
 
             var fileCount = reader.ReadInteger();
 

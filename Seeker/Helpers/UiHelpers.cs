@@ -973,6 +973,17 @@ namespace Seeker
             return v;
         }
 
+        /// <summary>
+        /// Soft keyboards append a trailing space when a suggestion-strip prediction is tapped
+        /// However, usernames do not allow leading or trailing spaces per:
+        /// https://nicotine-plus.org/doc/SLSKPROTOCOL.html#invalidusername
+        /// So lets clean it up rather than make an impossible request (which times out in my case)
+        /// </summary>
+        public static string GetEnteredUsername(AutoCompleteTextView actv)
+        {
+            return actv?.Text?.Trim() ?? string.Empty;
+        }
+
         public static void SetupRecentUserAutoCompleteTextView(AutoCompleteTextView actv, bool forAddingUser = false)
         {
             if (PreferencesState.ShowRecentUsers)

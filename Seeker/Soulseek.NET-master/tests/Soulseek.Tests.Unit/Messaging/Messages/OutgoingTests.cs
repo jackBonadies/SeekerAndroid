@@ -83,6 +83,32 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         }
 
         [Trait("Category", "Instantiation")]
+        [Trait("Request", "ChildDepthCommand")]
+        [Theory(DisplayName = "ChildDepthCommand instantiates properly"), AutoData]
+        public void ChildDepthCommand_Instantiates_Properly(int depth)
+        {
+            var msg = new ChildDepthCommand(depth);
+
+            Assert.Equal(depth, msg.Depth);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Trait("Request", "ChildDepthCommand")]
+        [Theory(DisplayName = "ChildDepthCommand constructs the correct message"), AutoData]
+        public void ChildDepthCommand_Constructs_The_Correct_Message(int depth)
+        {
+            var msg = new ChildDepthCommand(depth).ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.ChildDepth, code);
+
+            Assert.Equal(4 + 4 + 4, msg.Length);
+            Assert.Equal(depth, reader.ReadInteger());
+        }
+
+        [Trait("Category", "Instantiation")]
         [Trait("Request", "AcknowledgePrivateMessage")]
         [Fact(DisplayName = "AcknowledgePrivateMessage instantiates properly")]
         public void AcknowledgePrivateMessage_Instantiates_Properly()
@@ -147,7 +173,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         {
             var name = Guid.NewGuid().ToString();
             var password = Guid.NewGuid().ToString();
-            var a = new LoginRequest(name, password);
+            var a = new LoginRequest(minorVersion: 9999, name, password);
 
             Assert.Equal(name, a.Username);
             Assert.Equal(password, a.Password);
@@ -163,7 +189,7 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         {
             var name = Guid.NewGuid().ToString();
             var password = Guid.NewGuid().ToString();
-            var a = new LoginRequest(name, password);
+            var a = new LoginRequest(minorVersion: 9999, name, password);
             var msg = a.ToByteArray();
 
             var reader = new MessageReader<MessageCode.Server>(msg);
@@ -280,23 +306,23 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         [Theory(DisplayName = "AddUserRequest instantiates properly"), AutoData]
         public void AddUserRequest_Instantiates_Properly(string username)
         {
-            var a = new AddUserRequest(username);
+            var a = new WatchUserRequest(username);
 
             Assert.Equal(username, a.Username);
         }
 
         [Trait("Category", "ToByteArray")]
-        [Trait("Request", "AddUserRequest")]
-        [Theory(DisplayName = "AddUserRequest constructs the correct message"), AutoData]
-        public void AddUserRequest_Constructs_The_Correct_Message(string username)
+        [Trait("Request", "WatchUserRequest")]
+        [Theory(DisplayName = "WatchUserRequest constructs the correct message"), AutoData]
+        public void WatchUserRequest_Constructs_The_Correct_Message(string username)
         {
-            var a = new AddUserRequest(username);
+            var a = new WatchUserRequest(username);
             var msg = a.ToByteArray();
 
             var reader = new MessageReader<MessageCode.Server>(msg);
             var code = reader.ReadCode();
 
-            Assert.Equal(MessageCode.Server.AddUser, code);
+            Assert.Equal(MessageCode.Server.WatchUser, code);
             Assert.Equal(username, reader.ReadString());
         }
 
@@ -322,6 +348,31 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             var code = reader.ReadCode();
 
             Assert.Equal(MessageCode.Server.GetStatus, code);
+            Assert.Equal(username, reader.ReadString());
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Trait("Request", "UserStatsRequest")]
+        [Theory(DisplayName = "UserStatsRequest instantiates properly"), AutoData]
+        public void UserStatsRequest_Instantiates_Properly(string username)
+        {
+            var a = new UserStatisticsRequest(username);
+
+            Assert.Equal(username, a.Username);
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "UserStatsRequest")]
+        [Theory(DisplayName = "UserStatsRequest constructs the correct message"), AutoData]
+        public void UserStatsRequest_Constructs_The_Correct_Message(string username)
+        {
+            var a = new UserStatisticsRequest(username);
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.GetUserStats, code);
             Assert.Equal(username, reader.ReadString());
         }
 
@@ -684,11 +735,11 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         }
 
         [Trait("Category", "ToByteArray")]
-        [Trait("Request", "PrivateRoomDropMembership")]
-        [Theory(DisplayName = "PrivateRoomDropMembership constructs the correct message"), AutoData]
-        public void PrivateRoomDropMembership_Constructs_The_Correct_Message(string roomName)
+        [Trait("Request", "PrivateRoomDropMembershipCommand")]
+        [Theory(DisplayName = "PrivateRoomDropMembershipCommand constructs the correct message"), AutoData]
+        public void PrivateRoomDropMembershipCommand_Constructs_The_Correct_Message(string roomName)
         {
-            var a = new PrivateRoomDropMembership(roomName);
+            var a = new PrivateRoomDropMembershipCommand(roomName);
             var msg = a.ToByteArray();
 
             var reader = new MessageReader<MessageCode.Server>(msg);
@@ -699,11 +750,11 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         }
 
         [Trait("Category", "ToByteArray")]
-        [Trait("Request", "PrivateRoomDropOwnership")]
-        [Theory(DisplayName = "PrivateRoomDropOwnership constructs the correct message"), AutoData]
-        public void PrivateRoomDropOwnership_Constructs_The_Correct_Message(string roomName)
+        [Trait("Request", "PrivateRoomDropOwnershipCommand")]
+        [Theory(DisplayName = "PrivateRoomDropOwnershipCommand constructs the correct message"), AutoData]
+        public void PrivateRoomDropOwnershipCommand_Constructs_The_Correct_Message(string roomName)
         {
-            var a = new PrivateRoomDropOwnership(roomName);
+            var a = new PrivateRoomDropOwnershipCommand(roomName);
             var msg = a.ToByteArray();
 
             var reader = new MessageReader<MessageCode.Server>(msg);
@@ -714,11 +765,11 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         }
 
         [Trait("Category", "ToByteArray")]
-        [Trait("Request", "StartPublicChat")]
-        [Fact(DisplayName = "StartPublicChat constructs the correct message")]
-        public void StartPublicChat_Constructs_The_Correct_Message()
+        [Trait("Request", "StartPublicChatCommand")]
+        [Fact(DisplayName = "StartPublicChatCommand constructs the correct message")]
+        public void StartPublicChatCommand_Constructs_The_Correct_Message()
         {
-            var a = new StartPublicChat();
+            var a = new StartPublicChatCommand();
             var msg = a.ToByteArray();
 
             var reader = new MessageReader<MessageCode.Server>(msg);
@@ -728,11 +779,11 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
         }
 
         [Trait("Category", "ToByteArray")]
-        [Trait("Request", "StopPublicChat")]
-        [Fact(DisplayName = "StopPublicChat constructs the correct message")]
-        public void StopPublicChat_Constructs_The_Correct_Message()
+        [Trait("Request", "StopPublicChatCommand")]
+        [Fact(DisplayName = "StopPublicChatCommand constructs the correct message")]
+        public void StopPublicChatCommand_Constructs_The_Correct_Message()
         {
-            var a = new StopPublicChat();
+            var a = new StopPublicChatCommand();
             var msg = a.ToByteArray();
 
             var reader = new MessageReader<MessageCode.Server>(msg);
@@ -755,6 +806,82 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             Assert.Equal(MessageCode.Server.SetRoomTicker, code);
             Assert.Equal(roomName, reader.ReadString());
             Assert.Equal(message, reader.ReadString());
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "UnwatchUserCommand")]
+        [Theory(DisplayName = "UnwatchUserCommand constructs the correct message"), AutoData]
+        public void UnwatchUserCommand_Constructs_The_Correct_Message(string username)
+        {
+            var a = new UnwatchUserCommand(username);
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.UnwatchUser, code);
+            Assert.Equal(username, reader.ReadString());
+            Assert.False(reader.HasMoreData);
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "LikedInterestAddCommand")]
+        [Theory(DisplayName = "LikedInterestAddCommand constructs the correct message"), AutoData]
+        public void LikedInterestAddCommand_Constructs_The_Correct_Message(string interest)
+        {
+            var a = new LikedInterestAddCommand(interest);
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.LikedInterestAdd, code);
+            Assert.Equal(interest, reader.ReadString());
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "LikedInterestRemoveCommand")]
+        [Theory(DisplayName = "LikedInterestRemoveCommand constructs the correct message"), AutoData]
+        public void LikedInterestRemoveCommand_Constructs_The_Correct_Message(string interest)
+        {
+            var a = new LikedInterestRemoveCommand(interest);
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.LikedInterestRemove, code);
+            Assert.Equal(interest, reader.ReadString());
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "HatedInterestAddCommand")]
+        [Theory(DisplayName = "HatedInterestAddCommand constructs the correct message"), AutoData]
+        public void HatedInterestAddCommand_Constructs_The_Correct_Message(string interest)
+        {
+            var a = new HatedInterestAddCommand(interest);
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.HatedInterestAdd, code);
+            Assert.Equal(interest, reader.ReadString());
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "HatedInterestRemoveCommand")]
+        [Theory(DisplayName = "HatedInterestRemoveCommand constructs the correct message"), AutoData]
+        public void HatedInterestRemoveCommand_Constructs_The_Correct_Message(string interest)
+        {
+            var a = new HatedInterestRemoveCommand(interest);
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.HatedInterestRemove, code);
+            Assert.Equal(interest, reader.ReadString());
         }
     }
 }

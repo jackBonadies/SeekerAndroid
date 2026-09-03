@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2021 Seeker
  *
  * This file is part of Seeker
@@ -90,8 +90,26 @@ namespace Seeker
             {
                 RequestedUserList.Add(new UserListItem(uname));
             }
-            SeekerState.SoulseekClient.GetUserStatisticsAsync(uname);
-            SeekerState.SoulseekClient.GetUserInfoAsync(uname).ContinueWith(new Action<Task<UserInfo>>(
+            // TODO: should this be fire and forget?
+            try
+            {
+                SeekerState.SoulseekClient.GetUserStatisticsAsync(uname);
+            }
+            catch (Exception e)
+            {
+                Logger.Debug("GetUserStatisticsAsync threw syncronously: " + e.Message);
+            }
+
+            Task<UserInfo> getUserInfoTask;
+            try
+            {
+                getUserInfoTask = SeekerState.SoulseekClient.GetUserInfoAsync(uname);
+            }
+            catch (Exception e)
+            {
+                getUserInfoTask = Task.FromException<UserInfo>(e);
+            }
+            getUserInfoTask.ContinueWith(new Action<Task<UserInfo>>(
                 (Task<UserInfo> userInfoTask) =>
                 {
                     if (userInfoTask.IsCompletedSuccessfully)
@@ -118,7 +136,7 @@ namespace Seeker
                     {
                         Exception e = userInfoTask.Exception;
 
-                        if (e.InnerException is SoulseekClientException && e.InnerException.Message.ToLower().Contains(Soulseek.SoulseekClient.FailedToEstablishDirectOrIndirectStringLower))
+                        if (e.InnerException is SoulseekClientException && e.InnerException.Message.ToLower().Contains(Common.Helpers.FailedToEstablishDirectOrIndirectStringLower))
                         {
                             SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.user_info_failed_conn), uname), ToastLength.Long);
                         }
@@ -129,6 +147,10 @@ namespace Seeker
                         else if (e.InnerException is TimeoutException)
                         {
                             SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.user_info_failed_timeout), uname), ToastLength.Long);
+                        }
+                        else if (e.InnerException is InvalidOperationException)
+                        {
+                            SeekerApplication.Toaster.ShowToast(string.Format(SeekerApplication.GetString(Resource.String.must_be_logged_to_request_user_info), uname), ToastLength.Long);
                         }
                         else
                         {

@@ -33,9 +33,10 @@ namespace Soulseek.Tests.Unit
         [Theory(DisplayName = "Instantiates with expected data"), AutoData]
         public void Instantiates_With_Expected_Data(string searchText, int token, SearchOptions options)
         {
-            var s = new SearchInternal(searchText, token, options);
+            var s = new SearchInternal(new SearchQuery(searchText), SearchScope.Network, token, options);
 
-            Assert.Equal(searchText, s.SearchText);
+            Assert.Equal(searchText, s.Query.SearchText);
+            Assert.Equal(SearchScope.Network.Type, s.Scope.Type);
             Assert.Equal(token, s.Token);
             Assert.Equal(options, s.Options);
 
@@ -52,9 +53,35 @@ namespace Soulseek.Tests.Unit
         [Fact(DisplayName = "Disposes without throwing")]
         public void Disposes_Without_Throwing()
         {
-            var s = new SearchInternal("foo", 42);
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42);
 
             var ex = Record.Exception(() => s.Dispose());
+
+            Assert.Null(ex);
+
+            s.Dispose();
+        }
+
+        [Trait("Category", "Dispose")]
+        [Fact(DisplayName = "Dispose is idempotent")]
+        public void Dispose_Is_Idempotent()
+        {
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42);
+            s.Dispose();
+
+            var ex = Record.Exception(() => s.Dispose());
+
+            Assert.Null(ex);
+        }
+
+        [Trait("Category", "Complete")]
+        [Fact(DisplayName = "Complete is idempotent")]
+        public void Complete_Is_Idempotent()
+        {
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42);
+            s.Complete(SearchStates.TimedOut);
+
+            var ex = Record.Exception(() => s.Complete(SearchStates.TimedOut));
 
             Assert.Null(ex);
 
@@ -65,7 +92,7 @@ namespace Soulseek.Tests.Unit
         [Fact(DisplayName = "Complete sets state")]
         public void Complete_Sets_State()
         {
-            var s = new SearchInternal("foo", 42);
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42);
 
             s.Complete(SearchStates.Cancelled);
 
@@ -79,8 +106,8 @@ namespace Soulseek.Tests.Unit
         [Fact(DisplayName = "Response filter returns true when FilterResponses option is false")]
         public void Response_Filter_Returns_True_When_FilterResponses_Option_Is_False()
         {
-            var s = new SearchInternal("foo", 42, new SearchOptions(filterResponses: false));
-            var response = new SearchResponse("u", 1, 1, 1, 1, null);
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42, new SearchOptions(filterResponses: false));
+            var response = new SearchResponse("u", 1, true, 1, 1, null);
 
             var filter = s.InvokeMethod<bool>("ResponseMeetsOptionCriteria", response);
 
@@ -99,28 +126,8 @@ namespace Soulseek.Tests.Unit
             var fixture = new Fixture();
             var file = fixture.Create<File>();
 
-            var s = new SearchInternal("foo", 42, new SearchOptions(filterResponses: true, minimumResponseFileCount: option));
-            var response = new SearchResponse("u", 1, 1, 1, 1, DuplicateFile(file, actual));
-
-            var filter = s.InvokeMethod<bool>("ResponseMeetsOptionCriteria", response);
-
-            Assert.Equal(expected, filter);
-
-            s.Dispose();
-        }
-
-        [Trait("Category", "ResponseMeetsOptionCriteria")]
-        [Theory(DisplayName = "Response filter respects MinimumPeerFreeUploadSlots option")]
-        [InlineData(0, 1, false)]
-        [InlineData(1, 1, true)]
-        [InlineData(1, 0, true)]
-        public void Response_Filter_Respects_MinimumPeerFreeUploadSlots_Option(int actual, int option, bool expected)
-        {
-            var fixture = new Fixture();
-            var file = fixture.Create<File>();
-
-            var s = new SearchInternal("foo", 42, new SearchOptions(filterResponses: true, minimumPeerFreeUploadSlots: option));
-            var response = new SearchResponse("u", 1, actual, 1, 1, DuplicateFile(file, 1));
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42, new SearchOptions(filterResponses: true, minimumResponseFileCount: option));
+            var response = new SearchResponse("u", 1, true, 1, 1, DuplicateFile(file, actual));
 
             var filter = s.InvokeMethod<bool>("ResponseMeetsOptionCriteria", response);
 
@@ -139,8 +146,8 @@ namespace Soulseek.Tests.Unit
             var fixture = new Fixture();
             var file = fixture.Create<File>();
 
-            var s = new SearchInternal("foo", 42, new SearchOptions(filterResponses: true, minimumPeerUploadSpeed: option));
-            var response = new SearchResponse("u", 1, 1, actual, 1, DuplicateFile(file, 1));
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42, new SearchOptions(filterResponses: true, minimumPeerUploadSpeed: option));
+            var response = new SearchResponse("u", 1, true, actual, 1, DuplicateFile(file, 1));
 
             var filter = s.InvokeMethod<bool>("ResponseMeetsOptionCriteria", response);
 
@@ -159,8 +166,8 @@ namespace Soulseek.Tests.Unit
             var fixture = new Fixture();
             var file = fixture.Create<File>();
 
-            var s = new SearchInternal("foo", 42, new SearchOptions(filterResponses: true, maximumPeerQueueLength: option));
-            var response = new SearchResponse("u", 1, 1, 1, actual, DuplicateFile(file, 1));
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42, new SearchOptions(filterResponses: true, maximumPeerQueueLength: option));
+            var response = new SearchResponse("u", 1, true, 1, actual, DuplicateFile(file, 1));
 
             var filter = s.InvokeMethod<bool>("ResponseMeetsOptionCriteria", response);
 
@@ -173,12 +180,10 @@ namespace Soulseek.Tests.Unit
         [Fact(DisplayName = "TryAddResponse ignores response when search is not in progress")]
         public void TryAddResponse_Ignores_Response_When_Search_Is_Not_In_Progress()
         {
-            var s = new SearchInternal("foo", 42)
-            {
-                State = SearchStates.Completed,
-            };
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42);
+            s.SetState(SearchStates.Completed);
 
-            s.TryAddResponse(new SearchResponse("bar", 42, 1, 1, 1, null));
+            s.TryAddResponse(new SearchResponse("bar", 42, true, 1, 1, null));
 
             var invoked = false;
             s.ResponseReceived = (r) => invoked = true;
@@ -189,19 +194,20 @@ namespace Soulseek.Tests.Unit
         }
 
         [Trait("Category", "TryAddResponse")]
-        [Fact(DisplayName = "TryAddResponse ignores response when token does not match")]
+        [Fact(DisplayName = "TryAddResponse throws DataMisalignedException when token does not match")]
         public void TryAddResponse_Ignores_Response_When_Token_Does_Not_Match()
         {
-            var s = new SearchInternal("foo", 42)
-            {
-                State = SearchStates.InProgress,
-            };
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42);
+            s.SetState(SearchStates.InProgress);
 
-            s.TryAddResponse(new SearchResponse("bar", 24, 1, 1, 1, null));
+            var ex = Record.Exception(() => s.TryAddResponse(new SearchResponse("bar", 24, true, 1, 1, null)));
 
             var invoked = false;
             s.ResponseReceived = (r) => invoked = true;
 
+            Assert.NotNull(ex);
+            Assert.IsType<DataMisalignedException>(ex);
+            Assert.Contains($"with token {42} received response with search token {24}", ex.Message);
             Assert.False(invoked);
 
             s.Dispose();
@@ -211,12 +217,10 @@ namespace Soulseek.Tests.Unit
         [Fact(DisplayName = "TryAddResponse ignores response when response criteria not met")]
         public void TryAddResponse_Ignores_Response_When_Response_Criteria_Not_Met()
         {
-            var s = new SearchInternal("foo", 42, new SearchOptions(filterResponses: true, minimumResponseFileCount: 1))
-            {
-                State = SearchStates.InProgress,
-            };
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42, new SearchOptions(filterResponses: true, minimumResponseFileCount: 1));
+            s.SetState(SearchStates.InProgress);
 
-            s.TryAddResponse(new SearchResponse("bar", 42, 1, 1, 1, null));
+            s.TryAddResponse(new SearchResponse("bar", 42, true, 1, 1, null));
 
             var invoked = false;
             s.ResponseReceived = (r) => invoked = true;
@@ -232,12 +236,10 @@ namespace Soulseek.Tests.Unit
         {
             bool Filter(SearchResponse response) => false;
 
-            var s = new SearchInternal("foo", 42, new SearchOptions(filterResponses: true, minimumResponseFileCount: 0, responseFilter: Filter))
-            {
-                State = SearchStates.InProgress,
-            };
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42, new SearchOptions(filterResponses: true, minimumResponseFileCount: 0, responseFilter: Filter));
+            s.SetState(SearchStates.InProgress);
 
-            s.TryAddResponse(new SearchResponse("bar", 42, 1, 1, 1, null));
+            s.TryAddResponse(new SearchResponse("bar", 42, true, 1, 1, null));
 
             var invoked = false;
             s.ResponseReceived = (r) => invoked = true;
@@ -253,12 +255,10 @@ namespace Soulseek.Tests.Unit
         {
             bool Filter(File file) => false;
 
-            var s = new SearchInternal("foo", 42, new SearchOptions(filterResponses: true, minimumResponseFileCount: 1, fileFilter: Filter))
-            {
-                State = SearchStates.InProgress,
-            };
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42, new SearchOptions(filterResponses: true, minimumResponseFileCount: 1, fileFilter: Filter));
+            s.SetState(SearchStates.InProgress);
 
-            s.TryAddResponse(new SearchResponse("bar", 42, 1, 1, 1, new List<File>() { new File(1, "a", 1, "b") }));
+            s.TryAddResponse(new SearchResponse("bar", 42, true, 1, 1, new List<File>() { new File(1, "a", 1, "b") }));
 
             var invoked = false;
             s.ResponseReceived = (r) => invoked = true;
@@ -274,12 +274,10 @@ namespace Soulseek.Tests.Unit
         {
             bool Filter(File file) => false;
 
-            var s = new SearchInternal("foo", 42, new SearchOptions(filterResponses: true, minimumResponseFileCount: 1, fileFilter: Filter))
-            {
-                State = SearchStates.InProgress,
-            };
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42, new SearchOptions(filterResponses: true, minimumResponseFileCount: 1, fileFilter: Filter));
+            s.SetState(SearchStates.InProgress);
 
-            s.TryAddResponse(new SearchResponse("bar", 42, 1, 1, 1, null, lockedFileList: new List<File>() { new File(1, "a", 1, "b") }));
+            s.TryAddResponse(new SearchResponse("bar", 42, true, 1, 1, null, lockedFileList: new List<File>() { new File(1, "a", 1, "b") }));
 
             var invoked = false;
             s.ResponseReceived = (r) => invoked = true;
@@ -293,10 +291,8 @@ namespace Soulseek.Tests.Unit
         [Theory(DisplayName = "TryAddResponse adds response"), AutoData]
         public void TryAddResponse_Adds_Response(string username, int token, File file)
         {
-            var s = new SearchInternal("foo", token, new SearchOptions(filterResponses: true, minimumResponseFileCount: 1))
-            {
-                State = SearchStates.InProgress,
-            };
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, token, new SearchOptions(filterResponses: true, minimumResponseFileCount: 1));
+            s.SetState(SearchStates.InProgress);
 
             var msg = new MessageBuilder()
                 .WriteCode(MessageCode.Peer.SearchResponse)
@@ -316,7 +312,7 @@ namespace Soulseek.Tests.Unit
             var responses = new List<SearchResponse>();
             s.ResponseReceived = (r) => responses.Add(r);
 
-            s.TryAddResponse(new SearchResponse(username, token, 1, 1, 1, new List<File>() { file }, new List<File>() { file }));
+            s.TryAddResponse(new SearchResponse(username, token, true, 1, 1, new List<File>() { file }, new List<File>() { file }));
 
             Assert.Single(responses);
 
@@ -332,13 +328,45 @@ namespace Soulseek.Tests.Unit
         }
 
         [Trait("Category", "TryAddResponse")]
+        [Fact(DisplayName = "TryAddResponse returns without invoking handler when disposed")]
+        public void TryAddResponse_Returns_When_Disposed()
+        {
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42);
+            s.SetState(SearchStates.InProgress);
+
+            var invoked = false;
+            s.ResponseReceived = (r) => invoked = true;
+
+            s.Dispose();
+
+            var ex = Record.Exception(() => s.TryAddResponse(new SearchResponse("bar", 42, true, 1, 1, null)));
+
+            Assert.Null(ex);
+            Assert.False(invoked);
+        }
+
+        [Trait("Category", "TryAddResponse")]
+        [Theory(DisplayName = "TryAddResponse swallows ObjectDisposedException thrown from body"), AutoData]
+        public void TryAddResponse_Swallows_ObjectDisposedException_Thrown_From_Body(string username, int token, File file)
+        {
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, token);
+            s.SetState(SearchStates.InProgress);
+
+            s.ResponseReceived = (r) => throw new ObjectDisposedException("test");
+
+            var ex = Record.Exception(() => s.TryAddResponse(new SearchResponse(username, token, true, 1, 1, new List<File>() { file })));
+
+            Assert.Null(ex);
+
+            s.Dispose();
+        }
+
+        [Trait("Category", "TryAddResponse")]
         [Theory(DisplayName = "TryAddResponse swallows exceptions"), AutoData]
         public void TryAddResponse_Swallows_Exceptions(string username, int token, File file)
         {
-            var s = new SearchInternal("foo", token, new SearchOptions(filterResponses: true, minimumResponseFileCount: 1))
-            {
-                State = SearchStates.InProgress,
-            };
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, token, new SearchOptions(filterResponses: true, minimumResponseFileCount: 1));
+            s.SetState(SearchStates.InProgress);
 
             var msg = new MessageBuilder()
                 .WriteCode(MessageCode.Peer.SearchResponse)
@@ -358,7 +386,7 @@ namespace Soulseek.Tests.Unit
             var invoked = false;
             s.ResponseReceived += (r) => invoked = true;
 
-            var ex = Record.Exception(() => s.TryAddResponse(new SearchResponse(username, token, 1, 1, 1, new List<File>() { file })));
+            var ex = Record.Exception(() => s.TryAddResponse(new SearchResponse(username, token, true, 1, 1, new List<File>() { file })));
 
             Assert.Null(ex);
             Assert.True(invoked);
@@ -375,10 +403,8 @@ namespace Soulseek.Tests.Unit
                     minimumResponseFileCount: 1,
                     fileFilter: (f) => false);
 
-            var s = new SearchInternal("foo", token, options)
-            {
-                State = SearchStates.InProgress,
-            };
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, token, options);
+            s.SetState(SearchStates.InProgress);
 
             var msg = new MessageBuilder()
                 .WriteCode(MessageCode.Peer.SearchResponse)
@@ -401,7 +427,7 @@ namespace Soulseek.Tests.Unit
             var reader = new MessageReader<MessageCode.Peer>(msg);
             reader.Seek(username.Length + 12); // seek to the start of the file list
 
-            s.TryAddResponse(new SearchResponse(username, token, 1, 1, 1, null));
+            s.TryAddResponse(new SearchResponse(username, token, true, 1, 1, null));
 
             var invoked = false;
             s.ResponseReceived = (r) => invoked = true;
@@ -420,10 +446,8 @@ namespace Soulseek.Tests.Unit
                     minimumResponseFileCount: 1,
                     responseFilter: (r) => false);
 
-            var s = new SearchInternal("foo", token, options)
-            {
-                State = SearchStates.InProgress,
-            };
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, token, options);
+            s.SetState(SearchStates.InProgress);
 
             var msg = new MessageBuilder()
                 .WriteCode(MessageCode.Peer.SearchResponse)
@@ -446,7 +470,7 @@ namespace Soulseek.Tests.Unit
             var reader = new MessageReader<MessageCode.Peer>(msg);
             reader.Seek(username.Length + 12); // seek to the start of the file list
 
-            s.TryAddResponse(new SearchResponse(username, token, 1, 1, 1, null));
+            s.TryAddResponse(new SearchResponse(username, token, true, 1, 1, null));
 
             var invoked = false;
             s.ResponseReceived = (r) => invoked = true;
@@ -465,10 +489,8 @@ namespace Soulseek.Tests.Unit
                     minimumResponseFileCount: 1,
                     fileLimit: 1);
 
-            var s = new SearchInternal("foo", token, options)
-            {
-                State = SearchStates.InProgress,
-            };
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, token, options);
+            s.SetState(SearchStates.InProgress);
 
             var msg = new MessageBuilder()
                 .WriteCode(MessageCode.Peer.SearchResponse)
@@ -487,7 +509,7 @@ namespace Soulseek.Tests.Unit
 
             var task = s.WaitForCompletion(CancellationToken.None);
 
-            s.TryAddResponse(new SearchResponse(username, token, 1, 1, 1, new List<File>() { file }));
+            s.TryAddResponse(new SearchResponse(username, token, true, 1, 1, new List<File>() { file }));
 
             await task;
 
@@ -507,10 +529,8 @@ namespace Soulseek.Tests.Unit
                     responseLimit: 1,
                     fileLimit: 10000000);
 
-            var s = new SearchInternal("foo", token, options)
-            {
-                State = SearchStates.InProgress,
-            };
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, token, options);
+            s.SetState(SearchStates.InProgress);
 
             var msg = new MessageBuilder()
                 .WriteCode(MessageCode.Peer.SearchResponse)
@@ -535,7 +555,7 @@ namespace Soulseek.Tests.Unit
 
             var task = s.WaitForCompletion(CancellationToken.None);
 
-            s.TryAddResponse(new SearchResponse(username, token, 1, 1, 1, null));
+            s.TryAddResponse(new SearchResponse(username, token, true, 1, 1, null));
 
             await task;
 
@@ -551,10 +571,8 @@ namespace Soulseek.Tests.Unit
         {
             SearchResponse addResponse = null;
 
-            var s = new SearchInternal("foo", token, new SearchOptions(filterResponses: true, minimumResponseFileCount: 1))
-            {
-                State = SearchStates.InProgress,
-            };
+            var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, token, new SearchOptions(filterResponses: true, minimumResponseFileCount: 1));
+            s.SetState(SearchStates.InProgress);
 
             s.ResponseReceived += (response) => addResponse = response;
 
@@ -573,7 +591,7 @@ namespace Soulseek.Tests.Unit
             var reader = new MessageReader<MessageCode.Peer>(msg);
             reader.Seek(username.Length + 12); // seek to the start of the file list
 
-            s.TryAddResponse(new SearchResponse(username, token, 1, 1, 1, new List<File>() { file }));
+            s.TryAddResponse(new SearchResponse(username, token, true, 1, 1, new List<File>() { file }));
 
             Assert.NotNull(addResponse);
             Assert.Equal(file.Filename, addResponse.Files.ToList()[0].Filename);
@@ -585,7 +603,7 @@ namespace Soulseek.Tests.Unit
         [Fact(DisplayName = "Cancel cancels")]
         public async Task Cancel_Cancels()
         {
-            using (var s = new SearchInternal("foo", 1))
+            using (var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 1))
             {
                 s.Cancel();
 
@@ -596,7 +614,143 @@ namespace Soulseek.Tests.Unit
             }
         }
 
-        private List<File> DuplicateFile(File file, int count)
+        [Trait("Category", "Cancel")]
+        [Fact(DisplayName = "Cancel is idempotent")]
+        public void Cancel_Is_Idempotent()
+        {
+            using (var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 1))
+            {
+                s.Cancel();
+
+                var ex = Record.Exception(() => s.Cancel());
+
+                Assert.Null(ex);
+            }
+        }
+
+        [Trait("Category", "Cancel")]
+        [Fact(DisplayName = "Cancel sets state to Cancelled and stops the timer")]
+        public void Cancel_Sets_State_And_Stops_Timer()
+        {
+            using (var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 1))
+            {
+                s.SetState(SearchStates.InProgress);
+
+                var timer = s.GetProperty<System.Timers.Timer>("SearchTimeoutTimer");
+
+                Assert.True(timer.Enabled);
+
+                s.Cancel();
+
+                Assert.True(s.State.HasFlag(SearchStates.Completed));
+                Assert.True(s.State.HasFlag(SearchStates.Cancelled));
+                Assert.False(timer.Enabled);
+            }
+        }
+
+        [Trait("Category", "WaitForCompletion")]
+        [Fact(DisplayName = "WaitForCompletion returns when Complete is called")]
+        public async Task WaitForCompletion_Returns_When_Complete_Is_Called()
+        {
+            using (var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42))
+            {
+                s.SetState(SearchStates.InProgress);
+
+                var task = s.WaitForCompletion(CancellationToken.None);
+                s.Complete(SearchStates.TimedOut);
+
+                var ex = await Record.ExceptionAsync(() => task);
+
+                Assert.Null(ex);
+                Assert.True(s.State.HasFlag(SearchStates.Completed));
+            }
+        }
+
+        [Trait("Category", "WaitForCompletion")]
+        [Fact(DisplayName = "WaitForCompletion throws when CancellationToken is cancelled")]
+        public async Task WaitForCompletion_Throws_When_CancellationToken_Is_Cancelled()
+        {
+            using (var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 42))
+            using (var cts = new CancellationTokenSource())
+            {
+                s.SetState(SearchStates.InProgress);
+
+                var task = s.WaitForCompletion(cts.Token);
+                await cts.CancelAsync();
+
+                var ex = await Record.ExceptionAsync(() => task);
+
+                Assert.NotNull(ex);
+                Assert.IsType<OperationCanceledException>(ex);
+            }
+        }
+
+        [Trait("Category", "Timer")]
+        [Fact(DisplayName = "Timer is disabled initially")]
+        public void Timer_Disabled_Initially()
+        {
+            using (var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 1))
+            {
+                var timer = s.GetProperty<System.Timers.Timer>("SearchTimeoutTimer");
+
+                Assert.False(timer.Enabled);
+            }
+        }
+
+        [Trait("Category", "Timer")]
+        [Fact(DisplayName = "Timer starts on transition to InProgress")]
+        public void Timer_Starts_On_InProgress_Transition()
+        {
+            using (var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 1))
+            {
+                var timer = s.GetProperty<System.Timers.Timer>("SearchTimeoutTimer");
+
+                Assert.False(timer.Enabled);
+
+                s.SetState(SearchStates.Requested);
+
+                Assert.False(timer.Enabled);
+
+                s.SetState(SearchStates.Queued);
+
+                Assert.False(timer.Enabled);
+
+                s.SetState(SearchStates.InProgress);
+
+                Assert.True(timer.Enabled);
+            }
+        }
+
+        [Trait("Category", "Timer")]
+        [Fact(DisplayName = "Timer does not reset when already InProgress")]
+        public void Timer_Does_Not_Reset_When_Already_InProgress()
+        {
+            using (var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 1))
+            {
+                s.SetState(SearchStates.InProgress);
+
+                var ex = Record.Exception(() => s.SetState(SearchStates.InProgress));
+
+                Assert.Null(ex);
+            }
+        }
+
+        [Trait("Category", "Timer")]
+        [Fact(DisplayName = "Timer elapsed completes search with TimedOut")]
+        public async Task Timer_Elapsed_Completes_Search_With_TimedOut()
+        {
+            using (var s = new SearchInternal(new SearchQuery("foo"), SearchScope.Network, 1, new SearchOptions(searchTimeout: 50)))
+            {
+                s.SetState(SearchStates.InProgress);
+
+                await s.WaitForCompletion(CancellationToken.None);
+
+                Assert.True(s.State.HasFlag(SearchStates.Completed));
+                Assert.True(s.State.HasFlag(SearchStates.TimedOut));
+            }
+        }
+
+        private static List<File> DuplicateFile(File file, int count)
         {
             var list = new List<File>();
 

@@ -32,9 +32,9 @@ namespace Soulseek.Tests.Unit
             var searchText = Guid.NewGuid().ToString();
             var token = new Random().Next();
 
-            using (var search = new SearchInternal(searchText, token, new SearchOptions()))
+            using (var search = new SearchInternal(new SearchQuery(searchText), SearchScope.Network, token, new SearchOptions()))
             {
-                var response = new SearchResponse("foo", 1, 1, 1, 1, new List<File>());
+                var response = new SearchResponse("foo", 1, true, 1, 1, new List<File>());
 
                 var s = new Search(search);
                 var e = new SearchResponseReceivedEventArgs(response, s);
@@ -52,7 +52,7 @@ namespace Soulseek.Tests.Unit
             var searchText = Guid.NewGuid().ToString();
             var token = new Random().Next();
 
-            using (var search = new SearchInternal(searchText, token, new SearchOptions()))
+            using (var search = new SearchInternal(new SearchQuery(searchText), SearchScope.Network, token, new SearchOptions()))
             {
                 search.SetProperty("State", SearchStates.Completed);
 

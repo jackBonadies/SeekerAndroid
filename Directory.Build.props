@@ -1,0 +1,27 @@
+<Project>
+
+  <!--
+    The .NET SDK only defaults Optimize=true when $(Configuration) is exactly 'Release'
+    (Microsoft.NET.Sdk.props). We have custom Release configurations ('Release IzzySoft',
+    'Release Mock') which needs to explicitly set Optimize=true, this covers both 
+    Soulseek.NET / Mono.Nat project files (since they are in subdirectories).
+    In our CI script we pass -p:Optimize=true so this change is only needed for local builds.
+  -->
+  <PropertyGroup Condition="$(Configuration.StartsWith('Release'))">
+    <Optimize Condition="'$(Optimize)' == ''">true</Optimize>
+  </PropertyGroup>
+
+
+  <!--
+    Grants Soulseek.NET's internals to Common, for Common/MockSoulseekClient.cs only, since to effectively
+	Mock Soulseek.NET we need to access some internal members (i.e. create domain EventArgs)
+  -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'Soulseek'">
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Common</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+
+
+</Project>

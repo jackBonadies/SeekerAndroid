@@ -204,6 +204,27 @@ namespace Soulseek.Tests.Unit
                 throw new ArgumentException($"No such property '{propertyName}' exists on target Type {type.Name}.", nameof(propertyName));
             }
 
+            // get-only auto properties have no setter, so fall back to the compiler generated backing field
+            if (!property.CanWrite)
+            {
+                var backingField = type.GetField($"<{propertyName}>k__BackingField", Flags);
+
+                if (backingField == default)
+                {
+                    throw new ArgumentException($"Property '{propertyName}' on target Type {type.Name} is read only and has no backing field.", nameof(propertyName));
+                }
+
+                try
+                {
+                    backingField.SetValue(target, value);
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Failed to set backing field for property '{propertyName}' on target Type {type.Name}.  See inner Exception for details.", ex);
+                }
+            }
+
             try
             {
                 property.SetValue(target, value);

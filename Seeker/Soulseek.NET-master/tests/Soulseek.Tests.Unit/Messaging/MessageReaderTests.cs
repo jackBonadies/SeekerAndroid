@@ -393,12 +393,32 @@ namespace Soulseek.Tests.Unit.Messaging
         {
             var msg = new MessageBuilder()
                 .WriteCode(MessageCode.Peer.BrowseRequest)
-                .WriteString("Ð")
+                .WriteString("Ð", CharacterEncoding.ISO88591)
                 .Build();
 
             var reader = new MessageReader<MessageCode.Peer>(msg);
 
             Assert.Equal("Ð", reader.ReadString());
+        }
+
+        [Trait("Category", "ReadString")]
+        [InlineData("UTF-8")]
+        [InlineData("ISO-8859-1")]
+        [Theory(DisplayName = "ReadString respects specified encoding")]
+        public void ReadString_Respects_Specified_Encoding(string encoding)
+        {
+            var str = "Ð";
+            var utf8Bytes = Encoding.GetEncoding("UTF-8").GetBytes(str);
+
+            var msg = new MessageBuilder()
+                .WriteCode(MessageCode.Peer.BrowseRequest)
+                .WriteString(str, new CharacterEncoding("UTF-8"))
+                .Build();
+
+            var expectedStr = Encoding.GetEncoding(encoding).GetString(utf8Bytes);
+            var readStr = new MessageReader<MessageCode.Peer>(msg).ReadString(new CharacterEncoding(encoding));
+
+            Assert.Equal(expectedStr, readStr);
         }
 
         [Trait("Category", "ReadString")]
@@ -525,7 +545,7 @@ namespace Soulseek.Tests.Unit.Messaging
 
             var reader = new MessageReader<MessageCode.Peer>(msg);
 
-            var ex = Record.Exception(() => reader.InvokeMethod("Decompress", BindingFlags.NonPublic | BindingFlags.Instance, null, null));
+            var ex = Record.Exception(() => reader.InvokeMethod("Decompress", BindingFlags.NonPublic | BindingFlags.Static, null, null));
 
             Assert.NotNull(ex);
             Assert.NotNull(ex.InnerException);

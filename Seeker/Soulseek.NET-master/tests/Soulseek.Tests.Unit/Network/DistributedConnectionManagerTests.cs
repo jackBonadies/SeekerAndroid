@@ -55,6 +55,7 @@ namespace Soulseek.Tests.Unit.Network
             Assert.False(c.HasParent);
             Assert.Equal((string.Empty, default(IPEndPoint)), c.Parent);
             Assert.Empty(c.PendingSolicitations);
+            Assert.Null(c.AverageBroadcastLatency);
         }
 
         [Trait("Category", "BranchRoot")]
@@ -137,7 +138,7 @@ namespace Soulseek.Tests.Unit.Network
         [Fact(DisplayName = "CanAcceptChildren is false if AcceptDistributedChildren is false")]
         public void CanAcceptChildren_Is_False_If_AcceptDistributedChildren_Is_False()
         {
-            using (var s = new SoulseekClient(new SoulseekClientOptions(
+            using (var s = new SoulseekClient(minorVersion: 9999, new SoulseekClientOptions(
                 acceptDistributedChildren: false,
                 distributedChildLimit: 10)))
             {
@@ -152,7 +153,7 @@ namespace Soulseek.Tests.Unit.Network
         [Fact(DisplayName = "CanAcceptChildren is false if EnableDistributedNetwork is false")]
         public void CanAcceptChildren_Is_False_If_EnableDistributedNEtwork_Is_False()
         {
-            using (var s = new SoulseekClient(new SoulseekClientOptions(
+            using (var s = new SoulseekClient(minorVersion: 9999, new SoulseekClientOptions(
                 enableDistributedNetwork: false,
                 acceptDistributedChildren: true,
                 distributedChildLimit: 10)))
@@ -172,7 +173,7 @@ namespace Soulseek.Tests.Unit.Network
             parent.Setup(m => m.State)
                 .Returns(ConnectionState.Connected);
 
-            using (var s = new SoulseekClient(new SoulseekClientOptions(
+            using (var s = new SoulseekClient(minorVersion: 9999, new SoulseekClientOptions(
                 acceptDistributedChildren: true,
                 distributedChildLimit: 10)))
             {
@@ -189,7 +190,7 @@ namespace Soulseek.Tests.Unit.Network
         [Fact(DisplayName = "HasParent returns false if parent is null")]
         public void HasParent_Returns_False_If_Parent_Is_Null()
         {
-            using (var s = new SoulseekClient(new SoulseekClientOptions(
+            using (var s = new SoulseekClient(minorVersion: 9999, new SoulseekClientOptions(
                 acceptDistributedChildren: false,
                 distributedChildLimit: 10)))
             {
@@ -208,7 +209,7 @@ namespace Soulseek.Tests.Unit.Network
             conn.Setup(m => m.State)
                 .Returns(ConnectionState.Disconnected);
 
-            using (var s = new SoulseekClient(new SoulseekClientOptions(
+            using (var s = new SoulseekClient(minorVersion: 9999, new SoulseekClientOptions(
                 acceptDistributedChildren: false,
                 distributedChildLimit: 10)))
             {
@@ -229,7 +230,7 @@ namespace Soulseek.Tests.Unit.Network
             conn.Setup(m => m.State)
                 .Returns(ConnectionState.Connected);
 
-            using (var s = new SoulseekClient(new SoulseekClientOptions(
+            using (var s = new SoulseekClient(minorVersion: 9999, new SoulseekClientOptions(
                 acceptDistributedChildren: false,
                 distributedChildLimit: 10)))
             {
@@ -246,7 +247,7 @@ namespace Soulseek.Tests.Unit.Network
         [Theory(DisplayName = "Raises DiagnosticGenerated on diagnostic"), AutoData]
         public void Raises_DiagnosticGenerated_On_Diagnostic(string message)
         {
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             {
                 DiagnosticEventArgs args = default;
 
@@ -266,7 +267,7 @@ namespace Soulseek.Tests.Unit.Network
         [Theory(DisplayName = "Does not throw raising DiagnosticGenerated if no handlers bound"), AutoData]
         public void Does_Not_Throw_Raising_DiagnosticGenerated_If_No_Handlers_Bound(string message)
         {
-            using (var client = new SoulseekClient(options: null))
+            using (var client = new SoulseekClient(minorVersion: 9999, options: null))
             using (var l = new DistributedConnectionManager(client))
             {
                 var diagnostic = l.GetProperty<IDiagnosticFactory>("Diagnostic");
@@ -309,20 +310,23 @@ namespace Soulseek.Tests.Unit.Network
         }
 
         [Trait("Category", "PromoteToBranchRoot")]
-        [Fact(DisplayName = "PromoteToBranchRoot raises PromotedToBranchRoot")]
-        public void PromoteToBranchRoot_Raises_PromotedToBranchRoot()
+        [Fact(DisplayName = "PromoteToBranchRoot raises PromotedToBranchRoot and StateChanged")]
+        public void PromoteToBranchRoot_Raises_PromotedToBranchRoot_And_StateChanged()
         {
             var (manager, _) = GetFixture();
 
             using (manager)
             {
                 bool fired = false;
+                bool stateChangedFired = false;
 
                 manager.PromotedToBranchRoot += (sender, args) => fired = true;
+                manager.StateChanged += (sender, rags) => stateChangedFired = true;
 
                 manager.PromoteToBranchRoot();
 
                 Assert.True(fired);
+                Assert.True(stateChangedFired);
             }
         }
 
@@ -396,6 +400,27 @@ namespace Soulseek.Tests.Unit.Network
                 var fired = false;
 
                 manager.DemotedFromBranchRoot += (sender, args) => fired = true;
+
+                manager.DemoteFromBranchRoot();
+
+                Assert.True(fired);
+            }
+        }
+
+        [Trait("Category", "DemoteFromBranchRoot")]
+        [Fact(DisplayName = "DemoteFromBranchRoot raises StateChanged")]
+        public void DemoteFromBranchRoot_Raises_StateChanged()
+        {
+            var (manager, _) = GetFixture();
+
+            using (manager)
+            {
+                manager.PromoteToBranchRoot();
+                Assert.True(manager.IsBranchRoot);
+
+                var fired = false;
+
+                manager.StateChanged += (sender, args) => fired = true;
 
                 manager.DemoteFromBranchRoot();
 
@@ -497,10 +522,15 @@ namespace Soulseek.Tests.Unit.Network
         [Theory(DisplayName = "BroadcastMessageAsync broadcasts message"), AutoData]
         public async Task BroadcastMessageAsync_Broadcasts_Message(byte[] bytes)
         {
-            var (manager, mocks) = GetFixture();
+            var (manager, _) = GetFixture();
 
             var c1 = new Mock<IMessageConnection>();
+            c1.Setup(m => m.State)
+                .Returns(ConnectionState.Connected);
+
             var c2 = new Mock<IMessageConnection>();
+            c2.Setup(m => m.State)
+                .Returns(ConnectionState.Connected);
 
             var dict = manager.GetProperty<ConcurrentDictionary<string, Lazy<Task<IMessageConnection>>>>("ChildConnectionDictionary");
             dict.TryAdd("c1", new Lazy<Task<IMessageConnection>>(() => Task.FromResult(c1.Object)));
@@ -511,20 +541,69 @@ namespace Soulseek.Tests.Unit.Network
                 await manager.BroadcastMessageAsync(bytes, CancellationToken.None);
             }
 
-            c1.Verify(m => m.WriteAsync(It.Is<byte[]>(o => o.Matches(bytes)), It.IsAny<CancellationToken?>()));
-            c2.Verify(m => m.WriteAsync(It.Is<byte[]>(o => o.Matches(bytes)), It.IsAny<CancellationToken?>()));
+            c1.Verify(m => m.WriteAsync(It.Is<byte[]>(o => o.Matches(bytes)), CancellationToken.None));
+            c2.Verify(m => m.WriteAsync(It.Is<byte[]>(o => o.Matches(bytes)), CancellationToken.None));
         }
 
         [Trait("Category", "BroadcastMessageAsync")]
-        [Theory(DisplayName = "BroadcastMessageAsync disposes on throw"), AutoData]
-        public async Task BroadcastMessageAsync_Disposes_On_Throw(byte[] bytes)
+        [Theory(DisplayName = "BroadcastMessageAsync sets AverageBroadcastLatency"), AutoData]
+        public async Task BroadcastMessageAsync_Sets_AverageBroadcastLatency(byte[] bytes)
         {
-            var (manager, mocks) = GetFixture();
+            var (manager, _) = GetFixture();
 
             var c1 = new Mock<IMessageConnection>();
+            c1.Setup(m => m.State)
+                .Returns(ConnectionState.Connected);
+
+            var dict = manager.GetProperty<ConcurrentDictionary<string, Lazy<Task<IMessageConnection>>>>("ChildConnectionDictionary");
+            dict.TryAdd("c1", new Lazy<Task<IMessageConnection>>(() => Task.FromResult(c1.Object)));
+
+            using (manager)
+            {
+                Assert.Null(manager.AverageBroadcastLatency);
+
+                await manager.BroadcastMessageAsync(bytes, CancellationToken.None);
+
+                Assert.NotNull(manager.AverageBroadcastLatency);
+            }
+        }
+
+        [Trait("Category", "BroadcastMessageAsync")]
+        [Theory(DisplayName = "BroadcastMessageAsync updates AverageBroadcastLatency"), AutoData]
+        public async Task BroadcastMessageAsync_Updates_AverageBroadcastLatency(byte[] bytes)
+        {
+            var (manager, _) = GetFixture();
+
+            var c1 = new Mock<IMessageConnection>();
+            c1.Setup(m => m.State)
+                .Returns(ConnectionState.Connected);
+
+            var dict = manager.GetProperty<ConcurrentDictionary<string, Lazy<Task<IMessageConnection>>>>("ChildConnectionDictionary");
+            dict.TryAdd("c1", new Lazy<Task<IMessageConnection>>(() => Task.FromResult(c1.Object)));
+
+            using (manager)
+            {
+                manager.SetProperty(nameof(manager.AverageBroadcastLatency), double.MaxValue);
+
+                await manager.BroadcastMessageAsync(bytes, CancellationToken.None);
+
+                Assert.True(manager.AverageBroadcastLatency < double.MaxValue);
+            }
+        }
+
+        [Trait("Category", "BroadcastMessageAsync")]
+        [Theory(DisplayName = "BroadcastMessageAsync does not broadcast message to unconnected connections"), AutoData]
+        public async Task BroadcastMessageAsync_Does_Not_Broadcast_Message_To_Unconnected_Connections(byte[] bytes)
+        {
+            var (manager, _) = GetFixture();
+
+            var c1 = new Mock<IMessageConnection>();
+            c1.Setup(m => m.State)
+                .Returns(ConnectionState.Connected);
+
             var c2 = new Mock<IMessageConnection>();
-            c2.Setup(m => m.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken?>()))
-                .Throws(new Exception("foo"));
+            c2.Setup(m => m.State)
+                .Returns(ConnectionState.Disconnected);
 
             var dict = manager.GetProperty<ConcurrentDictionary<string, Lazy<Task<IMessageConnection>>>>("ChildConnectionDictionary");
             dict.TryAdd("c1", new Lazy<Task<IMessageConnection>>(() => Task.FromResult(c1.Object)));
@@ -532,20 +611,42 @@ namespace Soulseek.Tests.Unit.Network
 
             using (manager)
             {
-                await manager.BroadcastMessageAsync(bytes);
+                await manager.BroadcastMessageAsync(bytes, CancellationToken.None);
             }
 
-            c1.Verify(m => m.WriteAsync(It.Is<byte[]>(o => o.Matches(bytes)), It.IsAny<CancellationToken?>()));
+            c1.Verify(m => m.WriteAsync(It.Is<byte[]>(o => o.Matches(bytes)), CancellationToken.None), Times.Once);
+            c2.Verify(m => m.WriteAsync(It.Is<byte[]>(o => o.Matches(bytes)), CancellationToken.None), Times.Never);
+        }
 
-            c2.Verify(m => m.WriteAsync(It.Is<byte[]>(o => o.Matches(bytes)), It.IsAny<CancellationToken?>()));
-            c2.Verify(m => m.Dispose(), Times.AtLeastOnce);
+        [Trait("Category", "BroadcastMessageAsync")]
+        [Theory(DisplayName = "BroadcastMessageAsync disconnects connection if write throws"), AutoData]
+        public async Task BroadcastMessageAsync_Disconnects_Connection_If_Write_Throws(byte[] bytes)
+        {
+            var (manager, _) = GetFixture();
+
+            var c1 = new Mock<IMessageConnection>();
+            c1.Setup(m => m.State)
+                .Returns(ConnectionState.Connected);
+            c1.Setup(m => m.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken?>()))
+                .Throws(new Exception("foo"));
+
+            var dict = manager.GetProperty<ConcurrentDictionary<string, Lazy<Task<IMessageConnection>>>>("ChildConnectionDictionary");
+            dict.TryAdd("c1", new Lazy<Task<IMessageConnection>>(() => Task.FromResult(c1.Object)));
+
+            using (manager)
+            {
+                await manager.BroadcastMessageAsync(bytes, CancellationToken.None);
+            }
+
+            c1.Verify(m => m.WriteAsync(It.Is<byte[]>(o => o.Matches(bytes)), CancellationToken.None), Times.Once);
+            c1.Verify(m => m.Disconnect(It.Is<string>(s => s == "Broadcast failure: foo"), It.IsAny<Exception>()), Times.Once);
         }
 
         [Trait("Category", "BroadcastMessageAsync")]
         [Theory(DisplayName = "BroadcastMessageAsync does not throw if connection is null"), AutoData]
         public async Task BroadcastMessageAsync_Does_Not_Throw_If_Connection_Is_Null(byte[] bytes)
         {
-            var (manager, mocks) = GetFixture();
+            var (manager, _) = GetFixture();
 
             var c1 = new Mock<IMessageConnection>();
 
@@ -584,8 +685,8 @@ namespace Soulseek.Tests.Unit.Network
         }
 
         [Trait("Category", "ParentConnection_Disconnected")]
-        [Theory(DisplayName = "ParentConnection_Disconnected raises ParentDisconnected"), AutoData]
-        public void ParentConnection_Raises_ParentDisconnected(string username, IPEndPoint endpoint, string message)
+        [Theory(DisplayName = "ParentConnection_Disconnected raises ParentDisconnected and StateChanged"), AutoData]
+        public void ParentConnection_Raises_ParentDisconnected_And_StateChanged(string username, IPEndPoint endpoint, string message)
         {
             var c = GetMessageConnectionMock(username, endpoint);
 
@@ -598,8 +699,10 @@ namespace Soulseek.Tests.Unit.Network
                 manager.SetProperty("ParentBranchRoot", "foo");
 
                 DistributedParentEventArgs actualArgs = default;
+                bool stateChangedFired = false;
 
                 manager.ParentDisconnected += (sender, args) => actualArgs = args;
+                manager.StateChanged += (sender, args) => stateChangedFired = true;
 
                 manager.InvokeMethod("ParentConnection_Disconnected", c.Object, new ConnectionDisconnectedEventArgs(message));
 
@@ -607,6 +710,8 @@ namespace Soulseek.Tests.Unit.Network
                 Assert.Equal(endpoint, actualArgs.IPEndPoint);
                 Assert.Equal(1, actualArgs.BranchLevel);
                 Assert.Equal("foo", actualArgs.BranchRoot);
+
+                Assert.True(stateChangedFired);
             }
         }
 
@@ -767,6 +872,38 @@ namespace Soulseek.Tests.Unit.Network
                 Assert.NotNull(actualArgs);
                 Assert.Equal(ctpr.Username, actualArgs.Username);
                 Assert.Equal(ctpr.IPEndPoint, actualArgs.IPEndPoint);
+            }
+        }
+
+        [Trait("Category", "AddChildConnectionAsync")]
+        [Theory(DisplayName = "AddChildConnectionAsync CTPR raises StateChanged on successful connection"), AutoData]
+        internal async Task AddChildConnectionAsync_Ctpr_Raises_StateChanged_On_Successful_Connection(ConnectToPeerResponse ctpr)
+        {
+            var (manager, mocks) = GetFixture();
+
+            var conn = GetMessageConnectionMock(ctpr.Username, ctpr.IPEndPoint);
+
+            mocks.ConnectionFactory.Setup(m => m.GetDistributedConnection(ctpr.Username, ctpr.IPEndPoint, It.IsAny<ConnectionOptions>(), It.IsAny<ITcpClient>()))
+                .Returns(conn.Object);
+
+            mocks.Waiter.Setup(m => m.Wait<int>(It.IsAny<WaitKey>(), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+                .Returns(Task.FromResult(1));
+
+            var parent = new Mock<IMessageConnection>();
+            parent.Setup(m => m.State)
+                .Returns(ConnectionState.Connected);
+
+            using (manager)
+            {
+                manager.SetProperty("ParentConnection", parent.Object);
+
+                bool stateChangedFired = false;
+
+                manager.StateChanged += (_, args) => stateChangedFired = true;
+
+                await manager.GetOrAddChildConnectionAsync(ctpr);
+
+                Assert.True(stateChangedFired);
             }
         }
 
@@ -1695,6 +1832,41 @@ namespace Soulseek.Tests.Unit.Network
         }
 
         [Trait("Category", "AddChildConnectionAsync")]
+        [Theory(DisplayName = "AddChildConnectionAsync raises StateChanged on success when not superseding"), AutoData]
+        internal async Task AddChildConnectionAsync_Raises_StateChanged_On_Success_When_Not_Superseding(string username, IPEndPoint endpoint)
+        {
+            var (manager, mocks) = GetFixture();
+
+            var conn = GetMessageConnectionMock(username, endpoint);
+
+            mocks.Client.Setup(m => m.State)
+                .Returns(SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+            mocks.ConnectionFactory.Setup(m => m.GetDistributedConnection(username, endpoint, It.IsAny<ConnectionOptions>(), It.IsAny<ITcpClient>()))
+                .Returns(conn.Object);
+
+            mocks.Waiter.Setup(m => m.Wait<int>(It.IsAny<WaitKey>(), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+                .Returns(Task.FromResult(1));
+
+            var parent = new Mock<IMessageConnection>();
+            parent.Setup(m => m.State)
+                .Returns(ConnectionState.Connected);
+
+            using (manager)
+            {
+                manager.SetProperty("ParentConnection", parent.Object);
+
+                bool stateChangedFired = false;
+
+                manager.StateChanged += (sender, args) => stateChangedFired = true;
+
+                await manager.AddOrUpdateChildConnectionAsync(username, GetMessageConnectionMock(username, endpoint).Object);
+
+                Assert.True(stateChangedFired);
+            }
+        }
+
+        [Trait("Category", "AddChildConnectionAsync")]
         [Theory(DisplayName = "AddChildConnectionAsync generates expected diagnostics on throw"), AutoData]
         internal async Task AddChildConnectionAsync_Generates_Expected_Diagnostics_On_Throw(string username, IPEndPoint endpoint)
         {
@@ -1789,7 +1961,7 @@ namespace Soulseek.Tests.Unit.Network
         [Fact(DisplayName = "UpdateStatusAsync writes expected payload to server")]
         internal async Task UpdateStatusAsync_Writes_Expected_Payload_To_Server()
         {
-            var expectedPayload = Convert.FromBase64String("CAAAAH4AAAABAAAACAAAAH8AAAAAAAAACAAAAIEAAAAAAAAABQAAAGQAAAABBQAAAEcAAAAA");
+            var expectedPayload = Convert.FromBase64String("CAAAAH4AAAABAAAACAAAAH8AAAAAAAAABQAAAGQAAAABBQAAAEcAAAAA");
 
             var (manager, mocks) = GetFixture();
 
@@ -1817,7 +1989,7 @@ namespace Soulseek.Tests.Unit.Network
         [Fact(DisplayName = "UpdateStatusAsync writes HaveNoParents = false if disabled")]
         internal async Task UpdateStatusAsync_Writes_HaveNoParents_False_If_Disabled()
         {
-            var expectedPayload = Convert.FromBase64String("CAAAAH4AAAAAAAAACAAAAH8AAAAAAAAACAAAAIEAAAAAAAAABQAAAGQAAAAABQAAAEcAAAAA");
+            var expectedPayload = Convert.FromBase64String("CAAAAH4AAAAAAAAACAAAAH8AAAAAAAAABQAAAGQAAAAABQAAAEcAAAAA");
 
             var (manager, mocks) = GetFixture();
 
@@ -1862,6 +2034,33 @@ namespace Soulseek.Tests.Unit.Network
             }
 
             mocks.Diagnostic.Verify(m => m.Info(It.Is<string>(s => s.ContainsInsensitive("Updated distributed status"))), Times.Once);
+        }
+
+        [Trait("Category", "UpdateStatusAsync")]
+        [Fact(DisplayName = "UpdateStatusAsync raises StateChanged on success")]
+        internal async Task UpdateStatusAsync_Raises_StateChanged_On_Success()
+        {
+            var (manager, mocks) = GetFixture();
+
+            mocks.Client.Setup(m => m.State)
+                .Returns(SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+            var conn = GetMessageConnectionMock("foo", null);
+            conn.Setup(m => m.State)
+                .Returns(ConnectionState.Connected);
+
+            using (manager)
+            {
+                manager.SetProperty("ParentConnection", conn.Object);
+
+                bool stateChangedFired = false;
+
+                manager.StateChanged += (sender, args) => stateChangedFired = true;
+
+                await manager.UpdateStatusAsync();
+
+                Assert.True(stateChangedFired);
+            }
         }
 
         [Trait("Category", "UpdateStatusAsync")]
@@ -1989,6 +2188,32 @@ namespace Soulseek.Tests.Unit.Network
 
                 Assert.Equal("foo", actualArgs.Username);
                 Assert.Equal(conn.Object.IPEndPoint, actualArgs.IPEndPoint);
+            }
+        }
+
+        [Trait("Category", "ChildConnection_Disconnected")]
+        [Theory(DisplayName = "ChildConnection_Disconnected raises StateChanged"), AutoData]
+        internal void ChildConnection_Disconnected_Raises_StateChanged(string message)
+        {
+            var (manager, _) = GetFixture();
+
+            var conn = GetMessageConnectionMock("foo", null);
+
+            var dict = manager.GetProperty<ConcurrentDictionary<string, Lazy<Task<IMessageConnection>>>>("ChildConnectionDictionary");
+            dict.TryAdd("foo", new Lazy<Task<IMessageConnection>>(() => Task.FromResult(conn.Object)));
+
+            var dict2 = manager.GetProperty<ConcurrentDictionary<string, IPEndPoint>>("ChildDictionary");
+            dict2.TryAdd("foo", conn.Object.IPEndPoint);
+
+            using (manager)
+            {
+                bool stateChangedFired = false;
+
+                manager.StateChanged += (sender, args) => stateChangedFired = true;
+
+                manager.InvokeMethod("ChildConnection_Disconnected", conn.Object, new ConnectionDisconnectedEventArgs(message));
+
+                Assert.True(stateChangedFired);
             }
         }
 
@@ -2963,6 +3188,32 @@ namespace Soulseek.Tests.Unit.Network
         }
 
         [Trait("Category", "AddParentConnectionAsync")]
+        [Fact(DisplayName = "AddParentConnectionAsync returns if already processing")]
+        internal async Task AddParentConnectionAsync_Returns_If_Already_Processing()
+        {
+            var (manager, mocks) = GetFixture(options: new SoulseekClientOptions());
+
+            mocks.Client.Setup(m => m.State)
+                .Returns(SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+            var candidates = new List<(string Username, IPEndPoint IPEndPoint)>
+            {
+                ("foo", new IPEndPoint(IPAddress.None, 1)),
+                ("bar", new IPEndPoint(IPAddress.None, 2)),
+            };
+
+            using (manager)
+            {
+                var semaphore = manager.GetProperty<SemaphoreSlim>("ParentSyncRoot");
+                await semaphore.WaitAsync();
+
+                await manager.AddParentConnectionAsync(candidates);
+            }
+
+            mocks.Diagnostic.Verify(m => m.Debug(It.Is<string>(s => s.ContainsInsensitive("Parent connection solicitation ignored; already in the process of establishing a connection."))), Times.Once);
+        }
+
+        [Trait("Category", "AddParentConnectionAsync")]
         [Fact(DisplayName = "AddParentConnectionAsync produces warning diagnostic, does not throw, and updates status if no candidates connect")]
         internal async Task AddParentConnectionAsync_Produces_Warning_Diagnostic_Does_Not_Throw_And_Updates_Status_If_No_Candidates_Connect()
         {
@@ -3372,8 +3623,8 @@ namespace Soulseek.Tests.Unit.Network
         }
 
         [Trait("Category", "AddParentConnectionAsync")]
-        [Theory(DisplayName = "AddParentConnectionAsync raises ParentAdopted on connect"), AutoData]
-        internal async Task AddParentConnectionAsync_Raises_ParentAdopted_On_Connect(string localUser, string username1, IPEndPoint endpoint1, string username2, IPEndPoint endpoint2, Guid id1, Guid id2)
+        [Theory(DisplayName = "AddParentConnectionAsync raises ParentAdopted and StateChanged on connect"), AutoData]
+        internal async Task AddParentConnectionAsync_Raises_ParentAdopted_and_StateChanged_On_Connect(string localUser, string username1, IPEndPoint endpoint1, string username2, IPEndPoint endpoint2, Guid id1, Guid id2)
         {
             var (manager, mocks) = GetFixture();
 
@@ -3430,8 +3681,10 @@ namespace Soulseek.Tests.Unit.Network
             using (manager)
             {
                 DistributedParentEventArgs actualArgs = default;
+                bool stateChangedFired = false;
 
                 manager.ParentAdopted += (sender, args) => actualArgs = args;
+                manager.StateChanged += (sender, args) => stateChangedFired = true;
 
                 await manager.AddParentConnectionAsync(candidates);
 
@@ -3439,6 +3692,8 @@ namespace Soulseek.Tests.Unit.Network
                 Assert.Equal(endpoint1, actualArgs.IPEndPoint);
                 Assert.Equal(1, actualArgs.BranchLevel);
                 Assert.Equal("foo1", actualArgs.BranchRoot);
+
+                Assert.True(stateChangedFired);
             }
         }
 
@@ -3536,7 +3791,7 @@ namespace Soulseek.Tests.Unit.Network
         [Theory(DisplayName = "WaitForParentCandidateConnection_MessageRead ignores all other messages"), AutoData]
         internal void WaitForParentCandidateConnection_MessageRead_Ignores_All_Other_Messages(string username, IPEndPoint endpoint)
         {
-            var (manager, mocks) = GetFixture();
+            var (manager, _) = GetFixture();
 
             var conn = GetMessageConnectionMock(username, endpoint);
 
@@ -3554,7 +3809,7 @@ namespace Soulseek.Tests.Unit.Network
         [Theory(DisplayName = "WaitForParentCandidateConnection_MessageRead disconnects and disposes on exception"), AutoData]
         internal void WaitForParentCandidateConnection_MessageRead_Disconnects_And_Disposes_On_Exception(string username, IPEndPoint endpoint)
         {
-            var (manager, mocks) = GetFixture();
+            var (manager, _) = GetFixture();
 
             var conn = GetMessageConnectionMock(username, endpoint);
 
@@ -3731,7 +3986,120 @@ namespace Soulseek.Tests.Unit.Network
             mocks.ServerConnection.Verify(m => m.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken?>()), Times.Once);
         }
 
-        private (DistributedConnectionManager Manager, Mocks Mocks) GetFixture(string username = null, IPEndPoint endpoint = null, SoulseekClientOptions options = null)
+        [Trait("Category", "RemoveAndDisposeAll")]
+        [Fact(DisplayName = "RemoveAndDisposeAll removes and disposes all child connections")]
+        internal void RemoveAndDisposeAll_Removes_And_Disposes_All_Child_Connections()
+        {
+            var (manager, _) = GetFixture();
+
+            var conn1 = GetMessageConnectionMock("foo", null);
+            var conn2 = GetMessageConnectionMock("bar", null);
+
+            var dict = manager.GetProperty<ConcurrentDictionary<string, Lazy<Task<IMessageConnection>>>>("ChildConnectionDictionary");
+            dict.TryAdd("foo", new Lazy<Task<IMessageConnection>>(() => Task.FromResult(conn1.Object)));
+            dict.TryAdd("bar", new Lazy<Task<IMessageConnection>>(() => Task.FromResult(conn2.Object)));
+
+            var dict2 = manager.GetProperty<ConcurrentDictionary<string, IPEndPoint>>("ChildDictionary");
+            dict2.TryAdd("foo", conn1.Object.IPEndPoint);
+            dict2.TryAdd("bar", conn2.Object.IPEndPoint);
+
+            using (manager)
+            {
+                manager.RemoveAndDisposeAll();
+
+                Assert.Empty(dict);
+                Assert.Empty(dict2);
+            }
+
+            conn1.Verify(m => m.Dispose(), Times.AtLeastOnce);
+            conn2.Verify(m => m.Dispose(), Times.AtLeastOnce);
+        }
+
+        [Trait("Category", "RemoveAndDisposeAll")]
+        [Fact(DisplayName = "RemoveAndDisposeAll swallows exception when disposing child connection")]
+        internal void RemoveAndDisposeAll_Swallows_Exception_When_Disposing_Child_Connection()
+        {
+            var (manager, _) = GetFixture();
+
+            var bad = GetMessageConnectionMock("foo", null);
+            bad.Setup(m => m.Dispose())
+                .Throws(new Exception("dispose failed"));
+
+            var good = GetMessageConnectionMock("bar", null);
+
+            var dict = manager.GetProperty<ConcurrentDictionary<string, Lazy<Task<IMessageConnection>>>>("ChildConnectionDictionary");
+            dict.TryAdd("foo", new Lazy<Task<IMessageConnection>>(() => Task.FromResult(bad.Object)));
+            dict.TryAdd("bar", new Lazy<Task<IMessageConnection>>(() => Task.FromResult(good.Object)));
+
+            var dict2 = manager.GetProperty<ConcurrentDictionary<string, IPEndPoint>>("ChildDictionary");
+            dict2.TryAdd("foo", bad.Object.IPEndPoint);
+            dict2.TryAdd("bar", good.Object.IPEndPoint);
+
+            using (manager)
+            {
+                var ex = Record.Exception(() => manager.RemoveAndDisposeAll());
+
+                Assert.Null(ex);
+
+                // the failed dispose must not strand entries in either dictionary,
+                // and must not abort the loop before the remaining children are disposed
+                Assert.Empty(dict);
+                Assert.Empty(dict2);
+            }
+
+            good.Verify(m => m.Dispose(), Times.AtLeastOnce);
+        }
+
+        [Trait("Category", "RemoveAndDisposeAll")]
+        [Fact(DisplayName = "RemoveAndDisposeAll swallows exception when child connection task faults")]
+        internal void RemoveAndDisposeAll_Swallows_Exception_When_Child_Connection_Task_Faults()
+        {
+            var (manager, _) = GetFixture();
+
+            var dict = manager.GetProperty<ConcurrentDictionary<string, Lazy<Task<IMessageConnection>>>>("ChildConnectionDictionary");
+            dict.TryAdd("foo", new Lazy<Task<IMessageConnection>>(() => Task.FromException<IMessageConnection>(new Exception("connect failed"))));
+
+            var dict2 = manager.GetProperty<ConcurrentDictionary<string, IPEndPoint>>("ChildDictionary");
+            dict2.TryAdd("foo", new IPEndPoint(IPAddress.None, 0));
+
+            using (manager)
+            {
+                var ex = Record.Exception(() => manager.RemoveAndDisposeAll());
+
+                Assert.Null(ex);
+                Assert.Empty(dict);
+                Assert.Empty(dict2);
+            }
+        }
+
+        [Trait("Category", "RemoveAndDisposeAll")]
+        [Fact(DisplayName = "RemoveAndDisposeAll clears pending dictionaries and disposes parent connection")]
+        internal void RemoveAndDisposeAll_Clears_Pending_Dictionaries_And_Disposes_Parent_Connection()
+        {
+            var (manager, _) = GetFixture();
+
+            var parent = GetMessageConnectionMock("parent", null);
+
+            var pendingSolicitations = manager.GetProperty<ConcurrentDictionary<int, string>>("PendingSolicitationDictionary");
+            pendingSolicitations.TryAdd(1, "foo");
+
+            var pendingInbound = manager.GetProperty<ConcurrentDictionary<string, CancellationTokenSource>>("PendingInboundIndirectConnectionDictionary");
+            pendingInbound.TryAdd("foo", new CancellationTokenSource());
+
+            using (manager)
+            {
+                manager.SetProperty("ParentConnection", parent.Object);
+
+                manager.RemoveAndDisposeAll();
+
+                Assert.Empty(pendingSolicitations);
+                Assert.Empty(pendingInbound);
+            }
+
+            parent.Verify(m => m.Dispose(), Times.AtLeastOnce);
+        }
+
+        private static (DistributedConnectionManager Manager, Mocks Mocks) GetFixture(string username = null, IPEndPoint endpoint = null, SoulseekClientOptions options = null)
         {
             var mocks = new Mocks(options);
 
@@ -3748,7 +4116,7 @@ namespace Soulseek.Tests.Unit.Network
             return (handler, mocks);
         }
 
-        private Mock<IMessageConnection> GetMessageConnectionMock(string username, IPEndPoint endpoint)
+        private static Mock<IMessageConnection> GetMessageConnectionMock(string username, IPEndPoint endpoint)
         {
             var mock = new Mock<IMessageConnection>();
             mock.Setup(m => m.Username).Returns(username);
@@ -3757,7 +4125,7 @@ namespace Soulseek.Tests.Unit.Network
             return mock;
         }
 
-        private Mock<IConnection> GetConnectionMock(IPEndPoint endpoint)
+        private static Mock<IConnection> GetConnectionMock(IPEndPoint endpoint)
         {
             var mock = new Mock<IConnection>();
             mock.Setup(m => m.IPEndPoint)
@@ -3770,7 +4138,7 @@ namespace Soulseek.Tests.Unit.Network
         {
             public Mocks(SoulseekClientOptions clientOptions = null)
             {
-                Client = new Mock<SoulseekClient>(clientOptions)
+                Client = new Mock<SoulseekClient>(9999, clientOptions)
                 {
                     CallBase = true,
                 };

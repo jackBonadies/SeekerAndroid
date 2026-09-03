@@ -292,6 +292,9 @@ namespace Seeker.Services
         /// <summary>
         /// Opens a stream for writing to the incomplete file. Call after GetOrCreateIncompleteLocation.
         /// </summary>
+        /// <remarks>
+        /// partialLength is the startOffset
+        /// </remarks>
         public System.IO.Stream OpenIncompleteStream(string incompleteUri, long partialLength)
         {
             return OpenIncompleteStreamInternal(Android.Net.Uri.Parse(incompleteUri), partialLength);
@@ -323,7 +326,9 @@ namespace Seeker.Services
                     stream = SeekerState.MainActivityRef.ContentResolver.OpenOutputStream(incompleteUri);
                 }
 
-                return new PositionTrackingOutputStream(stream, 0);
+                // start tracking at partialLength (start offset) since the library reads Position 
+                // for progress updates / total downloaded
+                return new PositionTrackingOutputStream(stream, partialLength);
             }
         }
 

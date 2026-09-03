@@ -1,10 +1,12 @@
 ﻿// <copyright file="TransferRequest.cs" company="JP Dillingham">
-//     Copyright (c) JP Dillingham. All rights reserved.
+//     Copyright (c) JP Dillingham.
+//
+//     Copyright (c) 2021-2026 Jack Bonadies
+//     Modified: added Latin-1 encoding flags for filename and folder
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
+//     the Free Software Foundation, version 3.
 //
 //     This program is distributed in the hope that it will be useful,
 //     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,6 +15,13 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
+//
+//     This program is distributed with Additional Terms pursuant to Section 7
+//     of the GPLv3.  See the LICENSE file in the root directory of this
+//     project for the complete terms and conditions.
+//
+//     SPDX-FileCopyrightText: JP Dillingham
+//     SPDX-License-Identifier: GPL-3.0-only
 // </copyright>
 
 namespace Soulseek.Messaging.Messages
@@ -29,6 +38,8 @@ namespace Soulseek.Messaging.Messages
         /// <param name="token">The unique token for the transfer.</param>
         /// <param name="filename">The name of the file being transferred.</param>
         /// <param name="fileSize">The size of the file being transferred.</param>
+        /// <param name="isFileDecodedLatin1">Whether the filename should be written as ISO-8859-1 rather than UTF-8.</param>
+        /// <param name="isFolderDecodedLatin1">Whether the directory portion should be written as ISO-8859-1.</param>
         public TransferRequest(TransferDirection direction, int token, string filename, long fileSize = 0, bool isFileDecodedLatin1 = false, bool isFolderDecodedLatin1 = false)
         {
             Direction = direction;
@@ -60,10 +71,13 @@ namespace Soulseek.Messaging.Messages
         public int Token { get; }
 
         /// <summary>
-        ///     Gets whether it is legacy
+        ///     Gets a value indicating whether the filename should be written as ISO-8859-1.
         /// </summary>
         public bool IsFileDecodedLatin1 { get; }
 
+        /// <summary>
+        ///     Gets a value indicating whether the directory portion of the filename should be written as ISO-8859-1.
+        /// </summary>
         public bool IsFolderDecodedLatin1 { get; }
 
         /// <summary>

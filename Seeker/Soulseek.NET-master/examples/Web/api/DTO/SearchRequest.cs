@@ -29,12 +29,6 @@ namespace WebAPI.DTO
         public int? MaximumPeerQueueLength { get; set; }
 
         /// <summary>
-        ///     Gets or sets the minimum number of free upload slots a peer must have in order for a response to be processed.
-        ///     (Default = 0).
-        /// </summary>
-        public int? MinimumPeerFreeUploadSlots { get; set; }
-
-        /// <summary>
         ///     Gets or sets the minimum upload speed a peer must have in order for a response to be processed. (Default = 0).
         /// </summary>
         public int? MinimumPeerUploadSpeed { get; set; }
@@ -76,8 +70,8 @@ namespace WebAPI.DTO
         public SearchOptions ToSearchOptions(
             Func<SearchResponse, bool> responseFilter = null,
             Func<File, bool> fileFilter = null,
-            Action<SearchStateChangedEventArgs> stateChanged = null,
-            Action<SearchResponseReceivedEventArgs> responseReceived = null)
+            Action<(SearchStates PreviousState, Search Search)> stateChanged = null,
+            Action<(Search Search, SearchResponse Response)> responseReceived = null)
         {
             var def = new SearchOptions();
 
@@ -87,7 +81,6 @@ namespace WebAPI.DTO
                 fileLimit: FileLimit ?? def.FileLimit,
                 filterResponses: FilterResponses ?? def.FilterResponses,
                 minimumResponseFileCount: MinimumResponseFileCount ?? def.MinimumResponseFileCount,
-                minimumPeerFreeUploadSlots: MinimumPeerFreeUploadSlots ?? def.MinimumPeerFreeUploadSlots,
                 maximumPeerQueueLength: MaximumPeerQueueLength ?? def.MaximumPeerQueueLength,
                 minimumPeerUploadSpeed: MinimumPeerUploadSpeed ?? def.MinimumPeerUploadSpeed,
                 responseFilter: responseFilter,

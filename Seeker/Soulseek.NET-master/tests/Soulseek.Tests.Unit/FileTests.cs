@@ -25,7 +25,7 @@ namespace Soulseek.Tests.Unit
     public class FileTests
     {
         [Trait("Category", "Instantiation")]
-        [Theory(DisplayName ="Instantiates with the given data"), AutoData]
+        [Theory(DisplayName = "Instantiates with the given data"), AutoData]
         public void Instantiates_With_The_Given_Data(int code, string filename, long size, string extension, List<FileAttribute> attributeList)
         {
             var f = default(File);
@@ -142,28 +142,6 @@ namespace Soulseek.Tests.Unit
 
             Assert.Empty(f.Attributes);
             Assert.Null(f.Length);
-        }
-
-        [Trait("Category", "GetAttributeValue")]
-        [Theory(DisplayName = "GetAttributeValue returns null when no value"), AutoData]
-        public void GetAttributeValue_Returns_Null_When_No_Value(int code, string filename, long size, string extension)
-        {
-            var list = new List<FileAttribute>() { };
-
-            var f = new File(code, filename, size, extension, list);
-
-            Assert.Null(f.GetAttributeValue(FileAttributeType.BitDepth));
-        }
-
-        [Trait("Category", "GetAttributeValue")]
-        [Theory(DisplayName = "GetAttributeValue returns value when value"), AutoData]
-        public void GetAttributeValue_Returns_Value_When_Value(int code, string filename, long size, string extension, FileAttributeType type, int value)
-        {
-            var list = new List<FileAttribute>() { new FileAttribute(type, value) };
-
-            var f = new File(code, filename, size, extension, list);
-
-            Assert.Equal(value, f.GetAttributeValue(type));
         }
 
         [Trait("Category", "IsVariableBitRate")]

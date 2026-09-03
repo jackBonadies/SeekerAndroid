@@ -24,13 +24,47 @@ namespace Soulseek.Tests.Unit
     {
         [Trait("Category", "ServerInfo")]
         [Theory(DisplayName = "Instantiates with given values"), AutoData]
-        public void ServerInfo_Initializes_With_Nulls(int parentMinSpeed, int parentSpeedRatio, int wishlistInterval)
+        public void ServerInfo_Initializes_With_Nulls(int parentMinSpeed, int parentSpeedRatio, int wishlistInterval, bool isSupporter)
         {
-            var info = new ServerInfo(parentMinSpeed, parentSpeedRatio, wishlistInterval);
+            var info = new ServerInfo(parentMinSpeed, parentSpeedRatio, wishlistInterval, isSupporter);
 
             Assert.Equal(parentMinSpeed, info.ParentMinSpeed);
             Assert.Equal(parentSpeedRatio, info.ParentSpeedRatio);
             Assert.Equal(wishlistInterval, info.WishlistInterval);
+            Assert.Equal(isSupporter, info.IsSupporter);
+        }
+
+        [Trait("Category", "ServerInfo")]
+        [Theory(DisplayName = "With overlays substitutions"), AutoData]
+        public void ServerInfo_With_Overlays(int parentMinSpeed, int parentSpeedRatio, int wishlistInterval, bool isSupporter)
+        {
+            var info = new ServerInfo();
+
+            Assert.Null(info.ParentMinSpeed);
+            Assert.Null(info.ParentSpeedRatio);
+            Assert.Null(info.WishlistInterval);
+            Assert.Null(info.IsSupporter);
+
+            info = info.With(parentMinSpeed: parentMinSpeed, parentSpeedRatio: parentSpeedRatio, wishlistInterval: wishlistInterval, isSupporter: isSupporter);
+
+            Assert.Equal(parentMinSpeed, info.ParentMinSpeed);
+            Assert.Equal(parentSpeedRatio, info.ParentSpeedRatio);
+            Assert.Equal(wishlistInterval, info.WishlistInterval);
+            Assert.Equal(isSupporter, info.IsSupporter);
+        }
+
+        [Trait("Category", "ServerInfo")]
+        [Theory(DisplayName = "With does not overlay nulls"), AutoData]
+        public void ServerInfo_With_Does_Not_Overlay_Nulls(int parentMinSpeed, int parentSpeedRatio, int wishlistInterval, bool isSupporter)
+        {
+            var info = new ServerInfo(parentMinSpeed, parentSpeedRatio, wishlistInterval, isSupporter);
+
+            info = info.With(parentMinSpeed: null, parentSpeedRatio: null, wishlistInterval: null, isSupporter: null);
+
+            Assert.Equal(parentMinSpeed, info.ParentMinSpeed);
+            Assert.Equal(parentSpeedRatio, info.ParentSpeedRatio);
+            Assert.Equal(wishlistInterval, info.WishlistInterval);
+            Assert.Equal(isSupporter, info.IsSupporter);
         }
     }
 }

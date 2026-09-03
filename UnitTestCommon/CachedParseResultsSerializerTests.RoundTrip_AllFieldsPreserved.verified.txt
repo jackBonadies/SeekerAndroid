@@ -48,23 +48,6 @@
             Filename: song.mp3,
             Size: 5000000
           }
-        ],
-        OrderedFiles: [
-          {
-            AttributeCount: 1,
-            Attributes: [
-              {
-                Value: 320
-              }
-            ],
-            BitRate: 320,
-            IsLatin1Decoded: false,
-            IsDirectoryLatin1Decoded: false,
-            Code: 1,
-            Extension: mp3,
-            Filename: song.mp3,
-            Size: 5000000
-          }
         ]
       },
       {
@@ -72,16 +55,6 @@
         DecodedViaLatin1: false,
         FileCount: 1,
         Files: [
-          {
-            IsLatin1Decoded: false,
-            IsDirectoryLatin1Decoded: false,
-            Code: 2,
-            Extension: flac,
-            Filename: track.flac,
-            Size: 20000000
-          }
-        ],
-        OrderedFiles: [
           {
             IsLatin1Decoded: false,
             IsDirectoryLatin1Decoded: false,
@@ -98,8 +71,7 @@
   BrowseResponseHiddenPortion: [
     {
       Name: Private/Stuff,
-      DecodedViaLatin1: false,
-      OrderedFiles: []
+      DecodedViaLatin1: false
     }
   ],
   PresentableDirectoryNameToDirectoryUriMappings: [

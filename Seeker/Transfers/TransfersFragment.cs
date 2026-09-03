@@ -543,9 +543,6 @@ namespace Seeker
         public override void OnResume()
         {
             StaticHacks.TransfersFrag = this;
-            DownloadService.Instance.TransferItemChanged += OnTransferItemChanged;
-            DownloadService.Instance.TransferListRefreshRequested += OnTransferListRefreshRequested;
-            DownloadService.Instance.DownloadAddedUINotify += SeekerState_DownloadAddedUINotify;
             if (MainActivity.fromNotificationMoveToUploads)
             {
                 MainActivity.fromNotificationMoveToUploads = false;
@@ -565,9 +562,6 @@ namespace Seeker
 
         public override void OnPause()
         {
-            DownloadService.Instance.TransferItemChanged -= OnTransferItemChanged;
-            DownloadService.Instance.TransferListRefreshRequested -= OnTransferListRefreshRequested;
-            DownloadService.Instance.DownloadAddedUINotify -= SeekerState_DownloadAddedUINotify;
             base.OnPause();
             Logger.Debug("TransferFragment OnPause");
         }
@@ -1223,10 +1217,13 @@ namespace Seeker
             Seeker.Transfers.TransferEventRouter.ItemRemoved += OnRouterItemRemoved;
             UploadService.TransferAddedUINotify += MainActivity_TransferAddedUINotify; //todo this should eventually be for downloads too.
             DownloadService.Instance.TransferItemQueueUpdated += TransferQueueStateChanged;
+            DownloadService.Instance.TransferItemChanged += OnTransferItemChanged;
+            DownloadService.Instance.TransferListRefreshRequested += OnTransferListRefreshRequested;
+            DownloadService.Instance.DownloadAddedUINotify += SeekerState_DownloadAddedUINotify;
 
             if (recyclerTransferAdapter != null)
             {
-                recyclerTransferAdapter.NotifyDataSetChanged();
+                refreshListView();
             }
 
             base.OnStart();
@@ -1270,6 +1267,9 @@ namespace Seeker
             Seeker.Transfers.TransferEventRouter.ItemRemoved -= OnRouterItemRemoved;
             DownloadService.Instance.TransferItemQueueUpdated -= TransferQueueStateChanged;
             UploadService.TransferAddedUINotify -= MainActivity_TransferAddedUINotify;
+            DownloadService.Instance.TransferItemChanged -= OnTransferItemChanged;
+            DownloadService.Instance.TransferListRefreshRequested -= OnTransferListRefreshRequested;
+            DownloadService.Instance.DownloadAddedUINotify -= SeekerState_DownloadAddedUINotify;
             base.OnStop();
         }
 

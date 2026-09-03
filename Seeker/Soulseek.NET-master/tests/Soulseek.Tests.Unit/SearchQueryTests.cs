@@ -106,6 +106,18 @@ namespace Soulseek.Tests.Unit
         }
 
         [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Parses single character tokens and punctuation from search text")]
+        public void Parses_Single_Character_Tokens_And_Punctuation_From_Search_Text()
+        {
+            var s = new SearchQuery("a ! b @ c # d % e ^ f & g * h ( i ) j - k _ l + m = n -big_old_exclusion ~ o ` p [ q { r ] s } t | u \\ v ; w : x ' y \" z , a < b . c > d / e ?");
+
+            Assert.Equal("a ! b @ c # d % e ^ f & g * h ( i ) j - k _ l + m = n ~ o ` p [ q { r ] s } t | u \\ v ; w : x ' y \" z , a < b . c > d / e ?", s.Query);
+            Assert.Equal("a ! b @ c # d % e ^ f & g * h ( i ) j - k _ l + m = n ~ o ` p [ q { r ] s } t | u \\ v ; w : x ' y \" z , a < b . c > d / e ? -big_old_exclusion", s.SearchText);
+            Assert.Single(s.Exclusions);
+            Assert.Equal("big_old_exclusion", s.Exclusions.ToList()[0]);
+        }
+
+        [Trait("Category", "Instantiation")]
         [Fact(DisplayName = "Parses exclusions")]
         public void Parses_Exclusions()
         {
@@ -142,6 +154,17 @@ namespace Soulseek.Tests.Unit
             Assert.Equal(2, s.Exclusions.Count);
             Assert.Equal("bar", s.Exclusions.ToList()[0]);
             Assert.Equal("baz", s.Exclusions.ToList()[1]);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Fact(DisplayName = "Preserves duplicate terms")]
+        public void Preserves_Duplicate_Terms()
+        {
+            var s = new SearchQuery("foo bar foo foo");
+
+            Assert.Equal("foo bar foo foo", s.Query);
+            Assert.Equal("foo bar foo foo", s.SearchText);
+            Assert.Empty(s.Exclusions);
         }
 
         [Trait("Category", "FromText")]

@@ -1,10 +1,12 @@
 ﻿// <copyright file="SearchResponse.cs" company="JP Dillingham">
-//     Copyright (c) JP Dillingham. All rights reserved.
+//     Copyright (c) JP Dillingham.
+//
+//     Copyright (c) 2021-2026 Jack Bonadies
+//     Modified: added cached file type / bitrate fields
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
+//     the Free Software Foundation, version 3.
 //
 //     This program is distributed in the hope that it will be useful,
 //     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -13,6 +15,13 @@
 //
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see https://www.gnu.org/licenses/.
+//
+//     This program is distributed with Additional Terms pursuant to Section 7
+//     of the GPLv3.  See the LICENSE file in the root directory of this
+//     project for the complete terms and conditions.
+//
+//     SPDX-FileCopyrightText: JP Dillingham
+//     SPDX-License-Identifier: GPL-3.0-only
 // </copyright>
 
 namespace Soulseek
@@ -21,7 +30,6 @@ namespace Soulseek
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Xml.Serialization;
     using Soulseek.Messaging.Messages;
 
     /// <summary>
@@ -55,29 +63,8 @@ namespace Soulseek
             LockedFileCount = LockedFiles.Count;
         }
 
-        public override bool Equals(object obj)
-        {
-            if ((obj == null) || !this.GetType().Equals(obj.GetType()))
-            {
-                return false;
-            }
-            if (this.Username  != ((SearchResponse)(obj)).Username)
-            {
-                return false;
-            }
-            if(this.Files.Count != 0 && ((SearchResponse)(obj)).Files.Count != 0)
-            {
-                return this.Files.First().Filename == ((SearchResponse)(obj)).Files.First().Filename;
-            }
-            else
-            {
-                return true;
-            }
-        }
-
         public string cachedDominantFileType = null;
         public double cachedCalcBitRate = double.NaN;
-
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="SearchResponse"/> class.
