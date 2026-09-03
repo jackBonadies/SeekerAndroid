@@ -2247,14 +2247,48 @@ namespace Seeker
             _mockJoinedRoomUsers.TryRemove(roomName, out _);
         }
 
-        public async Task SendRoomMessageAsync(string roomName, string message, CancellationToken? cancellationToken = null)
+        private void ThrowIfApplicable(string message)
         {
+            if (message.Contains("reject"))
+            {
+                throw new InvalidOperationException($"The server connection must be connected and logged in to send a chat room message (currently: {State})");
+            }
+        }
+
+        private async Task MessageDelay(string message)
+        {
+            if (message.Contains("veryslow"))
+            {
+                await Task.Delay(10_000).ConfigureAwait(false);
+            }
+            else if (message.Contains("slow"))
+            {
+                await Task.Delay(1_000).ConfigureAwait(false);
+            }
+        }
+
+        public Task SendRoomMessageAsync(string roomName, string message, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfApplicable(message);
+            return SendRoomMessageInternalAsync(roomName, message, cancellationToken);
+        }
+
+        private async Task SendRoomMessageInternalAsync(string roomName, string message, CancellationToken? cancellationToken)
+        {
+            await MessageDelay(message);
             if (SendRoomMessageAsyncHandler != null) { await SendRoomMessageAsyncHandler(roomName, message, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public async Task SendPrivateMessageAsync(string username, string message, CancellationToken? cancellationToken = null)
+        public Task SendPrivateMessageAsync(string username, string message, CancellationToken? cancellationToken = null)
         {
+            ThrowIfApplicable(message);
+            return SendPrivateMessageInternalAsync(username, message, cancellationToken);
+        }
+
+        private async Task SendPrivateMessageInternalAsync(string username, string message, CancellationToken? cancellationToken)
+        {
+            await MessageDelay(message);
             if (SendPrivateMessageAsyncHandler != null) { await SendPrivateMessageAsyncHandler(username, message, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
