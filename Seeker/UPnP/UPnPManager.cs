@@ -227,7 +227,7 @@ namespace Seeker.UPnP
                         RenewMappingTimer.AutoReset = false;//since this function will get called again anyway.
                         RenewMappingTimer.Elapsed += RenewMappingTimer_Elapsed;
                     }
-                    RenewMappingTimer.Interval = Math.Max(LastSetLifeTimeSeconds * 1000 / 2, MinimumLifetimeSeconds * 1000); // at least 20 mins (for now).  divided by 2!
+                    RenewMappingTimer.Interval = Math.Max(LastSetLifeTimeSeconds * 1000 / 2, MinimumLifetimeSeconds * 1000 / 2); // at least 10 mins
                     RenewMappingTimer.Start();
                 }
             }
