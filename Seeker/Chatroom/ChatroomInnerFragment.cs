@@ -819,13 +819,15 @@ namespace Seeker.Chatroom
 
         private void EditTextEnterMessage_KeyPress(object sender, View.KeyEventArgs e)
         {
-            if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
+            if (e.Event != null && e.Event.KeyCode == Keycode.Enter)
             {
+                //consume the down as well, otherwise can turn into an editor action and we get 
+                //empty message toast
                 e.Handled = true;
-                //send the message and record our send message..
-                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(PreferencesState.Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
-
-                editTextEnterMessage.Text = string.Empty;
+                if (e.Event.Action == KeyEventActions.Up)
+                {
+                    TrySendCurrentMessage();
+                }
             }
             else
             {
@@ -837,11 +839,24 @@ namespace Seeker.Chatroom
         {
             if (e.ActionId == Android.Views.InputMethods.ImeAction.Send)
             {
-                //send the message and record our send message..
-                SendChatroomMessageAPI(OurRoomInfo.Name, new Message(PreferencesState.Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
-
-                editTextEnterMessage.Text = string.Empty;
+                TrySendCurrentMessage();
             }
+        }
+
+        /// <summary>
+        /// Dont send if empty - there is IME weirdness that can cause multiple events on enter press
+        /// i.e. both IME send and enter down, even if we set e.Handled = true
+        /// </summary>
+        private void TrySendCurrentMessage()
+        {
+            string messageText = editTextEnterMessage.Text;
+            if (string.IsNullOrEmpty(messageText))
+            {
+                return;
+            }
+            editTextEnterMessage.Text = string.Empty;
+            //send the message and record our send message..
+            SendChatroomMessageAPI(OurRoomInfo.Name, new Message(PreferencesState.Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, messageText, true, SentStatus.Pending));
         }
 
         public override void OnAttach(Context activity)
@@ -954,10 +969,7 @@ namespace Seeker.Chatroom
 
         private void SendMessage_Click(object sender, EventArgs e)
         {
-            //send the message and record our send message..
-            SendChatroomMessageAPI(OurRoomInfo.Name, new Message(PreferencesState.Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
-
-            editTextEnterMessage.Text = string.Empty;
+            TrySendCurrentMessage();
         }
 
         private void EditTextEnterMessage_TextChanged(object sender, Android.Text.TextChangedEventArgs e)

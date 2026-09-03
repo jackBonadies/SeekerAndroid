@@ -105,13 +105,15 @@ namespace Seeker.Messages
 
         private void EditTextEnterMessage_KeyPress(object sender, View.KeyEventArgs e)
         {
-            if (e.Event != null && e.Event.Action == KeyEventActions.Up && e.Event.KeyCode == Keycode.Enter)
+            if (e.Event != null && e.Event.KeyCode == Keycode.Enter)
             {
+                //consume the down as well, so TextView never gets to turn it into an editor
+                //action of its own (or into a newline).
                 e.Handled = true;
-                //send the message and record our send message..
-                MessageController.SendMessageAPI(new Message(Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
-
-                editTextEnterMessage.Text = string.Empty;
+                if (e.Event.Action == KeyEventActions.Up)
+                {
+                    TrySendCurrentMessage();
+                }
             }
             else
             {
@@ -123,11 +125,28 @@ namespace Seeker.Messages
         {
             if (e.ActionId == Android.Views.InputMethods.ImeAction.Send)
             {
-                //send the message and record our send message..
-                MessageController.SendMessageAPI(new Message(Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
-
-                editTextEnterMessage.Text = string.Empty;
+                TrySendCurrentMessage();
             }
+        }
+
+        /// <summary>
+        /// The single send path for all three triggers (send button, IME Send action, ENTER key).
+        /// It has to be safe to call twice for one keypress: some IMEs deliver an
+        /// IME_ACTION_SEND *and* a KEYCODE_ENTER down/up pair for the same key, which used to
+        /// send the message from the first trigger and then toast must_type_text_to_send from
+        /// the second. Clearing the box before sending is what makes the second call a no-op.
+        /// The send button never hit this because it is disabled while the box is empty.
+        /// </summary>
+        private void TrySendCurrentMessage()
+        {
+            string messageText = editTextEnterMessage.Text;
+            if (string.IsNullOrEmpty(messageText))
+            {
+                return;
+            }
+            editTextEnterMessage.Text = string.Empty;
+            //send the message and record our send message..
+            MessageController.SendMessageAPI(new Message(Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, messageText, true, SentStatus.Pending));
         }
 
         private sealed class InnerMenuProvider : Java.Lang.Object, AndroidX.Core.View.IMenuProvider
@@ -208,10 +227,7 @@ namespace Seeker.Messages
 
         private void SendMessage_Click(object sender, EventArgs e)
         {
-            //send the message and record our send message..
-            MessageController.SendMessageAPI(new Message(Username, -1, false, SimpleHelpers.GetDateTimeNowSafe(), DateTime.UtcNow, editTextEnterMessage.Text, true, SentStatus.Pending));
-
-            editTextEnterMessage.Text = string.Empty;
+            TrySendCurrentMessage();
         }
 
         private void EditTextEnterMessage_TextChanged(object sender, Android.Text.TextChangedEventArgs e)
