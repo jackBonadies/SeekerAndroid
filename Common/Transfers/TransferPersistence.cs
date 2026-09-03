@@ -8,25 +8,12 @@ namespace Seeker
     {
         private static DateTime transfersLastSavedTime = DateTime.MinValue;
 
-        public static void RestoreUploadTransferItems(string transferListLegacy, string transferListV2)
+        public static void RestoreUploadTransferItems(string transferListLegacy)
         {
-            if (transferListV2 == string.Empty)
-            {
-                RestoreUploadTransferItemsLegacy(transferListLegacy);
-            }
-            else
-            {
-                TransferItems.TransferItemManagerUploads = new TransferItemManager(true);
-                using (var stream = new System.IO.StringReader(transferListV2))
-                {
-                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItems.TransferItemManagerUploads.GetType());
-                    TransferItems.TransferItemManagerUploads = serializer.Deserialize(stream) as TransferItemManager;
-                    TransferItems.TransferItemManagerUploads.OnRelaunch();
-                }
-            }
+            RestoreUploadTransferItemsStandard(transferListLegacy);
         }
 
-        public static void RestoreUploadTransferItemsLegacy(string transferList)
+        public static void RestoreUploadTransferItemsStandard(string transferList)
         {
             if (transferList == string.Empty)
             {
@@ -50,25 +37,12 @@ namespace Seeker
             }
         }
 
-        public static void RestoreDownloadTransferItems(string transferListLegacy, string transferListV2)
+        public static void RestoreDownloadTransferItems(string transferList)
         {
-            if (transferListV2 == string.Empty)
-            {
-                RestoreDownloadTransferItemsLegacy(transferListLegacy);
-            }
-            else
-            {
-                TransferItems.TransferItemManagerDL = new TransferItemManager();
-                using (var stream = new System.IO.StringReader(transferListV2))
-                {
-                    var serializer = new System.Xml.Serialization.XmlSerializer(TransferItems.TransferItemManagerDL.GetType());
-                    TransferItems.TransferItemManagerDL = serializer.Deserialize(stream) as TransferItemManager;
-                    TransferItems.TransferItemManagerDL.OnRelaunch();
-                }
-            }
+            RestoreDownloadTransferItemsStandard(transferList);
         }
 
-        public static void RestoreDownloadTransferItemsLegacy(string transferList)
+        public static void RestoreDownloadTransferItemsStandard(string transferList)
         {
             if (transferList == string.Empty)
             {
