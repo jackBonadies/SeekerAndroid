@@ -938,7 +938,7 @@ namespace Seeker.Chatroom
 
             if (!PreferencesState.CurrentlyLoggedIn)
             {
-                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_browse), ToastLength.Short);
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_send_message), ToastLength.Short);
                 return;
             }
             if (string.IsNullOrEmpty(msg.MessageText))
