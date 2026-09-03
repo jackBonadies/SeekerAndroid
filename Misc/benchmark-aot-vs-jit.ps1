@@ -54,7 +54,7 @@ function Invoke-Arm {
     )
 
     $sw = [Diagnostics.Stopwatch]::StartNew()
-    & dotnet @buildArgs
+    & dotnet @buildArgs | Out-Host
     if ($LASTEXITCODE -ne 0) { throw "$Label build failed with exit code $LASTEXITCODE." }
     Write-Host ('build+install: {0:n0}s' -f $sw.Elapsed.TotalSeconds)
 

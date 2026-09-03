@@ -638,7 +638,6 @@ namespace Seeker
                 return false;
             }
 
-            // a number too large to parse falls back to the property default.
             if (match.Groups["seconds"].Success && int.TryParse(match.Groups["seconds"].Value, out int seconds))
             {
                 dropIntervalSec = seconds;
@@ -676,7 +675,7 @@ namespace Seeker
         {
             try
             {
-                await Task.Delay(dropIntervalSec * 1000, ct).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(dropIntervalSec), ct).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
