@@ -565,7 +565,15 @@ namespace Seeker
                     // Connected | LoggingIn at this point, and unwinds to Disconnected through Disconnect().
                     if (username.Contains("reject"))
                     {
-                        throw new LoginRejectedException($"The server rejected login attempt: mock rejection for {username}");
+                        throw new LoginRejectedException($"The server rejected login attempt: INVALIDPASS");
+                    } 
+                    else if (username.Contains("serverfull")) 
+                    {
+                        throw new LoginRejectedException($"The server rejected login attempt: SVRFULL");
+                    }
+                    else if (username.Contains("rejectnew")) 
+                    {
+                        throw new LoginRejectedException($"The server rejected login attempt: INVALIDUSERNAME: too short");
                     }
 
                     ServerInfo = new ServerInfo(parentMinSpeed: 1, parentSpeedRatio: 1, wishlistInterval: 120);
@@ -2501,6 +2509,17 @@ namespace Seeker
         public Task StopPublicChatAsync(CancellationToken? cancellationToken = null)
             => throw new NotImplementedException();
 
+        public Task AddHatedInterestAsync(string interest, CancellationToken? cancellationToken = null)
+            => throw new NotImplementedException();
+
+        public Task RemoveHatedInterestAsync(string interest, CancellationToken? cancellationToken = null)
+            => throw new NotImplementedException();
+
+        public Task AddLikedInterestAsync(string interest, CancellationToken? cancellationToken = null)
+            => throw new NotImplementedException();
+        
+        public Task RemoveLikedInterestAsync(string interest, CancellationToken? cancellationToken = null)
+            => throw new NotImplementedException();
         // --- IDisposable ---
         public void Dispose()
         {
