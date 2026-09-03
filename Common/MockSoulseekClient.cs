@@ -735,7 +735,13 @@ namespace Seeker
             }
         }
 
-        public async Task<BrowseResponse> BrowseAsync(string username, BrowseOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<BrowseResponse> BrowseAsync(string username, BrowseOptions options = null, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "browse");
+            return BrowseInternalAsync(username, options, cancellationToken);
+        }
+
+        private async Task<BrowseResponse> BrowseInternalAsync(string username, BrowseOptions options, CancellationToken? cancellationToken)
         {
             if (BrowseAsyncHandler != null) return await BrowseAsyncHandler(username, options, cancellationToken);
             int millisecondDelay = 100;
@@ -837,7 +843,13 @@ namespace Seeker
             return browseResponse;
         }
 
-        public async Task<IReadOnlyCollection<Soulseek.Directory>> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null, bool isLegacy = false)
+        public Task<IReadOnlyCollection<Soulseek.Directory>> GetDirectoryContentsAsync(string username, string directoryName, int? token = null, CancellationToken? cancellationToken = null, bool isLegacy = false)
+        {
+            ThrowIfRejectRequested(username, "fetch directory contents");
+            return GetDirectoryContentsInternalAsync(username, directoryName, token, cancellationToken, isLegacy);
+        }
+
+        private async Task<IReadOnlyCollection<Soulseek.Directory>> GetDirectoryContentsInternalAsync(string username, string directoryName, int? token, CancellationToken? cancellationToken, bool isLegacy)
         {
             if (GetDirectoryContentsAsyncHandler != null)
             {
@@ -1567,7 +1579,12 @@ namespace Seeker
 
 
 
-        public async Task<(Soulseek.Search Search, IReadOnlyCollection<SearchResponse> Responses)> SearchAsync(SearchQuery query, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<(Soulseek.Search Search, IReadOnlyCollection<SearchResponse> Responses)> SearchAsync(SearchQuery query, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null)
+        {
+            return SearchToCollectionAsync(query, scope, token, options, cancellationToken);
+        }
+
+        private async Task<(Soulseek.Search Search, IReadOnlyCollection<SearchResponse> Responses)> SearchToCollectionAsync(SearchQuery query, SearchScope scope, int? token, SearchOptions options, CancellationToken? cancellationToken)
         {
             if (SearchAsyncHandler != null) return await SearchAsyncHandler(query, scope, token, options, cancellationToken);
             var resolvedScope = scope ?? new SearchScope(SearchScopeType.Network);
@@ -1766,7 +1783,12 @@ namespace Seeker
             return (searchCompleted, allResponses.AsReadOnly());
         }
 
-        public async Task<Soulseek.Search> SearchAsync(SearchQuery query, Action<SearchResponse> responseHandler, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<Soulseek.Search> SearchAsync(SearchQuery query, Action<SearchResponse> responseHandler, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null)
+        {
+            return SearchToCallbackAsync(query, responseHandler, scope, token, options, cancellationToken);
+        }
+
+        private async Task<Soulseek.Search> SearchToCallbackAsync(SearchQuery query, Action<SearchResponse> responseHandler, SearchScope scope, int? token, SearchOptions options, CancellationToken? cancellationToken)
         {
             if (SearchWithHandlerAsyncHandler != null) return await SearchWithHandlerAsyncHandler(query, responseHandler, scope, token, options, cancellationToken);
             var resolvedScope = scope ?? new SearchScope(SearchScopeType.Network);
@@ -1785,7 +1807,13 @@ namespace Seeker
             return searchCompleted;
         }
 
-        public async Task<Transfer> DownloadAsync(string username, string remoteFilename, string localFilename, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<Transfer> DownloadAsync(string username, string remoteFilename, string localFilename, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "download files");
+            return DownloadToFileAsync(username, remoteFilename, localFilename, size, startOffset, token, options, cancellationToken);
+        }
+
+        private async Task<Transfer> DownloadToFileAsync(string username, string remoteFilename, string localFilename, long? size, long startOffset, int? token, TransferOptions options, CancellationToken? cancellationToken)
         {
             if (DownloadToFileAsyncHandler != null) return await DownloadToFileAsyncHandler(username, remoteFilename, localFilename, size, startOffset, token, options, cancellationToken);
             var fileMode = startOffset > 0 ? FileMode.Append : FileMode.Create;
@@ -1793,19 +1821,37 @@ namespace Seeker
             return await DownloadInternalAsync(username, remoteFilename, size ?? 1024, startOffset, token ?? GetNextToken(), outputStreamFactory, options, cancellationToken ?? CancellationToken.None);
         }
 
-        public async Task<Transfer> DownloadAsync(string username, string remoteFilename, Func<Task<System.IO.Stream>> outputStreamFactory, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<Transfer> DownloadAsync(string username, string remoteFilename, Func<Task<System.IO.Stream>> outputStreamFactory, long? size = null, long startOffset = 0, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "download files");
+            return DownloadToStreamAsync(username, remoteFilename, outputStreamFactory, size, startOffset, token, options, cancellationToken);
+        }
+
+        private async Task<Transfer> DownloadToStreamAsync(string username, string remoteFilename, Func<Task<System.IO.Stream>> outputStreamFactory, long? size, long startOffset, int? token, TransferOptions options, CancellationToken? cancellationToken)
         {
             if (DownloadToStreamAsyncHandler != null) return await DownloadToStreamAsyncHandler(username, remoteFilename, outputStreamFactory, size, startOffset, token, options, cancellationToken);
             return await DownloadInternalAsync(username, remoteFilename, size ?? 1024, startOffset, token ?? GetNextToken(), outputStreamFactory, options, cancellationToken ?? CancellationToken.None);
         }
 
-        public async Task<Transfer> UploadAsync(string username, string remoteFilename, string localFilename, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<Transfer> UploadAsync(string username, string remoteFilename, string localFilename, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "upload files");
+            return UploadFromFileAsync(username, remoteFilename, localFilename, token, options, cancellationToken);
+        }
+
+        private async Task<Transfer> UploadFromFileAsync(string username, string remoteFilename, string localFilename, int? token, TransferOptions options, CancellationToken? cancellationToken)
         {
             if (UploadFromFileAsyncHandler != null) return await UploadFromFileAsyncHandler(username, remoteFilename, localFilename, token, options, cancellationToken);
             return await UploadInternalAsync(username, remoteFilename, 1024, 0, token ?? GetNextToken(), options, cancellationToken ?? CancellationToken.None);
         }
 
-        public async Task<Transfer> UploadAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        public Task<Transfer> UploadAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "upload files");
+            return UploadFromStreamAsync(username, remoteFilename, size, inputStreamFactory, token, options, cancellationToken);
+        }
+
+        private async Task<Transfer> UploadFromStreamAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token, TransferOptions options, CancellationToken? cancellationToken)
         {
             if (UploadFromStreamAsyncHandler != null) return await UploadFromStreamAsyncHandler(username, remoteFilename, size, inputStreamFactory, token, options, cancellationToken);
             return await UploadInternalAsync(username, remoteFilename, size, 0, token ?? GetNextToken(), options, cancellationToken ?? CancellationToken.None);
@@ -2166,7 +2212,12 @@ namespace Seeker
             }
         }
 
-        public async Task<RoomData> JoinRoomAsync(string roomName, bool isPrivate = false, CancellationToken? cancellationToken = null)
+        public Task<RoomData> JoinRoomAsync(string roomName, bool isPrivate = false, CancellationToken? cancellationToken = null)
+        {
+            return JoinRoomInternalAsync(roomName, isPrivate, cancellationToken);
+        }
+
+        private async Task<RoomData> JoinRoomInternalAsync(string roomName, bool isPrivate, CancellationToken? cancellationToken)
         {
             if (JoinRoomAsyncHandler != null) return await JoinRoomAsyncHandler(roomName, isPrivate, cancellationToken);
 
@@ -2227,7 +2278,12 @@ namespace Seeker
             return roomData;
         }
 
-        public async Task LeaveRoomAsync(string roomName, CancellationToken? cancellationToken = null)
+        public Task LeaveRoomAsync(string roomName, CancellationToken? cancellationToken = null)
+        {
+            return LeaveRoomInternalAsync(roomName, cancellationToken);
+        }
+
+        private async Task LeaveRoomInternalAsync(string roomName, CancellationToken? cancellationToken)
         {
             if (LeaveRoomAsyncHandler != null) { await LeaveRoomAsyncHandler(roomName, cancellationToken); return; }
 
@@ -2247,11 +2303,13 @@ namespace Seeker
             _mockJoinedRoomUsers.TryRemove(roomName, out _);
         }
 
-        private void ThrowIfApplicable(string message)
+        // Mirrors the real client: every public *Async is a non-async wrapper that has the potential
+        // to throw synchronously (i.e. LoggedIn Exception)
+        private void ThrowIfRejectRequested(string value, string operation)
         {
-            if (message.Contains("reject"))
+            if (value != null && value.Contains("reject"))
             {
-                throw new InvalidOperationException($"The server connection must be connected and logged in to send a chat room message (currently: {State})");
+                throw new InvalidOperationException($"The server connection must be connected and logged in to {operation} (currently: {State})");
             }
         }
 
@@ -2269,7 +2327,7 @@ namespace Seeker
 
         public Task SendRoomMessageAsync(string roomName, string message, CancellationToken? cancellationToken = null)
         {
-            ThrowIfApplicable(message);
+            ThrowIfRejectRequested(message, "send a chat room message");
             return SendRoomMessageInternalAsync(roomName, message, cancellationToken);
         }
 
@@ -2282,7 +2340,7 @@ namespace Seeker
 
         public Task SendPrivateMessageAsync(string username, string message, CancellationToken? cancellationToken = null)
         {
-            ThrowIfApplicable(message);
+            ThrowIfRejectRequested(message, "send a private message");
             return SendPrivateMessageInternalAsync(username, message, cancellationToken);
         }
 
@@ -2293,7 +2351,12 @@ namespace Seeker
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public async Task SetStatusAsync(UserPresence status, CancellationToken? cancellationToken = null)
+        public Task SetStatusAsync(UserPresence status, CancellationToken? cancellationToken = null)
+        {
+            return SetStatusInternalAsync(status, cancellationToken);
+        }
+
+        private async Task SetStatusInternalAsync(UserPresence status, CancellationToken? cancellationToken)
         {
             if (SetStatusAsyncHandler != null) { await SetStatusAsyncHandler(status, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
@@ -2306,13 +2369,23 @@ namespace Seeker
             return 20L;
         }
 
-        public async Task SetSharedCountsAsync(int directories, int files, CancellationToken? cancellationToken = null)
+        public Task SetSharedCountsAsync(int directories, int files, CancellationToken? cancellationToken = null)
+        {
+            return SetSharedCountsInternalAsync(directories, files, cancellationToken);
+        }
+
+        private async Task SetSharedCountsInternalAsync(int directories, int files, CancellationToken? cancellationToken)
         {
             if (SetSharedCountsAsyncHandler != null) { await SetSharedCountsAsyncHandler(directories, files, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public async Task<bool> ReconfigureOptionsAsync(SoulseekClientOptionsPatch patch, CancellationToken? cancellationToken = null)
+        public Task<bool> ReconfigureOptionsAsync(SoulseekClientOptionsPatch patch, CancellationToken? cancellationToken = null)
+        {
+            return ReconfigureOptionsInternalAsync(patch, cancellationToken);
+        }
+
+        private async Task<bool> ReconfigureOptionsInternalAsync(SoulseekClientOptionsPatch patch, CancellationToken? cancellationToken)
         {
             if (ReconfigureOptionsAsyncHandler != null) return await ReconfigureOptionsAsyncHandler(patch, cancellationToken);
             Options = (Options ?? new SoulseekClientOptions()).With(
@@ -2347,7 +2420,13 @@ namespace Seeker
             return roomList;
         }
 
-        public async Task<UserData> WatchUserAsync(string username, CancellationToken? cancellationToken = null)
+        public Task<UserData> WatchUserAsync(string username, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "add users");
+            return WatchUserInternalAsync(username, cancellationToken);
+        }
+
+        private async Task<UserData> WatchUserInternalAsync(string username, CancellationToken? cancellationToken)
         {
             var delay = getBimodalDelay(100, 5000);
             await Task.Delay(delay).ConfigureAwait(false);
@@ -2369,25 +2448,47 @@ namespace Seeker
             return new UserData(username, userPresence, _random.Next(0, 10000), _random.Next(0, 10000), _random.Next(0, 10000), _random.Next(0, 10000), GenerateMockCountryCode());
         }
 
-        public async Task UnwatchUserAsync(string username, CancellationToken? cancellationToken = null)
+        public Task UnwatchUserAsync(string username, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "add users");
+            return UnwatchUserInternalAsync(username, cancellationToken);
+        }
+
+        private async Task UnwatchUserInternalAsync(string username, CancellationToken? cancellationToken)
         {
             if (UnwatchUserAsyncHandler != null) { await UnwatchUserAsyncHandler(username, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public async Task AcknowledgePrivateMessageAsync(int privateMessageId, CancellationToken? cancellationToken = null)
+        public Task AcknowledgePrivateMessageAsync(int privateMessageId, CancellationToken? cancellationToken = null)
+        {
+            return AcknowledgePrivateMessageInternalAsync(privateMessageId, cancellationToken);
+        }
+
+        private async Task AcknowledgePrivateMessageInternalAsync(int privateMessageId, CancellationToken? cancellationToken)
         {
             if (AcknowledgePrivateMessageAsyncHandler != null) { await AcknowledgePrivateMessageAsyncHandler(privateMessageId, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public async Task ChangePasswordAsync(string password, CancellationToken? cancellationToken = null)
+        public Task ChangePasswordAsync(string password, CancellationToken? cancellationToken = null)
+        {
+            return ChangePasswordInternalAsync(password, cancellationToken);
+        }
+
+        private async Task ChangePasswordInternalAsync(string password, CancellationToken? cancellationToken)
         {
             if (ChangePasswordAsyncHandler != null) { await ChangePasswordAsyncHandler(password, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public async Task GrantUserPrivilegesAsync(string username, int days, CancellationToken? cancellationToken = null)
+        public Task GrantUserPrivilegesAsync(string username, int days, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "grant user privileges");
+            return GrantUserPrivilegesInternalAsync(username, days, cancellationToken);
+        }
+
+        private async Task GrantUserPrivilegesInternalAsync(string username, int days, CancellationToken? cancellationToken)
         {
             if (GrantUserPrivilegesAsyncHandler != null) { await GrantUserPrivilegesAsyncHandler(username, days, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
@@ -2427,7 +2528,13 @@ namespace Seeker
             }
         }
 
-        public async Task<UserStatistics> GetUserStatisticsAsync(string username, CancellationToken? cancellationToken = null)
+        public Task<UserStatistics> GetUserStatisticsAsync(string username, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "fetch user statistics");
+            return GetUserStatisticsInternalAsync(username, cancellationToken);
+        }
+
+        private async Task<UserStatistics> GetUserStatisticsInternalAsync(string username, CancellationToken? cancellationToken)
         {
             if (GetUserStatisticsAsyncHandler != null) return await GetUserStatisticsAsyncHandler(username, cancellationToken);
             // this will either be very slow or very fast to test it coming in before or after UserInfo
@@ -2438,7 +2545,13 @@ namespace Seeker
             return await Task.FromResult<UserStatistics>(userStats);
         }
 
-        public async Task<UserInfo> GetUserInfoAsync(string username, CancellationToken? cancellationToken = null)
+        public Task<UserInfo> GetUserInfoAsync(string username, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(username, "fetch user information");
+            return GetUserInfoInternalAsync(username, cancellationToken);
+        }
+
+        private async Task<UserInfo> GetUserInfoInternalAsync(string username, CancellationToken? cancellationToken)
         {
             if (GetUserInfoAsyncHandler != null) return await GetUserInfoAsyncHandler(username, cancellationToken);
             await Task.Delay(100);
@@ -2461,13 +2574,24 @@ namespace Seeker
             return res;
         }
 
-        public async Task SendUploadSpeedAsync(int speed, CancellationToken? cancellationToken = null)
+        public Task SendUploadSpeedAsync(int speed, CancellationToken? cancellationToken = null)
+        {
+            return SendUploadSpeedInternalAsync(speed, cancellationToken);
+        }
+
+        private async Task SendUploadSpeedInternalAsync(int speed, CancellationToken? cancellationToken)
         {
             if (SendUploadSpeedAsyncHandler != null) { await SendUploadSpeedAsyncHandler(speed, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
         }
 
-        public async Task SetRoomTickerAsync(string roomName, string message, CancellationToken? cancellationToken = null)
+        public Task SetRoomTickerAsync(string roomName, string message, CancellationToken? cancellationToken = null)
+        {
+            ThrowIfRejectRequested(message, "set chat room tickers");
+            return SetRoomTickerInternalAsync(roomName, message, cancellationToken);
+        }
+
+        private async Task SetRoomTickerInternalAsync(string roomName, string message, CancellationToken? cancellationToken)
         {
             if (SetRoomTickerAsyncHandler != null) { await SetRoomTickerAsyncHandler(roomName, message, cancellationToken); return; }
             await Task.Delay(SimulatedDelayMs / 5).ConfigureAwait(false);
@@ -2515,7 +2639,13 @@ namespace Seeker
         public Task<Task<Transfer>> EnqueueUploadAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
             => throw new NotImplementedException();
 
-        public async Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool wasFileLatin1Decoded = false, bool wasFolderLatin1Decoded = false)
+        public Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool wasFileLatin1Decoded = false, bool wasFolderLatin1Decoded = false)
+        {
+            ThrowIfRejectRequested(username, "check download queue position");
+            return GetDownloadPlaceInQueueInternalAsync(username, filename, cancellationToken, wasFileLatin1Decoded, wasFolderLatin1Decoded);
+        }
+
+        private async Task<int> GetDownloadPlaceInQueueInternalAsync(string username, string filename, CancellationToken? cancellationToken, bool wasFileLatin1Decoded, bool wasFolderLatin1Decoded)
         {
             await Task.Delay(_random.Next(0, 5000));
             return _random.Next(1, 125);
