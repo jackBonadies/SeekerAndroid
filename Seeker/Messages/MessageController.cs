@@ -880,7 +880,18 @@ namespace Seeker.Messages
                 RaiseMessageReceived(msg);
             });
             Logger.Debug("useranme to mesasge " + usernameToMessage);
-            SeekerState.SoulseekClient.SendPrivateMessageAsync(usernameToMessage, msg.MessageText).ContinueWith(continueWithAction);
+            // otherwise SendPrivateMessageAsync can throw syncronously (on loggedin precheck) which can crash the thread
+            //   now we treat it like any other failure
+            Task sendTask;
+            try
+            {
+                sendTask = SeekerState.SoulseekClient.SendPrivateMessageAsync(usernameToMessage, msg.MessageText);
+            } 
+            catch (Exception e)
+            {
+                sendTask = Task.FromException(e);
+            }
+            sendTask.ContinueWith(continueWithAction);
         }
 
         public static void UndoDeleteMessagesFromUser((string username, List<Message> messages, int readCount) deletedData)
