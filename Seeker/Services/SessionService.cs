@@ -336,17 +336,20 @@ namespace Seeker.Services
                     else if (loginRejectedMessage != null && loginRejectedMessage.Contains("INVALIDVERSION"))
                     {
                         Logger.Firebase("InvalidVersion - this is unexpected");
-                        msg = SeekerApplication.GetString(Resource.String.invalid_password);
+                        msg = SeekerApplication.GetString(Resource.String.invalid_client_version);
+                        clearCreds = false;
                     }
                     else if (loginRejectedMessage != null && loginRejectedMessage.Contains("SVRFULL"))
                     {
                         Logger.Firebase("SVRFULL - this is unexpected");
                         msg = SeekerApplication.GetString(Resource.String.invalid_server_full);
+                        clearCreds = false;
                     }
                     else if (loginRejectedMessage != null && loginRejectedMessage.Contains("SVRPRIVATE"))
                     {
                         Logger.Firebase("SVRPRIVATE - this is unexpected");
                         msg = SeekerApplication.GetString(Resource.String.invalid_server_private);
+                        clearCreds = false;
                     }
                     else
                     {
