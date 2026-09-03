@@ -563,17 +563,17 @@ namespace Seeker
 
                     // stands in for a LoginResponse with Succeeded == false. note that the real client is in
                     // Connected | LoggingIn at this point, and unwinds to Disconnected through Disconnect().
-                    if (username.Contains("reject"))
+                    if (username.Contains("rejectnew")) 
+                    {
+                        throw new LoginRejectedException($"The server rejected login attempt: INVALIDUSERNAME: too short");
+                    }
+                    else if (username.Contains("reject"))
                     {
                         throw new LoginRejectedException($"The server rejected login attempt: INVALIDPASS");
                     } 
                     else if (username.Contains("serverfull")) 
                     {
                         throw new LoginRejectedException($"The server rejected login attempt: SVRFULL");
-                    }
-                    else if (username.Contains("rejectnew")) 
-                    {
-                        throw new LoginRejectedException($"The server rejected login attempt: INVALIDUSERNAME: too short");
                     }
 
                     ServerInfo = new ServerInfo(parentMinSpeed: 1, parentSpeedRatio: 1, wishlistInterval: 120);
