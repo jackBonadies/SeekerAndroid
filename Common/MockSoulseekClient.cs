@@ -2473,6 +2473,7 @@ namespace Seeker
 
         public Task ChangePasswordAsync(string password, CancellationToken? cancellationToken = null)
         {
+            ThrowIfRejectRequested(password, "change password");
             return ChangePasswordInternalAsync(password, cancellationToken);
         }
 
