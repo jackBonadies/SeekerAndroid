@@ -47,7 +47,7 @@ if ($times.Count -eq 0) {
 
 # Turn animations back on (no side effects)
 foreach ($setting in 'window_animation_scale', 'transition_animation_scale', 'animator_duration_scale') {
-    & adb -s $Device shell settings put global $setting 0 | Out-Null
+    & adb -s $Device shell settings put global $setting 1 | Out-Null
 }
 
 $sorted = @($times | Sort-Object)
