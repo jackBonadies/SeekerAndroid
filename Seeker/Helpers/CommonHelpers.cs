@@ -378,7 +378,18 @@ namespace Seeker
 
         public static void ChangePasswordLogic(string newPassword)
         {
-            SeekerState.SoulseekClient.ChangePasswordAsync(newPassword).ContinueWith(new Action<Task>
+            // otherwise ChangePasswordAsync can throw syncronously (on loggedin precheck) which can crash the thread
+            //   now we treat it like any other failure
+            Task changePasswordTask;
+            try
+            {
+                changePasswordTask = SeekerState.SoulseekClient.ChangePasswordAsync(newPassword);
+            }
+            catch (Exception e)
+            {
+                changePasswordTask = Task.FromException(e);
+            }
+            changePasswordTask.ContinueWith(new Action<Task>
                 ((Task t) =>
                 {
                     SeekerState.ActiveActivityRef.RunOnUiThread(() =>
@@ -444,7 +455,18 @@ namespace Seeker
         private static void GivePrivilegesLogic(string username, int numDaysInt)
         {
             SeekerApplication.Toaster.ShowToast(SeekerState.ActiveActivityRef.GetString(Resource.String.sending__), ToastLength.Short);
-            SeekerState.SoulseekClient.GrantUserPrivilegesAsync(username, numDaysInt).ContinueWith(new Action<Task>
+            // otherwise GrantUserPrivilegesAsync can throw syncronously (on loggedin precheck) which can crash the thread
+            //   now we treat it like any other failure
+            Task grantPrivilegesTask;
+            try
+            {
+                grantPrivilegesTask = SeekerState.SoulseekClient.GrantUserPrivilegesAsync(username, numDaysInt);
+            }
+            catch (Exception e)
+            {
+                grantPrivilegesTask = Task.FromException(e);
+            }
+            grantPrivilegesTask.ContinueWith(new Action<Task>
                 ((Task t) =>
                 {
                     if (t.IsFaulted)
