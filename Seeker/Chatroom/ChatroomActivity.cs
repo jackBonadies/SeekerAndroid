@@ -73,6 +73,18 @@ namespace Seeker
         protected override void OnCreate(Bundle savedInstanceState)
         {
             Logger.Debug("chatroom activity on create");
+
+            //base.OnCreate will re-instantiates the saved fragments so we must repopulate the static it uses first
+            if (savedInstanceState != null
+                && savedInstanceState.GetBoolean(SAVE_STATE_AT_INNER_KEY)
+                && ChatroomInnerFragment.OurRoomInfo == null)
+            {
+                Logger.Debug("ourroominfo is null - restoring chatroom inner fragment room info");
+                RestoreStartingRoomInfo(savedInstanceState);
+                //this means we have since been killed, so have the post login task rejoin the room
+                ChatroomController.StartingState = ChatroomInnerFragment.OurRoomInfo?.Name;
+            }
+
             base.OnCreate(savedInstanceState);
 
             ChatroomActivityRef = this;
@@ -87,32 +99,27 @@ namespace Seeker
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
             //this.SupportActionBar.SetDisplayShowHomeEnabled(true);
-            bool startWithUserFragment = false;
+            bool startWithInnerChatroomFragment = false;
 
             backPressedCallback = new GenericOnBackPressedCallback(false, onBackPressedAction);
             OnBackPressedDispatcher.AddCallback(backPressedCallback);
 
-            if (savedInstanceState != null && savedInstanceState.GetBoolean(SAVE_STATE_AT_INNER_KEY))
+            var restoredInner = SupportFragmentManager.FindFragmentByTag(INNER_FRAGMENT_TAG);
+            if (restoredInner != null && ChatroomInnerFragment.OurRoomInfo == null)
             {
-                Logger.Debug("restoring chatroom inner fragment");
-                if (ChatroomInnerFragment.OurRoomInfo == null)
+                Logger.Firebase("restore inner chatroom with no room info");
+                if (!SupportFragmentManager.PopBackStackImmediate(INNER_FRAGMENT_BACKSTACK, (int)AndroidX.Fragment.App.FragmentManager.PopBackStackInclusive))
                 {
-                    Logger.Debug("ourroominfo is null");
-                    RestoreStartingRoomInfo(savedInstanceState);
-                    ChatroomController.StartingState = ChatroomInnerFragment.OurRoomInfo != null ? ChatroomInnerFragment.OurRoomInfo.Name : null;
-                    //this means we have since been killed
+                    SupportFragmentManager.BeginTransaction().Remove(restoredInner).Commit();
                 }
-                if (ChatroomInnerFragment.OurRoomInfo != null)
-                {
-                    startWithUserFragment = true;
-                    SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(ChatroomInnerFragment.OurRoomInfo), INNER_FRAGMENT_TAG).Commit();
-                    backPressedCallback.Enabled = true;
-                }
-                else
-                {
-                    Logger.Firebase("restore inner chatroom with no room info");
-                }
-                //savedInstanceState.Clear(); //else we will keep doing the first even if the second was done by intent..
+                restoredInner = null;
+            }
+
+            if (restoredInner != null)
+            {
+                Logger.Debug("restored chatroom inner fragment");
+                startWithInnerChatroomFragment = true;
+                backPressedCallback.Enabled = true;
             }
             else if (Intent != null) //if an intent started this activity
             {
@@ -125,7 +132,7 @@ namespace Seeker
                     }
                     else
                     {
-                        startWithUserFragment = true;
+                        startWithInnerChatroomFragment = true;
                         Soulseek.RoomInfo roomInfo = ResolveRoomInfoForNotificationOrDummy(goToRoom);
                         SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), INNER_FRAGMENT_TAG).Commit();
                         backPressedCallback.Enabled = true;
@@ -135,7 +142,7 @@ namespace Seeker
                 }
             }
 
-            if (!startWithUserFragment)
+            if (!startWithInnerChatroomFragment && SupportFragmentManager.FindFragmentByTag(OVERVIEW_FRAGMENT_TAG) == null)
             {
                 SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomOverviewFragment(), OVERVIEW_FRAGMENT_TAG).Commit();
             }
