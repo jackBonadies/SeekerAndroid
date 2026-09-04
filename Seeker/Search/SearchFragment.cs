@@ -184,15 +184,9 @@ namespace Seeker
         public static void SetCustomViewTabNumberInner(View container, Context c)
         {
             int numTabs = SearchTabHelper.SearchTabCollection.Keys.Count;
-
-            ImageView icon = container.FindViewById<ImageView>(Resource.Id.search_tabs_icon);
-            TextView numberText = container.FindViewById<TextView>(Resource.Id.search_tabs_number);
-
-            int idOfDrawable = Resource.Drawable.numeric_tab_outline;
             string text = numTabs >= 100 ? "99+" : numTabs.ToString();
 
-            Android.Graphics.Drawables.Drawable drawable = c.Resources.GetDrawable(idOfDrawable, c.Theme);
-            icon.SetImageDrawable(drawable);
+            TextView numberText = container.FindViewById<TextView>(Resource.Id.search_tabs_number);
             numberText.Text = text;
         }
 
