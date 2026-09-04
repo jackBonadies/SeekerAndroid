@@ -61,7 +61,12 @@ namespace Seeker
         private LinearLayoutManager treePathLayoutManager;
         private TreePathRecyclerAdapter treePathRecyclerAdapter;
 
-        private static Stack<Tuple<int, int>> ScrollPositionRestore = new Stack<Tuple<int, int>>();
+        /// <summary>
+        /// A dictionary (where key is path) instead of a stack as its possible to start browsing deep in the tree (Browse at Location)
+        /// or jump up multiple (when clicking on a node in the path).  This makes things simpler than always trying to sync the stack.
+        /// If we have been to the directory then moved deeper, then we saved its scroll position here.
+        /// </summary>
+        private static Dictionary<string, Tuple<int, int>> ScrollPositionRestore = new Dictionary<string, Tuple<int, int>>();
         private static Tuple<int, int> ScrollPositionRestoreRotate = null;
 
 
@@ -90,10 +95,15 @@ namespace Seeker
         {
             try
             {
+                string currentDirectory = state.GetCurrentDirectoryName();
+                if (currentDirectory == null)
+                {
+                    return;
+                }
                 int index = browseLayoutManager.FindFirstVisibleItemPosition();
                 View v = browseLayoutManager.FindViewByPosition(index);
                 int top = (v == null) ? 0 : (v.Top - recyclerViewDirectories.PaddingTop);
-                ScrollPositionRestore.Push(new Tuple<int, int>(index, top));
+                ScrollPositionRestore[currentDirectory] = new Tuple<int, int>(index, top);
             }
             catch (Exception e)
             {
@@ -126,8 +136,16 @@ namespace Seeker
         {
             try
             {
-                Tuple<int, int> pos = ScrollPositionRestore.Pop();
-                browseLayoutManager.ScrollToPositionWithOffset(pos.Item1, pos.Item2);
+                string currentDirectory = state.GetCurrentDirectoryName();
+                if (currentDirectory == null)
+                {
+                    return;
+                }
+                if (ScrollPositionRestore.TryGetValue(currentDirectory, out Tuple<int, int> pos))
+                {
+                    ScrollPositionRestore.Remove(currentDirectory);
+                    browseLayoutManager.ScrollToPositionWithOffset(pos.Item1, pos.Item2);
+                }
             }
             catch (Exception e)
             {

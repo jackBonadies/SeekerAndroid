@@ -88,6 +88,23 @@ namespace Seeker
             }
         }
 
+        /// <summary>
+        /// Unique per browse tree
+        /// </summary>
+        public string? GetCurrentDirectoryName()
+        {
+            lock (DataItems)
+            {
+                if (DataItems.Count == 0)
+                {
+                    return null;
+                }
+                var first = DataItems[0];
+                var currentNode = first.IsDirectory() ? first.Node?.Parent : first.Node;
+                return currentNode?.Data?.Name;
+            }
+        }
+
         public bool IsAtRoot()
         {
             if (DataItems.Count == 0) 
