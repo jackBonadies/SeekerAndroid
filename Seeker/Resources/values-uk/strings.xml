@@ -317,7 +317,6 @@
     <string name="startup_room_on">{0} налаштовано на приєднання під час запуску</string>
     <string name="notif_room_off">Сповіщення вимкнено для: {0}</string>
     <string name="notif_room_on">Сповіщення увімкнено для: {0}</string>
-    <string name="new_room_message_received">Нове повідомлення в кімнаті {0}</string>
     <string name="removing_mod">Вилучення користувача як модератора в {0}</string>
     <string name="adding_mod">Додавання користувача як модератора в {0}</string>
     <string name="inviting_user_to">Запрошення користувача до {0}</string>

@@ -297,7 +297,6 @@
     <string name="startup_room_on">{0} is now set to join on startup</string>
     <string name="notif_room_off">Benachrichtigungen deaktiviert für: {0}</string>
     <string name="notif_room_on">Benachrichtigungen aktiviert für: {0}</string>
-    <string name="new_room_message_received">Neue Nachricht im Raum {0}</string>
     <string name="removing_mod">Removing user as moderator in {0}</string>
     <string name="adding_mod">Adding user as moderator in {0}</string>
     <string name="inviting_user_to">Inviting user to {0}</string>

@@ -297,7 +297,6 @@
     <string name="startup_room_on">{0} ahora está configurado para unirse al inicio</string>
     <string name="notif_room_off">Las notificaciones se han desactivado durante: {0}</string>
     <string name="notif_room_on">Las notificaciones se han activado durante: {0}</string>
-    <string name="new_room_message_received">Nuevo mensaje en la sala {0}</string>
     <string name="removing_mod">Eliminando usuario como moderador en {0}</string>
     <string name="adding_mod">Añadiendo usuario como moderador en {0}</string>
     <string name="inviting_user_to">Invitando usuario a {0}</string>
