@@ -146,6 +146,11 @@ namespace Seeker.Chatroom
 
         public static bool IsPrivate(string roomName)
         {
+            if (RoomList == null)
+            {
+                // cold start from chatroom notification
+                return JoinedRoomData.TryGetValue(roomName, out var roomData) && roomData.IsPrivate;
+            }
             if (RoomList.Private.Any(privRoom => { return privRoom.Name == roomName; }))
             {
                 return true;
@@ -162,6 +167,12 @@ namespace Seeker.Chatroom
 
         public static bool IsOwnedByUs(Soulseek.RoomInfo roomInfo)
         {
+            if (RoomList == null)
+            {
+                // cold start from chatroom notification
+                return JoinedRoomData.TryGetValue(roomInfo.Name, out var roomData)
+                    && roomData.Owner == PreferencesState.Username;
+            }
             return RoomList.Owned.Any(ownedRoom => { return ownedRoom.Name == roomInfo.Name; }); //use AreWeOwner instead maybe...
         }
 

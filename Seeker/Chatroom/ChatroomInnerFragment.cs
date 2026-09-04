@@ -552,6 +552,14 @@ namespace Seeker.Chatroom
         {
             Logger.Debug("Chatroom Inner Fragment OnCreateView");
 
+            if (OurRoomInfo == null)
+            {
+                //in case the system re-instantiates fragments with the default ctor
+                Logger.Firebase("ChatroomInnerFragment.OnCreateView with null OurRoomInfo");
+                this.Activity?.Finish();
+                return null;
+            }
+
             //if (Username == null)
             //{
             //    Username = savedInstanceState.GetString("Inner_Username_ToMessage");

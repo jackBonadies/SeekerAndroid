@@ -102,9 +102,16 @@ namespace Seeker
                     ChatroomController.StartingState = ChatroomInnerFragment.OurRoomInfo != null ? ChatroomInnerFragment.OurRoomInfo.Name : null;
                     //this means we have since been killed
                 }
-                startWithUserFragment = true;
-                SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(ChatroomInnerFragment.OurRoomInfo), INNER_FRAGMENT_TAG).Commit();
-                backPressedCallback.Enabled = true;
+                if (ChatroomInnerFragment.OurRoomInfo != null)
+                {
+                    startWithUserFragment = true;
+                    SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(ChatroomInnerFragment.OurRoomInfo), INNER_FRAGMENT_TAG).Commit();
+                    backPressedCallback.Enabled = true;
+                }
+                else
+                {
+                    Logger.Firebase("restore inner chatroom with no room info");
+                }
                 //savedInstanceState.Clear(); //else we will keep doing the first even if the second was done by intent..
             }
             else if (Intent != null) //if an intent started this activity
@@ -119,7 +126,7 @@ namespace Seeker
                     else
                     {
                         startWithUserFragment = true;
-                        Soulseek.RoomInfo roomInfo = ChatroomController.RoomListParsed.FirstOrDefault((roomInfo) => { return roomInfo.Name == goToRoom; }); //roomListParsed can be null, causing crash.
+                        Soulseek.RoomInfo roomInfo = ResolveRoomInfoForNotificationOrDummy(goToRoom);
                         SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), INNER_FRAGMENT_TAG).Commit();
                         backPressedCallback.Enabled = true;
                         //switch in that fragment...
@@ -185,14 +192,34 @@ namespace Seeker
                 }
                 else
                 {
-                    Soulseek.RoomInfo roomInfo = ChatroomController.RoomListParsed.FirstOrDefault((roomInfo) => { return roomInfo.Name == goToRoom; });
-                    SupportFragmentManager.BeginTransaction().Remove(new ChatroomInnerFragment()).Commit();
+                    Soulseek.RoomInfo roomInfo = ResolveRoomInfoForNotificationOrDummy(goToRoom);
                     SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame, new ChatroomInnerFragment(roomInfo), INNER_FRAGMENT_TAG).Commit();
                     backPressedCallback.Enabled = true;
                     //switch in that fragment...
                     //SupportFragmentManager.BeginTransaction().Replace(Resource.Id.content_frame,new MessagesOverviewFragment()).Commit();
                 }
             }
+        }
+
+        /// <summary>
+        /// On a cold start (app is killed but user taps a notification) we wont have the RoomList
+        /// (also the case where the room doesnt exist anymore on the server / we got kicked from
+        ///   private room)
+        /// </summary>
+        private static Soulseek.RoomInfo ResolveRoomInfoForNotificationOrDummy(string roomName)
+        {
+            Soulseek.RoomInfo roomInfo = ChatroomController.RoomListParsed?.FirstOrDefault((r) => { return r.Name == roomName; });
+            if (roomInfo == null)
+            {
+                roomInfo = new Soulseek.RoomInfo(roomName, 0); // dummy seed room
+            }
+            //if we are not logged in yet then JoinRoomApi is a no-op, so add it to 
+            //StartingState so post login task joins
+            if (!ChatroomController.HasRoomData(roomName))
+            {
+                ChatroomController.StartingState = roomName;
+            }
+            return roomInfo;
         }
 
         private const string INNER_ROOM_NAME_CONST = "INNER_ROOM_NAME_CONST";
