@@ -272,6 +272,7 @@
     <string name="room_data_still_loading">Too fast! Still retrieving room data...</string>
     <string name="must_be_logged_to_browse">Must be logged in to browse a user</string>
     <string name="must_be_logged_to_get_room_list">Must be logged in to get chatroom list</string>
+    <string name="must_be_logged_to_join_room">Must be logged in to join chatroom</string>
     <string name="must_be_logged_to_request_user_info">Must be logged in to request user info</string>
     <string name="must_be_logged_to_create_room">Must be logged in to create chatroom</string>
     <string name="must_be_logged_to_add_or_remove_user">Must be logged in to add or remove user</string>

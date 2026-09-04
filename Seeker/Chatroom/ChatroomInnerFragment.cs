@@ -141,6 +141,11 @@ namespace Seeker.Chatroom
                 SetJoinEmptyState(JoinEmptyState.None);
                 return;
             }
+            if (!PreferencesState.CurrentlyLoggedIn)
+            {
+                ShowJoinErrorUi(this.Resources.GetString(Resource.String.must_be_logged_to_join_room), null, showRetry: false);
+                return;
+            }
             if (ChatroomController.RoomJoinStates.TryGetValue(OurRoomInfo.Name, out var status))
             {
                 ApplyJoinStateUi(status.State, status.FailureMessage);
@@ -174,30 +179,43 @@ namespace Seeker.Chatroom
                     this.Activity?.InvalidateOptionsMenu();
                     break;
                 case RoomJoinState.Forbidden:
-                    if (joinFailedMessage != null)
-                    {
-                        joinFailedMessage.Text = this.Resources.GetString(Resource.String.room_join_failed);
-                    }
-                    if (joinFailedSubtitle != null)
-                    {
-                        joinFailedSubtitle.Text = this.Resources.GetString(Resource.String.room_join_forbidden);
-                    }
-                    SetJoinEmptyState(JoinEmptyState.Error);
-                    UpdateSendEnabled();
+                    ShowJoinErrorUi(
+                        this.Resources.GetString(Resource.String.room_join_failed),
+                        this.Resources.GetString(Resource.String.room_join_forbidden),
+                        showRetry: true);
                     break;
                 case RoomJoinState.Failed:
-                    if (joinFailedMessage != null)
-                    {
-                        joinFailedMessage.Text = this.Resources.GetString(Resource.String.room_join_failed);
-                    }
-                    if (joinFailedSubtitle != null)
-                    {
-                        joinFailedSubtitle.Text = failureMessage ?? string.Empty;
-                    }
-                    SetJoinEmptyState(JoinEmptyState.Error);
-                    UpdateSendEnabled();
+                    ShowJoinErrorUi(
+                        this.Resources.GetString(Resource.String.room_join_failed),
+                        failureMessage,
+                        showRetry: true);
                     break;
             }
+            SetActivityStatusesVisibility();
+            SetTickerVisibility();
+        }
+
+        /// <summary>
+        /// For either failure or not logged in
+        /// </summary>
+        private void ShowJoinErrorUi(string message, string subtitle, bool showRetry)
+        {
+            if (joinFailedMessage != null)
+            {
+                joinFailedMessage.Text = message;
+            }
+            if (joinFailedSubtitle != null)
+            {
+                joinFailedSubtitle.Text = subtitle ?? string.Empty;
+                joinFailedSubtitle.Visibility = string.IsNullOrEmpty(subtitle) ? ViewStates.Gone : ViewStates.Visible;
+            }
+            if (joinFailedRetry != null)
+            {
+                joinFailedRetry.Visibility = showRetry ? ViewStates.Visible : ViewStates.Gone;
+            }
+            StopTickerLoadingPulse();
+            SetJoinEmptyState(JoinEmptyState.Error);
+            UpdateSendEnabled();
             SetActivityStatusesVisibility();
             SetTickerVisibility();
         }
