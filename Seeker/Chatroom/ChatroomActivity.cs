@@ -224,9 +224,6 @@ namespace Seeker
 
         private const string INNER_ROOM_NAME_CONST = "INNER_ROOM_NAME_CONST";
         private const string INNER_ROOM_COUNT_CONST = "INNER_ROOM_COUNT_CONST";
-        private const string INNER_ROOM_PRIV_CONST = "INNER_ROOM_PRIV_CONST";
-        private const string INNER_ROOM_OWNED_CONST = "INNER_ROOM_OWNED_CONST";
-        private const string INNER_ROOM_MOD_CONST = "INNER_ROOM_MOD_CONST";
 
         private const string INNER_FRAGMENT_TAG = "ChatroomInnerFragment";
         private const string OVERVIEW_FRAGMENT_TAG = "OuterListChatroomFragment";
@@ -238,18 +235,12 @@ namespace Seeker
         /// Its all the info we need to rejoin the room and get the full data.
         /// </summary>
         /// <param name="outState"></param>
-        private static void SaveStartingRoomInfo(Bundle outState, ChatroomInnerFragment f)
+        private static void SaveStartingRoomInfo(Bundle outState)
         {
             if (ChatroomInnerFragment.OurRoomInfo != null)
             {
                 outState.PutString(INNER_ROOM_NAME_CONST, ChatroomInnerFragment.OurRoomInfo.Name);
                 outState.PutInt(INNER_ROOM_COUNT_CONST, ChatroomInnerFragment.OurRoomInfo.UserCount);
-            }
-            if (f != null && ChatroomController.RoomList != null)
-            {
-                outState.PutBoolean(INNER_ROOM_PRIV_CONST, f.IsPrivate());
-                outState.PutBoolean(INNER_ROOM_OWNED_CONST, f.IsOwned());
-                outState.PutBoolean(INNER_ROOM_MOD_CONST, f.IsOperatedByUs());
             }
         }
 
@@ -264,9 +255,6 @@ namespace Seeker
             }
             Logger.Firebase("restoring info...");
             ChatroomInnerFragment.OurRoomInfo = new Soulseek.RoomInfo(rName, rCount);
-            ChatroomInnerFragment.cachedMod = inState.GetBoolean(INNER_ROOM_MOD_CONST, false);
-            ChatroomInnerFragment.cachedOwned = inState.GetBoolean(INNER_ROOM_OWNED_CONST, false);
-            ChatroomInnerFragment.cachedPrivate = inState.GetBoolean(INNER_ROOM_PRIV_CONST, false);
         }
 
         protected override void OnSaveInstanceState(Bundle outState) //gets hit on rotate, home button press
@@ -276,7 +264,7 @@ namespace Seeker
             {
                 outState.PutBoolean(SAVE_STATE_AT_INNER_KEY, true);
                 Logger.Debug("SaveStateAtChatroomInner OnSaveInstanceState");
-                SaveStartingRoomInfo(outState, f as ChatroomInnerFragment);
+                SaveStartingRoomInfo(outState);
                 Logger.Debug("currentlyInsideRoomName -- OnSaveInstanceState -- " + ChatroomController.currentlyInsideRoomName);
                 //ChatroomController.currentlyInsideRoomName = ChatroomInnerFragment.OurRoomInfo.Name; //this sets it after we are leaving....
             }

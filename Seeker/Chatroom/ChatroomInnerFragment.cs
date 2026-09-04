@@ -63,11 +63,6 @@ namespace Seeker.Chatroom
 
         public static Soulseek.RoomInfo OurRoomInfo = null;
 
-        //these are for if we get killed by system on the chatroom inner fragment and we do not yet have the room list.
-        public static bool cachedPrivate = false;
-        public static bool cachedOwned = false;
-        public static bool cachedMod = false;
-
         public bool IsPrivate()
         {
             return ChatroomController.IsPrivate(OurRoomInfo.Name);
@@ -1212,21 +1207,10 @@ namespace Seeker.Chatroom
                 var activity = fragment.Activity as ChatroomActivity;
                 string roomName = OurRoomInfo.Name;
 
-                bool isPrivate;
-                bool isOwnedByUs;
-                bool isOperator;
-                if (ChatroomController.RoomList != null)
-                {
-                    isPrivate = fragment.IsPrivate();
-                    isOwnedByUs = fragment.IsOwned();
-                    isOperator = fragment.IsOperatedByUs();
-                }
-                else
-                {
-                    isPrivate = cachedPrivate;
-                    isOwnedByUs = cachedOwned;
-                    isOperator = cachedMod;
-                }
+                //all three are only ever read after `joined` below, so we will always have room data
+                bool isPrivate = fragment.IsPrivate();
+                bool isOwnedByUs = fragment.IsOwned();
+                bool isOperator = fragment.IsOperatedByUs();
                 bool joined = ChatroomController.HasRoomData(roomName);
 
                 var config = new AnchoredMenuConfig();
