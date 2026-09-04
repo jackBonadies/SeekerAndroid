@@ -318,7 +318,6 @@
     <string name="startup_room_on">{0} Теперь установлен при запуске</string>
     <string name="notif_room_off">Уведомления отключены для: {0}</string>
     <string name="notif_room_on">Уведомления включены для: {0}</string>
-    <string name="new_room_message_received">Новое сообщение в комнате {0}</string>
     <string name="removing_mod">Удаление пользователя как модератора в {0}</string>
     <string name="adding_mod">Добавление пользователя как модератора в {0}</string>
     <string name="inviting_user_to">Приглашение пользователя в {0}</string>

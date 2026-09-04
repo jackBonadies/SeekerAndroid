@@ -181,59 +181,37 @@ namespace Seeker
             base.OnPrepareOptionsMenu(menu);
         }
 
-        public static void SetCustomViewTabNumberInner(View container, Context c)
+        public static void SetCustomViewTabNumberInner(View container)
         {
-            int numTabs = SearchTabHelper.SearchTabCollection.Keys.Count;
-
-            ImageView icon = container.FindViewById<ImageView>(Resource.Id.search_tabs_icon);
-            TextView numberText = container.FindViewById<TextView>(Resource.Id.search_tabs_number);
-
-            int idOfDrawable = Resource.Drawable.numeric_tab_outline;
-            string text = numTabs >= 100 ? "99+" : numTabs.ToString();
-
-            Android.Graphics.Drawables.Drawable drawable = c.Resources.GetDrawable(idOfDrawable, c.Theme);
-            icon.SetImageDrawable(drawable);
-            numberText.Text = text;
+            TextView numberText = container?.FindViewById<TextView>(Resource.Id.search_tabs_number);
+            if (numberText != null)
+            {
+                int numTabs = SearchTabHelper.SearchTabCollection.Keys.Count;
+                string text = numTabs >= 100 ? "99+" : numTabs.ToString();
+                numberText.Text = text;
+            }
+            else
+            {
+                // this should not happen anymore
+                Logger.Debug("SetCustomViewTabNumberInner numberText is null");
+            }
         }
 
         public void SetCustomViewTabNumberImageViewState()
         {
-            View container = null;
-            Context c = null;
-            if (this.Activity is AndroidX.AppCompat.App.AppCompatActivity appCompat)
-            {
-                c = this.Activity;
-                container = appCompat.SupportActionBar?.CustomView?.FindViewById<FrameLayout>(Resource.Id.search_tabs);
-            }
-            else
-            {
-                c = SeekerState.MainActivityRef;
-                container = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<FrameLayout>(Resource.Id.search_tabs);
-            }
-
-            SetCustomViewTabNumberInner(container, c);
+            SetCustomViewTabNumberInner(GetActionBarCustomView()?.FindViewById<FrameLayout>(Resource.Id.search_tabs));
         }
 
-        public EditText GetCustomViewSearchHere()
+        /// <summary>
+        /// The app bar custom view (custom_menu_layout: the search box + the tab count icon).
+        /// </summary>
+        private View GetActionBarCustomView()
         {
             if (this.Activity is AndroidX.AppCompat.App.AppCompatActivity appCompat)
             {
-                var editText = appCompat.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
-                if (editText == null)
-                {
-
-                }
-                return editText;
+                return appCompat.SupportActionBar?.CustomView;
             }
-            else
-            {
-                var editText = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
-                if (editText == null)
-                {
-
-                }
-                return editText;
-            }
+            return SeekerState.MainActivityRef?.SupportActionBar?.CustomView;
         }
 
         private void SetFilterState()
@@ -321,12 +299,7 @@ namespace Seeker
         {
             var searchTab = SearchTabHelper.SearchTabCollection[tabToGoTo];
 
-            var searchHereEditText = GetCustomViewSearchHere();
-            if (searchHereEditText != null)
-            {
-                searchHereEditText.Text = searchTab.LastSearchTerm;
-            }
-            SetSearchHintTarget(searchTab.SearchTarget);
+            RenderActionBarCustomView(GetActionBarCustomView(), searchTab.LastSearchTerm);
             if (!fromIntent)
             {
                 SetTransitionDrawableState();
@@ -359,7 +332,6 @@ namespace Seeker
             {
                 GetTransitionDrawable()?.InvalidateSelf();
             }
-            this.SetCustomViewTabNumberImageViewState();
             this.Activity?.InvalidateOptionsMenu();
 
             if (!fromIntent)
@@ -518,43 +490,58 @@ namespace Seeker
         }
 
 
-        public static void ConfigureSupportCustomView(View customView/*, Context contextJustInCase*/) //todo: seems to be an error. which seems entirely possible. where ActiveActivityRef does not get set yet.
+        public static void ConfigureSupportCustomView(View customView)
         {
             Logger.Debug("ConfigureSupportCustomView");
             AutoCompleteTextView actv = customView.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
-            try
-            {
-                actv.Text = SearchingText; //this works with string.Empty and emojis so I dont think its here...
-                UpdateDrawableState(actv);
-                actv.Touch += Actv_Touch;
-            }
-            catch (System.ArgumentException e)
-            {
-                Logger.Firebase("ArugmentException Value does not fall within range: " + SearchingText + " " + e.Message);
-            }
-            catch (System.Exception e)
-            {
-                Logger.Firebase("catchException Value does not fall within range: " + SearchingText + " " + e.Message);
-            }
-            catch
-            {
-                Logger.Firebase("catchunspecException Value does not fall within range: " + SearchingText);
-            }
             FrameLayout iv = customView.FindViewById<FrameLayout>(Resource.Id.search_tabs);
+
+            iv.Click -= Iv_Click;
             iv.Click += Iv_Click;
+            actv.Touch -= Actv_Touch;
+            actv.Touch += Actv_Touch;
             actv.EditorAction -= Search_EditorActionHELPER;
             actv.EditorAction += Search_EditorActionHELPER;
-            SetSearchHintTarget(SearchTabHelper.SearchTarget, actv);
-
-            Context contextToUse = SeekerState.ActiveActivityRef;
-
-            actv.Adapter = new ArrayAdapter<string>(contextToUse, Resource.Layout.search_dropdown_item, PreferencesState.SearchHistory);
             actv.KeyPress -= Actv_KeyPressHELPER;
             actv.KeyPress += Actv_KeyPressHELPER;
+            actv.FocusChange -= UiHelpers.OnFocusAdjustNothing;
             actv.FocusChange += UiHelpers.OnFocusAdjustNothing;
+            actv.TextChanged -= Actv_TextChanged;
             actv.TextChanged += Actv_TextChanged;
 
-            SetCustomViewTabNumberInner(iv, contextToUse);
+            actv.Adapter = new ArrayAdapter<string>(SeekerState.ActiveActivityRef, Resource.Layout.search_dropdown_item, PreferencesState.SearchHistory);
+
+            RenderActionBarCustomView(customView, SearchingText);
+        }
+
+        /// <summary>
+        /// Renders every app bar custom view widget - search text, hint, its clear button, and the tab
+        /// count badge - from the current tab's state. 
+        /// </summary>
+        public static void RenderActionBarCustomView(View customView, string searchText)
+        {
+            SearchingText = searchText ?? string.Empty;
+
+            AutoCompleteTextView actv = customView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
+            if (actv != null)
+            {
+                try
+                {
+                    actv.Text = SearchingText;
+                    UpdateDrawableState(actv);
+                }
+                catch (System.ArgumentException e)
+                {
+                    Logger.Firebase("ArugmentException Value does not fall within range: " + SearchingText + " " + e.Message);
+                }
+                catch (System.Exception e)
+                {
+                    Logger.Firebase("catchException Value does not fall within range: " + SearchingText + " " + e.Message);
+                }
+                SetSearchHintTarget(SearchTabHelper.SearchTarget, actv);
+            }
+
+            SetCustomViewTabNumberInner(customView?.FindViewById<FrameLayout>(Resource.Id.search_tabs));
         }
 
         private static void Actv_Touch(object sender, View.TouchEventArgs e)

@@ -451,7 +451,8 @@ namespace Seeker.Services
                 finalUri = musicFile.ToURI().ToString();
                 if (memoryMode)
                 {
-                    stream.Write(bytes.Array, bytes.Offset, bytes.Count);
+                    ChunkedStreamWriter.CopyInChunks(bytes, stream.Write);
+                    stream.Flush();
                     stream.Close();
                 }
                 else
@@ -631,7 +632,7 @@ namespace Seeker.Services
                     DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
                     finalUri = mFile.Uri.ToString();
                     using System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
-                    stream.Write(bytes.Array, bytes.Offset, bytes.Count);
+                    ChunkedStreamWriter.WriteChunked(stream, bytes);
                 }
                 else
                 {

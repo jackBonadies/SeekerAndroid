@@ -297,7 +297,6 @@
     <string name="startup_room_on">{0} sekarang diatur untuk bergabung saat mulai (startup)</string>
     <string name="notif_room_off">Notifikasi dimatikan untuk: {0}</string>
     <string name="notif_room_on">Notifikasi dinyalakan untuk: {0}</string>
-    <string name="new_room_message_received">Pesan baru di ruangan {0}</string>
     <string name="removing_mod">Menghapus pengguna sebagai moderator di {0}</string>
     <string name="adding_mod">Menambahkan pengguna sebagai moderator di {0}</string>
     <string name="inviting_user_to">Mengundang pengguna ke {0}</string>

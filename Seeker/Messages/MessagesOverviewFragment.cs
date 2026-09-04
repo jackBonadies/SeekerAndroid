@@ -62,6 +62,7 @@ namespace Seeker.Messages
             itemTouchHelper.AttachToRecyclerView(recyclerViewOverview);
 
             var fabNewMessage = rootView.FindViewById<Google.Android.Material.FloatingActionButton.FloatingActionButton>(Resource.Id.fabNewMessage);
+            AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(fabNewMessage, new Seeker.Helpers.BottomMarginInsetsListener(fabNewMessage));
             fabNewMessage.Click += (s, e) => (Activity as MessagesActivity)?.ShowEditTextMessageUserDialog();
 
             created = true;

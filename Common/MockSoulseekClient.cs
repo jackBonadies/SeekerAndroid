@@ -758,7 +758,7 @@ namespace Seeker
                     new[] { new FileAttribute(FileAttributeType.BitRate, 320), new FileAttribute(FileAttributeType.Length, 240) });
 
             BrowseResponse browseResponse;
-            if (username == "large2")
+            if (username.Contains("xlarge"))
             {
                 var dirs = new List<Soulseek.Directory>
                 {
@@ -779,6 +779,10 @@ namespace Seeker
                     new("@@mockuser\\Documents\\Misc\\Test\\Test2"),
                     new("@@mockuser\\Documents\\Misc\\Test\\Test2\\HelloWorld", new[] { MakeFile("readme.txt", 1_000) }),
                 };
+
+                dirs.Add(new Soulseek.Directory("@@mockuser\\Music\\Library"));
+                dirs.AddRange(GenerateBulkMusicDirectories("@@mockuser\\Music\\Library", artistCount: 78, albumsPerArtist: 5, songsPerAlbum: 10, includeArtistDirs: true));
+
                 var lockedDirs = new List<Soulseek.Directory>
                 {
                     new("@@mockuser\\Music\\ArtistA\\Album3 (Private)", new[] { MakeFile("01 Unreleased.mp3"), MakeFile("02 Demo failed.mp3") }),
@@ -800,6 +804,9 @@ namespace Seeker
                     new("@@mockuser\\Music\\Various\\Compilation", new[] { MakeFile("01 Song.mp3"), MakeFile("02 Song.mp3"), MakeFile("03 Song.mp3") }),
                     new("@@mockuser\\Documents\\Misc", new[] { MakeFile("readme.txt", 1_000) }),
                 };
+
+                dirs.AddRange(GenerateBulkMusicDirectories("@@mockuser\\Music\\Library", artistCount: 26, albumsPerArtist: 5, songsPerAlbum: 8, includeArtistDirs: false));
+
                 var lockedDirs = new List<Soulseek.Directory>
                 {
                     new("@@mockuser\\Music\\ArtistA\\Album3 (Private)", new[] { MakeFile("01 Unreleased.mp3"), MakeFile("02 Demo failed.mp3") }),
@@ -836,7 +843,11 @@ namespace Seeker
                     new("@@mockuser\\Music"),
                     new("@@mockuser\\Documents"),
                     new("@@mockuser\\Pictures"),
+                    new("@@mockuser\\Music\\Library"),
                 };
+
+                dirs.AddRange(GenerateBulkMusicDirectories("@@mockuser\\Music\\Library", artistCount: 26, albumsPerArtist: 3, songsPerAlbum: 5, includeArtistDirs: true));
+
                 browseResponse = new BrowseResponse(dirs);
             }
 
@@ -883,6 +894,54 @@ namespace Seeker
             }
 
             return directories.AsReadOnly();
+        }
+
+        private static readonly string[] _bulkAlbumWords = { "Echoes", "Horizons", "Nightfall", "Static", "Reverie", "Voyager", "Lowlands", "Aftermath", "Driftwood" };
+        private static readonly string[] _bulkSongWords = { "Opening", "Drifting", "Signal", "Undertow", "Parallax", "Lanterns", "Meridian", "Afterglow", "Kite", "Glasshouse", "Slow Tide", "Northline" };
+        private static readonly int[] _bulkBitRates = { 128, 192, 256, 320 };
+
+        private static List<Soulseek.Directory> GenerateBulkMusicDirectories(string rootPath, int artistCount, int albumsPerArtist, int songsPerAlbum, bool includeArtistDirs)
+        {
+            Soulseek.File MakeBulkFile(string name, long size, int bitRate, int lengthSeconds) =>
+                new Soulseek.File(1, name, size, name[(name.LastIndexOf('.') + 1)..],
+                    new[] { new FileAttribute(FileAttributeType.BitRate, bitRate), new FileAttribute(FileAttributeType.Length, lengthSeconds) });
+
+            var dirs = new List<Soulseek.Directory>(artistCount * (albumsPerArtist + 1));
+
+            for (int a = 0; a < artistCount; a++)
+            {
+                char letter = (char)('A' + (a % 26));
+                int wave = (a / 26) + 1;
+                string artist = wave == 1 ? $"Artist{letter}" : $"Artist{letter}{wave}";
+                string artistPath = $"{rootPath}\\{artist}";
+
+                if (includeArtistDirs)
+                {
+                    dirs.Add(new Soulseek.Directory(artistPath, new[] { MakeBulkFile("folder.jpg", 150_000 + (a * 1_337), 320, 240) }));
+                }
+
+                for (int b = 1; b <= albumsPerArtist; b++)
+                {
+                    bool flac = ((a + b) % 3) == 0;
+                    string ext = flac ? "flac" : "mp3";
+                    int bitRate = flac ? 1411 : _bulkBitRates[(a + b) % _bulkBitRates.Length];
+                    string album = $"Album{b} - {_bulkAlbumWords[(a + b) % _bulkAlbumWords.Length]} ({1990 + ((a * 3 + b) % 34)})";
+                    string albumPath = $"{artistPath}\\{album}";
+
+                    var files = new List<Soulseek.File>(songsPerAlbum);
+                    for (int s = 1; s <= songsPerAlbum; s++)
+                    {
+                        int lengthSeconds = 145 + (((a + b + s) * 17) % 320);
+                        long size = flac ? 22_000_000 + (lengthSeconds * 34_000L) : 2_500_000 + (lengthSeconds * (bitRate * 125L));
+                        string song = $"{s:D2} Song{s} - {_bulkSongWords[(a + b + s) % _bulkSongWords.Length]}.{ext}";
+                        files.Add(MakeBulkFile(song, size, bitRate, lengthSeconds));
+                    }
+
+                    dirs.Add(new Soulseek.Directory(albumPath, files));
+                }
+            }
+
+            return dirs;
         }
 
         private static readonly Random _random = new Random();

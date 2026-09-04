@@ -210,6 +210,9 @@ namespace Seeker
             SeekerState.MainActivityRef = this;
             SeekerState.ActiveActivityRef = this;
 
+            this.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);
+            SearchFragment.ConfigureSupportCustomView(this.SupportActionBar.CustomView);
+
             pager = (AndroidX.ViewPager2.Widget.ViewPager2)FindViewById(Resource.Id.pager);
             TabsPagerAdapter adapter = new TabsPagerAdapter(this);
 
@@ -1084,8 +1087,6 @@ namespace Seeker
 
                     this.SupportActionBar.SetDisplayShowCustomEnabled(true);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(false);
-                    this.SupportActionBar.SetCustomView(Resource.Layout.custom_menu_layout);
-                    SearchFragment.ConfigureSupportCustomView(this.SupportActionBar.CustomView/*, this*/);
                     if (goToSearchTab != int.MaxValue)
                     {
                         if (SearchFragment.Instance?.Activity == null || !(SearchFragment.Instance.Activity.Lifecycle.CurrentState.IsAtLeast(Lifecycle.State.Started))) //this happens if we come from settings activity. Main Activity has NOT been started. SearchFragment has the .Actvity ref of an OLD activity.  so we are not ready yet. 

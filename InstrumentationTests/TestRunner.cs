@@ -24,6 +24,13 @@ namespace InstrumentationTests
     {
         const string Tag = "SeekerTests";
 
+        public TestInstrumentation() { }
+
+        public TestInstrumentation(IntPtr handle, Android.Runtime.JniHandleOwnership transfer)
+            : base(handle, transfer)
+        {
+        }
+
         public override void OnCreate(Bundle arguments)
         {
             base.OnCreate(arguments);

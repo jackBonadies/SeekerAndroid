@@ -63,11 +63,6 @@ namespace Seeker.Chatroom
 
         public static Soulseek.RoomInfo OurRoomInfo = null;
 
-        //these are for if we get killed by system on the chatroom inner fragment and we do not yet have the room list.
-        public static bool cachedPrivate = false;
-        public static bool cachedOwned = false;
-        public static bool cachedMod = false;
-
         public bool IsPrivate()
         {
             return ChatroomController.IsPrivate(OurRoomInfo.Name);
@@ -141,6 +136,11 @@ namespace Seeker.Chatroom
                 SetJoinEmptyState(JoinEmptyState.None);
                 return;
             }
+            if (!PreferencesState.CurrentlyLoggedIn)
+            {
+                ShowJoinErrorUi(this.Resources.GetString(Resource.String.must_be_logged_to_join_room), null, showRetry: false);
+                return;
+            }
             if (ChatroomController.RoomJoinStates.TryGetValue(OurRoomInfo.Name, out var status))
             {
                 ApplyJoinStateUi(status.State, status.FailureMessage);
@@ -174,30 +174,43 @@ namespace Seeker.Chatroom
                     this.Activity?.InvalidateOptionsMenu();
                     break;
                 case RoomJoinState.Forbidden:
-                    if (joinFailedMessage != null)
-                    {
-                        joinFailedMessage.Text = this.Resources.GetString(Resource.String.room_join_failed);
-                    }
-                    if (joinFailedSubtitle != null)
-                    {
-                        joinFailedSubtitle.Text = this.Resources.GetString(Resource.String.room_join_forbidden);
-                    }
-                    SetJoinEmptyState(JoinEmptyState.Error);
-                    UpdateSendEnabled();
+                    ShowJoinErrorUi(
+                        this.Resources.GetString(Resource.String.room_join_failed),
+                        this.Resources.GetString(Resource.String.room_join_forbidden),
+                        showRetry: true);
                     break;
                 case RoomJoinState.Failed:
-                    if (joinFailedMessage != null)
-                    {
-                        joinFailedMessage.Text = this.Resources.GetString(Resource.String.room_join_failed);
-                    }
-                    if (joinFailedSubtitle != null)
-                    {
-                        joinFailedSubtitle.Text = failureMessage ?? string.Empty;
-                    }
-                    SetJoinEmptyState(JoinEmptyState.Error);
-                    UpdateSendEnabled();
+                    ShowJoinErrorUi(
+                        this.Resources.GetString(Resource.String.room_join_failed),
+                        failureMessage,
+                        showRetry: true);
                     break;
             }
+            SetActivityStatusesVisibility();
+            SetTickerVisibility();
+        }
+
+        /// <summary>
+        /// For either failure or not logged in
+        /// </summary>
+        private void ShowJoinErrorUi(string message, string subtitle, bool showRetry)
+        {
+            if (joinFailedMessage != null)
+            {
+                joinFailedMessage.Text = message;
+            }
+            if (joinFailedSubtitle != null)
+            {
+                joinFailedSubtitle.Text = subtitle ?? string.Empty;
+                joinFailedSubtitle.Visibility = string.IsNullOrEmpty(subtitle) ? ViewStates.Gone : ViewStates.Visible;
+            }
+            if (joinFailedRetry != null)
+            {
+                joinFailedRetry.Visibility = showRetry ? ViewStates.Visible : ViewStates.Gone;
+            }
+            StopTickerLoadingPulse();
+            SetJoinEmptyState(JoinEmptyState.Error);
+            UpdateSendEnabled();
             SetActivityStatusesVisibility();
             SetTickerVisibility();
         }
@@ -551,6 +564,14 @@ namespace Seeker.Chatroom
         public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             Logger.Debug("Chatroom Inner Fragment OnCreateView");
+
+            if (OurRoomInfo == null)
+            {
+                //in case the system re-instantiates fragments with the default ctor
+                Logger.Firebase("ChatroomInnerFragment.OnCreateView with null OurRoomInfo");
+                this.Activity?.Finish();
+                return null;
+            }
 
             //if (Username == null)
             //{
@@ -1186,21 +1207,10 @@ namespace Seeker.Chatroom
                 var activity = fragment.Activity as ChatroomActivity;
                 string roomName = OurRoomInfo.Name;
 
-                bool isPrivate;
-                bool isOwnedByUs;
-                bool isOperator;
-                if (ChatroomController.RoomList != null)
-                {
-                    isPrivate = fragment.IsPrivate();
-                    isOwnedByUs = fragment.IsOwned();
-                    isOperator = fragment.IsOperatedByUs();
-                }
-                else
-                {
-                    isPrivate = cachedPrivate;
-                    isOwnedByUs = cachedOwned;
-                    isOperator = cachedMod;
-                }
+                //all three are only ever read after `joined` below, so we will always have room data
+                bool isPrivate = fragment.IsPrivate();
+                bool isOwnedByUs = fragment.IsOwned();
+                bool isOperator = fragment.IsOperatedByUs();
                 bool joined = ChatroomController.HasRoomData(roomName);
 
                 var config = new AnchoredMenuConfig();

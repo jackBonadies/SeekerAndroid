@@ -146,6 +146,11 @@ namespace Seeker.Chatroom
 
         public static bool IsPrivate(string roomName)
         {
+            if (RoomList == null)
+            {
+                // cold start from chatroom notification
+                return JoinedRoomData.TryGetValue(roomName, out var roomData) && roomData.IsPrivate;
+            }
             if (RoomList.Private.Any(privRoom => { return privRoom.Name == roomName; }))
             {
                 return true;
@@ -162,6 +167,12 @@ namespace Seeker.Chatroom
 
         public static bool IsOwnedByUs(Soulseek.RoomInfo roomInfo)
         {
+            if (RoomList == null)
+            {
+                // cold start from chatroom notification
+                return JoinedRoomData.TryGetValue(roomInfo.Name, out var roomData)
+                    && roomData.Owner == PreferencesState.Username;
+            }
             return RoomList.Owned.Any(ownedRoom => { return ownedRoom.Name == roomInfo.Name; }); //use AreWeOwner instead maybe...
         }
 
@@ -804,7 +815,7 @@ namespace Seeker.Chatroom
             JoinedRoomTickers[e.RoomName] = e.Tickers.ToList();
             RoomTickerListReceived?.Invoke(null, e);
         }
-        public static string StartingState = null; //this is if we get killed in the inner fragment.
+        public static string StartingStateRoomToJoin = null; //this is if we get killed in the inner fragment.
         public static void ClearAndCacheJoined()
         {
             if (CurrentlyJoinedRoomNames == null || CurrentlyJoinedRoomNames.Count == 0)
@@ -845,11 +856,11 @@ namespace Seeker.Chatroom
             }
 
             //if we got killed.
-            if (StartingState != null && StartingState != string.Empty)
+            if (!string.IsNullOrEmpty(StartingStateRoomToJoin))
             {
-                Logger.Debug("starting state is not null " + StartingState);
-                JoinRoomApi(StartingState, true, false, false, false);
-                StartingState = null;
+                Logger.Debug("starting state is not null " + StartingStateRoomToJoin);
+                JoinRoomApi(StartingStateRoomToJoin, true, false, false, false);
+                StartingStateRoomToJoin = null;
             }
 
             AttemptedToJoinAutoJoins = true;
@@ -892,8 +903,9 @@ namespace Seeker.Chatroom
                     notifIntent.PutExtra(FromRoomName, roomName); //so we can go to this user..
                     notifIntent.PutExtra(ComingFromMessageTapped, true); //so we can go to this user..
                     PendingIntent pendingIntent =
-                        PendingIntent.GetActivity(SeekerState.ActiveActivityRef, msg.Username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
-                    Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, AppNotifications.CHANNEL_ID_CHATROOM, string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.new_room_message_received), roomName), msg.Username + ": " + msg.MessageText, false);
+                        PendingIntent.GetActivity(SeekerState.ActiveActivityRef, roomName.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                    Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, AppNotifications.CHANNEL_ID_CHATROOM, 
+                        string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.new_room_message_received2), roomName), msg.Username + ": " + msg.MessageText, false);
                     NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
                     // notificationId is a unique int for each notification that you must define
                     notificationManager.Notify(roomName.GetHashCode(), n);
