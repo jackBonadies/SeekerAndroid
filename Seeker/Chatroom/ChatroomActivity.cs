@@ -154,8 +154,12 @@ namespace Seeker
             var f = SupportFragmentManager.FindFragmentByTag(INNER_FRAGMENT_TAG);
             if (f != null && f.IsVisible)
             {
-                if (SupportFragmentManager.BackStackEntryCount == 0) //this is if we got to inner messages through a notification, in which case we are done..
+                if (SupportFragmentManager.BackStackEntryCount == 0) //this is if we got to the inner room through a notification, in which case we are done..
                 {
+                    if (BackNavigationHelpers.GoToMainActivityIfTaskRoot(this))
+                    {
+                        return;
+                    }
                     callback.Enabled = false;
                     OnBackPressedDispatcher.OnBackPressed();
                     callback.Enabled = true;

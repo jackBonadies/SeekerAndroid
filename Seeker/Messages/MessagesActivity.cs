@@ -46,7 +46,6 @@ using AndroidX.Activity;
 
 using Common;
 using Common.Messages;
-using ActivityFlags = Android.Content.ActivityFlags;
 namespace Seeker
 {
 
@@ -222,24 +221,14 @@ namespace Seeker
             {
                 if (SupportFragmentManager.BackStackEntryCount == 0) //this is if we got to inner messages through a notification, in which case we are done..
                 {
-                    bool root = IsTaskRoot;
-                    Logger.Debug("IS TASK ROOT: " + root); //returns false if there is in fact a task behind it (such as the main activity task).
-                    if (IsTaskRoot) //it is TRUE if we swiped seeker from task list and then later followed a notification..
+                    if (BackNavigationHelpers.GoToMainActivityIfTaskRoot(this))
                     {
-                        Intent intent = new Intent(this, typeof(MainActivity));
-                        intent.AddFlags(ActivityFlags.ClearTop);
-                        this.StartActivity(intent);
-                        this.Finish(); //without this, pressing back just launches the main activity (messages will still be behind it)
-                        //and so you can go back infinitely, it will show messages behind it, then it will launch main again, then messages behind it, etc.
                         return;
                     }
-                    else
-                    {
-                        callback.Enabled = false;
-                        OnBackPressedDispatcher.OnBackPressed();
-                        callback.Enabled = true;
-                        return;
-                    }
+                    callback.Enabled = false;
+                    OnBackPressedDispatcher.OnBackPressed();
+                    callback.Enabled = true;
+                    return;
                 }
                 AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.messages_toolbar);
                 myToolbar.Title = SeekerState.ActiveActivityRef.GetString(Resource.String.messages);
