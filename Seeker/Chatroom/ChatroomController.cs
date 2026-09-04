@@ -903,7 +903,7 @@ namespace Seeker.Chatroom
                     notifIntent.PutExtra(FromRoomName, roomName); //so we can go to this user..
                     notifIntent.PutExtra(ComingFromMessageTapped, true); //so we can go to this user..
                     PendingIntent pendingIntent =
-                        PendingIntent.GetActivity(SeekerState.ActiveActivityRef, msg.Username.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
+                        PendingIntent.GetActivity(SeekerState.ActiveActivityRef, roomName.GetHashCode(), notifIntent, CommonHelpers.AppendMutabilityIfApplicable(PendingIntentFlags.UpdateCurrent, true));
                     Notification n = CommonHelpers.CreateNotification(SeekerState.ActiveActivityRef, pendingIntent, AppNotifications.CHANNEL_ID_CHATROOM, 
                         string.Format(SeekerState.ActiveActivityRef.Resources.GetString(Resource.String.new_room_message_received2), roomName), msg.Username + ": " + msg.MessageText, false);
                     NotificationManagerCompat notificationManager = NotificationManagerCompat.From(SeekerState.ActiveActivityRef);
