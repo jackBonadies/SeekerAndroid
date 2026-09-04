@@ -42,7 +42,8 @@ namespace Seeker.Services
                     return false;
                 }
 
-                if (cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
+                var networkInfo = cm.ActiveNetworkInfo;
+                if (networkInfo != null && networkInfo.IsConnected)
                 {
                     bool oldUnmetered = CurrentConnectionIsUnmetered;
                     bool oldVpn = CurrentConnectionIsVpn;

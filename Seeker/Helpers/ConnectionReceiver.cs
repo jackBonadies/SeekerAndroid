@@ -48,9 +48,10 @@ namespace Seeker
 #if DEBUG
                 ConnectivityManager cm = (ConnectivityManager)context.GetSystemService(Context.ConnectivityService);
 
-                if (cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected)
+                var networkInfo = cm.ActiveNetworkInfo;
+                if (networkInfo != null && networkInfo.IsConnected)
                 {
-                    Logger.Debug("info: " + cm.ActiveNetworkInfo.GetDetailedState().ToString());
+                    Logger.Debug("info: " + networkInfo.GetDetailedState().ToString());
                     SeekerApplication.Toaster.ShowToast("Is Connected", ToastLength.Long);
                     NetworkInfo info = cm.GetNetworkInfo(ConnectivityType.Wifi);
                     if (info.IsConnected)
@@ -65,9 +66,9 @@ namespace Seeker
                 }
                 else
                 {
-                    if (cm.ActiveNetworkInfo != null)
+                    if (networkInfo != null)
                     {
-                        Logger.Debug("info: " + cm.ActiveNetworkInfo.GetDetailedState().ToString());
+                        Logger.Debug("info: " + networkInfo.GetDetailedState().ToString());
                         SeekerApplication.Toaster.ShowToast("Is Disconnected", ToastLength.Long);
                     }
                     else
@@ -83,7 +84,8 @@ namespace Seeker
         public static bool DoWeHaveInternet()
         {
             ConnectivityManager cm = (ConnectivityManager)(SeekerState.ActiveActivityRef.GetSystemService(Context.ConnectivityService));
-            return cm.ActiveNetworkInfo != null && cm.ActiveNetworkInfo.IsConnected;
+            var networkInfo = cm.ActiveNetworkInfo;
+            return networkInfo != null && networkInfo.IsConnected;
         }
     }
 }
