@@ -183,11 +183,20 @@ namespace Seeker
 
         public static void SetCustomViewTabNumberInner(View container, Context c)
         {
-            int numTabs = SearchTabHelper.SearchTabCollection.Keys.Count;
-            string text = numTabs >= 100 ? "99+" : numTabs.ToString();
-
-            TextView numberText = container.FindViewById<TextView>(Resource.Id.search_tabs_number);
-            numberText.Text = text;
+            TextView numberText = container?.FindViewById<TextView>(Resource.Id.search_tabs_number);
+            if (numberText != null)
+            {
+                int numTabs = SearchTabHelper.SearchTabCollection.Keys.Count;
+                string text = numTabs >= 100 ? "99+" : numTabs.ToString();
+                numberText.Text = text;
+            } 
+            else
+            {
+                Logger.Debug("SetCustomViewTabNumberInner numberText is null");
+                // we get here if someone clicks on the Intent to go to wishlist tab when the activity 
+                //  has been destroyed in the meantime (and therefore gets recreated) since we end up
+                //  setting the action bar.  This is fine bc we end up configuring the action bar soon after.
+            }
         }
 
         public void SetCustomViewTabNumberImageViewState()
