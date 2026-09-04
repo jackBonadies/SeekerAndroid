@@ -815,7 +815,7 @@ namespace Seeker.Chatroom
             JoinedRoomTickers[e.RoomName] = e.Tickers.ToList();
             RoomTickerListReceived?.Invoke(null, e);
         }
-        public static string StartingState = null; //this is if we get killed in the inner fragment.
+        public static string StartingStateRoomToJoin = null; //this is if we get killed in the inner fragment.
         public static void ClearAndCacheJoined()
         {
             if (CurrentlyJoinedRoomNames == null || CurrentlyJoinedRoomNames.Count == 0)
@@ -856,11 +856,11 @@ namespace Seeker.Chatroom
             }
 
             //if we got killed.
-            if (StartingState != null && StartingState != string.Empty)
+            if (!string.IsNullOrEmpty(StartingStateRoomToJoin))
             {
-                Logger.Debug("starting state is not null " + StartingState);
-                JoinRoomApi(StartingState, true, false, false, false);
-                StartingState = null;
+                Logger.Debug("starting state is not null " + StartingStateRoomToJoin);
+                JoinRoomApi(StartingStateRoomToJoin, true, false, false, false);
+                StartingStateRoomToJoin = null;
             }
 
             AttemptedToJoinAutoJoins = true;

@@ -82,7 +82,7 @@ namespace Seeker
                 Logger.Debug("ourroominfo is null - restoring chatroom inner fragment room info");
                 RestoreStartingRoomInfo(savedInstanceState);
                 //this means we have since been killed, so have the post login task rejoin the room
-                ChatroomController.StartingState = ChatroomInnerFragment.OurRoomInfo?.Name;
+                ChatroomController.StartingStateRoomToJoin = ChatroomInnerFragment.OurRoomInfo?.Name;
             }
 
             base.OnCreate(savedInstanceState);
@@ -126,7 +126,7 @@ namespace Seeker
                 if (Intent.GetBooleanExtra(ChatroomController.ComingFromMessageTapped, false))
                 {
                     string goToRoom = Intent.GetStringExtra(ChatroomController.FromRoomName);
-                    if (goToRoom == string.Empty)
+                    if (string.IsNullOrEmpty(goToRoom))
                     {
                         Logger.Firebase("empty goToUsersMessages");
                     }
@@ -197,7 +197,7 @@ namespace Seeker
             if (intent.GetBooleanExtra(ChatroomController.ComingFromMessageTapped, false))
             {
                 string goToRoom = intent.GetStringExtra(ChatroomController.FromRoomName);
-                if (goToRoom == string.Empty)
+                if (string.IsNullOrEmpty(goToRoom))
                 {
                     Logger.Firebase("empty goToRoom");
                 }
@@ -225,10 +225,10 @@ namespace Seeker
                 roomInfo = new Soulseek.RoomInfo(roomName, 0); // dummy seed room
             }
             //if we are not logged in yet then JoinRoomApi is a no-op, so add it to 
-            //StartingState so post login task joins
-            if (!ChatroomController.HasRoomData(roomName))
+            //StartingState so the post login task joins
+            if (!PreferencesState.CurrentlyLoggedIn && !ChatroomController.HasRoomData(roomName))
             {
-                ChatroomController.StartingState = roomName;
+                ChatroomController.StartingStateRoomToJoin = roomName;
             }
             return roomInfo;
         }
