@@ -267,6 +267,7 @@ namespace Seeker.Settings.Rows
                      Seeker.Services.ServiceLifecycle.IsStartUpServiceCurrentlyRunning
                          ? Resource.String.stop_service
                          : Resource.String.start_service),
+                DisableIfParentDisabled = false,
                 OnClick = (h, r) => { h.StartStopBackgroundService(); h.NotifyRowChanged(r.Id); },
             });
 
