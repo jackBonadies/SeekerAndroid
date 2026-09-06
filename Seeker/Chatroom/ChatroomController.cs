@@ -885,9 +885,13 @@ namespace Seeker.Chatroom
             {
                 foreach (string roomName in JoinedRoomNames)
                 {
-                    if (!CurrentlyJoinedRoomNames.ContainsKey(roomName)) //just in case.
+                    if (!CurrentlyJoinedRoomNames.ContainsKey(roomName) && !IsJoinPending(roomName)) //just in case.
                     {
                         JoinRoomApi(roomName, true, false, false, false);
+                    } 
+                    else
+                    {
+                        Logger.Debug("skipping autojoin for JoinedRoom: " + roomName);
                     }
                 }
             }
@@ -896,7 +900,14 @@ namespace Seeker.Chatroom
             if (!string.IsNullOrEmpty(StartingStateRoomToJoin))
             {
                 Logger.Debug("starting state is not null " + StartingStateRoomToJoin);
-                JoinRoomApi(StartingStateRoomToJoin, true, false, false, false);
+                if (!CurrentlyJoinedRoomNames.ContainsKey(StartingStateRoomToJoin) && !IsJoinPending(StartingStateRoomToJoin))
+                {
+                    JoinRoomApi(StartingStateRoomToJoin, true, false, false, false);
+                }
+                else
+                {
+                    Logger.Debug("skipping autojoin for StartingStateRoomToJoin: " + StartingStateRoomToJoin);
+                }
                 StartingStateRoomToJoin = null;
             }
 
@@ -1325,7 +1336,10 @@ namespace Seeker.Chatroom
             });
         }
 
-
+        public static bool IsJoinPending(string roomName)
+        {
+            return RoomJoinStates.TryGetValue(roomName, out RoomJoinStatus status) && status.State == RoomJoinState.Pending;
+        }
 
         public static void JoinRoomApi(string roomName, bool joining, bool refreshViewAfter, bool feedback, bool fromAutoJoin)
         {
@@ -1378,6 +1392,18 @@ namespace Seeker.Chatroom
                     Logger.Debug(task.Exception.GetType().Name);
                     Logger.Debug(task.Exception.Message);
                     var baseException = task.Exception?.GetBaseException();
+                    if (joining && baseException is Soulseek.NoResponseException && CurrentlyJoinedRoomNames.ContainsKey(roomName))
+                    {
+                        // if we got no response but we are already joined, thats normal
+                        Logger.Debug("no response to join but we are already in the room: " + roomName);
+                        RoomJoinStates[roomName] = new RoomJoinStatus { State = RoomJoinState.Joined };
+                        RoomDataReceived?.Invoke(null, new EventArgs());
+                        if (refreshViewAfter)
+                        {
+                            ChatroomController.GetRoomListApi(false);
+                        }
+                        return;
+                    }
                     bool isForbiddenException = baseException is Soulseek.RoomJoinForbiddenException;
                     if (joining)
                     {
