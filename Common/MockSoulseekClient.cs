@@ -586,6 +586,8 @@ namespace Seeker
                     // stands in for SendConfigurationMessagesAsync
                     RaisePrivilegedUserList();
 
+                    _ = RaiseLoginRoomListAsync();
+
                     StartSpottyDropTimerIfNeeded(username);
                 }
                 catch (Exception ex) when (!(ex is LoginRejectedException) && !(ex is OperationCanceledException) && !(ex is TimeoutException))
@@ -2463,20 +2465,73 @@ namespace Seeker
             return true;
         }
 
+        public int LoginRoomListPublicCount { get; set; } = 5;
+
+        private RoomList FullRoomList { get; set; }
+
+        private object RoomListSyncRoot { get; } = new object();
+
+        private ConcurrentQueue<TaskCompletionSource<RoomList>> RoomListWaits { get; }
+            = new ConcurrentQueue<TaskCompletionSource<RoomList>>();
+
         public async Task<RoomList> GetRoomListAsync(CancellationToken? cancellationToken = null)
         {
             if (GetRoomListAsyncHandler != null) return await GetRoomListAsyncHandler(cancellationToken);
 
-            await Task.Delay(200).ConfigureAwait(false);
+            var wait = new TaskCompletionSource<RoomList>(TaskCreationOptions.RunContinuationsAsynchronously);
+            RoomListWaits.Enqueue(wait);
 
-            var roomList = new RoomList(
-                publicList:            GenerateMockRooms(20, stableCount: 8, suffix: "_public"),
-                privateList:           GenerateMockRooms(10, stableCount: 4, suffix: "_private"),
-                ownedList:             GenerateMockRooms(10, stableCount: 4, suffix: "_owned"),
-                moderatedRoomNameList: GenerateMockRooms(10, stableCount: 4, suffix: "_moderated").Select(r => r.Name));
+            _ = RespondToRoomListRequestAsync();
+
+            return await wait.Task.ConfigureAwait(false);
+        }
+
+        private async Task RespondToRoomListRequestAsync()
+        {
+            await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
+            ReceiveRoomList(GetOrCreateFullRoomList());
+        }
+
+        private async Task RaiseLoginRoomListAsync()
+        {
+            await Task.Delay(SimulatedDelayMs / 4).ConfigureAwait(false);
+            ReceiveRoomList(BuildLoginRoomList());
+        }
+
+        private void ReceiveRoomList(RoomList roomList)
+        {
+            while (RoomListWaits.TryDequeue(out var wait))
+            {
+                if (wait.TrySetResult(roomList))
+                {
+                    break;
+                }
+            }
 
             RaiseRoomListReceived(roomList);
-            return roomList;
+        }
+
+        private RoomList GetOrCreateFullRoomList()
+        {
+            lock (RoomListSyncRoot)
+            {
+                return FullRoomList ??= new RoomList(
+                    publicList:            GenerateMockRooms(20, stableCount: 8, suffix: "_public"),
+                    privateList:           GenerateMockRooms(10, stableCount: 4, suffix: "_private"),
+                    ownedList:             GenerateMockRooms(10, stableCount: 4, suffix: "_owned"),
+                    moderatedRoomNameList: GenerateMockRooms(10, stableCount: 4, suffix: "_moderated").Select(r => r.Name));
+            }
+        }
+
+        private RoomList BuildLoginRoomList()
+        {
+            var full = GetOrCreateFullRoomList();
+
+            return new RoomList(
+                publicList:            full.Public.OrderByDescending(r => r.UserCount).Take(LoginRoomListPublicCount),
+                privateList:           full.Private,
+                ownedList:             full.Owned,
+                moderatedRoomNameList: full.ModeratedRoomNames);
         }
 
         public Task<UserData> WatchUserAsync(string username, CancellationToken? cancellationToken = null)
