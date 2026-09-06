@@ -1371,9 +1371,6 @@ namespace Seeker.Chatroom
                 if (joining)
                 {
                     task = SeekerState.SoulseekClient.JoinRoomAsync(roomName); //this will create it if it does not exist..
-                    String message = "Joining Room: " + roomName;
-                    Android.Util.Log.Warn("seeker", message);
-                    SeekerApplication.Toaster.ShowToast(message, ToastLength.Long);
                 }
                 else
                 {
