@@ -751,7 +751,7 @@ namespace Seeker
                             Logger.Debug("current that is...");
                         }
 
-                        if (ForegroundLifecycleTracker.NumberOfActiveActivities != 0)
+                        if (!ForegroundLifecycleTracker.IsBackground())
                         {
                             Logger.Debug("There is a hole in our logic!!! the pendingstatus and/or current status should not be away!!!");
                         }
