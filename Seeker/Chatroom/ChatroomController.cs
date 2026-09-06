@@ -69,7 +69,13 @@ namespace Seeker.Chatroom
         //tracks the state of any join attempt so the inner fragment can render Pending/Failed/Forbidden UI without racing the event. The status carries the failure message so a fragment opened after a background auto-join failure can still render meaningfully.
         public static System.Collections.Concurrent.ConcurrentDictionary<string, RoomJoinStatus> RoomJoinStates = new System.Collections.Concurrent.ConcurrentDictionary<string, RoomJoinStatus>();
 
-        public static List<string> JoinedRoomNames = null; //these are the ones that the user joined.
+
+        /// <summary>
+        /// The list of rooms that the user has logically joined whether or not they are currently connected.
+        /// If a room is part of this list it means that they have successfully joined as some point in the Seeker Session
+        /// (even if they have since lost server connection), on reconnect we rejoin these, we never persist these to disk.
+        /// </summary>
+        public static List<string> JoinedRoomNames = null;
         public static List<string> AutoJoinRoomNames = null; //we automatically join these at startup.  if all goes well then JoinedRoomNames should contain all of these...
 
         public static List<string> NotifyRoomNames = null; //!!these are ones we are currently joined!! so autojoins after we actually join them and joined but that are not set to autojoin...
@@ -298,12 +304,39 @@ namespace Seeker.Chatroom
             RoomListParsed = RoomList != null ? ParseRoomListForPresentation(RoomList) : null;
         }
 
+        private static Soulseek.RoomInfo getRoomInfo(Soulseek.RoomList roomList, string roomName)
+        {
+            var ownedList = roomList.Owned;
+            var publicList = roomList.Public;
+            var privateList = roomList.Private;
+
+            var foundRoom = ownedList.FirstOrDefault((room) => { return room.Name == roomName; });
+            if (foundRoom != null)
+            {
+                return foundRoom;
+            }
+
+            foundRoom = publicList.FirstOrDefault((room) => { return room.Name == roomName; });
+            if (foundRoom != null)
+            {
+                return foundRoom;
+            }
+
+            foundRoom = privateList.FirstOrDefault((room) => { return room.Name == roomName; });
+            if (foundRoom != null)
+            {
+                return foundRoom;
+            }
+
+            return null;
+        }
+
         //TODO2026 move to lower
         public static List<Soulseek.RoomInfo> ParseRoomListForPresentation(Soulseek.RoomList roomList)
         {
-            List<Soulseek.RoomInfo> ownedList = roomList.Owned.ToList();
-            List<Soulseek.RoomInfo> publicList = roomList.Public.ToList();
-            List<Soulseek.RoomInfo> privateList = roomList.Private.ToList();
+            var ownedList = roomList.Owned;
+            var publicList = roomList.Public;
+            var privateList = roomList.Private;
 
             List<Soulseek.RoomInfo> allRooms = new List<Soulseek.RoomInfo>();
 
@@ -313,23 +346,23 @@ namespace Seeker.Chatroom
                 //find the rooms and add them...
                 foreach (string roomName in JoinedRoomNames)
                 {
-                    Soulseek.RoomInfo foundRoom = ownedList.FirstOrDefault((room) => { return room.Name == roomName; });
-                    if (foundRoom != null)
+                    Soulseek.RoomInfo foundRoom = getRoomInfo(roomList, roomName);
+
+                    // if not part of room list this can be due to the fact we do not have the full
+                    //   room list yet.  If its part of Joined then that means the user logically
+                    //   connected and joined this session so we should still show it.
+                    //   Otherwise, we get disappearing rooms (i.e. low user count, nicotine)
+                    if (foundRoom == null)
                     {
-                        allRooms.Add(foundRoom);
-                        continue;
+                        JoinedRoomData.TryGetValue(roomName, out var roomData);
+                        if (roomData != null) 
+                        {
+                            foundRoom = new Soulseek.RoomInfo(roomName, roomData.UserCount);
+                        }
                     }
-                    foundRoom = publicList.FirstOrDefault((room) => { return room.Name == roomName; });
                     if (foundRoom != null)
                     {
                         allRooms.Add(foundRoom);
-                        continue;
-                    }
-                    foundRoom = privateList.FirstOrDefault((room) => { return room.Name == roomName; });
-                    if (foundRoom != null)
-                    {
-                        allRooms.Add(foundRoom);
-                        continue;
                     }
                 }
             }
@@ -963,6 +996,10 @@ namespace Seeker.Chatroom
             }
             task.ContinueWith((Task<Soulseek.RoomList> task) =>
             {
+                string message = "TASK CONTINUE WITH: Room list received: " + task.Result.PublicCount + "task is Faulted: " + task.IsFaulted;
+                Android.Util.Log.Warn("seeker", message);
+                SeekerApplication.Toaster.ShowToastLong(message);
+
                 if (task.IsFaulted)
                 {
                     RoomListRequestFailed(feedback);
@@ -1321,6 +1358,9 @@ namespace Seeker.Chatroom
                 if (joining)
                 {
                     task = SeekerState.SoulseekClient.JoinRoomAsync(roomName); //this will create it if it does not exist..
+                    String message = "Joining Room: " + roomName;
+                    Android.Util.Log.Warn("seeker", message);
+                    SeekerApplication.Toaster.ShowToast(message, ToastLength.Long);
                 }
                 else
                 {
