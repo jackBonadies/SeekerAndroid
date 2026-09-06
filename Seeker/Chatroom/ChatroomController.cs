@@ -539,10 +539,9 @@ namespace Seeker.Chatroom
             SeekerState.SoulseekClient.PrivateRoomModerationAdded += SoulseekClient_PrivateRoomModerationAdded;
             SeekerState.SoulseekClient.PrivateRoomModerationRemoved += SoulseekClient_PrivateRoomModerationRemoved;
             SeekerState.SoulseekClient.PrivateRoomUserListReceived += SoulseekClient_PrivateRoomUserListReceived;
-            // SeekerState.SoulseekClient.
+            SeekerState.SoulseekClient.RoomListReceived += SoulseekClient_RoomListReceived;
             SeekerState.SoulseekClient.RoomJoined += SoulseekClient_RoomJoined;
             SeekerState.SoulseekClient.RoomLeft += SoulseekClient_RoomLeft;
-            //SeekerState.SoulseekClient.RoomListReceived
             SeekerState.SoulseekClient.RoomMessageReceived += SoulseekClient_RoomMessageReceived;
             SeekerState.SoulseekClient.RoomTickerAdded += SoulseekClient_RoomTickerAdded;
             SeekerState.SoulseekClient.OperatorInPrivateRoomAddedRemoved += SoulseekClient_OperatorInPrivateRoomAddedRemoved;
@@ -557,6 +556,14 @@ namespace Seeker.Chatroom
             JoinedRoomData = new System.Collections.Concurrent.ConcurrentDictionary<string, Soulseek.RoomData>();
 
             IsInitialized = true;
+        }
+
+        private static void SoulseekClient_RoomListReceived(object sender, RoomList e)
+        {
+            RoomList = e;
+            RoomListParsed = ParseRoomListForPresentation(RoomList);
+            IsRoomListLoading = false;
+            RoomListReceived?.Invoke(null, new EventArgs());
         }
 
         private static void SoulseekClient_UserStatusChanged(object sender, UserStatus e)
@@ -994,24 +1001,19 @@ namespace Seeker.Chatroom
             }
             task.ContinueWith((Task<Soulseek.RoomList> task) =>
             {
-                string message = "TASK CONTINUE WITH: Room list received: " + task.Result.PublicCount + "task is Faulted: " + task.IsFaulted;
-                Android.Util.Log.Warn("seeker", message);
-                SeekerApplication.Toaster.ShowToastLong(message);
-
+                // This continueWith is not always going to be (and on startup almost always is not) for our request
+                //   The Server and consequently the Waiter cannot distinuish between receiving code 64 (roomlist) at
+                //   startup vs in response to a request.  So this tends to complete almost immediately with the short list.
                 if (task.IsFaulted)
                 {
                     RoomListRequestFailed(feedback);
                 }
                 else
                 {
-                    RoomList = task.Result;
-                    RoomListParsed = ParseRoomListForPresentation(RoomList);
-                    IsRoomListLoading = false;
                     if (feedback)
                     {
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.room_list_received), ToastLength.Short);
                     }
-                    RoomListReceived?.Invoke(null, new EventArgs());
                 }
             });
         }
