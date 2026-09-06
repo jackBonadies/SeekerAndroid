@@ -601,9 +601,9 @@ namespace Seeker
                 {
                     // User intentionally logged out — do not reconnect
                 }
-                else if (AUTO_CONNECT_ON && PreferencesState.CurrentlyLoggedIn)
+                else
                 {
-                    ReconnectService.Instance.Start();
+                    ReconnectService.Instance.RequestReconnectNow("disconnected");
                 }
             }
             else if (e.PreviousState.HasFlag(SoulseekClientStates.Disconnected))

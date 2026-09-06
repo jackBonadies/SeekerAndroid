@@ -1,4 +1,4 @@
-using Android.Content;
+﻿using Android.Content;
 using Android.Net;
 using Common;
 using Seeker.Helpers;
@@ -10,6 +10,8 @@ namespace Seeker.Services
     {
         public static bool CurrentConnectionIsUnmetered = true;
         public static bool CurrentConnectionIsVpn = false;
+
+        public static volatile bool CurrentConnectionIsBlocked = false;
 
         public static bool IsNetworkPermitting()
         {
@@ -112,6 +114,25 @@ namespace Seeker.Services
             public override void OnLost(Network network)
             {
                 Recompute();
+            }
+
+            /// <summary>
+            /// API 29+. Occurs when we are backgrounded and all network is blocked.
+            /// Happens when no foreground service.
+            /// </summary>
+            public override void OnBlockedStatusChanged(Network network, bool blocked)
+            {
+                Logger.Debug("OnBlockedStatusChanged blocked=" + blocked);
+                CurrentConnectionIsBlocked = blocked;
+                if (blocked)
+                {
+                    // wake so it re-evaluates and gives up now, when we arent blocked we will restart it
+                    ReconnectService.Instance?.TriggerImmediateRetryIfRunning();
+                }
+                else
+                {
+                    ReconnectService.Instance?.RequestReconnectNow("network unblocked");
+                }
             }
 
             private void Recompute()
