@@ -152,34 +152,31 @@ namespace Seeker.Chatroom
 
         public static bool IsPrivate(string roomName)
         {
-            if (RoomList == null)
+            if (RoomList != null)
             {
-                // cold start from chatroom notification
-                return JoinedRoomData.TryGetValue(roomName, out var roomData) && roomData.IsPrivate;
+                if (RoomList.Private.Any(privRoom => { return privRoom.Name == roomName; }))
+                {
+                    return true;
+                }
+                if (RoomList.Owned.Any(ownedRoom => { return ownedRoom.Name == roomName; }))
+                {
+                    return true;
+                }
             }
-            if (RoomList.Private.Any(privRoom => { return privRoom.Name == roomName; }))
-            {
-                return true;
-            }
-            else if (RoomList.Owned.Any(privRoom => { return privRoom.Name == roomName; }))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            // its possible for us to have no room list yet (cold start from chatroom notification)
+            //   or we are excluded from the room list (the short list - i.e. no low user counts, nicotine)
+            //   Fallback to cached value we got on joining the room
+            return JoinedRoomData.TryGetValue(roomName, out var roomData) && roomData.IsPrivate;
         }
 
         public static bool IsOwnedByUs(Soulseek.RoomInfo roomInfo)
         {
-            if (RoomList == null)
+            if (RoomList != null && RoomList.Owned.Any(ownedRoom => { return ownedRoom.Name == roomInfo.Name; }))
             {
-                // cold start from chatroom notification
-                return JoinedRoomData.TryGetValue(roomInfo.Name, out var roomData)
-                    && roomData.Owner == PreferencesState.Username;
+                return true;
             }
-            return RoomList.Owned.Any(ownedRoom => { return ownedRoom.Name == roomInfo.Name; }); //use AreWeOwner instead maybe...
+            return JoinedRoomData.TryGetValue(roomInfo.Name, out var roomData)
+                && roomData.Owner == PreferencesState.Username;
         }
 
         public static bool IsAutoJoinOn(Soulseek.RoomInfo autoJoinOn)
@@ -357,6 +354,7 @@ namespace Seeker.Chatroom
                         JoinedRoomData.TryGetValue(roomName, out var roomData);
                         if (roomData != null) 
                         {
+                            SeekerApplication.Toaster.ShowToastLong(roomName + " restored from cache!!");
                             foundRoom = new Soulseek.RoomInfo(roomName, roomData.UserCount);
                         }
                     }
