@@ -163,11 +163,11 @@ namespace Seeker
                 var fileInfos = files.Select(item => BrowseUtils.ToFullFileInfo(item)).ToList();
                 if (queuePaused)
                 {
-                    SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(fileInfos.ToArray(), true, state.CurrentUsername).Start());
+                    SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(fileInfos.ToArray(), true, state.CurrentUsername));
                 }
                 else
                 {
-                    SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(fileInfos.ToArray(), false, state.CurrentUsername).Start());
+                    SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(fileInfos.ToArray(), false, state.CurrentUsername));
                 }
             }
         }

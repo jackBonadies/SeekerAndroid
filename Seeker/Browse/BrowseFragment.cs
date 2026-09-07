@@ -618,7 +618,7 @@ namespace Seeker
             else
             {
                 List<FullFileInfo> slskFile = GetSelectedFileInfos();
-                SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, state.CurrentUsername).Start());
+                SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(slskFile.ToArray(), queuePaused, state.CurrentUsername));
             }
         }
 
@@ -894,11 +894,11 @@ namespace Seeker
                 {
                     case 0: // Download File
                         var ffi = BrowseUtils.ToFullFileInfo(dataItem);
-                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(new[] { ffi }, false, state.CurrentUsername).Start());
+                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(new[] { ffi }, false, state.CurrentUsername));
                         break;
                     case 1: // Queue as Paused
                         var ffi2 = BrowseUtils.ToFullFileInfo(dataItem);
-                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(new[] { ffi2 }, true, state.CurrentUsername).Start());
+                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(new[] { ffi2 }, true, state.CurrentUsername));
                         break;
                     case 2: // Copy URL
                         var ffi3 = BrowseUtils.ToFullFileInfo(dataItem);

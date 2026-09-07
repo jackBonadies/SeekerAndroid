@@ -41,23 +41,32 @@ namespace Seeker.Services
 
         public event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
 
-        public Task CreateDownloadAllTask(FullFileInfo[] files, bool queuePaused, string username)
+        /// <summary>
+        /// Adds the files to the transfer list and kicks off the downloads.
+        /// The returned task completes once the last file has been handed to the library.
+        /// </summary>
+        public Task EnqueueFilesAsync(FullFileInfo[] files, bool queuePaused, string username)
         {
             if (username == PreferencesState.Username)
             {
                 toaster.ShowToastLong(StringKey.cannot_download_from_self);
-                return new Task(() => { }); //since we call start on the task, if we call Task.Completed or Task.Delay(0) it will crash...
+                return Task.CompletedTask;
             }
 
-            Task task = new Task(() =>
-            {
-                EnqueueFiles(files, queuePaused, username);
-            });
-
-            return task;
+            return Task.Run(() => EnqueueFiles(files, queuePaused, username));
         }
 
-        public async Task EnqueueFiles(FullFileInfo[] files, bool queuePaused, string username)
+        /// <summary>
+        /// Fire and forget entry point for the UI call sites. Completely asynchronous (including adding DLs to transfer list).
+        /// </summary>
+        public void EnqueueFilesFireAndForget(FullFileInfo[] files, bool queuePaused, string username)
+        {
+            EnqueueFilesAsync(files, queuePaused, username).ContinueWith(
+                t => logger.Debug("EnqueueFiles failed: " + t.Exception?.InnerException),
+                TaskContinuationOptions.OnlyOnFaulted);
+        }
+
+        private async Task EnqueueFiles(FullFileInfo[] files, bool queuePaused, string username)
         {
             bool allExist = true; //only show the transfer exists if all transfers in question do already exist
             var isSingle = files.Count() == 1;
@@ -110,7 +119,20 @@ namespace Seeker.Services
             {
                 var dlInfo = dlInfos[i];
                 var file = files[i];
-                var dlTask = DownloadFileAsync(username, file.FullFileName, file.Size, dlInfo.CancellationTokenSource, out Task waitForNext, dlInfo, file.Depth, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded);
+                Task dlTask;
+                Task waitForNext;
+                try
+                {
+                    dlTask = DownloadFileAsync(username, file.FullFileName, file.Size, dlInfo.CancellationTokenSource, out waitForNext, dlInfo, file.Depth, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded);
+                }
+                catch (Exception ex)
+                {
+                    // we throw synchrnously in memory mode case when no longer connected to server.
+                    // by catching we treat it like any other error
+                    logger.Debug($"DownloadFileAsync threw synchronously for {file.FullFileName}: {ex.Message}");
+                    dlTask = Task.FromException(ex);
+                    waitForNext = Task.CompletedTask;
+                }
                 var e = new DownloadAddedEventArgs(dlInfo);
                 Action<Task> continuationActionSaveFile = DownloadContinuationActionUI(e);
                 dlTask.ContinueWith(continuationActionSaveFile);

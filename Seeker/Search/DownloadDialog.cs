@@ -337,24 +337,14 @@ namespace Seeker
                 {
                     if (t.IsFaulted)
                     {
+                        Logger.Debug("DownloadDialog DownloadWithContinuation: " + t.Exception?.InnerException?.Message);
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
+                        return; //dont dismiss dialog.  that only happens on success..
                     }
                     Logger.Debug("DownloadDialog Dl_Click");
                     DownloadFiles(filesToDownload, username, false);
-
+                    DismissOnUiThread();
                 }));
-                try
-                {
-                    t.Wait(); //errors will propagate on WAIT.  They will not propagate on ContinueWith.  So you can get an exception thrown here if there is no network.
-                    //we dont need to do anything if there is an exception thrown here.  Since the ContinueWith actually takes care of it by checking if task faulted..
-                }
-                catch (Exception exx)
-                {
-                    Logger.Debug("DownloadDialog DownloadWithContinuation: " + exx.Message);
-                    return; //dont dismiss dialog.  that only happens on success..
-                }
-                Dismiss();
             }
             else
             {
@@ -384,9 +374,23 @@ namespace Seeker
 
         private void DownloadFiles(FullFileInfo[] files, string username, bool queuePaused)
         {
-            var task = DownloadService.Instance.CreateDownloadAllTask(files, queuePaused, username);
-            task.Start(); //start task immediately
-            task.Wait(); //it only waits for the downloadasync (and optionally connectasync tasks).
+            DownloadService.Instance.EnqueueFilesFireAndForget(files, queuePaused, username);
+        }
+
+        /// <summary>
+        /// Dismiss from a task continuation, which runs on a pool thread.
+        /// </summary>
+        private void DismissOnUiThread()
+        {
+            SeekerState.MainActivityRef?.RunOnUiThread(() =>
+            {
+                //if we have since closed the dialog, then this.View will be null
+                if (this.View == null)
+                {
+                    return;
+                }
+                Dismiss();
+            });
         }
 
         public void OnCloseClick(object sender, DialogClickEventArgs d)
