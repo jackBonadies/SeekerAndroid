@@ -285,7 +285,7 @@ namespace Seeker.Transfers
                 Logger.Debug("transfer state changed to in progress" + e.Transfer.Filename);
                 //uploading file to user...
             }
-            //if(e.Transfer.State == TransferStates.Completed) //this condition will NEVER be hit.  it is always completed | succeeded
+
             if (e.Transfer.State.HasFlag(TransferStates.Succeeded)) //todo rethink upload notifications....
             {
                 Logger.Debug("transfer state changed to completed" + e.Transfer.Filename);
@@ -310,7 +310,7 @@ namespace Seeker.Transfers
                 }
                 catch (Exception err)
                 {
-                    Logger.Firebase("Upload Noficiation Failed" + err.Message + err.StackTrace);
+                    Logger.Firebase("Upload Notification Failed" + err.Message + err.StackTrace);
                 }
             }
         }
