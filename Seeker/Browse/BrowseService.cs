@@ -46,8 +46,15 @@ namespace Seeker.Browse
                 }
                 else
                 {
-                    //the original logic...
-                    Task<IReadOnlyCollection<Directory>> t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, null, null, isLegacy);
+                    Task<IReadOnlyCollection<Directory>> t;
+                    try
+                    {
+                        t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, null, null, isLegacy);
+                    }
+                    catch (Exception e)
+                    {
+                        t = Task.FromException<IReadOnlyCollection<Directory>>(e);
+                    }
                     t.ContinueWith(continueWithAction);
                 }
 

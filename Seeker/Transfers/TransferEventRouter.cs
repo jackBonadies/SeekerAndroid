@@ -297,7 +297,15 @@ namespace Seeker.Transfers
                     return;
                 }
                 Logger.Debug("sending avg speed of " + e.Transfer.AverageSpeed.ToString());
-                SeekerState.SoulseekClient.SendUploadSpeedAsync((int)(e.Transfer.AverageSpeed));
+                try
+                {
+                    SeekerState.SoulseekClient.SendUploadSpeedAsync((int)(e.Transfer.AverageSpeed));
+                }
+                catch (Exception speedException)
+                {
+                    //throws synchronously if the server connection dropped while the upload was finishing
+                    Logger.Debug("failed to send avg speed: " + speedException.Message);
+                }
                 try
                 {
                     CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, AppNotifications.CHANNEL_ID_UPLOAD_COMPLETED, AppNotifications.CHANNEL_NAME_UPLOAD_COMPLETED, NotificationImportance.High);

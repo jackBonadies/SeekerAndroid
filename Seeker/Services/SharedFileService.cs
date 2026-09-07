@@ -1173,8 +1173,17 @@ namespace Seeker.Services
         {
             if (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
             {
-                SeekerState.SoulseekClient.SetSharedCountsAsync(e.Directories, e.Files);
-                SharedFileService.NumberOfSharedDirectoriesIsStale = false;
+                try
+                {
+                    SeekerState.SoulseekClient.SetSharedCountsAsync(e.Directories, e.Files);
+                    SharedFileService.NumberOfSharedDirectoriesIsStale = false;
+                }
+                catch (Exception ex)
+                {
+                    // retry on next login
+                    Logger.Debug("failed to set shared counts: " + ex.Message);
+                    SharedFileService.NumberOfSharedDirectoriesIsStale = true;
+                }
             }
             else
             {
