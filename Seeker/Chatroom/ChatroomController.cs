@@ -1360,7 +1360,25 @@ namespace Seeker.Chatroom
             {
                 RoomJoinStates[roomName] = new RoomJoinStatus { State = RoomJoinState.Pending };
             }
-            SessionService.Instance.RunWithReconnect(() => JoinRoomLogic(roomName, joining, refreshViewAfter, feedback, fromAutoJoin));
+            SessionService.Instance.RunWithReconnect((Task task) => 
+            {
+                if (task.IsFaulted)
+                {
+                    var baseException = task.Exception?.GetBaseException();
+                    RoomJoinStates[roomName] = new RoomJoinStatus
+                    {
+                        State = RoomJoinState.Failed,
+                        FailureMessage = baseException?.Message,
+                        IsForbidden = false,
+                    };
+                    RoomJoinFailed?.Invoke(null, new RoomJoinFailedEventArgs(roomName, baseException, false, fromAutoJoin));
+
+                } 
+                else
+                {
+                    JoinRoomLogic(roomName, joining, refreshViewAfter, feedback, fromAutoJoin);
+                }
+            });
         }
 
         public static void JoinRoomLogic(string roomName, bool joining, bool refreshViewAfter, bool feedback, bool fromAutoJoin)
