@@ -285,6 +285,7 @@
     <string name="already_added_user_">Already added user: {0}</string>
     <string name="must_be_logged_to_search">Must log in before searching</string>
     <string name="create_and_refresh">Created room, now refreshing room list</string>
+    <string name="failed_to_create_room">Failed to create room</string>
     <string name="setting_ticker">Setting ticker...</string>
     <string name="failed_to_set_ticker">Failed to set ticker</string>
     <string name="successfully_set_ticker">Successfully set ticker</string>
