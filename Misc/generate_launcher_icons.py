@@ -2,47 +2,9 @@
 """Regenerate the launcher icon bitmaps in Seeker/Resources/mipmap-* from the 512px
 rasters in Seeker/Assets.
 
-    python tools/generate_launcher_icons.py                    # write into Seeker/Resources
-    python tools/generate_launcher_icons.py --out-dir /tmp/x   # dry run somewhere else
-
-Only needs Pillow:  pip install Pillow
-
 Sources
-    seeker_logo_raster.png        colour bird, white eye  -> ic_launcher{,_round,_foreground}
-    seeker_logo_source_mono.png   eye punched to alpha 0  -> ic_launcher_mono_foreground
-
-Both are 512x512 exports of the matching .svg's *page*.  The artwork deliberately
-overflows that page on three sides (drawing bbox -32.8,118.6 551.8x430.1), so the page
-edge is the crop and these rasters already have it baked in.  Re-export after editing an
-SVG -- Inkscape's File > Export already has it configured (inkscape:export-filename,
-96 dpi, page area), or from the command line:
-
-    inkscape --export-type=png --export-area-page --export-width=512 --export-height=512 \
-             --export-filename=Seeker/Assets/seeker_logo_raster.png \
-             Seeker/Assets/seeker_logo_source.svg
-
-512 is enough: the largest thing generated below is a 294px plate, so nothing is ever
-upscaled.  Rasterizing at 2048 from the SVG instead makes no visible difference.
-
-Geometry is not invented -- it was measured off the checked-in PNGs so that a re-run
-reproduces them.  The originals came from Android Studio's Image Asset Studio, whose
-settings were never recorded anywhere.
-
-    adaptive canvas   108dp   foreground / monochrome layers
-    legacy canvas      48dp   ic_launcher, ic_launcher_round  (still needed: minSdk 23)
-    white plate        68% of the adaptive canvas, centred, hard edges, no shadow
-                              -> 73/110/147/220/294 px, matching the current files
-    legacy square      38/48 of the canvas, corner radius 1/15.2 of its side
-    legacy circle      44/48 of the canvas
-    both legacy shapes carry a soft black drop shadow, offset down
-
-The monochrome layer is rendered black.  Android uses only its alpha channel and tints
-the glyph itself, so the blue in the current file is meaningless -- it is the colour
-artwork's fill leaking through -- and black is the convention.
-
-Not generated, hand-authored, leave them alone:
-    mipmap-anydpi-v26/ic_launcher.xml, ic_launcher_round.xml
-    values{,-night}/ic_launcher_background.xml   (#2C3E50)
+    seeker_logo_raster.png        -> ic_launcher{,_round,_foreground}
+    seeker_logo_source_mono.png   -> ic_launcher_mono_foreground
 """
 
 from __future__ import annotations
@@ -73,17 +35,13 @@ LEGACY_SQUARE_SCALE = 38 / 48    # rounded square / legacy canvas
 LEGACY_ROUND_SCALE = 44 / 48     # circle / legacy canvas
 SQUARE_CORNER = 10 / 152         # corner radius / square side
 
-# Drop shadow, as fractions of the legacy canvas.  Measured at 192px: the shadow
-# reaches ~9px below the shape, ~4px to its left, and peaks near alpha 63.
+# Drop shadow, as fractions of the legacy canvas.
 SHADOW_BLUR = 2.5 / 192
 SHADOW_DY = 3.0 / 192
 SHADOW_ALPHA = 0.35
 
 SS = 4                           # mask supersampling; ImageDraw has no antialiasing
 
-# A re-export leaves the .svg a few seconds newer than the .png, because Inkscape marks
-# the document dirty when you export and you save it straight after.  Only shout when the
-# gap is big enough to mean a real edit went unexported.
 STALE_TOLERANCE_SEC = 300
 
 
