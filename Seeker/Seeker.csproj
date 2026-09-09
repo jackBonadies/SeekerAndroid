@@ -64,6 +64,7 @@
 	  <DefineConstants>IzzySoft</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.StartsWith('Release'))">
+	<AndroidLinkTool>r8</AndroidLinkTool>
 	<RunAOTCompilation>true</RunAOTCompilation>
 	<AndroidEnableProfiledAot>true</AndroidEnableProfiledAot>
 	<AndroidUseDefaultAotProfile>false</AndroidUseDefaultAotProfile>
