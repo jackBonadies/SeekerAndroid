@@ -23,26 +23,25 @@ namespace Seeker
 
         public void Set(string filterString)
         {
+            // always create new consistent version, never .Clear() bc it will be iterated over on other
+            //   threads leading to InvalidOperation_EnumFailedVersion on WordsToAvoid/WordsToInclude
+            List<string> wordsToAvoid = new List<string>();
+            List<string> wordsToInclude = new List<string>();
+            FilterSpecialFlags? specialFlags = supportsSpecialFlags ? new FilterSpecialFlags() : null;
+            SearchFilter.ParseFilterString(filterString, wordsToAvoid, wordsToInclude, specialFlags);
+
             FilterString = filterString;
-            WordsToAvoid.Clear();
-            WordsToInclude.Clear();
-            FilterSpecialFlags?.Clear();
-            if (supportsSpecialFlags)
-            {
-                SearchFilter.ParseFilterString(filterString, WordsToAvoid, WordsToInclude, FilterSpecialFlags);
-            }
-            else
-            {
-                SearchFilter.ParseFilterString(filterString, WordsToAvoid, WordsToInclude);
-            }
+            WordsToAvoid = wordsToAvoid;
+            WordsToInclude = wordsToInclude;
+            FilterSpecialFlags = specialFlags;
         }
 
         public void Reset()
         {
-            FilterString = null;
-            WordsToAvoid.Clear();
-            WordsToInclude.Clear();
-            FilterSpecialFlags?.Clear();
+            FilterString = string.Empty;
+            WordsToAvoid = new List<string>();
+            WordsToInclude = new List<string>();
+            FilterSpecialFlags = supportsSpecialFlags ? new FilterSpecialFlags() : null;
         }
     }
 }

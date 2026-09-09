@@ -992,17 +992,21 @@ namespace Seeker
         public void SetBrowseAdapters(bool toFilter, List<DataItem> nonFilteredItems, bool fullRefreshOfPathItems, bool goingUp = false)
         {
             BrowseActionMode?.Finish();
-            if (toFilter)
+            List<PathItem> items;
+            lock (state.DataItems)
             {
-                state.FilteredDataItems = BrowseUtils.FilterBrowseList(state.DataItems, state.Filter);
-                recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.FilteredDataItems, this));
-            }
-            else
-            {
-                recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.DataItems, this));
-            }
+                if (toFilter)
+                {
+                    state.FilteredDataItems = BrowseUtils.FilterBrowseList(state.DataItems, state.Filter);
+                    recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.FilteredDataItems, this));
+                }
+                else
+                {
+                    recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.DataItems, this));
+                }
 
-            var items = BrowseUtils.GetPathItems(state.DataItems);
+                items = BrowseUtils.GetPathItems(state.DataItems);
+            }
             state.PathItems.Clear();
             state.PathItems.AddRange(items);
             if (fullRefreshOfPathItems)

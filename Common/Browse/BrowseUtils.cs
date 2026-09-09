@@ -157,7 +157,7 @@ namespace Common.Browse
         {
             return files.Select(it=>new FullFileInfo() { Size = it.Size, FullFileName = it.Filename, Depth = 1, wasFilenameLatin1Decoded = it.IsLatin1Decoded, wasFolderLatin1Decoded = it.IsDirectoryLatin1Decoded }).ToArray();
         }
-        private static bool MatchesCriteriaFull(DataItem di, TextFilter filter)
+        private static bool MatchesCriteriaFull(DataItem di, List<string> wordsToAvoid, List<string> wordsToInclude)
         {
             string fullyQualifiedName = string.Empty;
             if (di.File != null)
@@ -172,7 +172,7 @@ namespace Common.Browse
             }
 
 
-            foreach (string avoid in filter.WordsToAvoid)
+            foreach (string avoid in wordsToAvoid)
             {
                 if (fullyQualifiedName.Contains(avoid, StringComparison.OrdinalIgnoreCase))
                 {
@@ -181,7 +181,7 @@ namespace Common.Browse
                 }
             }
             bool includesAll = true;
-            foreach (string include in filter.WordsToInclude)
+            foreach (string include in wordsToInclude)
             {
                 if (!fullyQualifiedName.Contains(include, StringComparison.OrdinalIgnoreCase))
                 {
@@ -210,7 +210,7 @@ namespace Common.Browse
                     {
                         foreach (TreeNode<Directory> child in di.Node.Children)
                         {
-                            if (MatchesCriteriaFull(new DataItem(child.Data, child), filter))
+                            if (MatchesCriteriaFull(new DataItem(child.Data, child), wordsToAvoid, wordsToInclude))
                             {
                                 return true;
                             }
@@ -220,7 +220,7 @@ namespace Common.Browse
                     {
                         foreach (File f in di.Directory.Files)
                         {
-                            if (MatchesCriteriaFull(new DataItem(f, di.Node), filter))
+                            if (MatchesCriteriaFull(new DataItem(f, di.Node), wordsToAvoid, wordsToInclude))
                             {
                                 return true;
                             }
@@ -234,9 +234,11 @@ namespace Common.Browse
         public static List<DataItem> FilterBrowseList(List<DataItem> unfiltered, TextFilter filter)
         {
             List<DataItem> filtered = new List<DataItem>();
+            List<string> wordsToAvoid = filter.WordsToAvoid;
+            List<string> wordsToInclude = filter.WordsToInclude;
             foreach (DataItem di in unfiltered)
             {
-                if (MatchesCriteriaFull(di, filter)) //change back to shallow...
+                if (MatchesCriteriaFull(di, wordsToAvoid, wordsToInclude)) //change back to shallow...
                 {
                     filtered.Add(di);
                 }

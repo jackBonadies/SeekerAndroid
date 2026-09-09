@@ -228,7 +228,7 @@ namespace Seeker
             ParseFilterString(filterString, wordsToAvoid, wordsToInclude, null);
         }
 
-        public static void ParseFilterString(string filterString, List<string> wordsToAvoid, List<string> wordsToInclude, FilterSpecialFlags filterSpecialFlags)
+        public static void ParseFilterString(string filterString, List<string> wordsToAvoid, List<string> wordsToInclude, FilterSpecialFlags? filterSpecialFlags)
         {
             List<string> filterStringSplit = filterString.Split(' ').ToList();
             foreach (string word in filterStringSplit)
