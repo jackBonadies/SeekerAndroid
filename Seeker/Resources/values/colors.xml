@@ -32,9 +32,6 @@
 
     <color name="dialog_background">#ffffffff</color>
 
-    <color name="normalTextColorAgainstPurple">#FFFFFFFF</color>
-    <color name="subTextColorAgainstPurple">#ffC7C7C7</color>
-
     <color name="chipSeparatorColor">#ff606060</color>
 
     <color name="absoluteBackColor1">#ff000000</color>

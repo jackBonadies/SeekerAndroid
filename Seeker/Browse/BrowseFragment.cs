@@ -296,11 +296,10 @@ namespace Seeker
 
             this.noBrowseView = this.rootView.FindViewById<View>(Resource.Id.noBrowseView);
             this.separator = this.rootView.FindViewById<View>(Resource.Id.recyclerViewHorizontalPathSep);
-            this.separator.Visibility = ViewStates.Gone;
+            UpdatePathBarVisibility();
             if (state.HasResponse())
             {
                 noBrowseView.Visibility = ViewStates.Gone;
-                separator.Visibility = ViewStates.Visible;
             }
 
             View v = rootView.FindViewById<View>(Resource.Id.relativeLayout1);
@@ -985,6 +984,19 @@ namespace Seeker
             return res;
         }
 
+        private void UpdatePathBarVisibility()
+        {
+            var visibility = state.HasResponse() ? ViewStates.Visible : ViewStates.Gone;
+            if (treePathRecyclerView != null)
+            {
+                treePathRecyclerView.Visibility = visibility;
+            }
+            if (separator != null)
+            {
+                separator.Visibility = visibility;
+            }
+        }
+
         /// <summary>
         /// Sets both the main and the Path Items adapters.  necessary when first loading or when going up or down directories (i.e. if path changes).  not necessary if just changing the filter.
         /// </summary>
@@ -1010,19 +1022,12 @@ namespace Seeker
             }
             state.PathItems.Clear();
             state.PathItems.AddRange(items);
-            if (fullRefreshOfPathItems)
+            treePathRecyclerAdapter.NotifyDataSetChanged();
+            if (!fullRefreshOfPathItems && !goingUp && state.PathItems.Count > 0)
             {
-                treePathRecyclerAdapter.NotifyDataSetChanged();
-            }
-            else if (goingUp)
-            {
-                treePathRecyclerAdapter.NotifyDataSetChanged();
-            }
-            else
-            {
-                treePathRecyclerAdapter.NotifyDataSetChanged();
                 treePathRecyclerView.ScrollToPosition(state.PathItems.Count - 1);
             }
+            UpdatePathBarVisibility();
             SeekerState.MainActivityRef?.InvalidateOptionsMenu();
             SeekerState.MainActivityRef?.RefreshBackCallbackState();
         }
@@ -1184,7 +1189,7 @@ namespace Seeker
             if (noBrowseView != null)
             {
                 noBrowseView.Visibility = ViewStates.Gone;
-                separator.Visibility = ViewStates.Visible;
+                UpdatePathBarVisibility();
             }
             recyclerViewDirectories = rootView.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
             if (browseLayoutManager == null)

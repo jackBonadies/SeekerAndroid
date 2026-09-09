@@ -1,5 +1,6 @@
-﻿using Android.App;
+using Android.App;
 using Android.Content;
+using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
 using Android.Util;
@@ -23,7 +24,6 @@ namespace Seeker
         {
 
             TreePathItemView view = TreePathItemView.inflate(parent);
-            view.setupChildren();
             view.ViewFolderName.Click += View_Click;
             return new TreePathItemViewHolder(view as View);
 
@@ -33,14 +33,13 @@ namespace Seeker
         private void View_Click(object sender, EventArgs e)
         {
             int pos = (sender as TextView).FindAncestor<TreePathItemView>().ViewHolder.BindingAdapterPosition;
-            Seeker.Helpers.Logger.InfoFirebase("browse click pos " + pos);
-            int additionalLevels = localDataSet.Count - pos - 2;
-            Seeker.Helpers.Logger.InfoFirebase("browse click pos " + pos + "  additional levels " + additionalLevels);
             if (pos == RecyclerView.NoPosition)
             {
                 Seeker.Helpers.Logger.Firebase("position is -1");
                 return;
             }
+            int additionalLevels = localDataSet.Count - pos - 2;
+            Seeker.Helpers.Logger.InfoFirebase("browse click pos " + pos + "  additional levels " + additionalLevels);
             Owner.GoUpDirectory(additionalLevels);
         }
 
@@ -71,11 +70,6 @@ namespace Seeker
             pathItemView.ViewHolder = this;
             //(ChatroomOverviewView as View).SetOnCreateContextMenuListener(this);
         }
-
-        public TreePathItemView getUnderlyingView()
-        {
-            return pathItemView;
-        }
     }
 
     public class TreePathItemView : LinearLayout
@@ -85,6 +79,9 @@ namespace Seeker
         public TextView ViewFolderName;
         public PathItem InnerPathItem { get; set; }
         public TreePathItemViewHolder ViewHolder;
+
+        private Color currentFolderColor;
+        private Color ancestorFolderColor;
 
         public TreePathItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
         {
@@ -107,6 +104,9 @@ namespace Seeker
         {
             viewSeparator = FindViewById<ImageView>(Resource.Id.folderSeparator);
             ViewFolderName = FindViewById<TextView>(Resource.Id.folderName);
+
+            currentFolderColor = UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.mainTextColor);
+            ancestorFolderColor = UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.cellTextColorSubdued);
         }
 
         public void setItem(PathItem item)
@@ -115,11 +115,15 @@ namespace Seeker
             ViewFolderName.Text = item.DisplayName;
             if (item.IsLastNode)
             {
+                ViewFolderName.SetTypeface(null, TypefaceStyle.Bold);
+                ViewFolderName.SetTextColor(currentFolderColor);
                 ViewFolderName.Clickable = false;
                 viewSeparator.Visibility = ViewStates.Gone;
             }
             else
             {
+                ViewFolderName.SetTypeface(null, TypefaceStyle.Normal);
+                ViewFolderName.SetTextColor(ancestorFolderColor);
                 ViewFolderName.Clickable = true;
                 viewSeparator.Visibility = ViewStates.Visible;
             }
