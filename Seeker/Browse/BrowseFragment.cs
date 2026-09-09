@@ -840,6 +840,7 @@ namespace Seeker
                         SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.directory_is_empty), ToastLength.Short);
                         return;
                     }
+                    Logger.InfoFirebase("browse drill down pos " + position + "  path count " + state.PathItems.Count);
                     SaveScrollPosition();
 
                     PopulateDataItemsToItemSelected(state.DataItems, itemSelected);

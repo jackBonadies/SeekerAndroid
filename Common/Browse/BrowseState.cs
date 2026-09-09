@@ -1,5 +1,6 @@
 using Common;
 using Common.Browse;
+using Seeker.Helpers;
 using Soulseek;
 using System;
 using System.Collections.Generic;
@@ -155,6 +156,13 @@ namespace Seeker
                 }
                 for (int i = 0; i < additionalLevels; i++)
                 {
+                    if (item.Parent == null)
+                    {
+                        // not sure the root cause - but theoretically there is nothing stopping the path items recycler view
+                        // and DataItems from disagreeing due to race condition
+                        Logger.Firebase("GoUpDirectory overshoot: additionalLevels=" + additionalLevels + " stopped at i=" + i);
+                        break;
+                    }
                     item = item.Parent;
                 }
                 DataItems.Clear();
