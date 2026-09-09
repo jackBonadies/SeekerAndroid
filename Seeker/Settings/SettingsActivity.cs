@@ -349,13 +349,12 @@ namespace Seeker
                 true);
         }
 
-
-
         private void CheckStatus()
         {
             Android.Net.Uri uri = Android.Net.Uri.Parse("http://www.slsknet.org/porttest.php?port=" + PreferencesState.ListenerPort); // missing 'http://' will cause crashed. //an https for this link does not exist
             CommonHelpers.ViewUri(uri, this);
         }
+
         public void ClearIncompleteFolder()
         {
             List<string> doNotDelete = TransferItems.TransferItemManagerDL.GetInUseIncompleteFolderNames();

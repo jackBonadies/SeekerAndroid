@@ -556,7 +556,7 @@ namespace Seeker
             }
         }
 
-        public List<ImportItem> localDataSet; //tab id's
+        public List<ImportItem> localDataSet;
         public override int ItemCount => localDataSet.Count;
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {

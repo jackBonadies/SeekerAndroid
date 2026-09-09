@@ -15,7 +15,7 @@ namespace Seeker
 {
     public class ChipsItemRecyclerAdapter : RecyclerView.Adapter
     {
-        private List<ChipDataItem> localDataSet; //tab id's
+        private List<ChipDataItem> localDataSet;
         public override int ItemCount => localDataSet.Count;
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {

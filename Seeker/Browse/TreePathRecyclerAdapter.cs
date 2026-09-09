@@ -16,7 +16,7 @@ namespace Seeker
 {
     public class TreePathRecyclerAdapter : RecyclerView.Adapter
     {
-        private List<PathItem> localDataSet; //tab id's
+        private List<PathItem> localDataSet;
         public override int ItemCount => localDataSet.Count;
         public BrowseFragment Owner;
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
