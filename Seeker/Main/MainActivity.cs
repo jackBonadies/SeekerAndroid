@@ -466,7 +466,7 @@ namespace Seeker
                         return;
                     }
 
-                    if (OnUIthread())
+                    if (SeekerApplication.OnUIThread())
                     {
                         RequestNotifPermissionsLogic();
                     }
@@ -770,7 +770,7 @@ namespace Seeker
                     }
                     else
                     {
-                        if (OnUIthread())
+                        if (SeekerApplication.OnUIThread())
                         {
                             showDirectoryButton();
                         }
@@ -802,7 +802,7 @@ namespace Seeker
                 else
                 {
 
-                    if (OnUIthread())
+                    if (SeekerApplication.OnUIThread())
                     {
                         showDirectoryButton();
                     }
@@ -841,7 +841,7 @@ namespace Seeker
                     }
                     else
                     {
-                        if (OnUIthread())
+                        if (SeekerApplication.OnUIThread())
                         {
                             reiterate();
                         }
@@ -872,7 +872,7 @@ namespace Seeker
 
                     //hide the button
 
-                    if (OnUIthread())
+                    if (SeekerApplication.OnUIThread())
                     {
                         hideButton();
                     }
@@ -883,7 +883,7 @@ namespace Seeker
                 }
                 else
                 {
-                    if (OnUIthread())
+                    if (SeekerApplication.OnUIThread())
                     {
                         reiterate();
                     }
@@ -999,15 +999,6 @@ namespace Seeker
                 //on Pixel 5 emulator this limit is around 78 characters.
                 //^It must BOTH target Android 12 AND be running on Android 12^
             }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public static bool OnUIthread()
-        {
-            return Looper.MainLooper.IsCurrentThread;
         }
 
         protected override void OnSaveInstanceState(Bundle outState)

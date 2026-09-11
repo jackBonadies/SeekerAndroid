@@ -655,6 +655,28 @@ namespace Seeker
             return SeekerApplication.ApplicationContext.GetString(resId);
         }
 
+        private static readonly Handler uiThreadHandler = new Handler(Looper.MainLooper);
+
+        public static bool OnUIThread()
+        {
+            return Looper.MainLooper.IsCurrentThread;
+        }
+
+        /// <summary>
+        /// Same as Activity.RunOnUiThread - if on UI thread run inline, else post
+        /// </summary>
+        public static void RunOnUIThread(Action action)
+        {
+            if (OnUIThread())
+            {
+                action();
+            }
+            else
+            {
+                uiThreadHandler.Post(action);
+            }
+        }
+
         /// <summary>
         /// Resolve a string resource, falling back to a hardcoded default if the lookup throws
         /// (e.g. Resources.NotFoundException from a stale resource-ID mismatch after an incomplete

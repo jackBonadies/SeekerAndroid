@@ -139,7 +139,7 @@ namespace Seeker
 
         private void OnUserStatusChanged(object sender, string username)
         {
-            if (MainActivity.OnUIthread())
+            if (SeekerApplication.OnUIThread())
             {
                 if (UserListSortOrder == SortOrder.OnlineStatus)
                 {
@@ -204,7 +204,7 @@ namespace Seeker
 
         private void HandleListChange(UserListChangedEventArgs e, bool friendList)
         {
-            if (!MainActivity.OnUIthread())
+            if (!SeekerApplication.OnUIThread())
             {
                 SeekerState.ActiveActivityRef.RunOnUiThread(() => HandleListChange(e, friendList));
                 return;
@@ -230,7 +230,7 @@ namespace Seeker
 
         private void OnUserRowChanged(object sender, string username)
         {
-            if (!MainActivity.OnUIthread())
+            if (!SeekerApplication.OnUIThread())
             {
                 SeekerState.ActiveActivityRef.RunOnUiThread(() => OnUserRowChanged(null, username));
                 return;

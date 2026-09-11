@@ -1186,7 +1186,7 @@ namespace Seeker
 
         private void MainActivity_TransferAddedUINotify(object sender, TransferItem e)
         {
-            if (MainActivity.OnUIthread())
+            if (SeekerApplication.OnUIThread())
             {
                 if (e.IsUpload() && ViewState.InUploadsMode)
                 {

@@ -586,7 +586,7 @@ namespace Seeker.Messages
 
         public static void ShowNotification(Message msg, bool fromOurResponse = false, bool directReplyFailure = false, string directReplayFailureMessage = "", Context broadcastContext = null)
         {
-            BroadcastFriendlyRunOnUiThread(() =>
+            SeekerApplication.RunOnUIThread(() =>
             {
                 ShowNotificationLogic(msg, fromOurResponse, directReplyFailure, directReplayFailureMessage, broadcastContext);
             });
@@ -766,18 +766,6 @@ namespace Seeker.Messages
             MarkAsRead(Messages?.Keys);
         }
 
-        public static void BroadcastFriendlyRunOnUiThread(Action action)
-        {
-            if (SeekerState.ActiveActivityRef != null)
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(action);
-            }
-            else
-            {
-                new Handler(Looper.MainLooper).Post(action);
-            }
-        }
-
         public static void SendMessageAPI(Message msg, bool fromDirectReplyAction = false, Android.Content.Context broadcastContext = null)
         {
             //if the seeker process is hard killed (i.e. go to Running Services > kill) and the notification is still up,
@@ -825,7 +813,7 @@ namespace Seeker.Messages
                     }
                     throw new FaultPropagationException();
                 }
-                BroadcastFriendlyRunOnUiThread(new Action(() =>
+                SeekerApplication.RunOnUIThread(new Action(() =>
                 {
                     SendMessageLogic(msg, fromDirectReplyAction, broadcastContext);
                 }));
