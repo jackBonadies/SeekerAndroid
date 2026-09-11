@@ -260,6 +260,10 @@ namespace Seeker
             #if MOCK
                 SeekerState.SoulseekClient = new MockSoulseekClient();
                 SharingService.TurnOnSharing();
+                if (Seeker.Debug.MockTransferStress.AutoStartOnLaunch)
+                {
+                    Seeker.Debug.MockTransferStress.StartDelayed();
+                }
             #else
                 SeekerState.SoulseekClient = new SoulseekClient(
                     128,

@@ -1221,7 +1221,11 @@ namespace Seeker
             }
             else if (e.KeyCode == Keycode.VolumeDown)
             {
+#if MOCK
+                Seeker.Debug.MockTransferStress.Toggle();
+#else
                 SeekerState.SoulseekClient.ConnectAsync("slowtest", "slowpass");
+#endif
             }
             return base.DispatchKeyEvent(e);
         }
