@@ -1782,6 +1782,7 @@ namespace Seeker
 
 #if DEBUG
                 var sw = System.Diagnostics.Stopwatch.StartNew();
+                var oldList = SearchTabHelper.UI_SearchResponses.ToList();
 #endif
                 SearchTabHelper.TextFilter.Set(e.Text.ToString());
                 if (PreferencesState.FilterSticky)
@@ -1789,7 +1790,6 @@ namespace Seeker
                     PreferencesState.FilterStickyString = SearchTabHelper.TextFilter.FilterString;
                 }
 
-                var oldList = SearchTabHelper.UI_SearchResponses.ToList();
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
 #if DEBUG
 
