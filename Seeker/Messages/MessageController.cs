@@ -594,6 +594,7 @@ namespace Seeker.Messages
 
         public static void SaveMessagesToSharedPrefs(ISharedPreferences sharedPrefs)
         {
+            using var _ = DebugTimer.Start(nameof(SaveMessagesToSharedPrefs));
             //For some reason, the generic Dictionary in .net 2.0 is not XML serializable.
             if (RootMessages == null)
             {
@@ -613,6 +614,7 @@ namespace Seeker.Messages
 
         public static void RestoreMessagesFromSharedPrefs(ISharedPreferences sharedPrefs)
         {
+            using var _ = DebugTimer.Start(nameof(RestoreMessagesFromSharedPrefs));
             string messages = sharedPrefs.GetString(KeyConsts.M_Messages, string.Empty);
             if (messages == string.Empty)
             {
