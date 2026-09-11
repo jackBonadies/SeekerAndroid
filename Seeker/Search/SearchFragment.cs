@@ -229,6 +229,50 @@ namespace Seeker
             UpdateDrawableState(filter, true);
         }
 
+        /// <summary>
+        /// UI thread only, sets drawable, empty search state, header state
+        /// </summary>
+        public static void SetSearchingState(int tabId, bool searching)
+        {
+            SearchTab tab = SearchTabHelper.SearchTabCollection[tabId];
+            bool changed = tab.CurrentlySearching != searching;
+            tab.CurrentlySearching = searching;
+            if (tabId != SearchTabHelper.CurrentTab)
+            {
+                return;
+            }
+            SearchFragment fragment = SearchFragment.Instance;
+            if (fragment == null)
+            {
+                return;
+            }
+            if (changed)
+            {
+                TransitionDrawable transitionDrawable = fragment.GetTransitionDrawable();
+                if (searching)
+                {
+                    Logger.Debug("transitionDrawable: start transition");
+                    transitionDrawable?.StartTransition(SearchToCloseDuration);
+                }
+                else
+                {
+                    Logger.Debug("transitionDrawable: reverse transition");
+                    transitionDrawable?.ReverseTransition(SearchToCloseDuration);
+                }
+                fragment.PerformBackUpRefresh(); // TODO remove?
+            }
+            RefreshSearchStateUi();
+        }
+
+        /// <summary>
+        /// Re-renders the parts of the current tab that depend on searching state and result counts.
+        /// </summary>
+        private static void RefreshSearchStateUi()
+        {
+            SearchFragment.Instance?.UpdateEmptyState();
+            SearchFragment.Instance?.NotifySearchHeaderChanged();
+        }
+
         private void SetTransitionDrawableState()
         {
             if (SearchTabHelper.CurrentlySearching)
@@ -240,7 +284,7 @@ namespace Seeker
             {
                 GetTransitionDrawable()?.ResetTransition();
             }
-            //forces refresh.
+            //forces refresh. // TODO remove?
             ActionBarMenu?.FindItem(Resource.Id.action_search)?.SetVisible(false);
             ActionBarMenu?.FindItem(Resource.Id.action_search)?.SetVisible(true);
         }
@@ -366,35 +410,13 @@ namespace Seeker
                 case Resource.Id.action_search:
                     if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
                     {
-                        Logger.Debug("transitionDrawable: REVERSE transition");
-                        (item.Icon as Android.Graphics.Drawables.TransitionDrawable).ReverseTransition(SearchToCloseDuration); //you cannot hit reverse twice, it will put it back to the original state...
-                        SearchTabHelper.CancellationTokenSource.Cancel();
-                        SearchTabHelper.CurrentlySearching = false;
-                        UpdateEmptyState();
-                        NotifySearchHeaderChanged();
-                        return true;
+                        CancelSearch();
                     }
                     else
                     {
-                        EditText editText = SeekerState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
-                        string searchText = editText == null ? SearchingText : editText.Text;
-
-                        var currentTab = SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab];
-                        if (currentTab.DiskLoadInProgress)
-                        {
-                            var capturedItem = item;
-                            currentTab.DiskLoadTask.ContinueWith(_ =>
-                            {
-                                SeekerState.MainActivityRef?.RunOnUiThread(() =>
-                                {
-                                    StartSearchInternal(capturedItem, searchText);
-                                });
-                            }, TaskScheduler.Default);
-                            return true;
-                        }
-                        StartSearchInternal(item, searchText);
-                        return true;
+                        SubmitSearch(GetSearchBoxText());
                     }
+                    return true;
                 case Resource.Id.action_change_result_style:
                     ShowChangeResultStyleBottomDialog();
                     return true;
@@ -419,16 +441,102 @@ namespace Seeker
             return base.OnOptionsItemSelected(item);
         }
 
-        private void StartSearchInternal(IMenuItem item, string searchText)
+        private static AutoCompleteTextView GetSearchBox()
         {
-            (item.Icon as Android.Graphics.Drawables.TransitionDrawable).StartTransition(SearchToCloseDuration);
-            PerformBackUpRefresh();
-            Logger.Debug("START TRANSITION");
-            SearchTabHelper.CurrentlySearching = true;
-            UpdateEmptyState();
-            NotifySearchHeaderChanged();
-            SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
-            SearchAPI(SearchTabHelper.CancellationTokenSource.Token, (item.Icon as Android.Graphics.Drawables.TransitionDrawable), searchText, SearchTabHelper.CurrentTab);
+            return SeekerState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<AutoCompleteTextView>(Resource.Id.searchHere);
+        }
+
+        private static string GetSearchBoxText()
+        {
+            AutoCompleteTextView searchBox = GetSearchBox();
+            return searchBox == null ? SearchingText : searchBox.Text;
+        }
+
+        /// <summary>
+        /// Entrypoint for user-initiated search (toolbar button, IME action,hardware ENTER or intent search dialog)
+        /// </summary>
+        private void SubmitSearch(string searchText)
+        {
+            int tabId = SearchTabHelper.CurrentTab;
+            SearchTab tab = SearchTabHelper.SearchTabCollection[tabId];
+            if (tab.DiskLoadInProgress)
+            {
+                tab.DiskLoadTask.ContinueWith(_ => SeekerApplication.RunOnUIThread(() => SubmitSearch(searchText)), TaskScheduler.Default);
+                return;
+            }
+
+            // precheck
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_search_text), ToastLength.Short);
+                return;
+            }
+            if (!TryBuildSearchScope(out SearchScope scope))
+            {
+                return;
+            }
+
+            // Important: Swap token in before cancelling
+            CancellationTokenSource superseded = tab.CancellationTokenSource;
+            tab.CancellationTokenSource = new CancellationTokenSource();
+            superseded?.Cancel();
+
+            AutoCompleteTextView searchBox = GetSearchBox();
+            searchBox?.DismissDropDown();
+            searchBox?.ClearFocus(); // gets rid of the blinking cursor
+            UiHelpers.HideSoftKeyboard(rootView);
+
+            SetSearchingState(tabId, true);
+            SearchAPI(tab.CancellationTokenSource.Token, searchText, tabId, scope);
+        }
+
+        /// <summary>
+        /// Builds search scope or false if invalid
+        /// </summary>
+        private static bool TryBuildSearchScope(out SearchScope scope)
+        {
+            scope = null;
+            switch (SearchTabHelper.SearchTarget)
+            {
+                case SearchTarget.UserList:
+                    var userlist = CommonState.UserList;
+                    if (userlist == null || userlist.Count == 0)
+                    {
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.user_list_empty), ToastLength.Short);
+                        return false;
+                    }
+                    scope = new SearchScope(SearchScopeType.User, CommonState.UserList.Select(item => item.Username).ToArray());
+                    return true;
+                case SearchTarget.ChosenUser:
+                    if (string.IsNullOrEmpty(SearchTabHelper.SearchTargetChosenUser))
+                    {
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_user), ToastLength.Short);
+                        return false;
+                    }
+                    scope = new SearchScope(SearchScopeType.User, new string[] { SearchTabHelper.SearchTargetChosenUser });
+                    return true;
+                case SearchTarget.Room:
+                    if (string.IsNullOrEmpty(SearchTabHelper.SearchTargetChosenRoom))
+                    {
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_room), ToastLength.Short);
+                        return false;
+                    }
+                    scope = new SearchScope(SearchScopeType.Room, new string[] { SearchTabHelper.SearchTargetChosenRoom });
+                    return true;
+                default:
+                    // AllUsers, and Wishlist - a manual search run from a wishlist tab is a plain network search.
+                    scope = new SearchScope(SearchScopeType.Network);
+                    return true;
+            }
+        }
+
+        /// <summary>
+        /// The toolbar X: stop the current tab's search and keep whatever results it has so far.
+        /// </summary>
+        private void CancelSearch()
+        {
+            SearchTabHelper.CancellationTokenSource?.Cancel();
+            SetSearchingState(SearchTabHelper.CurrentTab, false);
         }
 
         public void AddSearchToWishlist()
@@ -1278,46 +1386,8 @@ namespace Seeker
                 e.ActionId == Android.Views.InputMethods.ImeAction.Next ||
                 e.ActionId == Android.Views.InputMethods.ImeAction.Search)
             {
-                string editSearchText = null;
-                EditText editTextSearch = SeekerState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere); //get asap to avoid nullref...
-                if (editTextSearch == null)
-                {
-                    EditText searchHere = (this.Activity as AndroidX.AppCompat.App.AppCompatActivity)?.SupportActionBar?.CustomView?.FindViewById<EditText>(Resource.Id.searchHere);
-                    if (searchHere != null)
-                    {
-                        editSearchText = searchHere.Text;
-                    }
-                    else
-                    {
-                        editSearchText = SearchingText;
-                    }
-                }
-                else
-                {
-                    editSearchText = editTextSearch.Text;
-                }
                 Logger.Debug("IME ACTION: " + e.ActionId.ToString());
-                UiHelpers.HideSoftKeyboard(rootView);
-                var transitionDrawable = GetTransitionDrawable();
-                if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
-                {
-                    Logger.Debug("transitionDrawable: reverse transition");
-                    transitionDrawable?.ReverseTransition(SearchToCloseDuration); //you cannot hit reverse twice, it will put it back to the original state...
-                    SearchTabHelper.CancellationTokenSource.Cancel();
-                    SearchTabHelper.CurrentlySearching = false;
-                }
-                else
-                {
-                    Logger.Debug("transitionDrawable: start transition");
-                    transitionDrawable?.StartTransition(SearchToCloseDuration);
-                    PerformBackUpRefresh();
-                    SearchTabHelper.CurrentlySearching = true;
-                }
-                UpdateEmptyState();
-                NotifySearchHeaderChanged();
-                SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
-                SearchAPI(SearchTabHelper.CancellationTokenSource.Token, transitionDrawable, editSearchText, SearchTabHelper.CurrentTab);
-                (sender as AutoCompleteTextView).DismissDropDown();
+                SubmitSearch(GetSearchBoxText());
             }
         }
 
@@ -1416,11 +1486,6 @@ namespace Seeker
             }
             //return ActionBarMenu.FindItem(Resource.Id.action_search).Icon as Android.Graphics.Drawables.TransitionDrawable; // we got nullref here...
 
-        }
-
-        public static void ClearFocusSearchEditText()
-        {
-            SeekerState.MainActivityRef?.SupportActionBar?.CustomView?.FindViewById<View>(Resource.Id.searchHere)?.ClearFocus();
         }
 
 
@@ -1822,40 +1887,13 @@ namespace Seeker
             SearchFragment.Instance.Actv_KeyPress(sender, e);
         }
 
-        public static void PerformSearchLogicFromSearchDialog(string searchTerm)
+        /// <summary>
+        /// Search dialog (link following / share intent): put the term in the app bar box, then search it.
+        /// </summary>
+        public static void SubmitSearchFromDialog(string searchTerm)
         {
-            EditText editTextSearch = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
-            editTextSearch.Text = searchTerm;
-            SearchFragment.Instance.PeformSearchLogic(null);
-        }
-
-        private void PeformSearchLogic(object sender)
-        {
-            var transitionDrawable = GetTransitionDrawable();
-            if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
-            {
-                Logger.Debug("transitionDrawable: RESET transition");
-                transitionDrawable?.ReverseTransition(SearchToCloseDuration); //you cannot hit reverse twice, it will put it back to the original state...
-                SearchTabHelper.CancellationTokenSource.Cancel();
-                SearchTabHelper.CurrentlySearching = false;
-            }
-            else
-            {
-                transitionDrawable?.StartTransition(SearchToCloseDuration);
-                PerformBackUpRefresh();
-                Logger.Debug("START TRANSITION");
-                SearchTabHelper.CurrentlySearching = true;
-            }
-            UpdateEmptyState();
-            NotifySearchHeaderChanged();
-            SearchTabHelper.CancellationTokenSource = new CancellationTokenSource();
-            EditText editTextSearch = SeekerState.MainActivityRef.SupportActionBar.CustomView.FindViewById<EditText>(Resource.Id.searchHere);
-            SearchAPI(SearchTabHelper.CancellationTokenSource.Token, transitionDrawable, editTextSearch.Text, SearchTabHelper.CurrentTab);
-            if (sender != null)
-            {
-                (sender as AutoCompleteTextView).DismissDropDown();
-            }
-            Logger.Debug("Enter Pressed..");
+            RenderActionBarCustomView(SeekerState.MainActivityRef?.SupportActionBar?.CustomView, searchTerm);
+            SearchFragment.Instance?.SubmitSearch(searchTerm);
         }
 
         private void Actv_KeyPress(object sender, View.KeyEventArgs e)
@@ -1863,7 +1901,7 @@ namespace Seeker
             if (e.KeyCode == Keycode.Enter && e.Event.Action == KeyEventActions.Down)
             {
                 Logger.Debug("ENTER PRESSED " + e.KeyCode.ToString());
-                PeformSearchLogic(sender);
+                SubmitSearch(GetSearchBoxText());
             }
             else if (e.KeyCode == Keycode.Del && e.Event.Action == KeyEventActions.Down)
             {
@@ -2186,20 +2224,8 @@ namespace Seeker
             return true;
         }
 
-        private static void SearchLogic(CancellationToken cancellationToken, Android.Graphics.Drawables.TransitionDrawable transitionDrawable, string searchString, int fromTab, bool fromWishlist)
+        private static void SearchLogic(CancellationToken cancellationToken, string searchString, int fromTab, SearchScope scope, bool fromWishlist)
         {
-            try
-            {
-                if (!fromWishlist)
-                {
-                    Android.Views.InputMethods.InputMethodManager imm = (Android.Views.InputMethods.InputMethodManager)SearchFragment.Instance.context.GetSystemService(Context.InputMethodService);
-                    imm.HideSoftInputFromWindow(SearchFragment.Instance.rootView.WindowToken, 0);
-                }
-            }
-            catch
-            {
-                //not worth throwing over
-            }
             try
             {
                 //all click event handlers occur on UI thread.
@@ -2225,42 +2251,6 @@ namespace Seeker
                 responseReceived: searchResponseReceived, 
                 responseFilter: (SearchResponse s) => searchResponseFilter(s), 
                 filterResponses: true);
-            SearchScope scope = null;
-            if (fromWishlist)
-            {
-                scope = new SearchScope(SearchScopeType.Wishlist); //this is the same as passing no option for search scope 
-            }
-            else if (SearchTabHelper.SearchTarget == SearchTarget.AllUsers || SearchTabHelper.SearchTarget == SearchTarget.Wishlist) //this is like a manual wishlist search...
-            {
-                scope = new SearchScope(SearchScopeType.Network); //this is the same as passing no option for search scope
-            }
-            else if (SearchTabHelper.SearchTarget == SearchTarget.UserList)
-            {
-                if (CommonState.UserList == null || CommonState.UserList.Count == 0)
-                {
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.user_list_empty), ToastLength.Short);
-                    return;
-                }
-                scope = new SearchScope(SearchScopeType.User, CommonState.UserList.Select(item => item.Username).ToArray());
-            }
-            else if (SearchTabHelper.SearchTarget == SearchTarget.ChosenUser)
-            {
-                if (SearchTabHelper.SearchTargetChosenUser == string.Empty)
-                {
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_user), ToastLength.Short);
-                    return;
-                }
-                scope = new SearchScope(SearchScopeType.User, new string[] { SearchTabHelper.SearchTargetChosenUser });
-            }
-            else if (SearchTabHelper.SearchTarget == SearchTarget.Room)
-            {
-                if (SearchTabHelper.SearchTargetChosenRoom == string.Empty)
-                {
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_room), ToastLength.Short);
-                    return;
-                }
-                scope = new SearchScope(SearchScopeType.Room, new string[] { SearchTabHelper.SearchTargetChosenRoom });
-            }
             try
             {
                 Task<(Soulseek.Search, IReadOnlyCollection<SearchResponse>)> t = null;
@@ -2270,57 +2260,47 @@ namespace Seeker
                     oldList?.Clear();
                 }
                 t = SeekerState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
-                //t = TestClient.SearchAsync(searchString, searchResponseReceived, cancellationToken);
-                //drawable.StartTransition() - since if we get here, the search is launched and the continue with will always happen...
 
                 t.ContinueWith(new Action<Task<(Soulseek.Search, IReadOnlyCollection<SearchResponse>)>>(t =>
                 {
                     var searchTab = SearchTabHelper.SearchTabCollection[fromTab];
-                    searchTab.CurrentlySearching = false;
+                    // Superseded by a newer search on this tab (SubmitSearch replaced the token, then cancelled old token)
+                    bool IsStale() => !fromWishlist && searchTab.CancellationTokenSource?.Token != cancellationToken;
+                    if (IsStale())
+                    {
+                        Logger.Debug("stale search continuation, tab " + fromTab);
+                        return;
+                    }
 
                     if (!t.IsCompletedSuccessfully && t.Exception != null)
                     {
                         Logger.Debug("search exception: " + t.Exception.Message);
                     }
 
-                    if (t.IsCanceled)
+                    SeekerApplication.RunOnUIThread(() =>
                     {
-                    }
-                    else
-                    {
-
-                        SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                        if (IsStale())
                         {
-                            try
+                            Logger.Debug("stale search continuation (ui), tab " + fromTab);
+                            return;
+                        }
+                        try
+                        {
+                            if (fromWishlist)
                             {
-                                if (fromTab == SearchTabHelper.CurrentTab && !fromWishlist)
-                                {
-                                    Logger.Debug("transitionDrawable: ReverseTransition transition");
-                                    //this can be stale, not part of anything anymore....
-                                    //no real way to test that.  IsVisible returns true...
-                                    try
-                                    {
-                                        GetSearchFragment().GetTransitionDrawable().ReverseTransition(SearchToCloseDuration);
-                                    }
-                                    catch
-                                    {
-
-                                    }
-                                    SearchFragment.Instance.PerformBackUpRefresh();
-
-
-                                }
-                                SearchFragment.Instance.UpdateEmptyState();
-                                SearchFragment.Instance.NotifySearchHeaderChanged();
+                                RefreshSearchStateUi();
                             }
-                            catch (System.ObjectDisposedException e)
+                            else
                             {
-                                //since its disposed when you go back to the screen it will be the correct search icon again..
-                                //noop
+                                SetSearchingState(fromTab, false);
                             }
-                        }));
-
-                    }
+                        }
+                        catch (System.ObjectDisposedException)
+                        {
+                            //since its disposed when you go back to the screen it will be the correct search icon again..
+                            //noop
+                        }
+                    });
                     if ((!t.IsCanceled) && t.Result.Item2.Count == 0 && !fromWishlist) //if t is cancelled, t.Result throws..
                     {
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.no_search_results), ToastLength.Short);
@@ -2396,7 +2376,7 @@ namespace Seeker
             }
             catch (ArgumentNullException)
             {
-                clearSearchWithMessage(fromWishlist, fromTab, transitionDrawable);
+                clearSearchWithMessage(fromWishlist, fromTab);
                 return;
             }
             catch (ArgumentException ex)
@@ -2407,12 +2387,12 @@ namespace Seeker
                     // use localized version
                     message = fromWishlist ? SeekerApplication.GetString(Resource.String.no_wish_text) : SeekerApplication.GetString(Resource.String.no_search_text);
                 }
-                clearSearchWithMessage(fromWishlist, fromTab, transitionDrawable, message);
+                clearSearchWithMessage(fromWishlist, fromTab, message);
                 return;
             }
             catch (System.Exception ex)
             {
-                clearSearchWithMessage(fromWishlist, fromTab, transitionDrawable, ex.Message);
+                clearSearchWithMessage(fromWishlist, fromTab, ex.Message);
                 return;
             }
             if (!fromWishlist)
@@ -2440,7 +2420,7 @@ namespace Seeker
             }
         }
 
-        private static void clearSearchWithMessage(bool fromWishlist, int fromTab, TransitionDrawable transitionDrawable, string message = null)
+        private static void clearSearchWithMessage(bool fromWishlist, int fromTab, string message = null)
         {
             SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
             {
@@ -2448,48 +2428,28 @@ namespace Seeker
                 {
                     message = fromWishlist ? SeekerApplication.GetString(Resource.String.no_wish_text) : SeekerApplication.GetString(Resource.String.no_search_text);
                 }
-                SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
-                Logger.Debug("transitionDrawable: RESET transition");
                 SeekerApplication.Toaster.ShowToast(message, ToastLength.Short);
-                if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
-                {
-                    transitionDrawable?.ResetTransition();
-                }
-                SearchFragment.Instance?.UpdateEmptyState();
-                SearchFragment.Instance?.NotifySearchHeaderChanged();
+                SetSearchingState(fromTab, false);
             }));
 
         }
 
-        public static void SearchAPI(CancellationToken cancellationToken, Android.Graphics.Drawables.TransitionDrawable transitionDrawable, string searchString, int fromTab, bool fromWishlist = false)
+        public static void SearchAPI(CancellationToken cancellationToken, string searchString, int fromTab, SearchScope scope, bool fromWishlist = false)
         {
             SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm = searchString;
             SearchTabHelper.SearchTabCollection[fromTab].LastRanTime = SimpleHelpers.GetDateTimeNowSafe();
-            if (!fromWishlist)
-            {
-                //try to clearFocus on the search if you can (gets rid of blinking cursor)
-                ClearFocusSearchEditText();
-                Logger.Debug("Search_Click");
-            }
-            //#if !DEBUG
             if (!PreferencesState.CurrentlyLoggedIn)
             {
                 if (!fromWishlist)
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_search), ToastLength.Long);
-                    Logger.Debug("transitionDrawable: RESET transition");
-                    transitionDrawable?.ResetTransition();
-
                 }
-
-                SearchTabHelper.CurrentlySearching = false;
-                SearchFragment.Instance?.UpdateEmptyState();
-                SearchFragment.Instance?.NotifySearchHeaderChanged();
+                SetSearchingState(fromTab, false);
                 return;
             }
             else
             {
-                SessionService.Instance.RunWithReconnect(() => SearchLogic(cancellationToken, transitionDrawable, searchString, fromTab, fromWishlist), silent: fromWishlist);
+                SessionService.Instance.RunWithReconnect(() => SearchLogic(cancellationToken, searchString, fromTab, scope, fromWishlist), silent: fromWishlist);
             }
         }
     }

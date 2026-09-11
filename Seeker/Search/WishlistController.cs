@@ -169,7 +169,7 @@ namespace Seeker.Search
                         Logger.Debug("now searching " + oldestId);
 #endif
                         //SearchTabHelper.SearchTabCollection[oldestId].CurrentlySearching = true;
-                        SearchFragment.SearchAPI((new CancellationTokenSource()).Token, null, SearchTabHelper.SearchTabCollection[oldestId].LastSearchTerm, oldestId, true);
+                        SearchFragment.SearchAPI((new CancellationTokenSource()).Token, SearchTabHelper.SearchTabCollection[oldestId].LastSearchTerm, oldestId, new SearchScope(SearchScopeType.Wishlist), fromWishlist: true);
                     }
                     else
                     {
