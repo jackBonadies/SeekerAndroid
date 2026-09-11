@@ -687,26 +687,23 @@ namespace Seeker
                     case TransferContextMenuItem.ClearFromList:
                         Logger.InfoFirebase("Clear Complete item pressed");
                         // TODO MOVE
-                        lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList()) //TODO: test
+                        try
                         {
-                            try
+                            if (ViewState.InUploadsMode)
                             {
-                                if (ViewState.InUploadsMode)
-                                {
-                                    TransferItems.TransferItemManagerWrapped.RemoveAtUserIndex(position);
-                                }
-                                else
-                                {
-                                    TransferItems.TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //UI
-                                }
+                                TransferItems.TransferItemManagerWrapped.RemoveAtUserIndex(position);
                             }
-                            catch (ArgumentOutOfRangeException)
+                            else
                             {
-                                    SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
-                                return base.OnContextItemSelected(item);
+                                TransferItems.TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //UI
                             }
-                            recyclerTransferAdapter.NotifyItemRemoved(position);
                         }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
+                            return base.OnContextItemSelected(item);
+                        }
+                        recyclerTransferAdapter.NotifyItemRemoved(position);
                         break;
                     case TransferContextMenuItem.CancelAndClear: //cancel and clear (downloads) OR abort and clear (uploads)
                         Logger.InfoFirebase("Cancel and Clear item pressed");
@@ -723,19 +720,16 @@ namespace Seeker
                         if (tItem is TransferItem tti)
                         {
                             TransferState.CancelAndRemoveToken(tti);
-                            lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList())
+                            // TODO MOVE
+                            if (ViewState.InUploadsMode)
                             {
-                        // TODO MOVE
-                                if (ViewState.InUploadsMode)
-                                {
-                                    TransferItems.TransferItemManagerWrapped.RemoveAtUserIndex(position);
-                                }
-                                else
-                                {
-                                    TransferItems.TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //this means basically, wait for the stream to be closed. no race conditions..
-                                }
-                                recyclerTransferAdapter.NotifyItemRemoved(position);
+                                TransferItems.TransferItemManagerWrapped.RemoveAtUserIndex(position);
                             }
+                            else
+                            {
+                                TransferItems.TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //this means basically, wait for the stream to be closed. no race conditions..
+                            }
+                            recyclerTransferAdapter.NotifyItemRemoved(position);
                         }
                         else if (tItem is FolderItem fi)
                         {

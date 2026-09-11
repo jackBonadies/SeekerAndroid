@@ -288,36 +288,44 @@ namespace Seeker
         /// <returns></returns>
         public object RemoveAtUserIndex(int indexOfItem, TransferUIState uiState)
         {
-            if (uiState.GroupByFolder)
+            lock (AllTransferItems)
             {
-                if (uiState.CurrentlySelectedFolder != null)
+                lock (AllFolderItems)
                 {
-                    var ti = uiState.CurrentlySelectedFolder.TransferItems[indexOfItem];
-                    Remove(ti);
-                    return ti;
-                }
-                else
-                {
-                    List<TransferItem> transferItemsToRemove = new List<TransferItem>();
-                    lock (AllFolderItems[indexOfItem].TransferItems)
+                    if (uiState.GroupByFolder)
                     {
-                        foreach (var ti in AllFolderItems[indexOfItem].TransferItems)
+                        if (uiState.CurrentlySelectedFolder != null)
                         {
-                            transferItemsToRemove.Add(ti);
+                            TransferItem ti;
+                            lock (uiState.CurrentlySelectedFolder.TransferItems)
+                            {
+                                ti = uiState.CurrentlySelectedFolder.TransferItems[indexOfItem];
+                            }
+                            Remove(ti);
+                            return ti;
+                        }
+                        else
+                        {
+                            FolderItem folder = AllFolderItems[indexOfItem];
+                            List<TransferItem> transferItemsToRemove;
+                            lock (folder.TransferItems)
+                            {
+                                transferItemsToRemove = folder.TransferItems.ToList();
+                            }
+                            foreach (var ti in transferItemsToRemove)
+                            {
+                                Remove(ti);
+                            }
+                            return transferItemsToRemove;
                         }
                     }
-                    foreach (var ti in transferItemsToRemove)
+                    else
                     {
+                        var ti = AllTransferItems[indexOfItem];
                         Remove(ti);
+                        return ti;
                     }
-                    return transferItemsToRemove;
                 }
-            }
-            else
-            {
-                var ti = AllTransferItems[indexOfItem];
-                Remove(ti);
-                return ti;
             }
         }
 
