@@ -315,6 +315,22 @@ namespace Seeker
             SimpleHelpers.UserListService = UserListService.Instance;
         }
 
+        /// <summary>
+        /// Otherwise on below API 33 ApplicationContext.GetString will resolve the system language,
+        /// not the override.
+        /// </summary>
+        public override void OnConfigurationChanged(Android.Content.Res.Configuration newConfig)
+        {
+            base.OnConfigurationChanged(newConfig);
+            if (LocaleHelper.HasProperPerAppLanguageSupport())
+            {
+                return;
+            }
+            SeekerState.SystemLanguage = LocaleHelper.LocaleToString(newConfig.Locale);
+            string before = LocaleHelper.LocaleToString(Resources.Configuration.Locale);
+            LocaleHelper.SetLanguageLegacy(PreferencesState.Language, false);
+        }
+
         private void SoulseekClient_ExcludedSearchPhrasesReceived(object sender, IReadOnlyCollection<string> exludedPhrasesList)
         {
             SearchUtil.ExcludedSearchPhrases = exludedPhrasesList;
