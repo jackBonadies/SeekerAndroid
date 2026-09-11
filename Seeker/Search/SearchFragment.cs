@@ -140,8 +140,12 @@ namespace Seeker
 
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
         {
-            inflater.Inflate(Resource.Menu.search_menu, menu); //test432
-            (menu.FindItem(Resource.Id.action_search).Icon as Android.Graphics.Drawables.TransitionDrawable).CrossFadeEnabled = true;
+            inflater.Inflate(Resource.Menu.search_menu, menu);
+            var searchIcon = new CrossFadeDrawable(
+                ContextCompat.GetDrawable(Context, Resource.Drawable.baseline_search_white_24),
+                ContextCompat.GetDrawable(Context, Resource.Drawable.baseline_close_white_24));
+            searchIcon.ShowSecond(SearchTabHelper.CurrentlySearching, 0);
+            menu.FindItem(Resource.Id.action_search).SetIcon(searchIcon);
             if (SearchTabHelper.SearchTarget == SearchTarget.Wishlist)
             {
                 menu.FindItem(Resource.Id.action_add_to_wishlist).SetVisible(false);
@@ -152,11 +156,6 @@ namespace Seeker
             }
 
             ActionBarMenu = menu;
-
-            if (SearchTabHelper.CurrentlySearching)
-            {
-                GetTransitionDrawable()?.StartTransition(0);
-            }
             base.OnCreateOptionsMenu(menu, inflater);
         }
 
@@ -248,18 +247,8 @@ namespace Seeker
             }
             if (changed)
             {
-                TransitionDrawable transitionDrawable = fragment.GetTransitionDrawable();
-                if (searching)
-                {
-                    Logger.Debug("transitionDrawable: start transition");
-                    transitionDrawable?.StartTransition(SearchToCloseDuration);
-                }
-                else
-                {
-                    Logger.Debug("transitionDrawable: reverse transition");
-                    transitionDrawable?.ReverseTransition(SearchToCloseDuration);
-                }
-                fragment.PerformBackUpRefresh(); // TODO remove?
+                Logger.Debug("search icon: " + (searching ? "search -> close" : "close -> search"));
+                fragment.GetTransitionDrawable()?.ShowSecond(searching, SearchToCloseDuration);
             }
             RefreshSearchStateUi();
         }
@@ -275,18 +264,7 @@ namespace Seeker
 
         private void SetTransitionDrawableState()
         {
-            if (SearchTabHelper.CurrentlySearching)
-            {
-                Logger.Debug("CURRENT SEARCHING SET TRANSITION DRAWABLE");
-                GetTransitionDrawable()?.StartTransition(0);
-            }
-            else
-            {
-                GetTransitionDrawable()?.ResetTransition();
-            }
-            //forces refresh. // TODO remove?
-            ActionBarMenu?.FindItem(Resource.Id.action_search)?.SetVisible(false);
-            ActionBarMenu?.FindItem(Resource.Id.action_search)?.SetVisible(true);
+            GetTransitionDrawable()?.ShowSecond(SearchTabHelper.CurrentlySearching, 0);
         }
 
         public void GoToTab(int tabToGoTo, bool force, bool fromIntent = false)
@@ -1449,9 +1427,12 @@ namespace Seeker
             }
         }
 
-        public Android.Graphics.Drawables.TransitionDrawable GetTransitionDrawable()
+        /// <summary>
+        /// The search/close app bar icon, built in <see cref="OnCreateOptionsMenu"/>. Null before the menu exists.
+        /// </summary>
+        public CrossFadeDrawable GetTransitionDrawable()
         {
-            Android.Graphics.Drawables.TransitionDrawable icon = ActionBarMenu?.FindItem(Resource.Id.action_search)?.Icon as Android.Graphics.Drawables.TransitionDrawable;
+            CrossFadeDrawable icon = ActionBarMenu?.FindItem(Resource.Id.action_search)?.Icon as CrossFadeDrawable;
             //tested this and it works well
             if (icon == null)
             {
@@ -1478,14 +1459,12 @@ namespace Seeker
                 }
                 //when coming from an intent its actually (toolbar.Menu.FindItem(Resource.Id.action_search)) that is null.  so the menu is there, just no action_search menu item.
                 AndroidX.AppCompat.Widget.Toolbar toolbar = (this.Activity as AndroidX.AppCompat.App.AppCompatActivity)?.FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.toolbar);
-                return toolbar?.Menu?.FindItem(Resource.Id.action_search)?.Icon as Android.Graphics.Drawables.TransitionDrawable;
+                return toolbar?.Menu?.FindItem(Resource.Id.action_search)?.Icon as CrossFadeDrawable;
             }
             else
             {
                 return icon;
             }
-            //return ActionBarMenu.FindItem(Resource.Id.action_search).Icon as Android.Graphics.Drawables.TransitionDrawable; // we got nullref here...
-
         }
 
 
@@ -2195,22 +2174,6 @@ namespace Seeker
                 Logger.Firebase(msg + " showEditDialog" + e.Message);
                 SeekerApplication.Toaster.ShowToast("Error, please try again: " + msg, ToastLength.Long);
             }
-        }
-
-        private void PerformBackUpRefresh()
-        {
-            Handler h = new Handler(Looper.MainLooper);
-            h.PostDelayed(new Action(() =>
-            {
-                var menuItem = ActionBarMenu?.FindItem(Resource.Id.action_search);
-                if (menuItem != null)
-                {
-                    menuItem.SetVisible(false);
-                    menuItem.SetVisible(true);
-                    Logger.Debug("perform backup refresh");
-                }
-
-            }), 310);
         }
 
         public const int SearchToCloseDuration = 300;

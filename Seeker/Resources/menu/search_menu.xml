@@ -6,7 +6,6 @@
     <item
         android:id="@+id/action_search"
         android:title="@string/searches_tab2"
-        android:icon="@drawable/search_transition"
         app:showAsAction="always"
         android:iconifiedByDefault="true"
     />
