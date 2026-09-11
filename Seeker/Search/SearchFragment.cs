@@ -1213,13 +1213,13 @@ namespace Seeker
             if (AreFilterControlsActive() || AreChipsFiltering() || SearchTabHelper.TextFilter.IsFiltered)
             {
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
-                recyclerSearchAdapter.NotifyDataSetChanged();
+                ResetAdapterAndBaseline();
             }
             else
             {
                 SearchTabHelper.UI_SearchResponses.Clear();
                 SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
-                recyclerSearchAdapter.NotifyDataSetChanged();
+                ResetAdapterAndBaseline();
             }
             NotifySearchHeaderChanged();
         }
@@ -1591,13 +1591,13 @@ namespace Seeker
                     if (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
                     {
                         UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
-                        recyclerSearchAdapter.NotifyDataSetChanged();
+                        ResetAdapterAndBaseline();
                     }
                     else
                     {
                         SearchTabHelper.UI_SearchResponses.Clear();
                         SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
-                        recyclerSearchAdapter.NotifyDataSetChanged();
+                        ResetAdapterAndBaseline();
                     }
                     NotifySearchHeaderChanged();
 
@@ -1800,7 +1800,7 @@ namespace Seeker
 #if DEBUG
                 sw.Stop();
 #endif
-                recyclerSearchAdapter.NotifyDataSetChanged(); //does have the nice effect that if nothing changes, you dont just back to top. (unlike old method)
+                ResetAdapterAndBaseline(); //does have the nice effect that if nothing changes, you dont just back to top. (unlike old method)
 #if DEBUG
                 Logger.Debug($"old {oldCount} new {newCount} time {sw.ElapsedMilliseconds} ms");
 #endif
@@ -1817,7 +1817,7 @@ namespace Seeker
                 SearchTabHelper.UI_SearchResponses.Clear();
                 SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
 
-                recyclerSearchAdapter.NotifyDataSetChanged(); //does have the nice effect that if nothing changes, you dont just back to top.
+                ResetAdapterAndBaseline(); //does have the nice effect that if nothing changes, you dont just back to top.
                 UpdateEmptyState();
             }
             NotifySearchHeaderChanged();
@@ -1842,13 +1842,13 @@ namespace Seeker
             if (AreChipsFiltering() || SearchTabHelper.TextFilter.IsFiltered || AreFilterControlsActive())
             {
                 UpdateFilteredResponses(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab]);
-                recyclerSearchAdapter.NotifyDataSetChanged();
+                ResetAdapterAndBaseline();
             }
             else
             {
                 SearchTabHelper.UI_SearchResponses.Clear();
                 SearchTabHelper.UI_SearchResponses.AddRange(SearchTabHelper.SearchResponses);
-                recyclerSearchAdapter.NotifyDataSetChanged();
+                ResetAdapterAndBaseline();
             }
             NotifySearchHeaderChanged();
         }
@@ -1978,7 +1978,19 @@ namespace Seeker
         private SearchAdapterRecyclerVersion CreateSearchAdapter(SearchTab tab, List<SearchResponse> responses)
         {
             recyclerSearchAdapter = new SearchAdapterRecyclerVersion(tab, responses);
+            // every adapter creation (tab switch, new search, style change, view recreate) goes through here
+            SetOldList(tab.TextFilter.FilterString, responses?.ToList());
             return recyclerSearchAdapter;
+        }
+
+        /// <summary>
+        /// Full reset after a sort / filter / chip change. Also resync old list to what we 
+        /// currently show so that subsequent updates can use it.
+        /// </summary>
+        private void ResetAdapterAndBaseline()
+        {
+            recyclerSearchAdapter.NotifyDataSetChanged();
+            SetOldList(SearchTabHelper.TextFilter.FilterString, SearchTabHelper.UI_SearchResponses.ToList());
         }
 
         private void NotifySearchHeaderChanged()
@@ -2006,8 +2018,11 @@ namespace Seeker
         private static string oldListCondition = string.Empty;
 
         /// <summary>
-        /// Applies new search results to the RecyclerView, creating a new adapter if needed
-        /// or using DiffUtil for incremental updates.
+        /// Applies new search results to the RecyclerView, creating a new adapter if needed or
+        /// notifying just the inserted ranges. Since results only ever get added, never removed or changed
+        /// during a search, the previous list will always be a subsequence of the new one.
+        /// This prevents expensive diffing O(N+D^2) + JNI copy of every item which took 500+ ms at times
+        /// for real searches in release (whenever we would get an addition with say 500 new items)
         /// </summary>
         private static void ApplySearchResults(List<SearchResponse> newResults, string cacheKey)
         {
@@ -2020,19 +2035,23 @@ namespace Seeker
             {
                 // SaveInstanceState/RestoreInstanceState prevents autoscroll even when animations are off
                 var state = Instance.recycleLayoutManager.OnSaveInstanceState();
-#if DEBUG
-                if (prevList.Count == 0)
-                {
-                    Logger.Debug("refreshListView  oldList: " + prevList.Count + " newList " + newResults.Count);
-                }
-#endif
-                System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-                sw.Start();
-                var diff = DiffUtil.CalculateDiff(new SearchDiffCallback(prevList, newResults), true);
-                var elapsed = sw.ElapsedMilliseconds;
-                Android.Util.Log.Info("seeker", "DiffUtil.CalculateDiff took " + elapsed + " ms for oldList: " + prevList.Count + " newList " + newResults.Count);
+                var sw = System.Diagnostics.Stopwatch.StartNew();
                 Instance.recyclerSearchAdapter.localDataSet = newResults;
-                diff.DispatchUpdatesTo(Instance.recyclerSearchAdapter);
+                if (InsertOnlyDiff.TryComputeInsertRuns(prevList, newResults, out var runs))
+                {
+                    // a run's start is the adapter position once the runs before it are applied
+                    foreach (var (start, count) in runs)
+                    {
+                        Instance.recyclerSearchAdapter.NotifyItemRangeInserted(start, count);
+                    }
+                    Android.Util.Log.Debug("seeker", "insert-only diff took " + sw.ElapsedMilliseconds + " ms for oldList: " + prevList.Count + " newList " + newResults.Count + " runs " + runs.Count);
+                }
+                else
+                {
+                    // this shouldnt happen
+                    Logger.Firebase("search results baseline stale, full reset. oldList: " + prevList.Count + " newList " + newResults.Count);
+                    Instance.recyclerSearchAdapter.NotifyDataSetChanged();
+                }
                 Instance.recycleLayoutManager.OnRestoreInstanceState(state);
             }
             Instance.NotifySearchHeaderChanged();
@@ -2241,11 +2260,6 @@ namespace Seeker
             try
             {
                 Task<(Soulseek.Search, IReadOnlyCollection<SearchResponse>)> t = null;
-                if (fromTab == SearchTabHelper.CurrentTab)
-                {
-                    //there was a bug where wishlist search would clear this in the middle of diffutil calculating causing out of index crash.
-                    oldList?.Clear();
-                }
                 t = SeekerState.SoulseekClient.SearchAsync(SearchQuery.FromText(searchString), options: searchOptions, scope: scope, cancellationToken: cancellationToken);
 
                 t.ContinueWith(new Action<Task<(Soulseek.Search, IReadOnlyCollection<SearchResponse>)>>(t =>

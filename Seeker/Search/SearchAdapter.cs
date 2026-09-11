@@ -255,31 +255,5 @@ namespace Seeker
             }
             return ss;
         }
-
-        public class SearchDiffCallback : DiffUtil.Callback
-        {
-            private List<SearchResponse> oldList;
-            private List<SearchResponse> newList;
-
-            public SearchDiffCallback(List<SearchResponse> _oldList, List<SearchResponse> _newList)
-            {
-                oldList = _oldList;
-                newList = _newList;
-            }
-
-            public override int NewListSize => newList.Count;
-
-            public override int OldListSize => oldList.Count;
-
-            public override bool AreContentsTheSame(int oldItemPosition, int newItemPosition)
-            {
-                return oldList[oldItemPosition].Equals(newList[newItemPosition]); //my override
-            }
-
-            public override bool AreItemsTheSame(int oldItemPosition, int newItemPosition)
-            {
-                return oldList[oldItemPosition] == newList[newItemPosition];
-            }
-        }
     }
 }
