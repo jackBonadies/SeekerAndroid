@@ -18,6 +18,8 @@ namespace Seeker
         }
 
         private bool isUploads;
+
+        // Lock order: AllTransferItems -> AllFolderItems -> FolderItem.TransferItems
         /// <summary>
         /// Do not use directly.  This is public only for default serialization.
         /// </summary>
@@ -653,9 +655,12 @@ namespace Seeker
                 AllTransferItems.RemoveAll((TransferItem i) => { return i.State.HasFlag(TransferStates.Succeeded) && fi.Username == i.Username && GetFolderNameFromTransferItem(i) == fi.FolderName; });
             }
             fi.ClearAllComplete();
-            if (fi.IsEmpty())
+            lock (AllFolderItems)
             {
-                AllFolderItems.Remove(fi);
+                if (fi.IsEmpty())
+                {
+                    AllFolderItems.Remove(fi);
+                }
             }
             MarkTransfersDirty();
         }
@@ -741,28 +746,41 @@ namespace Seeker
         {
             lock (AllTransferItems)
             {
-                foreach (TransferItem ti in fi.TransferItems)
+                lock (fi.TransferItems)
                 {
-                    AllTransferItems.Remove(ti);
+                    foreach (TransferItem ti in fi.TransferItems)
+                    {
+                        AllTransferItems.Remove(ti);
+                    }
+                    fi.TransferItems.Clear();
                 }
             }
-            fi.TransferItems.Clear();
-            AllFolderItems.Remove(fi);
+            lock (AllFolderItems)
+            {
+                AllFolderItems.Remove(fi);
+            }
             MarkTransfersDirty();
         }
 
         public List<TransferItem> ClearAllFromFolderReturnCleanupItems(FolderItem fi)
         {
-            var tisNeedingCleanup = fi.TransferItems.Where(NeedsCleanUp).ToList();
+            List<TransferItem> tisNeedingCleanup;
             lock (AllTransferItems)
             {
-                foreach (TransferItem ti in fi.TransferItems)
+                lock (fi.TransferItems)
                 {
-                    AllTransferItems.Remove(ti);
+                    tisNeedingCleanup = fi.TransferItems.Where(NeedsCleanUp).ToList();
+                    foreach (TransferItem ti in fi.TransferItems)
+                    {
+                        AllTransferItems.Remove(ti);
+                    }
+                    fi.TransferItems.Clear();
                 }
             }
-            fi.TransferItems.Clear();
-            AllFolderItems.Remove(fi);
+            lock (AllFolderItems)
+            {
+                AllFolderItems.Remove(fi);
+            }
             MarkTransfersDirty();
             return tisNeedingCleanup;
         }
