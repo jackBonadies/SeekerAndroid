@@ -686,22 +686,28 @@ namespace Seeker
                         break;
                     case TransferContextMenuItem.ClearFromList:
                         Logger.InfoFirebase("Clear Complete item pressed");
-                        // TODO MOVE
-                        try
+                        if (ViewState.InUploadsMode)
                         {
-                            if (ViewState.InUploadsMode)
+                            // Uploads have no incomplete file to clean up.
+                            if (ti is TransferItem tiUpload)
                             {
-                                TransferItems.TransferItemManagerWrapped.RemoveAtUserIndex(position);
+                                TransferItems.TransferItemManagerWrapped.Remove(tiUpload);
                             }
-                            else
+                            else if (ti is FolderItem fiUpload)
                             {
-                                TransferItems.TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //UI
+                                TransferItems.TransferItemManagerWrapped.ClearAllFromFolder(fiUpload);
                             }
                         }
-                        catch (ArgumentOutOfRangeException)
+                        else
                         {
-                            SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
-                            return base.OnContextItemSelected(item);
+                            if (ti is TransferItem tiDownload)
+                            {
+                                TransferItems.TransferItemManagerWrapped.RemoveAndCleanUp(tiDownload);
+                            }
+                            else if (ti is FolderItem fiDownload)
+                            {
+                                TransferItems.TransferItemManagerWrapped.RemoveAndCleanUp(fiDownload);
+                            }
                         }
                         recyclerTransferAdapter.NotifyItemRemoved(position);
                         break;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Seeker.Helpers;
@@ -132,9 +132,33 @@ namespace Seeker
         public void RemoveAndCleanUp(TransferItem ti)
         {
             Remove(ti);
-            if (NeedsCleanUp(ti))
+            FlagInFlightAndCleanUpRest(new List<TransferItem> { ti });
+        }
+
+        public void RemoveAndCleanUp(FolderItem fi)
+        {
+            List<TransferItem> removed;
+            lock (fi.TransferItems)
             {
-                CleanupEntry(ti);
+                removed = fi.TransferItems.ToList();
+            }
+            ClearAllFromFolder(fi);
+            FlagInFlightAndCleanUpRest(removed);
+        }
+
+        private void FlagInFlightAndCleanUpRest(List<TransferItem> tis)
+        {
+            foreach (TransferItem ti in tis)
+            {
+                if (ti.InProcessing)
+                {
+                    ti.CancelAndClearFlag = true;
+                }
+            }
+            List<TransferItem> needingCleanup = tis.Where(NeedsCleanUp).ToList();
+            if (needingCleanup.Count != 0)
+            {
+                CleanupEntry(needingCleanup);
             }
         }
 
@@ -227,32 +251,11 @@ namespace Seeker
             object objectRemoved = RemoveAtUserIndex(position);
             if (objectRemoved is TransferItem ti)
             {
-                if (ti.InProcessing)
-                {
-                    ti.CancelAndClearFlag = true;
-                }
-                else
-                {
-                    if (NeedsCleanUp(ti))
-                    {
-                        CleanupEntry(ti);
-                    }
-                }
+                FlagInFlightAndCleanUpRest(new List<TransferItem> { ti });
             }
-            else
+            else if (objectRemoved is List<TransferItem> tis)
             {
-                List<TransferItem> tis = objectRemoved as List<TransferItem>;
-                IEnumerable<TransferItem> tisCleanUpOnComplete = tis.Where((item) => { return item.InProcessing; });
-                foreach (var item in tisCleanUpOnComplete)
-                {
-                    item.CancelAndClearFlag = true;
-                }
-                IEnumerable<TransferItem> tisNeedingCleanup = tis.Where((item) => { return NeedsCleanUp(item); });
-                if (tisNeedingCleanup.Any())
-                {
-                    CleanupEntry(tisNeedingCleanup);
-                }
-
+                FlagInFlightAndCleanUpRest(tis);
             }
         }
 
