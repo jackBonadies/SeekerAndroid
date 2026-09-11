@@ -713,38 +713,25 @@ namespace Seeker
                         break;
                     case TransferContextMenuItem.CancelAndClear: //cancel and clear (downloads) OR abort and clear (uploads)
                         Logger.InfoFirebase("Cancel and Clear item pressed");
-                        ITransferItem tItem = null;
-                        try
-                        {
-                            tItem = TransferItems.TransferItemManagerWrapped.GetItemAtUserIndex(position);
-                        }
-                        catch (ArgumentOutOfRangeException)
-                        {
-                            SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
-                            return base.OnContextItemSelected(item);
-                        }
-                        if (tItem is TransferItem tti)
+                        if (ti is TransferItem tti)
                         {
                             TransferState.CancelAndRemoveToken(tti);
                             // TODO MOVE
                             if (ViewState.InUploadsMode)
                             {
-                                TransferItems.TransferItemManagerWrapped.RemoveAtUserIndex(position);
+                                TransferItems.TransferItemManagerWrapped.Remove(tti);
                             }
                             else
                             {
-                                TransferItems.TransferItemManagerWrapped.RemoveAndCleanUpAtUserIndex(position); //this means basically, wait for the stream to be closed. no race conditions..
+                                TransferItems.TransferItemManagerWrapped.RemoveAndCleanUp(tti); //this means basically, wait for the stream to be closed. no race conditions..
                             }
                             recyclerTransferAdapter.NotifyItemRemoved(position);
                         }
-                        else if (tItem is FolderItem fi)
+                        else if (ti is FolderItem fi)
                         {
                             TransferItems.TransferItemManagerWrapped.CancelFolder(fi, true);
                             TransferItems.TransferItemManagerWrapped.ClearAllFromFolderAndClean(fi);
-                            lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList())
-                            {
-                                recyclerTransferAdapter.NotifyItemRemoved(position);
-                            }
+                            recyclerTransferAdapter.NotifyItemRemoved(position);
                         }
                         else
                         {
@@ -756,26 +743,16 @@ namespace Seeker
                         {
                             return true;
                         }
-                        tItem = null;
-                        try
-                        {
-                            tItem = TransferItems.TransferItemManagerDL.GetItemAtUserIndex(position, ViewState.CreateDLUIState());
-                        }
-                        catch (ArgumentOutOfRangeException)
-                        {
-                            SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
-                            return base.OnContextItemSelected(item);
-                        }
 
                         //the folder implementation will re-request all queued files
                         //recently I thought of just doing the lowest, but then if the lowest is ready, it will download leaving the other transfers behind.
 
                         // TODO MOVE
-                        if (tItem is TransferItem)
+                        if (ti is TransferItem tiQueue)
                         {
-                            GetQueuePosition(tItem as TransferItem);
+                            GetQueuePosition(tiQueue);
                         }
-                        else if (tItem is FolderItem folderItem)
+                        else if (ti is FolderItem folderItem)
                         {
                             lock (folderItem.TransferItems)
                             {
@@ -787,32 +764,23 @@ namespace Seeker
                         }
                         break;
                     case TransferContextMenuItem.PlayFile:
-                        tItem = null;
-                        try
-                        {
-                            tItem = TransferItems.TransferItemManagerDL.GetItemAtUserIndex(position, ViewState.CreateDLUIState()) as TransferItem;
-                        }
-                        catch (ArgumentOutOfRangeException)
-                        {
-                            SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
-                            return base.OnContextItemSelected(item);
-                        }
+                        TransferItem tiPlay = ti as TransferItem;
                         try
                         {
                             //tested on API25 and API30
                             //AndroidX.Core.Content.FileProvider
                             Android.Net.Uri uriToUse = null;
-                            if (PlatformInfo.UseLegacyStorage() && SimpleHelpers.IsFileUri((tItem as TransferItem).FinalUri)) //i.e. if it is a FILE URI.
+                            if (PlatformInfo.UseLegacyStorage() && SimpleHelpers.IsFileUri(tiPlay.FinalUri)) //i.e. if it is a FILE URI.
                             {
-                                uriToUse = AndroidX.Core.Content.FileProvider.GetUriForFile(this.Context, this.Context.ApplicationContext.PackageName + ".provider", new Java.IO.File(Android.Net.Uri.Parse((tItem as TransferItem).FinalUri).Path));
+                                uriToUse = AndroidX.Core.Content.FileProvider.GetUriForFile(this.Context, this.Context.ApplicationContext.PackageName + ".provider", new Java.IO.File(Android.Net.Uri.Parse(tiPlay.FinalUri).Path));
                             }
                             else
                             {
-                                uriToUse = Android.Net.Uri.Parse((tItem as TransferItem).FinalUri);
+                                uriToUse = Android.Net.Uri.Parse(tiPlay.FinalUri);
                             }
                             Intent playFileIntent = new Intent(Intent.ActionView);
                             //playFileIntent.SetDataAndType(uriToUse,"audio/*");
-                            playFileIntent.SetDataAndType(uriToUse, CommonHelpers.GetMimeTypeFromFilename((tItem as TransferItem).FullFilename));   //works
+                            playFileIntent.SetDataAndType(uriToUse, CommonHelpers.GetMimeTypeFromFilename(tiPlay.FullFilename));   //works
                             playFileIntent.AddFlags(ActivityFlags.GrantReadUriPermission | /*ActivityFlags.NewTask |*/ ActivityFlags.GrantWriteUriPermission); //works.  newtask makes it go to foobar and immediately jump back
                             //Intent chooser = Intent.CreateChooser(playFileIntent, "Play song with");
                             this.StartActivity(playFileIntent); //also the chooser isnt needed.  if you show without the chooser, it will show you the options and you can check Only Once, Always.
@@ -872,22 +840,9 @@ namespace Seeker
                         break;
                     case TransferContextMenuItem.AbortUpload: //abort upload
                         Logger.InfoFirebase("Abort Upload item pressed");
-                        tItem = null;
-                        try
-                        {
-                            tItem = TransferItems.TransferItemManagerWrapped.GetItemAtUserIndex(position);
-                        }
-                        catch (ArgumentOutOfRangeException)
-                        {
-                            SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
-                            return base.OnContextItemSelected(item);
-                        }
-                        TransferItem uploadToCancel = tItem as TransferItem;
+                        TransferItem uploadToCancel = ti as TransferItem;
                         TransferState.CancelAndRemoveToken(uploadToCancel);
-                        lock (TransferItems.TransferItemManagerWrapped.GetUICurrentList())
-                        {
-                            recyclerTransferAdapter.NotifyItemChanged(position);
-                        }
+                        recyclerTransferAdapter.NotifyItemChanged(position);
                         break;
                     case TransferContextMenuItem.IgnoreUnshareUser: //ignore (unshare) user
                         Logger.InfoFirebase("Unshare User item pressed");
