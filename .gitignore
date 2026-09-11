@@ -361,3 +361,6 @@ healthchecksdb
 
 #dont ignore Common/Debug which contains important utilities
 !/Common/Debug/
+# dotnet-trace captures
+*.nettrace
+*.speedscope.json
