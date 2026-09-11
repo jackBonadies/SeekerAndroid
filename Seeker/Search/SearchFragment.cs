@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 
 using Common;
 using Common.Search;
+using Android.Graphics.Drawables;
 namespace Seeker
 {
     public partial class SearchFragment : Fragment
@@ -2393,69 +2394,25 @@ namespace Seeker
 
                 }));
             }
-            catch (ArgumentNullException ane)
+            catch (ArgumentNullException)
             {
-                SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+                clearSearchWithMessage(fromWishlist, fromTab, transitionDrawable);
+                return;
+            }
+            catch (ArgumentException ex)
+            {
+                string message = ex.Message;
+                if (message.Contains("Search text must not be a null or empty string"))
                 {
-                    string errorMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.no_search_text);
-                    if (fromWishlist)
-                    {
-                        errorMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.no_wish_text);
-                    }
-
-                    SeekerApplication.Toaster.ShowToast(errorMsg, ToastLength.Short);
-                    SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
-                    Logger.Debug("transitionDrawable: RESET transition");
-                    if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
-                    {
-                        transitionDrawable?.ResetTransition();
-                    }
-                    SearchFragment.Instance?.UpdateEmptyState();
-                    SearchFragment.Instance?.NotifySearchHeaderChanged();
+                    // use localized version
+                    message = fromWishlist ? SeekerApplication.GetString(Resource.String.no_wish_text) : SeekerApplication.GetString(Resource.String.no_search_text);
                 }
-                ));
-                //MainActivity.ShowAlert(ane, this.Context);
+                clearSearchWithMessage(fromWishlist, fromTab, transitionDrawable, message);
                 return;
             }
-            catch (ArgumentException ae)
+            catch (System.Exception ex)
             {
-                SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
-                {
-                    SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
-                    string errorMsg = SeekerState.MainActivityRef.GetString(Resource.String.no_search_text);
-                    if (fromWishlist)
-                    {
-                        errorMsg = SeekerState.ActiveActivityRef.GetString(Resource.String.no_wish_text);
-                    }
-                    Logger.Debug("transitionDrawable: RESET transition");
-                    SeekerApplication.Toaster.ShowToast(errorMsg, ToastLength.Short);
-                    if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
-                    {
-                        transitionDrawable?.ResetTransition();
-                    }
-                    SearchFragment.Instance?.UpdateEmptyState();
-                    SearchFragment.Instance?.NotifySearchHeaderChanged();
-                }));
-                return;
-            }
-            catch (System.Exception ue)
-            {
-
-                SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
-                {
-                    SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
-                    Logger.Debug("transitionDrawable: RESET transition");
-
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.search_error_unspecified), ToastLength.Short);
-                    Logger.Firebase("tabpageradapter searchclick: " + ue.Message);
-
-                    if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
-                    {
-                        transitionDrawable?.ResetTransition();
-                    }
-                    SearchFragment.Instance?.UpdateEmptyState();
-                    SearchFragment.Instance?.NotifySearchHeaderChanged();
-                }));
+                clearSearchWithMessage(fromWishlist, fromTab, transitionDrawable, ex.Message);
                 return;
             }
             if (!fromWishlist)
@@ -2481,6 +2438,27 @@ namespace Seeker
                 }
                 actv.Adapter = new ArrayAdapter<string>(SearchFragment.Instance.context, Resource.Layout.search_dropdown_item, PreferencesState.SearchHistory); //refresh adapter
             }
+        }
+
+        private static void clearSearchWithMessage(bool fromWishlist, int fromTab, TransitionDrawable transitionDrawable, string message = null)
+        {
+            SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+            {
+                if (string.IsNullOrEmpty(message))
+                {
+                    message = fromWishlist ? SeekerApplication.GetString(Resource.String.no_wish_text) : SeekerApplication.GetString(Resource.String.no_search_text);
+                }
+                SearchTabHelper.SearchTabCollection[fromTab].CurrentlySearching = false;
+                Logger.Debug("transitionDrawable: RESET transition");
+                SeekerApplication.Toaster.ShowToast(message, ToastLength.Short);
+                if (!fromWishlist && fromTab == SearchTabHelper.CurrentTab)
+                {
+                    transitionDrawable?.ResetTransition();
+                }
+                SearchFragment.Instance?.UpdateEmptyState();
+                SearchFragment.Instance?.NotifySearchHeaderChanged();
+            }));
+
         }
 
         public static void SearchAPI(CancellationToken cancellationToken, Android.Graphics.Drawables.TransitionDrawable transitionDrawable, string searchString, int fromTab, bool fromWishlist = false)

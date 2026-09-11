@@ -1642,6 +1642,38 @@ namespace Seeker
 
         public Task<(Soulseek.Search Search, IReadOnlyCollection<SearchResponse> Responses)> SearchAsync(SearchQuery query, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null)
         {
+            if (query == null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
+
+            if (string.IsNullOrWhiteSpace(query.SearchText))
+            {
+                throw new ArgumentException("Search text must not be a null or empty string, or one consisting only of whitespace", nameof(query));
+            }
+
+            if (query.Terms.Count == 0)
+            {
+                throw new ArgumentException("Search query must contain at least one non-exclusion term", nameof(query));
+            }
+
+            if (!State.HasFlag(SoulseekClientStates.Connected) || !State.HasFlag(SoulseekClientStates.LoggedIn))
+            {
+                throw new InvalidOperationException($"The server connection must be connected and logged in to perform a search (currently: {State})");
+            }
+
+            scope ??= new SearchScope(SearchScopeType.Network);
+            options ??= new SearchOptions();
+
+            if (options.RemoveSingleCharacterSearchTerms)
+            {
+                query = new SearchQuery(query.Terms.Where(term => term.Length > 1), query.Exclusions);
+            }
+
+            if (query.Terms.Count == 0)
+            {
+                throw new ArgumentException("Search query must contain at least one non-exclusion term with length greater than 1", nameof(query));
+            }
             return SearchToCollectionAsync(query, scope, token, options, cancellationToken);
         }
 
