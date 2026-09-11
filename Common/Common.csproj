@@ -14,6 +14,11 @@
     <DefineConstants>$(DefineConstants);MOCK</DefineConstants>
   </PropertyGroup>
 
+  <!-- For 'Debug Mock' -->
+  <PropertyGroup Condition="$(Configuration.StartsWith('Debug'))">
+    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="MessagePack" Version="2.5.198" />
     <PackageReference Include="MessagePackAnalyzer" Version="2.5.198">

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Seeker.Helpers;
 
 namespace Seeker
 {
@@ -15,6 +16,7 @@ namespace Seeker
 
         public static void RestoreUploadTransferItemsStandard(string transferList)
         {
+            using var _ = DebugTimer.Start(nameof(RestoreUploadTransferItemsStandard));
             if (transferList == string.Empty)
             {
                 TransferItems.TransferItemManagerUploads = new TransferItemManager(true);
@@ -44,6 +46,7 @@ namespace Seeker
 
         public static void RestoreDownloadTransferItemsStandard(string transferList)
         {
+            using var _ = DebugTimer.Start(nameof(RestoreDownloadTransferItemsStandard));
             if (transferList == string.Empty)
             {
                 TransferItems.TransferItemManagerDL = new TransferItemManager();
@@ -72,6 +75,7 @@ namespace Seeker
         /// </summary>
         public static (string downloads, string uploads)? SaveTransferItems(bool force = false, int maxSecondsUpdate = 0)
         {
+            using var _ = DebugTimer.Start(nameof(SaveTransferItems));
             if (force || (TransferItemManager.TransfersDirty && DateTime.UtcNow.Subtract(transfersLastSavedTime).TotalSeconds >= maxSecondsUpdate))
             {
                 if (TransferItems.TransferItemManagerDL?.AllTransferItems == null)
