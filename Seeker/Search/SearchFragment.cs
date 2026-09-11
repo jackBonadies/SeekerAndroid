@@ -2026,7 +2026,11 @@ namespace Seeker
                     Logger.Debug("refreshListView  oldList: " + prevList.Count + " newList " + newResults.Count);
                 }
 #endif
+                System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+                sw.Start();
                 var diff = DiffUtil.CalculateDiff(new SearchDiffCallback(prevList, newResults), true);
+                var elapsed = sw.ElapsedMilliseconds;
+                Android.Util.Log.Info("seeker", "DiffUtil.CalculateDiff took " + elapsed + " ms for oldList: " + prevList.Count + " newList " + newResults.Count);
                 Instance.recyclerSearchAdapter.localDataSet = newResults;
                 diff.DispatchUpdatesTo(Instance.recyclerSearchAdapter);
                 Instance.recycleLayoutManager.OnRestoreInstanceState(state);

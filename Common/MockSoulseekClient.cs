@@ -1038,8 +1038,8 @@ namespace Seeker
             bool first = true;
             while (i < total)
             {
-                int gap = first ? _random.Next(300, 700) : _random.Next(80, 350);
-                int size = Math.Min(total - i, _random.Next(30, 151));
+                int gap = first ? _random.Next(100, 400) : _random.Next(80, 350);
+                int size = Math.Min(total - i, _random.Next(30, 700));
                 yield return (i, size, gap);
                 i += size;
                 first = false;
