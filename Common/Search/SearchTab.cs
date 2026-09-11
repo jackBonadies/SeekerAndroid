@@ -33,6 +33,7 @@ namespace Seeker
 
         public string LastSearchTerm = string.Empty;
         public int LastSearchResultsCount = 0;
+        public string LastSearchError = string.Empty;
 
         public List<ChipDataItem> ChipDataItems;
         public ChipFilter ChipsFilter;

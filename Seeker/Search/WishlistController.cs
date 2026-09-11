@@ -74,6 +74,13 @@ namespace Seeker.Search
         }
         public const string FromWishlistString = "FromWishlistTabID";
         public const string FromWishlistStringID = "FromWishlistTabIDToGoTo";
+
+        public static void SearchFailed(int id)
+        {
+            // same as what search completed does
+            OldResultsToCompare.TryRemove(id, out _);
+        }
+
         public static void SearchCompleted(int id)
         {
             OldResultsToCompare.TryRemove(id, out _);

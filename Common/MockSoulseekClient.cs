@@ -1694,6 +1694,12 @@ namespace Seeker
 
             string joinedTerms = string.Join(" ", query.Terms).ToLowerInvariant();
 
+            if (joinedTerms.Contains("asyncfail"))
+            {
+                await Task.Delay(500);
+                throw new InvalidOperationException("Connection has been closed");
+            }
+
 
             if (Seeker.Debug.SearchCaptureStore.IsConfigured &&
                 Seeker.Debug.SearchCaptureStore.TryLoad(joinedTerms, out var capturedResponses, out _))

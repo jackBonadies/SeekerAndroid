@@ -42,6 +42,7 @@ namespace Seeker
         private ViewFlipper searchEmptyStateFlipper = null;
         private TextView noResultsSubtitle = null;
         private TextView allFilteredTitle = null;
+        private TextView searchFailedReason = null;
         private View linearProgressIndicator = null;
         private TextView searchLoadingQueryText = null;
         private TextView searchLoadingTitle = null;
@@ -454,6 +455,8 @@ namespace Seeker
                 return;
             }
 
+            tab.LastSearchError = string.Empty;
+
             // Important: Swap token in before cancelling
             CancellationTokenSource superseded = tab.CancellationTokenSource;
             tab.CancellationTokenSource = new CancellationTokenSource();
@@ -749,6 +752,7 @@ namespace Seeker
             NoResults = 1,
             AllFiltered = 2,
             NoSearches = 3,
+            Failed = 4,
         }
 
         public void UpdateEmptyState()
@@ -761,6 +765,7 @@ namespace Seeker
             var currentTab = SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab];
             bool searching = SearchTabHelper.CurrentlySearching;
             bool emptyTerm = string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm);
+            bool failed = !string.IsNullOrEmpty(currentTab.LastSearchError);
             int total = SearchTabHelper.SearchResponses?.Count ?? 0;
             int shown = SearchTabHelper.UI_SearchResponses?.Count ?? 0;
 
@@ -768,6 +773,10 @@ namespace Seeker
             if ((searching && shown == 0) || currentTab.DiskLoadInProgress)
             {
                 state = SearchEmptyState.Loading;
+            }
+            else if (!searching && failed && total == 0)
+            {
+                state = SearchEmptyState.Failed;
             }
             else if (!searching && emptyTerm)
             {
@@ -829,6 +838,10 @@ namespace Seeker
                 allFilteredTitle.Text = string.Format(
                     SeekerApplication.GetString(Resource.String.results_hidden_title),
                     total);
+            }
+            else if (state == SearchEmptyState.Failed && searchFailedReason != null)
+            {
+                searchFailedReason.Text = currentTab.LastSearchError;
             }
 
             if (state == SearchEmptyState.None)
@@ -1053,6 +1066,7 @@ namespace Seeker
             searchLoadingTitle = rootView.FindViewById<TextView>(Resource.Id.searchLoadingTitle);
             noResultsSubtitle = rootView.FindViewById<TextView>(Resource.Id.noResultsSubtitle);
             allFilteredTitle = rootView.FindViewById<TextView>(Resource.Id.allFilteredTitle);
+            searchFailedReason = rootView.FindViewById<TextView>(Resource.Id.searchFailedReason);
             wishlistBanner = rootView.FindViewById<View>(Resource.Id.wishlistBanner);
             wishlistBannerText = rootView.FindViewById<TextView>(Resource.Id.wishlistHeaderText);
             UpdateEmptyState();
@@ -2189,6 +2203,12 @@ namespace Seeker
 
         private static void SearchLogic(CancellationToken cancellationToken, string searchString, int fromTab, SearchScope scope, bool fromWishlist)
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                // cancelled (X) or superseded (restart) while we waited on a reconnect, not needed anymore
+                Logger.Debug("search cancelled before it started, tab " + fromTab);
+                return;
+            }
             try
             {
                 //all click event handlers occur on UI thread.
@@ -2235,9 +2255,11 @@ namespace Seeker
                         return;
                     }
 
-                    if (!t.IsCompletedSuccessfully && t.Exception != null)
+                    if (t.IsFaulted)
                     {
-                        Logger.Debug("search exception: " + t.Exception.Message);
+                        // Timeout, ConnectionException, SoulseekClientException (basically issue writing the search request to server)
+                        MarkSearchFailed(fromTab, fromWishlist, cancellationToken, t.Exception?.InnerException?.Message ?? t.Exception?.Message);
+                        return;
                     }
 
                     SeekerApplication.RunOnUIThread(() =>
@@ -2339,7 +2361,7 @@ namespace Seeker
             }
             catch (ArgumentNullException)
             {
-                clearSearchWithMessage(fromWishlist, fromTab);
+                MarkSearchFailed(fromTab, fromWishlist, cancellationToken, fromWishlist ? SeekerApplication.GetString(Resource.String.no_wish_text) : SeekerApplication.GetString(Resource.String.no_search_text));
                 return;
             }
             catch (ArgumentException ex)
@@ -2350,12 +2372,21 @@ namespace Seeker
                     // use localized version
                     message = fromWishlist ? SeekerApplication.GetString(Resource.String.no_wish_text) : SeekerApplication.GetString(Resource.String.no_search_text);
                 }
-                clearSearchWithMessage(fromWishlist, fromTab, message);
+                else
+                {
+                    // Strip dev specific message from library if applicable
+                    int paramSuffix = message.IndexOf(" (Parameter '", StringComparison.Ordinal);
+                    if (paramSuffix > 0)
+                    {
+                        message = message.Substring(0, paramSuffix);
+                    }
+                }
+                MarkSearchFailed(fromTab, fromWishlist, cancellationToken, message);
                 return;
             }
             catch (System.Exception ex)
             {
-                clearSearchWithMessage(fromWishlist, fromTab, ex.Message);
+                MarkSearchFailed(fromTab, fromWishlist, cancellationToken, ex.Message);
                 return;
             }
             if (!fromWishlist)
@@ -2383,18 +2414,29 @@ namespace Seeker
             }
         }
 
-        private static void clearSearchWithMessage(bool fromWishlist, int fromTab, string message = null)
+        private static void MarkSearchFailed(int tabId, bool fromWishlist, CancellationToken cancellationToken, string reason)
         {
-            SeekerState.ActiveActivityRef.RunOnUiThread(new Action(() =>
+            Logger.Debug($"search failed, tab {tabId}, wishlist {fromWishlist}: {reason}");
+            if (fromWishlist)
             {
-                if (string.IsNullOrEmpty(message))
+                WishlistController.SearchFailed(tabId);
+                return;
+            }
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+            SeekerApplication.RunOnUIThread(() =>
+            {
+                SearchTab tab = SearchTabHelper.SearchTabCollection[tabId];
+                tab.LastSearchError = string.IsNullOrEmpty(reason) ? SeekerApplication.GetString(Resource.String.search_failed_title) : reason;
+                bool failedStateWillShow = tabId == SearchTabHelper.CurrentTab && tab.SearchResponses.Count == 0;
+                if (!failedStateWillShow)
                 {
-                    message = fromWishlist ? SeekerApplication.GetString(Resource.String.no_wish_text) : SeekerApplication.GetString(Resource.String.no_search_text);
+                    SeekerApplication.Toaster.ShowToast(tab.LastSearchError, ToastLength.Short);
                 }
-                SeekerApplication.Toaster.ShowToast(message, ToastLength.Short);
-                SetSearchingState(fromTab, false);
-            }));
-
+                SetSearchingState(tabId, false);
+            });
         }
 
         public static void SearchAPI(CancellationToken cancellationToken, string searchString, int fromTab, SearchScope scope, bool fromWishlist = false)
@@ -2403,17 +2445,25 @@ namespace Seeker
             SearchTabHelper.SearchTabCollection[fromTab].LastRanTime = SimpleHelpers.GetDateTimeNowSafe();
             if (!PreferencesState.CurrentlyLoggedIn)
             {
-                if (!fromWishlist)
-                {
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_search), ToastLength.Long);
-                }
-                SetSearchingState(fromTab, false);
+                MarkSearchFailed(fromTab, fromWishlist, cancellationToken, SeekerApplication.GetString(Resource.String.must_be_logged_to_search));
                 return;
             }
-            else
+            SessionService.Instance.RunWithReconnect(t =>
             {
-                SessionService.Instance.RunWithReconnect(() => SearchLogic(cancellationToken, searchString, fromTab, scope, fromWishlist), silent: fromWishlist);
-            }
+                if (t.IsFaulted)
+                {
+                    MarkSearchFailed(fromTab, fromWishlist, cancellationToken, SeekerApplication.GetString(Resource.String.failed_to_connect));
+                    throw new FaultPropagationException();
+                }
+                if (fromWishlist)
+                {
+                    SearchLogic(cancellationToken, searchString, fromTab, scope, fromWishlist);
+                }
+                else
+                {
+                    SeekerApplication.RunOnUIThread(() => SearchLogic(cancellationToken, searchString, fromTab, scope, fromWishlist));
+                }
+            }, silent: fromWishlist);
         }
     }
 

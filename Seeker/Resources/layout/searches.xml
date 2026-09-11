@@ -245,6 +245,44 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/searchFailedView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <ImageView
+                    android:layout_width="96dp"
+                    android:layout_height="96dp"
+                    android:src="@drawable/alert_circle_outline"
+                    android:tint="?attr/cellTextColorSubdued" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxWidth="320dp"
+                    android:gravity="center"
+                    android:breakStrategy="balanced"
+                    android:text="@string/search_failed_title"
+                    android:textSize="18sp"
+                    android:textColor="?attr/cellTextColor"
+                    android:layout_marginTop="12dp" />
+
+                <TextView
+                    android:id="@+id/searchFailedReason"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxWidth="320dp"
+                    android:gravity="center"
+                    android:breakStrategy="balanced"
+                    android:textSize="14sp"
+                    android:textColor="?attr/cellTextColorSubdued"
+                    android:layout_marginTop="4dp" />
+
+            </LinearLayout>
+
         </ViewFlipper>
     </FrameLayout>
     <androidx.core.widget.NestedScrollView
