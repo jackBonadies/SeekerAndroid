@@ -72,10 +72,10 @@ namespace Common.Share
             foreach (string presentableName in presentableNameToFullFileInfo.Keys)
             {
                 string searchableName = SimpleHelpers.GetFolderNameFromFile(presentableName).ToString() + " " + System.IO.Path.GetFileNameWithoutExtension(SimpleHelpers.GetFileNameFromFile(presentableName)).ToString();
-                searchableName = SharedFileCache.MatchSpecialCharAgnostic(searchableName);
                 int code = presentableNameToFileKey[presentableName];
-                foreach (string token in searchableName.ToLower().Split(null)) //null means whitespace
+                foreach (string rawToken in searchableName.Split(null)) //null means whitespace
                 {
+                    string token = NormalizeSearchToken(rawToken);
                     if (token == string.Empty)
                     {
                         continue;
@@ -260,6 +260,11 @@ namespace Common.Share
         public static string MatchSpecialCharAgnostic(string input)
         {
             return input.Replace(".", "").Replace(",", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("[", "").Replace("]", "");
+        }
+
+        public static string NormalizeSearchToken(string token)
+        {
+            return MatchSpecialCharAgnostic(token).ToLowerInvariant();
         }
 
         public IEnumerable<Soulseek.File> GetSlskFilesFromMatches(IEnumerable<int> matches, string uname, out IEnumerable<Soulseek.File> lockedFiles)
@@ -457,7 +462,7 @@ namespace Common.Share
                 IEnumerable<int> matches = null;
                 foreach(string includeTerm in includeTerms)
                 {
-                    string includeTermAgnostic = SharedFileCache.MatchSpecialCharAgnostic(includeTerm);
+                    string includeTermAgnostic = NormalizeSearchToken(includeTerm);
                     if(includeTermAgnostic==string.Empty)
                     {
                         continue;
@@ -494,7 +499,7 @@ namespace Common.Share
 
                 foreach (string excludeTerm in excludeTerms)
                 {
-                    string excludeTermAgnostic = SharedFileCache.MatchSpecialCharAgnostic(excludeTerm);
+                    string excludeTermAgnostic = NormalizeSearchToken(excludeTerm);
                     if (TokenIndex.ContainsKey(excludeTermAgnostic))
                     {
                         matches = matches.Except(TokenIndex[excludeTermAgnostic]);
