@@ -581,12 +581,12 @@ namespace Seeker.Services
                     catch (Exception e)
                     {
                         //ape and aiff always fail with built in metadata retreiver.
-                        if (System.IO.Path.GetExtension(presentableName).ToLower() == ".ape")
+                        if (string.Equals(System.IO.Path.GetExtension(presentableName), ".ape", StringComparison.OrdinalIgnoreCase))
                         {
                             using var stream = contentResolver.OpenInputStream(childUri);
                             MicroTagReader.Instance.GetApeMetadata(stream, out sampleRate, out bitDepth, out duration);
                         }
-                        else if (System.IO.Path.GetExtension(presentableName).ToLower() == ".aiff")
+                        else if (string.Equals(System.IO.Path.GetExtension(presentableName), ".aiff", StringComparison.OrdinalIgnoreCase))
                         {
                             using var stream = contentResolver.OpenInputStream(childUri);
                             MicroTagReader.Instance.GetAiffMetadata(stream, out sampleRate, out bitDepth, out duration);

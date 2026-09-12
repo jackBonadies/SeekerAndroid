@@ -686,7 +686,7 @@ namespace Seeker.Services
                             //"Failed to move to /storage/1801-090D/Music/Soulseek Complete/folder/song.mp3"
                             //{content://com.android.externalstorage.documents/tree/primary%3A/document/primary%3ASoulseek%20Incomplete%2F/****.mp3}
                             //content://com.android.externalstorage.documents/tree/1801-090D%3AMusic/document/1801-090D%3AMusic%2FSoulseek%20Complete%2F/****}
-                            if (e.Message.ToLower().Contains("already exists"))
+                            if (e.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase))
                             {
                                 try
                                 {

@@ -284,7 +284,7 @@ namespace Seeker
                             string volToCompare = volName.Replace(":", "");
                             foreach (string mediaStoreVolume in volumeNames)
                             {
-                                if (mediaStoreVolume.ToLower() == volToCompare.ToLower())
+                                if (string.Equals(mediaStoreVolume, volToCompare, StringComparison.OrdinalIgnoreCase))
                                 {
                                     chosenVolume = mediaStoreVolume;
                                 }

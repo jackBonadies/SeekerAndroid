@@ -520,7 +520,7 @@ namespace Seeker
                 {
                     if (dirTask.Exception?.InnerException?.Message != null)
                     {
-                        if (dirTask.Exception.InnerException.Message.ToLower().Contains("timed out"))
+                        if (dirTask.Exception.InnerException.Message.Contains("timed out", StringComparison.OrdinalIgnoreCase))
                         {
                             SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.folder_request_timed_out), ToastLength.Short);
                         }

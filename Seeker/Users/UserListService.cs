@@ -195,7 +195,7 @@ namespace Seeker
                 if (t == null || t.IsFaulted)
                 {
                     //failed to add user
-                    if (t.Exception != null && t.Exception.Message != null && t.Exception.Message.ToLower().Contains("the wait timed out"))
+                    if (t.Exception != null && t.Exception.Message != null && t.Exception.Message.Contains("the wait timed out", StringComparison.OrdinalIgnoreCase))
                     {
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.error_adding_user_timeout), ToastLength.Short);
                     }

@@ -11,6 +11,7 @@ using Common.Messages;
 using Seeker.Helpers.ActionSheet;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -217,7 +218,7 @@ namespace Seeker.Chatroom
         public void setItem(Soulseek.UserData userData)
         {
             DataItem = userData;
-            viewFlag.Text = ChatroomActivity.LocaleToEmoji(userData.CountryCode.ToUpper());
+            viewFlag.Text = ChatroomActivity.LocaleToEmoji(userData.CountryCode.ToUpperInvariant());
             viewUsername.Text = userData.Username;
             viewNumFiles.Text = userData.FileCount.ToString("N0");
             viewSpeed.Text = (userData.AverageSpeed / 1024).ToString("N0") + " " + SimpleHelpers.STRINGS_KBS;
@@ -230,12 +231,12 @@ namespace Seeker.Chatroom
                 else if (cData.ChatroomUserRole == Soulseek.UserRole.Operator)
                 {
                     viewOperatorStatus.Visibility = ViewStates.Visible;
-                    viewOperatorStatus.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.mod).ToUpper();
+                    viewOperatorStatus.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.mod).ToUpper(CultureInfo.CurrentCulture);
                 }
                 else
                 {
                     viewOperatorStatus.Visibility = ViewStates.Visible;
-                    viewOperatorStatus.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.owner).ToUpper();
+                    viewOperatorStatus.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.owner).ToUpper(CultureInfo.CurrentCulture);
                 }
             }
             else

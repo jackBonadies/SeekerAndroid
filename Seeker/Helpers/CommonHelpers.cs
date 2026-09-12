@@ -197,7 +197,7 @@ namespace Seeker
         public const string APE_MIME = "audio/x-ape";
         public static string GetMimeTypeFromFilename(string filename)
         {
-            string ext = System.IO.Path.GetExtension(filename).ToLower();
+            string ext = System.IO.Path.GetExtension(filename).ToLowerInvariant();
             string mimeType = @"audio/mpeg"; //default
             if (ext != null && ext != string.Empty)
             {

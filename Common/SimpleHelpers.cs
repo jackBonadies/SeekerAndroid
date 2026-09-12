@@ -18,7 +18,7 @@ namespace Seeker
         /// Fragment of the message Soulseek.NET puts on the SoulseekClientException it throws when
         /// neither a direct nor an indirect connection to a peer could be established.
         /// </summary>
-        public const string FailedToEstablishDirectOrIndirectStringLower = "failed to establish a direct or indirect";
+        public const string FailedToEstablishDirectOrIndirectString = "failed to establish a direct or indirect";
 
 
         public static string AvoidLineBreaks(string orig)

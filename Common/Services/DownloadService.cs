@@ -342,7 +342,7 @@ namespace Seeker.Services
                                 toaster.ShowToastDebounced(string.Format(toaster.GetString(StringKey.UserXIsOffline), username), "_6_", username);
                             }
                         }
-                        else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.ToLower().Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectStringLower))
+                        else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase))
                         {
                             //Nicotine transitions from Queued to Cannot Connect IF you pause and resume. Otherwise you stay in Queued. Here if someone explicitly retries (i.e. silent = false) then we will transition states.
                             // otherwise, its okay, lets just stay in Queued.
@@ -573,7 +573,7 @@ namespace Seeker.Services
                             catch (System.Exception e)
                             {
                                 //disconnected error
-                                if (e is System.InvalidOperationException && e.Message.ToLower().Contains("server connection must be connected and logged in"))
+                                if (e is System.InvalidOperationException && e.Message.Contains("server connection must be connected and logged in", StringComparison.OrdinalIgnoreCase))
                                 {
                                     action = () => { toaster.ShowToastDebounced(StringKey.MustBeLoggedInToRetryDL, "_16_"); };
                                 }
@@ -649,7 +649,7 @@ namespace Seeker.Services
                         else if (task.Exception.InnerException is Soulseek.TransferRejectedException tre) //derived class of TransferException...
                         {
                             //we go here when trying to download a locked file... (the exception only gets thrown on rejected with "not shared")
-                            bool isFileNotShared = tre.Message.ToLower().Contains("file not shared");
+                            bool isFileNotShared = tre.Message.Contains("file not shared", StringComparison.OrdinalIgnoreCase);
                             // if we request a file from a soulseek NS client such as eÌe.jpg which when encoded in UTF fails to be decoded by Latin1
                             // soulseek NS will send TransferRejectedException "File Not Shared." with our filename (the filename will be identical).
                             // when we retry lets try a Latin1 encoding.  If no special characters this will not make any difference and it will be just a normal retry.
@@ -689,12 +689,12 @@ namespace Seeker.Services
                         }
                         else if (task.Exception.InnerException is Soulseek.SoulseekClientException &&
                                 task.Exception.InnerException.Message != null &&
-                                task.Exception.InnerException.Message.ToLower().Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectStringLower))
+                                task.Exception.InnerException.Message.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase))
                         {
                             logger.Debug("Task Exception: " + task.Exception.InnerException.Message);
                             action = () => { toaster.ShowToastDebounced(StringKey.failed_to_establish_direct_or_indirect, "_4_"); };
                         }
-                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("read error: remote connection closed"))
+                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.Contains("read error: remote connection closed", StringComparison.OrdinalIgnoreCase))
                         {
                             retriable = true;
                             //logger.Firebase("read error: remote connection closed"); //this is if someone cancels the upload on their end.
@@ -705,7 +705,7 @@ namespace Seeker.Services
                                 resetRetryCount = true;
                             }
                         }
-                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("network subsystem is down"))
+                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.Contains("network subsystem is down", StringComparison.OrdinalIgnoreCase))
                         {
                             //logger.Firebase("Network Subsystem is Down");
                             if (networkStatus.DoWeHaveInternet())//if we have internet again by the time we get here then its retriable. this is often due to handoff. handoff either causes this or "remote connection closed"
@@ -725,7 +725,7 @@ namespace Seeker.Services
                             logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
 
                         }
-                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains("reported as failed by"))
+                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.Contains("reported as failed by", StringComparison.OrdinalIgnoreCase))
                         {
                             // if we request a file from a soulseek NS client such as eÌÌÌe.jpg which when encoded in UTF fails to be decoded by Latin1
                             // soulseek NS will send UploadFailed with our filename (the filename will be identical).
@@ -742,7 +742,7 @@ namespace Seeker.Services
                             logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                             action = () => { toaster.ShowToastLong(StringKey.reported_as_failed); };
                         }
-                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectStringLower))
+                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase))
                         {
                             //logger.Firebase("failed to establish a direct or indirect message connection");
                             logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
@@ -779,7 +779,7 @@ namespace Seeker.Services
                                     }
 
                                     //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
-                                    if (task.Exception.InnerException.InnerException.Message.ToLower().Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectStringLower))
+                                    if (task.Exception.InnerException.InnerException.Message.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase))
                                     {
                                         unknownException = false;
                                     }

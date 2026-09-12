@@ -529,7 +529,7 @@ namespace Seeker
 
             public static string GetInvariantKey(string key)
             {
-                string invariantKey = key.ToLower();
+                string invariantKey = key.ToLowerInvariant();
                 invariantKey = invariantKey.Replace("and", "&");
                 invariantKey = invariantKey.Replace(",", "");  //todo more efficient replace...
                 invariantKey = invariantKey.Replace("'", "");

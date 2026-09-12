@@ -347,8 +347,8 @@ namespace Seeker
                 ReadOnlySpan<char> parentFolderName = SimpleHelpers.GetParentFolderNameFromFile(fullFname);
                 foreach (string keyword in chipFilter.Keywords)
                 {
-                    if (!folderName.Contains(keyword, StringComparison.InvariantCultureIgnoreCase) &&
-                        !parentFolderName.Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+                    if (!folderName.Contains(keyword, StringComparison.OrdinalIgnoreCase) &&
+                        !parentFolderName.Contains(keyword, StringComparison.OrdinalIgnoreCase))
                     {
                         return false;
                     }
@@ -359,8 +359,8 @@ namespace Seeker
                     bool anyMatch = false;
                     foreach (string keyword in keywordsInvar)
                     {
-                        if (folderName.Contains(keyword, StringComparison.InvariantCultureIgnoreCase) ||
-                            parentFolderName.Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+                        if (folderName.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
+                            parentFolderName.Contains(keyword, StringComparison.OrdinalIgnoreCase))
                         {
                             anyMatch = true;
                             break;

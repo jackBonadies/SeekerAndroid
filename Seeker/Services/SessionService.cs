@@ -371,7 +371,7 @@ namespace Seeker.Services
                     }
                 }
                 else if (t.Exception.InnerExceptions[0].Message != null &&
-                    (t.Exception.InnerExceptions[0].Message.Contains("wait timed out") || t.Exception.InnerExceptions[0].Message.ToLower().Contains("operation timed out")))
+                    (t.Exception.InnerExceptions[0].Message.Contains("wait timed out") || t.Exception.InnerExceptions[0].Message.Contains("operation timed out", StringComparison.OrdinalIgnoreCase)))
                 {
                     clearCreds = false;
                     msg = SeekerApplication.GetString(Resource.String.cannot_login) + " - Time Out Waiting for Server Response.";
