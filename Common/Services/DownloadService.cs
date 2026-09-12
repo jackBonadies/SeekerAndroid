@@ -160,8 +160,8 @@ namespace Seeker.Services
                 downloadInfo = new DownloadInfo(username, fname, size, dlTask, cancellationTokenSource, queueLength, 0, depth);
 
                 transferItem = new TransferItem();
-                transferItem.Filename = SimpleHelpers.GetFileNameFromFile(downloadInfo.fullFilename);
-                transferItem.FolderName = SimpleHelpers.GetFolderNameFromFile(downloadInfo.fullFilename, depth);
+                transferItem.Filename = SimpleHelpers.GetFileNameFromFile(downloadInfo.fullFilename).ToString();
+                transferItem.FolderName = SimpleHelpers.GetFolderNameFromFile(downloadInfo.fullFilename, depth).ToString();
                 transferItem.Username = downloadInfo.username;
                 transferItem.FullFilename = downloadInfo.fullFilename;
                 transferItem.Size = downloadInfo.Size;
@@ -874,7 +874,7 @@ namespace Seeker.Services
 
                     if (!PreferencesState.DisableDownloadToastNotification)
                     {
-                        action = () => { toaster.ShowToastLong(SimpleHelpers.GetFileNameFromFile(e.dlInfo.fullFilename) + " " + toaster.GetString(StringKey.FinishedDownloading)); };
+                        action = () => { toaster.ShowToastLong(SimpleHelpers.GetFileNameFromFile(e.dlInfo.fullFilename).ToString() + " " + toaster.GetString(StringKey.FinishedDownloading)); };
                         mainThreadRunner.RunOnUiThread(action);
                     }
                     string finalUri = string.Empty;

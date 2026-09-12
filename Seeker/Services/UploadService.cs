@@ -179,8 +179,8 @@ namespace Seeker.Services
             TransferItem transferItem = new TransferItem();
             transferItem.Username = username;
             transferItem.FullFilename = filename;
-            transferItem.Filename = SimpleHelpers.GetFileNameFromFile(filename);
-            transferItem.FolderName = SimpleHelpers.GetFolderNameFromFile(filename);
+            transferItem.Filename = SimpleHelpers.GetFileNameFromFile(filename).ToString();
+            transferItem.FolderName = SimpleHelpers.GetFolderNameFromFile(filename).ToString();
             transferItem.CancellationTokenSource = cts;
             transferItem.Size = ourFile.Length();
             transferItem.isUpload = true;

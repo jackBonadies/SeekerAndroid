@@ -298,7 +298,7 @@ namespace UnitTestCommon
         [Test]
         public void GetFileNameFromFile_NormalPath()
         {
-            string result = SimpleHelpers.GetFileNameFromFile(@"music\artist\song.mp3");
+            string result = SimpleHelpers.GetFileNameFromFile(@"music\artist\song.mp3").ToString();
             Assert.That(result, Is.EqualTo("song.mp3"));
         }
 
@@ -306,30 +306,27 @@ namespace UnitTestCommon
         public void GetFileNameFromFile_NoBackslash()
         {
             // LastIndexOf returns -1, Substring(0) returns the whole string
-            string result = SimpleHelpers.GetFileNameFromFile("song.mp3");
+            string result = SimpleHelpers.GetFileNameFromFile("song.mp3").ToString();
             Assert.That(result, Is.EqualTo("song.mp3"));
         }
 
         [Test]
         public void GetFileNameFromFile_TrailingBackslash_ReturnsEmpty()
         {
-            string result = SimpleHelpers.GetFileNameFromFile(@"music\artist\");
+            string result = SimpleHelpers.GetFileNameFromFile(@"music\artist\").ToString();
             Assert.That(result, Is.EqualTo(""));
         }
 
-        [Test]
-        public void GetFolderNameFromFileLevels_ThaiCulture_DoesNotThrow()
+        [TestCase(1, @"level1")]
+        [TestCase(2, @"level2\level1")]
+        [TestCase(3, @"level3\level2\level1")]
+        [TestCase(4, @"level4\level3\level2\level1")]
+        public void GetFolderNameFromFileLevels_ThaiCulture_DoesNotThrow(int levels, string expected)
         {
             RunInCulture("th-TH", () =>
             {
-                string result = SimpleHelpers.GetFolderNameFromFile(@"level4\level3\level2\level1\song.mp3");
-                Assert.That(result, Is.EqualTo("level1"));
-                result = SimpleHelpers.GetFolderNameFromFile(@"level4\level3\level2\level1\song.mp3", 2);
-                Assert.That(result, Is.EqualTo("level2\\level1"));
-                result = SimpleHelpers.GetFolderNameFromFile(@"level4\level3\level2\level1\song.mp3", 3);
-                Assert.That(result, Is.EqualTo("level3\\level2\\level1"));
-                result = SimpleHelpers.GetFolderNameFromFile(@"level4\level3\level2\level1\song.mp3", 4);
-                Assert.That(result, Is.EqualTo("level4\\level3\\level2\\level1"));
+                string result = SimpleHelpers.GetFolderNameFromFile(@"level4\level3\level2\level1\song.mp3", levels).ToString();
+                Assert.That(result, Is.EqualTo(expected));
             });
         }
 
@@ -338,11 +335,38 @@ namespace UnitTestCommon
         {
             RunInCulture("th-TH", () =>
             {
-                string result = SimpleHelpers.GetParentFolderNameFromFile(@"level4\level3\level2\level1\song.mp3");
+                string result = SimpleHelpers.GetParentFolderNameFromFile(@"level4\level3\level2\level1\song.mp3").ToString();
                 Assert.That(result, Is.EqualTo("level2"));
-                result = SimpleHelpers.GetParentFolderNameFromFile(@"level2\level1\song.mp3");
+                result = SimpleHelpers.GetParentFolderNameFromFile(@"level2\level1\song.mp3").ToString();
                 Assert.That(result, Is.EqualTo("level2"));
             });
+        }
+
+        [TestCase(@"level2\level1\song.mp3", 5, @"level2\level1")]
+        [TestCase(@"level2\level1\song.mp3", 0, "")]
+        [TestCase("song.mp3", 1, "")]
+        [TestCase("", 1, "")]
+        [TestCase(@"\song.mp3", 1, "")]
+        public void GetFolderNameFromFile_EdgeCases(string path, int levels, string expected)
+        {
+            Assert.That(SimpleHelpers.GetFolderNameFromFile(path, levels).ToString(), Is.EqualTo(expected));
+        }
+
+        [TestCase(@"level3\level2\level1\song.mp3", "level2")]
+        [TestCase(@"level2\level1\song.mp3", "level2")]
+        [TestCase(@"\level2\level1\song.mp3", "level2")]
+        [TestCase(@"level1\song.mp3", "")]
+        [TestCase("song.mp3", "")]
+        [TestCase("", "")]
+        public void GetParentFolderNameFromFile_EdgeCases(string path, string expected)
+        {
+            Assert.That(SimpleHelpers.GetParentFolderNameFromFile(path).ToString(), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void GetFileNameFromFile_Null_ReturnsEmpty()
+        {
+            Assert.That(SimpleHelpers.GetFileNameFromFile((string)null).ToString(), Is.EqualTo(""));
         }
 
         [Test]

@@ -309,7 +309,7 @@ namespace Seeker.Transfers
                 try
                 {
                     CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, AppNotifications.CHANNEL_ID_UPLOAD_COMPLETED, AppNotifications.CHANNEL_NAME_UPLOAD_COMPLETED, NotificationImportance.High);
-                    string directory = SimpleHelpers.GetFolderNameFromFile(e.Transfer.Filename.Replace("/", @"\"));
+                    string directory = SimpleHelpers.GetFolderNameFromFile(e.Transfer.Filename.Replace("/", @"\")).ToString();
                     var notifInfo = Seeker.Services.UploadNotificationTracker.GetOrCreate(e.Transfer.Username, directory);
 
                     Notification n = Seeker.Services.UploadService.CreateUploadNotification(SeekerState.ActiveActivityRef, e.Transfer.Username, notifInfo.DirNames, notifInfo.FilesUploadedToUser);

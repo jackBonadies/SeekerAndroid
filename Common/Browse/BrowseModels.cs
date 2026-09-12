@@ -82,11 +82,11 @@ namespace Seeker
             {
                 if (this.Node.IsLocked)
                 {
-                    return SimpleHelpers.LOCK_EMOJI + SimpleHelpers.GetFileNameFromFile(Name);
+                    return SimpleHelpers.LOCK_EMOJI + SimpleHelpers.GetFileNameFromFile(Name).ToString();
                 }
                 else
                 {
-                    return SimpleHelpers.GetFileNameFromFile(Name);
+                    return SimpleHelpers.GetFileNameFromFile(Name).ToString();
                 }
             }
             else

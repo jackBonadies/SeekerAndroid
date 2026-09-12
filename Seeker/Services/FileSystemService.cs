@@ -25,7 +25,7 @@ namespace Seeker.Services
 
         private void GetOrCreateIncompleteLocationInternal(string username, string fullfilename, int depth, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
         {
-            string name = SimpleHelpers.GetFileNameFromFile(fullfilename);
+            string name = SimpleHelpers.GetFileNameFromFile(fullfilename).ToString();
             //string dir = Helpers.GetFolderNameFromFile(fullfilename);
             string filePath = string.Empty;
 
@@ -399,8 +399,8 @@ namespace Seeker.Services
             bool noSubFolder,
             out string finalUri)
         {
-            string name = SimpleHelpers.GetFileNameFromFile(fullfilename);
-            string dir = SimpleHelpers.GetFolderNameFromFile(fullfilename, depth);
+            string name = SimpleHelpers.GetFileNameFromFile(fullfilename).ToString();
+            string dir = SimpleHelpers.GetFolderNameFromFile(fullfilename, depth).ToString();
             string filePath = string.Empty;
 
             if (memoryMode && bytes.Count == 0)

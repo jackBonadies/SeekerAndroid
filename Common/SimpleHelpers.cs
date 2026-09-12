@@ -39,11 +39,11 @@ namespace Seeker
             string albumFolderName = string.Empty;
             if (depth == 1)
             {
-                albumFolderName = SimpleHelpers.GetFolderNameFromFile(fullFileName, depth);
+                albumFolderName = SimpleHelpers.GetFolderNameFromFile(fullFileName, depth).ToString();
             }
             else
             {
-                albumFolderName = SimpleHelpers.GetFolderNameFromFile(fullFileName, depth);
+                albumFolderName = SimpleHelpers.GetFolderNameFromFile(fullFileName, depth).ToString();
                 albumFolderName = albumFolderName.Replace('\\', '_');
             }
             string incompleteFolderName = username + "_" + albumFolderName;
@@ -88,11 +88,11 @@ namespace Seeker
         {
             if (item.FileCount > 0)
             {
-                return SimpleHelpers.GetFolderNameFromFile(GetUnlockedFileName(item));
+                return SimpleHelpers.GetFolderNameFromFile(GetUnlockedFileName(item)).ToString();
             }
             else if (item.LockedFileCount > 0)
             {
-                return LOCK_EMOJI + SimpleHelpers.GetFolderNameFromFile(GetLockedFileName(item));
+                return LOCK_EMOJI + SimpleHelpers.GetFolderNameFromFile(GetLockedFileName(item)).ToString();
             }
             else
             {
@@ -442,13 +442,12 @@ namespace Seeker
             }
         }
 
-        public static string GetFileNameFromFile(string filename) //is also used to get the last folder
+        /// <summary>
+        /// The last path segment - i.e. the file name
+        /// </summary>
+        public static ReadOnlySpan<char> GetFileNameFromFile(ReadOnlySpan<char> path)
         {
-            // char overload is ordinal - the string overload is culture-sensitive and returns
-            // Length under Thai collation (punctuation is ignorable), crashing the Substring.
-            int begin = filename.LastIndexOf('\\');
-            string clipped = filename.Substring(begin + 1);
-            return clipped;
+            return path.Slice(path.LastIndexOf('\\') + 1);
         }
 
         /// <summary>
@@ -495,57 +494,38 @@ namespace Seeker
         }
 
         /// <summary>
-        /// This gets a folder name with multiple levels for example for levels = 2
-        /// Folder1\Folder2\Folder3\File.mp3 will return Folder2\Folder3
+        /// The folders containing the file, <paramref name="levels"/> deep. For levels = 2,
+        /// Folder1\Folder2\Folder3\File.mp3 returns Folder2\Folder3. A path with fewer folders
+        /// than requested returns all of them
         /// </summary>
-        /// <param name="filename"></param>
-        /// <param name="levels"></param>
-        /// <returns></returns>
-        public static string GetFolderNameFromFile(string filename, int levels = 1)
+        public static ReadOnlySpan<char> GetFolderNameFromFile(ReadOnlySpan<char> path, int levels = 1)
         {
-            try
+            int end = path.LastIndexOf('\\'); // strip the file name
+            if (end == -1 || levels <= 0)
             {
-                int folderCount = 0;
-                int index = -1;
-                int firstIndex = int.MaxValue;
-                for (int i = filename.Length - 1; i >= 0; i--)
+                return ReadOnlySpan<char>.Empty;
+            }
+            int start = end;
+            for (int i = 0; i < levels; i++)
+            {
+                int previous = path.Slice(0, start).LastIndexOf('\\');
+                if (previous == -1)
                 {
-                    if (filename[i] == '\\')
-                    {
-                        folderCount++;
-                        if (firstIndex == int.MaxValue)
-                        {
-                            //strip off the file name
-                            firstIndex = i;
-                        }
-                        if (folderCount == (levels + 1))
-                        {
-                            index = i;
-                            break;
-                        }
-                    }
+                    return path.Slice(0, end);
                 }
-                return filename.Substring(index + 1, firstIndex - index - 1);
+                start = previous;
             }
-            catch
-            {
-                return "";
-            }
+            return path.Slice(start + 1, end - start - 1);
         }
 
-        public static string GetParentFolderNameFromFile(string filename)
+        public static ReadOnlySpan<char> GetParentFolderNameFromFile(ReadOnlySpan<char> path)
         {
-            try
+            int end = path.LastIndexOf('\\');
+            if (end == -1)
             {
-                string parent = filename.Substring(0, filename.LastIndexOf('\\'));
-                parent = parent.Substring(0, parent.LastIndexOf('\\'));
-                parent = parent.Substring(parent.LastIndexOf('\\') + 1);
-                return parent;
+                return ReadOnlySpan<char>.Empty;
             }
-            catch
-            {
-                return "";
-            }
+            return GetFolderNameFromFile(path.Slice(0, end));
         }
 
         public static IUserListService UserListService;

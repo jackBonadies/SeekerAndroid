@@ -52,7 +52,7 @@ namespace Seeker
                 first = false;
                 TextView tv = new TextView(SeekerState.MainActivityRef);
                 UiHelpers.SetTextColor(tv, SeekerState.MainActivityRef);
-                tv.Text = SimpleHelpers.GetFileNameFromFile(f.Filename);
+                tv.Text = SimpleHelpers.GetFileNameFromFile(f.Filename).ToString();
                 tv.SetPadding(0, 4, 0, 4);
                 container.AddView(tv);
             }
@@ -65,7 +65,7 @@ namespace Seeker
             {
                 TextView tv = new TextView(SeekerState.MainActivityRef);
                 UiHelpers.SetTextColor(tv, SeekerState.MainActivityRef);
-                tv.Text = SimpleHelpers.GetFileNameFromFile(f.Filename);
+                tv.Text = SimpleHelpers.GetFileNameFromFile(f.Filename).ToString();
                 container.AddView(tv);
             }
         }

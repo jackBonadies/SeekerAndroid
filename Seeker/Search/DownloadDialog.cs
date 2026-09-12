@@ -704,11 +704,11 @@ namespace Seeker
         {
             if (wrapper.IsLocked)
             {
-                viewFilename.Text = SimpleHelpers.LOCK_EMOJI + SimpleHelpers.GetFileNameFromFile(wrapper.File.Filename);
+                viewFilename.Text = string.Concat(SimpleHelpers.LOCK_EMOJI, SimpleHelpers.GetFileNameFromFile(wrapper.File.Filename));
             }
             else
             {
-                viewFilename.Text = SimpleHelpers.GetFileNameFromFile(wrapper.File.Filename);
+                viewFilename.Text = SimpleHelpers.GetFileNameFromFile(wrapper.File.Filename).ToString();
             }
             viewAttributes.Text = SimpleHelpers.GetSizeLengthAttrString(wrapper.File);
         }

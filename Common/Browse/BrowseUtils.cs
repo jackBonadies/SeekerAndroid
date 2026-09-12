@@ -275,7 +275,7 @@ namespace Common.Browse
 
         private static void GetPathItemsInternal(List<PathItem> pathItems, TreeNode<Directory> treeNode, bool lastChild)
         {
-            string displayName = SimpleHelpers.GetFileNameFromFile(treeNode.Data.Name);
+            string displayName = SimpleHelpers.GetFileNameFromFile(treeNode.Data.Name).ToString();
             pathItems.Add(new PathItem(displayName, lastChild));
             if (treeNode.Parent == null)
             {
