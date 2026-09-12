@@ -606,9 +606,20 @@ namespace UnitTestCommon
         [Test]
         public void GetRecentTimeNiceFormated_OverOneMonth_ReturnsFormattedDate()
         {
-            var timeRan = new DateTime(2025, 4, 14);
-            string result = SimpleHelpers.GetRecentTimeNiceFormated(timeRan, TimeSpan.FromDays(35), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            Assert.That(result, Is.EqualTo("Apr 14"));
+            var timeRanUtc = new DateTime(2025, 4, 14, 12, 0, 0, DateTimeKind.Utc);
+            string result = SimpleHelpers.GetRecentTimeNiceFormated(timeRanUtc, TimeSpan.FromDays(35), "just now", "min ago", "hr ago", "yesterday", "days ago");
+            string expected = TimeZoneInfo.ConvertTimeFromUtc(timeRanUtc, TimeZoneInfo.Local).ToString("MMM d");
+            Assert.That(result, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void GetRecentTimeNiceFormated_OverOneMonth_UnspecifiedKindIsTreatedAsUtc()
+        {
+            var timeRanUtc = new DateTime(2025, 4, 14, 12, 0, 0, DateTimeKind.Utc);
+            var timeRanUnspecified = new DateTime(timeRanUtc.Ticks);
+            string fromUtc = SimpleHelpers.GetRecentTimeNiceFormated(timeRanUtc, TimeSpan.FromDays(35), "just now", "min ago", "hr ago", "yesterday", "days ago");
+            string fromUnspecified = SimpleHelpers.GetRecentTimeNiceFormated(timeRanUnspecified, TimeSpan.FromDays(35), "just now", "min ago", "hr ago", "yesterday", "days ago");
+            Assert.That(fromUnspecified, Is.EqualTo(fromUtc));
         }
 
         // --- KNOWN_TYPES ---

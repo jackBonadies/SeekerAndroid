@@ -199,7 +199,7 @@ namespace Seeker
                 }
                 else if (searchTab.LastRanTime != DateTime.MinValue)
                 {
-                    timeString = " · " + CommonHelpers.GetRecentTimeNiceFormated(searchTab.LastRanTime, SimpleHelpers.GetDateTimeNowSafe().Subtract(searchTab.LastRanTime));
+                    timeString = " · " + CommonHelpers.GetRecentTimeNiceFormated(searchTab.LastRanTime, DateTime.UtcNow.Subtract(searchTab.LastRanTime));
                 }
                 else
                 {

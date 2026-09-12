@@ -192,7 +192,19 @@ namespace Seeker
             }
         }
 
-        public static string GetRecentTimeNiceFormated(DateTime absoluteTimeRan, TimeSpan timeSpan, string justNow, string minAgo, string hrAgo, string yesterday, string daysAgo)
+        public static DateTime ToLocalTimeSafe(DateTime dateTime)
+        {
+            try
+            {
+                return dateTime.ToLocalTime();
+            }
+            catch (System.TimeZoneNotFoundException)
+            {
+                return dateTime;
+            }
+        }
+
+        public static string GetRecentTimeNiceFormated(DateTime absoluteTimeRanUtc, TimeSpan timeSpan, string justNow, string minAgo, string hrAgo, string yesterday, string daysAgo)
         {
             if (timeSpan.TotalSeconds < 60)
             {
@@ -214,7 +226,7 @@ namespace Seeker
             {
                 return $"{timeSpan.Days} {daysAgo}";
             }
-            return absoluteTimeRan.ToString("MMM d");
+            return ToLocalTimeSafe(absoluteTimeRanUtc).ToString("MMM d");
         }
 
         public const string NoDocumentOpenTreeToHandle = "No Activity found to handle Intent";

@@ -2460,7 +2460,7 @@ namespace Seeker
         public static void SearchAPI(CancellationToken cancellationToken, string searchString, int fromTab, SearchScope scope, bool fromWishlist = false)
         {
             SearchTabHelper.SearchTabCollection[fromTab].LastSearchTerm = searchString;
-            SearchTabHelper.SearchTabCollection[fromTab].LastRanTime = SimpleHelpers.GetDateTimeNowSafe();
+            SearchTabHelper.SearchTabCollection[fromTab].LastRanTime = DateTime.UtcNow;
             if (!PreferencesState.CurrentlyLoggedIn)
             {
                 MarkSearchFailed(fromTab, fromWishlist, cancellationToken, SeekerApplication.GetString(Resource.String.must_be_logged_to_search));
