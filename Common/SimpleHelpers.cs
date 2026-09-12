@@ -487,10 +487,11 @@ namespace Seeker
             }
         }
 
-        public static string GetFullPathFromFile(string fullFilename)
+        public static string GetAllButLast(string path) 
         {
-            var lastIndex = fullFilename.LastIndexOf('\\');
-            return fullFilename.Substring(0, lastIndex);
+            int end = path.LastIndexOf('\\');
+            string clipped = path.Substring(0, end);
+            return clipped;
         }
 
         public static string GetFolderNameFromFile(string filename, int levels = 1)
@@ -580,11 +581,5 @@ namespace Seeker
 
         public static ReadOnlyCollection<string> KNOWN_TYPES;
 
-        public static string GetAllButLast(string path) //"raw:\\storage\\emulated\\0\\Download\\Soulseek Complete"
-        {
-            int end = path.LastIndexOf('\\');
-            string clipped = path.Substring(0, end);
-            return clipped; //"raw:\\storage\\emulated\\0\\Download"
-        }
     }
 }

@@ -13,7 +13,7 @@ namespace Common
             Dictionary<string, List<File>> folderFilePairs = new Dictionary<string, List<File>>();
             foreach (File file in files)
             {
-                string folderName = SimpleHelpers.GetFullPathFromFile(file.Filename);
+                string folderName = SimpleHelpers.GetAllButLast(file.Filename);
                 if (folderFilePairs.ContainsKey(folderName))
                 {
                     //MainActivity.LogDebug("Split Foldername: " + folderName);
