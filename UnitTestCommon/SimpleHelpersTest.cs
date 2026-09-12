@@ -318,24 +318,36 @@ namespace UnitTestCommon
         }
 
         [Test]
-        public void GetFileNameFromFile_ThaiCulture_DoesNotThrow()
+        public void GetFolderNameFromFileLevels_ThaiCulture_DoesNotThrow()
         {
-            // Thai collation ignores punctuation, so the culture-sensitive
-            // string.LastIndexOf("\\") returns Length (empty-needle behavior) and the
-            // following Substring(begin + 1) threw ArgumentOutOfRangeException.
-            // The fix uses the ordinal char overload, which is culture-independent.
             RunInCulture("th-TH", () =>
             {
-                string result = SimpleHelpers.GetFileNameFromFile(@"music\artist\song.mp3");
-                Assert.That(result, Is.EqualTo("song.mp3"));
+                string result = SimpleHelpers.GetFolderNameFromFile(@"level4\level3\level2\level1\song.mp3");
+                Assert.That(result, Is.EqualTo("level1"));
+                result = SimpleHelpers.GetFolderNameFromFile(@"level4\level3\level2\level1\song.mp3", 2);
+                Assert.That(result, Is.EqualTo("level2\\level1"));
+                result = SimpleHelpers.GetFolderNameFromFile(@"level4\level3\level2\level1\song.mp3", 3);
+                Assert.That(result, Is.EqualTo("level3\\level2\\level1"));
+                result = SimpleHelpers.GetFolderNameFromFile(@"level4\level3\level2\level1\song.mp3", 4);
+                Assert.That(result, Is.EqualTo("level4\\level3\\level2\\level1"));
+            });
+        }
+
+        [Test]
+        public void GetParentFolderName_ThaiCulture_DoesNotThrow()
+        {
+            RunInCulture("th-TH", () =>
+            {
+                string result = SimpleHelpers.GetParentFolderNameFromFile(@"level4\level3\level2\level1\song.mp3");
+                Assert.That(result, Is.EqualTo("level2"));
+                result = SimpleHelpers.GetParentFolderNameFromFile(@"level2\level1\song.mp3");
+                Assert.That(result, Is.EqualTo("level2"));
             });
         }
 
         [Test]
         public void GetDirectoryRequestFolderName_ThaiCulture_ReturnsFolder()
         {
-            // same root cause as GetFileNameFromFile, but the try/catch hid it:
-            // Substring(0, Length) silently returned the whole string instead of the folder
             RunInCulture("th-TH", () =>
             {
                 string result = SimpleHelpers.GetDirectoryRequestFolderName(@"music\artist\album\song.mp3");
@@ -350,6 +362,16 @@ namespace UnitTestCommon
             {
                 string result = SimpleHelpers.GetAllButLast(@"raw:\storage\emulated\0\Download\Soulseek Complete");
                 Assert.That(result, Is.EqualTo(@"raw:\storage\emulated\0\Download"));
+            });
+        }
+
+        [Test]
+        public void GetFullPathFromFile_ThaiCulture_ReturnsFolder()
+        {
+            RunInCulture("th-TH", () =>
+            {
+                string result = SimpleHelpers.GetAllButLast(@"music\artist\album\song.mp3");
+                Assert.That(result, Is.EqualTo(@"music\artist\album"));
             });
         }
 

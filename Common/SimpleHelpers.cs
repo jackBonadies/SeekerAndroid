@@ -494,12 +494,19 @@ namespace Seeker
             return clipped;
         }
 
+        /// <summary>
+        /// This gets a folder name with multiple levels for example for levels = 2
+        /// Folder1\Folder2\Folder3\File.mp3 will return Folder2\Folder3
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <param name="levels"></param>
+        /// <returns></returns>
         public static string GetFolderNameFromFile(string filename, int levels = 1)
         {
             try
             {
                 int folderCount = 0;
-                int index = -1; //-1 is important.  i.e. in the case of Folder\test.mp3, it can be Folder.
+                int index = -1;
                 int firstIndex = int.MaxValue;
                 for (int i = filename.Length - 1; i >= 0; i--)
                 {
