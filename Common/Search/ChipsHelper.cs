@@ -409,7 +409,7 @@ namespace Seeker
                     {
                         continue;
                     }
-                    string folderName = Common.Helpers.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(hideHidden, 0).Filename);
+                    string folderName = SimpleHelpers.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(hideHidden, 0).Filename);
                     AddKeywordsFromFolderName(keywordHelper.AddKey, folderName, false);
                 }
 
@@ -419,7 +419,7 @@ namespace Seeker
                     {
                         continue;
                     }
-                    string parentFolderName = Common.Helpers.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(hideHidden, 0).Filename);
+                    string parentFolderName = SimpleHelpers.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(hideHidden, 0).Filename);
                     AddKeywordsFromFolderName(keywordHelper.VoteIfExists, parentFolderName, true);
                 }
 

@@ -71,7 +71,7 @@ namespace Common.Share
             var presentableNameToFileKey = fileKeyToPresentableName.ToDictionary(x => x.Value, x => x.Key);
             foreach (string presentableName in presentableNameToFullFileInfo.Keys)
             {
-                string searchableName = Common.Helpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(SimpleHelpers.GetFileNameFromFile(presentableName));
+                string searchableName = SimpleHelpers.GetFolderNameFromFile(presentableName) + " " + System.IO.Path.GetFileNameWithoutExtension(SimpleHelpers.GetFileNameFromFile(presentableName));
                 searchableName = SharedFileCache.MatchSpecialCharAgnostic(searchableName);
                 int code = presentableNameToFileKey[presentableName];
                 foreach (string token in searchableName.ToLower().Split(null)) //null means whitespace

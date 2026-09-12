@@ -345,8 +345,8 @@ namespace Seeker
                 string fullFname = s.Files.FirstOrDefault()?.Filename ?? s.LockedFiles.FirstOrDefault().Filename;
                 foreach (string keyword in chipFilter.Keywords)
                 {
-                    if (!Common.Helpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) &&
-                        !Common.Helpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+                    if (!SimpleHelpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) &&
+                        !SimpleHelpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
                     {
                         return false;
                     }
@@ -357,8 +357,8 @@ namespace Seeker
                     bool anyMatch = false;
                     foreach (string keyword in keywordsInvar)
                     {
-                        if (Common.Helpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) ||
-                            Common.Helpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+                        if (SimpleHelpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) ||
+                            SimpleHelpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
                         {
                             anyMatch = true;
                             break;
@@ -383,7 +383,7 @@ namespace Seeker
         {
             foreach (File f in s.GetFiles(hideLocked))
             {
-                string dirString = Common.Helpers.GetFolderNameFromFile(f.Filename);
+                string dirString = SimpleHelpers.GetFolderNameFromFile(f.Filename);
                 string fileString = SimpleHelpers.GetFileNameFromFile(f.Filename);
                 foreach (string avoid in wordsToAvoid)
                 {

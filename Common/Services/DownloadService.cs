@@ -161,7 +161,7 @@ namespace Seeker.Services
 
                 transferItem = new TransferItem();
                 transferItem.Filename = SimpleHelpers.GetFileNameFromFile(downloadInfo.fullFilename);
-                transferItem.FolderName = Common.Helpers.GetFolderNameFromFile(downloadInfo.fullFilename, depth);
+                transferItem.FolderName = SimpleHelpers.GetFolderNameFromFile(downloadInfo.fullFilename, depth);
                 transferItem.Username = downloadInfo.username;
                 transferItem.FullFilename = downloadInfo.fullFilename;
                 transferItem.Size = downloadInfo.Size;
@@ -342,7 +342,7 @@ namespace Seeker.Services
                                 toaster.ShowToastDebounced(string.Format(toaster.GetString(StringKey.UserXIsOffline), username), "_6_", username);
                             }
                         }
-                        else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.ToLower().Contains(Common.Helpers.FailedToEstablishDirectOrIndirectStringLower))
+                        else if (t.Exception?.InnerException?.Message != null && t.Exception.InnerException.Message.ToLower().Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectStringLower))
                         {
                             //Nicotine transitions from Queued to Cannot Connect IF you pause and resume. Otherwise you stay in Queued. Here if someone explicitly retries (i.e. silent = false) then we will transition states.
                             // otherwise, its okay, lets just stay in Queued.
@@ -689,7 +689,7 @@ namespace Seeker.Services
                         }
                         else if (task.Exception.InnerException is Soulseek.SoulseekClientException &&
                                 task.Exception.InnerException.Message != null &&
-                                task.Exception.InnerException.Message.ToLower().Contains(Common.Helpers.FailedToEstablishDirectOrIndirectStringLower))
+                                task.Exception.InnerException.Message.ToLower().Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectStringLower))
                         {
                             logger.Debug("Task Exception: " + task.Exception.InnerException.Message);
                             action = () => { toaster.ShowToastDebounced(StringKey.failed_to_establish_direct_or_indirect, "_4_"); };
@@ -742,7 +742,7 @@ namespace Seeker.Services
                             logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
                             action = () => { toaster.ShowToastLong(StringKey.reported_as_failed); };
                         }
-                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains(Common.Helpers.FailedToEstablishDirectOrIndirectStringLower))
+                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.ToLower().Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectStringLower))
                         {
                             //logger.Firebase("failed to establish a direct or indirect message connection");
                             logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
@@ -779,7 +779,7 @@ namespace Seeker.Services
                                     }
 
                                     //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
-                                    if (task.Exception.InnerException.InnerException.Message.ToLower().Contains(Common.Helpers.FailedToEstablishDirectOrIndirectStringLower))
+                                    if (task.Exception.InnerException.InnerException.Message.ToLower().Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectStringLower))
                                     {
                                         unknownException = false;
                                     }

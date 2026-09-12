@@ -14,6 +14,13 @@ namespace Seeker
     {
         public static readonly string LOCK_EMOJI = char.ConvertFromUtf32(0x1F512);
 
+        /// <summary>
+        /// Fragment of the message Soulseek.NET puts on the SoulseekClientException it throws when
+        /// neither a direct nor an indirect connection to a peer could be established.
+        /// </summary>
+        public const string FailedToEstablishDirectOrIndirectStringLower = "failed to establish a direct or indirect";
+
+
         public static string AvoidLineBreaks(string orig)
         {
             return orig.Replace(' ', '\u00A0').Replace("\\", "\\\u2060");
@@ -32,11 +39,11 @@ namespace Seeker
             string albumFolderName = string.Empty;
             if (depth == 1)
             {
-                albumFolderName = Common.Helpers.GetFolderNameFromFile(fullFileName, depth);
+                albumFolderName = SimpleHelpers.GetFolderNameFromFile(fullFileName, depth);
             }
             else
             {
-                albumFolderName = Common.Helpers.GetFolderNameFromFile(fullFileName, depth);
+                albumFolderName = SimpleHelpers.GetFolderNameFromFile(fullFileName, depth);
                 albumFolderName = albumFolderName.Replace('\\', '_');
             }
             string incompleteFolderName = username + "_" + albumFolderName;
@@ -81,11 +88,11 @@ namespace Seeker
         {
             if (item.FileCount > 0)
             {
-                return Common.Helpers.GetFolderNameFromFile(GetUnlockedFileName(item));
+                return SimpleHelpers.GetFolderNameFromFile(GetUnlockedFileName(item));
             }
             else if (item.LockedFileCount > 0)
             {
-                return LOCK_EMOJI + Common.Helpers.GetFolderNameFromFile(GetLockedFileName(item));
+                return LOCK_EMOJI + SimpleHelpers.GetFolderNameFromFile(GetLockedFileName(item));
             }
             else
             {
@@ -442,6 +449,95 @@ namespace Seeker
             int begin = filename.LastIndexOf('\\');
             string clipped = filename.Substring(begin + 1);
             return clipped;
+        }
+
+        /// <summary>
+        /// Replaces d.Name.Contains(prevDirName) which fails for Mu, Music
+        /// </summary>
+        /// <param name="possibleChild"></param>
+        /// <param name="possibleParent"></param>
+        /// <returns></returns>
+        public static bool IsChildDirString(string possibleChild, string possibleParent, bool rootCase)
+        {
+            if (rootCase)
+            {
+                if (possibleChild.LastIndexOf('\\') == -1 && possibleParent.LastIndexOf('\\') == -1)
+                {
+                    if (possibleParent.IndexOf(':') == (possibleParent.Length - 1)) //i.e. primary:
+                    {
+                        return possibleChild.Contains(possibleParent);
+                    }
+                    else if (possibleChild.Equals(possibleParent))
+                    {
+                        return true; //else the primary:music case fails.
+                    }
+                }
+            }
+            int pathSep = possibleChild.LastIndexOf('\\');
+            if (pathSep == -1)
+            {
+                return false;
+            }
+            else
+            {
+                //fails in possibleChild="Music (1)\\test" possibleParent="Music" case
+                //return possibleChild.Substring(0, pathSep).Contains(possibleParent);
+
+                return possibleChild.Substring(0, pathSep + 1).StartsWith(possibleParent + "\\", StringComparison.Ordinal) || possibleChild.Substring(0, pathSep) == possibleParent || possibleParent == String.Empty;
+            }
+        }
+
+        public static string GetFullPathFromFile(string fullFilename)
+        {
+            var lastIndex = fullFilename.LastIndexOf('\\');
+            return fullFilename.Substring(0, lastIndex);
+        }
+
+        public static string GetFolderNameFromFile(string filename, int levels = 1)
+        {
+            try
+            {
+                int folderCount = 0;
+                int index = -1; //-1 is important.  i.e. in the case of Folder\test.mp3, it can be Folder.
+                int firstIndex = int.MaxValue;
+                for (int i = filename.Length - 1; i >= 0; i--)
+                {
+                    if (filename[i] == '\\')
+                    {
+                        folderCount++;
+                        if (firstIndex == int.MaxValue)
+                        {
+                            //strip off the file name
+                            firstIndex = i;
+                        }
+                        if (folderCount == (levels + 1))
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+                }
+                return filename.Substring(index + 1, firstIndex - index - 1);
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        public static string GetParentFolderNameFromFile(string filename)
+        {
+            try
+            {
+                string parent = filename.Substring(0, filename.LastIndexOf('\\'));
+                parent = parent.Substring(0, parent.LastIndexOf('\\'));
+                parent = parent.Substring(parent.LastIndexOf('\\') + 1);
+                return parent;
+            }
+            catch
+            {
+                return "";
+            }
         }
 
         public static IUserListService UserListService;

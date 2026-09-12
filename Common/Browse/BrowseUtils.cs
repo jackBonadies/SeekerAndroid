@@ -474,7 +474,7 @@ namespace Common.Browse
             }
 
             bool emptyRoot = false;
-            if (Helpers.IsChildDirString(dirInfoArray[dirInfoArray.Length - 1].Item1.Name, dirInfoArray[0].Item1.Name, true) || dirInfoArray[dirInfoArray.Length - 1].Item1.Name.Equals(dirInfoArray[0].Item1.Name))
+            if (SimpleHelpers.IsChildDirString(dirInfoArray[dirInfoArray.Length - 1].Item1.Name, dirInfoArray[0].Item1.Name, true) || dirInfoArray[dirInfoArray.Length - 1].Item1.Name.Equals(dirInfoArray[0].Item1.Name))
             {
                 //normal single tree case..
             }
@@ -508,7 +508,7 @@ namespace Common.Browse
                     curNode = rootNode;
                     prevDirName = dInfo.Item1.Name;
                 }
-                else if (Helpers.IsChildDirString(dInfo.Item1.Name, prevDirName, curNode?.Parent == null)) //if the next directory contains the previous in its path then it is a child. //this is not true... it will set music as the child of mu //TODO !!!!!
+                else if (SimpleHelpers.IsChildDirString(dInfo.Item1.Name, prevDirName, curNode?.Parent == null)) //if the next directory contains the previous in its path then it is a child. //this is not true... it will set music as the child of mu //TODO !!!!!
                 {
                     curNode = AddChildNode(curNode, dInfo, filter, wordsToAvoid, wordsToInclude);
                     prevDirName = dInfo.Item1.Name;
@@ -517,7 +517,7 @@ namespace Common.Browse
                 {
                     prevNodeDebug = new TreeNode<Directory>(curNode.Data, dInfo.Item2);
                     curNode = curNode.Parent; //This is not good if the first node is not the root...
-                    while (!Helpers.IsChildDirString(dInfo.Item1.Name, curNode.Data.Name, curNode?.Parent == null))
+                    while (!SimpleHelpers.IsChildDirString(dInfo.Item1.Name, curNode.Data.Name, curNode?.Parent == null))
                     {
                         if (curNode.Parent == null)
                         {

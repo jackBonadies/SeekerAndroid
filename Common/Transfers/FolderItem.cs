@@ -19,7 +19,7 @@ namespace Seeker
             Add(initialTransferItem);
             if (folderName == null)
             {
-                folderName = Common.Helpers.GetFolderNameFromFile(initialTransferItem.FullFilename);
+                folderName = SimpleHelpers.GetFolderNameFromFile(initialTransferItem.FullFilename);
             }
             FolderName = folderName;
             Username = username;

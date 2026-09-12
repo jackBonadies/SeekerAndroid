@@ -400,7 +400,7 @@ namespace Seeker.Services
             out string finalUri)
         {
             string name = SimpleHelpers.GetFileNameFromFile(fullfilename);
-            string dir = Common.Helpers.GetFolderNameFromFile(fullfilename, depth);
+            string dir = SimpleHelpers.GetFolderNameFromFile(fullfilename, depth);
             string filePath = string.Empty;
 
             if (memoryMode && bytes.Count == 0)

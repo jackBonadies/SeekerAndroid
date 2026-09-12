@@ -109,11 +109,11 @@ namespace Seeker.Search
         {
             if (searchResponse.Files.Count != 0)
             {
-                return Common.Helpers.GetFolderNameFromFile(searchResponse.Files.First().Filename);
+                return SimpleHelpers.GetFolderNameFromFile(searchResponse.Files.First().Filename);
             }
             else if (searchResponse.LockedFiles.Count != 0)
             {
-                return Common.Helpers.GetFolderNameFromFile(searchResponse.LockedFiles.First().Filename);
+                return SimpleHelpers.GetFolderNameFromFile(searchResponse.LockedFiles.First().Filename);
             }
             else
             {

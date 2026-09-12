@@ -180,7 +180,7 @@ namespace Seeker.Services
             transferItem.Username = username;
             transferItem.FullFilename = filename;
             transferItem.Filename = SimpleHelpers.GetFileNameFromFile(filename);
-            transferItem.FolderName = Common.Helpers.GetFolderNameFromFile(filename);
+            transferItem.FolderName = SimpleHelpers.GetFolderNameFromFile(filename);
             transferItem.CancellationTokenSource = cts;
             transferItem.Size = ourFile.Length();
             transferItem.isUpload = true;
