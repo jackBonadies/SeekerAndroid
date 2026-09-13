@@ -566,60 +566,46 @@ namespace UnitTestCommon
             Assert.That(files[2].Filename, Is.EqualTo("c.mp3"));
         }
 
-        // --- GetRecentTimeNiceFormated ---
+        // --- GetRecentTimeBucket ---
+
+        [TestCase(0, RecentTimeUnit.JustNow, 0)]
+        [TestCase(59, RecentTimeUnit.JustNow, 0)]
+        [TestCase(60, RecentTimeUnit.Minutes, 1)]
+        [TestCase(45 * 60, RecentTimeUnit.Minutes, 45)]
+        [TestCase(60 * 60 - 1, RecentTimeUnit.Minutes, 59)]
+        [TestCase(60 * 60, RecentTimeUnit.Hours, 1)]
+        [TestCase(3 * 3600, RecentTimeUnit.Hours, 3)]
+        [TestCase(24 * 3600 - 1, RecentTimeUnit.Hours, 23)]
+        [TestCase(24 * 3600, RecentTimeUnit.Days, 1)]
+        [TestCase(36 * 3600, RecentTimeUnit.Days, 1)]
+        [TestCase(48 * 3600 - 1, RecentTimeUnit.Days, 1)]
+        [TestCase(48 * 3600, RecentTimeUnit.Days, 2)]
+        [TestCase(5 * 86400, RecentTimeUnit.Days, 5)]
+        [TestCase(30 * 86400 - 1, RecentTimeUnit.Days, 29)]
+        [TestCase(30 * 86400, RecentTimeUnit.AbsoluteDate, 0)]
+        [TestCase(35 * 86400, RecentTimeUnit.AbsoluteDate, 0)]
+        public void GetRecentTimeBucket_PicksUnitAndWholeCount(int totalSeconds, RecentTimeUnit expectedUnit, int expectedCount)
+        {
+            var (unit, count) = SimpleHelpers.GetRecentTimeBucket(TimeSpan.FromSeconds(totalSeconds));
+            Assert.That(unit, Is.EqualTo(expectedUnit));
+            Assert.That(count, Is.EqualTo(expectedCount));
+        }
+
+        // --- ToLocalTimeSafe ---
 
         [Test]
-        public void GetRecentTimeNiceFormated_UnderOneMinute_ReturnsJustNow()
+        public void ToLocalTimeSafe_ConvertsUtcToLocal()
         {
-            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromSeconds(30), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            Assert.That(result, Is.EqualTo("just now"));
+            var utc = new DateTime(2025, 4, 14, 12, 0, 0, DateTimeKind.Utc);
+            Assert.That(SimpleHelpers.ToLocalTimeSafe(utc), Is.EqualTo(TimeZoneInfo.ConvertTimeFromUtc(utc, TimeZoneInfo.Local)));
         }
 
         [Test]
-        public void GetRecentTimeNiceFormated_45Minutes_ReturnsMinAgo()
+        public void ToLocalTimeSafe_UnspecifiedKindIsTreatedAsUtc()
         {
-            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromMinutes(45), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            Assert.That(result, Is.EqualTo("45 min ago"));
-        }
-
-        [Test]
-        public void GetRecentTimeNiceFormated_3Hours_ReturnsHrAgo()
-        {
-            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromHours(3), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            Assert.That(result, Is.EqualTo("3 hr ago"));
-        }
-
-        [Test]
-        public void GetRecentTimeNiceFormated_36Hours_ReturnsYesterday()
-        {
-            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromHours(36), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            Assert.That(result, Is.EqualTo("yesterday"));
-        }
-
-        [Test]
-        public void GetRecentTimeNiceFormated_5Days_ReturnsDaysAgo()
-        {
-            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromDays(5), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            Assert.That(result, Is.EqualTo("5 days ago"));
-        }
-
-        [Test]
-        public void GetRecentTimeNiceFormated_OverOneMonth_ReturnsFormattedDate()
-        {
-            var timeRanUtc = new DateTime(2025, 4, 14, 12, 0, 0, DateTimeKind.Utc);
-            string result = SimpleHelpers.GetRecentTimeNiceFormated(timeRanUtc, TimeSpan.FromDays(35), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            string expected = TimeZoneInfo.ConvertTimeFromUtc(timeRanUtc, TimeZoneInfo.Local).ToString("MMM d");
-            Assert.That(result, Is.EqualTo(expected));
-        }
-
-        [Test]
-        public void GetRecentTimeNiceFormated_OverOneMonth_UnspecifiedKindIsTreatedAsUtc()
-        {
-            var timeRanUtc = new DateTime(2025, 4, 14, 12, 0, 0, DateTimeKind.Utc);
-            var timeRanUnspecified = new DateTime(timeRanUtc.Ticks);
-            string fromUtc = SimpleHelpers.GetRecentTimeNiceFormated(timeRanUtc, TimeSpan.FromDays(35), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            string fromUnspecified = SimpleHelpers.GetRecentTimeNiceFormated(timeRanUnspecified, TimeSpan.FromDays(35), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            Assert.That(fromUnspecified, Is.EqualTo(fromUtc));
+            var utc = new DateTime(2025, 4, 14, 12, 0, 0, DateTimeKind.Utc);
+            var unspecified = new DateTime(utc.Ticks);
+            Assert.That(SimpleHelpers.ToLocalTimeSafe(unspecified), Is.EqualTo(SimpleHelpers.ToLocalTimeSafe(utc)));
         }
 
         // --- KNOWN_TYPES ---

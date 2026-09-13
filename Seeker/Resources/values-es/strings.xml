@@ -740,10 +740,6 @@
     <string name="error_dialog_content">Seeker encontró un problema. \n\nPor favor, considera enviar un reporte al desarrollador. \n\nCualquier información sobre las causas que desencadenaron este fallo será muy apreciada</string>
     <string name="folder_request_user_returned_empty_response">El usuario devolvió una respuesta vacía para esta carpeta</string>
     <string name="just_now">ahora mismo</string>
-    <string name="min_ago">minutos atrás</string>
-    <string name="hr_ago">horas atrás</string>
-    <string name="yesterday">ayer</string>
-    <string name="days_ago">días atrás</string>
     <!-- Modern settings screen -->
     <string name="Privileges">Permisos</string>
     <string name="search_settings">Ajustes de búsqueda</string>

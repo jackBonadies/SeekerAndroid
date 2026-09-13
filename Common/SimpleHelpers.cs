@@ -10,6 +10,15 @@ using System.Text.RegularExpressions;
 
 namespace Seeker
 {
+    public enum RecentTimeUnit
+    {
+        JustNow,
+        Minutes,
+        Hours,
+        Days,
+        AbsoluteDate,
+    }
+
     public static class SimpleHelpers
     {
         public static readonly string LOCK_EMOJI = char.ConvertFromUtf32(0x1F512);
@@ -204,29 +213,25 @@ namespace Seeker
             }
         }
 
-        public static string GetRecentTimeNiceFormated(DateTime absoluteTimeRanUtc, TimeSpan timeSpan, string justNow, string minAgo, string hrAgo, string yesterday, string daysAgo)
+        public static (RecentTimeUnit Unit, int Count) GetRecentTimeBucket(TimeSpan timeSpan)
         {
             if (timeSpan.TotalSeconds < 60)
             {
-                return justNow;
+                return (RecentTimeUnit.JustNow, 0);
             }
             if (timeSpan.TotalMinutes < 60)
             {
-                return $"{timeSpan.Minutes} {minAgo}";
+                return (RecentTimeUnit.Minutes, timeSpan.Minutes);
             }
             if (timeSpan.TotalHours < 24)
             {
-                return $"{timeSpan.Hours} {hrAgo}";
+                return (RecentTimeUnit.Hours, timeSpan.Hours);
             }
-            if (timeSpan.TotalHours < 48)
+            if (timeSpan.TotalDays < 30)
             {
-                return yesterday;
+                return (RecentTimeUnit.Days, timeSpan.Days);
             }
-            if (timeSpan.TotalHours < 30 * 24)
-            {
-                return $"{timeSpan.Days} {daysAgo}";
-            }
-            return ToLocalTimeSafe(absoluteTimeRanUtc).ToString("MMM d");
+            return (RecentTimeUnit.AbsoluteDate, 0);
         }
 
         public const string NoDocumentOpenTreeToHandle = "No Activity found to handle Intent";

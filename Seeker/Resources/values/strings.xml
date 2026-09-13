@@ -912,10 +912,18 @@
 	
 	
     <string name="just_now">just now</string>
-    <string name="min_ago">min ago</string>
-    <string name="hr_ago">hr ago</string>
-    <string name="yesterday">yesterday</string>
-    <string name="days_ago">days ago</string>
+    <plurals name="minutes_ago">
+        <item quantity="one">%d min ago</item>
+        <item quantity="other">%d min ago</item>
+    </plurals>
+    <plurals name="hours_ago">
+        <item quantity="one">%d hr ago</item>
+        <item quantity="other">%d hr ago</item>
+    </plurals>
+    <plurals name="days_ago">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
 
     <!-- Modern settings screen -->
     <string name="Privileges">Privileges</string>
