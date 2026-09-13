@@ -17,11 +17,9 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Android.App;
 using Android.Content;
 using Android.Content.Res;
 using Android.Graphics;
-using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Util;
 using Android.Views;
@@ -30,20 +28,14 @@ using Common;
 using Common.Browse;
 using Common.Search;
 using Google.Android.Material.BottomSheet;
-using Google.Android.Material.Snackbar;
 using Seeker.Extensions.SearchResponseExtensions;
 using Seeker.Helpers;
 using Seeker.Services;
-using Seeker.Transfers;
 using Soulseek;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using log = Android.Util.Log;
 
 namespace Seeker
 {

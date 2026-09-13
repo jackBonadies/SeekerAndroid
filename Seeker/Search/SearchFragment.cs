@@ -2044,7 +2044,6 @@ namespace Seeker
                     {
                         Instance.recyclerSearchAdapter.NotifyItemRangeInserted(start, count);
                     }
-                    Android.Util.Log.Debug("seeker", "insert-only diff took " + sw.ElapsedMilliseconds + " ms for oldList: " + prevList.Count + " newList " + newResults.Count + " runs " + runs.Count);
                 }
                 else
                 {

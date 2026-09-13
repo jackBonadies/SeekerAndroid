@@ -17,7 +17,6 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 using System;
-using log = Android.Util.Log;
 
 namespace Seeker.Helpers
 {

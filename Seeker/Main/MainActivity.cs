@@ -16,47 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
-using Seeker.Services;
-using Seeker.Extensions.SearchResponseExtensions;
-using Seeker.Helpers;
-using Seeker.Search;
 using Android;
-using Android.Animation;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
-using Android.Net;
 using Android.OS;
 using Android.Provider;
 using Android.Runtime;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
-using AndroidX.AppCompat.App;
+using AndroidX.Activity;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
 using AndroidX.DocumentFile.Provider;
-using AndroidX.Fragment.App;
 using AndroidX.Lifecycle;
-using AndroidX.ViewPager2.Widget;
 using Common;
 using Google.Android.Material.BottomNavigation;
-using Google.Android.Material.Snackbar;
-using Google.Android.Material.Tabs;
-using Java.IO;
+using Seeker.Helpers;
+using Seeker.Search;
+using Seeker.Services;
 using Soulseek;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading;
 using System.Threading.Tasks;
-using static Android.Provider.DocumentsContract;
-using log = Android.Util.Log;
-using Seeker.Serialization;
-using AndroidX.Activity;
-using Seeker.Transfers;
 using ActivityFlags = Android.Content.ActivityFlags;
 
 //using System.IO;
