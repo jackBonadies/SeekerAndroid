@@ -2,7 +2,6 @@
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Core.Content;
@@ -11,6 +10,7 @@ using Common.Messages;
 using Seeker.Helpers.ActionSheet;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -64,8 +64,7 @@ namespace Seeker.Chatroom
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {
 
-            RoomUserItemView view = RoomUserItemView.inflate(parent);
-            view.setupChildren();
+            RoomUserItemView view = RoomUserItemView.Create(parent);
             // .inflate(R.layout.text_row_item, viewGroup, false);
             (view as View).Click += RoomUserListRecyclerAdapter_Click;
             (view as View).LongClick += RoomUserListRecyclerAdapter_LongClick;
@@ -186,19 +185,15 @@ namespace Seeker.Chatroom
         private ImageView imageUserStatus;
         public Soulseek.UserData DataItem;
 
-        public RoomUserItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public RoomUserItemView(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.room_user_list_item, this, true);
             setupChildren();
         }
-        public RoomUserItemView(Context context, IAttributeSet attrs) : base(context, attrs)
+        public static RoomUserItemView Create(ViewGroup parent)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.room_user_list_item, this, true);
-            setupChildren();
-        }
-        public static RoomUserItemView inflate(ViewGroup parent)
-        {
-            RoomUserItemView itemView = (RoomUserItemView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.room_user_list_item_dummy, parent, false);
+            var itemView = new RoomUserItemView(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 
@@ -217,7 +212,7 @@ namespace Seeker.Chatroom
         public void setItem(Soulseek.UserData userData)
         {
             DataItem = userData;
-            viewFlag.Text = ChatroomActivity.LocaleToEmoji(userData.CountryCode.ToUpper());
+            viewFlag.Text = ChatroomActivity.LocaleToEmoji(userData.CountryCode.ToUpperInvariant());
             viewUsername.Text = userData.Username;
             viewNumFiles.Text = userData.FileCount.ToString("N0");
             viewSpeed.Text = (userData.AverageSpeed / 1024).ToString("N0") + " " + SimpleHelpers.STRINGS_KBS;
@@ -230,12 +225,12 @@ namespace Seeker.Chatroom
                 else if (cData.ChatroomUserRole == Soulseek.UserRole.Operator)
                 {
                     viewOperatorStatus.Visibility = ViewStates.Visible;
-                    viewOperatorStatus.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.mod).ToUpper();
+                    viewOperatorStatus.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.mod).ToUpper(CultureInfo.CurrentCulture);
                 }
                 else
                 {
                     viewOperatorStatus.Visibility = ViewStates.Visible;
-                    viewOperatorStatus.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.owner).ToUpper();
+                    viewOperatorStatus.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.owner).ToUpper(CultureInfo.CurrentCulture);
                 }
             }
             else

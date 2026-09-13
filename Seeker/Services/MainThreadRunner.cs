@@ -6,7 +6,7 @@ namespace Seeker.Services
     {
         public void RunOnUiThread(Action action)
         {
-            SeekerState.ActiveActivityRef?.RunOnUiThread(action);
+            SeekerApplication.RunOnUIThread(action);
         }
     }
 }

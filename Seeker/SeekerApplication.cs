@@ -42,6 +42,7 @@ using Seeker.UPnP;
 using Soulseek;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -181,7 +182,8 @@ namespace Seeker
             PreferencesManager.RestoreListeningStateLocked();
             UPnpManager.RestoreUpnpState();
 
-            SeekerState.OffsetFromUtcCached = SimpleHelpers.GetDateTimeNowSafe().Subtract(DateTime.UtcNow);
+            // warm up cache (takes ~100+ ms), subsequent calls to GetDateTimeNowSafe() will be fast (~0ms)
+            Task.Run(() => _ = SimpleHelpers.GetDateTimeNowSafe());
 
             SeekerState.SystemLanguage = LocaleHelper.LocaleToString(Resources.Configuration.Locale);
 
@@ -260,6 +262,10 @@ namespace Seeker
             #if MOCK
                 SeekerState.SoulseekClient = new MockSoulseekClient();
                 SharingService.TurnOnSharing();
+                if (Seeker.Debug.MockTransferStress.AutoStartOnLaunch)
+                {
+                    Seeker.Debug.MockTransferStress.StartDelayed();
+                }
             #else
                 SeekerState.SoulseekClient = new SoulseekClient(
                     128,
@@ -309,6 +315,22 @@ namespace Seeker
             SimpleHelpers.STRINGS_KHZ = TryGetStringOr(Resource.String.kilohertz, "kHz");
 
             SimpleHelpers.UserListService = UserListService.Instance;
+        }
+
+        /// <summary>
+        /// Otherwise on below API 33 ApplicationContext.GetString will resolve the system language,
+        /// not the override.
+        /// </summary>
+        public override void OnConfigurationChanged(Android.Content.Res.Configuration newConfig)
+        {
+            base.OnConfigurationChanged(newConfig);
+            if (LocaleHelper.HasProperPerAppLanguageSupport())
+            {
+                return;
+            }
+            SeekerState.SystemLanguage = LocaleHelper.LocaleToString(newConfig.Locale);
+            string before = LocaleHelper.LocaleToString(Resources.Configuration.Locale);
+            LocaleHelper.SetLanguageLegacy(PreferencesState.Language, false);
         }
 
         private void SoulseekClient_ExcludedSearchPhrasesReceived(object sender, IReadOnlyCollection<string> exludedPhrasesList)
@@ -601,9 +623,9 @@ namespace Seeker
                 {
                     // User intentionally logged out — do not reconnect
                 }
-                else if (AUTO_CONNECT_ON && PreferencesState.CurrentlyLoggedIn)
+                else
                 {
-                    ReconnectService.Instance.Start();
+                    ReconnectService.Instance.RequestReconnectNow("disconnected");
                 }
             }
             else if (e.PreviousState.HasFlag(SoulseekClientStates.Disconnected))
@@ -649,6 +671,28 @@ namespace Seeker
         public static string GetString(int resId)
         {
             return SeekerApplication.ApplicationContext.GetString(resId);
+        }
+
+        private static readonly Handler uiThreadHandler = new Handler(Looper.MainLooper);
+
+        public static bool OnUIThread()
+        {
+            return Looper.MainLooper.IsCurrentThread;
+        }
+
+        /// <summary>
+        /// Same as Activity.RunOnUiThread - if on UI thread run inline, else post
+        /// </summary>
+        public static void RunOnUIThread(Action action)
+        {
+            if (OnUIThread())
+            {
+                action();
+            }
+            else
+            {
+                uiThreadHandler.Post(action);
+            }
         }
 
         /// <summary>
@@ -751,7 +795,7 @@ namespace Seeker
                             Logger.Debug("current that is...");
                         }
 
-                        if (ForegroundLifecycleTracker.NumberOfActiveActivities != 0)
+                        if (!ForegroundLifecycleTracker.IsBackground())
                         {
                             Logger.Debug("There is a hole in our logic!!! the pendingstatus and/or current status should not be away!!!");
                         }

@@ -337,12 +337,12 @@ namespace Seeker.Services
                     }
                     else
                     {
-                        fname = SimpleHelpers.GetFileNameFromFile(f.Uri.Path.Replace("/", @"\"));
+                        fname = SimpleHelpers.GetFileNameFromFile(f.Uri.Path.Replace("/", @"\")).ToString();
                         searchableName = /*folderName + @"\" + */fname; //for the brose response should only be the filename!!! 
                     }
                     //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                     //bc we get a path that is:
-                    //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\(2009.09.23) Sufjan Stevens - Live from Castaways\\09 Between Songs 4.mp3"
+                    //"Soulseek Complete\\document\\primary:Pictures\\Soulseek Complete\\FolderName\\FileName.txt"
                     //not quite a full URI but it does add quite a bit..
 
                     //{
@@ -581,12 +581,12 @@ namespace Seeker.Services
                     catch (Exception e)
                     {
                         //ape and aiff always fail with built in metadata retreiver.
-                        if (System.IO.Path.GetExtension(presentableName).ToLower() == ".ape")
+                        if (string.Equals(System.IO.Path.GetExtension(presentableName), ".ape", StringComparison.OrdinalIgnoreCase))
                         {
                             using var stream = contentResolver.OpenInputStream(childUri);
                             MicroTagReader.Instance.GetApeMetadata(stream, out sampleRate, out bitDepth, out duration);
                         }
-                        else if (System.IO.Path.GetExtension(presentableName).ToLower() == ".aiff")
+                        else if (string.Equals(System.IO.Path.GetExtension(presentableName), ".aiff", StringComparison.OrdinalIgnoreCase))
                         {
                             using var stream = contentResolver.OpenInputStream(childUri);
                             MicroTagReader.Instance.GetAiffMetadata(stream, out sampleRate, out bitDepth, out duration);
@@ -740,7 +740,7 @@ namespace Seeker.Services
                         _parseStatus.NumberParsed = presentableNameToFullFileInfos.Count;
                         _parseStatus.UpdateCurrentRoot(presentableNameToFullFileInfos.Count);
 
-                        string fname = SimpleHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
+                        string fname = SimpleHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")).ToString(); //use presentable name so that the filename will not be primary:file.mp3
                                                                                                               //for the brose response should only be the filename!!! 
                                                                                                               //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                                                                                                               //bc we get a path that is:
@@ -813,7 +813,7 @@ namespace Seeker.Services
                     _parseStatus.NumberParsed = pairs.Count;
                     _parseStatus.UpdateCurrentRoot(pairs.Count);
 
-                    string fname = SimpleHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")); //use presentable name so that the filename will not be primary:file.mp3
+                    string fname = SimpleHelpers.GetFileNameFromFile(presentableName.Replace("/", @"\")).ToString(); //use presentable name so that the filename will not be primary:file.mp3
                                                                                                           //for the brose response should only be the filename!!! 
                                                                                                           //when a user tries to download something from a browse resonse, the soulseek client on their end must create a fully qualified path for us
                                                                                                           //bc we get a path that is:
@@ -1173,8 +1173,17 @@ namespace Seeker.Services
         {
             if (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
             {
-                SeekerState.SoulseekClient.SetSharedCountsAsync(e.Directories, e.Files);
-                SharedFileService.NumberOfSharedDirectoriesIsStale = false;
+                try
+                {
+                    SeekerState.SoulseekClient.SetSharedCountsAsync(e.Directories, e.Files);
+                    SharedFileService.NumberOfSharedDirectoriesIsStale = false;
+                }
+                catch (Exception ex)
+                {
+                    // retry on next login
+                    Logger.Debug("failed to set shared counts: " + ex.Message);
+                    SharedFileService.NumberOfSharedDirectoriesIsStale = true;
+                }
             }
             else
             {

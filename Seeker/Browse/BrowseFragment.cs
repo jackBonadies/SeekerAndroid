@@ -296,11 +296,10 @@ namespace Seeker
 
             this.noBrowseView = this.rootView.FindViewById<View>(Resource.Id.noBrowseView);
             this.separator = this.rootView.FindViewById<View>(Resource.Id.recyclerViewHorizontalPathSep);
-            this.separator.Visibility = ViewStates.Gone;
+            UpdatePathBarVisibility();
             if (state.HasResponse())
             {
                 noBrowseView.Visibility = ViewStates.Gone;
-                separator.Visibility = ViewStates.Visible;
             }
 
             View v = rootView.FindViewById<View>(Resource.Id.relativeLayout1);
@@ -618,7 +617,7 @@ namespace Seeker
             else
             {
                 List<FullFileInfo> slskFile = GetSelectedFileInfos();
-                SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(slskFile.ToArray(), queuePaused, state.CurrentUsername).Start());
+                SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(slskFile.ToArray(), queuePaused, state.CurrentUsername));
             }
         }
 
@@ -840,6 +839,7 @@ namespace Seeker
                         SeekerApplication.Toaster.ShowToast(this.Resources.GetString(Resource.String.directory_is_empty), ToastLength.Short);
                         return;
                     }
+                    Logger.InfoFirebase("browse drill down pos " + position + "  path count " + state.PathItems.Count);
                     SaveScrollPosition();
 
                     PopulateDataItemsToItemSelected(state.DataItems, itemSelected);
@@ -894,11 +894,11 @@ namespace Seeker
                 {
                     case 0: // Download File
                         var ffi = BrowseUtils.ToFullFileInfo(dataItem);
-                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(new[] { ffi }, false, state.CurrentUsername).Start());
+                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(new[] { ffi }, false, state.CurrentUsername));
                         break;
                     case 1: // Queue as Paused
                         var ffi2 = BrowseUtils.ToFullFileInfo(dataItem);
-                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(new[] { ffi2 }, true, state.CurrentUsername).Start());
+                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(new[] { ffi2 }, true, state.CurrentUsername));
                         break;
                     case 2: // Copy URL
                         var ffi3 = BrowseUtils.ToFullFileInfo(dataItem);
@@ -984,6 +984,19 @@ namespace Seeker
             return res;
         }
 
+        private void UpdatePathBarVisibility()
+        {
+            var visibility = state.HasResponse() ? ViewStates.Visible : ViewStates.Gone;
+            if (treePathRecyclerView != null)
+            {
+                treePathRecyclerView.Visibility = visibility;
+            }
+            if (separator != null)
+            {
+                separator.Visibility = visibility;
+            }
+        }
+
         /// <summary>
         /// Sets both the main and the Path Items adapters.  necessary when first loading or when going up or down directories (i.e. if path changes).  not necessary if just changing the filter.
         /// </summary>
@@ -992,32 +1005,29 @@ namespace Seeker
         public void SetBrowseAdapters(bool toFilter, List<DataItem> nonFilteredItems, bool fullRefreshOfPathItems, bool goingUp = false)
         {
             BrowseActionMode?.Finish();
-            if (toFilter)
+            List<PathItem> items;
+            lock (state.DataItems)
             {
-                state.FilteredDataItems = BrowseUtils.FilterBrowseList(state.DataItems, state.Filter);
-                recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.FilteredDataItems, this));
-            }
-            else
-            {
-                recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.DataItems, this));
-            }
+                if (toFilter)
+                {
+                    state.FilteredDataItems = BrowseUtils.FilterBrowseList(state.DataItems, state.Filter);
+                    recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.FilteredDataItems, this));
+                }
+                else
+                {
+                    recyclerViewDirectories.SetAdapter(new BrowseAdapter(state.DataItems, this));
+                }
 
-            var items = BrowseUtils.GetPathItems(state.DataItems);
+                items = BrowseUtils.GetPathItems(state.DataItems);
+            }
             state.PathItems.Clear();
             state.PathItems.AddRange(items);
-            if (fullRefreshOfPathItems)
+            treePathRecyclerAdapter.NotifyDataSetChanged();
+            if (!fullRefreshOfPathItems && !goingUp && state.PathItems.Count > 0)
             {
-                treePathRecyclerAdapter.NotifyDataSetChanged();
-            }
-            else if (goingUp)
-            {
-                treePathRecyclerAdapter.NotifyDataSetChanged();
-            }
-            else
-            {
-                treePathRecyclerAdapter.NotifyDataSetChanged();
                 treePathRecyclerView.ScrollToPosition(state.PathItems.Count - 1);
             }
+            UpdatePathBarVisibility();
             SeekerState.MainActivityRef?.InvalidateOptionsMenu();
             SeekerState.MainActivityRef?.RefreshBackCallbackState();
         }
@@ -1179,7 +1189,7 @@ namespace Seeker
             if (noBrowseView != null)
             {
                 noBrowseView.Visibility = ViewStates.Gone;
-                separator.Visibility = ViewStates.Visible;
+                UpdatePathBarVisibility();
             }
             recyclerViewDirectories = rootView.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
             if (browseLayoutManager == null)

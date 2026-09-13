@@ -740,10 +740,6 @@
     <string name="error_dialog_content">Es ist ein Fehler aufgetreten. \n\nBitte erwägen Sie einen Bericht an den Entwickler zu senden. \n\nAlle Informationen über die Schritte und Bedingungen, die zu diesem Problem führen, sind sehr hilfreich.</string>
     <string name="folder_request_user_returned_empty_response">User returned an empty response for this folder</string>
     <string name="just_now">just now</string>
-    <string name="min_ago">min ago</string>
-    <string name="hr_ago">hr ago</string>
-    <string name="yesterday">yesterday</string>
-    <string name="days_ago">days ago</string>
     <!-- Modern settings screen -->
     <string name="Privileges">Privileges</string>
     <string name="search_settings">Search settings</string>

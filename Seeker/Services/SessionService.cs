@@ -371,7 +371,7 @@ namespace Seeker.Services
                     }
                 }
                 else if (t.Exception.InnerExceptions[0].Message != null &&
-                    (t.Exception.InnerExceptions[0].Message.Contains("wait timed out") || t.Exception.InnerExceptions[0].Message.ToLower().Contains("operation timed out")))
+                    (t.Exception.InnerExceptions[0].Message.Contains("wait timed out") || t.Exception.InnerExceptions[0].Message.Contains("operation timed out", StringComparison.OrdinalIgnoreCase)))
                 {
                     clearCreds = false;
                     msg = SeekerApplication.GetString(Resource.String.cannot_login) + " - Time Out Waiting for Server Response.";
@@ -499,12 +499,12 @@ namespace Seeker.Services
         /// The caller provides a continuation that handles both fault propagation and the real action.
         /// The continutationAction will always get called
         /// </summary>
-        public void RunWithReconnect(Action<Task> continuationAction, string loggingInMsg = null, Context contextForMsg = null)
+        public void RunWithReconnect(Action<Task> continuationAction, string loggingInMsg = null, Context contextForMsg = null, bool silent = false)
         {
             if (CurrentlyLoggedInButDisconnectedState())
             {
                 Task t;
-                if (!ShowMessageAndCreateReconnectTask(false, out t))
+                if (!ShowMessageAndCreateReconnectTask(silent, out t))
                 {
                     Task.FromException(new Exception("could not start reconnect")).ContinueWith(continuationAction);
                     return;

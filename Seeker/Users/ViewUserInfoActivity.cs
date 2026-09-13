@@ -629,7 +629,7 @@ namespace Seeker
             if (OperatingSystem.IsAndroidVersionAtLeast(29))
             {
                 ContentValues valuesForContentResolver = GetContentValues();
-                valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.DisplayName, UserToView + SimpleHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext);
+                valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.DisplayName, UserToView + SimpleHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_HHmmss") + ext);
                 valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.RelativePath, "Pictures");
                 valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.IsPending, true); //Flag indicating if a media item is pending, and still being inserted by its owner.
                                                                                                           //While this flag is set, only the owner of the item can open the underlying file; requests from other apps will be rejected.
@@ -649,7 +649,7 @@ namespace Seeker
                 {
                     directory.Mkdirs();
                 }
-                string fileName = UserToView + SimpleHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_hhmmss") + ext;
+                string fileName = UserToView + SimpleHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_HHmmss") + ext;
                 Java.IO.File file = new Java.IO.File(directory, fileName);
                 SaveToStream(pic, this.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(file).Uri, "w"));
 
@@ -663,8 +663,7 @@ namespace Seeker
         private ContentValues GetContentValues()
         {
             ContentValues valuesForContentResolver = new ContentValues();
-            DateTime now = SimpleHelpers.GetDateTimeNowSafe();
-            long ms = new DateTimeOffset(now).ToUnixTimeMilliseconds();
+            long ms = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             long s = ms / 1000;
             valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.DateAdded, s);
             valuesForContentResolver.Put(Android.Provider.MediaStore.Images.IImageColumns.DateTaken, ms); //this one is in milliseconds. whereas date added and date modified are in seconds.

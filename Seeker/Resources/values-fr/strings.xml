@@ -742,10 +742,6 @@
     <string name="error_dialog_content">Seeker a eu un problème. \n\nVeuillez reporter au développeur.\n\nToute information à propos des étapes / conditions menant à ce problème serait appréciée.</string>
     <string name="folder_request_user_returned_empty_response">L\'utilisateur a renvoyé une réponse vide pour ce dossier</string>
     <string name="just_now">juste maintenant</string>
-    <string name="min_ago">il y a une minute</string>
-    <string name="hr_ago">il y une heure</string>
-    <string name="yesterday">hier</string>
-    <string name="days_ago">jours avant</string>
     <!-- Modern settings screen -->
     <string name="Privileges">Privilèges</string>
     <string name="search_settings">Recherche dans les paramètres</string>

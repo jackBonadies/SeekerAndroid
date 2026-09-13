@@ -25,7 +25,7 @@ namespace Seeker.Services
 
         private void GetOrCreateIncompleteLocationInternal(string username, string fullfilename, int depth, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
         {
-            string name = SimpleHelpers.GetFileNameFromFile(fullfilename);
+            string name = SimpleHelpers.GetFileNameFromFile(fullfilename).ToString();
             //string dir = Helpers.GetFolderNameFromFile(fullfilename);
             string filePath = string.Empty;
 
@@ -399,8 +399,8 @@ namespace Seeker.Services
             bool noSubFolder,
             out string finalUri)
         {
-            string name = SimpleHelpers.GetFileNameFromFile(fullfilename);
-            string dir = Common.Helpers.GetFolderNameFromFile(fullfilename, depth);
+            string name = SimpleHelpers.GetFileNameFromFile(fullfilename).ToString();
+            string dir = SimpleHelpers.GetFolderNameFromFile(fullfilename, depth).ToString();
             string filePath = string.Empty;
 
             if (memoryMode && bytes.Count == 0)
@@ -686,7 +686,7 @@ namespace Seeker.Services
                             //"Failed to move to /storage/1801-090D/Music/Soulseek Complete/folder/song.mp3"
                             //{content://com.android.externalstorage.documents/tree/primary%3A/document/primary%3ASoulseek%20Incomplete%2F/****.mp3}
                             //content://com.android.externalstorage.documents/tree/1801-090D%3AMusic/document/1801-090D%3AMusic%2FSoulseek%20Complete%2F/****}
-                            if (e.Message.ToLower().Contains("already exists"))
+                            if (e.Message.Contains("already exists", StringComparison.OrdinalIgnoreCase))
                             {
                                 try
                                 {

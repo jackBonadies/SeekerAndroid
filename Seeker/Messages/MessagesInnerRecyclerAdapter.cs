@@ -65,8 +65,7 @@ namespace Seeker.Messages
         {
             if (viewType == VIEW_SENT)
             {
-                MessageInnerViewSent view = MessageInnerViewSent.inflate(parent);
-                view.setupChildren();
+                MessageInnerViewSent view = MessageInnerViewSent.Create(parent);
                 view.LongClick += View_LongClick;
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 //(view as View).Click += MessageOverviewClick;
@@ -74,8 +73,7 @@ namespace Seeker.Messages
             }
             else
             {
-                MessageInnerViewReceived view = MessageInnerViewReceived.inflate(parent);
-                view.setupChildren();
+                MessageInnerViewReceived view = MessageInnerViewReceived.Create(parent);
                 view.LongClick += View_LongClick;
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 //(view as View).Click += MessageOverviewClick;
@@ -158,20 +156,16 @@ namespace Seeker.Messages
         private TextView viewMessage;
         private AndroidX.CardView.Widget.CardView cardView;
 
-        public MessageInnerViewSent(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.messages_inner_item_fromMe, this, true);
-            setupChildren();
-        }
-        public MessageInnerViewSent(Context context, IAttributeSet attrs) : base(context, attrs)
+        public MessageInnerViewSent(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.messages_inner_item_fromMe, this, true);
             setupChildren();
         }
 
-        public static MessageInnerViewSent inflate(ViewGroup parent)
+        public static MessageInnerViewSent Create(ViewGroup parent)
         {
-            MessageInnerViewSent itemView = (MessageInnerViewSent)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.messages_inner_item_fromMe_dummy, parent, false);
+            var itemView = new MessageInnerViewSent(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 
@@ -234,19 +228,15 @@ namespace Seeker.Messages
         private TextView viewTimeStamp;
         private TextView viewMessage;
 
-        public MessageInnerViewReceived(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public MessageInnerViewReceived(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.messages_inner_item_toMe, this, true);
             setupChildren();
         }
-        public MessageInnerViewReceived(Context context, IAttributeSet attrs) : base(context, attrs)
+        public static MessageInnerViewReceived Create(ViewGroup parent)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.messages_inner_item_toMe, this, true);
-            setupChildren();
-        }
-        public static MessageInnerViewReceived inflate(ViewGroup parent)
-        {
-            MessageInnerViewReceived itemView = (MessageInnerViewReceived)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.messages_inner_item_toMe_dummy, parent, false);
+            var itemView = new MessageInnerViewReceived(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 

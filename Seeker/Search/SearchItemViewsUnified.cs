@@ -1,7 +1,6 @@
 using Android.Content;
 using Android.Content.Res;
 using Android.Graphics;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Common;
@@ -14,7 +13,6 @@ namespace Seeker
 {
     public interface ISearchItemViewBase
     {
-        void setupChildren();
         SearchFragment.SearchViewHolder ViewHolder { get; set; }
         void setItem(SearchResponse item, int position);
     }
@@ -52,7 +50,7 @@ namespace Seeker
                 first = false;
                 TextView tv = new TextView(SeekerState.MainActivityRef);
                 UiHelpers.SetTextColor(tv, SeekerState.MainActivityRef);
-                tv.Text = SimpleHelpers.GetFileNameFromFile(f.Filename);
+                tv.Text = SimpleHelpers.GetFileNameFromFile(f.Filename).ToString();
                 tv.SetPadding(0, 4, 0, 4);
                 container.AddView(tv);
             }
@@ -65,7 +63,7 @@ namespace Seeker
             {
                 TextView tv = new TextView(SeekerState.MainActivityRef);
                 UiHelpers.SetTextColor(tv, SeekerState.MainActivityRef);
-                tv.Text = SimpleHelpers.GetFileNameFromFile(f.Filename);
+                tv.Text = SimpleHelpers.GetFileNameFromFile(f.Filename).ToString();
                 container.AddView(tv);
             }
         }
@@ -91,8 +89,7 @@ namespace Seeker
         public SearchFragment.SearchAdapterRecyclerVersion AdapterRef;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
-        protected SearchItemViewUnifiedBase(Context c, IAttributeSet a, int s) : base(c, a, s) { }
-        protected SearchItemViewUnifiedBase(Context c, IAttributeSet a) : base(c, a) { }
+        protected SearchItemViewUnifiedBase(Context c) : base(c) { }
 
         public virtual void setupChildren()
         {
@@ -179,19 +176,10 @@ namespace Seeker
     {
         private TextView viewAvailability;
 
-        public SearchItemViewSimpleBottom(Context c, IAttributeSet a, int s) : base(c, a, s) { Init(c); }
-        public SearchItemViewSimpleBottom(Context c, IAttributeSet a) : base(c, a) { Init(c); }
-
-        private void Init(Context c)
+        public SearchItemViewSimpleBottom(Context c) : base(c)
         {
             LayoutInflater.From(c).Inflate(Resource.Layout.search_result_simple_bottom, this, true);
             setupChildren();
-        }
-
-        public static SearchItemViewSimpleBottom inflate(ViewGroup parent)
-        {
-            return (SearchItemViewSimpleBottom)LayoutInflater.From(parent.Context)
-                .Inflate(Resource.Layout.searchitemview_simple_bottom_dummy, parent, false);
         }
 
         public override void setupChildren()
@@ -223,19 +211,10 @@ namespace Seeker
     {
         private TextView viewAvailability;
 
-        public SearchItemViewSimpleTop(Context c, IAttributeSet a, int s) : base(c, a, s) { Init(c); }
-        public SearchItemViewSimpleTop(Context c, IAttributeSet a) : base(c, a) { Init(c); }
-
-        private void Init(Context c)
+        public SearchItemViewSimpleTop(Context c) : base(c)
         {
             LayoutInflater.From(c).Inflate(Resource.Layout.search_result_simple_top, this, true);
             setupChildren();
-        }
-
-        public static SearchItemViewSimpleTop inflate(ViewGroup parent)
-        {
-            return (SearchItemViewSimpleTop)LayoutInflater.From(parent.Context)
-                .Inflate(Resource.Layout.searchitemview_simple_top_dummy, parent, false);
         }
 
         public override void setupChildren()
@@ -265,19 +244,20 @@ namespace Seeker
 
     public abstract class SearchItemViewModernBase : SearchItemViewUnifiedBase
     {
-        protected TextView viewBitrate;
-        protected TextView viewQueue;
+        protected SearchChip fileTypeChip;
+        protected SearchChip queueChip;
         protected TextView viewFileCount;
+        protected SearchChipPalette palette;
         protected int separatorColor;
 
-        protected SearchItemViewModernBase(Context c, IAttributeSet a, int s) : base(c, a, s) { }
-        protected SearchItemViewModernBase(Context c, IAttributeSet a) : base(c, a) { }
+        protected SearchItemViewModernBase(Context c) : base(c) { }
 
         public override void setupChildren()
         {
             base.setupChildren();
-            viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
-            viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
+            palette = SearchChipPalette.Get(Context);
+            fileTypeChip = new SearchChip(viewFileType);
+            queueChip = new SearchChip(FindViewById<TextView>(Resource.Id.queueTextView));
             viewFileCount = FindViewById<TextView>(Resource.Id.fileCountTextView);
             separatorColor = SearchItemViewExpandableHelper.GetSeparatorColor(Context);
         }
@@ -286,11 +266,11 @@ namespace Seeker
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            SearchChipHelper.StyleSpeed(viewSpeed, (item.UploadSpeed / 1024).ToString() + " kb/s");
+            viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + " kb/s";
             int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
-            SearchChipHelper.StyleFileCount(viewFileCount, fcount);
-            SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot, item.QueueLength);
+            viewFileCount.Text = fcount.ToString();
+            SearchChipHelper.StyleFormatChip(fileTypeChip, item.GetDominantFileTypeAndBitRate(hideLocked, out _), palette);
+            SearchChipHelper.StyleQueueChip(queueChip, item.HasFreeUploadSlot, item.QueueLength, palette);
             if (IsExpandable)
             {
                 ApplyExpandedState(item, position);
@@ -305,56 +285,40 @@ namespace Seeker
 
     public class SearchItemViewModernBottom : SearchItemViewModernBase
     {
-        public SearchItemViewModernBottom(Context c, IAttributeSet a, int s) : base(c, a, s) { Init(c); }
-        public SearchItemViewModernBottom(Context c, IAttributeSet a) : base(c, a) { Init(c); }
-
-        private void Init(Context c)
+        public SearchItemViewModernBottom(Context c) : base(c)
         {
             LayoutInflater.From(c).Inflate(Resource.Layout.search_result_modern_bottom, this, true);
             setupChildren();
         }
-
-        public static SearchItemViewModernBottom inflate(ViewGroup parent)
-        {
-            return (SearchItemViewModernBottom)LayoutInflater.From(parent.Context)
-                .Inflate(Resource.Layout.searchitemview_modern_bottom_dummy, parent, false);
-        }
     }
 
     // Compact style. Single-row variant of Modern: only foldername, queue chip
-    // (conditional), and file-type chip. Never expandable; bitrate position N/A.
+    // (conditional), and file-type chip. Never expandable.
     public class SearchItemViewCompact : SearchItemViewUnifiedBase
     {
-        private TextView viewBitrate;
-        private TextView viewQueue;
+        private SearchChip fileTypeChip;
+        private SearchChip queueChip;
+        private SearchChipPalette palette;
 
-        public SearchItemViewCompact(Context c, IAttributeSet a, int s) : base(c, a, s) { Init(c); }
-        public SearchItemViewCompact(Context c, IAttributeSet a) : base(c, a) { Init(c); }
-
-        private void Init(Context c)
+        public SearchItemViewCompact(Context c) : base(c)
         {
             LayoutInflater.From(c).Inflate(Resource.Layout.search_result_compact, this, true);
             setupChildren();
         }
 
-        public static SearchItemViewCompact inflate(ViewGroup parent)
-        {
-            return (SearchItemViewCompact)LayoutInflater.From(parent.Context)
-                .Inflate(Resource.Layout.searchitemview_compact_dummy, parent, false);
-        }
-
         public override void setupChildren()
         {
             base.setupChildren();
-            viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
-            viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
+            palette = SearchChipPalette.Get(Context);
+            fileTypeChip = new SearchChip(viewFileType);
+            queueChip = new SearchChip(FindViewById<TextView>(Resource.Id.queueTextView));
         }
 
         public override void setItem(SearchResponse item, int position)
         {
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot, item.QueueLength);
+            SearchChipHelper.StyleFormatChip(fileTypeChip, item.GetDominantFileTypeAndBitRate(hideLocked, out _), palette);
+            SearchChipHelper.StyleQueueChip(queueChip, item.HasFreeUploadSlot, item.QueueLength, palette);
         }
 
         public override void PopulateFiles(SearchResponse item)
@@ -365,19 +329,10 @@ namespace Seeker
 
     public class SearchItemViewModernTop : SearchItemViewModernBase
     {
-        public SearchItemViewModernTop(Context c, IAttributeSet a, int s) : base(c, a, s) { Init(c); }
-        public SearchItemViewModernTop(Context c, IAttributeSet a) : base(c, a) { Init(c); }
-
-        private void Init(Context c)
+        public SearchItemViewModernTop(Context c) : base(c)
         {
             LayoutInflater.From(c).Inflate(Resource.Layout.search_result_modern_top, this, true);
             setupChildren();
-        }
-
-        public static SearchItemViewModernTop inflate(ViewGroup parent)
-        {
-            return (SearchItemViewModernTop)LayoutInflater.From(parent.Context)
-                .Inflate(Resource.Layout.searchitemview_modern_top_dummy, parent, false);
         }
     }
 }

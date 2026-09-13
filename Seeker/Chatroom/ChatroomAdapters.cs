@@ -26,20 +26,16 @@ namespace Seeker
         private TextView viewUserStatusTimestamp;
         private ImageView viewUserStatusIcon;
 
-        public UserStatusView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.user_status_update_item, this, true);
-            setupChildren();
-        }
-        public UserStatusView(Context context, IAttributeSet attrs) : base(context, attrs)
+        public UserStatusView(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.user_status_update_item, this, true);
             setupChildren();
         }
 
-        public static UserStatusView inflate(ViewGroup parent)
+        public static UserStatusView Create(ViewGroup parent)
         {
-            UserStatusView itemView = (UserStatusView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.user_status_update_item_dummy, parent, false);
+            var itemView = new UserStatusView(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 
@@ -52,7 +48,7 @@ namespace Seeker
 
         private void SetMessageText(TextView userStatus, StatusMessageUpdate data)
         {
-            DateTime dateTimeLocal = data.DateTimeUtc.Add(SeekerState.OffsetFromUtcCached);
+            DateTime dateTimeLocal = SimpleHelpers.ToLocalTimeSafe(data.DateTimeUtc);
 
             int iconRes;
             int joinLeftAttr = data.StatusType == StatusMessageType.Joined || data.StatusType == StatusMessageType.CameBack ? Resource.Attribute.chat_join
@@ -143,8 +139,7 @@ namespace Seeker
 
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
         {
-            UserStatusView view = UserStatusView.inflate(parent);
-            view.setupChildren();
+            UserStatusView view = UserStatusView.Create(parent);
             return new UserStatusHolder(view as View);
         }
 
@@ -210,23 +205,20 @@ namespace Seeker
         {
             if (viewType == VIEW_SENT)
             {
-                MessageInnerViewSent view = MessageInnerViewSent.inflate(parent);
-                view.setupChildren();
+                MessageInnerViewSent view = MessageInnerViewSent.Create(parent);
                 view.IsGroupChat = true;
                 (view as View).LongClick += ChatroomReceivedAdapter_LongClick;
                 return new MessageInnerViewSentHolder(view as View);
             }
             else if (viewType == VIEW_RECEIVER)
             {
-                GroupMessageInnerViewReceived view = GroupMessageInnerViewReceived.inflate(parent);
-                view.setupChildren();
+                GroupMessageInnerViewReceived view = GroupMessageInnerViewReceived.Create(parent);
                 (view as View).LongClick += ChatroomReceivedAdapter_LongClick;
                 return new GroupMessageInnerViewReceivedHolder(view as View);
             }
             else
             {
-                MessageConnectionStatus view = MessageConnectionStatus.inflate(parent);
-                view.setupChildren();
+                MessageConnectionStatus view = MessageConnectionStatus.Create(parent);
                 return new MessageConnectionStatusHolder(view as View);
             }
         }
@@ -310,19 +302,15 @@ namespace Seeker
         private TextView viewUsername;
         public Message DataItem;
 
-        public GroupMessageInnerViewReceived(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public GroupMessageInnerViewReceived(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.group_messages_inner_item_toMe, this, true);
             setupChildren();
         }
-        public GroupMessageInnerViewReceived(Context context, IAttributeSet attrs) : base(context, attrs)
+        public static GroupMessageInnerViewReceived Create(ViewGroup parent)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.group_messages_inner_item_toMe, this, true);
-            setupChildren();
-        }
-        public static GroupMessageInnerViewReceived inflate(ViewGroup parent)
-        {
-            GroupMessageInnerViewReceived itemView = (GroupMessageInnerViewReceived)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.group_messages_inner_item_toMe_dummy, parent, false);
+            var itemView = new GroupMessageInnerViewReceived(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 
@@ -469,22 +457,19 @@ namespace Seeker
         {
             if (viewType == VIEW_CATEGORY_HEADER)
             {
-                ChatroomOverviewCategoryView view = ChatroomOverviewCategoryView.inflate(parent);
-                view.setupChildren();
+                ChatroomOverviewCategoryView view = ChatroomOverviewCategoryView.Create(parent);
                 return new ChatroomOverviewCategoryHolder(view as View);
             }
             else if (viewType == VIEW_JOINED_ROOM)
             {
-                ChatroomOverviewJoinedView view = ChatroomOverviewJoinedView.inflate(parent);
-                view.setupChildren();
+                ChatroomOverviewJoinedView view = ChatroomOverviewJoinedView.Create(parent);
                 (view as View).Click += ChatroomOverviewClick;
                 view.FindViewById<ImageView>(Resource.Id.leaveRoom).Click += ChatroomOverviewRecyclerAdapter_Click;
                 return new ChatroomOverviewJoinedViewHolder(view as View);
             }
             else
             {
-                ChatroomOverviewView view = ChatroomOverviewView.inflate(parent);
-                view.setupChildren();
+                ChatroomOverviewView view = ChatroomOverviewView.Create(parent);
                 (view as View).Click += ChatroomOverviewClick;
                 return new ChatroomOverviewHolder(view as View);
             }
@@ -533,20 +518,16 @@ namespace Seeker
         public MessageConnectionStatusHolder ViewHolder { get; set; }
         private TextView viewStatus;
 
-        public MessageConnectionStatus(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.chatroom_connect_disconnect_item, this, true);
-            setupChildren();
-        }
-        public MessageConnectionStatus(Context context, IAttributeSet attrs) : base(context, attrs)
+        public MessageConnectionStatus(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.chatroom_connect_disconnect_item, this, true);
             setupChildren();
         }
 
-        public static MessageConnectionStatus inflate(ViewGroup parent)
+        public static MessageConnectionStatus Create(ViewGroup parent)
         {
-            MessageConnectionStatus itemView = (MessageConnectionStatus)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.chatroom_connect_disconnect_item_dummy, parent, false);
+            var itemView = new MessageConnectionStatus(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 
@@ -607,20 +588,19 @@ namespace Seeker
         private TextView viewRoomName;
         private TextView viewUsersInRoom;
 
-        public ChatroomOverviewView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public ChatroomOverviewView(Context context) : base(context)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.chatroom_overview_item, this, true);
-            setupChildren();
-        }
-        public ChatroomOverviewView(Context context, IAttributeSet attrs) : base(context, attrs)
-        {
+            Foreground = UiHelpers.GetDrawableFromAttribute(context, Android.Resource.Attribute.SelectableItemBackground);
+            Clickable = true;
+            Focusable = true;
             LayoutInflater.From(context).Inflate(Resource.Layout.chatroom_overview_item, this, true);
             setupChildren();
         }
 
-        public static ChatroomOverviewView inflate(ViewGroup parent)
+        public static ChatroomOverviewView Create(ViewGroup parent)
         {
-            ChatroomOverviewView itemView = (ChatroomOverviewView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.chatroom_overview_item_dummy, parent, false);
+            var itemView = new ChatroomOverviewView(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 
@@ -660,20 +640,19 @@ namespace Seeker
         private TextView viewUsersInRoom;
         private ImageView unreadImageView;
 
-        public ChatroomOverviewJoinedView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public ChatroomOverviewJoinedView(Context context) : base(context)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.chatroom_overview_joined_item, this, true);
-            setupChildren();
-        }
-        public ChatroomOverviewJoinedView(Context context, IAttributeSet attrs) : base(context, attrs)
-        {
+            Foreground = UiHelpers.GetDrawableFromAttribute(context, Android.Resource.Attribute.SelectableItemBackground);
+            Clickable = true;
+            Focusable = true;
             LayoutInflater.From(context).Inflate(Resource.Layout.chatroom_overview_joined_item, this, true);
             setupChildren();
         }
 
-        public static ChatroomOverviewJoinedView inflate(ViewGroup parent)
+        public static ChatroomOverviewJoinedView Create(ViewGroup parent)
         {
-            ChatroomOverviewJoinedView itemView = (ChatroomOverviewJoinedView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.chatroom_overview_joined_item_dummy, parent, false);
+            var itemView = new ChatroomOverviewJoinedView(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 
@@ -729,20 +708,16 @@ namespace Seeker
         public ChatroomOverviewCategoryHolder ViewHolder { get; set; }
         private TextView viewCategory;
 
-        public ChatroomOverviewCategoryView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.chatroom_overview_category_item, this, true);
-            setupChildren();
-        }
-        public ChatroomOverviewCategoryView(Context context, IAttributeSet attrs) : base(context, attrs)
+        public ChatroomOverviewCategoryView(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.chatroom_overview_category_item, this, true);
             setupChildren();
         }
 
-        public static ChatroomOverviewCategoryView inflate(ViewGroup parent)
+        public static ChatroomOverviewCategoryView Create(ViewGroup parent)
         {
-            ChatroomOverviewCategoryView itemView = (ChatroomOverviewCategoryView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.chatroom_overview_category_item_dummy, parent, false);
+            var itemView = new ChatroomOverviewCategoryView(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 

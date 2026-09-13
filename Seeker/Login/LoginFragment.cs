@@ -253,7 +253,7 @@ namespace Seeker
                 }
                 viewFlipper.DisplayedChild = ChildLoginForm;
             });
-            if (MainActivity.OnUIthread())
+            if (SeekerApplication.OnUIThread())
             {
                 action();
             }
@@ -282,7 +282,7 @@ namespace Seeker
 
                 viewFlipper.DisplayedChild = ChildLoggedIn;
             });
-            if (MainActivity.OnUIthread())
+            if (SeekerApplication.OnUIThread())
             {
                 action();
             }
@@ -386,7 +386,7 @@ namespace Seeker
                     mustSelectDirButton.Click += clickHandler;
                 }
             });
-            if (MainActivity.OnUIthread())
+            if (SeekerApplication.OnUIThread())
             {
                 action();
             }
@@ -405,7 +405,7 @@ namespace Seeker
                     mustSelectDirButton.Visibility = ViewStates.Gone;
                 }
             });
-            if (MainActivity.OnUIthread())
+            if (SeekerApplication.OnUIThread())
             {
                 action();
             }

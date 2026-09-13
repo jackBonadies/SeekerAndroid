@@ -116,7 +116,7 @@ namespace Seeker.Helpers
             }
             else
             {
-                return lang + "-r" + locale.Variant.ToUpper();
+                return lang + "-r" + locale.Variant.ToUpperInvariant();
             }
         }
 

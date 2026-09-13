@@ -46,8 +46,15 @@ namespace Seeker.Browse
                 }
                 else
                 {
-                    //the original logic...
-                    Task<IReadOnlyCollection<Directory>> t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, null, null, isLegacy);
+                    Task<IReadOnlyCollection<Directory>> t;
+                    try
+                    {
+                        t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, null, null, isLegacy);
+                    }
+                    catch (Exception e)
+                    {
+                        t = Task.FromException<IReadOnlyCollection<Directory>>(e);
+                    }
                     t.ContinueWith(continueWithAction);
                 }
 
@@ -103,12 +110,12 @@ namespace Seeker.Browse
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.browse_user_timeout), ToastLength.Short);
                     return;
                 }
-                else if (br.IsFaulted && br.Exception?.InnerException is ConnectionException && br.Exception?.InnerException?.InnerException != null && br.Exception.InnerException.InnerException.ToString().ToLower().Contains("network subsystem is down"))
+                else if (br.IsFaulted && br.Exception?.InnerException is ConnectionException && br.Exception?.InnerException?.InnerException != null && br.Exception.InnerException.InnerException.ToString().Contains("network subsystem is down", StringComparison.OrdinalIgnoreCase))
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.network_down), ToastLength.Short);
                     return;
                 }
-                else if (br.IsFaulted && br.Exception?.InnerException != null && br.Exception.InnerException.Message.ToLower().Contains(Common.Helpers.FailedToEstablishDirectOrIndirectStringLower))
+                else if (br.IsFaulted && br.Exception?.InnerException != null && br.Exception.InnerException.Message.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase))
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.browse_user_nodirectconnection), ToastLength.Short);
                     return;
@@ -247,7 +254,7 @@ namespace Seeker.Browse
 
         public static void DownloadListOfFiles(List<FullFileInfo> slskFiles, bool queuePaused, string _username)
         {
-            SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.CreateDownloadAllTask(slskFiles.ToArray(), queuePaused, _username).Start());
+            SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(slskFiles.ToArray(), queuePaused, _username));
         }
 
         public static void DownloadFilesLogic(Task<IReadOnlyCollection<Directory>> dirTask, string _uname, string thisFileOnly = null)
@@ -258,11 +265,11 @@ namespace Seeker.Browse
                 if (dirTask.Exception?.InnerException?.Message != null)
                 {
                     string msgToToast = string.Empty;
-                    if (dirTask.Exception.InnerException.Message.ToLower().Contains("timed out"))
+                    if (dirTask.Exception.InnerException.Message.Contains("timed out", StringComparison.OrdinalIgnoreCase))
                     {
                         msgToToast = "Failed to Add Download - Request timed out";
                     }
-                    else if (dirTask.Exception.InnerException.Message.ToLower().Contains(Common.Helpers.FailedToEstablishDirectOrIndirectStringLower))
+                    else if (dirTask.Exception.InnerException.Message.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase))
                     {
                         msgToToast = $"Failed to Add Download - Cannot establish connection to user {_uname}";
                     }

@@ -781,5 +781,24 @@ namespace UnitTestCommon
             Assert.IsFalse(Seeker.ChipsHelper.KeywordHelper.IsSingleFileAttributeType(term),
                 $"\"{term}\" should not be classified as a file attribute");
         }
+
+        [Test]
+        public void GetInvariantKey_TurkishCulture_MatchesAsciiLiterals()
+        {
+            var previous = System.Globalization.CultureInfo.CurrentCulture;
+            try
+            {
+                System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("tr-TR");
+
+                Assert.AreEqual("V.A.", Seeker.ChipsHelper.KeywordHelper.GetInvariantKey("VARIOUS ARTISTS"));
+                Assert.AreEqual("iii", Seeker.ChipsHelper.KeywordHelper.GetInvariantKey("III"));
+                Assert.IsTrue(Seeker.ChipsHelper.KeywordHelper.ShouldIgnoreParentFolderTerm(
+                    Seeker.ChipsHelper.KeywordHelper.GetInvariantKey("MUSIC")));
+            }
+            finally
+            {
+                System.Globalization.CultureInfo.CurrentCulture = previous;
+            }
+        }
     }
 }

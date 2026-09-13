@@ -1,7 +1,6 @@
 ﻿using Seeker.Extensions.SearchResponseExtensions;
 using Seeker.Helpers;
 using Android.Content;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
@@ -15,13 +14,12 @@ namespace Seeker
 {
     public class ChipsItemRecyclerAdapter : RecyclerView.Adapter
     {
-        private List<ChipDataItem> localDataSet; //tab id's
+        private List<ChipDataItem> localDataSet;
         public override int ItemCount => localDataSet.Count;
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {
 
-            ChipItemView view = ChipItemView.inflate(parent);
-            view.setupChildren();
+            ChipItemView view = ChipItemView.Create(parent);
             view.Chip.CheckedChange += Chip_CheckedChange;
 
             return new ChipItemViewHolder(view as View);
@@ -118,20 +116,16 @@ namespace Seeker
         public View ChipLayout;
         public ChipItemViewHolder ViewHolder;
 
-        public ChipItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.chip_item_view, this, true);
-            setupChildren();
-        }
-        public ChipItemView(Context context, IAttributeSet attrs) : base(context, attrs)
+        public ChipItemView(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.chip_item_view, this, true);
             setupChildren();
         }
 
-        public static ChipItemView inflate(ViewGroup parent)
+        public static ChipItemView Create(ViewGroup parent)
         {
-            ChipItemView itemView = (ChipItemView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.chip_item_view_dummy, parent, false);
+            var itemView = new ChipItemView(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 

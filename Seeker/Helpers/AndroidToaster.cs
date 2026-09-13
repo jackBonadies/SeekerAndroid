@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using Android.OS;
 using Android.Widget;
 using Common;
 
@@ -12,7 +11,7 @@ namespace Seeker
 
         public void ShowToast(string msg, ToastLength toastLength)
         {
-            new Handler(Looper.MainLooper).Post(() =>
+            SeekerApplication.RunOnUIThread(() =>
             {
                 Toast.MakeText(SeekerApplication.ApplicationContext, msg, toastLength).Show();
             });

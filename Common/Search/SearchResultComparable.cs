@@ -105,19 +105,19 @@ namespace Seeker.Search
             return x.Username.CompareTo(y.Username);
         }
 
-        private string getFolderName(SearchResponse searchResponse)
+        private ReadOnlySpan<char> getFolderName(SearchResponse searchResponse)
         {
             if (searchResponse.Files.Count != 0)
             {
-                return Common.Helpers.GetFolderNameFromFile(searchResponse.Files.First().Filename);
+                return SimpleHelpers.GetFolderNameFromFile(searchResponse.Files.First().Filename);
             }
             else if (searchResponse.LockedFiles.Count != 0)
             {
-                return Common.Helpers.GetFolderNameFromFile(searchResponse.LockedFiles.First().Filename);
+                return SimpleHelpers.GetFolderNameFromFile(searchResponse.LockedFiles.First().Filename);
             }
             else
             {
-                return string.Empty;
+                return ReadOnlySpan<char>.Empty;
             }
         }
 
@@ -144,12 +144,12 @@ namespace Seeker.Search
             }
             else if (searchResultSorting == SearchResultSorting.FolderAlphabetical)
             {
-                string xFolder = getFolderName(x);
-                string yFolder = getFolderName(y);
+                ReadOnlySpan<char> xFolder = getFolderName(x);
+                ReadOnlySpan<char> yFolder = getFolderName(y);
 
-                if (!string.IsNullOrEmpty(xFolder) && !string.IsNullOrEmpty(yFolder))
+                if (!xFolder.IsEmpty && !yFolder.IsEmpty)
                 {
-                    int ret = xFolder.CompareTo(yFolder);
+                    int ret = xFolder.CompareTo(yFolder, StringComparison.CurrentCulture);
                     if (ret != 0)
                     {
                         return ret;

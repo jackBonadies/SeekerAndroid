@@ -29,9 +29,6 @@
     <color name="slightTint">#18ffffff</color>
     <color name="bolderTint">#40ffffff</color>
 
-    <color name="normalTextColorAgainstPurple">#FFFFFFFF</color>
-    <color name="subTextColorAgainstPurple">#ffC7C7C7</color>
-
     <color name="chipSeparatorColor">#ffe0e0e0</color>
 
     <color name="checkCircleSelected">#FFFFFF</color>

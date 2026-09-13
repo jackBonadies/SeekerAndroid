@@ -17,20 +17,20 @@
         android:id="@+id/relativeLayout1"
     >
         <androidx.recyclerview.widget.RecyclerView
-            android:background="?attr/mainPurple"
             android:minWidth="25px"
             android:minHeight="0px"
-            android:elevation="4dp"
+            android:paddingStart="6dp"
+            android:paddingEnd="10dp"
+            android:clipToPadding="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/recyclerViewHorizontalPath"
         />
         <View
             android:layout_below="@id/recyclerViewHorizontalPath"
-            android:background="#ffd4d4d4"
+            android:background="?attr/slightestContrastColor"
             android:id="@+id/recyclerViewHorizontalPathSep"
             android:layout_width="match_parent"
-            android:elevation="4dp"
             android:layout_height="1dp"
         />
         <androidx.recyclerview.widget.RecyclerView

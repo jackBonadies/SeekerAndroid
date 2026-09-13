@@ -228,7 +228,7 @@ namespace Seeker
             ParseFilterString(filterString, wordsToAvoid, wordsToInclude, null);
         }
 
-        public static void ParseFilterString(string filterString, List<string> wordsToAvoid, List<string> wordsToInclude, FilterSpecialFlags filterSpecialFlags)
+        public static void ParseFilterString(string filterString, List<string> wordsToAvoid, List<string> wordsToInclude, FilterSpecialFlags? filterSpecialFlags)
         {
             List<string> filterStringSplit = filterString.Split(' ').ToList();
             foreach (string word in filterStringSplit)
@@ -343,10 +343,12 @@ namespace Seeker
                 }
 
                 string fullFname = s.Files.FirstOrDefault()?.Filename ?? s.LockedFiles.FirstOrDefault().Filename;
+                ReadOnlySpan<char> folderName = SimpleHelpers.GetFolderNameFromFile(fullFname);
+                ReadOnlySpan<char> parentFolderName = SimpleHelpers.GetParentFolderNameFromFile(fullFname);
                 foreach (string keyword in chipFilter.Keywords)
                 {
-                    if (!Common.Helpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) &&
-                        !Common.Helpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+                    if (!folderName.Contains(keyword, StringComparison.OrdinalIgnoreCase) &&
+                        !parentFolderName.Contains(keyword, StringComparison.OrdinalIgnoreCase))
                     {
                         return false;
                     }
@@ -357,8 +359,8 @@ namespace Seeker
                     bool anyMatch = false;
                     foreach (string keyword in keywordsInvar)
                     {
-                        if (Common.Helpers.GetFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase) ||
-                            Common.Helpers.GetParentFolderNameFromFile(fullFname).Contains(keyword, StringComparison.InvariantCultureIgnoreCase))
+                        if (folderName.Contains(keyword, StringComparison.OrdinalIgnoreCase) ||
+                            parentFolderName.Contains(keyword, StringComparison.OrdinalIgnoreCase))
                         {
                             anyMatch = true;
                             break;
@@ -383,8 +385,8 @@ namespace Seeker
         {
             foreach (File f in s.GetFiles(hideLocked))
             {
-                string dirString = Common.Helpers.GetFolderNameFromFile(f.Filename);
-                string fileString = SimpleHelpers.GetFileNameFromFile(f.Filename);
+                ReadOnlySpan<char> dirString = SimpleHelpers.GetFolderNameFromFile(f.Filename);
+                ReadOnlySpan<char> fileString = SimpleHelpers.GetFileNameFromFile(f.Filename);
                 foreach (string avoid in wordsToAvoid)
                 {
                     if (dirString.Contains(avoid, StringComparison.OrdinalIgnoreCase) || fileString.Contains(avoid, StringComparison.OrdinalIgnoreCase))

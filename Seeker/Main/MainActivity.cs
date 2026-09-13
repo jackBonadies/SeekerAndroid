@@ -16,47 +16,31 @@
  * You should have received a copy of the GNU General Public License
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
-using Seeker.Services;
-using Seeker.Extensions.SearchResponseExtensions;
-using Seeker.Helpers;
-using Seeker.Search;
 using Android;
-using Android.Animation;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
-using Android.Net;
 using Android.OS;
 using Android.Provider;
 using Android.Runtime;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
-using AndroidX.AppCompat.App;
+using AndroidX.Activity;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
 using AndroidX.DocumentFile.Provider;
-using AndroidX.Fragment.App;
 using AndroidX.Lifecycle;
-using AndroidX.ViewPager2.Widget;
 using Common;
 using Google.Android.Material.BottomNavigation;
-using Google.Android.Material.Snackbar;
-using Google.Android.Material.Tabs;
-using Java.IO;
+using Seeker.Helpers;
+using Seeker.Search;
+using Seeker.Services;
 using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading;
 using System.Threading.Tasks;
-using static Android.Provider.DocumentsContract;
-using log = Android.Util.Log;
-using Seeker.Serialization;
-using AndroidX.Activity;
-using Seeker.Transfers;
 using ActivityFlags = Android.Content.ActivityFlags;
 
 //using System.IO;
@@ -466,7 +450,7 @@ namespace Seeker
                         return;
                     }
 
-                    if (OnUIthread())
+                    if (SeekerApplication.OnUIThread())
                     {
                         RequestNotifPermissionsLogic();
                     }
@@ -770,7 +754,7 @@ namespace Seeker
                     }
                     else
                     {
-                        if (OnUIthread())
+                        if (SeekerApplication.OnUIThread())
                         {
                             showDirectoryButton();
                         }
@@ -802,7 +786,7 @@ namespace Seeker
                 else
                 {
 
-                    if (OnUIthread())
+                    if (SeekerApplication.OnUIThread())
                     {
                         showDirectoryButton();
                     }
@@ -841,7 +825,7 @@ namespace Seeker
                     }
                     else
                     {
-                        if (OnUIthread())
+                        if (SeekerApplication.OnUIThread())
                         {
                             reiterate();
                         }
@@ -872,7 +856,7 @@ namespace Seeker
 
                     //hide the button
 
-                    if (OnUIthread())
+                    if (SeekerApplication.OnUIThread())
                     {
                         hideButton();
                     }
@@ -883,7 +867,7 @@ namespace Seeker
                 }
                 else
                 {
-                    if (OnUIthread())
+                    if (SeekerApplication.OnUIThread())
                     {
                         reiterate();
                     }
@@ -999,15 +983,6 @@ namespace Seeker
                 //on Pixel 5 emulator this limit is around 78 characters.
                 //^It must BOTH target Android 12 AND be running on Android 12^
             }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public static bool OnUIthread()
-        {
-            return Looper.MainLooper.IsCurrentThread;
         }
 
         protected override void OnSaveInstanceState(Bundle outState)
@@ -1221,7 +1196,11 @@ namespace Seeker
             }
             else if (e.KeyCode == Keycode.VolumeDown)
             {
+#if MOCK
+                Seeker.Debug.MockTransferStress.Toggle();
+#else
                 SeekerState.SoulseekClient.ConnectAsync("slowtest", "slowpass");
+#endif
             }
             return base.DispatchKeyEvent(e);
         }

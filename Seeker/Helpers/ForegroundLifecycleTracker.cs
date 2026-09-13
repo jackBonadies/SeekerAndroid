@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright 2021 Seeker
  *
  * This file is part of Seeker
@@ -118,8 +118,9 @@ namespace Seeker
             Logger.Debug("OnActivityStarted " + DiagLastStarted);
 
             NumberOfActiveActivities++;
-            if (NumberOfActiveActivities == 1)
+            if (!isForeground)
             {
+                isForeground = true;
                 Logger.Debug("We are back!");
                 if (AutoAwayTimer != null)
                 {
@@ -142,23 +143,28 @@ namespace Seeker
         void Application.IActivityLifecycleCallbacks.OnActivityStopped(Activity activity)
         {
             DiagLastStopped = activity.GetType().Name.ToString();
-            Logger.Debug("OnActivityStopped " + DiagLastStopped);
+            bool isRecreating = activity.IsChangingConfigurations;
+            Logger.Debug("OnActivityStopped " + DiagLastStopped + " isChangingConfigurations " + isRecreating);
 
             NumberOfActiveActivities--;
-            if (NumberOfActiveActivities == 0)
-            {
-                //app going to background — drain buffered diagnostics before Android can kill us.
-                DiagnosticFileWriter.FlushBlocking();
 
-                //snapshot state that is not saved at mutation time (e.g. transient user list
-                //status / data fields from Server)
-                PreferencesManager.SaveBulkState();
-                TransferPersistenceWrapper.SaveTransferItems();
+            if (NumberOfActiveActivities != 0 || isRecreating)
+            {
+                return;
             }
+            isForeground = false;
+            Logger.Debug("We are backgrounded!");
 
-            if (NumberOfActiveActivities == 0 && PreferencesState.AutoAwayOnInactivity)
+            //app going to background — drain buffered diagnostics before Android can kill us.
+            DiagnosticFileWriter.FlushBlocking();
+
+            //snapshot state that is not saved at mutation time (e.g. transient user list
+            //status / data fields from Server)
+            PreferencesManager.SaveBulkState();
+            TransferPersistenceWrapper.SaveTransferItems();
+
+            if (PreferencesState.AutoAwayOnInactivity)
             {
-                Logger.Debug("We are away!");
                 if (AutoAwayTimer == null)
                 {
                     AutoAwayTimer = new System.Timers.Timer(1000 * 60 * 5);
@@ -177,13 +183,15 @@ namespace Seeker
 
         public static bool IsBackground()
         {
-            return NumberOfActiveActivities == 0;
+            return !isForeground;
         }
 
         public volatile static string DiagLastStarted = string.Empty;
         public volatile static string DiagLastStopped = string.Empty;
 
         public static int NumberOfActiveActivities = 0;
+
+        private static bool isForeground = false;
         public static System.Timers.Timer AutoAwayTimer = null;
     }
 }

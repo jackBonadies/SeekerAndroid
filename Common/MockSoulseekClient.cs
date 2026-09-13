@@ -586,6 +586,8 @@ namespace Seeker
                     // stands in for SendConfigurationMessagesAsync
                     RaisePrivilegedUserList();
 
+                    _ = RaiseLoginRoomListAsync();
+
                     StartSpottyDropTimerIfNeeded(username);
                 }
                 catch (Exception ex) when (!(ex is LoginRejectedException) && !(ex is OperationCanceledException) && !(ex is TimeoutException))
@@ -1036,8 +1038,8 @@ namespace Seeker
             bool first = true;
             while (i < total)
             {
-                int gap = first ? _random.Next(300, 700) : _random.Next(80, 350);
-                int size = Math.Min(total - i, _random.Next(30, 151));
+                int gap = first ? _random.Next(100, 400) : _random.Next(80, 350);
+                int size = Math.Min(total - i, _random.Next(30, 700));
                 yield return (i, size, gap);
                 i += size;
                 first = false;
@@ -1640,6 +1642,38 @@ namespace Seeker
 
         public Task<(Soulseek.Search Search, IReadOnlyCollection<SearchResponse> Responses)> SearchAsync(SearchQuery query, SearchScope scope = null, int? token = null, SearchOptions options = null, CancellationToken? cancellationToken = null)
         {
+            if (query == null)
+            {
+                throw new ArgumentNullException(nameof(query));
+            }
+
+            if (string.IsNullOrWhiteSpace(query.SearchText))
+            {
+                throw new ArgumentException("Search text must not be a null or empty string, or one consisting only of whitespace", nameof(query));
+            }
+
+            if (query.Terms.Count == 0)
+            {
+                throw new ArgumentException("Search query must contain at least one non-exclusion term", nameof(query));
+            }
+
+            if (!State.HasFlag(SoulseekClientStates.Connected) || !State.HasFlag(SoulseekClientStates.LoggedIn))
+            {
+                throw new InvalidOperationException($"The server connection must be connected and logged in to perform a search (currently: {State})");
+            }
+
+            scope ??= new SearchScope(SearchScopeType.Network);
+            options ??= new SearchOptions();
+
+            if (options.RemoveSingleCharacterSearchTerms)
+            {
+                query = new SearchQuery(query.Terms.Where(term => term.Length > 1), query.Exclusions);
+            }
+
+            if (query.Terms.Count == 0)
+            {
+                throw new ArgumentException("Search query must contain at least one non-exclusion term with length greater than 1", nameof(query));
+            }
             return SearchToCollectionAsync(query, scope, token, options, cancellationToken);
         }
 
@@ -1659,6 +1693,12 @@ namespace Seeker
             SearchStateChanged?.Invoke(this, new SearchStateChangedEventArgs(SearchStates.Requested, searchInProgress));
 
             string joinedTerms = string.Join(" ", query.Terms).ToLowerInvariant();
+
+            if (joinedTerms.Contains("asyncfail"))
+            {
+                await Task.Delay(500);
+                throw new InvalidOperationException("Connection has been closed");
+            }
 
 
             if (Seeker.Debug.SearchCaptureStore.IsConfigured &&
@@ -2463,20 +2503,73 @@ namespace Seeker
             return true;
         }
 
+        public int LoginRoomListPublicCount { get; set; } = 5;
+
+        private RoomList FullRoomList { get; set; }
+
+        private object RoomListSyncRoot { get; } = new object();
+
+        private ConcurrentQueue<TaskCompletionSource<RoomList>> RoomListWaits { get; }
+            = new ConcurrentQueue<TaskCompletionSource<RoomList>>();
+
         public async Task<RoomList> GetRoomListAsync(CancellationToken? cancellationToken = null)
         {
             if (GetRoomListAsyncHandler != null) return await GetRoomListAsyncHandler(cancellationToken);
 
-            await Task.Delay(200).ConfigureAwait(false);
+            var wait = new TaskCompletionSource<RoomList>(TaskCreationOptions.RunContinuationsAsynchronously);
+            RoomListWaits.Enqueue(wait);
 
-            var roomList = new RoomList(
-                publicList:            GenerateMockRooms(20, stableCount: 8, suffix: "_public"),
-                privateList:           GenerateMockRooms(10, stableCount: 4, suffix: "_private"),
-                ownedList:             GenerateMockRooms(10, stableCount: 4, suffix: "_owned"),
-                moderatedRoomNameList: GenerateMockRooms(10, stableCount: 4, suffix: "_moderated").Select(r => r.Name));
+            _ = RespondToRoomListRequestAsync();
+
+            return await wait.Task.ConfigureAwait(false);
+        }
+
+        private async Task RespondToRoomListRequestAsync()
+        {
+            await Task.Delay(SimulatedDelayMs).ConfigureAwait(false);
+            ReceiveRoomList(GetOrCreateFullRoomList());
+        }
+
+        private async Task RaiseLoginRoomListAsync()
+        {
+            await Task.Delay(SimulatedDelayMs / 4).ConfigureAwait(false);
+            ReceiveRoomList(BuildLoginRoomList());
+        }
+
+        private void ReceiveRoomList(RoomList roomList)
+        {
+            while (RoomListWaits.TryDequeue(out var wait))
+            {
+                if (wait.TrySetResult(roomList))
+                {
+                    break;
+                }
+            }
 
             RaiseRoomListReceived(roomList);
-            return roomList;
+        }
+
+        private RoomList GetOrCreateFullRoomList()
+        {
+            lock (RoomListSyncRoot)
+            {
+                return FullRoomList ??= new RoomList(
+                    publicList:            GenerateMockRooms(20, stableCount: 8, suffix: "_public"),
+                    privateList:           GenerateMockRooms(10, stableCount: 4, suffix: "_private"),
+                    ownedList:             GenerateMockRooms(10, stableCount: 4, suffix: "_owned"),
+                    moderatedRoomNameList: GenerateMockRooms(10, stableCount: 4, suffix: "_moderated").Select(r => r.Name));
+            }
+        }
+
+        private RoomList BuildLoginRoomList()
+        {
+            var full = GetOrCreateFullRoomList();
+
+            return new RoomList(
+                publicList:            full.Public.OrderByDescending(r => r.UserCount).Take(LoginRoomListPublicCount),
+                privateList:           full.Private,
+                ownedList:             full.Owned,
+                moderatedRoomNameList: full.ModeratedRoomNames);
         }
 
         public Task<UserData> WatchUserAsync(string username, CancellationToken? cancellationToken = null)

@@ -349,13 +349,12 @@ namespace Seeker
                 true);
         }
 
-
-
         private void CheckStatus()
         {
             Android.Net.Uri uri = Android.Net.Uri.Parse("http://www.slsknet.org/porttest.php?port=" + PreferencesState.ListenerPort); // missing 'http://' will cause crashed. //an https for this link does not exist
             CommonHelpers.ViewUri(uri, this);
         }
+
         public void ClearIncompleteFolder()
         {
             List<string> doNotDelete = TransferItems.TransferItemManagerDL.GetInUseIncompleteFolderNames();
@@ -1217,10 +1216,6 @@ namespace Seeker
                 }
                 //SeekerState.UploadDataDirectoryUri = uri.ToString();
                 //SeekerState.UploadDataDirectoryUriIsFromTree = !fromLegacyPicker;
-                if ((UPLOAD_DIR_ADD_WRITE_EXTERNAL == requestCode || UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case == requestCode) && newlyAddedUriIfApplicable != null)
-                {
-                    this.ContentResolver.TakePersistableUriPermission(newlyAddedUriIfApplicable, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
-                }
                 //setup soulseek client with handlers if all conditions met
                 SharingService.SetUnsetSharingBasedOnConditions(true, true);
                 this.RunOnUiThread(new Action(() =>
@@ -1386,6 +1381,19 @@ namespace Seeker
                 {
                     reselectCase = true;
                 }
+
+                if (UPLOAD_DIR_ADD_WRITE_EXTERNAL == requestCode || UPLOAD_DIR_ADD_WRITE_EXTERNAL_Reselect_Case == requestCode)
+                {
+                    try
+                    {
+                        this.ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantWriteUriPermission | ActivityFlags.GrantReadUriPermission);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Firebase("TakePersistableUriPermission (upload dir): " + e.Message);
+                    }
+                }
+
                 //make sure you can parse the files before setting the directory..
 
                 //this takes 5+ seconds in Debug mode (with 20-30 albums) which means that this MUST be done on a separate thread..

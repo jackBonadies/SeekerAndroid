@@ -64,29 +64,30 @@ namespace Seeker
                 switch (family)
                 {
                     case SearchResultStyleEnum.SimpleBottom:
-                        view = SearchItemViewSimpleBottom.inflate(parent);
+                        view = new SearchItemViewSimpleBottom(parent.Context);
                         break;
                     case SearchResultStyleEnum.SimpleTop:
-                        view = SearchItemViewSimpleTop.inflate(parent);
+                        view = new SearchItemViewSimpleTop(parent.Context);
                         break;
                     case SearchResultStyleEnum.ModernBottom:
-                        view = SearchItemViewModernBottom.inflate(parent);
+                        view = new SearchItemViewModernBottom(parent.Context);
                         break;
                     case SearchResultStyleEnum.ModernTop:
-                        view = SearchItemViewModernTop.inflate(parent);
+                        view = new SearchItemViewModernTop(parent.Context);
                         break;
                     case SearchResultStyleEnum.Compact:
-                        view = SearchItemViewCompact.inflate(parent);
+                        view = new SearchItemViewCompact(parent.Context);
                         break;
                     default:
                         throw new System.InvalidOperationException(
                             $"Unknown search result style family {family}");
                 }
+                view.LayoutParameters = new RecyclerView.LayoutParams(
+                    ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
                 // Compact never expands, even if Expandable was somehow left set.
                 view.IsExpandable = !this.searchResultStyle.HasFlag(SearchResultStyleEnum.Compact)
                     && this.searchResultStyle.HasFlag(SearchResultStyleEnum.Expandable);
                 view.AdapterRef = this;
-                view.setupChildren();
                 view.ApplyExpandableMode();
                 var mainLayout = view.FindViewById<LinearLayout>(Resource.Id.relativeLayout1);
                 mainLayout.Click += UnifiedRowClick;
@@ -254,32 +255,6 @@ namespace Seeker
                 searchFrom = end;
             }
             return ss;
-        }
-
-        public class SearchDiffCallback : DiffUtil.Callback
-        {
-            private List<SearchResponse> oldList;
-            private List<SearchResponse> newList;
-
-            public SearchDiffCallback(List<SearchResponse> _oldList, List<SearchResponse> _newList)
-            {
-                oldList = _oldList;
-                newList = _newList;
-            }
-
-            public override int NewListSize => newList.Count;
-
-            public override int OldListSize => oldList.Count;
-
-            public override bool AreContentsTheSame(int oldItemPosition, int newItemPosition)
-            {
-                return oldList[oldItemPosition].Equals(newList[newItemPosition]); //my override
-            }
-
-            public override bool AreItemsTheSame(int oldItemPosition, int newItemPosition)
-            {
-                return oldList[oldItemPosition] == newList[newItemPosition];
-            }
         }
     }
 }

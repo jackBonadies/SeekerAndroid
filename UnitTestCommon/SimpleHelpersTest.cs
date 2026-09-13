@@ -298,7 +298,7 @@ namespace UnitTestCommon
         [Test]
         public void GetFileNameFromFile_NormalPath()
         {
-            string result = SimpleHelpers.GetFileNameFromFile(@"music\artist\song.mp3");
+            string result = SimpleHelpers.GetFileNameFromFile(@"music\artist\song.mp3").ToString();
             Assert.That(result, Is.EqualTo("song.mp3"));
         }
 
@@ -306,36 +306,72 @@ namespace UnitTestCommon
         public void GetFileNameFromFile_NoBackslash()
         {
             // LastIndexOf returns -1, Substring(0) returns the whole string
-            string result = SimpleHelpers.GetFileNameFromFile("song.mp3");
+            string result = SimpleHelpers.GetFileNameFromFile("song.mp3").ToString();
             Assert.That(result, Is.EqualTo("song.mp3"));
         }
 
         [Test]
         public void GetFileNameFromFile_TrailingBackslash_ReturnsEmpty()
         {
-            string result = SimpleHelpers.GetFileNameFromFile(@"music\artist\");
+            string result = SimpleHelpers.GetFileNameFromFile(@"music\artist\").ToString();
             Assert.That(result, Is.EqualTo(""));
         }
 
-        [Test]
-        public void GetFileNameFromFile_ThaiCulture_DoesNotThrow()
+        [TestCase(1, @"level1")]
+        [TestCase(2, @"level2\level1")]
+        [TestCase(3, @"level3\level2\level1")]
+        [TestCase(4, @"level4\level3\level2\level1")]
+        public void GetFolderNameFromFileLevels_ThaiCulture_DoesNotThrow(int levels, string expected)
         {
-            // Thai collation ignores punctuation, so the culture-sensitive
-            // string.LastIndexOf("\\") returns Length (empty-needle behavior) and the
-            // following Substring(begin + 1) threw ArgumentOutOfRangeException.
-            // The fix uses the ordinal char overload, which is culture-independent.
             RunInCulture("th-TH", () =>
             {
-                string result = SimpleHelpers.GetFileNameFromFile(@"music\artist\song.mp3");
-                Assert.That(result, Is.EqualTo("song.mp3"));
+                string result = SimpleHelpers.GetFolderNameFromFile(@"level4\level3\level2\level1\song.mp3", levels).ToString();
+                Assert.That(result, Is.EqualTo(expected));
             });
+        }
+
+        [Test]
+        public void GetParentFolderName_ThaiCulture_DoesNotThrow()
+        {
+            RunInCulture("th-TH", () =>
+            {
+                string result = SimpleHelpers.GetParentFolderNameFromFile(@"level4\level3\level2\level1\song.mp3").ToString();
+                Assert.That(result, Is.EqualTo("level2"));
+                result = SimpleHelpers.GetParentFolderNameFromFile(@"level2\level1\song.mp3").ToString();
+                Assert.That(result, Is.EqualTo("level2"));
+            });
+        }
+
+        [TestCase(@"level2\level1\song.mp3", 5, @"level2\level1")]
+        [TestCase(@"level2\level1\song.mp3", 0, "")]
+        [TestCase("song.mp3", 1, "")]
+        [TestCase("", 1, "")]
+        [TestCase(@"\song.mp3", 1, "")]
+        public void GetFolderNameFromFile_EdgeCases(string path, int levels, string expected)
+        {
+            Assert.That(SimpleHelpers.GetFolderNameFromFile(path, levels).ToString(), Is.EqualTo(expected));
+        }
+
+        [TestCase(@"level3\level2\level1\song.mp3", "level2")]
+        [TestCase(@"level2\level1\song.mp3", "level2")]
+        [TestCase(@"\level2\level1\song.mp3", "level2")]
+        [TestCase(@"level1\song.mp3", "")]
+        [TestCase("song.mp3", "")]
+        [TestCase("", "")]
+        public void GetParentFolderNameFromFile_EdgeCases(string path, string expected)
+        {
+            Assert.That(SimpleHelpers.GetParentFolderNameFromFile(path).ToString(), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void GetFileNameFromFile_Null_ReturnsEmpty()
+        {
+            Assert.That(SimpleHelpers.GetFileNameFromFile((string)null).ToString(), Is.EqualTo(""));
         }
 
         [Test]
         public void GetDirectoryRequestFolderName_ThaiCulture_ReturnsFolder()
         {
-            // same root cause as GetFileNameFromFile, but the try/catch hid it:
-            // Substring(0, Length) silently returned the whole string instead of the folder
             RunInCulture("th-TH", () =>
             {
                 string result = SimpleHelpers.GetDirectoryRequestFolderName(@"music\artist\album\song.mp3");
@@ -350,6 +386,16 @@ namespace UnitTestCommon
             {
                 string result = SimpleHelpers.GetAllButLast(@"raw:\storage\emulated\0\Download\Soulseek Complete");
                 Assert.That(result, Is.EqualTo(@"raw:\storage\emulated\0\Download"));
+            });
+        }
+
+        [Test]
+        public void GetFullPathFromFile_ThaiCulture_ReturnsFolder()
+        {
+            RunInCulture("th-TH", () =>
+            {
+                string result = SimpleHelpers.GetAllButLast(@"music\artist\album\song.mp3");
+                Assert.That(result, Is.EqualTo(@"music\artist\album"));
             });
         }
 
@@ -520,49 +566,46 @@ namespace UnitTestCommon
             Assert.That(files[2].Filename, Is.EqualTo("c.mp3"));
         }
 
-        // --- GetRecentTimeNiceFormated ---
+        // --- GetRecentTimeBucket ---
+
+        [TestCase(0, RecentTimeUnit.JustNow, 0)]
+        [TestCase(59, RecentTimeUnit.JustNow, 0)]
+        [TestCase(60, RecentTimeUnit.Minutes, 1)]
+        [TestCase(45 * 60, RecentTimeUnit.Minutes, 45)]
+        [TestCase(60 * 60 - 1, RecentTimeUnit.Minutes, 59)]
+        [TestCase(60 * 60, RecentTimeUnit.Hours, 1)]
+        [TestCase(3 * 3600, RecentTimeUnit.Hours, 3)]
+        [TestCase(24 * 3600 - 1, RecentTimeUnit.Hours, 23)]
+        [TestCase(24 * 3600, RecentTimeUnit.Days, 1)]
+        [TestCase(36 * 3600, RecentTimeUnit.Days, 1)]
+        [TestCase(48 * 3600 - 1, RecentTimeUnit.Days, 1)]
+        [TestCase(48 * 3600, RecentTimeUnit.Days, 2)]
+        [TestCase(5 * 86400, RecentTimeUnit.Days, 5)]
+        [TestCase(30 * 86400 - 1, RecentTimeUnit.Days, 29)]
+        [TestCase(30 * 86400, RecentTimeUnit.AbsoluteDate, 0)]
+        [TestCase(35 * 86400, RecentTimeUnit.AbsoluteDate, 0)]
+        public void GetRecentTimeBucket_PicksUnitAndWholeCount(int totalSeconds, RecentTimeUnit expectedUnit, int expectedCount)
+        {
+            var (unit, count) = SimpleHelpers.GetRecentTimeBucket(TimeSpan.FromSeconds(totalSeconds));
+            Assert.That(unit, Is.EqualTo(expectedUnit));
+            Assert.That(count, Is.EqualTo(expectedCount));
+        }
+
+        // --- ToLocalTimeSafe ---
 
         [Test]
-        public void GetRecentTimeNiceFormated_UnderOneMinute_ReturnsJustNow()
+        public void ToLocalTimeSafe_ConvertsUtcToLocal()
         {
-            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromSeconds(30), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            Assert.That(result, Is.EqualTo("just now"));
+            var utc = new DateTime(2025, 4, 14, 12, 0, 0, DateTimeKind.Utc);
+            Assert.That(SimpleHelpers.ToLocalTimeSafe(utc), Is.EqualTo(TimeZoneInfo.ConvertTimeFromUtc(utc, TimeZoneInfo.Local)));
         }
 
         [Test]
-        public void GetRecentTimeNiceFormated_45Minutes_ReturnsMinAgo()
+        public void ToLocalTimeSafe_UnspecifiedKindIsTreatedAsUtc()
         {
-            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromMinutes(45), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            Assert.That(result, Is.EqualTo("45 min ago"));
-        }
-
-        [Test]
-        public void GetRecentTimeNiceFormated_3Hours_ReturnsHrAgo()
-        {
-            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromHours(3), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            Assert.That(result, Is.EqualTo("3 hr ago"));
-        }
-
-        [Test]
-        public void GetRecentTimeNiceFormated_36Hours_ReturnsYesterday()
-        {
-            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromHours(36), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            Assert.That(result, Is.EqualTo("yesterday"));
-        }
-
-        [Test]
-        public void GetRecentTimeNiceFormated_5Days_ReturnsDaysAgo()
-        {
-            string result = SimpleHelpers.GetRecentTimeNiceFormated(DateTime.Now, TimeSpan.FromDays(5), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            Assert.That(result, Is.EqualTo("5 days ago"));
-        }
-
-        [Test]
-        public void GetRecentTimeNiceFormated_OverOneMonth_ReturnsFormattedDate()
-        {
-            var timeRan = new DateTime(2025, 4, 14);
-            string result = SimpleHelpers.GetRecentTimeNiceFormated(timeRan, TimeSpan.FromDays(35), "just now", "min ago", "hr ago", "yesterday", "days ago");
-            Assert.That(result, Is.EqualTo("Apr 14"));
+            var utc = new DateTime(2025, 4, 14, 12, 0, 0, DateTimeKind.Utc);
+            var unspecified = new DateTime(utc.Ticks);
+            Assert.That(SimpleHelpers.ToLocalTimeSafe(unspecified), Is.EqualTo(SimpleHelpers.ToLocalTimeSafe(utc)));
         }
 
         // --- KNOWN_TYPES ---

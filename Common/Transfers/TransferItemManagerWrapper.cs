@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Seeker.Helpers;
@@ -132,9 +132,33 @@ namespace Seeker
         public void RemoveAndCleanUp(TransferItem ti)
         {
             Remove(ti);
-            if (NeedsCleanUp(ti))
+            FlagInFlightAndCleanUpRest(new List<TransferItem> { ti });
+        }
+
+        public void RemoveAndCleanUp(FolderItem fi)
+        {
+            List<TransferItem> removed;
+            lock (fi.TransferItems)
             {
-                CleanupEntry(ti);
+                removed = fi.TransferItems.ToList();
+            }
+            ClearAllFromFolder(fi);
+            FlagInFlightAndCleanUpRest(removed);
+        }
+
+        private void FlagInFlightAndCleanUpRest(List<TransferItem> tis)
+        {
+            foreach (TransferItem ti in tis)
+            {
+                if (ti.InProcessing)
+                {
+                    ti.CancelAndClearFlag = true;
+                }
+            }
+            List<TransferItem> needingCleanup = tis.Where(NeedsCleanUp).ToList();
+            if (needingCleanup.Count != 0)
+            {
+                CleanupEntry(needingCleanup);
             }
         }
 
@@ -202,57 +226,6 @@ namespace Seeker
             else
             {
                 return Downloads.GetItemAtUserIndex(position, uiState);
-            }
-        }
-
-        public object RemoveAtUserIndex(int position)
-        {
-            var uiState = CreateUIState();
-            if (TransfersViewState.Instance.InUploadsMode)
-            {
-                return Uploads.RemoveAtUserIndex(position, uiState);
-            }
-            else
-            {
-                return Downloads.RemoveAtUserIndex(position, uiState);
-            }
-        }
-
-        /// <summary>
-        /// remove and spawn cleanup task if applicable
-        /// </summary>
-        /// <param name="position"></param>
-        public void RemoveAndCleanUpAtUserIndex(int position)
-        {
-            object objectRemoved = RemoveAtUserIndex(position);
-            if (objectRemoved is TransferItem ti)
-            {
-                if (ti.InProcessing)
-                {
-                    ti.CancelAndClearFlag = true;
-                }
-                else
-                {
-                    if (NeedsCleanUp(ti))
-                    {
-                        CleanupEntry(ti);
-                    }
-                }
-            }
-            else
-            {
-                List<TransferItem> tis = objectRemoved as List<TransferItem>;
-                IEnumerable<TransferItem> tisCleanUpOnComplete = tis.Where((item) => { return item.InProcessing; });
-                foreach (var item in tisCleanUpOnComplete)
-                {
-                    item.CancelAndClearFlag = true;
-                }
-                IEnumerable<TransferItem> tisNeedingCleanup = tis.Where((item) => { return NeedsCleanUp(item); });
-                if (tisNeedingCleanup.Any())
-                {
-                    CleanupEntry(tisNeedingCleanup);
-                }
-
             }
         }
 

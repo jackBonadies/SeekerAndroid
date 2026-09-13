@@ -52,6 +52,7 @@
     <string name="searching_label">Searching</string>
     <string name="loading_wishlist_label">Loading wishlist</string>
     <string name="no_results_title">No results found</string>
+    <string name="search_failed_title">Search failed</string>
     <string name="no_results_subtitle">Nothing found for \"{0}\"</string>
     <string name="results_hidden_title">{0} results hidden by filters</string>
     <string name="results_hidden_subtitle">Open filters to adjust</string>
@@ -285,6 +286,7 @@
     <string name="already_added_user_">Already added user: {0}</string>
     <string name="must_be_logged_to_search">Must log in before searching</string>
     <string name="create_and_refresh">Created room, now refreshing room list</string>
+    <string name="failed_to_create_room">Failed to create room</string>
     <string name="setting_ticker">Setting ticker...</string>
     <string name="failed_to_set_ticker">Failed to set ticker</string>
     <string name="successfully_set_ticker">Successfully set ticker</string>
@@ -910,10 +912,18 @@
 	
 	
     <string name="just_now">just now</string>
-    <string name="min_ago">min ago</string>
-    <string name="hr_ago">hr ago</string>
-    <string name="yesterday">yesterday</string>
-    <string name="days_ago">days ago</string>
+    <plurals name="minutes_ago">
+        <item quantity="one">%d min ago</item>
+        <item quantity="other">%d min ago</item>
+    </plurals>
+    <plurals name="hours_ago">
+        <item quantity="one">%d hr ago</item>
+        <item quantity="other">%d hr ago</item>
+    </plurals>
+    <plurals name="days_ago">
+        <item quantity="one">%d day ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
 
     <!-- Modern settings screen -->
     <string name="Privileges">Privileges</string>

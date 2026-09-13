@@ -18,6 +18,8 @@ namespace Seeker
         }
 
         private bool isUploads;
+
+        // Lock order: AllTransferItems -> AllFolderItems -> FolderItem.TransferItems
         /// <summary>
         /// Do not use directly.  This is public only for default serialization.
         /// </summary>
@@ -279,46 +281,6 @@ namespace Seeker
             }
         }
 
-        /// <summary>
-        /// Returns the removed object (either TransferItem or List of TransferItem)
-        /// </summary>
-        /// <param name="indexOfItem"></param>
-        /// <returns></returns>
-        public object RemoveAtUserIndex(int indexOfItem, TransferUIState uiState)
-        {
-            if (uiState.GroupByFolder)
-            {
-                if (uiState.CurrentlySelectedFolder != null)
-                {
-                    var ti = uiState.CurrentlySelectedFolder.TransferItems[indexOfItem];
-                    Remove(ti);
-                    return ti;
-                }
-                else
-                {
-                    List<TransferItem> transferItemsToRemove = new List<TransferItem>();
-                    lock (AllFolderItems[indexOfItem].TransferItems)
-                    {
-                        foreach (var ti in AllFolderItems[indexOfItem].TransferItems)
-                        {
-                            transferItemsToRemove.Add(ti);
-                        }
-                    }
-                    foreach (var ti in transferItemsToRemove)
-                    {
-                        Remove(ti);
-                    }
-                    return transferItemsToRemove;
-                }
-            }
-            else
-            {
-                var ti = AllTransferItems[indexOfItem];
-                Remove(ti);
-                return ti;
-            }
-        }
-
         public ITransferItem GetItemAtUserIndex(int indexOfItem, TransferUIState uiState)
         {
             if (uiState.GroupByFolder)
@@ -356,7 +318,7 @@ namespace Seeker
                     string foldername = ti.FolderName;
                     if (foldername == null)
                     {
-                        foldername = Common.Helpers.GetFolderNameFromFile(ti.FullFilename);
+                        foldername = SimpleHelpers.GetFolderNameFromFile(ti.FullFilename).ToString();
                     }
                     return AllFolderItems.FindIndex((FolderItem fi) => { return fi.FolderName == foldername && fi.Username == ti.Username; });
                 }
@@ -414,7 +376,7 @@ namespace Seeker
                     string foldername = ti.FolderName;
                     if (foldername == null)
                     {
-                        foldername = Common.Helpers.GetFolderNameFromFile(ti.FullFilename);
+                        foldername = SimpleHelpers.GetFolderNameFromFile(ti.FullFilename).ToString();
                     }
                     return AllFolderItems.FindIndex((FolderItem fi) => { return fi.FolderName == foldername && fi.Username == ti.Username; });
                 }
@@ -557,7 +519,7 @@ namespace Seeker
             lock (AllFolderItems)
             {
                 var foldername = string.IsNullOrEmpty(ti.FolderName)
-                    ? Common.Helpers.GetFolderNameFromFile(ti.FullFilename)
+                    ? SimpleHelpers.GetFolderNameFromFile(ti.FullFilename).ToString()
                     : ti.FolderName;
 
                 return AllFolderItems.FirstOrDefault(f =>
@@ -653,9 +615,12 @@ namespace Seeker
                 AllTransferItems.RemoveAll((TransferItem i) => { return i.State.HasFlag(TransferStates.Succeeded) && fi.Username == i.Username && GetFolderNameFromTransferItem(i) == fi.FolderName; });
             }
             fi.ClearAllComplete();
-            if (fi.IsEmpty())
+            lock (AllFolderItems)
             {
-                AllFolderItems.Remove(fi);
+                if (fi.IsEmpty())
+                {
+                    AllFolderItems.Remove(fi);
+                }
             }
             MarkTransfersDirty();
         }
@@ -664,7 +629,7 @@ namespace Seeker
         {
             if (string.IsNullOrEmpty(ti.FolderName)) //this wont happen with the latest code.  so no need to worry about depth.
             {
-                return Common.Helpers.GetFolderNameFromFile(ti.FullFilename);
+                return SimpleHelpers.GetFolderNameFromFile(ti.FullFilename).ToString();
             }
             else
             {
@@ -741,28 +706,41 @@ namespace Seeker
         {
             lock (AllTransferItems)
             {
-                foreach (TransferItem ti in fi.TransferItems)
+                lock (fi.TransferItems)
                 {
-                    AllTransferItems.Remove(ti);
+                    foreach (TransferItem ti in fi.TransferItems)
+                    {
+                        AllTransferItems.Remove(ti);
+                    }
+                    fi.TransferItems.Clear();
                 }
             }
-            fi.TransferItems.Clear();
-            AllFolderItems.Remove(fi);
+            lock (AllFolderItems)
+            {
+                AllFolderItems.Remove(fi);
+            }
             MarkTransfersDirty();
         }
 
         public List<TransferItem> ClearAllFromFolderReturnCleanupItems(FolderItem fi)
         {
-            var tisNeedingCleanup = fi.TransferItems.Where(NeedsCleanUp).ToList();
+            List<TransferItem> tisNeedingCleanup;
             lock (AllTransferItems)
             {
-                foreach (TransferItem ti in fi.TransferItems)
+                lock (fi.TransferItems)
                 {
-                    AllTransferItems.Remove(ti);
+                    tisNeedingCleanup = fi.TransferItems.Where(NeedsCleanUp).ToList();
+                    foreach (TransferItem ti in fi.TransferItems)
+                    {
+                        AllTransferItems.Remove(ti);
+                    }
+                    fi.TransferItems.Clear();
                 }
             }
-            fi.TransferItems.Clear();
-            AllFolderItems.Remove(fi);
+            lock (AllFolderItems)
+            {
+                AllFolderItems.Remove(fi);
+            }
             MarkTransfersDirty();
             return tisNeedingCleanup;
         }

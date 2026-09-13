@@ -17,11 +17,9 @@
  * along with Seeker. If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Android.App;
 using Android.Content;
 using Android.Content.Res;
 using Android.Graphics;
-using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Util;
 using Android.Views;
@@ -30,20 +28,14 @@ using Common;
 using Common.Browse;
 using Common.Search;
 using Google.Android.Material.BottomSheet;
-using Google.Android.Material.Snackbar;
 using Seeker.Extensions.SearchResponseExtensions;
 using Seeker.Helpers;
 using Seeker.Services;
-using Seeker.Transfers;
 using Soulseek;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using log = Android.Util.Log;
 
 namespace Seeker
 {
@@ -337,24 +329,14 @@ namespace Seeker
                 {
                     if (t.IsFaulted)
                     {
+                        Logger.Debug("DownloadDialog DownloadWithContinuation: " + t.Exception?.InnerException?.Message);
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_connect), ToastLength.Short);
-                        return;
+                        return; //dont dismiss dialog.  that only happens on success..
                     }
                     Logger.Debug("DownloadDialog Dl_Click");
                     DownloadFiles(filesToDownload, username, false);
-
+                    DismissOnUiThread();
                 }));
-                try
-                {
-                    t.Wait(); //errors will propagate on WAIT.  They will not propagate on ContinueWith.  So you can get an exception thrown here if there is no network.
-                    //we dont need to do anything if there is an exception thrown here.  Since the ContinueWith actually takes care of it by checking if task faulted..
-                }
-                catch (Exception exx)
-                {
-                    Logger.Debug("DownloadDialog DownloadWithContinuation: " + exx.Message);
-                    return; //dont dismiss dialog.  that only happens on success..
-                }
-                Dismiss();
             }
             else
             {
@@ -384,9 +366,23 @@ namespace Seeker
 
         private void DownloadFiles(FullFileInfo[] files, string username, bool queuePaused)
         {
-            var task = DownloadService.Instance.CreateDownloadAllTask(files, queuePaused, username);
-            task.Start(); //start task immediately
-            task.Wait(); //it only waits for the downloadasync (and optionally connectasync tasks).
+            DownloadService.Instance.EnqueueFilesFireAndForget(files, queuePaused, username);
+        }
+
+        /// <summary>
+        /// Dismiss from a task continuation, which runs on a pool thread.
+        /// </summary>
+        private void DismissOnUiThread()
+        {
+            SeekerState.MainActivityRef?.RunOnUiThread(() =>
+            {
+                //if we have since closed the dialog, then this.View will be null
+                if (this.View == null)
+                {
+                    return;
+                }
+                DismissAllowingStateLoss();
+            });
         }
 
         public void OnCloseClick(object sender, DialogClickEventArgs d)
@@ -516,7 +512,7 @@ namespace Seeker
                 {
                     if (dirTask.Exception?.InnerException?.Message != null)
                     {
-                        if (dirTask.Exception.InnerException.Message.ToLower().Contains("timed out"))
+                        if (dirTask.Exception.InnerException.Message.Contains("timed out", StringComparison.OrdinalIgnoreCase))
                         {
                             SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.folder_request_timed_out), ToastLength.Short);
                         }
@@ -643,7 +639,7 @@ namespace Seeker
             DownloadItemView itemView = (DownloadItemView)convertView;
             if (null == itemView)
             {
-                itemView = DownloadItemView.inflate(parent);
+                itemView = DownloadItemView.Create(parent);
             }
             itemView.setItem(GetItem(position));
 
@@ -672,20 +668,17 @@ namespace Seeker
         private TextView viewFilename;
         //private TextView viewSize;
         private TextView viewAttributes;
-        public DownloadItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.download_row, this, true);
-            setupChildren();
-        }
-        public DownloadItemView(Context context, IAttributeSet attrs) : base(context, attrs)
+        public DownloadItemView(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.download_row, this, true);
             setupChildren();
         }
 
-        public static DownloadItemView inflate(ViewGroup parent)
+        // ListView row: AbsListView casts the params, so they must be its own type.
+        public static DownloadItemView Create(ViewGroup parent)
         {
-            DownloadItemView itemView = (DownloadItemView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.download_view_row_dummy, parent, false);
+            var itemView = new DownloadItemView(parent.Context);
+            itemView.LayoutParameters = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 
@@ -700,11 +693,11 @@ namespace Seeker
         {
             if (wrapper.IsLocked)
             {
-                viewFilename.Text = SimpleHelpers.LOCK_EMOJI + SimpleHelpers.GetFileNameFromFile(wrapper.File.Filename);
+                viewFilename.Text = string.Concat(SimpleHelpers.LOCK_EMOJI, SimpleHelpers.GetFileNameFromFile(wrapper.File.Filename));
             }
             else
             {
-                viewFilename.Text = SimpleHelpers.GetFileNameFromFile(wrapper.File.Filename);
+                viewFilename.Text = SimpleHelpers.GetFileNameFromFile(wrapper.File.Filename).ToString();
             }
             viewAttributes.Text = SimpleHelpers.GetSizeLengthAttrString(wrapper.File);
         }

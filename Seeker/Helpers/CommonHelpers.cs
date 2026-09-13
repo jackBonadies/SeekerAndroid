@@ -197,7 +197,7 @@ namespace Seeker
         public const string APE_MIME = "audio/x-ape";
         public static string GetMimeTypeFromFilename(string filename)
         {
-            string ext = System.IO.Path.GetExtension(filename).ToLower();
+            string ext = System.IO.Path.GetExtension(filename).ToLowerInvariant();
             string mimeType = @"audio/mpeg"; //default
             if (ext != null && ext != string.Empty)
             {
@@ -520,16 +520,23 @@ namespace Seeker
             }
         }
 
-        public static string GetRecentTimeNiceFormated(DateTime timeRan, TimeSpan timeSpan)
+        public static string GetRecentTimeNiceFormated(DateTime timeRanUtc, TimeSpan timeSpan)
         {
-            return SimpleHelpers.GetRecentTimeNiceFormated(
-                timeRan,
-                timeSpan,
-                SeekerApplication.GetString(Resource.String.just_now),
-                SeekerApplication.GetString(Resource.String.min_ago),
-                SeekerApplication.GetString(Resource.String.hr_ago),
-                SeekerApplication.GetString(Resource.String.yesterday),
-                SeekerApplication.GetString(Resource.String.days_ago));
+            var (unit, count) = SimpleHelpers.GetRecentTimeBucket(timeSpan);
+            var resources = SeekerApplication.ApplicationContext.Resources;
+            switch (unit)
+            {
+                case RecentTimeUnit.JustNow:
+                    return SeekerApplication.GetString(Resource.String.just_now);
+                case RecentTimeUnit.Minutes:
+                    return resources.GetQuantityString(Resource.Plurals.minutes_ago, count, count);
+                case RecentTimeUnit.Hours:
+                    return resources.GetQuantityString(Resource.Plurals.hours_ago, count, count);
+                case RecentTimeUnit.Days:
+                    return resources.GetQuantityString(Resource.Plurals.days_ago, count, count);
+                default:
+                    return SimpleHelpers.ToLocalTimeSafe(timeRanUtc).ToString("MMM d");
+            }
         }
     }
 

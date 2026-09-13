@@ -8,6 +8,7 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Android.Widget;
+using AndroidX.RecyclerView.Widget;
 using Seeker.Transfers;
 using Soulseek;
 using System;
@@ -33,8 +34,6 @@ namespace Seeker
     public interface ITransferItemView
     {
         public ITransferItem InnerTransferItem { get; set; }
-
-        public void setupChildren();
 
         public void setItem(ITransferItem ti, bool isInBatchMode);
 
@@ -122,29 +121,18 @@ namespace Seeker
             return showSpeed;
         }
 
-        public TransferItemViewFolder(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public TransferItemViewFolder(Context context) : base(context)
         {
-            bool _showSizes = attrs.GetAttributeBooleanValue("http://schemas.android.com/apk/res-auto", "show_progress_size", false);
-
-                LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder_showProgressSize, this, true);
-
-            setupChildren();
-        }
-        public TransferItemViewFolder(Context context, IAttributeSet attrs) : base(context, attrs)
-        {
-            bool _showSizes = attrs.GetAttributeBooleanValue("http://schemas.android.com/apk/res-auto", "show_progress_size", false);
-
             LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder_showProgressSize, this, true);
-
             setupChildren();
         }
 
-        public static TransferItemViewFolder inflate(ViewGroup parent, bool _showSize, bool _showSpeed)
+        public static TransferItemViewFolder Create(ViewGroup parent, bool showSize, bool showSpeed)
         {
-            TransferItemViewFolder itemView = null;
-            itemView = (TransferItemViewFolder)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_view_folder_dummy_showSizeProgress, parent, false);
-            itemView.showSpeed = _showSpeed;
-            itemView.showSize = _showSize;
+            var itemView = new TransferItemViewFolder(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
+            itemView.showSpeed = showSpeed;
+            itemView.showSize = showSize;
             return itemView;
         }
 
@@ -880,24 +868,18 @@ namespace Seeker
 
         public bool showSpeed;
         public bool showSizes;
-        public TransferItemViewDetails(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
-            setupChildren();
-        }
-        public TransferItemViewDetails(Context context, IAttributeSet attrs) : base(context, attrs)
+        public TransferItemViewDetails(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
             setupChildren();
         }
 
-        public static TransferItemViewDetails inflate(ViewGroup parent, bool _showSizes, bool _showSpeed)
+        public static TransferItemViewDetails Create(ViewGroup parent, bool showSizes, bool showSpeed)
         {
-
-            TransferItemViewDetails itemView = null;
-            itemView = (TransferItemViewDetails)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.transfer_item_details_dummy_showProgressSize, parent, false);
-            itemView.showSpeed = _showSpeed;
-            itemView.showSizes = _showSizes;
+            var itemView = new TransferItemViewDetails(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
+            itemView.showSpeed = showSpeed;
+            itemView.showSizes = showSizes;
             return itemView;
         }
 

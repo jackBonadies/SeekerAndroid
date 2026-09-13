@@ -17,28 +17,45 @@ namespace Seeker.Services
         private static readonly int[] retrySeconds = new int[] { 1, 2, 4, 10, 20 };
 
         // If the reconnect stepped-backoff thread is sleeping but something happens
-        // that makes us want to retry immediately, set this event to wake it.
+        // that makes us want to re-evaluate immediately, set this event to wake it.
         private readonly AutoResetEvent wakeEvent = new AutoResetEvent(false);
-        private volatile bool isRunning = false;
 
-        public bool IsRunning => isRunning;
+        private int isRunning = 0;
+
+        public bool IsRunning => Volatile.Read(ref isRunning) == 1;
 
         /// <summary>
-        /// Start a stepped-backoff reconnect attempt on a background thread.
-        /// Caller is responsible for deciding whether to start (e.g. AUTO_CONNECT_ON check).
+        /// Start a stepped-backoff reconnect attempt on a background thread. Idempotent: if a loop
+        /// is already running this only wakes it, so there is never more than one at a time.
+        /// Caller is responsible for deciding whether to start (e.g. AUTO_CONNECT_ON check)
         /// </summary>
         public void Start()
         {
+            if (Interlocked.CompareExchange(ref isRunning, 1, 0) != 0)
+            {
+                wakeEvent.Set();
+                return;
+            }
             _ = Task.Run(RunLoop);
         }
 
+        public void RequestReconnectNow(string reason)
+        {
+            if (!SeekerApplication.AUTO_CONNECT_ON || !ShouldWeTryToConnect())
+            {
+                return;
+            }
+            Logger.Debug("RequestReconnectNow: " + reason);
+            Start();
+        }
+
         /// <summary>
-        /// If a backoff loop is currently sleeping, wake it so it retries immediately.
+        /// If a backoff loop is currently sleeping, wake it so it re-evaluates immediately.
         /// Returns true if a running loop was signalled; false if no loop was running.
         /// </summary>
         public bool TriggerImmediateRetryIfRunning()
         {
-            if (!isRunning)
+            if (!IsRunning)
             {
                 return false;
             }
@@ -50,18 +67,18 @@ namespace Seeker.Services
         {
             try
             {
-                isRunning = true;
                 for (int i = 0; i < retrySeconds.Length; i++)
                 {
-                    if (!ShouldWeTryToConnect())
-                    {
-                        return;
-                    }
-
                     bool wokenEarly = wakeEvent.WaitOne(retrySeconds[i] * 1000);
                     if (wokenEarly)
                     {
                         Logger.Debug("is woken due to auto reset");
+                    }
+
+                    // In case things changed while we were sleeping (i.e. already connected, network blocked)
+                    if (!ShouldWeTryToConnect())
+                    {
+                        return;
                     }
 
                     try
@@ -91,7 +108,7 @@ namespace Seeker.Services
             }
             finally
             {
-                isRunning = false;
+                Volatile.Write(ref isRunning, 0);
             }
         }
 
@@ -106,6 +123,12 @@ namespace Seeker.Services
             if (SeekerState.SoulseekClient == null)
             {
                 // too early
+                return false;
+            }
+
+            if (NetworkStateService.CurrentConnectionIsBlocked)
+            {
+                Logger.Debug("Not retrying while our network access is blocked");
                 return false;
             }
 

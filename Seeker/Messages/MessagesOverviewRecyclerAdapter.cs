@@ -4,7 +4,6 @@ using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.OS;
 using Android.Runtime;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Core.Content;
@@ -196,8 +195,7 @@ namespace Seeker.Messages
 
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
         {
-            MessageOverviewView view = MessageOverviewView.inflate(parent);
-            view.setupChildren();
+            MessageOverviewView view = MessageOverviewView.Create(parent);
             (view as View).Click += MessageOverviewClick;
             MessageOverviewHolder holder = new MessageOverviewHolder(view as View);
             (view as View).LongClick += (sender, e) =>
@@ -278,20 +276,16 @@ namespace Seeker.Messages
         private Color subduedColor;
         private Color verySubduedColor;
 
-        public MessageOverviewView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.message_overview_item, this, true);
-            setupChildren();
-        }
-        public MessageOverviewView(Context context, IAttributeSet attrs) : base(context, attrs)
+        public MessageOverviewView(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.message_overview_item, this, true);
             setupChildren();
         }
 
-        public static MessageOverviewView inflate(ViewGroup parent)
+        public static MessageOverviewView Create(ViewGroup parent)
         {
-            MessageOverviewView itemView = (MessageOverviewView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.message_overview_item_dummy, parent, false);
+            var itemView = new MessageOverviewView(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 

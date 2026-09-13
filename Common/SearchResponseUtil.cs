@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Seeker;
 using Soulseek;
 
 namespace Common
@@ -12,7 +13,7 @@ namespace Common
             Dictionary<string, List<File>> folderFilePairs = new Dictionary<string, List<File>>();
             foreach (File file in files)
             {
-                string folderName = Common.Helpers.GetFullPathFromFile(file.Filename);
+                string folderName = SimpleHelpers.GetAllButLast(file.Filename);
                 if (folderFilePairs.ContainsKey(folderName))
                 {
                     //MainActivity.LogDebug("Split Foldername: " + folderName);

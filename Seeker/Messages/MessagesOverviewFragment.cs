@@ -97,7 +97,7 @@ namespace Seeker.Messages
 
         private void OnUserStatusChanged(object sender, string username)
         {
-            if (MainActivity.OnUIthread())
+            if (SeekerApplication.OnUIThread())
             {
                 recyclerAdapter.NotifyNameChanged(username);
             }

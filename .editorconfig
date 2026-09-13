@@ -5,3 +5,5 @@ dotnet_analyzer_diagnostic.category-StyleCop.CSharp.SpacingRules.severity = sile
 
 # S1104: Fields should not have public accessibility
 dotnet_diagnostic.S1104.severity = none
+
+dotnet_diagnostic.CA1311.severity = warning

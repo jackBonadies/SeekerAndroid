@@ -10,9 +10,25 @@ using System.Text.RegularExpressions;
 
 namespace Seeker
 {
+    public enum RecentTimeUnit
+    {
+        JustNow,
+        Minutes,
+        Hours,
+        Days,
+        AbsoluteDate,
+    }
+
     public static class SimpleHelpers
     {
         public static readonly string LOCK_EMOJI = char.ConvertFromUtf32(0x1F512);
+
+        /// <summary>
+        /// Fragment of the message Soulseek.NET puts on the SoulseekClientException it throws when
+        /// neither a direct nor an indirect connection to a peer could be established.
+        /// </summary>
+        public const string FailedToEstablishDirectOrIndirectString = "failed to establish a direct or indirect";
+
 
         public static string AvoidLineBreaks(string orig)
         {
@@ -32,11 +48,11 @@ namespace Seeker
             string albumFolderName = string.Empty;
             if (depth == 1)
             {
-                albumFolderName = Common.Helpers.GetFolderNameFromFile(fullFileName, depth);
+                albumFolderName = SimpleHelpers.GetFolderNameFromFile(fullFileName, depth).ToString();
             }
             else
             {
-                albumFolderName = Common.Helpers.GetFolderNameFromFile(fullFileName, depth);
+                albumFolderName = SimpleHelpers.GetFolderNameFromFile(fullFileName, depth).ToString();
                 albumFolderName = albumFolderName.Replace('\\', '_');
             }
             string incompleteFolderName = username + "_" + albumFolderName;
@@ -81,11 +97,11 @@ namespace Seeker
         {
             if (item.FileCount > 0)
             {
-                return Common.Helpers.GetFolderNameFromFile(GetUnlockedFileName(item));
+                return SimpleHelpers.GetFolderNameFromFile(GetUnlockedFileName(item)).ToString();
             }
             else if (item.LockedFileCount > 0)
             {
-                return LOCK_EMOJI + Common.Helpers.GetFolderNameFromFile(GetLockedFileName(item));
+                return LOCK_EMOJI + SimpleHelpers.GetFolderNameFromFile(GetLockedFileName(item)).ToString();
             }
             else
             {
@@ -185,29 +201,37 @@ namespace Seeker
             }
         }
 
-        public static string GetRecentTimeNiceFormated(DateTime absoluteTimeRan, TimeSpan timeSpan, string justNow, string minAgo, string hrAgo, string yesterday, string daysAgo)
+        public static DateTime ToLocalTimeSafe(DateTime dateTime)
+        {
+            try
+            {
+                return dateTime.ToLocalTime();
+            }
+            catch (System.TimeZoneNotFoundException)
+            {
+                return dateTime;
+            }
+        }
+
+        public static (RecentTimeUnit Unit, int Count) GetRecentTimeBucket(TimeSpan timeSpan)
         {
             if (timeSpan.TotalSeconds < 60)
             {
-                return justNow;
+                return (RecentTimeUnit.JustNow, 0);
             }
             if (timeSpan.TotalMinutes < 60)
             {
-                return $"{timeSpan.Minutes} {minAgo}";
+                return (RecentTimeUnit.Minutes, timeSpan.Minutes);
             }
             if (timeSpan.TotalHours < 24)
             {
-                return $"{timeSpan.Hours} {hrAgo}";
+                return (RecentTimeUnit.Hours, timeSpan.Hours);
             }
-            if (timeSpan.TotalHours < 48)
+            if (timeSpan.TotalDays < 30)
             {
-                return yesterday;
+                return (RecentTimeUnit.Days, timeSpan.Days);
             }
-            if (timeSpan.TotalHours < 30 * 24)
-            {
-                return $"{timeSpan.Days} {daysAgo}";
-            }
-            return absoluteTimeRan.ToString("MMM d");
+            return (RecentTimeUnit.AbsoluteDate, 0);
         }
 
         public const string NoDocumentOpenTreeToHandle = "No Activity found to handle Intent";
@@ -435,13 +459,90 @@ namespace Seeker
             }
         }
 
-        public static string GetFileNameFromFile(string filename) //is also used to get the last folder
+        /// <summary>
+        /// The last path segment - i.e. the file name
+        /// </summary>
+        public static ReadOnlySpan<char> GetFileNameFromFile(ReadOnlySpan<char> path)
         {
-            // char overload is ordinal - the string overload is culture-sensitive and returns
-            // Length under Thai collation (punctuation is ignorable), crashing the Substring.
-            int begin = filename.LastIndexOf('\\');
-            string clipped = filename.Substring(begin + 1);
+            return path.Slice(path.LastIndexOf('\\') + 1);
+        }
+
+        /// <summary>
+        /// Replaces d.Name.Contains(prevDirName) which fails for Mu, Music
+        /// </summary>
+        /// <param name="possibleChild"></param>
+        /// <param name="possibleParent"></param>
+        /// <returns></returns>
+        public static bool IsChildDirString(string possibleChild, string possibleParent, bool rootCase)
+        {
+            if (rootCase)
+            {
+                if (possibleChild.LastIndexOf('\\') == -1 && possibleParent.LastIndexOf('\\') == -1)
+                {
+                    if (possibleParent.IndexOf(':') == (possibleParent.Length - 1)) //i.e. primary:
+                    {
+                        return possibleChild.Contains(possibleParent);
+                    }
+                    else if (possibleChild.Equals(possibleParent))
+                    {
+                        return true; //else the primary:music case fails.
+                    }
+                }
+            }
+            int pathSep = possibleChild.LastIndexOf('\\');
+            if (pathSep == -1)
+            {
+                return false;
+            }
+            else
+            {
+                //fails in possibleChild="Music (1)\\test" possibleParent="Music" case
+                //return possibleChild.Substring(0, pathSep).Contains(possibleParent);
+
+                return possibleChild.Substring(0, pathSep + 1).StartsWith(possibleParent + "\\", StringComparison.Ordinal) || possibleChild.Substring(0, pathSep) == possibleParent || possibleParent == String.Empty;
+            }
+        }
+
+        public static string GetAllButLast(string path) 
+        {
+            int end = path.LastIndexOf('\\');
+            string clipped = path.Substring(0, end);
             return clipped;
+        }
+
+        /// <summary>
+        /// The folders containing the file, <paramref name="levels"/> deep. For levels = 2,
+        /// Folder1\Folder2\Folder3\File.mp3 returns Folder2\Folder3. A path with fewer folders
+        /// than requested returns all of them
+        /// </summary>
+        public static ReadOnlySpan<char> GetFolderNameFromFile(ReadOnlySpan<char> path, int levels = 1)
+        {
+            int end = path.LastIndexOf('\\'); // strip the file name
+            if (end == -1 || levels <= 0)
+            {
+                return ReadOnlySpan<char>.Empty;
+            }
+            int start = end;
+            for (int i = 0; i < levels; i++)
+            {
+                int previous = path.Slice(0, start).LastIndexOf('\\');
+                if (previous == -1)
+                {
+                    return path.Slice(0, end);
+                }
+                start = previous;
+            }
+            return path.Slice(start + 1, end - start - 1);
+        }
+
+        public static ReadOnlySpan<char> GetParentFolderNameFromFile(ReadOnlySpan<char> path)
+        {
+            int end = path.LastIndexOf('\\');
+            if (end == -1)
+            {
+                return ReadOnlySpan<char>.Empty;
+            }
+            return GetFolderNameFromFile(path.Slice(0, end));
         }
 
         public static IUserListService UserListService;
@@ -484,11 +585,5 @@ namespace Seeker
 
         public static ReadOnlyCollection<string> KNOWN_TYPES;
 
-        public static string GetAllButLast(string path) //"raw:\\storage\\emulated\\0\\Download\\Soulseek Complete"
-        {
-            int end = path.LastIndexOf('\\');
-            string clipped = path.Substring(0, end);
-            return clipped; //"raw:\\storage\\emulated\\0\\Download"
-        }
     }
 }

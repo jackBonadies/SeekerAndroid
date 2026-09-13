@@ -740,10 +740,6 @@
     <string name="error_dialog_content">Seeker mengalami masalah.\n\nMohon pertimbangkan untuk mengirimkan laporan ini ke pengembang.\n\nInformasi tambahan mengenai langkah atau kondisi sebelum masalah terjadi akan sangat kami hargai.</string>
     <string name="folder_request_user_returned_empty_response">Pengguna memberikan respons kosong untuk folder ini</string>
     <string name="just_now">baru saja</string>
-    <string name="min_ago">menit lalu</string>
-    <string name="hr_ago">jam lalu</string>
-    <string name="yesterday">kemarin</string>
-    <string name="days_ago">hari lalu</string>
     <!-- Modern settings screen -->
     <string name="Privileges">Hak akses</string>
     <string name="search_settings">Pengaturan pencarian</string>

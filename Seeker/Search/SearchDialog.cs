@@ -118,7 +118,7 @@ namespace Seeker
         private void SearchButton_Click(object sender, EventArgs e)
         {
             var editText = this.View.FindViewById<EditText>(Resource.Id.editText);
-            SearchFragment.PerformSearchLogicFromSearchDialog(editText.Text);
+            SearchFragment.SubmitSearchFromDialog(editText.Text);
             IsFollowingLink = false;
             SearchTerm = null;
             this.Dismiss();

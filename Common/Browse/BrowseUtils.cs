@@ -157,7 +157,7 @@ namespace Common.Browse
         {
             return files.Select(it=>new FullFileInfo() { Size = it.Size, FullFileName = it.Filename, Depth = 1, wasFilenameLatin1Decoded = it.IsLatin1Decoded, wasFolderLatin1Decoded = it.IsDirectoryLatin1Decoded }).ToArray();
         }
-        private static bool MatchesCriteriaFull(DataItem di, TextFilter filter)
+        private static bool MatchesCriteriaFull(DataItem di, List<string> wordsToAvoid, List<string> wordsToInclude)
         {
             string fullyQualifiedName = string.Empty;
             if (di.File != null)
@@ -172,7 +172,7 @@ namespace Common.Browse
             }
 
 
-            foreach (string avoid in filter.WordsToAvoid)
+            foreach (string avoid in wordsToAvoid)
             {
                 if (fullyQualifiedName.Contains(avoid, StringComparison.OrdinalIgnoreCase))
                 {
@@ -181,7 +181,7 @@ namespace Common.Browse
                 }
             }
             bool includesAll = true;
-            foreach (string include in filter.WordsToInclude)
+            foreach (string include in wordsToInclude)
             {
                 if (!fullyQualifiedName.Contains(include, StringComparison.OrdinalIgnoreCase))
                 {
@@ -210,7 +210,7 @@ namespace Common.Browse
                     {
                         foreach (TreeNode<Directory> child in di.Node.Children)
                         {
-                            if (MatchesCriteriaFull(new DataItem(child.Data, child), filter))
+                            if (MatchesCriteriaFull(new DataItem(child.Data, child), wordsToAvoid, wordsToInclude))
                             {
                                 return true;
                             }
@@ -220,7 +220,7 @@ namespace Common.Browse
                     {
                         foreach (File f in di.Directory.Files)
                         {
-                            if (MatchesCriteriaFull(new DataItem(f, di.Node), filter))
+                            if (MatchesCriteriaFull(new DataItem(f, di.Node), wordsToAvoid, wordsToInclude))
                             {
                                 return true;
                             }
@@ -234,9 +234,11 @@ namespace Common.Browse
         public static List<DataItem> FilterBrowseList(List<DataItem> unfiltered, TextFilter filter)
         {
             List<DataItem> filtered = new List<DataItem>();
+            List<string> wordsToAvoid = filter.WordsToAvoid;
+            List<string> wordsToInclude = filter.WordsToInclude;
             foreach (DataItem di in unfiltered)
             {
-                if (MatchesCriteriaFull(di, filter)) //change back to shallow...
+                if (MatchesCriteriaFull(di, wordsToAvoid, wordsToInclude)) //change back to shallow...
                 {
                     filtered.Add(di);
                 }
@@ -273,7 +275,7 @@ namespace Common.Browse
 
         private static void GetPathItemsInternal(List<PathItem> pathItems, TreeNode<Directory> treeNode, bool lastChild)
         {
-            string displayName = SimpleHelpers.GetFileNameFromFile(treeNode.Data.Name);
+            string displayName = SimpleHelpers.GetFileNameFromFile(treeNode.Data.Name).ToString();
             pathItems.Add(new PathItem(displayName, lastChild));
             if (treeNode.Parent == null)
             {
@@ -472,7 +474,7 @@ namespace Common.Browse
             }
 
             bool emptyRoot = false;
-            if (Helpers.IsChildDirString(dirInfoArray[dirInfoArray.Length - 1].Item1.Name, dirInfoArray[0].Item1.Name, true) || dirInfoArray[dirInfoArray.Length - 1].Item1.Name.Equals(dirInfoArray[0].Item1.Name))
+            if (SimpleHelpers.IsChildDirString(dirInfoArray[dirInfoArray.Length - 1].Item1.Name, dirInfoArray[0].Item1.Name, true) || dirInfoArray[dirInfoArray.Length - 1].Item1.Name.Equals(dirInfoArray[0].Item1.Name))
             {
                 //normal single tree case..
             }
@@ -506,7 +508,7 @@ namespace Common.Browse
                     curNode = rootNode;
                     prevDirName = dInfo.Item1.Name;
                 }
-                else if (Helpers.IsChildDirString(dInfo.Item1.Name, prevDirName, curNode?.Parent == null)) //if the next directory contains the previous in its path then it is a child. //this is not true... it will set music as the child of mu //TODO !!!!!
+                else if (SimpleHelpers.IsChildDirString(dInfo.Item1.Name, prevDirName, curNode?.Parent == null)) //if the next directory contains the previous in its path then it is a child. //this is not true... it will set music as the child of mu //TODO !!!!!
                 {
                     curNode = AddChildNode(curNode, dInfo, filter, wordsToAvoid, wordsToInclude);
                     prevDirName = dInfo.Item1.Name;
@@ -515,7 +517,7 @@ namespace Common.Browse
                 {
                     prevNodeDebug = new TreeNode<Directory>(curNode.Data, dInfo.Item2);
                     curNode = curNode.Parent; //This is not good if the first node is not the root...
-                    while (!Helpers.IsChildDirString(dInfo.Item1.Name, curNode.Data.Name, curNode?.Parent == null))
+                    while (!SimpleHelpers.IsChildDirString(dInfo.Item1.Name, curNode.Data.Name, curNode?.Parent == null))
                     {
                         if (curNode.Parent == null)
                         {

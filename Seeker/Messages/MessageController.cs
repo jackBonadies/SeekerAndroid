@@ -586,7 +586,7 @@ namespace Seeker.Messages
 
         public static void ShowNotification(Message msg, bool fromOurResponse = false, bool directReplyFailure = false, string directReplayFailureMessage = "", Context broadcastContext = null)
         {
-            BroadcastFriendlyRunOnUiThread(() =>
+            SeekerApplication.RunOnUIThread(() =>
             {
                 ShowNotificationLogic(msg, fromOurResponse, directReplyFailure, directReplayFailureMessage, broadcastContext);
             });
@@ -594,6 +594,7 @@ namespace Seeker.Messages
 
         public static void SaveMessagesToSharedPrefs(ISharedPreferences sharedPrefs)
         {
+            using var _ = DebugTimer.Start(nameof(SaveMessagesToSharedPrefs));
             //For some reason, the generic Dictionary in .net 2.0 is not XML serializable.
             if (RootMessages == null)
             {
@@ -613,6 +614,7 @@ namespace Seeker.Messages
 
         public static void RestoreMessagesFromSharedPrefs(ISharedPreferences sharedPrefs)
         {
+            using var _ = DebugTimer.Start(nameof(RestoreMessagesFromSharedPrefs));
             string messages = sharedPrefs.GetString(KeyConsts.M_Messages, string.Empty);
             if (messages == string.Empty)
             {
@@ -766,18 +768,6 @@ namespace Seeker.Messages
             MarkAsRead(Messages?.Keys);
         }
 
-        public static void BroadcastFriendlyRunOnUiThread(Action action)
-        {
-            if (SeekerState.ActiveActivityRef != null)
-            {
-                SeekerState.ActiveActivityRef.RunOnUiThread(action);
-            }
-            else
-            {
-                new Handler(Looper.MainLooper).Post(action);
-            }
-        }
-
         public static void SendMessageAPI(Message msg, bool fromDirectReplyAction = false, Android.Content.Context broadcastContext = null)
         {
             //if the seeker process is hard killed (i.e. go to Running Services > kill) and the notification is still up,
@@ -825,7 +815,7 @@ namespace Seeker.Messages
                     }
                     throw new FaultPropagationException();
                 }
-                BroadcastFriendlyRunOnUiThread(new Action(() =>
+                SeekerApplication.RunOnUIThread(new Action(() =>
                 {
                     SendMessageLogic(msg, fromDirectReplyAction, broadcastContext);
                 }));

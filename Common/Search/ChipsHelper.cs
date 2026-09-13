@@ -409,7 +409,7 @@ namespace Seeker
                     {
                         continue;
                     }
-                    string folderName = Common.Helpers.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(hideHidden, 0).Filename);
+                    string folderName = SimpleHelpers.GetFolderNameFromFile(responses[i].GetElementAtAdapterPosition(hideHidden, 0).Filename).ToString();
                     AddKeywordsFromFolderName(keywordHelper.AddKey, folderName, false);
                 }
 
@@ -419,7 +419,7 @@ namespace Seeker
                     {
                         continue;
                     }
-                    string parentFolderName = Common.Helpers.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(hideHidden, 0).Filename);
+                    string parentFolderName = SimpleHelpers.GetParentFolderNameFromFile(responses[i].GetElementAtAdapterPosition(hideHidden, 0).Filename).ToString();
                     AddKeywordsFromFolderName(keywordHelper.VoteIfExists, parentFolderName, true);
                 }
 
@@ -529,7 +529,7 @@ namespace Seeker
 
             public static string GetInvariantKey(string key)
             {
-                string invariantKey = key.ToLower();
+                string invariantKey = key.ToLowerInvariant();
                 invariantKey = invariantKey.Replace("and", "&");
                 invariantKey = invariantKey.Replace(",", "");  //todo more efficient replace...
                 invariantKey = invariantKey.Replace("'", "");
