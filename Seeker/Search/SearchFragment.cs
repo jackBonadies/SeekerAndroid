@@ -2035,7 +2035,6 @@ namespace Seeker
             {
                 // SaveInstanceState/RestoreInstanceState prevents autoscroll even when animations are off
                 var state = Instance.recycleLayoutManager.OnSaveInstanceState();
-                var sw = System.Diagnostics.Stopwatch.StartNew();
                 Instance.recyclerSearchAdapter.localDataSet = newResults;
                 if (InsertOnlyDiff.TryComputeInsertRuns(prevList, newResults, out var runs))
                 {
