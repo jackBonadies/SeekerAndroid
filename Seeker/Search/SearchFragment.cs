@@ -107,16 +107,14 @@ namespace Seeker
                     filterText.Text = string.Empty;
                     UpdateDrawableState(filterText, true);
                 }
+
+                var formatToggle = rootView?.FindViewById<MaterialButtonToggleGroup>(Resource.Id.formatToggleGroup);
+                formatToggle?.Check(Resource.Id.formatAny);
+
+                var bitrateToggle = rootView?.FindViewById<MaterialButtonToggleGroup>(Resource.Id.bitrateToggleGroup);
+                bitrateToggle?.Check(Resource.Id.bitrateAny);
             }
-            
-            var formatToggle = rootView?.FindViewById<MaterialButtonToggleGroup>(Resource.Id.formatToggleGroup);
-            formatToggle?.Check(Resource.Id.formatAny);
-
-            var bitrateToggle = rootView?.FindViewById<MaterialButtonToggleGroup>(Resource.Id.bitrateToggleGroup);
-            bitrateToggle?.Check(Resource.Id.bitrateAny);
         }
-
-
 
         /// <summary>
         /// Keeps a horizontally-scrolling child RecyclerView's drags from being intercepted by an
