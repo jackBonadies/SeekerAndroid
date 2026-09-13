@@ -2,7 +2,6 @@
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.Core.Content;
@@ -86,8 +85,7 @@ namespace Seeker.Users
         {
             if (viewType == (int)UserRole.Friend)
             {
-                UserRowView view = UserRowView.inflate(parent);
-                view.setupChildren();
+                UserRowView view = UserRowView.Create(parent);
                 //view.viewMoreOptions.Click += this.UserListActivity.UserListItemMoreOptionsClick;
                 view.viewUserStatus.Click += view.ViewUserStatus_Click;
                 view.viewUserStatus.LongClick += view.ViewUserStatus_LongClick;
@@ -99,8 +97,7 @@ namespace Seeker.Users
             }
             else if (viewType == (int)UserRole.Ignored)
             {
-                UserRowView view = UserRowView.inflate(parent);
-                view.setupChildren();
+                UserRowView view = UserRowView.Create(parent);
                 //view.viewMoreOptions.Click += this.UserListActivity.IgnoredUserListItemMoreOptionsClick;
                 view.viewUserStatus.Click += view.ViewUserStatus_Click;
                 view.viewUserStatus.LongClick += view.ViewUserStatus_LongClick;
@@ -113,8 +110,7 @@ namespace Seeker.Users
             }
             else// if(viewType == CATEGORY)
             {
-                ChatroomOverviewCategoryView view = ChatroomOverviewCategoryView.inflate(parent);
-                view.setupChildren();
+                ChatroomOverviewCategoryView view = ChatroomOverviewCategoryView.Create(parent);
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 //(view as View).Click += MessageOverviewClick;
                 return new ChatroomOverviewCategoryHolder(view as View);
@@ -191,12 +187,7 @@ namespace Seeker.Users
         public ViewGroup viewStatsLayout;
 
         //private TextView viewQueue;
-        public UserRowView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.user_row, this, true);
-            setupChildren();
-        }
-        public UserRowView(Context context, IAttributeSet attrs) : base(context, attrs)
+        public UserRowView(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.user_row, this, true);
             setupChildren();
@@ -244,9 +235,10 @@ namespace Seeker.Users
             UiHelpers.ShowActionSheetDialogSafe(activity.SupportFragmentManager, config);
         }
 
-        public static UserRowView inflate(ViewGroup parent)
+        public static UserRowView Create(ViewGroup parent)
         {
-            UserRowView itemView = (UserRowView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.user_row_dummy, parent, false);
+            var itemView = new UserRowView(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 

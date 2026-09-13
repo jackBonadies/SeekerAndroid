@@ -639,7 +639,7 @@ namespace Seeker
             DownloadItemView itemView = (DownloadItemView)convertView;
             if (null == itemView)
             {
-                itemView = DownloadItemView.inflate(parent);
+                itemView = DownloadItemView.Create(parent);
             }
             itemView.setItem(GetItem(position));
 
@@ -668,20 +668,17 @@ namespace Seeker
         private TextView viewFilename;
         //private TextView viewSize;
         private TextView viewAttributes;
-        public DownloadItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.download_row, this, true);
-            setupChildren();
-        }
-        public DownloadItemView(Context context, IAttributeSet attrs) : base(context, attrs)
+        public DownloadItemView(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.download_row, this, true);
             setupChildren();
         }
 
-        public static DownloadItemView inflate(ViewGroup parent)
+        // ListView row: AbsListView casts the params, so they must be its own type.
+        public static DownloadItemView Create(ViewGroup parent)
         {
-            DownloadItemView itemView = (DownloadItemView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.download_view_row_dummy, parent, false);
+            var itemView = new DownloadItemView(parent.Context);
+            itemView.LayoutParameters = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 

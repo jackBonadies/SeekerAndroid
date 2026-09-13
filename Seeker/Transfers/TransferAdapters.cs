@@ -29,9 +29,7 @@ namespace Seeker
 
             public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
             {
-                ITransferItemView view = TransferItemViewDetails.inflate(parent, this.showSizes, this.showSpeed);
-
-                view.setupChildren();
+                ITransferItemView view = TransferItemViewDetails.Create(parent, this.showSizes, this.showSpeed);
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 (view as View).Click += TransferAdapterRecyclerIndividualItem_Click;
                 (view as View).LongClick += TransferAdapterRecyclerVersion_LongClick;
@@ -76,8 +74,7 @@ namespace Seeker
 
             public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
             {
-                ITransferItemView view = TransferItemViewFolder.inflate(parent, this.showSizes, this.showSpeed);
-                view.setupChildren();
+                ITransferItemView view = TransferItemViewFolder.Create(parent, this.showSizes, this.showSpeed);
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 (view as View).Click += TransferAdapterRecyclerFolderItem_Click;
                 (view as View).LongClick += TransferAdapterRecyclerVersion_LongClick;

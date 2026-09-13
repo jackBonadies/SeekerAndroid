@@ -561,8 +561,7 @@ namespace Seeker
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {
 
-            ImportItemView view = ImportItemView.inflate(parent);
-            view.setupChildren();
+            ImportItemView view = ImportItemView.Create(parent);
             var holder = new ImportItemViewHolder(view as View);
             (view as View).Click += (object sender, EventArgs e) =>
             {
@@ -619,20 +618,19 @@ namespace Seeker
         public ImportItem InnerImportItem { get; set; }
         public ImportItemViewHolder ViewHolder;
 
-        public ImportItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public ImportItemView(Context context) : base(context)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.import_item_view, this, true);
-            setupChildren();
-        }
-        public ImportItemView(Context context, IAttributeSet attrs) : base(context, attrs)
-        {
+            Background = UiHelpers.GetDrawableFromAttribute(context, Resource.Attribute.selectableItemBackground);
+            Clickable = true;
+            Focusable = true;
             LayoutInflater.From(context).Inflate(Resource.Layout.import_item_view, this, true);
             setupChildren();
         }
 
-        public static ImportItemView inflate(ViewGroup parent)
+        public static ImportItemView Create(ViewGroup parent)
         {
-            ImportItemView itemView = (ImportItemView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.import_item_view_dummy, parent, false);
+            var itemView = new ImportItemView(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 

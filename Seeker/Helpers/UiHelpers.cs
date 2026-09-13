@@ -122,7 +122,7 @@ namespace Seeker
             var typedValue = new TypedValue();
             c.Theme.ResolveAttribute(attr, typedValue, true);
             int drawableRes = (typedValue.ResourceId != 0) ? typedValue.ResourceId : typedValue.Data;
-            return c.Resources.GetDrawable(drawableRes, SeekerState.ActiveActivityRef.Theme);
+            return c.Resources.GetDrawable(drawableRes, c.Theme);
         }
 
         public static Color GetColorFromInteger(int color)

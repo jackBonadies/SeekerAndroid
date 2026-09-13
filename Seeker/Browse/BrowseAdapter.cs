@@ -51,8 +51,7 @@ namespace Seeker
 
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
         {
-            BrowseResponseItemView itemView = BrowseResponseItemView.inflate(parent);
-            itemView.setupChildren();
+            BrowseResponseItemView itemView = BrowseResponseItemView.Create(parent);
             if (SeekerState.InDarkModeCache)
             {
                 itemView.DisplayName.SetTextColor(Android.Graphics.Color.White);
@@ -165,20 +164,17 @@ namespace Seeker
         public FrameLayout ActionContainer;
         public LinearLayout ContainingViewGroup;
         public BrowseResponseItemViewHolder ViewHolder { get; set; }
-        public BrowseResponseItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public BrowseResponseItemView(Context context) : base(context)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.browse_response_item, this, true);
-            setupChildren();
-        }
-        public BrowseResponseItemView(Context context, IAttributeSet attrs) : base(context, attrs)
-        {
+            Foreground = UiHelpers.GetDrawableFromAttribute(context, Android.Resource.Attribute.SelectableItemBackground);
             LayoutInflater.From(context).Inflate(Resource.Layout.browse_response_item, this, true);
             setupChildren();
         }
 
-        public static BrowseResponseItemView inflate(ViewGroup parent)
+        public static BrowseResponseItemView Create(ViewGroup parent)
         {
-            BrowseResponseItemView itemView = (BrowseResponseItemView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.browse_response_item_dummy, parent, false);
+            var itemView = new BrowseResponseItemView(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
 

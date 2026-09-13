@@ -2,7 +2,6 @@
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
@@ -23,8 +22,7 @@ namespace Seeker
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {
 
-            SearchTabView view = SearchTabView.inflate(parent);
-            view.setupChildren();
+            SearchTabView view = SearchTabView.Create(parent);
             // .inflate(R.layout.text_row_item, viewGroup, false);
             (view as SearchTabView).searchTabLayout.Click += SearchTabLayout_Click;
             (view as SearchTabView).removeSearch.Click += RemoveSearch_Click;
@@ -160,19 +158,15 @@ namespace Seeker
         private View rowBackground;
         public SearchTabViewHolder ViewHolder;
         public int SearchTabId = int.MaxValue;
-        public SearchTabView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
+        public SearchTabView(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.tab_page_item, this, true);
             setupChildren();
         }
-        public SearchTabView(Context context, IAttributeSet attrs) : base(context, attrs)
+        public static SearchTabView Create(ViewGroup parent)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.tab_page_item, this, true);
-            setupChildren();
-        }
-        public static SearchTabView inflate(ViewGroup parent)
-        {
-            SearchTabView itemView = (SearchTabView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.tab_page_item_dummy, parent, false);
+            var itemView = new SearchTabView(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }
         public void setupChildren()

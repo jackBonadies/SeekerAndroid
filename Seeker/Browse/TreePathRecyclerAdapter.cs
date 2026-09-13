@@ -3,7 +3,6 @@ using Android.Content;
 using Android.Graphics;
 using Android.OS;
 using Android.Runtime;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
@@ -23,7 +22,7 @@ namespace Seeker
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType) //so view Type is a real thing that the recycler adapter knows about.
         {
 
-            TreePathItemView view = TreePathItemView.inflate(parent);
+            TreePathItemView view = TreePathItemView.Create(parent);
             view.ViewFolderName.Click += View_Click;
             return new TreePathItemViewHolder(view as View);
 
@@ -83,20 +82,16 @@ namespace Seeker
         private Color currentFolderColor;
         private Color ancestorFolderColor;
 
-        public TreePathItemView(Context context, IAttributeSet attrs, int defStyle) : base(context, attrs, defStyle)
-        {
-            LayoutInflater.From(context).Inflate(Resource.Layout.tree_path_item_view, this, true);
-            setupChildren();
-        }
-        public TreePathItemView(Context context, IAttributeSet attrs) : base(context, attrs)
+        public TreePathItemView(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.tree_path_item_view, this, true);
             setupChildren();
         }
 
-        public static TreePathItemView inflate(ViewGroup parent)
+        public static TreePathItemView Create(ViewGroup parent)
         {
-            TreePathItemView itemView = (TreePathItemView)LayoutInflater.From(parent.Context).Inflate(Resource.Layout.tree_path_item_view_dummy, parent, false);
+            var itemView = new TreePathItemView(parent.Context);
+            itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WrapContent, ViewGroup.LayoutParams.MatchParent);
             return itemView;
         }
 
