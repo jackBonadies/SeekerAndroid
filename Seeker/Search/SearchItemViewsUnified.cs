@@ -1,7 +1,6 @@
 using Android.Content;
 using Android.Content.Res;
 using Android.Graphics;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Common;
@@ -14,7 +13,6 @@ namespace Seeker
 {
     public interface ISearchItemViewBase
     {
-        void setupChildren();
         SearchFragment.SearchViewHolder ViewHolder { get; set; }
         void setItem(SearchResponse item, int position);
     }
@@ -91,8 +89,7 @@ namespace Seeker
         public SearchFragment.SearchAdapterRecyclerVersion AdapterRef;
         public SearchFragment.SearchViewHolder ViewHolder { get; set; }
 
-        protected SearchItemViewUnifiedBase(Context c, IAttributeSet a, int s) : base(c, a, s) { }
-        protected SearchItemViewUnifiedBase(Context c, IAttributeSet a) : base(c, a) { }
+        protected SearchItemViewUnifiedBase(Context c) : base(c) { }
 
         public virtual void setupChildren()
         {
@@ -179,19 +176,10 @@ namespace Seeker
     {
         private TextView viewAvailability;
 
-        public SearchItemViewSimpleBottom(Context c, IAttributeSet a, int s) : base(c, a, s) { Init(c); }
-        public SearchItemViewSimpleBottom(Context c, IAttributeSet a) : base(c, a) { Init(c); }
-
-        private void Init(Context c)
+        public SearchItemViewSimpleBottom(Context c) : base(c)
         {
             LayoutInflater.From(c).Inflate(Resource.Layout.search_result_simple_bottom, this, true);
             setupChildren();
-        }
-
-        public static SearchItemViewSimpleBottom inflate(ViewGroup parent)
-        {
-            return (SearchItemViewSimpleBottom)LayoutInflater.From(parent.Context)
-                .Inflate(Resource.Layout.searchitemview_simple_bottom_dummy, parent, false);
         }
 
         public override void setupChildren()
@@ -223,19 +211,10 @@ namespace Seeker
     {
         private TextView viewAvailability;
 
-        public SearchItemViewSimpleTop(Context c, IAttributeSet a, int s) : base(c, a, s) { Init(c); }
-        public SearchItemViewSimpleTop(Context c, IAttributeSet a) : base(c, a) { Init(c); }
-
-        private void Init(Context c)
+        public SearchItemViewSimpleTop(Context c) : base(c)
         {
             LayoutInflater.From(c).Inflate(Resource.Layout.search_result_simple_top, this, true);
             setupChildren();
-        }
-
-        public static SearchItemViewSimpleTop inflate(ViewGroup parent)
-        {
-            return (SearchItemViewSimpleTop)LayoutInflater.From(parent.Context)
-                .Inflate(Resource.Layout.searchitemview_simple_top_dummy, parent, false);
         }
 
         public override void setupChildren()
@@ -271,8 +250,7 @@ namespace Seeker
         protected SearchChipPalette palette;
         protected int separatorColor;
 
-        protected SearchItemViewModernBase(Context c, IAttributeSet a, int s) : base(c, a, s) { }
-        protected SearchItemViewModernBase(Context c, IAttributeSet a) : base(c, a) { }
+        protected SearchItemViewModernBase(Context c) : base(c) { }
 
         public override void setupChildren()
         {
@@ -307,19 +285,10 @@ namespace Seeker
 
     public class SearchItemViewModernBottom : SearchItemViewModernBase
     {
-        public SearchItemViewModernBottom(Context c, IAttributeSet a, int s) : base(c, a, s) { Init(c); }
-        public SearchItemViewModernBottom(Context c, IAttributeSet a) : base(c, a) { Init(c); }
-
-        private void Init(Context c)
+        public SearchItemViewModernBottom(Context c) : base(c)
         {
             LayoutInflater.From(c).Inflate(Resource.Layout.search_result_modern_bottom, this, true);
             setupChildren();
-        }
-
-        public static SearchItemViewModernBottom inflate(ViewGroup parent)
-        {
-            return (SearchItemViewModernBottom)LayoutInflater.From(parent.Context)
-                .Inflate(Resource.Layout.searchitemview_modern_bottom_dummy, parent, false);
         }
     }
 
@@ -331,19 +300,10 @@ namespace Seeker
         private SearchChip queueChip;
         private SearchChipPalette palette;
 
-        public SearchItemViewCompact(Context c, IAttributeSet a, int s) : base(c, a, s) { Init(c); }
-        public SearchItemViewCompact(Context c, IAttributeSet a) : base(c, a) { Init(c); }
-
-        private void Init(Context c)
+        public SearchItemViewCompact(Context c) : base(c)
         {
             LayoutInflater.From(c).Inflate(Resource.Layout.search_result_compact, this, true);
             setupChildren();
-        }
-
-        public static SearchItemViewCompact inflate(ViewGroup parent)
-        {
-            return (SearchItemViewCompact)LayoutInflater.From(parent.Context)
-                .Inflate(Resource.Layout.searchitemview_compact_dummy, parent, false);
         }
 
         public override void setupChildren()
@@ -369,19 +329,10 @@ namespace Seeker
 
     public class SearchItemViewModernTop : SearchItemViewModernBase
     {
-        public SearchItemViewModernTop(Context c, IAttributeSet a, int s) : base(c, a, s) { Init(c); }
-        public SearchItemViewModernTop(Context c, IAttributeSet a) : base(c, a) { Init(c); }
-
-        private void Init(Context c)
+        public SearchItemViewModernTop(Context c) : base(c)
         {
             LayoutInflater.From(c).Inflate(Resource.Layout.search_result_modern_top, this, true);
             setupChildren();
-        }
-
-        public static SearchItemViewModernTop inflate(ViewGroup parent)
-        {
-            return (SearchItemViewModernTop)LayoutInflater.From(parent.Context)
-                .Inflate(Resource.Layout.searchitemview_modern_top_dummy, parent, false);
         }
     }
 }
