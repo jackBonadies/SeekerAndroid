@@ -52,7 +52,7 @@ namespace Seeker
 
         private void SetMessageText(TextView userStatus, StatusMessageUpdate data)
         {
-            DateTime dateTimeLocal = data.DateTimeUtc.Add(SeekerState.OffsetFromUtcCached);
+            DateTime dateTimeLocal = SimpleHelpers.ToLocalTimeSafe(data.DateTimeUtc);
 
             int iconRes;
             int joinLeftAttr = data.StatusType == StatusMessageType.Joined || data.StatusType == StatusMessageType.CameBack ? Resource.Attribute.chat_join

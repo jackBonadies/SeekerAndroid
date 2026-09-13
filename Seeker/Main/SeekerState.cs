@@ -17,8 +17,6 @@ namespace Seeker
 
         public static string SystemLanguage;
 
-        public static TimeSpan OffsetFromUtcCached = TimeSpan.Zero;
-
         public static bool OurCurrentStatusIsAway = false;
         public enum PendingStatusChange
         {

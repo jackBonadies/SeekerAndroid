@@ -42,6 +42,7 @@ using Seeker.UPnP;
 using Soulseek;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -181,7 +182,8 @@ namespace Seeker
             PreferencesManager.RestoreListeningStateLocked();
             UPnpManager.RestoreUpnpState();
 
-            SeekerState.OffsetFromUtcCached = SimpleHelpers.GetDateTimeNowSafe().Subtract(DateTime.UtcNow);
+            // warm up cache (takes ~100+ ms), subsequent calls to GetDateTimeNowSafe() will be fast (~0ms)
+            Task.Run(() => _ = SimpleHelpers.GetDateTimeNowSafe());
 
             SeekerState.SystemLanguage = LocaleHelper.LocaleToString(Resources.Configuration.Locale);
 
