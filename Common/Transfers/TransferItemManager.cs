@@ -281,54 +281,6 @@ namespace Seeker
             }
         }
 
-        /// <summary>
-        /// Returns the removed object (either TransferItem or List of TransferItem)
-        /// </summary>
-        /// <param name="indexOfItem"></param>
-        /// <returns></returns>
-        public object RemoveAtUserIndex(int indexOfItem, TransferUIState uiState)
-        {
-            lock (AllTransferItems)
-            {
-                lock (AllFolderItems)
-                {
-                    if (uiState.GroupByFolder)
-                    {
-                        if (uiState.CurrentlySelectedFolder != null)
-                        {
-                            TransferItem ti;
-                            lock (uiState.CurrentlySelectedFolder.TransferItems)
-                            {
-                                ti = uiState.CurrentlySelectedFolder.TransferItems[indexOfItem];
-                            }
-                            Remove(ti);
-                            return ti;
-                        }
-                        else
-                        {
-                            FolderItem folder = AllFolderItems[indexOfItem];
-                            List<TransferItem> transferItemsToRemove;
-                            lock (folder.TransferItems)
-                            {
-                                transferItemsToRemove = folder.TransferItems.ToList();
-                            }
-                            foreach (var ti in transferItemsToRemove)
-                            {
-                                Remove(ti);
-                            }
-                            return transferItemsToRemove;
-                        }
-                    }
-                    else
-                    {
-                        var ti = AllTransferItems[indexOfItem];
-                        Remove(ti);
-                        return ti;
-                    }
-                }
-            }
-        }
-
         public ITransferItem GetItemAtUserIndex(int indexOfItem, TransferUIState uiState)
         {
             if (uiState.GroupByFolder)

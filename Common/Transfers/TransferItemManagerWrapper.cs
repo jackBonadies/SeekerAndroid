@@ -229,36 +229,6 @@ namespace Seeker
             }
         }
 
-        public object RemoveAtUserIndex(int position)
-        {
-            var uiState = CreateUIState();
-            if (TransfersViewState.Instance.InUploadsMode)
-            {
-                return Uploads.RemoveAtUserIndex(position, uiState);
-            }
-            else
-            {
-                return Downloads.RemoveAtUserIndex(position, uiState);
-            }
-        }
-
-        /// <summary>
-        /// remove and spawn cleanup task if applicable
-        /// </summary>
-        /// <param name="position"></param>
-        public void RemoveAndCleanUpAtUserIndex(int position)
-        {
-            object objectRemoved = RemoveAtUserIndex(position);
-            if (objectRemoved is TransferItem ti)
-            {
-                FlagInFlightAndCleanUpRest(new List<TransferItem> { ti });
-            }
-            else if (objectRemoved is List<TransferItem> tis)
-            {
-                FlagInFlightAndCleanUpRest(tis);
-            }
-        }
-
         public void CancelFolder(FolderItem fi)
         {
             if (TransfersViewState.Instance.InUploadsMode)

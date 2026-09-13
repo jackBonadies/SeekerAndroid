@@ -463,40 +463,6 @@ namespace UnitTestCommon
         }
 
         [Test]
-        public void RemoveAtUserIndex_NotGrouped_RemovesCorrectItem()
-        {
-            var ti1 = CreateTransferItem("user1", "\\dir\\folder1\\file1.mp3");
-            var ti2 = CreateTransferItem("user1", "\\dir\\folder1\\file2.mp3");
-            manager.Add(ti1);
-            manager.Add(ti2);
-
-            var uiState = new TransferUIState { GroupByFolder = false };
-            var removed = manager.RemoveAtUserIndex(0, uiState);
-
-            Assert.AreEqual(ti1, removed);
-            Assert.AreEqual(1, manager.AllTransferItems.Count);
-            Assert.AreEqual(ti2, manager.AllTransferItems[0]);
-        }
-
-        [Test]
-        public void RemoveAtUserIndex_GroupedNoFolder_RemovesEntireFolder()
-        {
-            var ti1 = CreateTransferItem("user1", "\\dir\\folder1\\file1.mp3", "folder1");
-            var ti2 = CreateTransferItem("user1", "\\dir\\folder1\\file2.mp3", "folder1");
-            var ti3 = CreateTransferItem("user1", "\\dir\\folder2\\file.mp3", "folder2");
-            manager.Add(ti1);
-            manager.Add(ti2);
-            manager.Add(ti3);
-
-            var uiState = new TransferUIState { GroupByFolder = true, CurrentlySelectedFolder = null };
-            var removed = manager.RemoveAtUserIndex(0, uiState) as List<TransferItem>;
-
-            Assert.AreEqual(2, removed.Count);
-            Assert.AreEqual(1, manager.AllTransferItems.Count);
-            Assert.AreEqual(1, manager.AllFolderItems.Count);
-        }
-
-        [Test]
         public void NeedsCleanUp_ReturnsTrueWhenIncompleteParentUriSet()
         {
             var ti = CreateTransferItem("user1", "\\dir\\folder1\\file.mp3");
