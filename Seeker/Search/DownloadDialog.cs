@@ -381,7 +381,7 @@ namespace Seeker
                 {
                     return;
                 }
-                Dismiss();
+                DismissAllowingStateLoss();
             });
         }
 
