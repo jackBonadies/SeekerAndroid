@@ -42,10 +42,10 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '10.0.300'
+          global-json-file: global.json
 
       - name: Install android workload
-        run: dotnet workload install android
+        run: dotnet workload restore Seeker/Seeker.csproj
 
       - name: Derive SOURCE_DATE_EPOCH from HEAD commit
         run: echo "SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)" >> "$GITHUB_ENV"
