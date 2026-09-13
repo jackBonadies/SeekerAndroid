@@ -64,6 +64,8 @@
 	  <DefineConstants>IzzySoft</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.StartsWith('Release'))">
+    <!-- Frequent Release "How can an object and a reference inside it not be in the same block?" that point to SGen -->
+	<AndroidEnableSGenConcurrent>false</AndroidEnableSGenConcurrent>
 	<AndroidLinkTool>r8</AndroidLinkTool>
 	<RunAOTCompilation>true</RunAOTCompilation>
 	<AndroidEnableProfiledAot>true</AndroidEnableProfiledAot>

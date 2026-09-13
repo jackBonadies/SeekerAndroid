@@ -5,7 +5,7 @@ namespace Seeker.Helpers
 {
     public readonly struct DebugTimer : IDisposable
     {
-#if DEBUG
+#if ADB_LOGCAT
         private readonly string label;
         private readonly long start;
 
@@ -18,7 +18,7 @@ namespace Seeker.Helpers
 
         public static DebugTimer Start(string label)
         {
-#if DEBUG
+#if ADB_LOGCAT
             return new DebugTimer(label);
 #else
             return default;
@@ -27,7 +27,7 @@ namespace Seeker.Helpers
 
         public void Dispose()
         {
-#if DEBUG
+#if ADB_LOGCAT
             double ms = (Stopwatch.GetTimestamp() - start) * 1000.0 / Stopwatch.Frequency;
             Logger.Debug($"[timing] {label}: {ms:F1}ms");
 #endif
