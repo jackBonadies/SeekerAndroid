@@ -25,7 +25,10 @@ Changes:
   connect at all on the IPv6-only networks mobile carriers use), a `SoulseekClientOptions.AddressResolver` hook 
   (`Dns.GetHostEntry` fails sometimes on Android); and `GetListeningState()` on `SoulseekClient`
   (we dont fail if listener fails)
-- **Concurrency**: Fixes race condition.
+- **Concurrency**: `RemoveAndDisposeAll` race (`Common/Extensions.cs`); `SearchInternal.Dispose`
+  swallows the `SynchronizationLockException` that `ReaderWriterLockSlim.Dispose()` throws when a
+  late `TryAddResponse` / timeout `Complete` is still parked on the lock - thrown from
+  `SearchToCallbackAsync`'s `finally`, it replaced the search's real outcome.
 - **Transfer state**: the additional `TransferStates` values (`UserOffline`, `CannotConnect`,
   `FallenFromQueue`, `SizeMismatch`), a `TransferSizeMismatchException` only when the peer
   reports a non-zero size, and `IsTransferInDownloads()`.

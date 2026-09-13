@@ -1,6 +1,9 @@
 ﻿// <copyright file="SearchInternal.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham.
 //
+//     Copyright (c) 2021-2026 Jack Bonadies
+//     Modified: Dispose tolerates a late waiter on the state lock
+//
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
 //     the Free Software Foundation, version 3.
@@ -172,7 +175,21 @@ namespace Soulseek
                 if (disposing)
                 {
                     SearchTimeoutTimer.Dispose();
-                    ReaderWriterLock.Dispose();
+
+                    try
+                    {
+                        ReaderWriterLock.Dispose();
+                    }
+                    catch (SynchronizationLockException)
+                    {
+                        // When we finish a search we enter ReaderWriterLock in write (exclusive) mode, set the task completion source,
+                        // and then exit ReaderWriterLock.  after setting task completion source, SearchToCallbackAsync continues from WaitForCompletion,
+                        // and enters the finally with search.Dispose() which disposes the ReaderWriterLock.
+                        // However, other threads may queue up behind the lock with new search results,
+                        // while it is true that they all hit the early return (since State is not in progress), if any are still waiting then
+                        // we hit SynchronizationLockException in Dispose (https://github.com/microsoft/referencesource/blob/main/System.Core/System/threading/ReaderWriterLockSlim/ReaderWriterLockSlim.cs#L1334)
+                        // which checks explicitly for waiting reads, throws, which results in the whole search marked as failed.
+                    }
                 }
 
                 Disposed = true;
