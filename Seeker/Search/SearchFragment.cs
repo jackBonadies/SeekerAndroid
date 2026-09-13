@@ -2012,6 +2012,10 @@ namespace Seeker
 
         private static List<SearchResponse> GetOldList(string filter)
         {
+            if (filter == null)
+            {
+                filter = string.Empty;
+            }
             if (filter == oldListCondition)
             {
                 return oldList;
@@ -2021,7 +2025,11 @@ namespace Seeker
 
         private static void SetOldList(string filter, List<SearchResponse> searchResponses)
         {
-            oldListCondition = !string.IsNullOrEmpty(filter) ? filter : null;
+            if (filter == null)
+            {
+                filter = string.Empty;
+            }
+            oldListCondition = filter;
             oldList = searchResponses;
         }
 
@@ -2172,7 +2180,7 @@ namespace Seeker
                 else
                 {
                     tab.UI_SearchResponses = tab.SearchResponses.ToList();
-                    ApplySearchResults(tab.UI_SearchResponses, null);
+                    ApplySearchResults(tab.UI_SearchResponses, string.Empty);
                 }
                 tab.LastSearchResponseCount = total;
             }), RefreshDebounceMs);
