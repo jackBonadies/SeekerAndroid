@@ -61,14 +61,6 @@
             android:textStyle="bold"
             android:singleLine="true"
         />
-        <!-- Hidden bitrate slot kept so SearchChipHelper.StyleFormatAndBitrateChips
-             (which always writes both views) can be reused unchanged. -->
-        <TextView
-            android:id="@+id/bitrateTextView"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:visibility="gone"
-        />
     </LinearLayout>
     <View
         android:layout_width="match_parent"

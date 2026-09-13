@@ -265,9 +265,10 @@ namespace Seeker
 
     public abstract class SearchItemViewModernBase : SearchItemViewUnifiedBase
     {
-        protected TextView viewBitrate;
-        protected TextView viewQueue;
+        protected SearchChip fileTypeChip;
+        protected SearchChip queueChip;
         protected TextView viewFileCount;
+        protected SearchChipPalette palette;
         protected int separatorColor;
 
         protected SearchItemViewModernBase(Context c, IAttributeSet a, int s) : base(c, a, s) { }
@@ -276,8 +277,9 @@ namespace Seeker
         public override void setupChildren()
         {
             base.setupChildren();
-            viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
-            viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
+            palette = SearchChipPalette.Get(Context);
+            fileTypeChip = new SearchChip(viewFileType);
+            queueChip = new SearchChip(FindViewById<TextView>(Resource.Id.queueTextView));
             viewFileCount = FindViewById<TextView>(Resource.Id.fileCountTextView);
             separatorColor = SearchItemViewExpandableHelper.GetSeparatorColor(Context);
         }
@@ -286,11 +288,11 @@ namespace Seeker
         {
             viewUsername.Text = item.Username;
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            SearchChipHelper.StyleSpeed(viewSpeed, (item.UploadSpeed / 1024).ToString() + " kb/s");
+            viewSpeed.Text = (item.UploadSpeed / 1024).ToString() + " kb/s";
             int fcount = hideLocked ? item.FileCount : item.FileCount + item.LockedFileCount;
-            SearchChipHelper.StyleFileCount(viewFileCount, fcount);
-            SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot, item.QueueLength);
+            viewFileCount.Text = fcount.ToString();
+            SearchChipHelper.StyleFormatChip(fileTypeChip, item.GetDominantFileTypeAndBitRate(hideLocked, out _), palette);
+            SearchChipHelper.StyleQueueChip(queueChip, item.HasFreeUploadSlot, item.QueueLength, palette);
             if (IsExpandable)
             {
                 ApplyExpandedState(item, position);
@@ -322,11 +324,12 @@ namespace Seeker
     }
 
     // Compact style. Single-row variant of Modern: only foldername, queue chip
-    // (conditional), and file-type chip. Never expandable; bitrate position N/A.
+    // (conditional), and file-type chip. Never expandable.
     public class SearchItemViewCompact : SearchItemViewUnifiedBase
     {
-        private TextView viewBitrate;
-        private TextView viewQueue;
+        private SearchChip fileTypeChip;
+        private SearchChip queueChip;
+        private SearchChipPalette palette;
 
         public SearchItemViewCompact(Context c, IAttributeSet a, int s) : base(c, a, s) { Init(c); }
         public SearchItemViewCompact(Context c, IAttributeSet a) : base(c, a) { Init(c); }
@@ -346,15 +349,16 @@ namespace Seeker
         public override void setupChildren()
         {
             base.setupChildren();
-            viewBitrate = FindViewById<TextView>(Resource.Id.bitrateTextView);
-            viewQueue = FindViewById<TextView>(Resource.Id.queueTextView);
+            palette = SearchChipPalette.Get(Context);
+            fileTypeChip = new SearchChip(viewFileType);
+            queueChip = new SearchChip(FindViewById<TextView>(Resource.Id.queueTextView));
         }
 
         public override void setItem(SearchResponse item, int position)
         {
             viewFoldername.Text = SimpleHelpers.GetFolderNameForSearchResult(item);
-            SearchChipHelper.StyleFormatAndBitrateChips(viewFileType, viewBitrate, item.GetDominantFileTypeAndBitRate(hideLocked, out _));
-            SearchChipHelper.StyleQueueChip(viewQueue, item.HasFreeUploadSlot, item.QueueLength);
+            SearchChipHelper.StyleFormatChip(fileTypeChip, item.GetDominantFileTypeAndBitRate(hideLocked, out _), palette);
+            SearchChipHelper.StyleQueueChip(queueChip, item.HasFreeUploadSlot, item.QueueLength, palette);
         }
 
         public override void PopulateFiles(SearchResponse item)

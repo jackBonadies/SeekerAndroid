@@ -1,13 +1,91 @@
 using Android.Content;
+using Android.Content.Res;
 using Android.Graphics;
 using Android.Graphics.Drawables;
-using Android.Util;
 using Android.Views;
 using Android.Widget;
-using AndroidX.Core.Content;
 
 namespace Seeker.Search
 {
+    // search chip colors are constant and only differ for day vs night
+    //   so bind them all ahead of time instead of at bind time
+    public sealed class SearchChipPalette
+    {
+        private static SearchChipPalette day;
+        private static SearchChipPalette night;
+
+        private static readonly (int text, int bg)[] FormatColorResIds =
+        {
+            (Resource.Color.searchChipFlacText, Resource.Color.searchChipFlacBg),
+            (Resource.Color.searchChipMp3Text, Resource.Color.searchChipMp3Bg),
+            (Resource.Color.searchChipM4aText, Resource.Color.searchChipM4aBg),
+            (Resource.Color.searchChipWavText, Resource.Color.searchChipWavBg),
+            (Resource.Color.searchChipAacText, Resource.Color.searchChipAacBg),
+            (Resource.Color.searchChipWmaText, Resource.Color.searchChipWmaBg),
+            (Resource.Color.searchChipAiffText, Resource.Color.searchChipAiffBg),
+            (Resource.Color.searchChipOtherText, Resource.Color.searchChipOtherBg),
+        };
+
+        private readonly (Color text, Color bg)[] formatColors;
+        public readonly Color QueueText;
+        public readonly Color QueueBg;
+
+        private SearchChipPalette(Resources resources, Resources.Theme theme)
+        {
+            formatColors = new (Color, Color)[FormatColorResIds.Length];
+            for (int i = 0; i < FormatColorResIds.Length; i++)
+            {
+                formatColors[i] = (resources.GetColor(FormatColorResIds[i].text, theme),
+                    resources.GetColor(FormatColorResIds[i].bg, theme));
+            }
+            QueueText = resources.GetColor(Resource.Color.searchChipQueueText, theme);
+            QueueBg = resources.GetColor(Resource.Color.searchChipQueueBg, theme);
+        }
+
+        public static SearchChipPalette Get(Context context)
+        {
+            bool isNight = (context.Resources.Configuration.UiMode & UiMode.NightMask) == UiMode.NightYes;
+            ref SearchChipPalette slot = ref (isNight ? ref night : ref day);
+            if (slot == null)
+            {
+                slot = new SearchChipPalette(context.Resources, context.Theme);
+            }
+            return slot;
+        }
+
+        public (Color text, Color bg) ForFormat(string formatName)
+        {
+            return formatColors[SearchChipHelper.GetFormatColorIndex(formatName)];
+        }
+    }
+
+    // A chip TextView plus its own mutated copy of the search_format_chip_bg background, taken
+    // once at row creation so that a bind is Visibility + Text + SetTextColor + SetColor.
+    public sealed class SearchChip
+    {
+        private readonly TextView view;
+        private readonly GradientDrawable background;
+
+        public SearchChip(TextView view)
+        {
+            this.view = view;
+            background = view.Background?.Mutate() as GradientDrawable;
+        }
+
+        public void Hide()
+        {
+            view.Visibility = ViewStates.Gone;
+        }
+
+        public void Show(string text, Color textColor, Color bgColor)
+        {
+            view.Visibility = ViewStates.Visible;
+            view.Text = text;
+            view.SetTextColor(textColor);
+            background?.SetColor(bgColor);
+        }
+    }
+
     public static class SearchChipHelper
     {
         public static string ExtractFormatName(string dominantFileTypeStr)
@@ -32,9 +110,7 @@ namespace Seeker.Search
             return lower;
         }
 
-        /// <summary>
-        /// Extracts just the bitrate portion like "320kbps" from "mp3 (320 kbs)"
-        /// </summary>
+        // "mp3 (320 kbs)" -> "320kbps"
         public static string ExtractBitRate(string dominantFileTypeStr)
         {
             if (string.IsNullOrEmpty(dominantFileTypeStr))
@@ -54,116 +130,46 @@ namespace Seeker.Search
             return "";
         }
 
-        private static readonly (int textColorResId, int bgColorResId)[] ChipColors = new[]
-        {
-            (Resource.Color.searchChipFlacText, Resource.Color.searchChipFlacBg), 
-            (Resource.Color.searchChipMp3Text, Resource.Color.searchChipMp3Bg),    
-            (Resource.Color.searchChipM4aText, Resource.Color.searchChipM4aBg),     
-            (Resource.Color.searchChipWavText, Resource.Color.searchChipWavBg),      
-            (Resource.Color.searchChipAacText, Resource.Color.searchChipAacBg),       
-            (Resource.Color.searchChipWmaText, Resource.Color.searchChipWmaBg),     
-            (Resource.Color.searchChipAiffText, Resource.Color.searchChipAiffBg),    
-            (Resource.Color.searchChipOtherText, Resource.Color.searchChipOtherBg),   
-        };
-
-        public static (int textColorResId, int bgColorResId) GetFormatChipColorResIds(string formatName)
+        // Index into SearchChipPalette's format colours
+        public static int GetFormatColorIndex(string formatName)
         {
             switch (formatName)
             {
                 // orange
                 case "flac":
                 case "epub":
-                    return (Resource.Color.searchChipFlacText, Resource.Color.searchChipFlacBg);
+                    return 0;
                 // blue
                 case "mp3":
                 case "pdf":
-                    return (Resource.Color.searchChipMp3Text, Resource.Color.searchChipMp3Bg);
+                    return 1;
                 // pink
                 case "m4a":
                 case "azw3":
-                    return (Resource.Color.searchChipM4aText, Resource.Color.searchChipM4aBg);
+                    return 2;
                 // green
                 case "wav":
-                    return (Resource.Color.searchChipWavText, Resource.Color.searchChipWavBg);
+                    return 3;
                 // teal
                 case "aac":
                 case "mobi":
-                    return (Resource.Color.searchChipAacText, Resource.Color.searchChipAacBg);
+                    return 4;
                 case "wma":
-                    return (Resource.Color.searchChipWmaText, Resource.Color.searchChipWmaBg);
+                    return 5;
                 case "aiff":
-                    return (Resource.Color.searchChipAiffText, Resource.Color.searchChipAiffBg);
+                    return 6;
                 default:
                     int hash = formatName.GetHashCode() & 0x7FFFFFFF;
-                    return ChipColors[hash % ChipColors.Length];
+                    return hash % 8;
             }
         }
 
-        private static void ApplyChipStyle(TextView chip, int textColor, int bgColor)
-        {
-            chip.SetTextColor(new Color(textColor));
-            chip.SetTypeface(chip.Typeface, TypefaceStyle.Bold);
-            chip.SetTextSize(ComplexUnitType.Sp, 10);
-
-            var bg = chip.Background?.Mutate() as GradientDrawable;
-            if (bg != null)
-            {
-                bg.SetColor(bgColor);
-                bg.SetStroke(0, Color.Transparent);
-            }
-        }
-
-        /// <summary>
-        /// Shows full format string like "FLAC 320kbps" as a colored chip
-        /// </summary>
-        public static void StyleFormatChip(TextView chip, string fullFormatStr)
+        // One combined chip, e.g. [WAV · 192kbps]
+        public static void StyleFormatChip(SearchChip chip, string fullFormatStr, SearchChipPalette palette)
         {
             if (string.IsNullOrEmpty(fullFormatStr))
             {
-                chip.Visibility = ViewStates.Gone;
-                return;
-            }
-            chip.Visibility = ViewStates.Visible;
-            chip.Text = fullFormatStr;
-
-            string formatName = ExtractFormatName(fullFormatStr);
-            var (textColorResId, bgColorResId) = GetFormatChipColorResIds(formatName);
-
-            var resources = chip.Context.Resources;
-            var theme = chip.Context.Theme;
-            ApplyChipStyle(chip, resources.GetColor(textColorResId, theme), resources.GetColor(bgColorResId, theme));
-        }
-
-        /// <summary>
-        /// Shows just the format name in uppercase like "FLAC" as a colored chip
-        /// </summary>
-        public static void StyleFormatChipShort(TextView chip, string fullFormatStr)
-        {
-            if (string.IsNullOrEmpty(fullFormatStr))
-            {
-                chip.Visibility = ViewStates.Gone;
-                return;
-            }
-            string formatName = ExtractFormatName(fullFormatStr);
-            chip.Text = formatName.ToUpperInvariant();
-            chip.Visibility = ViewStates.Visible;
-
-            var (textColorResId, bgColorResId) = GetFormatChipColorResIds(formatName);
-            var resources = chip.Context.Resources;
-            var theme = chip.Context.Theme;
-            ApplyChipStyle(chip, resources.GetColor(textColorResId, theme), resources.GetColor(bgColorResId, theme));
-        }
-
-        /// <summary>
-        /// Shows format and bitrate as a single combined chip. e.g. [WAV · 192kbps]
-        /// bitrateChip is always hidden (kept for layout compat).
-        /// </summary>
-        public static void StyleFormatAndBitrateChips(TextView formatChip, TextView bitrateChip, string fullFormatStr)
-        {
-            bitrateChip.Visibility = ViewStates.Gone;
-            if (string.IsNullOrEmpty(fullFormatStr))
-            {
-                formatChip.Visibility = ViewStates.Gone;
+                chip.Hide();
                 return;
             }
             string formatName = ExtractFormatName(fullFormatStr);
@@ -175,168 +181,18 @@ namespace Seeker.Search
                 chipText += " \u00b7 " + bitRate;
             }
 
-            formatChip.Visibility = ViewStates.Visible;
-            formatChip.Text = chipText;
-
-            var (textColorResId, bgColorResId) = GetFormatChipColorResIds(formatName);
-            var resources = formatChip.Context.Resources;
-            var theme = formatChip.Context.Theme;
-            ApplyChipStyle(formatChip,
-                resources.GetColor(textColorResId, theme),
-                resources.GetColor(bgColorResId, theme));
+            var (textColor, bgColor) = palette.ForFormat(formatName);
+            chip.Show(chipText, textColor, bgColor);
         }
 
-        public static void StyleQueueChip(TextView chip, bool hasFreeSlot, int queueLength)
+        public static void StyleQueueChip(SearchChip chip, bool hasFreeSlot, int queueLength, SearchChipPalette palette)
         {
             if (hasFreeSlot)
             {
-                chip.Visibility = ViewStates.Gone;
+                chip.Hide();
                 return;
             }
-            chip.Visibility = ViewStates.Visible;
-            chip.Text = "Q:" + queueLength;
-
-            var resources = chip.Context.Resources;
-            var theme = chip.Context.Theme;
-            ApplyChipStyle(chip,
-                resources.GetColor(Resource.Color.searchChipQueueText, theme),
-                resources.GetColor(Resource.Color.searchChipQueueBg, theme));
-        }
-
-        public static void StyleQueueText(TextView view, int queueLength)
-        {
-            if (queueLength <= 0)
-            {
-                view.Visibility = ViewStates.Gone;
-                return;
-            }
-            view.Visibility = ViewStates.Visible;
-            view.Text = "Q:" + queueLength;
-        }
-
-        public static void StyleNoSlotChip(TextView chip, bool hasFreeSlot)
-        {
-            if (hasFreeSlot)
-            {
-                chip.Visibility = ViewStates.Gone;
-                return;
-            }
-            chip.Visibility = ViewStates.Visible;
-            chip.Text = "No Slots";
-
-            var resources = chip.Context.Resources;
-            var theme = chip.Context.Theme;
-            ApplyChipStyle(chip,
-                resources.GetColor(Resource.Color.searchChipNoSlotText, theme),
-                resources.GetColor(Resource.Color.searchChipNoSlotBg, theme));
-        }
-
-        public static void StyleNoSlotText(TextView view, bool hasFreeSlot)
-        {
-            if (hasFreeSlot)
-            {
-                view.Visibility = ViewStates.Gone;
-                return;
-            }
-            view.Visibility = ViewStates.Visible;
-            view.Text = "!";
-        }
-
-        /// <summary>
-        /// Shows "Free" in green or "No slot" in red
-        /// </summary>
-        public static void StyleFreeSlotIndicator(TextView view, bool hasFreeSlot)
-        {
-            view.Visibility = ViewStates.Visible;
-            if (hasFreeSlot)
-            {
-                view.Text = "Free";
-                var resources = view.Context.Resources;
-                var theme = view.Context.Theme;
-                int greenColor = resources.GetColor(Resource.Color.searchChipMp3Text, theme);
-                view.SetTextColor(new Color(greenColor));
-            }
-            else
-            {
-                view.Text = "No slot";
-                var resources = view.Context.Resources;
-                var theme = view.Context.Theme;
-                int redColor = resources.GetColor(Resource.Color.searchChipNoSlotText, theme);
-                view.SetTextColor(new Color(redColor));
-            }
-        }
-
-        /// <summary>
-        /// Shows "No slot · Q:N" in red, or "Free" in green
-        /// </summary>
-        public static void StyleSlotAndQueue(TextView view, bool hasFreeSlot, int queueLength)
-        {
-            view.Visibility = ViewStates.Visible;
-            if (hasFreeSlot)
-            {
-                view.Text = "Free";
-                var resources = view.Context.Resources;
-                var theme = view.Context.Theme;
-                int greenColor = resources.GetColor(Resource.Color.searchChipMp3Text, theme);
-                view.SetTextColor(new Color(greenColor));
-            }
-            else
-            {
-                string text = "No slot";
-                if (queueLength > 0)
-                {
-                    text += " \u00b7 Q:" + queueLength;
-                }
-                view.Text = text;
-                var resources = view.Context.Resources;
-                var theme = view.Context.Theme;
-                int redColor = resources.GetColor(Resource.Color.searchChipNoSlotText, theme);
-                view.SetTextColor(new Color(redColor));
-            }
-        }
-
-        public static void StyleSpeedChip(TextView chip, string speedText)
-        {
-            chip.Visibility = ViewStates.Visible;
-            chip.Text = speedText;
-
-            var resources = chip.Context.Resources;
-            var theme = chip.Context.Theme;
-            int textColor = resources.GetColor(Resource.Color.searchChipOtherText, theme);
-            ApplyChipStyle(chip, textColor,
-                resources.GetColor(Resource.Color.searchChipOtherBg, theme));
-
-            var drawables = chip.GetCompoundDrawablesRelative();
-            if (drawables[0] != null)
-            {
-                var tinted = drawables[0].Mutate();
-                tinted.SetTint(textColor);
-                chip.SetCompoundDrawablesRelativeWithIntrinsicBounds(tinted, null, null, null);
-            }
-        }
-
-        public static void StyleSpeed(TextView view, string speedText)
-        {
-            view.Text = speedText;
-            var drawables = view.GetCompoundDrawablesRelative();
-            if (drawables[0] != null)
-            {
-                var tinted = drawables[0].Mutate();
-                tinted.SetTint(view.CurrentTextColor);
-                view.SetCompoundDrawablesRelativeWithIntrinsicBounds(tinted, null, null, null);
-            }
-        }
-
-        public static void StyleFileCount(TextView view, int fileCount)
-        {
-            view.Text = fileCount.ToString();
-            var drawables = view.GetCompoundDrawablesRelative();
-            if (drawables[0] != null)
-            {
-                var tinted = drawables[0].Mutate();
-                tinted.SetTint(view.CurrentTextColor);
-                view.SetCompoundDrawablesRelativeWithIntrinsicBounds(tinted, null, null, null);
-            }
+            chip.Show("Q:" + queueLength, palette.QueueText, palette.QueueBg);
         }
     }
 }

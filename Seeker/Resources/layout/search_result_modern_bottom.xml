@@ -102,21 +102,6 @@
                         android:textStyle="bold"
                         android:singleLine="true"
                     />
-                    <TextView
-                        android:id="@+id/bitrateTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/search_format_chip_bg"
-                        android:paddingStart="5dp"
-                        android:paddingEnd="5dp"
-                        android:paddingTop="1dp"
-                        android:paddingBottom="1dp"
-                        android:layout_marginStart="3dp"
-                        android:textSize="10sp"
-                        android:textStyle="bold"
-                        android:singleLine="true"
-                        android:visibility="gone"
-                    />
                     <View
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -127,6 +112,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:drawableStart="@drawable/file_stacks_drawable"
+                        android:drawableTint="@color/subTextColor"
                         android:drawablePadding="2dp"
                         android:paddingStart="6dp"
                         android:textColor="@color/subTextColor"
@@ -138,6 +124,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:drawableStart="@drawable/download_search_drawable"
+                        android:drawableTint="@color/subTextColor"
                         android:drawablePadding="0dp"
                         android:paddingStart="6dp"
                         android:textColor="@color/subTextColor"
