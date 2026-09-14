@@ -1,31 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Seeker</string>
-    <string name="com.google.firebase.crashlytics.mapping_file_id">1.0</string>
-
     <string name="home_tab">Domů</string>
     <string name="transfer_tab">Přenosy</string>
     <string name="browse_tab">Procházet</string>
     <string name="account_tab">Účet</string>
     <string name="searches_tab">Hledání</string>
     <string name="searches_tab2">Hledat</string>
-
     <string name="new_result">nový výsledek</string>
     <string name="new_results">nové výsledky</string>
-
-
     <string name="saerch_user_list">Prohledat seznam uživatelů</string>
     <string name="search_room">Vyhledat místnost</string>
     <string name="search_room_">Vyhledat místnost {0}</string>
     <string name="search_user_">Hledat uživatele {0}</string>
     <string name="wishlist_search">Hledat v seznamu přání</string>
-
-    <string name="no_account">
-        Nemáte účet? Jednoduše zadejte unikátní uživatelské jméno a jeden pro vás bude vytvořen.
-    </string>
-
-
-    <string name="privileges_more_info">Privileges help support the Soulseek Network and the central server this app depends on.\n\nThey also let you skip ahead of non-privileged users in download queues.\n\nNote: donations do not go to the creator of this unofficial Android client (Seeker). I do not currently accept donations.</string>
-
     <string name="no_messages">Žádné zprávy. Stiskněte \"+\" pro začnutí.</string>
     <string name="messages">Zprávy</string>
     <string name="browse_files">Procházet soubory</string>
@@ -33,77 +20,50 @@
     <string name="requesting_room_list">Požaduji seznam místností</string>
     <string name="requesting_user_info">Požaduji informace o uživateli</string>
     <string name="room_list_received">Seznam místností byl přijat</string>
-
-    <string name="kilobytes_per_second">kb/s</string>
+    <string name="kilobytes_per_second">kbs</string>
     <string name="kilohertz">kHz</string>
     <string name="wishlist">Seznam přání</string>
-    <string name="user_info_bio">
-        <b>Informace o uživateli:</b>
-    </string>
-    <string name="user_info_picture">
-        <b>Obrázek</b>
-    </string>
     <string name="unsaved_changes_title">Zahodit neuložené změny?</string>
-    <string name="unsaved_changes_body">
-        Máte neuložené změny, určitě je chcete zahodit?
-    </string>
     <string name="add_user">Přidat uživatele</string>
     <string name="get_user_info">Získat informace o uživateli</string>
     <string name="quick_info">Rychlé info</string>
+    <!--
+  These are search targets
+  -->
     <string name="all_target">Všichni uživatelé</string>
     <string name="target_user_list">Seznam uživatelů</string>
     <string name="target_room">Místnost</string>
     <string name="target_room_name">Název místnosti</string>
     <string name="target_choose_user">Vybrat uživatele</string>
     <string name="username">Přezdívka</string>
-    <string name="search_target_">Cíl vyhledávání</string>
-
+    <string name="search_target_">Cíl vyhledávání:</string>
     <string name="friends">Přátelé</string>
     <string name="ignored">Ignorováno</string>
-
     <string name="chatroom_disconnected">Odpojili jsme se...</string>
+    <!--Where placeholder {0} is time -->
     <string name="chatroom_disconnected_at">Odpojili jsme se: {0}</string>
     <string name="chatroom_reconnected_at">Znovu jsme připojili: {0}</string>
-    <string name="chatroom_loading_ticker">Loading current ticker...</string>
     <string name="chatroom_enter_message">Zadat zprávu</string>
     <string name="send_message">Odeslat</string>
     <string name="filter_chatrooms_here">Filtrovat zde</string>
-
-    <string name="enter_listening_port">Enter port to listen on</string>
-
     <string name="create_chatroom_private">Nastavit jako soukromé</string>
-
     <string name="search_here">Hledat zde</string>
-
-    <string name="seeker_needs_dl_dir_content">
-        Please Choose a Download Directory (Default is the Music Folder)
-    </string>
-    <string name="seeker_needs_dl_dir_error">
-        Must select a directory to place downloaded files
-    </string>
-    <string name="seeker_needs_dl_dir_choose_settings">
-        Please set a download directory in Settings.
-    </string>
-    <string name="seeker_cannot_access_files">
-        Cannot access filesystem.  You must select a download directory, either in the login page or in settings.
-    </string>
-
+    <!--
+  Download Dialog Columns
+  -->
     <string name="size_column">Velikost</string>
-
+    <!--
+  Download Dialog Buttons
+  -->
     <string name="download_folder">Složka stahování</string>
     <string name="download_selected">Stáhnout vybrané</string>
     <string name="close_download_diag">Zavřít</string>
-
-    <string name="add_about_me">Tap to add an about me</string>
     <string name="select_image">Vybrat obrázek</string>
     <string name="clear_image">Vymazat obrázek</string>
     <string name="no_image_chosen">Žádné</string>
-
     <string name="inviteuser">Pozvat uživatele</string>
-
     <string name="give_up_room">Vzdát se místnosti</string>
     <string name="give_up_membership">Vzdát členství</string>
-
     <string name="logout">Odhlášení</string>
     <string name="login">Přihlášení</string>
     <string name="password">Heslo</string>
@@ -111,378 +71,64 @@
     <string name="PleaseWait_">Počkejte prosím...</string>
     <string name="choose_a_download_folder">Vyberte složku pro stahování</string>
     <string name="settings">Nastavení</string>
-
-
-    <string name="search_result_style">Result style</string>
-
+    <!--Search Result Styles-->
     <string name="new_search_tab">Nové hledání</string>
-    <string name="filter_search_results_here">Filter results</string>
     <string name="persist_it">Připnout</string>
-    <string name="type_chatroom_ticker_message">Ticker message</string>
-
-    <string name="max_search_results">Max search results</string>
-    <string name="only_show_free_slots">
-        Only show results of users with free slots
-    </string>
-    <string name="start_service_on_startup">Start service on startup</string>
-    <string name="allow_private_room_invitations">
-        Allow private room invitations
-    </string>
-
-    <string name="show_bottom_notifs_complete">
-        Notify on file complete
-    </string>
-    <string name="show_notifs_on_folder_complete">
-        Notify on folder complete
-    </string>
-    <string name="remember_search_history">Remember search history</string>
-    <string name="clear_search_history">Clear search history</string>
-    <string name="file_backed_downloads">File backed downloads</string>
-    <string name="night_mode_options">Night mode option</string>
-    <string name="enable_sharing">Enable sharing</string>
     <string name="browse_yourself">Procházet vlastní</string>
-    <string name="enable_listening">Enable listening</string>
     <string name="change_port">Změnit port</string>
     <string name="check_your_port_status">Zkontrolovat stav</string>
-    <string name="use_pnp_for_port_forwarding">
-        UPnP port forwarding
-    </string>
     <string name="edit_your_user_info">Upravit informace o uživateli</string>
-    <string name="restore_default_settings">Restore default settings</string>
-
-
     <string name="user_has_no_bio">Uživatel nemá žádné bio.</string>
     <string name="user_has_no_pic">Uživatel nemá žádný obrázek.</string>
     <string name="no_pic_set">Není nastaven žádný obrázek</string>
     <string name="select_pic">Vybrat obrázek</string>
     <string name="success_set_pic">Obrázek byl úspěšně nastaven</string>
-    <string name="error_no_file_manager_image">
-        CHYBA - Není nainstalován žádný správce souborů, který by mohl vybrat obrázek. Nainstalujte si jej.
-    </string>
-    <string name="error_no_file_manager_dir">
-        CHYBA - Není nainstalován žádný správce souborů, který by mohl vybrat složku. Nainstalujte si jej.
-    </string>
-    <string name="error_no_file_manager_dir_manage_storage">
-        ERROR - No file manager installed that is capable of choosing a directory. Please install one. If your device does not implement OPEN_DOCUMENT_TREE intent, please install Seeker from Fdroid (IzzyOnDroid Repo) which has the Manage External Storage permission.
-    </string>
-    <string name="error_image_doesnt_exist">Image does not exist</string>
-    <string name="error_image_too_large">
-        Image is too large. Please choose a smaller image. (&lt;5MB).
-    </string>
-
-    <string name="no_room_tickers">No room tickers yet...</string>
-    <string name="user_list_empty">
-        User list is empty. Please add a user to user list.
-    </string>
-    <string name="no_user">No user is selected</string>
-    <string name="no_room">No room is selected</string>
-    <string name="no_search_results">No results found</string>
-    <string name="no_search_text">Must type text to search</string>
-    <string name="no_wish_text">Must type text for wishlist search</string>
-    <string name="search_error_unspecified">Search error.</string>
-
-    <string name="we_are_already_logging_in">We are already logging in</string>
-    <string name="nothing_to_download">Nothing to download</string>
+    <!--Toasts-->
     <string name="download_is_starting">Stahování začíná...</string>
     <string name="directory_is_empty">Tento adresář je prázdný</string>
     <string name="nothing_selected">Nic nebylo vybráno</string>
-    <string name="nothing_selected_extra">
-        "Nic bylo vybráno - klepněte pro výběr"
-    </string>
     <string name="failed_to_connect">Připojení se nezdařilo</string>
-    <string name="cannot_download_from_self">
-        Nelze stáhnout od sebe
-    </string>
-    <string name="must_type_a_username_to_browse">
-        Must type user to browse
-    </string>
-    <string name="must_type_a_username_to_message">
-        Must type user to message
-    </string>
-    <string name="must_type_a_username_to_invite">
-        Must type user to invite
-    </string>
-    <string name="must_type_a_username_to_add">Must type user to add</string>
-    <string name="must_type_ticker_text">Must type ticker text</string>
-    <string name="must_type_chatroom_name">Must type a chatroom name</string>
-    <string name="must_type_text_to_send">Must type text to send</string>
     <string name="error">Chyba</string>
-    <string name="error_">Chyba:</string>
-    <string name="error_duplicate">Error: Duplicate request detected</string>
-    <string name="error_browse_at_location">
-        Error getting user directories at specified location
-    </string>
-    <string name="room_data_still_loading">
-        Too fast! Still retreiving room data...
-    </string>
-    <string name="must_be_logged_to_browse">
-        Must be logged in to browse a user
-    </string>
-    <string name="must_be_logged_to_get_room_list">
-        Must be logged in to get chatroom list
-    </string>
-    <string name="must_be_logged_to_request_user_info">
-        Must be logged in to request user info
-    </string>
-    <string name="must_be_logged_to_create_room">
-        Must be logged in to create chatroom
-    </string>
-    <string name="must_be_logged_to_add_or_remove_user">
-        Must be logged in to add or remove user
-    </string>
-    <string name="must_be_logged_to_set_ticker">
-        Must be logged in to set ticker
-    </string>
-    <string name="must_be_logged_to_send_message">
-        Must be logged in to send message
-    </string>
-    <string name="must_be_logged_to_toggle_priv_invites">
-        Must be logged in to toggle allow private invites
-    </string>
-    <string name="must_be_logged_in_to_check_privileges">
-        Must be logged in to check privileges
-    </string>
-    <string name="must_be_logged_in_to_get_privileges">
-        Must be logged in to get privileges
-    </string>
-    <string name="checking_priv_">Checking privileges...</string>
-    <string name="already_added_user_">Already added user: {0}</string>
-    <string name="must_be_logged_to_search">
-        Must log in before searching
-    </string>
-    <string name="create_and_refresh">
-        Created room, now refreshing room list
-    </string>
-    <string name="setting_ticker">Setting ticker...</string>
-    <string name="failed_to_set_ticker">Failed to set ticker</string>
-    <string name="successfully_set_ticker">Successfully set ticker</string>
-    <string name="folder_request_timed_out">Folder request timed out</string>
-    <string name="folder_request_failed">Folder request failed</string>
-    <string name="folder_request_already_have">
-        We already have the complete folder
-    </string>
+    <string name="error_">Chyba: </string>
     <string name="saved">Uložené</string>
-    <string name="no_changes_to_save">No changes to save</string>
-    <string name="request_user_error_empty">Username cannot be empty</string>
-    <string name="temporary_disconnected">
-        We got temporarily disconnected.. reconnecting now
-    </string>
-    <string name="failed_to_undo">Failure to undo</string>
-    <string name="add_user_title">Přidat uživatele</string>
-    <string name="ignore_user_title">Ignore user(s)</string>
-
-
-
-    <string name="not_sharing">You are not sharing any files</string>
-    <string name="failed_to_parse_shares_post">
-        Your shares were not successfully parsed
-    </string>
-
-    <string name="error_reading_dir">Error reading directory</string>
-    <string name="error_not_a_dir">Error: Not a directory</string>
-    <string name="successfully_changed_dl_dir">
-        Successfully changed download directory to \"{0}\"
-    </string>
-
-    <string name="follow_system">Follow system</string>
+    <string name="add_user_title">Přidat uživatele:</string>
     <string name="always_light">Vždy světlý</string>
     <string name="always_dark">Vždy tmavý</string>
-
-    <string name="queue_length_">Délka fronty</string>
-    <string name="upload_slots_">Volné nahrávací sloty</string>
+    <!-- theme variant color names (AMOLED variants are composed in code as "AMOLED - <color>") -->
+    <!-- info -->
+    <string name="queue_length_">Délka fronty: </string>
+    <string name="upload_slots_">Volné nahrávací sloty: </string>
     <string name="today">Dnes</string>
-
     <string name="pending_">Probíhající...</string>
     <string name="failed">Selhalo</string>
-
-    <string name="must_be_logged_to_drop_private">
-        Must be logged in to drop {0} of private room
-    </string>
-    <string name="failed_to_remove">Failed to remove {0}</string>
-    <string name="successfully_removed">Successfully removed {0}</string>
-    <string name="dropping_MEMBERSHIP_of_ROOMNAME">Dropping {0} of {1}</string>
+    <!--For someone translating, position {0} to where the words membership or ownership will occur -->
+    <!--For someone translating, position {0} to where the words membership or ownership will occur and {1} is where the roomanme will occur -->
     <string name="ownership">vlastnictví</string>
     <string name="membership">členství</string>
-
-    <string name="startup_room_off">
-        {0} is no longer set to join on startup
-    </string>
-    <string name="startup_room_on">{0} is now set to join on startup</string>
-    <string name="notif_room_off">Notifications turned off for: {0}</string>
-    <string name="notif_room_on">Notifications turned on for: {0}</string>
-    <string name="removing_mod">Removing user as moderator in {0}</string>
-    <string name="adding_mod">Adding user as moderator in {0}</string>
-    <string name="inviting_user_to">Inviting user to {0}</string>
-    <string name="removing_user_from">Removing user from {0}</string>
-    <string name="leaving_room">Leaving room: {0}</string>
-    <string name="adding_user_">Adding user: {0}</string>
-    <string name="error_adding_user_timeout">Error adding user: timeout</string>
-    <string name="error_adding_user_not_found">
-        Error adding user: user not found
-    </string>
-
-    <string name="failed_setting_priv_invites">
-        Failed to set allow private invites to: {0}
-    </string>
-    <string name="network_error_setting_listener">
-        Network error setting listener to {0}
-    </string>
-    <string name="network_error_setting_listener_port">
-        Network error changing listener to {0}
-    </string>
+    <!--For someone translating, position {0} is a placeholder for the roomname-->
+    <!--For someone translating, position {0} is a placeholder for the allowed/denied-->
     <string name="allowed">Povoleno</string>
     <string name="denied">Zamítnuto</string>
-
-    <string name="get_folder">Get folder</string>
-
-    <string name="success_added_user">Successfully added user</string>
-
-    <string name="success_added_mod">Successfully added moderator</string>
-    <string name="failed_added_mod">Failed to add moderator</string>
-    <string name="success_invite_user">Successfully invited user</string>
-    <string name="failed_invite_user">Failed to invite user</string>
-    <string name="success_remove_mod">Successfully removed moderator</string>
-    <string name="failed_remove_mod">Failed to remove moderator</string>
-    <string name="success_removed_user">Successfully removed user</string>
-    <string name="failed_removed_user">Failed to remove user</string>
-
-    <string name="wishlist_tab_error">
-        Desired wishlist tab no longer exists
-    </string>
-    <string name="perform_search_first">
-        Must perform a search first to add to wishlist
-    </string>
-    <string name="added_to_wishlist">
-        Added search query \"{0}\" to wishlist
-    </string>
-    <string name="wishlist_tab_target">
-        Cannot change target for wishlist search
-    </string>
-    <string name="search_tab_error">Desired search tab no longer exists</string>
-    <string name="error_sharing">
-        Error parsing files, could not set shared directory
-    </string>
-    <string name="success_sharing">Sharing successfully set up</string>
     <string name="sharing_off">Sdílení je vypnuto</string>
     <string name="sharing_currently_parsing">Probíhá analýza souborů...</string>
-    <string name="sharing_disabled_failure_parsing">
-        Sharing disabled. Failed to parse shares.
-    </string>
-    <string name="sharing_disabled_share_not_set">
-        Sharing disabled. Share directory is not set.
-    </string>
-    <string name="sharing_disabled_error">Error: Sharing disabled.</string>
-
-    <string name="change_target">Change target</string>
-    <string name="change_result_style">Change result style</string>
-    <string name="add_to_wish">Přidat do seznamu přání</string>
-    <string name="remove_from_ignored">Remove from ignored</string>
-
-    <string name="failed_to_send_message">Failed to send message</string>
-    <string name="empty_message_error">Cannot send an empty message</string>
-
-    <string name="browse_user_contacting">
-        Contacting user for directory list. Will appear in browse tab when complete.
-    </string>
-    <string name="browse_user_timeout">User directory request timed out</string>
-    <string name="browse_user_nodirectconnection">
-        User directory request failed - Cannot establish direct connection to peer
-    </string>
-    <string name="browse_user_wefailedtoparse">
-        Failed to parse the browse response
-    </string>
-    <string name="browse_response_received">Browse response received</string>
-    <string name="browse_none">User is not sharing any directories</string>
-    <string name="browse_onlylocked">
-        User is only sharing locked directories
-    </string>
-    <string name="kicked_due_to_other_client">
-        Disconnecting... is another client using this username?
-    </string>
-    <string name="port_already_in_use">
-        Failed to set up listener. Port likely already in use.
-    </string>
-    <string name="dns_failed">
-        DNS lookup of server failed. Falling back on hardcoded IP succeeded.
-    </string>
-    <string name="bad_user_pass">Bad username or password</string>
-    <string name="invalid_username">Invalid username</string>
-    <string name="invalid_password">Invalid password</string>
-    <string name="user_too_long">Username must be under 30 characters</string>
-    <string name="user_invalid_char">
-        Username cannot contain special characters
-    </string>
-    <string name="network_unreachable">Network is unreachable</string>
+    <string name="add_to_wish">Přidat do Seznamu přání</string>
     <string name="cannot_login">Nelze se přihlásit</string>
-    <string name="no_empty_user_pass">
-        Username and password cannot be empty
-    </string>
-    <string name="dns_failed_2">
-        Failed to resolve soulseek server ip address.
-    </string>
-
-    <string name="added_to_ignore">Added user \"{0}\" to ignore list</string>
-    <string name="already_added_to_ignore">
-        User \"{0}\" already added to ignore list
-    </string>
-    <string name="failed_to_establish_connection_to_peer">
-        Failed to establish connection to {0}
-    </string>
-    <string name="user_info_received">User info from {0} received</string>
-    <string name="user_info_failed_conn">
-        Failed to get info for user: {0}.  Could not establish connection.
-    </string>
-    <string name="user_info_failed_offline">
-        Failed to get info for user: {0}.  User is offline.
-    </string>
-    <string name="user_info_failed_timeout">
-        Failed to get info for user: {0}.  Connection timed out.
-    </string>
-    <string name="deleted_message_history_with">
-        Deleted message history with {0}
-    </string>
-
-    <string name="failed_to_establish_direct_or_indirect">
-        Failed to establish a direct or indirect message connection to user
-    </string>
-    <string name="remote_conn_closed">
-        Read error: remote connection closed
-    </string>
+    <!--In this case the placeholder {0} is for the username-->
     <string name="network_down">Síťový subsystém je nedostupný</string>
-    <string name="reported_as_failed">
-        Error: Transfer reported as failed by the uploader
-    </string>
-
     <string name="error_no_space">Chyba: Na zařízení nezbývá žádné místo.</string>
-    <string name="error_unspecified">
-        The task did not complete due to unhandled exception
-    </string>
-
-    <string name="timeout_peer">Timout talking to peer</string>
-    <string name="transfer_rejected">Transfer request rejected</string>
-    <string name="transfer_rejected_file_not_shared">
-        Transfer request rejected. Reason: file not shared
-    </string>
-
-    <string name="delete_messages">Delete messages</string>
-    <string name="delete_all_messages">Delete all messages</string>
-    <string name="deleted_all_messages">Deleted all message history</string>
     <string name="deleted_all_no_messages">Žádné zprávy ke smazání!</string>
-
+    <!--Room Categories-->
     <string name="public_room">Veřejné</string>
     <string name="private_room">Soukromé</string>
     <string name="owned">Vlastněno</string>
     <string name="joined">Připojen</string>
-
     <string name="owner">Vlastník</string>
     <string name="mod">Moderátor</string>
-
-    <string name="set_ticker">Set ticker</string>
-    <string name="setticker">Set ticker</string>
+    <!--Title-->
     <string name="chatrooms">Chatovací místnost</string>
-    <string name="create_chatroom_">Vytvořit místnost</string>
+    <string name="create_chatroom_">Vytvořit místnost:</string>
     <string name="edit_info">Upravit informace</string>
-
+    <!--Dialog Action-->
     <string name="okay">OK</string>
     <string name="undo">Vrátit zpět</string>
     <string name="go">Jít</string>
@@ -492,78 +138,48 @@
     <string name="invite">Pozvat</string>
     <string name="cancel">Zrušit</string>
     <string name="close">Zavřít</string>
-    <string name="report">Report</string>
     <string name="create_chatroom">Vytvořit místnost</string>
     <string name="refresh_room_list">Aktualizovat seznam místností</string>
-
     <string name="away">Pryč</string>
     <string name="online">Online</string>
     <string name="offline">Offline</string>
-
-    <string name="auto_join">Automatické připojení</string>
-    <string name="notification">Oznámení</string>
-    <string name="copy_text">Kopírovat text</string>
-    <string name="ignore_user">Ignorovat uživatele</string>
+    <!--Menu Items-->
+    <string name="copy_text">Kopírovat Text</string>
+    <string name="ignore_user">Ignorovat Uživatele</string>
     <string name="remove_user">Odebrat uživatele</string>
     <string name="remove_mod_priv">Odstranit oprávnění moderátora</string>
     <string name="add_mod_priv">Přidat oprávnění moderátora</string>
     <string name="browse_user">Procházet uživatele</string>
-    <string name="browse_at_location">Browse at location</string>
     <string name="search_user_files">Procházet soubory uživatele</string>
-    <string name="add_to_user_list">Add to user list</string>
     <string name="msg_user">Poslat zprávu uživateli</string>
     <string name="copy_image">Kopírovat obrázek</string>
     <string name="save_image">Uložit obrázek</string>
-
     <string name="success_save">Obrázek uživatele byl úspěšně uložen.</string>
-
+    <!--Internal File Selector-->
     <string name="select_folder">Označit složku</string>
-    <string name="current_location_">Current location:</string>
-
+    <!--Upnp-->
     <string name="upnp_off">UPnP je vypnuté</string>
-    <string name="listener_off">Listener is off</string>
-    <string name="upnp_not_ran">UPnP has not been ran</string>
-    <string name="upnp_currently_running">UPnP is currently running</string>
-    <string name="no_upnp_devices_found">
-        No UPnP compatible devices found
-    </string>
-    <string name="upnp_wifi_only">UPnP is for Wi-Fi only</string>
-    <string name="upnp_no_wifi_conn">No Wi-Fi connection</string>
-    <string name="failed_to_set">Failed to set mapping on UPnP device</string>
-    <string name="upnp_success">UPnP successfully forwarded port</string>
-    <string name="upnp_last_success">UPnP was last ran successfully</string>
-    <string name="attempting_to_find_and_open">
-        Attempting to find and open port via UPnP
-    </string>
-    <string name="upnp_search_finished">UPnP search finished</string>
-
-
+    <!--Sharing-->
+    <!--Transfer States-->
     <string name="completed">Dokončeno</string>
     <string name="in_progress">Probíhá</string>
     <string name="not_started">Nezahájeno</string>
     <string name="paused">Pozastaveno</string>
     <string name="in_queue">Ve frontě</string>
     <string name="unknown">Neznámé</string>
-
     <string name="retry_dl">Opakovat stahování</string>
     <string name="clear_from_list">Smazat ze seznamu</string>
     <string name="cancel_and_clear">Zrušit stahování a vymazat</string>
     <string name="resume_dl">Obnovit stahování</string>
     <string name="refresh_queue_pos">Obnovit pozici fronty</string>
     <string name="play_file">Otevřít soubor</string>
-    <string name="chosen_transfer_doesnt_exist">
-        Zvolená položka přenosu již neexistuje.
-    </string>
     <string name="position_is_still_">Pozice ve frontě je stále: {0}</string>
     <string name="failed_to_play">Nepodařilo se přehrát soubor ve výchozím přehrávači</string>
-
+    <!--Notification-->
     <string name="download_in_progress">Probíhá stahování</string>
     <string name="transfers_in_progress">Probíhá přenos...</string>
     <string name="seeker_running">Seeker běží</string>
-    <string name="seeker_running_content">
-        Seeker právě běží na pozadí
-    </string>
-
+    <!--Privileges-->
     <string name="yes">Ano</string>
     <string name="seconds_left">{0} sekund</string>
     <string name="second_left">{0} sekunda</string>
@@ -577,40 +193,22 @@
     <string name="timeout">Časový limit vypršel</string>
     <string name="priv_success">Práva byla úspěšně aktualizována</string>
     <string name="status">Status</string>
-
     <string name="view_users">Zobrazit uživatele</string>
     <string name="view_self">Zobrazit sebe</string>
-    <string name="view_all_tickers">View all tickers</string>
-
     <string name="resume_all">Obnovit vše</string>
     <string name="pause_all">Pozastavit vše</string>
     <string name="retry_all_failed">Zopakovat vše neúspěšné</string>
     <string name="cancel_and_clear_all">Zrušit a vymazat vše</string>
     <string name="clear_all_complete">Vymazat vše dokončené</string>
-
     <string name="file">soubor</string>
     <string name="files">soubory</string>
     <string name="from_directory">Z adresáře</string>
     <string name="from_directories">Z adresářů</string>
     <string name="upload_f_string">Nahráno {0} {1} uživateli: {2}</string>
-
     <string name="about_title">O programu</string>
-
     <string name="give_privileges">Dávat oprávnění</string>
-    <string name="error_days_entered_no_parse">
-        Zadané dny musí být celé číslo.
-    </string>
-    <string name="error_days_entered_not_positive">
-        Zadané dny musí být kladné číslo.
-    </string>
-    <string name="error_insufficient_days">
-        Nemáte {0} dní na vydání.
-    </string>
     <string name="give_to_">Dát {0}</string>
     <string name="error_give_priv">Předání oprávnění se nezdařilo</string>
-    <string name="give_priv_success">
-        Úspěšně uděleno {0} dní oprávnění uživateli {1}.
-    </string>
     <string name="sending__">Odesílání...</string>
     <string name="give_hint"># dní</string>
     <string name="edit_note">Upravit poznámku</string>
@@ -618,91 +216,26 @@
     <string name="note_title">Poznámka {0}</string>
     <string name="more_options">Více možností</string>
     <string name="remove_from_user_list">Odebrat ze seznamu</string>
-
     <string name="filter_is_on">Filtr zapnutý</string>
-    <string name="filter_is_on_body">
-        Chcete stáhnout celou složku nebo jen filtrované položky?
-    </string>
     <string name="all">Vše</string>
     <string name="just_filtered">Jen filtrované</string>
-
-    <string name="item_total_singular">{0} item total</string>
-    <string name="item_total_plural">{0} items total</string>
-
-    <string name="subfolders_warning">
-        This folder contains subfolders, would you like to download all files in those subfolders as well ({0}) or only the files in the current folder ({1})?
-    </string>
-
-    <string name="subfolders_warning_queue_paused">
-        This folder contains subfolders, would you like to queue all files in those subfolders as well ({0}) or only the files in the current folder ({1})?
-    </string>
-
-    <string name="current_folder_only">Current folder only</string>
-    <string name="must_be_logged_in_to_give_privileges">
-        Must be logged in to give privileges
-    </string>
-
-    <string name="about_body">Seeker is a free and open source Soulseek client for Android. It will never have ads or paid features.</string>
-    <string name="must_be_logged_in_to_get_dir_contents">
-        Must be logged in to get directory contents
-    </string>
     <string name="note">Poznámka</string>
-    <string name="removed_user_from_ignored_list">
-        Removed user \"{0}\" from ignore list
-    </string>
-
-    <string name="removed_user">Removed user: \"{0}\"</string>
-
-    <string name="successfully_changed_incomplete_dir">
-        Successfully changed incomplete directory to \"{0}\"
-    </string>
-
-    <string name="auto_clear_complete">Auto-clear complete downloads</string>
-    <string name="auto_clear_complete_uploads">
-        Auto-clear complete uploads
-    </string>
-
     <string name="download_remaining">Zbývá stáhnout {0}</string>
     <string name="downloads_remaining">Zbývá stáhnout {0}</string>
-
     <string name="upload_remaining">Zbývá nahrát {0}</string>
     <string name="uploads_remaining">Zbývá nahrát {0}</string>
     <string name="uploads_in_progress">Probíhá nahrávání</string>
     <string name="shutdown">Vypnout</string>
-
-    <string name="set_online_alert">Set online alert</string>
-    <string name="remove_online_alert">Remove online alert</string>
-    <string name="user_X_is_now_online">User {0} is now online</string>
-
-    <string name="publicRoomCreation">Requesting public room creation</string>
-
-    <string name="failed_user_offline">Nezdařilo se - uživatel offline</string>
+    <string name="failed_user_offline">Nezdařilo se - Uživatel offline</string>
     <string name="failed_denied">Nezdařilo se - zamítnuto</string>
-    <string name="re_requesting">Re-requesting</string>
-
-
-
-    <string name="diagnostics_more_info">
-        This will save diagnostic information to a text file named \"seeker_diagnostics.txt\" which will be located in the root of the selected download folder.
-		\n\nThis can be useful to send to the dev for the purposes of troubleshooting issues.  If the issues are of a networking nature, one may have to restart the app after turning this option on for full results.
-    </string>
-
-    <string name="folder_X_from_user_Y_finished">
-        {0} from {1} successfully completed.
-    </string>
-
     <string name="sort_results_by">Seřadit dle</string>
-
     <string name="next">Další</string>
     <string name="prev">Předch</string>
     <string name="finish">Dokončit</string>
-
     <string name="Uploads">Nahrávání</string>
     <string name="Downloads">Stahování</string>
     <string name="You">Vy</string>
-
     <string name="sendmessage_">Odeslat zprávu...</string>
-
     <string name="Availability">Dostupnost</string>
     <string name="Speed">Rychlost</string>
     <string name="FolderName">Název složky</string>
@@ -710,227 +243,60 @@
     <string name="Check">Zkontrolovat</string>
     <string name="Keywords">Klíčová slova</string>
     <string name="Configure">Nastavit</string>
-
     <string name="Reselect">Znovu vybrat</string>
     <string name="RemoveFolder">Odstranit složku</string>
     <string name="FolderError">Chyba složky</string>
-    <string name="ErrorForFolder">Chyba pro složku:</string>
-
-    <string name="ErrorDownloadDirNotProperlySet">
-        Error: the download directory is not properly set.
-    </string>
-
-    <string name="CopySelectedURLs">Copy selected URLs</string>
+    <string name="ErrorForFolder">Chyba pro složku: </string>
     <string name="CopyURL">Kopírovat URL</string>
     <string name="CopyFolderURL">Kopírovat URL složky</string>
     <string name="LinkCopied">Odkaz zkopírován</string>
     <string name="LinksCopied">Odkazy zkopírovány</string>
     <string name="ShowFolderInfo">Zobrazit informace o složce</string>
-
     <string name="NothingToCopy">Nic ke kopírování</string>
-    <string name="ThisFolderContainsSubfolders">
-        Tato složka obsahuje podsložky
-    </string>
-    <string name="QueuedForDownload">Queued for download</string>
-    <string name="QueueFolderAsPaused">Queued folder as paused</string>
-
+    <!--meaning duration of song / songs-->
     <string name="Length">Délka</string>
-
     <string name="NumFiles">Počet souborů</string>
     <string name="NumSubfolders">Počet podsložek</string>
-
-    <string name="HideTickerView">Hide ticker view</string>
-    <string name="ShowTickerView">Show ticker view</string>
     <string name="HideStatusView">Skrýt zobrazení stavu</string>
     <string name="ShowStatusView">Zobrazit zobrazení stavu</string>
-
     <string name="theUserJoined">připojen</string>
     <string name="theUserLeft">odpojen</string>
     <string name="theUserWentAway">odešel</string>
     <string name="theUserCameBack">vrátil se zpět</string>
-
-    <string name="messageWillSendOnReConnect">
-        Message will send on connection re-establishment
-    </string>
-
     <string name="SortUsersBy">Seřadit uživatele podle</string>
     <string name="FilterUsers">Filtrovat uživatele...</string>
-
     <string name="Total_">Celkem:</string>
-
-    <string name="CannotBrowseUsernameOffline">
-        Cannot browse {0}, user is offline.
-    </string>
-    <string name="FailedToBrowseUsernameUnspecifiedError">
-        Failed to browse {0} due to unspecified error.
-    </string>
-    <string name="BrowseOnlyEmptyDir">
-        User, {0}, is sharing only an empty directory.
-    </string>
-
-
-    <string name="GetFolderDoesntWorkForLockedShares">
-        Get folder does not work for locked shares.  Must use Browse or Browse at location instead.
-    </string>
     <string name="ImportWizard">Průvodce importem</string>
     <string name="Import">Importovat</string>
-    <string name="SuccessfullyParsed">
-        Úspěšně nalezeno! Klepnutím na Další pokračujte
-    </string>
-    <string name="FailedToParseContactDev">
-        Nepodařilo se analyzovat soubor. Ujistěte se, že soubor je platný. Pro pomoc kontaktujte vývojáře.
-    </string>
-    <string name="FailedToParseReasonContactDev">
-        Nepodařilo se analyzovat soubor. {0}. Pro další pomoc kontaktujte vývojáře.
-    </string>
-
     <string name="NoSuitableFileManager">Nenalezen žádný vhodný správce souborů</string>
-    <string name="SuccessfullyImported">
-        Data klienta byla úspěšně importována
-    </string>
-
-    <string name="FolderFinishedDownloading">
-        Folder finished downloading
-    </string>
     <string name="FinishedDownloading">stahování dokončeno</string>
-    <string name="PermissionsIssueShared">
-        Permissions issue opening shared folder.  Please go into settings and reselect shared folder.
-    </string>
-    <string name="SharedFolderIssuesAllFailed">
-        Issue accessing shared folders. Tap folders for more info.
-    </string>
-
-    <string name="UserXIsOffline">User {0} is offline</string>
-    <string name="CannotConnectUserX">Cannot connect to user {0}</string>
-    <string name="TimeoutQueueUserX">
-        Timeout getting queue position from {0}
-    </string>
-
-    <string name="PermissionErrorShared">
-        Permission error, cannot write (please reselect).
-    </string>
-    <string name="FolderNotAccessible">
-        Folder is not accessible (please reselect).
-    </string>
-    <string name="UnknownErrorShared">Unknown error. See dev.</string>
-    <string name="MessagesWithUser">Messages with {0}</string>
-
-    <string name="DateAddedAsc">Date added (asc)</string>
-    <string name="DateAddedDesc">Date added (desc)</string>
     <string name="Name">Jméno</string>
     <string name="OnlineStatus">Online stav</string>
-
-    <string name="NoUsersFound">No users found</string>
-    <string name="CurrentDownloadFolder_">Download folder</string>
-    <string name="CreateCompleteAndIncomplete">
-        Create Soulseek Complete and Soulseek Incomplete directories
-    </string>
-    <string name="CreateUsernameSubfolders">Create username subfolders</string>
-    <string name="DoNotCreateSubfoldersForSingleDownloads">
-        Skip subfolders for single files
-    </string>
     <string name="ShowSmartFilters">Zobrazit chytré filtry</string>
-    <string name="ShowPrivateLockedSearch">
-        Show private (locked) files in search results
-    </string>
-    <string name="ShowPrivateLockedBrowse">
-        Show private (locked) files in browse response
-    </string>
-    <string name="RememberRecent">Remember recent users</string>
     <string name="ClearRecentUsers">Vymazat poslední uživatele</string>
-    <string name="AutoRetryFailedOfflineOnline">
-        Auto-retry failed downloads when user goes back online
-    </string>
-    <string name="AwayOnInactivity">
-        Set status to away when inactive
-    </string>
-    <string name="DayVarient_">Day theme</string>
-    <string name="NightVarient_">Night theme</string>
-    <string name="NoSharedAdd">No shared folders</string>
     <string name="RescanShares">Znovu skenovat sdílené</string>
-    <string name="PauseSharingIfMetered">
-        Pause sharing on metered (mobile) connection
-    </string>
-    <string name="LimitDownloadSpeed">Limit download speed</string>
-    <string name="LimitUploadSpeed">Limit upload speed</string>
-    <string name="LimitConcurrentDownloads">Limit concurrent downloads</string>
     <string name="EnableDiagnostics">Diagnostický e-mail</string>
-    <string name="ImportExternalClientData">Import external client data</string>
-    <string name="LockedUserListOnly">
-        Locked (only user list can download)
-    </string>
-    <string name="HiddenUserListOnly">Hidden (only user list can view)</string>
-    <string name="OverrideFolderName">Override folder name</string>
-    <string name="CustomFolderName">Custom folder name</string>
-    <string name="QueueSelectedAsPaused">Queue selected as paused</string>
-
     <string name="UserOptions">Možnosti uživatele</string>
     <string name="Options">Možnosti</string>
     <string name="Save">Uložit</string>
     <string name="SortOrder">Řazení</string>
-    <string name="AddUserToIgnored">Add user to ignored</string>
-
-    <string name="ClearAllCompleteAndAborted">
-        Vymazat vše kompletní a přerušeno
-    </string>
     <string name="AbortAll">Přerušit vše</string>
-
-    <string name="BatchSelect">Batch select</string>
     <string name="ShowSize">Zobrazit velikost</string>
     <string name="ShowSpeed">Zobrazit rychlost</string>
-
     <string name="ResumeSelected">Obnovit vybrané</string>
     <string name="PauseSelected">Pozastavit vybrané</string>
     <string name="RetryFailed">Zopakovat neúspěšné</string>
     <string name="InvertSelection">Invertovat výběr</string>
     <string name="SelectAll">Označit vše</string>
-
     <string name="ConfigureSmartFilters">Konfigurace chytrých filtrů</string>
     <string name="NotSet">Nenastaveno</string>
     <string name="AppLocalStorage">Místní úložiště aplikací</string>
     <string name="NotInUse">Není používáno</string>
-
-    <string name="IncompleteFolderEmpty">Incomplete folder is empty</string>
-    <string name="NoEligibleToClear">No eligible items to clear</string>
-
-    <string name="WaitForParsing">Wait for parsing to complete.</string>
-
-    <string name="ErrorAlreadyAdded">Error: directory already added.</string>
-    <string name="UploadFolderOptions">Upload folder options</string>
-    <string name="CannotChangeNameNotUnique">
-        Cannot change name. Not unique.
-    </string>
     <string name="AlreadyParsing">Již probíhá analýza</string>
     <string name="DirectoryNotSet">Adresář není nastaven</string>
-    <string name="FailedGettingAccess">
-        Failed getting access to directory
-    </string>
-    <string name="AdditionalFiles">
-        {0} additional files since last scan.
-    </string>
-    <string name="OneAdditionalFile">1 additional file since last scan.</string>
-    <string name="NoMediaStore">
-        No access to media store. Parsing will be unoptimized.
-    </string>
-    <string name="NoPermissionsForDir">
-        Cannot set directory without proper permissions
-    </string>
     <string name="No">Ne</string>
-
-    <string name="MustBeLoggedInToImport">
-        Musí být přihlášen a připojen k importu dat.
-    </string>
-    <string name="MustBeLoggedInToRetryDL">
-        Musí být přihlášen a připojen k opětovnému zkusení stahování.
-    </string>
-
-    <string name="FailedDownloadDirectoryNotSet">
-        Chyba: Adresář stahování není správně nastaven.
-    </string>
-
     <string name="CopyLink">Kopírovat odkaz</string>
     <string name="DownloadFile">Stáhnout soubor</string>
-
     <string name="IgnoreUnshareUser">Ignorovat uživatele (zrušit sdílení)</string>
     <string name="RetryFailedFiles">Opakovat neúspěšné soubory</string>
     <string name="ResumeFolder">Pokračovat ve složce</string>
@@ -940,68 +306,13 @@
     <string name="AbortandClearUpload">Zrušit a vymazat nahrávání</string>
     <string name="AbortandClearUploads">Zrušit a vymazat nahrávání</string>
     <string name="HideSmartFilters">Skrýt chytré filtry</string>
-
-    <string name="UserIsOffline">User is offline</string>
     <string name="Cancelled">Zrušené</string>
-    <string name="TimedOut">Timed out</string>
     <string name="CannotConnect">Nelze se připojit</string>
-
     <string name="Aborted">Přerušené</string>
-    <string name="SetLanguage">Language</string>
     <string name="Automatic">Automatický</string>
-
-    <string name="ManuallySetIncompleteFolder">
-        Override incomplete folder location
-    </string>
-    <string name="CurrentIncompleteFolder">Incomplete folder</string>
-    <string name="ClearFolder">Clear folder</string>
-
     <string name="HideSize">Skrýt velikost</string>
     <string name="HideSpeed">Skrýt rychlost</string>
-
-    <string name="Num_Selected">{0} vybráno</string>
-
-    <string name="ExportClientData">Export client data</string>
-    <string name="successfully_exported">
-        Successfully exported Seeker client data.
-    </string>
-
-    <string name="ForceFilesystemPermission">
-        Force filesystem permissions
-    </string>
-    <string name="permission_already_successfully_granted">
-        Permission has already been succesfully granted
-    </string>
-    <string name="permission_successfully_granted">
-        Permission succesfully granted
-    </string>
-    <string name="permission_failed">Failed to grant permission</string>
-
-    <string name="bitrate">Bitrate</string>
-
-    <string name="setUpSharing">Set up sharing</string>
-
-    <string name="change_password">Change password</string>
-    <string name="new_password">New password</string>
-    <string name="cannot_be_empty">Cannot be empty</string>
-
-    <string name="must_be_logged_in_to_change_password">
-        Must be logged in to change password
-    </string>
-
-    <string name="failed_to_change_password">Failed to change password</string>
-    <string name="password_successfully_updated">
-        Password successfully updated
-    </string>
-    <string name="error_dialog_content">
-        Seeker has encountered an issue.  \n\nPlease consider sending a report to the developer.  \n\nAny information about the steps / conditions leading up to the issue is much appreciated.
-    </string>
-    <string name="section_downloads">Downloads</string>
-    <string name="section_search">Search</string>
-    <string name="section_general">General</string>
-    <string name="section_appearance">Appearance</string>
-    <string name="section_sharing">Sharing</string>
-    <string name="section_network">Network</string>
-    <string name="section_account">Account</string>
+    <string name="Num_Selected">{0} Vybráno</string>
+    <!-- Modern settings screen -->
+    <!-- Search keyword synonyms -->
 </resources>
-
