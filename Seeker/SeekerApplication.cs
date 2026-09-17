@@ -102,11 +102,21 @@ namespace Seeker
             }
         }
 
-        public static bool DnsLookupFailed;
+        public enum DnsLookupResult
+        {
+            Success,
+            Failed,
+            TimedOut
+        }
+
+        public static DnsLookupResult DnsLookupStatus = DnsLookupResult.Success;
+
+        public static Exception DnsLookupException;
 
         private static async Task<IPAddress> ResolveAddressAsync(string address)
         {
-            DnsLookupFailed = false;
+            DnsLookupStatus = DnsLookupResult.Success;
+            DnsLookupException = null;
             var dnsTask = Dns.GetHostEntryAsync(address);
             var completed = await Task.WhenAny(dnsTask, Task.Delay(3000)).ConfigureAwait(false);
 
@@ -115,8 +125,30 @@ namespace Seeker
                 return dnsTask.Result.AddressList[0];
             }
 
-            DnsLookupFailed = true;
+            if (completed == dnsTask)
+            {
+                DnsLookupStatus = DnsLookupResult.Failed;
+                DnsLookupException = dnsTask.Exception?.InnerException ?? dnsTask.Exception;
+            }
+            else
+            {
+                DnsLookupStatus = DnsLookupResult.TimedOut;
+            }
+            Logger.Debug("DNS lookup of " + address + " " + DnsLookupStatus + " " + DescribeDnsException(DnsLookupException) + " - falling back to hardcoded IP");
             return IPAddress.Parse("208.76.170.59");
+        }
+
+        public static string DescribeDnsException(Exception e)
+        {
+            if (e == null)
+            {
+                return string.Empty;
+            }
+            if (e is SocketException se)
+            {
+                return se.SocketErrorCode + " (" + se.ErrorCode + "): " + se.Message;
+            }
+            return e.GetType().Name + ": " + e.Message;
         }
 
         public const bool AUTO_CONNECT_ON = true;

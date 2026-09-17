@@ -23,6 +23,7 @@
     <locale android:name="ru" />
     <locale android:name="sr" />
     <locale android:name="uk" />
+    <locale android:name="vi" />
 
     <!--Note: res dir is zh-rCN-->
     <locale android:name="zh-CN" />

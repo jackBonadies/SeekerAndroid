@@ -46,6 +46,11 @@ namespace Seeker.Services
 
         private static readonly object loginPhaseSyncRoot = new object();
         private static LoginOrigin? inFlightOrigin;
+
+        // We create this task so it is published under the lock.  ConnectAsync only creates the task
+        //   after both DNS and binding to the listener are done so it would be unfeasible to have that in the lock.
+        // Before this we would get issues where we would be in state Connecting but with no task.  Allowing 
+        //   multiple calls to interleave in ConnectAsync and having no way of knowing if a login was truly in flight.
         private static Task inFlightLogin;
 
         /// <summary>
@@ -62,6 +67,17 @@ namespace Seeker.Services
             }
         }
 
+        private static Task InFlightLogin
+        {
+            get
+            {
+                lock (loginPhaseSyncRoot)
+                {
+                    return inFlightLogin;
+                }
+            }
+        }
+
         public static event EventHandler<LoginCompletedEventArgs> LoginCompleted;
 
         /// <summary>
@@ -69,12 +85,12 @@ namespace Seeker.Services
         /// session state changes when the connect finishes, and raises <see cref="LoginCompleted"/>.
         /// </summary>
         /// <returns>
-        /// The connect task, or null when there is nothing to wait on — either the login already
-        /// failed (synchronously), or a connect is underway that we have no handle for. Callers that
-        /// chain onto the result must handle null.
+        /// A task that completes only after the connect task does. Prevents multiple threads from 
+        /// entering and connecting.
         /// </returns>
         public static Task BeginLogin(LoginOrigin origin, string username, string password)
         {
+            TaskCompletionSource<bool> handle;
             lock (loginPhaseSyncRoot)
             {
                 if (inFlightLogin != null && !inFlightLogin.IsCompleted)
@@ -88,66 +104,46 @@ namespace Seeker.Services
                     return inFlightLogin;
                 }
                 inFlightOrigin = origin;
-                inFlightLogin = null;
+                handle = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                inFlightLogin = handle.Task;
             }
 
-            Task login;
+            Task soulseekClientConnectTask;
             try
             {
-                login = SeekerApplication.ConnectAndPerformPostConnectTasks(username, password);
+                soulseekClientConnectTask = SeekerApplication.ConnectAndPerformPostConnectTasks(username, password);
             }
             catch (InvalidOperationException)
             {
-                login = AdoptConnectInProgress();
-            }
-            catch (AddressException)
-            {
-                FailLogin(SeekerApplication.GetString(Resource.String.dns_failed_2), clearCreds: false);
-                return null;
+                soulseekClientConnectTask = AdoptConnectInProgress();
             }
             catch (Exception e)
             {
-                Logger.Firebase("BeginLogin: " + e.Message + e.StackTrace);
-                FailLogin(e.Message, clearCreds: false);
-                return null;
+                soulseekClientConnectTask = Task.FromException(e);
             }
 
-            if (login == null)
-            {
-                return null;
-            }
-
-            lock (loginPhaseSyncRoot)
-            {
-                inFlightLogin = login;
-            }
-            login.ContinueWith(OnLoginTaskCompleted);
-            return login;
+            // We set the handle after the connect task finishes
+            soulseekClientConnectTask.ContinueWith(t => OnLoginTaskCompleted(t, handle), TaskScheduler.Default);
+            return handle.Task;
         }
 
         /// <summary>
-        /// ConnectAsync refused because a connect is already underway (or done). Attach to that one
-        /// instead of leaving the caller with nothing to wait on.
+        /// This is still possible to get to if we check if logged in -> false, then the login task completes and sets logged in -> true,
+        ///   then we call BeginLogin(), there is no current task, we try to Connect and we get InvalidStateException
         /// </summary>
         private static Task AdoptConnectInProgress()
         {
+            Logger.InfoFirebase("AdoptConnectionInProgress");
             if (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
             {
                 // Already connected and logged in — the login we were about to start is done.
-                SucceedLogin();
-                return null;
+                return Task.CompletedTask;
             }
 
             Task adopted = SeekerApplication.OurCurrentLoginTask;
             if (adopted == null)
             {
-                // Connecting, but there is no task to attach to: SeekerApplication nulls
-                // OurCurrentLoginTask on LoggedIn/Disconnected, and it is assigned only after
-                // ConnectAsync returns, so this is reachable. Drop the in-flight state rather than
-                // leave the UI on a spinner that can never end.
-                Logger.Firebase("BeginLogin: connect underway with no task to adopt");
-                FinishLogin(success: false);
-                return null;
+                return Task.FromException(new InvalidOperationException("BeginLogin: connect underway with no task to adopt"));
             }
 
             SeekerApplication.Toaster.ShowToast(
@@ -155,28 +151,36 @@ namespace Seeker.Services
             return adopted;
         }
 
-        private static void OnLoginTaskCompleted(Task t)
+        private static void OnLoginTaskCompleted(Task connect, TaskCompletionSource<bool> handle)
         {
-            lock (loginPhaseSyncRoot)
+            try
             {
-                if (!ReferenceEquals(t, inFlightLogin))
+                ReportDnsFallbackIfNeeded(connect);
+
+                if (connect.IsCompletedSuccessfully)
                 {
-                    // A newer login already took over
-                    Logger.Debug("Ignoring the result of a superseded login");
-                    return;
+                    SucceedLogin();
+                }
+                else
+                {
+                    var (msg, clearCreds) = ClassifyLoginError(connect);
+                    FailLogin(msg, clearCreds);
                 }
             }
-
-            ReportDnsFallbackIfNeeded(t);
-
-            if (t.IsFaulted)
+            finally
             {
-                var (msg, clearCreds) = ClassifyLoginError(t);
-                FailLogin(msg, clearCreds);
-            }
-            else
-            {
-                SucceedLogin();
+                if (connect.IsFaulted)
+                {
+                    handle.TrySetException(connect.Exception.InnerExceptions);
+                }
+                else if (connect.IsCanceled)
+                {
+                    handle.TrySetCanceled();
+                }
+                else
+                {
+                    handle.TrySetResult(true);
+                }
             }
         }
 
@@ -238,17 +242,20 @@ namespace Seeker.Services
 
         private static void ReportDnsFallbackIfNeeded(Task t)
         {
-            if (!SeekerApplication.DnsLookupFailed)
+            var status = SeekerApplication.DnsLookupStatus;
+            var exception = SeekerApplication.DnsLookupException;
+            if (status == SeekerApplication.DnsLookupResult.Success)
             {
                 return;
             }
-            SeekerApplication.DnsLookupFailed = false;
+            SeekerApplication.DnsLookupStatus = SeekerApplication.DnsLookupResult.Success;
+            SeekerApplication.DnsLookupException = null;
             if (t.IsFaulted)
             {
                 // The login failed anyway; its own error is the useful message.
                 return;
             }
-            Logger.Firebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.");
+            Logger.Firebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded. Status: " + status + " " + SeekerApplication.DescribeDnsException(exception));
             if (InFlightLoginOrigin == LoginOrigin.Interactive)
             {
                 SeekerApplication.Toaster.ShowToast(
@@ -356,6 +363,11 @@ namespace Seeker.Services
                         msg = SeekerApplication.GetString(Resource.String.bad_user_pass);
                     }
                 }
+                else if (t.Exception.InnerExceptions[0] is AddressException)
+                {
+                    clearCreds = false;
+                    msg = SeekerApplication.GetString(Resource.String.dns_failed_2);
+                }
                 else if (t.Exception.InnerExceptions[0] is SoulseekClientException)
                 {
                     clearCreds = false;
@@ -436,26 +448,27 @@ namespace Seeker.Services
         {
             lock (SeekerApplication.OurCurrentLoginTaskSyncObject)
             {
-                if (!SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.Connected) || !SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
-                {
-                    SeekerApplication.OurCurrentLoginTask = SeekerApplication.OurCurrentLoginTask.ContinueWith(action, System.Threading.CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
-                    if (msg != null)
-                    {
-                        if (contextToUseForMessage == null)
-                        {
-                            SeekerApplication.Toaster.ShowToast(msg, ToastLength.Short);
-                        }
-                        else
-                        {
-                            SeekerApplication.Toaster.ShowToast(msg, ToastLength.Short);
-                        }
-                    }
-                    return true;
-                }
-                else
+                var state = SeekerState.SoulseekClient.State;
+                if (state.HasFlag(SoulseekClientStates.Connected) && state.HasFlag(SoulseekClientStates.LoggedIn))
                 {
                     return false;
                 }
+
+                // both are fine to continue with on
+                Task loginTask = SeekerApplication.OurCurrentLoginTask ?? InFlightLogin;
+                if (loginTask == null)
+                {
+                    // this should never happen
+                    Logger.Firebase("RunWithReconnect: not logged in and no login in flight, state " + state);
+                    loginTask = Task.FromException(new InvalidOperationException("not logged in and no login in flight"));
+                }
+
+                SeekerApplication.OurCurrentLoginTask = loginTask.ContinueWith(action, System.Threading.CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
+                if (msg != null)
+                {
+                    SeekerApplication.Toaster.ShowToast(msg, ToastLength.Short);
+                }
+                return true;
             }
         }
 

@@ -48,24 +48,24 @@ namespace Seeker
 
         public override bool OnPrepareOptionsMenu(IMenu menu)
         {
-            UiHelpers.SetMenuTitles(menu, UserToView);
+            UiHelpers.SetMenuTitles(menu, userToView);
             return base.OnPrepareOptionsMenu(menu);
         }
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), UserToView, this, null))
+            if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), userToView, this, null))
             {
                 return true;
             }
             switch (item.ItemId)
             {
                 case Resource.Id.browseUsersFiles:
-                    BrowseService.RequestFilesApi(UserToView, null); 
+                    BrowseService.RequestFilesApi(userToView, null); 
                     return true;
                 case Resource.Id.searchUserFiles:
                     SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
-                    SearchTabHelper.SearchTargetChosenUser = this.UserToView;
+                    SearchTabHelper.SearchTargetChosenUser = this.userToView;
                     Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
                     intent.PutExtra(MainActivity.GoToSearchExtra, true);
                     this.StartActivity(intent);
@@ -73,12 +73,12 @@ namespace Seeker
                 case Resource.Id.messageUser:
                     Intent intentMsg = new Intent(SeekerState.ActiveActivityRef, typeof(MessagesActivity));
                     intentMsg.AddFlags(ActivityFlags.SingleTop);
-                    intentMsg.PutExtra(MessageController.FromUserName, this.UserToView); //so we can go to this user..
+                    intentMsg.PutExtra(MessageController.FromUserName, this.userToView); //so we can go to this user..
                     intentMsg.PutExtra(MessageController.ComingFromMessageTapped, true); //so we can go to this user..
                     this.StartActivity(intentMsg);
                     return true;
                 case Resource.Id.addUser:
-                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, this.UserToView, null);
+                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, this.userToView, null);
                     return true;
                 case Android.Resource.Id.Home:
                     OnBackPressedDispatcher.OnBackPressed();
@@ -87,7 +87,7 @@ namespace Seeker
             return base.OnOptionsItemSelected(item);
         }
 
-        private string UserToView = string.Empty;
+        private string userToView = string.Empty;
         private Soulseek.UserInfo userInfo = null;
         private Soulseek.UserData userData = null;
 
@@ -108,7 +108,7 @@ namespace Seeker
 
         protected override void OnSaveInstanceState(Bundle outState)
         {
-            outState.PutString("UserToView", UserToView);
+            outState.PutString("UserToView", userToView);
             if (userInfo != null)
             {
                 // Picture bytes are not in the bundle — they live in UserInfoPictureCacheService
@@ -144,10 +144,10 @@ namespace Seeker
 
         private void RestoreStateFromBundleIfNecessary(Bundle savedInstanceState)
         {
-            if (string.IsNullOrEmpty(UserToView) || RequestedUserInfoHelper.GetInfoForUser(UserToView) == null)
+            if (string.IsNullOrEmpty(userToView) || RequestedUserInfoHelper.GetInfoForUser(userToView) == null)
             {
-                UserToView = savedInstanceState.GetString("UserToView", string.Empty);
-                if (RequestedUserInfoHelper.GetInfoForUser(UserToView) == null)
+                userToView = savedInstanceState.GetString("UserToView", string.Empty);
+                if (RequestedUserInfoHelper.GetInfoForUser(userToView) == null)
                 {
 
                     if (savedInstanceState.ContainsKey("UserInfo.HasPicture"))
@@ -192,28 +192,28 @@ namespace Seeker
             myToolbar.InflateMenu(Resource.Menu.view_user_info_menu);
             if (Intent != null)
             {
-                UserToView = Intent.GetStringExtra(USERNAME_TO_VIEW);
+                userToView = Intent.GetStringExtra(USERNAME_TO_VIEW);
             }
-            if (UserToView == null)
+            if (userToView == null)
             {
                 Logger.Firebase("UserToView==null");
             }
-            myToolbar.Title = UserToView;
+            myToolbar.Title = userToView;
             this.SetSupportActionBar(myToolbar);
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
 
-            if (UserToView == PreferencesState.Username)
+            if (userToView == PreferencesState.Username)
             {
                 // viewing self
                 //for UserData we only care about Online Status, upload speed, file count, and dir count
-                userData = new Soulseek.UserData(UserToView, Soulseek.UserPresence.Online, PreferencesState.UploadSpeed, 0, SharedFileService.SharedFileCache?.FileCount ?? 0, SharedFileService.SharedFileCache?.DirectoryCount ?? 0, "");
-                userInfo = UserInfoResponder.HandleRequest(UserToView, null).Result; //the task is already completed.  (task.fromresult).
+                userData = new Soulseek.UserData(userToView, Soulseek.UserPresence.Online, PreferencesState.UploadSpeed, 0, SharedFileService.SharedFileCache?.FileCount ?? 0, SharedFileService.SharedFileCache?.DirectoryCount ?? 0, "");
+                userInfo = UserInfoResponder.HandleRequest(userToView, null).Result; //the task is already completed.  (task.fromresult).
                 hasPicture = userInfo != null && userInfo.HasPicture && userInfo.Picture != null && userInfo.Picture.Length > 0;
             }
-            else if (UserToView != null && RequestedUserInfoHelper.GetInfoForUser(UserToView) != null)
+            else if (userToView != null && RequestedUserInfoHelper.GetInfoForUser(userToView) != null)
             {
-                UserListItem uli = RequestedUserInfoHelper.GetInfoForUser(UserToView);
+                UserListItem uli = RequestedUserInfoHelper.GetInfoForUser(userToView);
                 userInfo = uli.UserInfo; //null ref on uli.
                 userData = uli.UserData;
                 hasPicture = uli.HasPicture;
@@ -420,7 +420,7 @@ namespace Seeker
 
         private void SetPictureStatus()
         {
-            if (!hasPicture || string.IsNullOrEmpty(UserToView))
+            if (!hasPicture || string.IsNullOrEmpty(userToView))
             {
                 pictureFailedToLoad = false;
                 ShowNoPictureView();
@@ -454,7 +454,7 @@ namespace Seeker
             picture.Visibility = ViewStates.Gone;
 
             pictureLoadInFlight = true;
-            string requestedUser = UserToView;
+            string requestedUser = userToView;
             var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
 
             byte[] inMemory = userInfo?.Picture;
@@ -508,7 +508,7 @@ namespace Seeker
             {
                 return;
             }
-            if (!string.Equals(requestedUser, UserToView, StringComparison.Ordinal))
+            if (!string.Equals(requestedUser, userToView, StringComparison.Ordinal))
             {
                 // UserToView changed under us — drop this stale result.
                 return;
@@ -629,7 +629,7 @@ namespace Seeker
             if (OperatingSystem.IsAndroidVersionAtLeast(29))
             {
                 ContentValues valuesForContentResolver = GetContentValues();
-                valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.DisplayName, UserToView + SimpleHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_HHmmss") + ext);
+                valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.DisplayName, userToView + SimpleHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_HHmmss") + ext);
                 valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.RelativePath, "Pictures");
                 valuesForContentResolver.Put(Android.Provider.MediaStore.IMediaColumns.IsPending, true); //Flag indicating if a media item is pending, and still being inserted by its owner.
                                                                                                           //While this flag is set, only the owner of the item can open the underlying file; requests from other apps will be rejected.
@@ -649,7 +649,7 @@ namespace Seeker
                 {
                     directory.Mkdirs();
                 }
-                string fileName = UserToView + SimpleHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_HHmmss") + ext;
+                string fileName = userToView + SimpleHelpers.GetDateTimeNowSafe().ToString("_yyyyMMdd_HHmmss") + ext;
                 Java.IO.File file = new Java.IO.File(directory, fileName);
                 SaveToStream(pic, this.ContentResolver.OpenOutputStream(AndroidX.DocumentFile.Provider.DocumentFile.FromFile(file).Uri, "w"));
 
