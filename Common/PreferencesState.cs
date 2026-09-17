@@ -94,6 +94,7 @@ namespace Common
         public const string FieldLangPtPt = "pt-rPT";
         public const string FieldLangRu = "ru";
         public const string FieldLangSr = "sr";
+        public const string FieldLangVi = "vi";
         public const string FieldLangUk = "uk";
         public const string FieldLangZhCn = "zh-rCN";
 

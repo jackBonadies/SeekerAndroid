@@ -33,6 +33,7 @@ namespace Seeker.Settings.Rows
                 ("Português (Portugal)", PreferencesState.FieldLangPtPt),
                 ("ру́сский язы́к", PreferencesState.FieldLangRu),       // Russian
                 ("Srpski", PreferencesState.FieldLangSr),             // Serbian
+                ("Tiếng Việt", PreferencesState.FieldLangVi),        // Vietnamese
                 ("українська мо́ва", PreferencesState.FieldLangUk),     // Ukrainian
                 ("简体中文", PreferencesState.FieldLangZhCn),           // Chinese Simplified
                 ("日本語", PreferencesState.FieldLangJa),              // Japanese
