@@ -128,11 +128,12 @@ namespace Seeker.Services
         }
 
         /// <summary>
-        /// I dont believe this is possible to get to anymore
+        /// This is still possible to get to if we check if logged in -> false, then the login task completes and sets logged in -> true,
+        ///   then we call BeginLogin(), there is no current task, we try to Connect and we get InvalidStateException
         /// </summary>
         private static Task AdoptConnectInProgress()
         {
-            Logger.Firebase("AdoptConnectInProgress - this should be possible since the lock(loginPhaseSyncRoot) clause should take care of it");
+            Logger.InfoFirebase("AdoptConnectionInProgress");
             if (SeekerState.SoulseekClient.State.HasFlag(SoulseekClientStates.LoggedIn))
             {
                 // Already connected and logged in — the login we were about to start is done.
@@ -241,17 +242,20 @@ namespace Seeker.Services
 
         private static void ReportDnsFallbackIfNeeded(Task t)
         {
-            if (!SeekerApplication.DnsLookupFailed)
+            var status = SeekerApplication.DnsLookupStatus;
+            var exception = SeekerApplication.DnsLookupException;
+            if (status == SeekerApplication.DnsLookupResult.Success)
             {
                 return;
             }
-            SeekerApplication.DnsLookupFailed = false;
+            SeekerApplication.DnsLookupStatus = SeekerApplication.DnsLookupResult.Success;
+            SeekerApplication.DnsLookupException = null;
             if (t.IsFaulted)
             {
                 // The login failed anyway; its own error is the useful message.
                 return;
             }
-            Logger.Firebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded.");
+            Logger.Firebase("DNS Lookup of Server Failed. Falling back on hardcoded IP succeeded. Status: " + status + " " + SeekerApplication.DescribeDnsException(exception));
             if (InFlightLoginOrigin == LoginOrigin.Interactive)
             {
                 SeekerApplication.Toaster.ShowToast(
