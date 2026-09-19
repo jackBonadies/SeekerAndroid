@@ -97,6 +97,8 @@ namespace Seeker.Transfers
                 {
                     relevantItem.State = e.Transfer.State;
                 }
+                // this comes from speed, which if we just changed state we do not know yet
+                relevantItem.RemainingTime = null;
                 // IncompleteParentUri and IncompleteUri are now set directly by DownloadFileAsync
                 if (!relevantItem.State.HasFlag(TransferStates.Requested))
                 {
@@ -254,6 +256,11 @@ namespace Seeker.Transfers
                 relevantItem.BytesTransferred = e.Transfer.BytesTransferred;
                 relevantItem.RemainingTime = e.Transfer.RemainingTime;
                 relevantItem.AvgSpeed = e.Transfer.AverageSpeed;
+                // a fresh transfer reports speed 0 for its first second; only a real sample is "recent"
+                if (e.Transfer.AverageSpeed > 0)
+                {
+                    relevantItem.AvgSpeedSampledUtc = DateTime.UtcNow;
+                }
 
                 bool wasFailed = false;
                 if (percentComplete != 0)

@@ -51,9 +51,15 @@ namespace Seeker
 
         public TextView GetSizeSeparatorView();
 
+        public TextView GetTimeRemainingTextView();
+
+        public TextView GetTimeRemainingSeparatorView();
+
         public bool GetShowProgressSize();
 
         public bool GetShowSpeed();
+
+        public bool GetShowTimeRemaining();
     }
 
     public class TransferItemViewFolder : RelativeLayout, ITransferItemView, View.IOnCreateContextMenuListener
@@ -69,6 +75,8 @@ namespace Seeker
         private TextView viewSize;
         private TextView viewSpeed;
         private TextView viewSizeSeparator;
+        private TextView viewTimeRemaining;
+        private TextView viewTimeRemainingSeparator;
         private ImageView selectionCheckbox;
         private FrameLayout actionContainer;
 
@@ -108,8 +116,19 @@ namespace Seeker
             return viewSizeSeparator;
         }
 
+        public TextView GetTimeRemainingTextView()
+        {
+            return viewTimeRemaining;
+        }
+
+        public TextView GetTimeRemainingSeparatorView()
+        {
+            return viewTimeRemainingSeparator;
+        }
+
         public bool showSize;
         public bool showSpeed;
+        public bool showTimeRemaining;
 
         public bool GetShowProgressSize()
         {
@@ -121,18 +140,24 @@ namespace Seeker
             return showSpeed;
         }
 
+        public bool GetShowTimeRemaining()
+        {
+            return showTimeRemaining;
+        }
+
         public TransferItemViewFolder(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder_showProgressSize, this, true);
             setupChildren();
         }
 
-        public static TransferItemViewFolder Create(ViewGroup parent, bool showSize, bool showSpeed)
+        public static TransferItemViewFolder Create(ViewGroup parent, bool showSize, bool showSpeed, bool showTimeRemaining)
         {
             var itemView = new TransferItemViewFolder(parent.Context);
             itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             itemView.showSpeed = showSpeed;
             itemView.showSize = showSize;
+            itemView.showTimeRemaining = showTimeRemaining;
             return itemView;
         }
 
@@ -151,6 +176,8 @@ namespace Seeker
             viewSize = FindViewById<TextView>(Resource.Id.textViewSize);
             viewSpeed = FindViewById<TextView>(Resource.Id.textViewSpeed);
             viewSizeSeparator = FindViewById<TextView>(Resource.Id.textViewSizeSeparator);
+            viewTimeRemaining = FindViewById<TextView>(Resource.Id.textViewTimeRemaining);
+            viewTimeRemainingSeparator = FindViewById<TextView>(Resource.Id.textViewTimeRemainingSeparator);
 
             selectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
             actionContainer = FindViewById<FrameLayout>(Resource.Id.actionContainer);
@@ -193,6 +220,7 @@ namespace Seeker
             var state = folderItem.GetState(out bool isFailed, out _);
 
             TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSizeSeparator, viewSize, viewSpeed, item, state, this.showSize, this.showSpeed, isFolder: true);
+            TransferViewHelper.SetTimeRemainingText(viewTimeRemainingSeparator, viewTimeRemaining, viewSpeed, item, this.showTimeRemaining);
             var arrowSpan = folderItem.IsUpload() ? cachedUploadArrowSpan : cachedDownloadArrowSpan;
             TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state, arrowSpan, cachedDlColor);
             TransferViewHelper.UpdateSegmentedProgressBar(segmentedProgressBar, folderItem);
@@ -432,49 +460,18 @@ namespace Seeker
         }
 
 
-        public static string GetTimeRemainingString(TimeSpan? timeSpan)
+        public static void SetTimeRemainingText(TextView separator, TextView timeRemainingView, TextView speedView, ITransferItem item, bool showTimeRemaining)
         {
-            if (timeSpan == null)
+            TimeSpan? remaining = showTimeRemaining ? item.GetRemainingTime() : null;
+            if (remaining == null)
             {
-                return SeekerState.ActiveActivityRef.GetString(Resource.String.unknown);
+                timeRemainingView.Visibility = ViewStates.Gone;
+                separator.Visibility = ViewStates.Gone;
+                return;
             }
-            else
-            {
-                string[] hms = timeSpan.ToString().Split(':');
-                string h = hms[0].TrimStart('0');
-                if (h == string.Empty)
-                {
-                    h = "0";
-                }
-                string m = hms[1].TrimStart('0');
-                if (m == string.Empty)
-                {
-                    m = "0";
-                }
-                string s = hms[2].TrimStart('0');
-                if (s.Contains('.'))
-                {
-                    s = s.Substring(0, s.IndexOf('.'));
-                }
-                if (s == string.Empty)
-                {
-                    s = "0";
-                }
-                //it will always be length 3.  if the seconds is more than a day it will be like "[13.21:53:20]" and if just 2 it will be like "[00:00:02]"
-                if (h != "0")
-                {
-                    //we have hours
-                    return h + "h:" + m + "m:" + s + "s";
-                }
-                else if (m != "0")
-                {
-                    return m + "m:" + s + "s";
-                }
-                else
-                {
-                    return s + "s";
-                }
-            }
+            timeRemainingView.Text = SimpleHelpers.FormatTimeRemaining(remaining.Value);
+            timeRemainingView.Visibility = ViewStates.Visible;
+            separator.Visibility = speedView.Visibility == ViewStates.Visible ? ViewStates.Visible : ViewStates.Gone;
         }
 
         private enum TransferChipType
@@ -824,6 +821,8 @@ namespace Seeker
         private TextView viewSize;
         private TextView viewSpeed;
         private TextView viewSizeSeparator;
+        private TextView viewTimeRemaining;
+        private TextView viewTimeRemainingSeparator;
         private ImageView selectionCheckbox;
         private FrameLayout actionContainer;
 
@@ -856,6 +855,16 @@ namespace Seeker
             return viewSizeSeparator;
         }
 
+        public TextView GetTimeRemainingTextView()
+        {
+            return viewTimeRemaining;
+        }
+
+        public TextView GetTimeRemainingSeparatorView()
+        {
+            return viewTimeRemainingSeparator;
+        }
+
         public bool GetShowProgressSize()
         {
             return showSizes;
@@ -865,21 +874,28 @@ namespace Seeker
             return showSpeed;
         }
 
+        public bool GetShowTimeRemaining()
+        {
+            return showTimeRemaining;
+        }
+
 
         public bool showSpeed;
         public bool showSizes;
+        public bool showTimeRemaining;
         public TransferItemViewDetails(Context context) : base(context)
         {
             LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
             setupChildren();
         }
 
-        public static TransferItemViewDetails Create(ViewGroup parent, bool showSizes, bool showSpeed)
+        public static TransferItemViewDetails Create(ViewGroup parent, bool showSizes, bool showSpeed, bool showTimeRemaining)
         {
             var itemView = new TransferItemViewDetails(parent.Context);
             itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             itemView.showSpeed = showSpeed;
             itemView.showSizes = showSizes;
+            itemView.showTimeRemaining = showTimeRemaining;
             return itemView;
         }
 
@@ -895,6 +911,8 @@ namespace Seeker
             viewSize = FindViewById<TextView>(Resource.Id.textViewSize);
             viewSpeed = FindViewById<TextView>(Resource.Id.textViewSpeed);
             viewSizeSeparator = FindViewById<TextView>(Resource.Id.textViewSizeSeparator);
+            viewTimeRemaining = FindViewById<TextView>(Resource.Id.textViewTimeRemaining);
+            viewTimeRemainingSeparator = FindViewById<TextView>(Resource.Id.textViewTimeRemainingSeparator);
 
             selectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
             actionContainer = FindViewById<FrameLayout>(Resource.Id.actionContainer);
@@ -915,6 +933,7 @@ namespace Seeker
             viewFilename.Text = ti.Filename;
             progressBar.Progress = ti.GetProgressForPresentation();
             TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSizeSeparator, viewSize, viewSpeed, ti, ti.State, this.showSizes, this.showSpeed);
+            TransferViewHelper.SetTimeRemainingText(viewTimeRemainingSeparator, viewTimeRemaining, viewSpeed, ti, this.showTimeRemaining);
             viewUsername.Text = ti.Username;
             bool isFailedOrAborted = ti.Failed;
             if (item.IsUpload() && ti.State.HasFlag(TransferStates.Cancelled))

@@ -107,6 +107,7 @@ namespace Common
         public static bool MemoryBackedDownload = false;
         public static bool TransferViewShowSizes = false;
         public static bool TransferViewShowSpeed = false;
+        public static bool TransferViewShowTimeRemaining = false;
         public static bool TransferViewGroupByFolder = false;
         public static volatile bool TransferViewInUploadsMode = false;
         public static bool AutoRetryBackOnline = true;

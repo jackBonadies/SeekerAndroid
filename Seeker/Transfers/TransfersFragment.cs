@@ -173,6 +173,15 @@ namespace Seeker
                 menu.FindItem(Resource.Id.action_show_speed).SetTitle(Resource.String.ShowSpeed);
             }
 
+            if (PreferencesState.TransferViewShowTimeRemaining)
+            {
+                menu.FindItem(Resource.Id.action_show_time_remaining).SetTitle(Resource.String.HideTimeRemaining);
+            }
+            else
+            {
+                menu.FindItem(Resource.Id.action_show_time_remaining).SetTitle(Resource.String.ShowTimeRemaining);
+            }
+
             base.OnPrepareOptionsMenu(menu);
         }
 
@@ -216,6 +225,11 @@ namespace Seeker
                 case Resource.Id.action_show_speed:
                     PreferencesState.TransferViewShowSpeed = !PreferencesState.TransferViewShowSpeed;
                     PreferencesManager.SaveTransferViewShowSpeed();
+                    SetRecyclerAdapter(true);
+                    return true;
+                case Resource.Id.action_show_time_remaining:
+                    PreferencesState.TransferViewShowTimeRemaining = !PreferencesState.TransferViewShowTimeRemaining;
+                    PreferencesManager.SaveTransferViewShowTimeRemaining();
                     SetRecyclerAdapter(true);
                     return true;
                 case Resource.Id.action_clear_all_complete_and_aborted:
@@ -1015,7 +1029,7 @@ namespace Seeker
             }
         }
 
-        private void refreshItemProgress(int indexToRefresh, int progress, TransferItem relevantItem, bool wasFailed, double avgSpeedBytes)
+        private void refreshItemProgress(int indexToRefresh, int progress, TransferItem relevantItem, bool wasFailed)
         {
             ITransferItemView v = recyclerViewTransferItems.GetLayoutManager().FindViewByPosition(indexToRefresh) as ITransferItemView;
             if (v != null) //it scrolled out of view which is find bc it will get updated when it gets rebound....
@@ -1023,23 +1037,15 @@ namespace Seeker
                 if (v is TransferItemViewFolder folderView)
                 {
                     var fi = v.InnerTransferItem as FolderItem;
-                    var (totalBytes, completedBytes) = fi.GetFolderProgress();
-
-                    TimeSpan? timeRemaining = null;
-                    long bytesRemaining = totalBytes - completedBytes;
-                    if (avgSpeedBytes != 0)
-                    {
-                        timeRemaining = TimeSpan.FromSeconds(bytesRemaining / avgSpeedBytes);
-                    }
-                    fi.RemainingFolderTime = timeRemaining;
-
                     TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeSeparatorView(), v.GetSizeTextView(), v.GetSpeedTextView(), v.InnerTransferItem, relevantItem.State, v.GetShowProgressSize(), v.GetShowSpeed(), isFolder: true);
+                    TransferViewHelper.SetTimeRemainingText(v.GetTimeRemainingSeparatorView(), v.GetTimeRemainingTextView(), v.GetSpeedTextView(), fi, v.GetShowTimeRemaining());
                     TransferViewHelper.UpdateSegmentedProgressBar(folderView.segmentedProgressBar, fi);
                 }
                 else
                 {
                     v.progressBar.Progress = progress;
                     TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeSeparatorView(), v.GetSizeTextView(), v.GetSpeedTextView(), relevantItem, relevantItem.State, v.GetShowProgressSize(), v.GetShowSpeed());
+                    TransferViewHelper.SetTimeRemainingText(v.GetTimeRemainingSeparatorView(), v.GetTimeRemainingTextView(), v.GetSpeedTextView(), relevantItem, v.GetShowTimeRemaining());
                     TransferViewHelper.SetProgressBarTint(v.progressBar, relevantItem.State, wasFailed);
                 }
             }
@@ -1128,7 +1134,7 @@ namespace Seeker
                         Logger.Debug("Index is -1 TransferProgressUpdated");
                         return;
                     }
-                    refreshItemProgress(index, e.TransferItem.GetProgressForPresentation(), e.TransferItem, e.WasFailed, e.AverageSpeedBytes);
+                    refreshItemProgress(index, e.TransferItem.GetProgressForPresentation(), e.TransferItem, e.WasFailed);
                 });
             }
             catch (System.Exception error)

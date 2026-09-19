@@ -28,7 +28,7 @@ namespace Seeker
 
             public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
             {
-                ITransferItemView view = TransferItemViewDetails.Create(parent, this.showSizes, this.showSpeed);
+                ITransferItemView view = TransferItemViewDetails.Create(parent, this.showSizes, this.showSpeed, this.showTimeRemaining);
                 (view as View).Click += TransferAdapterRecyclerIndividualItem_Click;
                 (view as View).LongClick += TransferAdapterRecyclerVersion_LongClick;
                 return new TransferViewHolder(view as View);
@@ -71,7 +71,7 @@ namespace Seeker
 
             public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
             {
-                ITransferItemView view = TransferItemViewFolder.Create(parent, this.showSizes, this.showSpeed);
+                ITransferItemView view = TransferItemViewFolder.Create(parent, this.showSizes, this.showSpeed, this.showTimeRemaining);
                 (view as View).Click += TransferAdapterRecyclerFolderItem_Click;
                 (view as View).LongClick += TransferAdapterRecyclerVersion_LongClick;
                 return new TransferViewHolder(view as View);
@@ -156,11 +156,13 @@ namespace Seeker
 
             protected readonly bool showSpeed = false;
             protected readonly bool showSizes = false;
+            protected readonly bool showTimeRemaining = false;
             public TransferAdapterRecyclerVersion(System.Collections.IList tranfersList)
             {
                 localDataSet = tranfersList;
                 showSpeed = PreferencesState.TransferViewShowSpeed;
                 showSizes = PreferencesState.TransferViewShowSizes;
+                showTimeRemaining = PreferencesState.TransferViewShowTimeRemaining;
             }
 
         }

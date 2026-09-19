@@ -59,6 +59,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
+            android:paddingEnd="6dp"
             android:gravity="center_vertical"
         >
             <View
@@ -117,7 +118,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="11sp"
-                android:layout_marginEnd="6dp"
+            />
+
+            <TextView
+                android:id="@+id/textViewTimeRemainingSeparator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" &#x00b7; "
+                android:textSize="11sp"
+                android:textColor="?attr/cellTextColor"
+            />
+
+            <TextView
+                android:id="@+id/textViewTimeRemaining"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:textColor="?attr/cellTextColor"
             />
         </LinearLayout>
 

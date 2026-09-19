@@ -819,6 +819,7 @@
     <string name="BatchSelect">Batch select</string>
     <string name="ShowSize">Show size</string>
     <string name="ShowSpeed">Show speed</string>
+    <string name="ShowTimeRemaining">Show time remaining</string>
 
     <string name="ResumeSelected">Resume selected</string>
     <string name="PauseSelected">Pause selected</string>
@@ -881,6 +882,7 @@
 
     <string name="HideSize">Hide size</string>
     <string name="HideSpeed">Hide speed</string>
+    <string name="HideTimeRemaining">Hide time remaining</string>
 
     <string name="Num_Selected">{0} selected</string>
     <string name="DeleteSelected">Delete selected</string>
