@@ -256,6 +256,29 @@ namespace Seeker
             }
         }
 
+        // "1d 4h" / "1h 2m" / "2m 3s" / "45s" - only show 2 units, keep it brief
+        public static string FormatTimeRemaining(TimeSpan remaining)
+        {
+            long totalSeconds = (long)Math.Max(0, remaining.TotalSeconds);
+            long days = totalSeconds / 86400;
+            long hours = (totalSeconds % 86400) / 3600;
+            long minutes = (totalSeconds % 3600) / 60;
+            long seconds = totalSeconds % 60;
+            if (days > 0)
+            {
+                return $"{days}d {hours}h";
+            }
+            if (hours > 0)
+            {
+                return $"{hours}h {minutes}m";
+            }
+            if (minutes > 0)
+            {
+                return $"{minutes}m {seconds}s";
+            }
+            return $"{seconds}s";
+        }
+
         public static string GetDateTimeSinceAbbrev(DateTime dtThen)
         {
             var dtNow = GetDateTimeNowSafe(); //2.5 microseconds

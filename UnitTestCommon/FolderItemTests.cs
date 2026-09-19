@@ -609,22 +609,171 @@ namespace UnitTestCommon
         }
 
         [Test]
-        public void GetRemainingTime_ReturnsRemainingFolderTime()
+        public void GetRemainingTime_NoSpeedSample_ReturnsNull()
         {
             var ti = CreateTransferItem("alice", "\\music\\jazz\\song.mp3", "jazz");
-            var folder = new FolderItem("jazz", "alice", ti);
-            folder.RemainingFolderTime = TimeSpan.FromSeconds(42);
-
-            Assert.AreEqual(TimeSpan.FromSeconds(42), folder.GetRemainingTime());
-        }
-
-        [Test]
-        public void GetRemainingTime_NullByDefault()
-        {
-            var ti = CreateTransferItem("alice", "\\music\\jazz\\song.mp3", "jazz");
+            ti.State = TransferStates.InProgress;
             var folder = new FolderItem("jazz", "alice", ti);
 
             Assert.IsNull(folder.GetRemainingTime());
+        }
+
+        [Test]
+        public void GetRemainingTime_QueuedFilesCountAtTheInProgressSpeed()
+        {
+            var active = CreateTransferItem("alice", "\\music\\jazz\\song1.mp3", "jazz", size: 1000);
+            active.State = TransferStates.InProgress;
+            active.BytesTransferred = 400;
+            active.AvgSpeed = 100;
+            var queued = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz", size: 2000);
+            queued.State = TransferStates.Queued;
+            var done = CreateTransferItem("alice", "\\music\\jazz\\song3.mp3", "jazz", size: 5000);
+            done.State = TransferStates.Succeeded;
+            done.BytesTransferred = 5000;
+            var folder = new FolderItem("jazz", "alice", active);
+            folder.Add(queued);
+            folder.Add(done);
+
+            // (600 + 2000) / 100
+            Assert.AreEqual(TimeSpan.FromSeconds(26), folder.GetRemainingTime());
+        }
+
+        [Test]
+        public void GetRemainingTime_FailedAndPausedFilesAreLeftOut()
+        {
+            var active = CreateTransferItem("alice", "\\music\\jazz\\song1.mp3", "jazz", size: 1000);
+            active.State = TransferStates.InProgress;
+            active.AvgSpeed = 50;
+            var failed = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz", size: 9000);
+            failed.State = TransferStates.Completed | TransferStates.Errored;
+            var paused = CreateTransferItem("alice", "\\music\\jazz\\song3.mp3", "jazz", size: 9000);
+            paused.State = TransferStates.Completed | TransferStates.Cancelled;
+            var folder = new FolderItem("jazz", "alice", active);
+            folder.Add(failed);
+            folder.Add(paused);
+
+            Assert.AreEqual(TimeSpan.FromSeconds(20), folder.GetRemainingTime());
+        }
+
+        [Test]
+        public void GetRemainingTime_TwoInProgressFiles_SumsTheirSpeeds()
+        {
+            var a = CreateTransferItem("alice", "\\music\\jazz\\song1.mp3", "jazz", size: 1000);
+            a.State = TransferStates.InProgress;
+            a.AvgSpeed = 100;
+            var b = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz", size: 1000);
+            b.State = TransferStates.InProgress;
+            b.AvgSpeed = 300;
+            var folder = new FolderItem("jazz", "alice", a);
+            folder.Add(b);
+
+            Assert.AreEqual(TimeSpan.FromSeconds(5), folder.GetRemainingTime());
+        }
+
+        [Test]
+        public void GetRemainingTime_OvershotBytesClampToZero()
+        {
+            var ti = CreateTransferItem("alice", "\\music\\jazz\\song.mp3", "jazz", size: 1000);
+            ti.State = TransferStates.InProgress;
+            ti.BytesTransferred = 1200;
+            ti.AvgSpeed = 10;
+            var folder = new FolderItem("jazz", "alice", ti);
+
+            Assert.AreEqual(TimeSpan.Zero, folder.GetRemainingTime());
+        }
+
+        private static readonly DateTime Now = new DateTime(2026, 9, 19, 12, 0, 0, DateTimeKind.Utc);
+
+        private TransferItem CreateSucceededItem(string fullFilename, double avgSpeed, TimeSpan sampledAgo, long size = 1000)
+        {
+            var ti = CreateTransferItem("alice", fullFilename, "jazz", size: size);
+            ti.State = TransferStates.Completed | TransferStates.Succeeded;
+            ti.BytesTransferred = size;
+            ti.AvgSpeed = avgSpeed;
+            ti.AvgSpeedSampledUtc = Now - sampledAgo;
+            return ti;
+        }
+
+        [Test]
+        public void GetRemainingTime_BetweenFiles_HoldsTheLastSampledSpeed()
+        {
+            var done = CreateSucceededItem("\\music\\jazz\\song1.mp3", 100, TimeSpan.FromSeconds(2));
+            var next = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz", size: 1000);
+            next.State = TransferStates.Queued | TransferStates.Remotely;
+            var folder = new FolderItem("jazz", "alice", done);
+            folder.Add(next);
+
+            Assert.AreEqual(TimeSpan.FromSeconds(10), folder.GetRemainingTime(Now));
+        }
+
+        [Test]
+        public void GetRemainingTime_NewFileWithoutSampleUsesTheHeldSpeed()
+        {
+            var done = CreateSucceededItem("\\music\\jazz\\song1.mp3", 100, TimeSpan.FromSeconds(3));
+            var next = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz", size: 1000);
+            next.State = TransferStates.InProgress;
+            next.AvgSpeed = 0;
+            var folder = new FolderItem("jazz", "alice", done);
+            folder.Add(next);
+
+            Assert.AreEqual(TimeSpan.FromSeconds(10), folder.GetRemainingTime(Now));
+        }
+
+        [Test]
+        public void GetRemainingTime_LiveSpeedWinsOverHeld()
+        {
+            var done = CreateSucceededItem("\\music\\jazz\\song1.mp3", 100, TimeSpan.FromSeconds(1));
+            var active = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz", size: 3000);
+            active.State = TransferStates.InProgress;
+            active.AvgSpeed = 300;
+            var folder = new FolderItem("jazz", "alice", done);
+            folder.Add(active);
+
+            Assert.AreEqual(TimeSpan.FromSeconds(10), folder.GetRemainingTime(Now));
+        }
+
+        [Test]
+        public void GetRemainingTime_HeldSpeedExpires()
+        {
+            var done = CreateSucceededItem("\\music\\jazz\\song1.mp3", 100, TimeSpan.FromSeconds(31));
+            var next = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz", size: 1000);
+            next.State = TransferStates.Queued | TransferStates.Remotely;
+            var folder = new FolderItem("jazz", "alice", done);
+            folder.Add(next);
+
+            Assert.IsNull(folder.GetRemainingTime(Now));
+        }
+
+        [Test]
+        public void GetRemainingTime_UnstampedSpeedIsNotHeld()
+        {
+            // AvgSpeed persists across restarts, the stamp does not.
+            var done = CreateTransferItem("alice", "\\music\\jazz\\song1.mp3", "jazz", size: 1000);
+            done.State = TransferStates.Completed | TransferStates.Succeeded;
+            done.BytesTransferred = 1000;
+            done.AvgSpeed = 100;
+            var next = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz", size: 1000);
+            next.State = TransferStates.Queued | TransferStates.Remotely;
+            var folder = new FolderItem("jazz", "alice", done);
+            folder.Add(next);
+
+            Assert.IsNull(folder.GetRemainingTime(Now));
+        }
+
+        [Test]
+        public void GetRemainingTime_NothingPending_ReturnsNullEvenWithRecentSample()
+        {
+            var a = CreateSucceededItem("\\music\\jazz\\song1.mp3", 100, TimeSpan.FromSeconds(1));
+            var b = CreateSucceededItem("\\music\\jazz\\song2.mp3", 100, TimeSpan.FromSeconds(1));
+            var folder = new FolderItem("jazz", "alice", a);
+            folder.Add(b);
+
+            Assert.IsNull(folder.GetRemainingTime(Now));
+
+            b.State = TransferStates.Completed | TransferStates.Cancelled;
+            b.BytesTransferred = 400;
+
+            Assert.IsNull(folder.GetRemainingTime(Now));
         }
 
         [Test]

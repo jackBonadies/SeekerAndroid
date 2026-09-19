@@ -110,6 +110,20 @@ namespace UnitTestCommon
             Assert.That(SimpleHelpers.GetHumanReadableTime(360000), Is.EqualTo("100h0m0s"));
         }
 
+        [TestCase(0, "0s")]
+        [TestCase(45, "45s")]
+        [TestCase(59.9, "59s")]
+        [TestCase(60, "1m 0s")]
+        [TestCase(123, "2m 3s")]
+        [TestCase(3600, "1h 0m")]
+        [TestCase(3723, "1h 2m")]
+        [TestCase(86400 + 4 * 3600 + 59 * 60 + 59, "1d 4h")]
+        [TestCase(-5, "0s")]
+        public void FormatTimeRemaining_FormatsByLargestUnit(double seconds, string expected)
+        {
+            Assert.AreEqual(expected, SimpleHelpers.FormatTimeRemaining(TimeSpan.FromSeconds(seconds)));
+        }
+
         // --- GetHumanReadableSize ---
 
         [Test]

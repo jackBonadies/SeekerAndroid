@@ -33,12 +33,70 @@ namespace Seeker
             TransferItems = new List<TransferItem>();
         }
 
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public TimeSpan? RemainingFolderTime; //this should never be serialized
+        // How long a speed sample is valid for.  Used by Folder Remaining Time / speed calculation
+        //  bc sometimes there are no valid speed samples (i.e. during initialization and the 1st second
+        //  of in progress it is blank)
+        private static readonly TimeSpan SpeedHoldWindow = TimeSpan.FromSeconds(15);
 
+        // Time remaining to finish files that will transfer on their own (does not count paused / failed
+        //   since those require user intervention).  There will not always be a transfer in progress / with 
+        //   active speed (since it can be intializing and we dont calc speed for the first second), if thats
+        //   the case hold the neweset one in our folder.
         public TimeSpan? GetRemainingTime()
         {
-            return RemainingFolderTime;
+            return GetRemainingTime(DateTime.UtcNow);
+        }
+
+        public TimeSpan? GetRemainingTime(DateTime utcNow)
+        {
+            const TransferStates pending = TransferStates.Requested | TransferStates.Queued
+                | TransferStates.Initializing | TransferStates.InProgress | TransferStates.Aborted;
+            long bytesRemaining = 0;
+            double speed = 0;
+            bool anyPending = false;
+            double heldSpeed = 0;
+            DateTime heldSpeedSampledUtc = DateTime.MinValue;
+            lock (TransferItems)
+            {
+                foreach (TransferItem ti in TransferItems)
+                {
+                    if (ti.AvgSpeed > 0 && ti.AvgSpeedSampledUtc > heldSpeedSampledUtc)
+                    {
+                        heldSpeed = ti.AvgSpeed;
+                        heldSpeedSampledUtc = ti.AvgSpeedSampledUtc;
+                    }
+                    if (ti.State.HasFlag(TransferStates.Completed) || (ti.State & pending) == 0)
+                    {
+                        continue;
+                    }
+                    anyPending = true;
+                    bytesRemaining += Math.Max(0, ti.Size - ti.GetBytesTransferred());
+                    if (ti.State.HasFlag(TransferStates.InProgress))
+                    {
+                        speed += ti.AvgSpeed;
+                    }
+                }
+            }
+            if (!anyPending)
+            {
+                return null;
+            }
+            if (speed <= 0 && utcNow - heldSpeedSampledUtc <= SpeedHoldWindow)
+            {
+                speed = heldSpeed;
+            }
+            // if nothing in progress and its been awhile since last speed update, hide time remaining, 
+            //   we would be giving a misleading estimate otherwise.
+            if (speed <= 0)
+            {
+                return null;
+            }
+            double seconds = bytesRemaining / speed;
+            if (seconds > TimeSpan.MaxValue.TotalSeconds)
+            {
+                return null;
+            }
+            return TimeSpan.FromSeconds(seconds);
         }
 
         [System.Xml.Serialization.XmlIgnoreAttribute]

@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Seeker;
 using Soulseek;
+using System;
 
 namespace UnitTestCommon
 {
@@ -55,6 +56,32 @@ namespace UnitTestCommon
 
             Assert.AreEqual(40, ti.GetProgressForPresentation());
             Assert.AreEqual(400, ti.GetBytesTransferred());
+        }
+
+        // --- GetRemainingTime ---
+
+        [Test]
+        public void GetRemainingTime_InProgress_ReturnsRemainingTime()
+        {
+            var ti = new TransferItem
+            {
+                State = TransferStates.InProgress,
+                RemainingTime = TimeSpan.FromSeconds(42),
+            };
+
+            Assert.AreEqual(TimeSpan.FromSeconds(42), ti.GetRemainingTime());
+        }
+
+        [Test]
+        public void GetRemainingTime_NotInProgress_ReturnsNull()
+        {
+            var ti = new TransferItem
+            {
+                State = TransferStates.Initializing,
+                RemainingTime = TimeSpan.FromSeconds(42),
+            };
+
+            Assert.IsNull(ti.GetRemainingTime());
         }
     }
 }
