@@ -113,22 +113,30 @@ namespace Seeker
 
         public static Exception DnsLookupException;
 
+        private const int DnsTimeoutMs = 3000;
+
         private static async Task<IPAddress> ResolveAddressAsync(string address)
         {
             DnsLookupStatus = DnsLookupResult.Success;
             DnsLookupException = null;
-            var dnsTask = Dns.GetHostEntryAsync(address);
-            var completed = await Task.WhenAny(dnsTask, Task.Delay(3000)).ConfigureAwait(false);
+            // server.slsknet.org has only A record, no AAAA record. If we dont pass InterNetwork then 
+            //   we end up calling getaddrinfo with AF_UNSPEC which waits until it gets a response from 
+            //   both queries. Some resolvers timeout when no AAAA record and its requested.  In our logs we 
+            //   see 20% of users timeout.  Therefore, we force IPv4 here.
+            var dnsTask = Dns.GetHostAddressesAsync(address, AddressFamily.InterNetwork);
 
-            if (completed == dnsTask && dnsTask.Status == TaskStatus.RanToCompletion)
+            var completed = await Task.WhenAny(dnsTask, Task.Delay(DnsTimeoutMs)).ConfigureAwait(false);
+
+            if (completed == dnsTask && dnsTask.Status == TaskStatus.RanToCompletion && dnsTask.Result.Length > 0)
             {
-                return dnsTask.Result.AddressList[0];
+                return dnsTask.Result[0];
             }
 
             if (completed == dnsTask)
             {
                 DnsLookupStatus = DnsLookupResult.Failed;
-                DnsLookupException = dnsTask.Exception?.InnerException ?? dnsTask.Exception;
+                DnsLookupException = dnsTask.Exception?.InnerException ?? (Exception)dnsTask.Exception
+                    ?? new SocketException((int)SocketError.NoData);
             }
             else
             {
