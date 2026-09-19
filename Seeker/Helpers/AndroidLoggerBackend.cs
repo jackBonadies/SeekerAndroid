@@ -34,6 +34,14 @@ namespace Seeker.Helpers
 #endif
         }
 
+        public void Info(string msg)
+        {
+            DiagnosticFileWriter.AppendIfEnabled(msg);
+#if ADB_LOGCAT
+            log.Info(LogCatTag, msg);
+#endif
+        }
+
         public void FirebaseError(string msg, Exception e)
         {
             Firebase($"{msg} msg: {e.Message} stack: {e.StackTrace}");
