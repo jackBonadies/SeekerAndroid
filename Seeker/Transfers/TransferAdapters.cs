@@ -24,13 +24,11 @@ namespace Seeker
             public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
             {
                 (holder as TransferViewHolder).getTransferItemView().setItem(localDataSet[position] as TransferItem, this.IsInBatchSelectMode);
-                //(holder as TransferViewHolder).getTransferItemView().LongClick += TransferAdapterRecyclerVersion_LongClick; //I dont think we should be adding this here.  you get 3 after a short time...
             }
 
             public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
             {
                 ITransferItemView view = TransferItemViewDetails.Create(parent, this.showSizes, this.showSpeed);
-                // .inflate(R.layout.text_row_item, viewGroup, false);
                 (view as View).Click += TransferAdapterRecyclerIndividualItem_Click;
                 (view as View).LongClick += TransferAdapterRecyclerVersion_LongClick;
                 return new TransferViewHolder(view as View);
@@ -69,13 +67,11 @@ namespace Seeker
             public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
             {
                 (holder as TransferViewHolder).getTransferItemView().setItem(localDataSet[position] as FolderItem, this.IsInBatchSelectMode);
-                //(holder as TransferViewHolder).getTransferItemView().LongClick += TransferAdapterRecyclerVersion_LongClick; //I dont think we should be adding this here.  you get 3 after a short time...
             }
 
             public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
             {
                 ITransferItemView view = TransferItemViewFolder.Create(parent, this.showSizes, this.showSpeed);
-                // .inflate(R.layout.text_row_item, viewGroup, false);
                 (view as View).Click += TransferAdapterRecyclerFolderItem_Click;
                 (view as View).LongClick += TransferAdapterRecyclerVersion_LongClick;
                 return new TransferViewHolder(view as View);
@@ -123,44 +119,6 @@ namespace Seeker
 
         }
 
-        public class ProgressSizeTextView : TextView
-        {
-            public int Progress = 0;
-            private readonly bool isInNightMode = false;
-            public ProgressSizeTextView(Context context, IAttributeSet attrs) : base(context, attrs)
-            {
-                isInNightMode = DownloadDialog.InNightMode(context);
-            }
-            protected override void OnDraw(Canvas canvas)
-            {
-                if (isInNightMode)
-                {
-                    canvas.Save();
-                    this.SetTextColor(Color.White);
-                    base.OnDraw(canvas);
-                    canvas.Restore();
-                }
-                else
-                {
-                    Rect rect = new Rect();
-                    this.GetDrawingRect(rect);
-                    rect.Right = (int)(rect.Left + (Progress * .01) * (rect.Right - rect.Left));
-                    canvas.Save();
-                    canvas.ClipRect(rect, Region.Op.Difference);
-                    this.SetTextColor(Color.Black);
-                    base.OnDraw(canvas);
-                    canvas.Restore();
-
-                    canvas.Save();
-                    canvas.ClipRect(rect, Region.Op.Intersect); // lets draw inside center rect only
-                    this.SetTextColor(Color.White);
-                    base.OnDraw(canvas);
-                    canvas.Restore();
-                }
-            }
-        }
-
-
         public abstract class TransferAdapterRecyclerVersion : RecyclerView.Adapter //<TransferAdapterRecyclerVersion.TransferViewHolder>
         {
             protected System.Collections.IList localDataSet;
@@ -195,15 +153,6 @@ namespace Seeker
             {
                 return this.selectedItem;
             }
-
-            //public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
-            //{
-            //    (holder as TransferViewHolder).getTransferItemView().setItem(localDataSet[position] as TransferItem);
-            //    //(holder as TransferViewHolder).getTransferItemView().LongClick += TransferAdapterRecyclerVersion_LongClick; //I dont think we should be adding this here.  you get 3 after a short time...
-            //}
-
-
-
 
             protected readonly bool showSpeed = false;
             protected readonly bool showSizes = false;
@@ -248,9 +197,6 @@ namespace Seeker
 
             public TransferViewHolder(View view) : base(view)
             {
-                //super(view);
-                // Define click listener for the ViewHolder's View
-
                 transferItemView = (ITransferItemView)view;
                 transferItemView.ViewHolder = this;
                 (transferItemView as View).SetOnCreateContextMenuListener(this);
@@ -263,14 +209,12 @@ namespace Seeker
 
             public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
             {
-                //base.OnCreateContextMenu(menu, v, menuInfo);
                 ITransferItemView tvh = v as ITransferItemView;
                 TransferItem ti = null;
                 FolderItem fi = null;
                 TransferStates folderItemState = TransferStates.None;
                 bool isTransferItem = false;
                 bool anyFailed = false;
-                //bool anyOffline = false;
                 bool isUpload = false;
                 if (tvh?.InnerTransferItem is TransferItem tvhi)
                 {
@@ -284,15 +228,6 @@ namespace Seeker
                     folderItemState = fi.GetState(out anyFailed, out _);
                     isUpload = fi.IsUpload();
                 }
-                //else
-                //{
-                //shouldnt happen....
-                AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-                int pos1 = info?.Position ?? -1;
-                //}
-
-
-                //if somehow we got here without setting the transfer item. then set it now...  you have menuInfo.Position, AND tvh.InnerTransferItem. and recyclerTransfer.GetSelectedItem() to check for null.
 
                 if (isUpload)
                 {
@@ -466,29 +401,8 @@ namespace Seeker
                 {
                     menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.IgnoreUnshareUser, 6, Resource.String.IgnoreUnshareUser);
                 }
-                //finally batch selection mode
                 menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.BatchSelect, 16, Resource.String.BatchSelect);
-
-                //if (!isUpload)
-                //{
-                //    if (isTransferItem)
-                //    {
-                //        if(ti.State.HasFlag(TransferStates.UserOffline))
-                //        {
-
-                //        }
-                //    }
-                //    else
-                //    {
-                //        if(anyOffline)
-                //        {
-                //            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 106, 17, "Do Not Auto-Retry When User Goes Back Online");
-                //            menu.Add(UNIQUE_TRANSFER_GROUP_ID, 106, 17, "Auto-Retry When User Goes Back Online");
-                //        }
-                //    }
-                //}
             }
-
         }
     }
 }
