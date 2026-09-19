@@ -321,7 +321,10 @@ namespace Seeker
 
                 currentFile.Visibility = ViewStates.Visible;
                 currentFile.SetTextColor(new Color(dlColor));
-                currentFile.SetText(spannable, TextView.BufferType.Spannable);
+                // Ellipsize only works with BufferType Normal not Spannable
+                //   Normal: creates a readonly copy
+                //   Spannable: allows you to change styling at runtime
+                currentFile.SetText(spannable, TextView.BufferType.Normal);
             }
             else
             {
