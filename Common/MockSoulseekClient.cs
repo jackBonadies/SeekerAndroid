@@ -225,20 +225,30 @@ namespace Seeker
         {
             while (!ct.IsCancellationRequested)
             {
-                await Task.Delay(10_000, ct);
-                var username = _mockUsernames[_random.Next(_mockUsernames.Length)];
-                var response = Options?.BrowseResponseResolver(username, IPEndPoint)?.Result;
-                if (response != null)
+                try
                 {
-                    var nonEmptyDirectories = response.Directories.Where(dir => dir.FileCount != 0);
-                    var index = _random.Next(0, nonEmptyDirectories.Count());
-                    var directoryToDownload = nonEmptyDirectories.ElementAt(index);
-                    foreach (var file in directoryToDownload.Files)
+                    await Task.Delay(10_000, ct);
+                    var username = _mockUsernames[_random.Next(_mockUsernames.Length)];
+                    var response = Options?.BrowseResponseResolver(username, IPEndPoint)?.Result;
+                    var nonEmptyDirectories = response?.Directories.Where(dir => dir.FileCount != 0).ToList();
+                    if (nonEmptyDirectories != null && nonEmptyDirectories.Count > 0)
                     {
-                        Options?.EnqueueDownload(username, IPEndPoint, directoryToDownload.Name + @"\" + file.Filename);
+                        var directoryToDownload = nonEmptyDirectories[_random.Next(0, nonEmptyDirectories.Count)];
+                        foreach (var file in directoryToDownload.Files)
+                        {
+                            Options?.EnqueueDownload(username, IPEndPoint, directoryToDownload.Name + @"\" + file.Filename);
+                        }
                     }
+                    await Task.Delay(BrowseUploadIntervalSec * 1000, ct);
                 }
-                await Task.Delay(BrowseUploadIntervalSec * 1000, ct);
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (Exception)
+                {
+                    // continue with the loop
+                }
             }
         }
 
@@ -1941,7 +1951,9 @@ namespace Seeker
         private async Task<Transfer> UploadFromFileAsync(string username, string remoteFilename, string localFilename, int? token, TransferOptions options, CancellationToken? cancellationToken)
         {
             if (UploadFromFileAsyncHandler != null) return await UploadFromFileAsyncHandler(username, remoteFilename, localFilename, token, options, cancellationToken);
-            return await UploadInternalAsync(username, remoteFilename, 1024, 0, token ?? GetNextToken(), options, cancellationToken ?? CancellationToken.None);
+            long size = new FileInfo(localFilename).Length;
+            Func<long, Task<Stream>> inputStreamFactory = (_) => Task.FromResult((Stream)new FileStream(localFilename, FileMode.Open, FileAccess.Read, FileShare.Read));
+            return await UploadInternalAsync(username, remoteFilename, size, 0, token ?? GetNextToken(), inputStreamFactory, options, cancellationToken ?? CancellationToken.None);
         }
 
         public Task<Transfer> UploadAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
@@ -1953,14 +1965,49 @@ namespace Seeker
         private async Task<Transfer> UploadFromStreamAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token, TransferOptions options, CancellationToken? cancellationToken)
         {
             if (UploadFromStreamAsyncHandler != null) return await UploadFromStreamAsyncHandler(username, remoteFilename, size, inputStreamFactory, token, options, cancellationToken);
-            return await UploadInternalAsync(username, remoteFilename, size, 0, token ?? GetNextToken(), options, cancellationToken ?? CancellationToken.None);
+            return await UploadInternalAsync(username, remoteFilename, size, 0, token ?? GetNextToken(), inputStreamFactory, options, cancellationToken ?? CancellationToken.None);
         }
 
-        SemaphoreSlim GlobalDownloadSemaphore = new SemaphoreSlim(initialCount: 3, maxCount: 3);
-        SemaphoreSlim GlobalUploadSemaphore = new SemaphoreSlim(initialCount: 3, maxCount: 3);
+        SemaphoreSlim GlobalDownloadSemaphore = new SemaphoreSlim(initialCount: int.MaxValue, maxCount: int.MaxValue);
+        SemaphoreSlim GlobalUploadSemaphore = new SemaphoreSlim(initialCount: 10, maxCount: 10);
+        ConcurrentDictionary<string, SemaphoreSlim> UploadSemaphores = new ConcurrentDictionary<string, SemaphoreSlim>();
+        ConcurrentDictionary<string, SemaphoreSlim> PeerUploadSlots = new ConcurrentDictionary<string, SemaphoreSlim>();
+        ConcurrentDictionary<string, List<int>> PeerQueues = new ConcurrentDictionary<string, List<int>>();
         ConcurrentDictionary<int, TransferInternal> DownloadDictionary = new ConcurrentDictionary<int, TransferInternal>();
         ConcurrentDictionary<int, TransferInternal> UploadDictionary = new ConcurrentDictionary<int, TransferInternal>();
         ConcurrentDictionary<string, bool> UniqueKeyDictionary = new ConcurrentDictionary<string, bool>();
+
+        private void EnqueueAtPeer(string username, int token)
+        {
+            var queue = PeerQueues.GetOrAdd(username, _ => new List<int>());
+            lock (queue)
+            {
+                queue.Add(token);
+            }
+        }
+
+        private void DequeueAtPeer(string username, int token)
+        {
+            if (PeerQueues.TryGetValue(username, out var queue))
+            {
+                lock (queue)
+                {
+                    queue.Remove(token);
+                }
+            }
+        }
+
+        private int GetPlaceAtPeer(string username, int token)
+        {
+            if (PeerQueues.TryGetValue(username, out var queue))
+            {
+                lock (queue)
+                {
+                    return queue.IndexOf(token) + 1;
+                }
+            }
+            return 0;
+        }
 
         private static bool HasToken(string name, string token)
         {
@@ -2048,6 +2095,8 @@ namespace Seeker
             }
 
             bool globalSemaphoreAcquired = false;
+            SemaphoreSlim peerSlot = null;
+            bool peerSlotAcquired = false;
 
             bool noFail = HasToken(filename, "no_fail");
             var updateCount = ParseIntToken(filename, "update");
@@ -2060,44 +2109,84 @@ namespace Seeker
             bool mismatch = HasToken(filename, "mismatch");
             bool realFile = HasToken(filename, "realfile");
             var mismatchPercent = ParseIntToken(filename, "mismatch");
+            int peerSlots = Math.Max(1, ParseIntToken(filename, "slots") ?? 1);
 
             Stream outputStream = null;
 
             try
             {
-                if (filename.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    UpdateState(TransferStates.Queued | TransferStates.Locally);
-                    UpdateState(TransferStates.Completed | TransferStates.Errored);
-                    throw new TransferRejectedException("Transfer rejected: filename contains 'failed'");
-                }
-
                 UpdateState(TransferStates.Queued | TransferStates.Locally);
-                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
 
                 await GlobalDownloadSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
                 globalSemaphoreAcquired = true;
 
-                UpdateState(TransferStates.Requested);
                 await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
-
-                long newSize = 100_000_000;
-                if (mismatch)
+                if (HasToken(filename, "offline"))
                 {
-                    if (mismatchPercent == null || _random.Next(0,100) < mismatchPercent.Value)
-                    {
-                        // if we dont include this we get an infinite loop
-                        if (download.Size !=  newSize) 
-                        {
-                            throw new TransferSizeMismatchException($"Transfer aborted: the remote size of {newSize} does not match expected size {download.Size}", download.Size.Value, newSize);
-                        }
-                    }
+                    throw new UserOfflineException($"User {username} appears to be offline");
+                }
+                if (HasToken(filename, "cannotconnect"))
+                {
+                    throw new ConnectionException($"Failed to establish a direct or indirect message connection to {username} ({IPEndPoint})");
                 }
 
-                UpdateState(TransferStates.Queued | TransferStates.Remotely);
-                await Task.Delay(queueSeconds != null ? queueSeconds.Value * 1000 : SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+                UpdateState(TransferStates.Requested);
 
-                UpdateState(TransferStates.Initializing);
+                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+                if (HasToken(filename, "timeout"))
+                {
+                    throw new TimeoutException($"The wait timed out after {Options?.PeerConnectionOptions?.InactivityTimeout ?? 15000} milliseconds");
+                }
+                if (HasToken(filename, "failed"))
+                {
+                    throw new TransferRejectedException("Transfer rejected: File not shared.");
+                }
+
+                long newSize = 100_000_000;
+                bool sizeMismatch = mismatch && download.Size != newSize
+                    && (mismatchPercent == null || _random.Next(0, 100) < mismatchPercent.Value);
+
+                peerSlot = PeerUploadSlots.GetOrAdd(username, _ => new SemaphoreSlim(peerSlots, peerSlots));
+                peerSlotAcquired = peerSlot.Wait(0);
+
+                if (peerSlotAcquired && queueSeconds == null)
+                {
+                    if (sizeMismatch)
+                    {
+                        throw new TransferSizeMismatchException($"Transfer aborted: the remote size of {newSize} does not match expected size {download.Size}", download.Size.Value, newSize);
+                    }
+                    UpdateState(TransferStates.Queued | TransferStates.Remotely);
+                    UpdateState(TransferStates.Initializing);
+                }
+                else
+                {
+                    UpdateState(TransferStates.Queued | TransferStates.Remotely);
+                    EnqueueAtPeer(username, token);
+                    try
+                    {
+                        if (queueSeconds != null)
+                        {
+                            await Task.Delay(queueSeconds.Value * 1000, cancellationToken).ConfigureAwait(false);
+                        }
+                        if (!peerSlotAcquired)
+                        {
+                            await peerSlot.WaitAsync(cancellationToken).ConfigureAwait(false);
+                            peerSlotAcquired = true;
+                        }
+                    }
+                    finally
+                    {
+                        DequeueAtPeer(username, token);
+                    }
+                    await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+                    if (sizeMismatch)
+                    {
+                        throw new TransferSizeMismatchException($"Transfer aborted: the remote size of {newSize} does not match expected size {download.Size}", download.Size.Value, newSize);
+                    }
+                    UpdateState(TransferStates.Initializing);
+                }
+
+                // the transfer connection
                 await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
 
                 if (realFile)
@@ -2126,7 +2215,7 @@ namespace Seeker
 
                     if (!noFail && _random.Next(5000) == 0)
                     {
-                        throw new Exception("Simulated Exception");
+                        throw new ConnectionException("Transfer failed: Read error: Remote connection closed");
                     }
 
                     if (realFile)
@@ -2138,14 +2227,19 @@ namespace Seeker
 
                     if (i == failStep)
                     {
-                        throw new Exception($"Simulated failure at {failAtPercent}%");
+                        throw new TransferReportedFailedException("Download reported as failed by remote client");
                     }
 
                     if (i == stallStep)
                     {
-                        await Task.Delay(
-                            stallSeconds != null ? stallSeconds.Value * 1000 : System.Threading.Timeout.Infinite,
-                            cancellationToken).ConfigureAwait(false);
+                        int inactivityTimeout = Options?.PeerConnectionOptions?.InactivityTimeout ?? 15000;
+                        int stallMs = stallSeconds != null ? stallSeconds.Value * 1000 : System.Threading.Timeout.Infinite;
+                        if (inactivityTimeout > 0 && (stallMs == System.Threading.Timeout.Infinite || stallMs >= inactivityTimeout))
+                        {
+                            await Task.Delay(inactivityTimeout, cancellationToken).ConfigureAwait(false);
+                            throw new TimeoutException($"Inactivity timeout of {inactivityTimeout} milliseconds was reached");
+                        }
+                        await Task.Delay(stallMs, cancellationToken).ConfigureAwait(false);
                     }
                 }
 
@@ -2160,15 +2254,42 @@ namespace Seeker
 
                 return new Transfer(download);
             }
-            catch (OperationCanceledException)
+            catch (TransferRejectedException ex)
             {
-                UpdateState(TransferStates.Completed | TransferStates.Cancelled);
+                download.Exception = ex;
+                UpdateState(TransferStates.Completed | TransferStates.Rejected);
                 throw;
             }
-            catch (Exception)
+            catch (TransferSizeMismatchException ex)
             {
-                UpdateState(TransferStates.Completed | TransferStates.Errored);
+                download.Exception = ex;
+                UpdateState(TransferStates.Completed | TransferStates.Aborted);
                 throw;
+            }
+            catch (OperationCanceledException ex)
+            {
+                download.Exception = ex;
+                UpdateProgress(download.BytesTransferred);
+                UpdateState(TransferStates.Completed | TransferStates.Cancelled);
+                throw new OperationCanceledException("Operation cancelled", ex, cancellationToken);
+            }
+            catch (TimeoutException ex)
+            {
+                download.Exception = ex;
+                UpdateProgress(download.BytesTransferred);
+                UpdateState(TransferStates.Completed | TransferStates.TimedOut);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                download.Exception = ex;
+                UpdateProgress(download.BytesTransferred);
+                UpdateState(TransferStates.Completed | TransferStates.Errored);
+                if (ex is UserOfflineException)
+                {
+                    throw;
+                }
+                throw new SoulseekClientException($"Failed to download file {filename} from user {username}: {ex.Message}", ex);
             }
             finally
             {
@@ -2191,6 +2312,11 @@ namespace Seeker
                     }
                 }
 
+                if (peerSlotAcquired)
+                {
+                    peerSlot.Release();
+                }
+
                 if (globalSemaphoreAcquired)
                 {
                     GlobalDownloadSemaphore.Release();
@@ -2201,7 +2327,7 @@ namespace Seeker
             }
         }
 
-        private async Task<Transfer> UploadInternalAsync(string username, string filename, long size, long startOffset, int token, TransferOptions options, CancellationToken cancellationToken)
+        private async Task<Transfer> UploadInternalAsync(string username, string filename, long size, long startOffset, int token, Func<long, Task<Stream>> inputStreamFactory, TransferOptions options, CancellationToken cancellationToken)
         {
             options ??= new TransferOptions();
 
@@ -2244,66 +2370,157 @@ namespace Seeker
                 TransferProgressUpdated?.Invoke(this, e);
             }
 
+            SemaphoreSlim userSemaphore = null;
+            bool userSemaphoreAcquired = false;
             bool globalSemaphoreAcquired = false;
+            Stream inputStream = null;
+            long bytesUploaded = 0;
 
+            // Same order of states, waits and failure points as SoulseekClient.UploadFromStreamAsync.
             try
             {
-                if (filename.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0)
-                {
-                    UpdateState(TransferStates.Queued | TransferStates.Locally);
-                    UpdateState(TransferStates.Completed | TransferStates.Errored);
-                    throw new TransferRejectedException("Transfer rejected: filename contains 'failed'");
-                }
+                int perUser = Math.Max(1, Options?.MaximumConcurrentUploadsPerUser ?? 1);
+                userSemaphore = UploadSemaphores.GetOrAdd(username, _ => new SemaphoreSlim(perUser, perUser));
 
                 UpdateState(TransferStates.Queued | TransferStates.Locally);
-                await Task.Delay(SimulatedDelayMs * 2, cancellationToken).ConfigureAwait(false);
+
+                await userSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+                userSemaphoreAcquired = true;
+
+                try
+                {
+                    await options.SlotAwaiter(new Transfer(upload), cancellationToken).ConfigureAwait(false);
+                }
+                catch (Exception ex) when (!(ex is OperationCanceledException))
+                {
+                    throw new TransferException($"Failed to acquire an upload slot for file {Path.GetFileName(upload.Filename)} to {username}: {ex.Message}", ex);
+                }
 
                 await GlobalUploadSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
                 globalSemaphoreAcquired = true;
 
+                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+                if (HasToken(filename, "offline"))
+                {
+                    throw new UserOfflineException($"User {username} appears to be offline");
+                }
+                if (HasToken(filename, "cannotconnect"))
+                {
+                    throw new ConnectionException($"Failed to establish a direct or indirect message connection to {username} ({IPEndPoint})");
+                }
+
                 UpdateState(TransferStates.Requested);
-                await Task.Delay(SimulatedDelayMs * 2, cancellationToken).ConfigureAwait(false);
+
+                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+                if (HasToken(filename, "timeout"))
+                {
+                    throw new TimeoutException($"The wait timed out after {Options?.PeerConnectionOptions?.InactivityTimeout ?? 15000} milliseconds");
+                }
+                if (HasToken(filename, "failed"))
+                {
+                    throw new TransferRejectedException("Transfer rejected: Cancelled");
+                }
 
                 UpdateState(TransferStates.Initializing);
-                await Task.Delay(SimulatedDelayMs * 2, cancellationToken).ConfigureAwait(false);
+
+                await Task.Delay(SimulatedDelayMs, cancellationToken).ConfigureAwait(false);
+
+                inputStream = await inputStreamFactory(upload.StartOffset).ConfigureAwait(false);
+
+                if (upload.StartOffset > 0 && options.SeekInputStreamAutomatically)
+                {
+                    if (!inputStream.CanSeek)
+                    {
+                        throw new TransferStreamException($"Requested non-zero start offset but input stream does not support seeking");
+                    }
+                    inputStream.Seek(upload.StartOffset, SeekOrigin.Begin);
+                }
 
                 UpdateState(TransferStates.InProgress);
-                UpdateProgress(startOffset);
+                UpdateProgress(upload.StartOffset);
 
                 int steps = 10;
-                long chunkSize = (size - startOffset) / steps;
-                for (int i = 1; i <= steps; i++)
+                long remaining = size - upload.StartOffset;
+                long chunkSize = Math.Max(1, remaining / steps);
+                var buffer = new byte[81920];
+                for (int i = 1; i <= steps && bytesUploaded < remaining; i++)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
-                    // sporadic failure
-                    //if (_random.Next(100) == 0)
-                    //{
-                    //    throw new Exception("Simulated Exception");
-                    //}
-                    UpdateProgress(startOffset + chunkSize * i);
+
+                    long chunkTarget = i == steps ? remaining : Math.Min(remaining, chunkSize * i);
+                    while (bytesUploaded < chunkTarget)
+                    {
+                        int want = (int)Math.Min(buffer.Length, chunkTarget - bytesUploaded);
+                        int read = await inputStream.ReadAsync(buffer, 0, want, cancellationToken).ConfigureAwait(false);
+                        if (read == 0)
+                        {
+                            throw new ConnectionException("Transfer failed: Read error: input stream ended before the expected length");
+                        }
+                        bytesUploaded += read;
+                    }
+
+                    UpdateProgress(upload.StartOffset + bytesUploaded);
                 }
 
-                UpdateProgress(size);
+                UpdateProgress(upload.StartOffset + bytesUploaded);
                 UpdateState(TransferStates.Completed | TransferStates.Succeeded);
 
                 return new Transfer(upload);
             }
-            catch (OperationCanceledException)
+            catch (TransferRejectedException ex)
             {
-                UpdateState(TransferStates.Completed | TransferStates.Cancelled);
+                upload.Exception = ex;
+                UpdateState(TransferStates.Completed | TransferStates.Rejected);
                 throw;
             }
-            catch (Exception)
+            catch (OperationCanceledException ex)
             {
-                UpdateState(TransferStates.Completed | TransferStates.Errored);
+                upload.Exception = ex;
+                UpdateProgress(upload.StartOffset + bytesUploaded);
+                UpdateState(TransferStates.Completed | TransferStates.Cancelled);
+                throw new OperationCanceledException("Operation cancelled", ex, cancellationToken);
+            }
+            catch (TimeoutException ex)
+            {
+                upload.Exception = ex;
+                UpdateProgress(upload.StartOffset + bytesUploaded);
+                UpdateState(TransferStates.Completed | TransferStates.TimedOut);
                 throw;
+            }
+            catch (Exception ex)
+            {
+                upload.Exception = ex;
+                UpdateProgress(upload.StartOffset + bytesUploaded);
+                UpdateState(TransferStates.Completed | TransferStates.Errored);
+                if (ex is UserOfflineException)
+                {
+                    throw;
+                }
+                throw new SoulseekClientException($"Failed to upload file {filename} to user {username}: {ex.Message}", ex);
             }
             finally
             {
+                if (options.DisposeInputStreamOnCompletion && inputStream != null)
+                {
+                    try
+                    {
+                        await inputStream.DisposeAsync().ConfigureAwait(false);
+                    }
+                    catch
+                    {
+                        // swallow finalize errors, matching the real client (which logs a warning)
+                    }
+                }
+
                 if (globalSemaphoreAcquired)
                 {
                     GlobalUploadSemaphore.Release();
+                }
+
+                if (userSemaphoreAcquired)
+                {
+                    userSemaphore.Release();
                 }
 
                 UploadDictionary.TryRemove(token, out _);
@@ -2795,13 +3012,40 @@ namespace Seeker
         public Task<int> GetDownloadPlaceInQueueAsync(string username, string filename, CancellationToken? cancellationToken = null, bool wasFileLatin1Decoded = false, bool wasFolderLatin1Decoded = false)
         {
             ThrowIfRejectRequested(username, "check download queue position");
-            return GetDownloadPlaceInQueueInternalAsync(username, filename, cancellationToken, wasFileLatin1Decoded, wasFolderLatin1Decoded);
+
+            var download = DownloadDictionary.Values.FirstOrDefault(d => d.Username == username && d.Filename == filename);
+            if (download == null)
+            {
+                throw new TransferNotFoundException($"A download of {filename} from user {username} is not active");
+            }
+
+            return GetDownloadPlaceInQueueInternalAsync(download, cancellationToken ?? CancellationToken.None);
         }
 
-        private async Task<int> GetDownloadPlaceInQueueInternalAsync(string username, string filename, CancellationToken? cancellationToken, bool wasFileLatin1Decoded, bool wasFolderLatin1Decoded)
+        private async Task<int> GetDownloadPlaceInQueueInternalAsync(TransferInternal download, CancellationToken cancellationToken)
         {
-            await Task.Delay(_random.Next(0, 5000));
-            return _random.Next(1, 125);
+            try
+            {
+                await Task.Delay(_random.Next(SimulatedDelayMs, SimulatedDelayMs * 5), cancellationToken).ConfigureAwait(false);
+                if (HasToken(download.Filename, "offline"))
+                {
+                    throw new UserOfflineException($"User {download.Username} appears to be offline");
+                }
+                if (HasToken(download.Filename, "cannotconnect"))
+                {
+                    throw new ConnectionException($"Failed to establish a direct or indirect message connection to {download.Username} ({IPEndPoint})");
+                }
+                if (HasToken(download.Filename, "timeout"))
+                {
+                    throw new TimeoutException($"The wait timed out after {Options?.PeerConnectionOptions?.InactivityTimeout ?? 15000} milliseconds");
+                }
+            }
+            catch (Exception ex) when (!(ex is UserOfflineException) && !(ex is TimeoutException) && !(ex is OperationCanceledException))
+            {
+                throw new SoulseekClientException($"Failed to fetch place in queue for download of {download.Filename} from {download.Username}: {ex.Message}", ex);
+            }
+
+            return GetPlaceAtPeer(download.Username, download.Token);
         }
 
         public Task<IPEndPoint> GetUserEndPointAsync(string username, CancellationToken? cancellationToken = null)
