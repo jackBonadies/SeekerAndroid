@@ -229,9 +229,9 @@ namespace Seeker.Services
             Task dlTask = null;
             Action<(TransferStates PreviousState, Transfer Transfer)> updateForEnqueue = new Action<(TransferStates PreviousState, Transfer Transfer)>( (args) =>
             {
-                if (args.Transfer.State.HasFlag(TransferStates.Queued) || args.Transfer.State == TransferStates.Initializing)
+                if (args.Transfer.State.HasFlag(TransferStates.Queued) && args.Transfer.State.HasFlag(TransferStates.Remotely))
                 {
-                    logger.Debug($"Queued / Init: {fullfilename} We can proceed to download next file.");
+                    logger.Debug($"Queued | Remotely: {fullfilename} We can proceed to download next file.");
                     waitUntilEnqueue.TrySetResult(true);
                 }
             });
