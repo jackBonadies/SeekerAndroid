@@ -115,50 +115,103 @@ namespace Seeker.Services
         /// </remarks>
         private async Task DownloadFiles(List<DownloadInfo> dlInfos, FullFileInfo[] files, string username)
         {
-            bool waitForAck = true;
+            Exception? peerFailure = null;
             for (int i = 0; i < dlInfos.Count; i++)
             {
                 var dlInfo = dlInfos[i];
                 var file = files[i];
                 Task dlTask;
                 Task waitForNext;
-                try
+                if (peerFailure != null)
                 {
-                    dlTask = DownloadFileAsync(username, file.FullFileName, file.Size, dlInfo.CancellationTokenSource, out waitForNext, dlInfo, file.Depth, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded);
-                }
-                catch (Exception ex)
-                {
-                    // we throw synchrnously in memory mode case when no longer connected to server.
-                    // by catching we treat it like any other error
-                    logger.Debug($"DownloadFileAsync threw synchronously for {file.FullFileName}: {ex.Message}");
-                    dlTask = Task.FromException(ex);
+                    if (dlInfo.CancellationTokenSource.IsCancellationRequested)
+                    {
+                        continue;
+                    }
+                    // the last download failed with peer offline / unreachable. dont wait for every 
+                    // other download to timeout, mark them offline here
+                    MarkTransferItemPeerUnavailable(dlInfo.TransferItemReference, peerFailure);
+                    dlTask = Task.FromException(peerFailure);
                     waitForNext = Task.CompletedTask;
+                }
+                else
+                {
+                    try
+                    {
+                        dlTask = DownloadFileAsync(username, file.FullFileName, file.Size, dlInfo.CancellationTokenSource, out waitForNext, dlInfo, file.Depth, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded);
+                    }
+                    catch (Exception ex)
+                    {
+                        // we throw synchrnously in memory mode case when no longer connected to server.
+                        // by catching we treat it like any other error
+                        logger.Debug($"DownloadFileAsync threw synchronously for {file.FullFileName}: {ex.Message}");
+                        dlTask = Task.FromException(ex);
+                        waitForNext = Task.CompletedTask;
+                    }
                 }
                 var e = new DownloadAddedEventArgs(dlInfo);
                 Action<Task> continuationActionSaveFile = DownloadContinuationActionUI(e);
                 dlTask.ContinueWith(continuationActionSaveFile);
-                if (!waitForAck)
+                if (peerFailure != null)
                 {
                     continue;
                 }
-                // wait for the remote client to acknowledge the request or for the dl to complete (i.e. faulted) 
+                // wait for the remote client to acknowledge the request or for the dl to complete (i.e. faulted)
                 await waitForNext;
-                // if the previous download failed with peer unreachable then dont wait for the timeout serially,
-                //   otherwise if we download say 20 files we will have to wait a full 200s for the final one to have their status
-                //   set properly.
-                if (dlTask.IsFaulted && IsPeerUnreachable(dlTask.Exception))
+                // if the previous download failed because the peer is offline / unreachable then dont wait for the
+                //   timeout serially, otherwise if we download say 20 files we will have to wait a full 200s for the
+                //   final one to have their status set properly. fail the rest with the same error instead.
+                if (dlTask.IsFaulted && TryGetPeerFailure(dlTask.Exception, out peerFailure))
                 {
-                    logger.Debug($"{username} unreachable, starting the remaining {dlInfos.Count - i - 1} downloads without waiting");
-                    waitForAck = false;
+                    logger.Debug($"{username} unavailable, failing the remaining {dlInfos.Count - i - 1} downloads");
                 }
+            }
+            if (peerFailure != null)
+            {
+                if (peerFailure is UserOfflineException)
+                {
+                    AddToUserOffline(username);
+                }
+                TransferItemManager.MarkTransfersDirty();
+                mainThreadRunner.RunOnUiThread(() => TransferListRefreshRequested?.Invoke(null, null!));
             }
         }
 
-        private static bool IsPeerUnreachable(AggregateException ex)
+        private static bool TryGetPeerFailure(AggregateException ex, out Exception? inner)
         {
-            var inner = ex?.InnerException;
-            return (inner?.Message?.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase) ?? false)
-                || (inner?.InnerException?.Message?.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase) ?? false);
+            inner = null;
+            var candidate = ex?.InnerException;
+            if (candidate == null)
+            {
+                return false;
+            }
+            bool isPeerFailure = candidate is UserOfflineException
+                || (candidate.Message?.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (candidate.InnerException?.Message?.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase) ?? false);
+            if (isPeerFailure)
+            {
+                inner = candidate;
+            }
+            return isPeerFailure;
+        }
+
+        // mirrors what TransferEventRouter does for the library's Completed | Errored state, which matches what the
+        // real attempt for the first file in the batch produced. UserOffline is what the queue-position path adds
+        // for an offline peer and what RetryDownloadsIfUserBackOnline selects on.
+        private static void MarkTransferItemPeerUnavailable(TransferItem? item, Exception peerFailure)
+        {
+            if (item == null)
+            {
+                return;
+            }
+            item.State = TransferStates.Completed | TransferStates.Errored;
+            if (peerFailure is UserOfflineException)
+            {
+                item.State |= TransferStates.UserOffline;
+            }
+            item.Failed = true;
+            item.InProcessing = false;
+            item.RemainingTime = null;
         }
 
 
