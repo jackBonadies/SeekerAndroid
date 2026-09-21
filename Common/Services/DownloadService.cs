@@ -115,6 +115,7 @@ namespace Seeker.Services
         /// </remarks>
         private async Task DownloadFiles(List<DownloadInfo> dlInfos, FullFileInfo[] files, string username)
         {
+            bool waitForAck = true;
             for (int i = 0; i < dlInfos.Count; i++)
             {
                 var dlInfo = dlInfos[i];
@@ -136,9 +137,28 @@ namespace Seeker.Services
                 var e = new DownloadAddedEventArgs(dlInfo);
                 Action<Task> continuationActionSaveFile = DownloadContinuationActionUI(e);
                 dlTask.ContinueWith(continuationActionSaveFile);
-                // wait for current download to update to queued / initialized or dltask to throw exception before kicking off next
+                if (!waitForAck)
+                {
+                    continue;
+                }
+                // wait for the remote client to acknowledge the request or for the dl to complete (i.e. faulted) 
                 await waitForNext;
+                // if the previous download failed with peer unreachable then dont wait for the timeout serially,
+                //   otherwise if we download say 20 files we will have to wait a full 200s for the final one to have their status
+                //   set properly.
+                if (dlTask.IsFaulted && IsPeerUnreachable(dlTask.Exception))
+                {
+                    logger.Debug($"{username} unreachable, starting the remaining {dlInfos.Count - i - 1} downloads without waiting");
+                    waitForAck = false;
+                }
             }
+        }
+
+        private static bool IsPeerUnreachable(AggregateException ex)
+        {
+            var inner = ex?.InnerException;
+            return (inner?.Message?.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase) ?? false)
+                || (inner?.InnerException?.Message?.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase) ?? false);
         }
 
 
