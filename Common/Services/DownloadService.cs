@@ -214,6 +214,15 @@ namespace Seeker.Services
             item.RemainingTime = null;
         }
 
+        // i.e. is it going to move on its own
+        private static bool IsSettled(TransferStates state)
+        {
+            return state == TransferStates.None
+                || state.HasFlag(TransferStates.Completed)
+                || state.HasFlag(TransferStates.Cancelled)
+                || state.HasFlag(TransferStates.Errored);
+        }
+
 
         /// <summary>
         /// Adds a transfer to the database. Does not
@@ -248,6 +257,9 @@ namespace Seeker.Services
 
                 if (!queuePaused)
                 {
+                    // this is the first state, set initialially (basically if local queue we know it will progress 
+                    //   through the library i.e. move to Requested or Errored unlike None)
+                    transferItem.State = TransferStates.Queued | TransferStates.Locally;
                     try
                     {
                         TransferState.SetupCancellationToken(transferItem, downloadInfo.CancellationTokenSource, out oldCts); //if its already there we dont add it..
@@ -268,6 +280,11 @@ namespace Seeker.Services
                 }
                 else
                 {
+                    // same initial state for a re-request
+                    if (exists && IsSettled(transferItem.State))
+                    {
+                        transferItem.State = TransferStates.Queued | TransferStates.Locally;
+                    }
                     var e = new DownloadAddedEventArgs(downloadInfo);
                     DownloadAddedUINotify?.Invoke(null, e);
                 }
