@@ -2038,6 +2038,17 @@ namespace Seeker
             return int.Parse(name.Substring(start, end - start));
         }
 
+        // The real client races a direct and an indirect message connection and the indirect Waiter.Wait always runs the
+        // full PeerConnectionOptions.ConnectTimeout, so an unreachable peer costs exactly that. "cannotconnect:N" = N seconds.
+        private async Task SimulateCannotConnectAsync(string filename, string username, CancellationToken cancellationToken)
+        {
+            int delayMs = ParseIntToken(filename, "cannotconnect") is int seconds
+                ? seconds * 1000
+                : Options?.PeerConnectionOptions?.ConnectTimeout ?? 10000;
+            await Task.Delay(delayMs, cancellationToken).ConfigureAwait(false);
+            throw new ConnectionException($"Failed to establish a direct or indirect message connection to {username} ({IPEndPoint})");
+        }
+
         // Reusable zero-filled buffer for writing mock "realFile" downloads to disk.
         private static readonly byte[] MockDownloadBuffer = new byte[81920];
 
@@ -2127,7 +2138,7 @@ namespace Seeker
                 }
                 if (HasToken(filename, "cannotconnect"))
                 {
-                    throw new ConnectionException($"Failed to establish a direct or indirect message connection to {username} ({IPEndPoint})");
+                    await SimulateCannotConnectAsync(filename, username, cancellationToken).ConfigureAwait(false);
                 }
 
                 UpdateState(TransferStates.Requested);
@@ -2406,7 +2417,7 @@ namespace Seeker
                 }
                 if (HasToken(filename, "cannotconnect"))
                 {
-                    throw new ConnectionException($"Failed to establish a direct or indirect message connection to {username} ({IPEndPoint})");
+                    await SimulateCannotConnectAsync(filename, username, cancellationToken).ConfigureAwait(false);
                 }
 
                 UpdateState(TransferStates.Requested);
@@ -3033,7 +3044,7 @@ namespace Seeker
                 }
                 if (HasToken(download.Filename, "cannotconnect"))
                 {
-                    throw new ConnectionException($"Failed to establish a direct or indirect message connection to {download.Username} ({IPEndPoint})");
+                    await SimulateCannotConnectAsync(download.Filename, download.Username, cancellationToken).ConfigureAwait(false);
                 }
                 if (HasToken(download.Filename, "timeout"))
                 {
