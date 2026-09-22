@@ -56,6 +56,10 @@ namespace Seeker
             bool anyPending = false;
             double heldSpeed = 0;
             DateTime heldSpeedSampledUtc = DateTime.MinValue;
+
+            int numContributing = 0; // probably always 0 or 1
+            string transferInQuestion = string.Empty;
+            string transferInQuestionHeld = string.Empty;
             lock (TransferItems)
             {
                 foreach (TransferItem ti in TransferItems)
@@ -64,6 +68,7 @@ namespace Seeker
                     {
                         heldSpeed = ti.AvgSpeed;
                         heldSpeedSampledUtc = ti.AvgSpeedSampledUtc;
+                        transferInQuestionHeld = ti.Filename;
                     }
                     if (ti.State.HasFlag(TransferStates.Completed) || (ti.State & pending) == 0)
                     {
@@ -73,17 +78,26 @@ namespace Seeker
                     bytesRemaining += Math.Max(0, ti.Size - ti.GetBytesTransferred());
                     if (ti.State.HasFlag(TransferStates.InProgress))
                     {
+                        transferInQuestion = ti.Filename;
+                        numContributing++;
                         speed += ti.AvgSpeed;
                     }
                 }
             }
+            bool usingHeldSpeed = false;
             if (!anyPending)
             {
                 return null;
             }
+            // held can be true if the previous download finished <1 second (and so was never in progress with AverageSpeed)
             if (speed <= 0 && utcNow - heldSpeedSampledUtc <= SpeedHoldWindow)
             {
+                usingHeldSpeed = true;
                 speed = heldSpeed;
+            }
+            if (usingHeldSpeed)
+            {
+                transferInQuestion = transferInQuestionHeld;
             }
             // if nothing in progress and its been awhile since last speed update, hide time remaining, 
             //   we would be giving a misleading estimate otherwise.
@@ -96,6 +110,9 @@ namespace Seeker
             {
                 return null;
             }
+
+            Logger.Info($"{seconds}. Held: {usingHeldSpeed}. Speed: {speed}. From: {transferInQuestion} Contrib: {numContributing}");
+
             return TimeSpan.FromSeconds(seconds);
         }
 
