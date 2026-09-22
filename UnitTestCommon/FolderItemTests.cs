@@ -377,6 +377,37 @@ namespace UnitTestCommon
             Assert.IsTrue(state.HasFlag(TransferStates.Queued));
         }
 
+        [TestCase(true)]
+        [TestCase(false)]
+        public void GetState_QueuedRemotelyBeatsQueuedLocally_EitherOrder(bool remotelyFirst)
+        {
+            var local = CreateTransferItem("alice", "\\music\\jazz\\song1.mp3", "jazz");
+            local.State = TransferStates.Queued | TransferStates.Locally;
+            var remote = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz");
+            remote.State = TransferStates.Queued | TransferStates.Remotely;
+            var folder = new FolderItem("jazz", "alice", remotelyFirst ? remote : local);
+            folder.Add(remotelyFirst ? local : remote);
+
+            var state = folder.GetState(out _, out _);
+
+            Assert.AreEqual(TransferStates.Queued | TransferStates.Remotely, state);
+        }
+
+        [Test]
+        public void GetState_AllQueuedLocally_ReturnsQueuedLocally()
+        {
+            var ti1 = CreateTransferItem("alice", "\\music\\jazz\\song1.mp3", "jazz");
+            ti1.State = TransferStates.Queued | TransferStates.Locally;
+            var ti2 = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz");
+            ti2.State = TransferStates.Queued | TransferStates.Locally;
+            var folder = new FolderItem("jazz", "alice", ti1);
+            folder.Add(ti2);
+
+            var state = folder.GetState(out _, out _);
+
+            Assert.AreEqual(TransferStates.Queued | TransferStates.Locally, state);
+        }
+
         [Test]
         public void GetState_AllSucceeded_ReturnsSucceeded()
         {

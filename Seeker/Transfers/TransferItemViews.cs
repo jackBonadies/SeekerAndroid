@@ -393,76 +393,6 @@ namespace Seeker
         }
 
 
-        public static void SetViewStatusText(TextView viewStatus, TransferStates state, bool isUpload, bool isFolder)
-        {
-            if (state.HasFlag(TransferStates.Queued))
-            {
-                viewStatus.SetText(Resource.String.in_queue);
-            }
-            else if (state.HasFlag(TransferStates.Cancelled))
-            {
-                if (isUpload)
-                {
-                    viewStatus.Text = SeekerApplication.GetString(Resource.String.Aborted);
-                }
-                else
-                {
-                    viewStatus.SetText(Resource.String.paused);
-                }
-            }
-            else if (isFolder && state.HasFlag(TransferStates.Rejected)) //if is folder we put the extra info here, else we put it in the additional status TextView
-            {
-                if (isUpload)
-                {
-                    viewStatus.Text = System.String.Format("{0} - {1}", SeekerApplication.GetString(Resource.String.failed), SeekerApplication.GetString(Resource.String.Cancelled));//if the user on the other end cancelled / paused / removed it.
-                }
-                else
-                {
-                    viewStatus.SetText(Resource.String.failed_denied);
-                }
-            }
-            else if (isFolder && state.HasFlag(TransferStates.UserOffline))
-            {
-                viewStatus.SetText(Resource.String.failed_user_offline);
-            }
-            else if (isFolder && state.HasFlag(TransferStates.CannotConnect))
-            {
-                viewStatus.Text = System.String.Format("{0} - {1}", SeekerApplication.GetString(Resource.String.failed), SeekerApplication.GetString(Resource.String.CannotConnect));
-                //"cannot connect" is too long for average screen. but the root problem needs to be fixed (for folder combine two TextView into one with padding???? TODO)
-            }
-            else if (state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Errored))
-            {
-                viewStatus.SetText(Resource.String.failed);
-            }
-            else if (state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested))  //item.State.HasFlag(TransferStates.None) captures EVERYTHING!!
-            {
-                viewStatus.SetText(Resource.String.not_started);
-            }
-            else if (state.HasFlag(TransferStates.InProgress))
-            {
-                viewStatus.SetText(Resource.String.in_progress);
-            }
-            else if (state.HasFlag(TransferStates.Succeeded))
-            {
-                viewStatus.SetText(Resource.String.completed);
-            }
-            else if (state.HasFlag(TransferStates.Aborted))
-            {
-                // this is the case that the filesize is wrong. In that case we always immediately re-request.
-                viewStatus.SetText(Resource.String.re_requesting);
-            }
-            else
-            {
-                //these views are recycled, so NEVER dont set them.
-                //otherwise they will be whatever the view they recycled was.
-                //so they may end up being Failed, Completed, etc.
-                //viewStatus.Text = "None";
-                
-                viewStatus.SetText(Resource.String.not_started);
-            }
-        }
-
-
         public static void SetTimeRemainingText(TextView separator, TextView timeRemainingView, TextView speedView, ITransferItem item, bool showTimeRemaining)
         {
             TimeSpan? remaining = showTimeRemaining ? item.GetRemainingTime() : null;
@@ -702,13 +632,22 @@ namespace Seeker
             {
                 StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.in_progress), TransferChipType.Downloading);
             }
-            else if (state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested))
+            else if (state.HasFlag(TransferStates.Initializing))
             {
-                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.not_started), TransferChipType.Downloading);
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.starting), TransferChipType.Downloading);
+            }
+            else if (state.HasFlag(TransferStates.Requested))
+            {
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.requested), TransferChipType.Downloading);
+            }
+            else if (!item.IsUpload() && state.HasFlag(TransferStates.Queued) && state.HasFlag(TransferStates.Locally))
+            {
+                // the earliest state
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.pending), TransferChipType.Queued);
             }
             else if (state.HasFlag(TransferStates.Queued))
             {
-                string label = SeekerApplication.GetString(Resource.String.in_queue);
+                string label = SeekerApplication.GetString(Resource.String.queued);
                 if (!item.IsUpload())
                 {
                     int queueLen = item.GetQueueLength();

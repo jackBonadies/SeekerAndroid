@@ -256,7 +256,7 @@ namespace Seeker
             }
         }
 
-        // "1d 4h" / "1h 2m" / "2m 3s" / "45s" - only show 2 units, keep it brief
+        // "1d 4h" / "1h 2m" / "2m 3s" / "9s" - i.e. 2 units only
         public static string FormatTimeRemaining(TimeSpan remaining)
         {
             long totalSeconds = (long)Math.Max(0, remaining.TotalSeconds);

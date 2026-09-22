@@ -262,7 +262,9 @@ namespace Seeker
                         {
                             folderState = state;
                         }
-                        else if (state.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested) && !folderState.HasFlag(TransferStates.Aborted))
+                        else if (state.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested) && !folderState.HasFlag(TransferStates.Aborted)
+                            // basically if folderState is remote queued dont override it with locally queued
+                            && !(folderState.HasFlag(TransferStates.Remotely) && state.HasFlag(TransferStates.Locally)))
                         {
                             folderState = state;
                         }

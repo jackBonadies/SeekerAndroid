@@ -532,9 +532,11 @@
     <!--Transfer States-->
     <string name="completed">Completed</string>
     <string name="in_progress">In progress</string>
-    <string name="not_started">Not started</string>
+    <string name="pending">Pending</string>
+    <string name="requested">Requested</string>
+    <string name="queued">Queued</string>
+    <string name="starting">Starting</string>
     <string name="paused">Paused</string>
-    <string name="in_queue">In queue</string>
     <string name="unknown">Unknown</string>
 
     <string name="retry_dl">Retry download</string>
