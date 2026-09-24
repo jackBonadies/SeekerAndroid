@@ -204,7 +204,8 @@ namespace Seeker.Services
                 mainThreadRunner.RunOnUiThread(() => TransferListRefreshRequested?.Invoke(null, null!));
             }
 
-            Exception? peerFailure = null;
+            Exception? batchFailure = null;
+            DownloadFailureKind batchFailureKind = DownloadFailureKind.Unknown;
             bool anyUpdatedHere = false;
             for (int i = 0; i < dlInfos.Count; i++)
             {
@@ -224,13 +225,13 @@ namespace Seeker.Services
                     anyUpdatedHere = true;
                     continue;
                 }
-                if (peerFailure != null)
+                if (batchFailure != null)
                 {
-                    // the last download failed with peer offline / unreachable. dont wait for every 
-                    // other download to timeout, mark them offline here
-                    MarkTransferItemPeerUnavailable(dlInfo.TransferItemReference, peerFailure);
+                    // the last download failed with peer offline / unreachable / not logged in. dont wait for every
+                    // other download to fail the same way, mark them failed here
+                    MarkTransferItemFailed(dlInfo.TransferItemReference, batchFailureKind);
                     anyUpdatedHere = true;
-                    dlTask = Task.FromException(peerFailure);
+                    dlTask = Task.FromException(batchFailure);
                     waitForNext = Task.CompletedTask;
                 }
                 else
@@ -251,7 +252,7 @@ namespace Seeker.Services
                 var e = new DownloadAddedEventArgs(dlInfo);
                 Action<Task> continuationActionSaveFile = GetDownloadContinuationAction(e);
                 dlTask.ContinueWith(continuationActionSaveFile);
-                if (peerFailure != null)
+                if (batchFailure != null)
                 {
                     continue;
                 }
@@ -260,9 +261,10 @@ namespace Seeker.Services
                 // if the previous download failed because the peer is offline / unreachable then dont wait for the
                 //   timeout serially, otherwise if we download say 20 files we will have to wait a full 200s for the
                 //   final one to have their status set properly. fail the rest with the same error instead.
-                if (dlTask.IsFaulted && TryGetPeerFailure(dlTask.Exception, out peerFailure))
+                //   same for not logged in - every remaining request would fail instantly.
+                if (dlTask.IsFaulted && TryGetBatchFailure(dlTask.Exception, out batchFailure, out batchFailureKind))
                 {
-                    logger.Debug($"{username} unavailable, failing the remaining {dlInfos.Count - i - 1} downloads");
+                    logger.Debug($"{username} {batchFailureKind}, failing the remaining {dlInfos.Count - i - 1} downloads");
                 }
             }
             if (anyUpdatedHere)
@@ -272,11 +274,11 @@ namespace Seeker.Services
             }
         }
 
-        private static bool TryGetPeerFailure(AggregateException ex, out Exception? inner)
+        private static bool TryGetBatchFailure(AggregateException ex, out Exception? inner, out DownloadFailureKind kind)
         {
             inner = null;
-            var kind = DownloadFailureClassifier.Classify(ex);
-            if (kind != DownloadFailureKind.UserOffline && kind != DownloadFailureKind.CannotConnect)
+            kind = DownloadFailureClassifier.Classify(ex);
+            if (kind != DownloadFailureKind.UserOffline && kind != DownloadFailureKind.CannotConnect && kind != DownloadFailureKind.NotLoggedIn)
             {
                 return false;
             }
@@ -285,20 +287,20 @@ namespace Seeker.Services
         }
 
         // mirrors what TransferEventRouter does for the library's Completed | Errored state, including the
-        // UserOffline / CannotConnect flag it derives from Transfer.Exception - the same state the real attempt
-        // for the first file in the batch produced.
-        private static void MarkTransferItemPeerUnavailable(TransferItem? item, Exception peerFailure)
+        // UserOffline / CannotConnect flag it derives from Transfer.Exception. for failures the library never
+        // saw, and so dont raise TransferStateChanged
+        private static void MarkTransferItemFailed(TransferItem? item, DownloadFailureKind kind)
         {
             if (item == null)
             {
                 return;
             }
             item.State = TransferStates.Completed | TransferStates.Errored;
-            if (peerFailure is UserOfflineException)
+            if (kind == DownloadFailureKind.UserOffline)
             {
                 item.State |= TransferStates.UserOffline;
             }
-            else
+            else if (kind == DownloadFailureKind.CannotConnect)
             {
                 item.State |= TransferStates.CannotConnect;
             }
@@ -404,6 +406,7 @@ namespace Seeker.Services
             Task dlTask = null;
             Action<(TransferStates PreviousState, Transfer Transfer)> updateForEnqueue = new Action<(TransferStates PreviousState, Transfer Transfer)>( (args) =>
             {
+                dlInfo.HandedToLibrary = true;
                 if (args.Transfer.State.HasFlag(TransferStates.Queued) && args.Transfer.State.HasFlag(TransferStates.Remotely))
                 {
                     logger.Debug($"Queued | Remotely: {fullfilename} We can proceed to download next file.");
@@ -739,6 +742,16 @@ namespace Seeker.Services
             Action<Task> continuationActionSaveFile = new Action<Task>(
             task =>
             {
+                var failureKind = task.IsFaulted ? DownloadFailureClassifier.Classify(task.Exception) : DownloadFailureKind.Unknown;
+                var item = e.dlInfo.TransferItemReference;
+                // the library never saw this request (not logged in, duplicate, incomplete location setup) so never raised
+                //   TransferStateChanged and now we need to set the terminal state
+                if (task.IsFaulted && !e.dlInfo.HandedToLibrary && !item.Failed)
+                {
+                    MarkTransferItemFailed(item, failureKind);
+                    TransferItemManager.MarkTransfersDirty();
+                    mainThreadRunner.RunOnUiThread(() => TransferListRefreshRequested?.Invoke(null, null!));
+                }
                 // before any retry below re-claims it
                 ReleaseClaim(e.dlInfo);
                 // protects against rare edge case where we own a transfer which faulted but has yet to reach the continuation action,
@@ -749,7 +762,6 @@ namespace Seeker.Services
                 e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
                 logger.Debug("DownloadContinuationActionUI started for " + e.dlInfo?.fullFilename + " with status: " + task.Status
                     + (task.IsFaulted ? " reason: " + SimpleHelpers.DescribeException(task.Exception) : string.Empty));
-                var failureKind = task.IsFaulted ? DownloadFailureClassifier.Classify(task.Exception) : DownloadFailureKind.Unknown;
                 if (failureKind == DownloadFailureKind.Duplicate)
                 {
                     // nothing for us to do - the other transfer is currently processing
@@ -952,6 +964,7 @@ namespace Seeker.Services
                         return;
                     }
                     transferItem.ClearStateForRetry();
+                    transferItem.State = TransferStates.Queued | TransferStates.Locally;
                     TransferState.SetupCancellationToken(transferItem, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
                     StartDownloadsFireAndForget(new[] { retryDlInfo });
                     return; //i.e. dont toast anything just retry.
