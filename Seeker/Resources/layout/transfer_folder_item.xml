@@ -79,10 +79,10 @@
                 android:textStyle="bold"
                 android:singleLine="true"
                 android:background="@drawable/transfer_status_chip_bg"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp"
-                android:paddingTop="2dp"
-                android:paddingBottom="2dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
             />
 
             <TextView

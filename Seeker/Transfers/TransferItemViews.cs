@@ -452,15 +452,15 @@ namespace Seeker
             }
         }
 
+        // folder rows: filled tonal pill, no dot
         private static void StyleStatusChip(View dot, TextView text, string label, TransferChipType chipType)
         {
+            dot.Visibility = ViewStates.Gone;
             if (label == string.Empty)
             {
-                dot.Visibility = ViewStates.Gone;
                 text.Visibility = ViewStates.Gone;
                 return;
             }
-            dot.Visibility = ViewStates.Gone;
             text.Visibility = ViewStates.Visible;
             text.Text = label;
 
@@ -470,15 +470,11 @@ namespace Seeker
             int bgColor = resources.GetColor(GetChipBgColorResId(chipType), theme);
 
             text.SetTextColor(new Color(textColor));
-            text.SetTypeface(text.Typeface, Android.Graphics.TypefaceStyle.Bold);
-            text.SetTextSize(ComplexUnitType.Sp, 10);
 
             var bg = text.Background?.Mutate() as GradientDrawable;
             if (bg != null)
             {
                 bg.SetColor(bgColor);
-                int strokeWidth = (int)(1 * resources.DisplayMetrics.Density);
-                bg.SetStroke(strokeWidth, new Color(textColor));
             }
         }
 
