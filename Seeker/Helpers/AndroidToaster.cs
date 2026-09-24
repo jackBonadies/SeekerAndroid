@@ -67,6 +67,7 @@ namespace Seeker
             {
                 StringKey.cannot_download_from_self => Resource.String.cannot_download_from_self,
                 StringKey.error_duplicate => Resource.String.error_duplicate_transfer_already_exists,
+                StringKey.error_duplicate_multiple => Resource.String.error_duplicate_transfers_already_exist,
                 StringKey.QueuedForDownload => Resource.String.QueuedForDownload,
                 StringKey.download_is_starting => Resource.String.download_is_starting,
                 StringKey.FailedDownloadDirectoryNotSet => Resource.String.FailedDownloadDirectoryNotSet,

@@ -86,7 +86,7 @@ namespace Seeker.Services
             // if every file already exists
             if (downloadInfos.Count == 0)
             {
-                toaster.ShowToastShort(StringKey.error_duplicate);
+                toaster.ShowToastShort(isSingle ? StringKey.error_duplicate : StringKey.error_duplicate_multiple);
                 return;
             }
 

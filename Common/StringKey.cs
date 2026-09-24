@@ -4,6 +4,7 @@ namespace Common
     {
         cannot_download_from_self,
         error_duplicate,
+        error_duplicate_multiple,
         QueuedForDownload,
         download_is_starting,
         FailedDownloadDirectoryNotSet,
