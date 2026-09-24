@@ -885,7 +885,6 @@ namespace Seeker.Services
                     var sizeException = (TransferSizeMismatchException)DownloadFailureClassifier.GetCause(task.Exception)!;
                     logger.Debug($"OLD SIZE {transferItem.Size} NEW SIZE {sizeException.RemoteSize}");
                     transferItem.Size = sizeException.RemoteSize;
-                    e.dlInfo.Size = sizeException.RemoteSize;
                     forceRetry = true;
                     resetRetryCount = true;
                     DeleteIncompleteFile(transferItem, "on TransferSizeMismatchException");
@@ -955,17 +954,15 @@ namespace Seeker.Services
                 logger.Debug("Retrying the Download" + e.dlInfo.fullFilename);
                 try
                 {
-                    CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                    var retryDlInfo = new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, null, cancellationTokenSource, e.dlInfo.QueueLength, resetRetryCount ? 0 : 1, task.Exception, e.dlInfo.Depth) { TransferItemReference = transferItem };
-                    if (!TryClaim(retryDlInfo))
+                    var retryDlInfo = PrepareRetry(transferItem, restartActive: false);
+                    if (retryDlInfo == null)
                     {
                         // the user already re-requested it
                         logger.Debug($"auto retry of {e.dlInfo.fullFilename} skipped, it is already being requested");
                         return;
                     }
-                    transferItem.ClearStateForRetry();
-                    transferItem.State = TransferStates.Queued | TransferStates.Locally;
-                    TransferState.SetupCancellationToken(transferItem, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
+                    retryDlInfo.RetryCount = resetRetryCount ? 0 : 1;
+                    retryDlInfo.PreviousFailureException = task.Exception;
                     StartDownloadsFireAndForget(new[] { retryDlInfo });
                     return; //i.e. dont toast anything just retry.
                 }
