@@ -66,7 +66,7 @@ namespace Seeker
             return key switch
             {
                 StringKey.cannot_download_from_self => Resource.String.cannot_download_from_self,
-                StringKey.error_duplicate => Resource.String.error_duplicate,
+                StringKey.error_duplicate => Resource.String.error_duplicate_transfer_already_exists,
                 StringKey.QueuedForDownload => Resource.String.QueuedForDownload,
                 StringKey.download_is_starting => Resource.String.download_is_starting,
                 StringKey.FailedDownloadDirectoryNotSet => Resource.String.FailedDownloadDirectoryNotSet,
