@@ -536,7 +536,7 @@ namespace Seeker
             if (count <= 0 || abortAll)
             {
                 Intent uploadServiceIntent = new Intent(this, typeof(UploadForegroundService));
-                Logger.Debug("Stop Service");
+                Logger.Debug("Stop Service (upload keep-alive)");
                 this.StopService(uploadServiceIntent);
                 ServiceLifecycle.UploadKeepAliveServiceRunning = false;
             }
@@ -573,7 +573,7 @@ namespace Seeker
             if (count <= 0 || cancelAndClear)
             {
                 Intent downloadServiceIntent = new Intent(this, typeof(DownloadForegroundService));
-                Logger.Debug("Stop Service");
+                Logger.Debug("Stop Service (download keep-alive, no downloads in progress)");
                 this.StopService(downloadServiceIntent);
                 ServiceLifecycle.DownloadKeepAliveServiceRunning = false;
             }
@@ -637,7 +637,8 @@ namespace Seeker
             Logger.Debug("Prev: " + e.PreviousState.ToString() + " Next: " + e.State.ToString());
             if (e.PreviousState.HasFlag(SoulseekClientStates.LoggedIn) && e.State.HasFlag(SoulseekClientStates.Disconnecting))
             {
-                Logger.Debug("!! changing from connected to disconnecting");
+                Logger.Debug("Changing from connected to disconnecting: " + (e.Message ?? "(no message)")
+                    + (e.Exception != null ? " (" + SimpleHelpers.DescribeException(e.Exception) + ")" : string.Empty));
 
 
                 if (e.Exception is KickedFromServerException)

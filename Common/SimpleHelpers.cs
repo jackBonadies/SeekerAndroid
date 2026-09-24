@@ -29,6 +29,28 @@ namespace Seeker
         /// </summary>
         public const string FailedToEstablishDirectOrIndirectString = "failed to establish a direct or indirect";
 
+        // one-line unwrap i.e. "Type: message <- InnerType: message" for logs
+        public static string DescribeException(Exception e)
+        {
+            if (e == null)
+            {
+                return "null";
+            }
+            if (e is AggregateException agg && agg.InnerException != null)
+            {
+                e = agg.InnerException;
+            }
+            var sb = new System.Text.StringBuilder();
+            for (Exception cur = e; cur != null; cur = cur.InnerException)
+            {
+                if (sb.Length > 0)
+                {
+                    sb.Append(" <- ");
+                }
+                sb.Append(cur.GetType().Name).Append(": ").Append(cur.Message);
+            }
+            return sb.ToString();
+        }
 
         public static string AvoidLineBreaks(string orig)
         {

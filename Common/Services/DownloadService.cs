@@ -470,7 +470,9 @@ namespace Seeker.Services
                             logger.Firebase("GetDownloadPlaceInQueue" + t.Exception.ToString());
                         }
 
-                        // 
+                        logger.Debug($"queue position check for {fullFileName} from {username} failed: {SimpleHelpers.DescribeException(t.Exception)}"
+                            + (transitionToNextState ? $" -> cancelling the download and marking it {state}" : " -> leaving the download as is"));
+
                         if (transitionToNextState)
                         {
                             //update the transferItem array
@@ -617,7 +619,7 @@ namespace Seeker.Services
             }
             catch (System.Exception e)
             {
-                //logger.Firebase("GetDownloadPlaceInQueue" + e.Message);
+                logger.Debug($"queue position check for {fullFileName} from {username} not sent: {SimpleHelpers.DescribeException(e)}");
                 return;
             }
             getDownloadPlace.ContinueWith(updateTask);
@@ -636,7 +638,8 @@ namespace Seeker.Services
             Action<Task> continuationActionSaveFile = new Action<Task>(
             task =>
             {
-                logger.Debug("DownloadContinuationActionUI started for " + e.dlInfo?.fullFilename + " with status: " + task.Status);
+                logger.Debug("DownloadContinuationActionUI started for " + e.dlInfo?.fullFilename + " with status: " + task.Status
+                    + (task.IsFaulted ? " reason: " + SimpleHelpers.DescribeException(task.Exception) : string.Empty));
                 try
                 {
                     Action action = null;
@@ -1181,7 +1184,7 @@ namespace Seeker.Services
                         }
                         foreach (int i in indicesToUpdate)
                         {
-                            logger.Debug($"updating {i}");
+                            logger.Debug($"retry: refreshing transfer row {i}");
                             TransferItemChanged?.Invoke(null, i);
                         }
 

@@ -1037,7 +1037,8 @@ namespace Seeker
                 if (v is TransferItemViewFolder folderView)
                 {
                     var fi = v.InnerTransferItem as FolderItem;
-                    TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeSeparatorView(), v.GetSizeTextView(), v.GetSpeedTextView(), v.InnerTransferItem, relevantItem.State, v.GetShowProgressSize(), v.GetShowSpeed(), isFolder: true);
+                    var folderState = fi.GetState(out _, out _);
+                    TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeSeparatorView(), v.GetSizeTextView(), v.GetSpeedTextView(), fi, folderState, v.GetShowProgressSize(), v.GetShowSpeed(), isFolder: true);
                     TransferViewHelper.SetTimeRemainingText(v.GetTimeRemainingSeparatorView(), v.GetTimeRemainingTextView(), v.GetSpeedTextView(), fi, v.GetShowTimeRemaining());
                     TransferViewHelper.UpdateSegmentedProgressBar(folderView.segmentedProgressBar, fi);
                 }

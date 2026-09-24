@@ -4,6 +4,7 @@ using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace UnitTestCommon
 {
@@ -122,6 +123,20 @@ namespace UnitTestCommon
         public void FormatTimeRemaining_FormatsByLargestUnit(double seconds, string expected)
         {
             Assert.AreEqual(expected, SimpleHelpers.FormatTimeRemaining(TimeSpan.FromSeconds(seconds)));
+        }
+
+        [Test]
+        public void DescribeException_UnwrapsAggregateAndWalksInnerChain()
+        {
+            var inner = new TimeoutException("The wait timed out after 30000 milliseconds");
+            var outer = new SoulseekClientException("Failed to download file x from user y: The wait timed out", inner);
+            var faulted = Task.FromException(outer);
+
+            Assert.AreEqual(
+                "SoulseekClientException: Failed to download file x from user y: The wait timed out <- TimeoutException: The wait timed out after 30000 milliseconds",
+                SimpleHelpers.DescribeException(faulted.Exception));
+            Assert.AreEqual("TimeoutException: The wait timed out after 30000 milliseconds", SimpleHelpers.DescribeException(inner));
+            Assert.AreEqual("null", SimpleHelpers.DescribeException(null));
         }
 
         // --- GetHumanReadableSize ---

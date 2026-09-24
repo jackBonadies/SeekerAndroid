@@ -147,7 +147,7 @@ namespace Seeker
 
         public TransferItemViewFolder(Context context) : base(context)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder_showProgressSize, this, true);
+            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_folder_item, this, true);
             setupChildren();
         }
 
@@ -512,6 +512,20 @@ namespace Seeker
             }
         }
 
+        // Cached typeface so we dont recreate it every time
+        private static Typeface speedFaceNormal;
+        private static Typeface speedFaceBold;
+
+        private static void SetSpeedTypeface(TextView speedView, bool bold)
+        {
+            if (speedFaceBold == null)
+            {
+                speedFaceNormal = speedView.Typeface ?? Typeface.Default;
+                speedFaceBold = Typeface.Create(speedFaceNormal, TypefaceStyle.Bold);
+            }
+            speedView.Typeface = bold ? speedFaceBold : speedFaceNormal;
+        }
+
         public static void SetSpeedText(TextView speedView, ITransferItem item, TransferStates state)
         {
             double avgSpeed = item.GetAvgSpeed();
@@ -528,13 +542,13 @@ namespace Seeker
             {
                 int color = resources.GetColor(Resource.Color.transferSpeedSubdued, theme);
                 speedView.SetTextColor(new Color(color));
-                speedView.SetTypeface(speedView.Typeface, TypefaceStyle.Normal);
+                SetSpeedTypeface(speedView, bold: false);
             }
             else
             {
                 int color = resources.GetColor(Resource.Color.transferChipDownloadingText, theme);
                 speedView.SetTextColor(new Color(color));
-                speedView.SetTypeface(speedView.Typeface, TypefaceStyle.Bold);
+                SetSpeedTypeface(speedView, bold: true);
             }
         }
 
@@ -825,7 +839,7 @@ namespace Seeker
         public bool showTimeRemaining;
         public TransferItemViewDetails(Context context) : base(context)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
+            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_single_item, this, true);
             setupChildren();
         }
 

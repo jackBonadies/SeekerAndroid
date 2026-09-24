@@ -80,7 +80,8 @@ namespace Seeker.Transfers
             {
                 Logger.InfoFirebase("relevantItem==null. state: " + e.Transfer.State.ToString());
             }
-            Logger.Debug("TransferStateChanged for user: " + e.Transfer.Username + " file: " + e.Transfer.Filename + " new state: " + e.Transfer.State.ToString());
+            Logger.Debug("TransferStateChanged for user: " + e.Transfer.Username + " file: " + e.Transfer.Filename + " new state: " + e.Transfer.State.ToString()
+                + (e.Transfer.Exception != null ? " reason: " + SimpleHelpers.DescribeException(e.Transfer.Exception) : string.Empty));
             TransferItemManager.MarkTransfersDirty();
             TransferPersistenceWrapper.SaveTransferItems(false, 30);
             if (relevantItem != null)
@@ -88,7 +89,7 @@ namespace Seeker.Transfers
                 //if the incoming transfer is not canclled, i.e. requested, then we replace the state (the user retried).
                 if (e.Transfer.State.HasFlag(TransferStates.Cancelled) && relevantItem.State.HasFlag(TransferStates.FallenFromQueue))
                 {
-                    Logger.Debug("fallen from queue");
+                    Logger.Debug("fallen from queue: cancelled " + relevantItem.State.ToString());
                     //the state is good as is.  do not add cancelled to it, since we used cancelled to mean "user cancelled" i.e. paused.
                     relevantItem.Failed = true;
                     relevantItem.Progress = 100;
