@@ -69,7 +69,10 @@ namespace Seeker.Transfers
                 }
             }
 
-            if (!isUpload && e.Transfer.State.HasFlag(TransferStates.UserOffline))
+            // add useroffline flag if appilcable (slsk.net no longer adds it)
+            TransferStates state = e.Transfer.State | GetPeerFailureFlags(e.Transfer, isUpload);
+
+            if (state.HasFlag(TransferStates.UserOffline))
             {
                 //user offline.
                 Seeker.Services.DownloadService.Instance.AddToUserOffline(e.Transfer.Username);
@@ -96,7 +99,7 @@ namespace Seeker.Transfers
                 }
                 else
                 {
-                    relevantItem.State = e.Transfer.State;
+                    relevantItem.State = state;
                 }
                 // this comes from speed, which if we just changed state we do not know yet
                 relevantItem.RemainingTime = null;
@@ -212,6 +215,25 @@ namespace Seeker.Transfers
                 }
                 StateChangedForItem?.Invoke(null, relevantItem);
             }
+        }
+
+        // gets useroffline or cannot connect flags since slsk.net no longer adds it
+        private static TransferStates GetPeerFailureFlags(Transfer transfer, bool isUpload)
+        {
+            if (isUpload || !transfer.State.HasFlag(TransferStates.Errored))
+            {
+                return TransferStates.None;
+            }
+            if (transfer.Exception is UserOfflineException)
+            {
+                return TransferStates.UserOffline;
+            }
+            if (transfer.Exception is ConnectionException
+                && (transfer.Exception.Message?.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase) ?? false))
+            {
+                return TransferStates.CannotConnect;
+            }
+            return TransferStates.None;
         }
 
         // Saves periodically. Republishes a UI-friendly ProgressUpdated event.

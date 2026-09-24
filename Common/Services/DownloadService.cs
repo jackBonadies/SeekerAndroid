@@ -168,10 +168,6 @@ namespace Seeker.Services
             }
             if (peerFailure != null)
             {
-                if (peerFailure is UserOfflineException)
-                {
-                    AddToUserOffline(username);
-                }
                 TransferItemManager.MarkTransfersDirty();
                 mainThreadRunner.RunOnUiThread(() => TransferListRefreshRequested?.Invoke(null, null!));
             }
@@ -195,9 +191,9 @@ namespace Seeker.Services
             return isPeerFailure;
         }
 
-        // mirrors what TransferEventRouter does for the library's Completed | Errored state, which matches what the
-        // real attempt for the first file in the batch produced. UserOffline is what the queue-position path adds
-        // for an offline peer and what RetryDownloadsIfUserBackOnline selects on.
+        // mirrors what TransferEventRouter does for the library's Completed | Errored state, including the
+        // UserOffline / CannotConnect flag it derives from Transfer.Exception - the same state the real attempt
+        // for the first file in the batch produced.
         private static void MarkTransferItemPeerUnavailable(TransferItem? item, Exception peerFailure)
         {
             if (item == null)
@@ -208,6 +204,10 @@ namespace Seeker.Services
             if (peerFailure is UserOfflineException)
             {
                 item.State |= TransferStates.UserOffline;
+            }
+            else
+            {
+                item.State |= TransferStates.CannotConnect;
             }
             item.Failed = true;
             item.InProcessing = false;
