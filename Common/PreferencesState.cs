@@ -1,5 +1,6 @@
 using Common.Messages;
 using Seeker;
+using Seeker.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,6 +42,7 @@ namespace Common
 
         public static void ClearCredentials()
         {
+            Logger.Info("ClearCredentials");
             CurrentlyLoggedIn = false;
             Password = null;
             Username = null; // fires event last
