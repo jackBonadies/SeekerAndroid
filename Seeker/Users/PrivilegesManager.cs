@@ -13,7 +13,7 @@ namespace Seeker.Managers
     public class PrivilegesManager
     {
         public static object PrivilegedUsersLock = new object();
-        public IReadOnlyCollection<string> PrivilegedUsers = null;
+        private HashSet<string> PrivilegedUsers = new HashSet<string>();
         public bool IsPrivileged = false; //are we privileged
 
         public static Context Context = null;
@@ -35,9 +35,10 @@ namespace Seeker.Managers
         /// <param name="privUsers"></param>
         public void SetPrivilegedList(IReadOnlyCollection<string> privUsers)
         {
+            var privilegedUsers = new HashSet<string>(privUsers);
             lock (PrivilegedUsersLock)
             {
-                PrivilegedUsers = privUsers;
+                PrivilegedUsers = privilegedUsers;
                 if (PreferencesState.Username != null && PreferencesState.Username != string.Empty)
                 {
                     IsPrivileged = CheckIfPrivileged(PreferencesState.Username);
@@ -45,6 +46,19 @@ namespace Seeker.Managers
                     {
                         GetPrivilegesAPI(false);
                     }
+                }
+            }
+        }
+
+        // server code 91
+        public void AddPrivilegedUser(string username)
+        {
+            lock (PrivilegedUsersLock)
+            {
+                PrivilegedUsers.Add(username);
+                if (username == PreferencesState.Username)
+                {
+                    IsPrivileged = true;
                 }
             }
         }
@@ -240,11 +254,7 @@ namespace Seeker.Managers
         {
             lock (PrivilegedUsersLock)
             {
-                if (PrivilegedUsers != null)
-                {
-                    return PrivilegedUsers.Contains(username);
-                }
-                return false;
+                return PrivilegedUsers.Contains(username);
             }
         }
     }

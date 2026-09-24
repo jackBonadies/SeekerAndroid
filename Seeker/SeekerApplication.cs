@@ -342,6 +342,7 @@ namespace Seeker
             BrowseService.BrowseResponseReceived += BrowseFragment.OnBrowseResponseReceived;
 
             SeekerState.SoulseekClient.PrivilegedUserListReceived += SoulseekClient_PrivilegedUserListReceived;
+            SeekerState.SoulseekClient.PrivilegeNotificationReceived += SoulseekClient_PrivilegeNotificationReceived;
             SeekerState.SoulseekClient.ExcludedSearchPhrasesReceived += SoulseekClient_ExcludedSearchPhrasesReceived;
 
             MessageController.Initialize();
@@ -608,6 +609,14 @@ namespace Seeker
         private void SoulseekClient_PrivilegedUserListReceived(object sender, IReadOnlyCollection<string> privilegedUsers)
         {
             PrivilegesManager.Instance.SetPrivilegedList(privilegedUsers);
+        }
+
+        private void SoulseekClient_PrivilegeNotificationReceived(object sender, PrivilegeNotificationReceivedEventArgs e)
+        {
+            if (!e.Id.HasValue)
+            {
+                PrivilegesManager.Instance.AddPrivilegedUser(e.Username);
+            }
         }
 
         private void SoulseekClient_ServerInfoReceived(object sender, ServerInfo e)
