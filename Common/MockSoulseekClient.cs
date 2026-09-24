@@ -1056,10 +1056,11 @@ namespace Seeker
             }
         }
 
-        private static (int count, int totalTimeMs, string search) ParseMockSearchParams(SearchQuery query)
+        private static (int count, int totalTimeMs, int? fileCount, string search) ParseMockSearchParams(SearchQuery query)
         {
             int count = 30;
             int totalTimeMs = 1000;
+            int? fileCount = null;
             string search = string.Empty;
             foreach (var term in query.Terms)
             {
@@ -1067,14 +1068,16 @@ namespace Seeker
                     count = Math.Max(0, n);
                 else if (term.StartsWith("t:", StringComparison.OrdinalIgnoreCase) && int.TryParse(term.Substring(2), out int t))
                     totalTimeMs = Math.Max(0, t);
+                else if (term.StartsWith("fileCount:", StringComparison.OrdinalIgnoreCase) && int.TryParse(term.Substring(10), out int fc))
+                    fileCount = Math.Max(1, fc);
                 else  
                     search += query + " ";
                 
             }
-            return (count, totalTimeMs, search);
+            return (count, totalTimeMs, fileCount, search);
         }
 
-        private static SearchResponse GenerateMockSearchResponse(int token, string term = "")
+        private static SearchResponse GenerateMockSearchResponse(int token, string term = "", int? fileCount = null)
         {
             lock (_randomLock)
             {
@@ -1088,7 +1091,7 @@ namespace Seeker
                 var hasFreeSlot = _random.Next(2) == 0;
                 var isLocked = _random.Next(5) == 0; // ~20% chance locked
 
-                int trackCount = _random.Next(1, 30);
+                int trackCount = fileCount ?? _random.Next(1, 30);
                 var files = new List<Soulseek.File>();
                 int bitRate = ext == "flac" ? 1411 : new[] { 128, 192, 256, 320 }[_random.Next(4)];
                 for (int i = 0; i < trackCount; i++)
@@ -1627,22 +1630,22 @@ namespace Seeker
             return new BrowseResponse(dirs);
         }
 
-        private static SearchResponse MakeResponseFileTypeBitRate(int resolvedToken, string search, string cachedType, double cachedBitRate = 128.0)
+        private static SearchResponse MakeResponseFileTypeBitRate(int resolvedToken, string search, string cachedType, int? fileCount, double cachedBitRate = 128.0)
         {
-            var resp = GenerateMockSearchResponse(resolvedToken, search);
+            var resp = GenerateMockSearchResponse(resolvedToken, search, fileCount);
             resp.cachedDominantFileType = cachedType;
             resp.cachedCalcBitRate = cachedBitRate;
             return resp;
         }
 
-        private static List<SearchResponse> MakeChipResponses(int resolvedToken, string search, params (string type, int count)[] buckets)
+        private static List<SearchResponse> MakeChipResponses(int resolvedToken, string search, int? fileCount, params (string type, int count)[] buckets)
         {
             var list = new List<SearchResponse>();
             foreach (var (t, c) in buckets)
             {
                 for (int i = 0; i < c; i++)
                 {
-                    list.Add(MakeResponseFileTypeBitRate(resolvedToken, search, t));
+                    list.Add(MakeResponseFileTypeBitRate(resolvedToken, search, t, fileCount));
                 }
             }
             return list;
@@ -1693,7 +1696,7 @@ namespace Seeker
             var resolvedScope = scope ?? new SearchScope(SearchScopeType.Network);
             var resolvedToken = token ?? GetNextToken();
 
-            var (count, totalTimeMs, search) = ParseMockSearchParams(query);
+            var (count, totalTimeMs, fileCount, search) = ParseMockSearchParams(query);
             int delayPerResponse = count > 0 ? totalTimeMs / count : 0;
 
             var searchRequested = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.Requested, 0, 0, 0);
@@ -1754,7 +1757,7 @@ namespace Seeker
                 } 
                 else if (isChipTestOther)
                 {
-                    curatedResponses = MakeChipResponses(resolvedToken, search,
+                    curatedResponses = MakeChipResponses(resolvedToken, search, fileCount,
                         ("mp3", 10),
                         ("mp3 (vbr)", 10),
                         ("mp3 (320kbs)", 10),
@@ -1811,7 +1814,7 @@ namespace Seeker
             else if (is1Results)
             {
                 await Task.Delay(8000).ConfigureAwait(false);
-                var response = GenerateMockSearchResponse(resolvedToken, search);
+                var response = GenerateMockSearchResponse(resolvedToken, search, fileCount);
                 allResponses.Add(response);
                 var currentSearch = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.InProgress, 1, 0, 0);
                 options?.ResponseReceived?.Invoke((currentSearch, response));
@@ -1831,7 +1834,7 @@ namespace Seeker
                         {
                             break;
                         }
-                        var response = GenerateMockSearchResponse(resolvedToken, (isWishlist ? DateTime.Now.ToString("HH:mm:ss") : "") + search);
+                        var response = GenerateMockSearchResponse(resolvedToken, (isWishlist ? DateTime.Now.ToString("HH:mm:ss") : "") + search, fileCount);
                         allResponses.Add(response);
                         var currentSearch = new Soulseek.Search(query, resolvedScope, resolvedToken, SearchStates.InProgress, i + 1, 0, 0);
                         options?.ResponseReceived?.Invoke((currentSearch, response));
@@ -1872,7 +1875,7 @@ namespace Seeker
                                 }
                                 if (cancellationToken?.IsCancellationRequested == true) return;
 
-                                var response = GenerateMockSearchResponse(resolvedToken, (isWishlist ? DateTime.Now.ToString("HH:mm:ss") : "") + search);
+                                var response = GenerateMockSearchResponse(resolvedToken, (isWishlist ? DateTime.Now.ToString("HH:mm:ss") : "") + search, fileCount);
                                 lock (allResponses)
                                 {
                                     allResponses.Add(response);
