@@ -515,28 +515,26 @@ namespace Seeker
         public static void SetSpeedText(TextView speedView, ITransferItem item, TransferStates state)
         {
             double avgSpeed = item.GetAvgSpeed();
+            if (avgSpeed <= 0)
+            {
+                speedView.Visibility = ViewStates.Gone;
+                return;
+            }
             var resources = speedView.Context.Resources;
             var theme = speedView.Context.Theme;
-            if ((state.HasFlag(TransferStates.InProgress) || state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested)) && avgSpeed > 0)
+            speedView.Visibility = ViewStates.Visible;
+            speedView.Text = SimpleHelpers.GetTransferSpeedString(avgSpeed);
+            if (state.HasFlag(TransferStates.Succeeded))
             {
-                speedView.Visibility = ViewStates.Visible;
-                speedView.Text = SimpleHelpers.GetTransferSpeedString(avgSpeed);
-                int color = resources.GetColor(Resource.Color.transferChipDownloadingText, theme);
-                speedView.SetTextColor(new Color(color));
-                speedView.SetTypeface(speedView.Typeface, TypefaceStyle.Bold);
-            }
-            else if (state.HasFlag(TransferStates.Succeeded) && avgSpeed > 0)
-            {
-                speedView.Visibility = ViewStates.Visible;
-                speedView.Text = SimpleHelpers.GetTransferSpeedString(avgSpeed);
-                //speedView.SetTextColor(UiHelpers.GetColorFromAttribute(speedView.Context, Resource.Attribute.transferSpeedSubdued));
                 int color = resources.GetColor(Resource.Color.transferSpeedSubdued, theme);
                 speedView.SetTextColor(new Color(color));
                 speedView.SetTypeface(speedView.Typeface, TypefaceStyle.Normal);
             }
             else
             {
-                speedView.Visibility = ViewStates.Gone;
+                int color = resources.GetColor(Resource.Color.transferChipDownloadingText, theme);
+                speedView.SetTextColor(new Color(color));
+                speedView.SetTypeface(speedView.Typeface, TypefaceStyle.Bold);
             }
         }
 

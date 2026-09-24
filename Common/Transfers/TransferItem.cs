@@ -99,7 +99,9 @@ namespace Seeker
 
         public double GetAvgSpeed()
         {
-            return AvgSpeed;
+            const TransferStates showing = TransferStates.InProgress | TransferStates.Initializing
+                | TransferStates.Requested | TransferStates.Succeeded;
+            return (State & showing) != 0 ? AvgSpeed : 0;
         }
 
         public long? GetSizeForDL()

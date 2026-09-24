@@ -38,16 +38,23 @@ namespace Seeker
         //  of in progress it is blank)
         private static readonly TimeSpan SpeedHoldWindow = TimeSpan.FromSeconds(15);
 
-        // Time remaining to finish files that will transfer on their own (does not count paused / failed
-        //   since those require user intervention).  There will not always be a transfer in progress / with 
-        //   active speed (since it can be intializing and we dont calc speed for the first second), if thats
-        //   the case hold the neweset one in our folder.
-        public TimeSpan? GetRemainingTime()
+        private readonly struct SpeedEstimate
         {
-            return GetRemainingTime(DateTime.UtcNow);
+            public readonly double Speed;
+            public readonly long BytesRemaining;
+
+            public SpeedEstimate(double speed, long bytesRemaining)
+            {
+                Speed = speed;
+                BytesRemaining = bytesRemaining;
+            }
         }
 
-        public TimeSpan? GetRemainingTime(DateTime utcNow)
+        // Time remaining (speed vs bytes remaining) to finish files that will transfer on their own (does not 
+        //   count paused / failed since those require user intervention).  There will not always be a transfer 
+        //   in progress / with active speed (since it can be intializing and we dont calc speed for the first second), 
+        //   if thats the case hold the neweset one in our folder.
+        private SpeedEstimate Estimate(DateTime utcNow)
         {
             const TransferStates pending = TransferStates.Requested | TransferStates.Queued
                 | TransferStates.Initializing | TransferStates.InProgress | TransferStates.Aborted;
@@ -79,19 +86,31 @@ namespace Seeker
             }
             if (!anyPending)
             {
-                return null;
+                // just completed or just paused - a held sample would show a speed (and "0s") for nothing
+                return default;
             }
             if (speed <= 0 && utcNow - heldSpeedSampledUtc <= SpeedHoldWindow)
             {
                 speed = heldSpeed;
             }
-            // if nothing in progress and its been awhile since last speed update, hide time remaining, 
+            return new SpeedEstimate(speed, bytesRemaining);
+        }
+
+        public TimeSpan? GetRemainingTime()
+        {
+            return GetRemainingTime(DateTime.UtcNow);
+        }
+
+        public TimeSpan? GetRemainingTime(DateTime utcNow)
+        {
+            SpeedEstimate estimate = Estimate(utcNow);
+            // if nothing in progress and its been awhile since last speed update, hide time remaining,
             //   we would be giving a misleading estimate otherwise.
-            if (speed <= 0)
+            if (estimate.Speed <= 0)
             {
                 return null;
             }
-            double seconds = bytesRemaining / speed;
+            double seconds = estimate.BytesRemaining / estimate.Speed;
             if (seconds > TimeSpan.MaxValue.TotalSeconds)
             {
                 return null;
@@ -99,12 +118,14 @@ namespace Seeker
             return TimeSpan.FromSeconds(seconds);
         }
 
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public double AvgSpeed; //this could one day be serialized if you want say speed history (like QT does)
-
         public double GetAvgSpeed()
         {
-            return AvgSpeed;
+            return GetAvgSpeed(DateTime.UtcNow);
+        }
+
+        public double GetAvgSpeed(DateTime utcNow)
+        {
+            return Estimate(utcNow).Speed;
         }
 
         public bool IsUpload()
