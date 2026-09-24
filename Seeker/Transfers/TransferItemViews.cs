@@ -241,7 +241,8 @@ namespace Seeker
     public class TransferViewHelper
     {
         /// <summary>
-        /// In Progress = InProgress proper, initializing, requested. 
+        /// In Progress = InProgress, initializing, requested only for upload (for download it is 
+        ///   between local queue and remote queue so still effectively queued - otherwise we get flicker). 
         /// If In Progress or Queued you should be able to pause it (the official client lets you).
         /// </summary>
         /// <param name="transferItems"></param>
@@ -260,7 +261,7 @@ namespace Seeker
             {
                 foreach (var ti in transferItems)
                 {
-                    if (ti.State.HasFlag(TransferStates.Queued))
+                    if (ti.State.HasFlag(TransferStates.Queued) || (!ti.IsUpload() && ti.State.HasFlag(TransferStates.Requested)))
                     {
                         numQueued++;
                     }
