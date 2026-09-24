@@ -1038,14 +1038,14 @@ namespace Seeker
                 {
                     var fi = v.InnerTransferItem as FolderItem;
                     var folderState = fi.GetState(out _, out _);
-                    TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeSeparatorView(), v.GetSizeTextView(), v.GetSpeedTextView(), fi, folderState, v.GetShowProgressSize(), v.GetShowSpeed(), isFolder: true);
+                    TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeTextView(), v.GetSpeedTextView(), fi, folderState, v.GetShowProgressSize(), v.GetShowSpeed(), isFolder: true);
                     TransferViewHelper.SetTimeRemainingText(v.GetTimeRemainingSeparatorView(), v.GetTimeRemainingTextView(), v.GetSpeedTextView(), fi, v.GetShowTimeRemaining());
                     TransferViewHelper.UpdateSegmentedProgressBar(folderView.segmentedProgressBar, fi);
                 }
                 else
                 {
                     v.progressBar.Progress = progress;
-                    TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeSeparatorView(), v.GetSizeTextView(), v.GetSpeedTextView(), relevantItem, relevantItem.State, v.GetShowProgressSize(), v.GetShowSpeed());
+                    TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeTextView(), v.GetSpeedTextView(), relevantItem, relevantItem.State, v.GetShowProgressSize(), v.GetShowSpeed());
                     TransferViewHelper.SetTimeRemainingText(v.GetTimeRemainingSeparatorView(), v.GetTimeRemainingTextView(), v.GetSpeedTextView(), relevantItem, v.GetShowTimeRemaining());
                     TransferViewHelper.SetProgressBarTint(v.progressBar, relevantItem.State, wasFailed, relevantItem.IsUpload());
                 }

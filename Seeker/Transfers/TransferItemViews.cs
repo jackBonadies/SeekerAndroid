@@ -49,8 +49,6 @@ namespace Seeker
 
         public TextView GetSpeedTextView();
 
-        public TextView GetSizeSeparatorView();
-
         public TextView GetTimeRemainingTextView();
 
         public TextView GetTimeRemainingSeparatorView();
@@ -74,7 +72,6 @@ namespace Seeker
         private View statusDot;
         private TextView viewSize;
         private TextView viewSpeed;
-        private TextView viewSizeSeparator;
         private TextView viewTimeRemaining;
         private TextView viewTimeRemainingSeparator;
         private ImageView selectionCheckbox;
@@ -109,11 +106,6 @@ namespace Seeker
         public TextView GetSpeedTextView()
         {
             return viewSpeed;
-        }
-
-        public TextView GetSizeSeparatorView()
-        {
-            return viewSizeSeparator;
         }
 
         public TextView GetTimeRemainingTextView()
@@ -175,7 +167,6 @@ namespace Seeker
             statusDot = FindViewById<View>(Resource.Id.statusDot);
             viewSize = FindViewById<TextView>(Resource.Id.textViewSize);
             viewSpeed = FindViewById<TextView>(Resource.Id.textViewSpeed);
-            viewSizeSeparator = FindViewById<TextView>(Resource.Id.textViewSizeSeparator);
             viewTimeRemaining = FindViewById<TextView>(Resource.Id.textViewTimeRemaining);
             viewTimeRemainingSeparator = FindViewById<TextView>(Resource.Id.textViewTimeRemainingSeparator);
 
@@ -219,7 +210,7 @@ namespace Seeker
             viewFoldername.Text = folderItem.GetDisplayFolderName();
             var state = folderItem.GetState(out bool isFailed, out _);
 
-            TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSizeSeparator, viewSize, viewSpeed, item, state, this.showSize, this.showSpeed, isFolder: true);
+            TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSize, viewSpeed, item, state, this.showSize, this.showSpeed, isFolder: true);
             TransferViewHelper.SetTimeRemainingText(viewTimeRemainingSeparator, viewTimeRemaining, viewSpeed, item, this.showTimeRemaining);
             var arrowSpan = folderItem.IsUpload() ? cachedUploadArrowSpan : cachedDownloadArrowSpan;
             TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state, arrowSpan, cachedDlColor);
@@ -624,7 +615,7 @@ namespace Seeker
         }
 
         public static void SetAdditionalStatusText(
-            View statusDot, TextView statusText, TextView sizeSeparator,
+            View statusDot, TextView statusText,
             TextView sizeView, TextView speedView,
             ITransferItem item, TransferStates state, bool showSize, bool showSpeed, bool isFolder = false)
         {
@@ -724,10 +715,6 @@ namespace Seeker
             if (showSize && sizeView != null)
             {
                 sizeView.Visibility = ViewStates.Visible;
-                if (sizeSeparator != null)
-                {
-                    sizeSeparator.Visibility = ViewStates.Visible;
-                }
                 if (item is TransferItem ti)
                 {
                     SetSizeText(sizeView, ti.GetBytesTransferred(), ti.Size);
@@ -738,16 +725,9 @@ namespace Seeker
                     SetSizeText(sizeView, completedBytes, totalBytes);
                 }
             }
-            else
+            else if (sizeView != null)
             {
-                if (sizeView != null)
-                {
-                    sizeView.Visibility = ViewStates.Gone;
-                }
-                if (sizeSeparator != null)
-                {
-                    sizeSeparator.Visibility = ViewStates.Gone;
-                }
+                sizeView.Visibility = ViewStates.Gone;
             }
 
             // Speed text
@@ -773,7 +753,6 @@ namespace Seeker
         private View statusDot;
         private TextView viewSize;
         private TextView viewSpeed;
-        private TextView viewSizeSeparator;
         private TextView viewTimeRemaining;
         private TextView viewTimeRemainingSeparator;
         private ImageView selectionCheckbox;
@@ -801,11 +780,6 @@ namespace Seeker
         public TextView GetSpeedTextView()
         {
             return viewSpeed;
-        }
-
-        public TextView GetSizeSeparatorView()
-        {
-            return viewSizeSeparator;
         }
 
         public TextView GetTimeRemainingTextView()
@@ -863,7 +837,6 @@ namespace Seeker
             statusDot = FindViewById<View>(Resource.Id.statusDot);
             viewSize = FindViewById<TextView>(Resource.Id.textViewSize);
             viewSpeed = FindViewById<TextView>(Resource.Id.textViewSpeed);
-            viewSizeSeparator = FindViewById<TextView>(Resource.Id.textViewSizeSeparator);
             viewTimeRemaining = FindViewById<TextView>(Resource.Id.textViewTimeRemaining);
             viewTimeRemainingSeparator = FindViewById<TextView>(Resource.Id.textViewTimeRemainingSeparator);
 
@@ -885,7 +858,7 @@ namespace Seeker
             TransferItem ti = item as TransferItem;
             viewFilename.Text = ti.Filename;
             progressBar.Progress = ti.GetProgressForPresentation();
-            TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSizeSeparator, viewSize, viewSpeed, ti, ti.State, this.showSizes, this.showSpeed);
+            TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSize, viewSpeed, ti, ti.State, this.showSizes, this.showSpeed);
             TransferViewHelper.SetTimeRemainingText(viewTimeRemainingSeparator, viewTimeRemaining, viewSpeed, ti, this.showTimeRemaining);
             viewUsername.Text = ti.Username;
             bool isFailedOrAborted = ti.Failed;

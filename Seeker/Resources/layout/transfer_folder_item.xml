@@ -87,15 +87,6 @@
             />
 
             <TextView
-                android:id="@+id/textViewSizeSeparator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textSize="11sp"
-                android:textColor="?attr/cellTextColor"
-            />
-
-            <TextView
                 android:layout_marginStart="5dp"
                 android:id="@+id/textViewSize"
                 android:layout_width="wrap_content"
