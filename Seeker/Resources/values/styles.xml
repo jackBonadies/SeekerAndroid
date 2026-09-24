@@ -58,6 +58,7 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionModeBackground">?attr/mainPurple</item>
         <item name="actionModeBackground">?attr/mainPurple</item>
+        <item name="actionModeTheme">@style/ThemeOverlay.Material3.Dark.ActionBar</item>
 
         <!-- Without this, BottomSheetDialogFragment falls back to Theme.Design.Light.BottomSheetDialog,
              whose colorPrimary is Material's default teal, not the app's purple. That mismatch is

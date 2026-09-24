@@ -45,6 +45,8 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionModeBackground">?attr/colorPrimary</item>
         <item name="actionModeBackground">?attr/colorPrimary</item>
+        <!-- Needed, otherwise in dark mode, icons that the system provides (back, 3 dot menu) are 60% opacity -->
+        <item name="actionModeTheme">@style/ThemeOverlay.Material3.Dark.ActionBar</item>
 
         <item name="bottomSheetDialogTheme">@style/SeekerBottomSheetDialog</item>
     </style>
