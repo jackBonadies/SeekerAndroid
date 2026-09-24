@@ -2,7 +2,6 @@ using Android.Views;
 using Common.Browse;
 using Seeker.Browse;
 using Seeker.Helpers;
-using Seeker.Services;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -145,31 +144,8 @@ namespace Seeker
                 return;
             }
 
-            // Separate files and folders
-            var files = selectedItems.Where(di => !di.IsDirectory()).ToList();
-            var folders = selectedItems.Where(di => di.IsDirectory()).ToList();
-
-            if (folders.Count > 0)
-            {
-                // Download folders via the existing entry point
-                foreach (var folder in folders)
-                {
-                    DownloadUserFilesEntry(queuePaused, false, folder);
-                }
-            }
-
-            if (files.Count > 0)
-            {
-                var fileInfos = files.Select(item => BrowseUtils.ToFullFileInfo(item)).ToList();
-                if (queuePaused)
-                {
-                    SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(fileInfos.ToArray(), true, state.CurrentUsername));
-                }
-                else
-                {
-                    SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(fileInfos.ToArray(), false, state.CurrentUsername));
-                }
-            }
+            // files and folders together - one set of dialogs and one enqueue (i.e. one ordered request loop for the user)
+            DownloadUserFilesEntry(queuePaused, false, selectedItems);
         }
 
         private void ShowBatchSelectedInfo()

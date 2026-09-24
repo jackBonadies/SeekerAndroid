@@ -612,6 +612,7 @@
 
     <string name="filter_is_on">Filter is on</string>
     <string name="filter_is_on_body">Would you like to download the full folder or just filtered items?</string>
+    <string name="filter_is_on_body_batch">Would you like to download the full folders or just filtered items?</string>
     <string name="all">All</string>
     <string name="just_filtered">Just filtered</string>
 
@@ -621,6 +622,12 @@
     <string name="subfolders_warning">This folder contains subfolders, would you like to download all files in those subfolders as well ({0}) or only the files in the current folder ({1})?</string>
 
     <string name="subfolders_warning_queue_paused">This folder contains subfolders, would you like to queue all files in those subfolders as well ({0}) or only the files in the current folder ({1})?</string>
+
+    <string name="subfolders_warning_batch">Some of the selected folders contain subfolders, would you like to download all files in those subfolders as well ({0}) or skip the subfolders ({1})?</string>
+
+    <string name="subfolders_warning_batch_queue_paused">Some of the selected folders contain subfolders, would you like to queue all files in those subfolders as well ({0}) or skip the subfolders ({1})?</string>
+
+    <string name="skip_subfolders">Skip subfolders</string>
 
     <string name="current_folder_only">Current folder only</string>
     <string name="must_be_logged_in_to_give_privileges">Must be logged in to give privileges</string>
@@ -700,6 +707,7 @@
 
     <string name="NothingToCopy">Nothing to copy</string>
     <string name="ThisFolderContainsSubfolders">This folder contains subfolders</string>
+    <string name="SelectedFoldersContainSubfolders">Selected folders contain subfolders</string>
     <string name="QueuedForDownload">Queued for download</string>
     <string name="QueueFolderAsPaused">Queued folder as paused</string>
 
