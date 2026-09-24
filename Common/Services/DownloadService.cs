@@ -468,6 +468,26 @@ namespace Seeker.Services
         }
 
 
+        // only once the library is done with the item, i.e. its output stream is closed
+        private void DeleteIncompleteFile(TransferItem item, string reason)
+        {
+            if (string.IsNullOrEmpty(item.IncompleteParentUri))
+            {
+                // memory backed or never created the incomplete location (i.e. was stuck behind a not yet started transfer)
+                return;
+            }
+            try
+            {
+                TransferItems.TransferItemManagerWrapped.PerformCleanup(item);
+            }
+            catch (Exception ex)
+            {
+                string exceptionString = "Failed to delete incomplete file " + reason + ": " + ex.ToString();
+                logger.Debug(exceptionString);
+                logger.Firebase(exceptionString);
+            }
+        }
+
         public void MarkTransferItemAsDirNotSet(TransferItem item)
         {
             item.Failed = true;
@@ -721,6 +741,12 @@ namespace Seeker.Services
             {
                 // before any retry below re-claims it
                 ReleaseClaim(e.dlInfo);
+                // protects against rare edge case where we own a transfer which faulted but has yet to reach the continuation action,
+                //   and so it is still in activeRequests.  We go to retry it (and so we cancel it and set the retry flag).  It will
+                //   then have the retry flag set but will never hit the cancelled branch (and so never retry).  Then next time we pause or
+                //   cancel and clear it, the stale CancelAndRetryFlag will cause it to redownload.
+                bool retryRequested = e.dlInfo.TransferItemReference.CancelAndRetryFlag;
+                e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
                 logger.Debug("DownloadContinuationActionUI started for " + e.dlInfo?.fullFilename + " with status: " + task.Status
                     + (task.IsFaulted ? " reason: " + SimpleHelpers.DescribeException(task.Exception) : string.Empty));
                 var failureKind = task.IsFaulted ? DownloadFailureClassifier.Classify(task.Exception) : DownloadFailureKind.Unknown;
@@ -742,9 +768,14 @@ namespace Seeker.Services
                             taskWasCancelledToastDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                         }
 
-                        if (e.dlInfo.TransferItemReference.CancelAndRetryFlag) //if we pressed "Retry Download" and it was in progress so we first had to cancel...
+                        if (e.dlInfo.TransferItemReference.CancelAndClearFlag)
                         {
-                            e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
+                            // takes precedence over CancelAndRetry
+                            logger.Debug("continue with cleanup activity: " + e.dlInfo.fullFilename);
+                            DeleteIncompleteFile(e.dlInfo.TransferItemReference, "on cancel and clear");
+                        }
+                        else if (retryRequested) //if we pressed "Retry Download" and it was in progress so we first had to cancel...
+                        {
                             try
                             {
                                 //retry download.
@@ -770,14 +801,6 @@ namespace Seeker.Services
                                     mainThreadRunner.RunOnUiThread(action);
                                 }
                             }
-                        }
-
-                        if (e.dlInfo.TransferItemReference.CancelAndClearFlag)
-                        {
-                            logger.Debug("continue with cleanup activity: " + e.dlInfo.fullFilename);
-                            e.dlInfo.TransferItemReference.CancelAndRetryFlag = false;
-                            e.dlInfo.TransferItemReference.InProcessing = false;
-                            TransferItems.TransferItemManagerWrapped.PerformCleanup(e.dlInfo.TransferItemReference); //this way we are sure that the stream is closed.
                         }
 
                         return;
@@ -853,19 +876,7 @@ namespace Seeker.Services
                     e.dlInfo.Size = sizeException.RemoteSize;
                     forceRetry = true;
                     resetRetryCount = true;
-                    if (!string.IsNullOrEmpty(transferItem.IncompleteParentUri))
-                    {
-                        try
-                        {
-                            TransferItems.TransferItemManagerWrapped.PerformCleanup(transferItem);
-                        }
-                        catch (Exception ex)
-                        {
-                            string exceptionString = "Failed to delete incomplete file on TransferSizeMismatchException: " + ex.ToString();
-                            logger.Debug(exceptionString);
-                            logger.Firebase(exceptionString);
-                        }
-                    }
+                    DeleteIncompleteFile(transferItem, "on TransferSizeMismatchException");
                     break;
                 }
                 case DownloadFailureKind.DirectoryNotSet:
