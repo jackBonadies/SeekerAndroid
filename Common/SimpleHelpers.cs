@@ -431,35 +431,68 @@ namespace Seeker
             }
         }
 
+        public const double TOTAL_BYTES_KB = 1024;
         public const double TOTAL_BYTES_MB = 1048576;
         public const double TOTAL_BYTES_GB = 1073741824;
+        public const double TOTAL_BYTES_TB = 1099511627776;
 
-        public static string GetHumanReadableSize(long totalBytes)
+        private static (double Scale, string Unit) GetSizeUnit(long bytes)
         {
-            if (totalBytes > TOTAL_BYTES_GB)
+            if (bytes > TOTAL_BYTES_TB)
             {
-                return $"{totalBytes / TOTAL_BYTES_GB:0.##} GB";
+                return (TOTAL_BYTES_TB, "TB");
+            }
+            else if (bytes > TOTAL_BYTES_GB)
+            {
+                return (TOTAL_BYTES_GB, "GB");
+            }
+            else if (bytes > TOTAL_BYTES_MB)
+            {
+                return (TOTAL_BYTES_MB, "MB");
+            }
+            else if (bytes > TOTAL_BYTES_KB)
+            {
+                return (TOTAL_BYTES_KB, "KB");
             }
             else
             {
-                return $"{totalBytes / TOTAL_BYTES_MB:0.##} MB";
+                return (1, "B");
             }
+        }
+
+        // for 3 total sigfigs
+        private static int GetSizeDecimals(double scaled, string unit)
+        {
+            if (unit == "B")
+            {
+                return 0;
+            }
+            else if (scaled < 10)
+            {
+                return 2;
+            }
+            else if (scaled < 100)
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        public static string GetHumanReadableSize(long totalBytes)
+        {
+            var (scale, unit) = GetSizeUnit(totalBytes);
+            return $"{totalBytes / scale:0.##} {unit}";
         }
 
         public static string GetHumanReadableProgressSize(long currentBytes, long totalBytes)
         {
-            if (totalBytes > TOTAL_BYTES_GB)
-            {
-                return currentBytes == 0
-                    ? $"0 GB / {totalBytes / TOTAL_BYTES_GB:F1} GB"
-                    : $"{currentBytes / TOTAL_BYTES_GB:F1} GB / {totalBytes / TOTAL_BYTES_GB:F1} GB";
-            }
-            else
-            {
-                return currentBytes == 0
-                    ? $"0 MB / {totalBytes / TOTAL_BYTES_MB:F1} MB"
-                    : $"{currentBytes / TOTAL_BYTES_MB:F1} MB / {totalBytes / TOTAL_BYTES_MB:F1} MB";
-            }
+            var (scale, unit) = GetSizeUnit(totalBytes);
+            double total = totalBytes / scale;
+            string format = "F" + GetSizeDecimals(total, unit);
+            return (currentBytes / scale).ToString(format) + " / " + total.ToString(format) + " " + unit;
         }
 
         public static string GetHumanReadableTime(int totalSeconds, bool withSpace = false)

@@ -3,6 +3,7 @@ using Seeker;
 using Soulseek;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ namespace UnitTestCommon
         [SetUp]
         public void Setup()
         {
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             SimpleHelpers.STRINGS_KBS = " kbs";
             SimpleHelpers.STRINGS_KHZ = " kHz";
         }
@@ -178,7 +180,47 @@ namespace UnitTestCommon
         public void GetHumanReadableSize_ZeroBytes()
         {
             string result = SimpleHelpers.GetHumanReadableSize(0);
-            Assert.That(result, Is.EqualTo("0 MB"));
+            Assert.That(result, Is.EqualTo("0 B"));
+        }
+
+        // --- GetHumanReadableProgressSize ---
+
+        // always show ~3 significant digits
+        [TestCase(5270000L, 9050000L, "5.03 / 8.63 MB")]
+        [TestCase(12900000L, 47185920L, "12.3 / 45.0 MB")]
+        [TestCase(365953024L, 367001600L, "349 / 350 MB")]
+        [TestCase(429496730L, 1717986918L, "0.40 / 1.60 GB")]
+        [TestCase(46080L, 307200L, "45 / 300 KB")]
+        [TestCase(100L, 900L, "100 / 900 B")]
+        public void GetHumanReadableProgressSize_Tiers(long current, long total, string expected)
+        {
+            Assert.That(SimpleHelpers.GetHumanReadableProgressSize(current, total), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void GetHumanReadableProgressSize_ZeroProgress_KeepsTotalWidth()
+        {
+            Assert.That(SimpleHelpers.GetHumanReadableProgressSize(0, 9050000L), Is.EqualTo("0.00 / 8.63 MB"));
+        }
+
+        [Test]
+        public void GetHumanReadableProgressSize_Complete()
+        {
+            long bytes = 5L * 1024 * 1024;
+            Assert.That(SimpleHelpers.GetHumanReadableProgressSize(bytes, bytes), Is.EqualTo("5.00 / 5.00 MB"));
+        }
+
+        [Test]
+        public void GetHumanReadableProgressSize_ExactlyAtGbThreshold_ReturnsMb()
+        {
+            long bytes = 1024L * 1024 * 1024;
+            Assert.That(SimpleHelpers.GetHumanReadableProgressSize(bytes / 2, bytes), Is.EqualTo("512 / 1024 MB"));
+        }
+
+        [Test]
+        public void GetHumanReadableProgressSize_ZeroTotal_DoesNotThrow()
+        {
+            Assert.That(SimpleHelpers.GetHumanReadableProgressSize(0, 0), Is.EqualTo("0 / 0 B"));
         }
 
         // --- GetTransferSpeedString ---
