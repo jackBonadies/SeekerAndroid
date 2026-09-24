@@ -92,7 +92,7 @@ namespace Seeker
                 {
                     var item = fi.TransferItems[i];
 
-                    if (item.State.HasFlag(TransferStates.Cancelled) || item.State.HasFlag(TransferStates.Queued))
+                    if (item.State.HasFlag(TransferStates.Cancelled))
                     {
                         transferItemConditionList.Add(new Tuple<TransferItem, int>(item, i));
                     }
@@ -113,7 +113,7 @@ namespace Seeker
                     {
                         var item = AllTransferItems[i];
 
-                        if (item.State.HasFlag(TransferStates.Cancelled) || item.State.HasFlag(TransferStates.Queued))
+                        if (item.State.HasFlag(TransferStates.Cancelled))
                         {
                             int folderIndex = -1;
                             for (int fi = 0; fi < AllFolderItems.Count; fi++)
@@ -198,7 +198,7 @@ namespace Seeker
                         {
                             tis.Add(ti);
                         }
-                        else if (!selectFailed && (ti.State.HasFlag(TransferStates.Cancelled) || ti.State.HasFlag(TransferStates.Queued)))
+                        else if (!selectFailed && ti.State.HasFlag(TransferStates.Cancelled))
                         {
                             tis.Add(ti);
                         }
@@ -210,7 +210,7 @@ namespace Seeker
                     {
                         tis.Add(ti);
                     }
-                    else if (!selectFailed && (ti.State.HasFlag(TransferStates.Cancelled) || ti.State.HasFlag(TransferStates.Queued)))
+                    else if (!selectFailed && ti.State.HasFlag(TransferStates.Cancelled))
                     {
                         tis.Add(ti);
                     }
