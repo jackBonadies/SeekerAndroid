@@ -136,7 +136,6 @@ namespace Seeker.Services
                 return Task.CompletedTask;
             }
 
-            //the filename is basically "the key"
             _ = endpoint;
             string errorMsg = null;
             Tuple<long, string, Tuple<int, int, int, int>, bool, bool> ourFileInfo = SharedFileService.SharedFileCache.GetFullInfoFromSearchableName(filename, out errorMsg);
@@ -151,8 +150,6 @@ namespace Seeker.Services
 
             if (ourFileInfo.Item4 || ourFileInfo.Item5)
             {
-                //locked or hidden (hidden shouldnt happen but just in case, it should still be userlist only)
-                //CHECK USER LIST
                 if (!SimpleHelpers.UserListService.ContainsUser(username))
                 {
                     throw new DownloadEnqueueException($"File not shared");
@@ -173,7 +170,6 @@ namespace Seeker.Services
                 throw new DownloadEnqueueException($"File not found.");
             }
 
-            // create a new cancellation token source so that we can cancel the upload from the UI.
             var cts = new CancellationTokenSource();
 
             TransferItem transferItem = new TransferItem();
@@ -217,7 +213,7 @@ namespace Seeker.Services
                 }
             }).ContinueWith(t =>
             {
-            }, TaskContinuationOptions.NotOnRanToCompletion); // fire and forget
+            }, TaskContinuationOptions.NotOnRanToCompletion);
 
             // return a completed task so that the invoking code can respond to the remote client.
             return Task.CompletedTask;
