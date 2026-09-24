@@ -55,6 +55,7 @@ namespace Seeker
             PreferencesState.AutoClearCompleteUploads = prefs.GetBoolean(KeyConsts.M_AutoClearCompleteUploads, false);
             PreferencesState.TransferViewShowSizes = prefs.GetBoolean(KeyConsts.M_TransfersShowSizes, true);
             PreferencesState.TransferViewShowSpeed = prefs.GetBoolean(KeyConsts.M_TransfersShowSpeed, true);
+            PreferencesState.TransferViewShowTimeRemaining = prefs.GetBoolean(KeyConsts.M_TransfersShowTimeRemaining, true);
             PreferencesState.TransferViewGroupByFolder = prefs.GetBoolean(KeyConsts.M_TransfersGroupByFolder, false);
             PreferencesState.TransferViewInUploadsMode = prefs.GetBoolean(KeyConsts.M_TransfersInUploadsMode, false);
             PreferencesState.DisableDownloadToastNotification = prefs.GetBoolean(KeyConsts.M_DisableToastNotifications, true);
@@ -266,6 +267,16 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_TransfersShowSpeed, PreferencesState.TransferViewShowSpeed);
+                editor.Apply();
+            }
+        }
+
+        public static void SaveTransferViewShowTimeRemaining()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_TransfersShowTimeRemaining, PreferencesState.TransferViewShowTimeRemaining);
                 editor.Apply();
             }
         }
@@ -912,6 +923,7 @@ namespace Seeker
                 editor.PutBoolean(KeyConsts.M_RememberUserHistory, PreferencesState.ShowRecentUsers);
                 editor.PutBoolean(KeyConsts.M_TransfersShowSizes, PreferencesState.TransferViewShowSizes);
                 editor.PutBoolean(KeyConsts.M_TransfersShowSpeed, PreferencesState.TransferViewShowSpeed);
+                editor.PutBoolean(KeyConsts.M_TransfersShowTimeRemaining, PreferencesState.TransferViewShowTimeRemaining);
                 editor.PutBoolean(KeyConsts.M_TransfersGroupByFolder, PreferencesState.TransferViewGroupByFolder);
                 editor.PutBoolean(KeyConsts.M_TransfersInUploadsMode, PreferencesState.TransferViewInUploadsMode);
                 editor.PutBoolean(KeyConsts.M_OnlyFreeUploadSlots, PreferencesState.FreeUploadSlotsOnly);

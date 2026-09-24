@@ -3,7 +3,9 @@ using Seeker;
 using Soulseek;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace UnitTestCommon
 {
@@ -12,6 +14,7 @@ namespace UnitTestCommon
         [SetUp]
         public void Setup()
         {
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             SimpleHelpers.STRINGS_KBS = " kbs";
             SimpleHelpers.STRINGS_KHZ = " kHz";
         }
@@ -110,6 +113,34 @@ namespace UnitTestCommon
             Assert.That(SimpleHelpers.GetHumanReadableTime(360000), Is.EqualTo("100h0m0s"));
         }
 
+        [TestCase(0, "0s")]
+        [TestCase(45, "45s")]
+        [TestCase(59.9, "59s")]
+        [TestCase(60, "1m 0s")]
+        [TestCase(123, "2m 3s")]
+        [TestCase(3600, "1h 0m")]
+        [TestCase(3723, "1h 2m")]
+        [TestCase(86400 + 4 * 3600 + 59 * 60 + 59, "1d 4h")]
+        [TestCase(-5, "0s")]
+        public void FormatTimeRemaining_FormatsByLargestUnit(double seconds, string expected)
+        {
+            Assert.AreEqual(expected, SimpleHelpers.FormatTimeRemaining(TimeSpan.FromSeconds(seconds)));
+        }
+
+        [Test]
+        public void DescribeException_UnwrapsAggregateAndWalksInnerChain()
+        {
+            var inner = new TimeoutException("The wait timed out after 30000 milliseconds");
+            var outer = new SoulseekClientException("Failed to download file x from user y: The wait timed out", inner);
+            var faulted = Task.FromException(outer);
+
+            Assert.AreEqual(
+                "SoulseekClientException: Failed to download file x from user y: The wait timed out <- TimeoutException: The wait timed out after 30000 milliseconds",
+                SimpleHelpers.DescribeException(faulted.Exception));
+            Assert.AreEqual("TimeoutException: The wait timed out after 30000 milliseconds", SimpleHelpers.DescribeException(inner));
+            Assert.AreEqual("null", SimpleHelpers.DescribeException(null));
+        }
+
         // --- GetHumanReadableSize ---
 
         [Test]
@@ -149,7 +180,47 @@ namespace UnitTestCommon
         public void GetHumanReadableSize_ZeroBytes()
         {
             string result = SimpleHelpers.GetHumanReadableSize(0);
-            Assert.That(result, Is.EqualTo("0 MB"));
+            Assert.That(result, Is.EqualTo("0 B"));
+        }
+
+        // --- GetHumanReadableProgressSize ---
+
+        // always show ~3 significant digits
+        [TestCase(5270000L, 9050000L, "5.03 / 8.63 MB")]
+        [TestCase(12900000L, 47185920L, "12.3 / 45.0 MB")]
+        [TestCase(365953024L, 367001600L, "349 / 350 MB")]
+        [TestCase(429496730L, 1717986918L, "0.40 / 1.60 GB")]
+        [TestCase(46080L, 307200L, "45 / 300 KB")]
+        [TestCase(100L, 900L, "100 / 900 B")]
+        public void GetHumanReadableProgressSize_Tiers(long current, long total, string expected)
+        {
+            Assert.That(SimpleHelpers.GetHumanReadableProgressSize(current, total), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void GetHumanReadableProgressSize_ZeroProgress_KeepsTotalWidth()
+        {
+            Assert.That(SimpleHelpers.GetHumanReadableProgressSize(0, 9050000L), Is.EqualTo("0.00 / 8.63 MB"));
+        }
+
+        [Test]
+        public void GetHumanReadableProgressSize_Complete()
+        {
+            long bytes = 5L * 1024 * 1024;
+            Assert.That(SimpleHelpers.GetHumanReadableProgressSize(bytes, bytes), Is.EqualTo("5.00 / 5.00 MB"));
+        }
+
+        [Test]
+        public void GetHumanReadableProgressSize_ExactlyAtGbThreshold_ReturnsMb()
+        {
+            long bytes = 1024L * 1024 * 1024;
+            Assert.That(SimpleHelpers.GetHumanReadableProgressSize(bytes / 2, bytes), Is.EqualTo("512 / 1024 MB"));
+        }
+
+        [Test]
+        public void GetHumanReadableProgressSize_ZeroTotal_DoesNotThrow()
+        {
+            Assert.That(SimpleHelpers.GetHumanReadableProgressSize(0, 0), Is.EqualTo("0 / 0 B"));
         }
 
         // --- GetTransferSpeedString ---
@@ -532,6 +603,19 @@ namespace UnitTestCommon
             string result = SimpleHelpers.GetSizeLengthAttrString(file);
             Assert.That(result, Does.Contain("•"));
             Assert.That(result, Does.Contain("3m 5s"));
+        }
+
+        [TestCase(5_624_222L, "5.36 MB")]
+        [TestCase(5L * 1024 * 1024, "5 MB")]
+        [TestCase(512_345_900L, "489 MB")]
+        [TestCase(1_234_567_890L, "1.15 GB")]
+        [TestCase(20_234_567_890L, "18.8 GB")]
+        public void GetSizeAttribute(long size, string expected)
+        {
+            var attrs = new List<FileAttribute> { new FileAttribute(FileAttributeType.Length, 185) };
+            var file = new File(1, "test.mp3", size, "mp3", attrs);
+            string result = SimpleHelpers.GetSizeLengthAttrString(file);
+            Assert.That(result, Does.Contain(expected));
         }
 
         [Test]

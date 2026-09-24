@@ -7,14 +7,12 @@ namespace Seeker
         public TransferItem TransferItem;
         public bool WasFailed;
         public double PercentComplete;
-        public double AverageSpeedBytes;
 
-        public ProgressUpdatedUIEventArgs(TransferItem transferItem, bool wasFailed, double percentComplete, double averageSpeedBytes)
+        public ProgressUpdatedUIEventArgs(TransferItem transferItem, bool wasFailed, double percentComplete)
         {
             TransferItem = transferItem;
             WasFailed = wasFailed;
             PercentComplete = percentComplete;
-            AverageSpeedBytes = averageSpeedBytes;
         }
     }
 }

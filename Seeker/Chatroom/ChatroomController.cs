@@ -559,6 +559,7 @@ namespace Seeker.Chatroom
 
         private static void SoulseekClient_RoomListReceived(object sender, RoomList e)
         {
+            Logger.Info("SoulseekClient_RoomListReceived, pubilc count: " + e.PublicCount);
             RoomList = e;
             RoomListParsed = ParseRoomListForPresentation(RoomList);
             IsRoomListLoading = false;

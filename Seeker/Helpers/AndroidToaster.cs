@@ -66,7 +66,8 @@ namespace Seeker
             return key switch
             {
                 StringKey.cannot_download_from_self => Resource.String.cannot_download_from_self,
-                StringKey.error_duplicate => Resource.String.error_duplicate,
+                StringKey.error_duplicate => Resource.String.error_duplicate_transfer_already_exists,
+                StringKey.error_duplicate_multiple => Resource.String.error_duplicate_transfers_already_exist,
                 StringKey.QueuedForDownload => Resource.String.QueuedForDownload,
                 StringKey.download_is_starting => Resource.String.download_is_starting,
                 StringKey.FailedDownloadDirectoryNotSet => Resource.String.FailedDownloadDirectoryNotSet,
@@ -75,10 +76,10 @@ namespace Seeker
                 StringKey.TimeoutQueueUserX => Resource.String.TimeoutQueueUserX,
                 StringKey.error_ => Resource.String.error_,
                 StringKey.MustBeLoggedInToRetryDL => Resource.String.MustBeLoggedInToRetryDL,
+                StringKey.must_be_logged_to_download => Resource.String.must_be_logged_to_download,
                 StringKey.timeout_peer => Resource.String.timeout_peer,
                 StringKey.transfer_rejected_file_not_shared => Resource.String.transfer_rejected_file_not_shared,
                 StringKey.transfer_rejected => Resource.String.transfer_rejected,
-                StringKey.failed_to_establish_connection_to_peer => Resource.String.failed_to_establish_connection_to_peer,
                 StringKey.failed_to_establish_direct_or_indirect => Resource.String.failed_to_establish_direct_or_indirect,
                 StringKey.remote_conn_closed => Resource.String.remote_conn_closed,
                 StringKey.network_down => Resource.String.network_down,

@@ -49,11 +49,15 @@ namespace Seeker
 
         public TextView GetSpeedTextView();
 
-        public TextView GetSizeSeparatorView();
+        public TextView GetTimeRemainingTextView();
+
+        public TextView GetTimeRemainingSeparatorView();
 
         public bool GetShowProgressSize();
 
         public bool GetShowSpeed();
+
+        public bool GetShowTimeRemaining();
     }
 
     public class TransferItemViewFolder : RelativeLayout, ITransferItemView, View.IOnCreateContextMenuListener
@@ -68,7 +72,8 @@ namespace Seeker
         private View statusDot;
         private TextView viewSize;
         private TextView viewSpeed;
-        private TextView viewSizeSeparator;
+        private TextView viewTimeRemaining;
+        private TextView viewTimeRemainingSeparator;
         private ImageView selectionCheckbox;
         private FrameLayout actionContainer;
 
@@ -103,13 +108,19 @@ namespace Seeker
             return viewSpeed;
         }
 
-        public TextView GetSizeSeparatorView()
+        public TextView GetTimeRemainingTextView()
         {
-            return viewSizeSeparator;
+            return viewTimeRemaining;
+        }
+
+        public TextView GetTimeRemainingSeparatorView()
+        {
+            return viewTimeRemainingSeparator;
         }
 
         public bool showSize;
         public bool showSpeed;
+        public bool showTimeRemaining;
 
         public bool GetShowProgressSize()
         {
@@ -121,18 +132,24 @@ namespace Seeker
             return showSpeed;
         }
 
+        public bool GetShowTimeRemaining()
+        {
+            return showTimeRemaining;
+        }
+
         public TransferItemViewFolder(Context context) : base(context)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_folder_showProgressSize, this, true);
+            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_folder_item, this, true);
             setupChildren();
         }
 
-        public static TransferItemViewFolder Create(ViewGroup parent, bool showSize, bool showSpeed)
+        public static TransferItemViewFolder Create(ViewGroup parent, bool showSize, bool showSpeed, bool showTimeRemaining)
         {
             var itemView = new TransferItemViewFolder(parent.Context);
             itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             itemView.showSpeed = showSpeed;
             itemView.showSize = showSize;
+            itemView.showTimeRemaining = showTimeRemaining;
             return itemView;
         }
 
@@ -150,7 +167,8 @@ namespace Seeker
             statusDot = FindViewById<View>(Resource.Id.statusDot);
             viewSize = FindViewById<TextView>(Resource.Id.textViewSize);
             viewSpeed = FindViewById<TextView>(Resource.Id.textViewSpeed);
-            viewSizeSeparator = FindViewById<TextView>(Resource.Id.textViewSizeSeparator);
+            viewTimeRemaining = FindViewById<TextView>(Resource.Id.textViewTimeRemaining);
+            viewTimeRemainingSeparator = FindViewById<TextView>(Resource.Id.textViewTimeRemainingSeparator);
 
             selectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
             actionContainer = FindViewById<FrameLayout>(Resource.Id.actionContainer);
@@ -192,7 +210,8 @@ namespace Seeker
             viewFoldername.Text = folderItem.GetDisplayFolderName();
             var state = folderItem.GetState(out bool isFailed, out _);
 
-            TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSizeSeparator, viewSize, viewSpeed, item, state, this.showSize, this.showSpeed, isFolder: true);
+            TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSize, viewSpeed, item, state, this.showSize, this.showSpeed, isFolder: true);
+            TransferViewHelper.SetTimeRemainingText(viewTimeRemainingSeparator, viewTimeRemaining, viewSpeed, item, this.showTimeRemaining);
             var arrowSpan = folderItem.IsUpload() ? cachedUploadArrowSpan : cachedDownloadArrowSpan;
             TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state, arrowSpan, cachedDlColor);
             TransferViewHelper.UpdateSegmentedProgressBar(segmentedProgressBar, folderItem);
@@ -222,7 +241,8 @@ namespace Seeker
     public class TransferViewHelper
     {
         /// <summary>
-        /// In Progress = InProgress proper, initializing, requested. 
+        /// In Progress = InProgress, initializing, requested only for upload (for download it is 
+        ///   between local queue and remote queue so still effectively queued - otherwise we get flicker). 
         /// If In Progress or Queued you should be able to pause it (the official client lets you).
         /// </summary>
         /// <param name="transferItems"></param>
@@ -241,7 +261,7 @@ namespace Seeker
             {
                 foreach (var ti in transferItems)
                 {
-                    if (ti.State.HasFlag(TransferStates.Queued))
+                    if (ti.State.HasFlag(TransferStates.Queued) || (!ti.IsUpload() && ti.State.HasFlag(TransferStates.Requested)))
                     {
                         numQueued++;
                     }
@@ -293,7 +313,10 @@ namespace Seeker
 
                 currentFile.Visibility = ViewStates.Visible;
                 currentFile.SetTextColor(new Color(dlColor));
-                currentFile.SetText(spannable, TextView.BufferType.Spannable);
+                // Ellipsize only works with BufferType Normal not Spannable
+                //   Normal: creates a readonly copy
+                //   Spannable: allows you to change styling at runtime
+                currentFile.SetText(spannable, TextView.BufferType.Normal);
             }
             else
             {
@@ -362,119 +385,18 @@ namespace Seeker
         }
 
 
-        public static void SetViewStatusText(TextView viewStatus, TransferStates state, bool isUpload, bool isFolder)
+        public static void SetTimeRemainingText(TextView separator, TextView timeRemainingView, TextView speedView, ITransferItem item, bool showTimeRemaining)
         {
-            if (state.HasFlag(TransferStates.Queued))
+            TimeSpan? remaining = showTimeRemaining ? item.GetRemainingTime() : null;
+            if (remaining == null)
             {
-                viewStatus.SetText(Resource.String.in_queue);
+                timeRemainingView.Visibility = ViewStates.Gone;
+                separator.Visibility = ViewStates.Gone;
+                return;
             }
-            else if (state.HasFlag(TransferStates.Cancelled))
-            {
-                if (isUpload)
-                {
-                    viewStatus.Text = SeekerApplication.GetString(Resource.String.Aborted);
-                }
-                else
-                {
-                    viewStatus.SetText(Resource.String.paused);
-                }
-            }
-            else if (isFolder && state.HasFlag(TransferStates.Rejected)) //if is folder we put the extra info here, else we put it in the additional status TextView
-            {
-                if (isUpload)
-                {
-                    viewStatus.Text = System.String.Format("{0} - {1}", SeekerApplication.GetString(Resource.String.failed), SeekerApplication.GetString(Resource.String.Cancelled));//if the user on the other end cancelled / paused / removed it.
-                }
-                else
-                {
-                    viewStatus.SetText(Resource.String.failed_denied);
-                }
-            }
-            else if (isFolder && state.HasFlag(TransferStates.UserOffline))
-            {
-                viewStatus.SetText(Resource.String.failed_user_offline);
-            }
-            else if (isFolder && state.HasFlag(TransferStates.CannotConnect))
-            {
-                viewStatus.Text = System.String.Format("{0} - {1}", SeekerApplication.GetString(Resource.String.failed), SeekerApplication.GetString(Resource.String.CannotConnect));
-                //"cannot connect" is too long for average screen. but the root problem needs to be fixed (for folder combine two TextView into one with padding???? TODO)
-            }
-            else if (state.HasFlag(TransferStates.Rejected) || state.HasFlag(TransferStates.TimedOut) || state.HasFlag(TransferStates.Errored))
-            {
-                viewStatus.SetText(Resource.String.failed);
-            }
-            else if (state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested))  //item.State.HasFlag(TransferStates.None) captures EVERYTHING!!
-            {
-                viewStatus.SetText(Resource.String.not_started);
-            }
-            else if (state.HasFlag(TransferStates.InProgress))
-            {
-                viewStatus.SetText(Resource.String.in_progress);
-            }
-            else if (state.HasFlag(TransferStates.Succeeded))
-            {
-                viewStatus.SetText(Resource.String.completed);
-            }
-            else if (state.HasFlag(TransferStates.Aborted))
-            {
-                // this is the case that the filesize is wrong. In that case we always immediately re-request.
-                viewStatus.SetText(Resource.String.re_requesting);
-            }
-            else
-            {
-                //these views are recycled, so NEVER dont set them.
-                //otherwise they will be whatever the view they recycled was.
-                //so they may end up being Failed, Completed, etc.
-                //viewStatus.Text = "None";
-                
-                viewStatus.SetText(Resource.String.not_started);
-            }
-        }
-
-
-        public static string GetTimeRemainingString(TimeSpan? timeSpan)
-        {
-            if (timeSpan == null)
-            {
-                return SeekerState.ActiveActivityRef.GetString(Resource.String.unknown);
-            }
-            else
-            {
-                string[] hms = timeSpan.ToString().Split(':');
-                string h = hms[0].TrimStart('0');
-                if (h == string.Empty)
-                {
-                    h = "0";
-                }
-                string m = hms[1].TrimStart('0');
-                if (m == string.Empty)
-                {
-                    m = "0";
-                }
-                string s = hms[2].TrimStart('0');
-                if (s.Contains('.'))
-                {
-                    s = s.Substring(0, s.IndexOf('.'));
-                }
-                if (s == string.Empty)
-                {
-                    s = "0";
-                }
-                //it will always be length 3.  if the seconds is more than a day it will be like "[13.21:53:20]" and if just 2 it will be like "[00:00:02]"
-                if (h != "0")
-                {
-                    //we have hours
-                    return h + "h:" + m + "m:" + s + "s";
-                }
-                else if (m != "0")
-                {
-                    return m + "m:" + s + "s";
-                }
-                else
-                {
-                    return s + "s";
-                }
-            }
+            timeRemainingView.Text = SimpleHelpers.FormatTimeRemaining(remaining.Value);
+            timeRemainingView.Visibility = ViewStates.Visible;
+            separator.Visibility = speedView.Visibility == ViewStates.Visible ? ViewStates.Visible : ViewStates.Gone;
         }
 
         private enum TransferChipType
@@ -522,15 +444,15 @@ namespace Seeker
             }
         }
 
+        // folder rows: filled tonal pill, no dot
         private static void StyleStatusChip(View dot, TextView text, string label, TransferChipType chipType)
         {
+            dot.Visibility = ViewStates.Gone;
             if (label == string.Empty)
             {
-                dot.Visibility = ViewStates.Gone;
                 text.Visibility = ViewStates.Gone;
                 return;
             }
-            dot.Visibility = ViewStates.Gone;
             text.Visibility = ViewStates.Visible;
             text.Text = label;
 
@@ -540,15 +462,11 @@ namespace Seeker
             int bgColor = resources.GetColor(GetChipBgColorResId(chipType), theme);
 
             text.SetTextColor(new Color(textColor));
-            text.SetTypeface(text.Typeface, Android.Graphics.TypefaceStyle.Bold);
-            text.SetTextSize(ComplexUnitType.Sp, 10);
 
             var bg = text.Background?.Mutate() as GradientDrawable;
             if (bg != null)
             {
                 bg.SetColor(bgColor);
-                int strokeWidth = (int)(1 * resources.DisplayMetrics.Density);
-                bg.SetStroke(strokeWidth, new Color(textColor));
             }
         }
 
@@ -582,31 +500,43 @@ namespace Seeker
             }
         }
 
+        // Cached typeface so we dont recreate it every time
+        private static Typeface speedFaceNormal;
+        private static Typeface speedFaceBold;
+
+        private static void SetSpeedTypeface(TextView speedView, bool bold)
+        {
+            if (speedFaceBold == null)
+            {
+                speedFaceNormal = speedView.Typeface ?? Typeface.Default;
+                speedFaceBold = Typeface.Create(speedFaceNormal, TypefaceStyle.Bold);
+            }
+            speedView.Typeface = bold ? speedFaceBold : speedFaceNormal;
+        }
+
         public static void SetSpeedText(TextView speedView, ITransferItem item, TransferStates state)
         {
             double avgSpeed = item.GetAvgSpeed();
+            if (avgSpeed <= 0)
+            {
+                speedView.Visibility = ViewStates.Gone;
+                return;
+            }
             var resources = speedView.Context.Resources;
             var theme = speedView.Context.Theme;
-            if ((state.HasFlag(TransferStates.InProgress) || state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested)) && avgSpeed > 0)
+            speedView.Visibility = ViewStates.Visible;
+            speedView.Text = SimpleHelpers.GetTransferSpeedString(avgSpeed);
+            if (state.HasFlag(TransferStates.Succeeded))
             {
-                speedView.Visibility = ViewStates.Visible;
-                speedView.Text = SimpleHelpers.GetTransferSpeedString(avgSpeed);
-                int color = resources.GetColor(Resource.Color.transferChipDownloadingText, theme);
-                speedView.SetTextColor(new Color(color));
-                speedView.SetTypeface(speedView.Typeface, TypefaceStyle.Bold);
-            }
-            else if (state.HasFlag(TransferStates.Succeeded) && avgSpeed > 0)
-            {
-                speedView.Visibility = ViewStates.Visible;
-                speedView.Text = SimpleHelpers.GetTransferSpeedString(avgSpeed);
-                //speedView.SetTextColor(UiHelpers.GetColorFromAttribute(speedView.Context, Resource.Attribute.transferSpeedSubdued));
                 int color = resources.GetColor(Resource.Color.transferSpeedSubdued, theme);
                 speedView.SetTextColor(new Color(color));
-                speedView.SetTypeface(speedView.Typeface, TypefaceStyle.Normal);
+                SetSpeedTypeface(speedView, bold: false);
             }
             else
             {
-                speedView.Visibility = ViewStates.Gone;
+                int color = resources.GetColor(Resource.Color.transferChipDownloadingText, theme);
+                speedView.SetTextColor(new Color(color));
+                SetSpeedTypeface(speedView, bold: true);
             }
         }
 
@@ -653,7 +583,7 @@ namespace Seeker
             bar.SetSegments(bytesSucceeded, bytesInProgress, bytesNotYet, bytesFailed, bytesPaused);
         }
 
-        public static void SetProgressBarTint(ProgressBar pb, TransferStates state, bool isFailed)
+        public static void SetProgressBarTint(ProgressBar pb, TransferStates state, bool isFailed, bool isUpload)
         {
             int colorResId;
             if (isFailed)
@@ -668,8 +598,9 @@ namespace Seeker
             {
                 colorResId = Resource.Color.transferChipPausedText;
             }
-            else if (state.HasFlag(TransferStates.Queued))
+            else if (state.HasFlag(TransferStates.Queued) || (!isUpload && state.HasFlag(TransferStates.Requested)))
             {
+                // if download & requested we are between queue local and queue remote, do not transfer to in progress colors
                 colorResId = Resource.Color.transferChipQueuedText;
             }
             else
@@ -685,7 +616,7 @@ namespace Seeker
         }
 
         public static void SetAdditionalStatusText(
-            View statusDot, TextView statusText, TextView sizeSeparator,
+            View statusDot, TextView statusText,
             TextView sizeView, TextView speedView,
             ITransferItem item, TransferStates state, bool showSize, bool showSpeed, bool isFolder = false)
         {
@@ -702,13 +633,24 @@ namespace Seeker
             {
                 StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.in_progress), TransferChipType.Downloading);
             }
-            else if (state.HasFlag(TransferStates.Initializing) || state.HasFlag(TransferStates.Requested))
+            else if (state.HasFlag(TransferStates.Initializing))
             {
-                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.not_started), TransferChipType.Downloading);
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.starting), TransferChipType.Downloading);
+            }
+            else if (state.HasFlag(TransferStates.Requested))
+            {
+                // if download & requested we are between queue local and queue remote, do not transfer to in progress colors
+                TransferChipType chipType = item.IsUpload() ? TransferChipType.Downloading : TransferChipType.Queued;
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.requested), chipType);
+            }
+            else if (!item.IsUpload() && state.HasFlag(TransferStates.Queued) && state.HasFlag(TransferStates.Locally))
+            {
+                // the earliest state
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.pending), TransferChipType.Queued);
             }
             else if (state.HasFlag(TransferStates.Queued))
             {
-                string label = SeekerApplication.GetString(Resource.String.in_queue);
+                string label = SeekerApplication.GetString(Resource.String.queued);
                 if (!item.IsUpload())
                 {
                     int queueLen = item.GetQueueLength();
@@ -774,10 +716,6 @@ namespace Seeker
             if (showSize && sizeView != null)
             {
                 sizeView.Visibility = ViewStates.Visible;
-                if (sizeSeparator != null)
-                {
-                    sizeSeparator.Visibility = ViewStates.Visible;
-                }
                 if (item is TransferItem ti)
                 {
                     SetSizeText(sizeView, ti.GetBytesTransferred(), ti.Size);
@@ -788,16 +726,9 @@ namespace Seeker
                     SetSizeText(sizeView, completedBytes, totalBytes);
                 }
             }
-            else
+            else if (sizeView != null)
             {
-                if (sizeView != null)
-                {
-                    sizeView.Visibility = ViewStates.Gone;
-                }
-                if (sizeSeparator != null)
-                {
-                    sizeSeparator.Visibility = ViewStates.Gone;
-                }
+                sizeView.Visibility = ViewStates.Gone;
             }
 
             // Speed text
@@ -823,7 +754,8 @@ namespace Seeker
         private View statusDot;
         private TextView viewSize;
         private TextView viewSpeed;
-        private TextView viewSizeSeparator;
+        private TextView viewTimeRemaining;
+        private TextView viewTimeRemainingSeparator;
         private ImageView selectionCheckbox;
         private FrameLayout actionContainer;
 
@@ -851,9 +783,14 @@ namespace Seeker
             return viewSpeed;
         }
 
-        public TextView GetSizeSeparatorView()
+        public TextView GetTimeRemainingTextView()
         {
-            return viewSizeSeparator;
+            return viewTimeRemaining;
+        }
+
+        public TextView GetTimeRemainingSeparatorView()
+        {
+            return viewTimeRemainingSeparator;
         }
 
         public bool GetShowProgressSize()
@@ -865,21 +802,28 @@ namespace Seeker
             return showSpeed;
         }
 
+        public bool GetShowTimeRemaining()
+        {
+            return showTimeRemaining;
+        }
+
 
         public bool showSpeed;
         public bool showSizes;
+        public bool showTimeRemaining;
         public TransferItemViewDetails(Context context) : base(context)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_item_detailed_sizeProgressBar, this, true);
+            LayoutInflater.From(context).Inflate(Resource.Layout.transfer_single_item, this, true);
             setupChildren();
         }
 
-        public static TransferItemViewDetails Create(ViewGroup parent, bool showSizes, bool showSpeed)
+        public static TransferItemViewDetails Create(ViewGroup parent, bool showSizes, bool showSpeed, bool showTimeRemaining)
         {
             var itemView = new TransferItemViewDetails(parent.Context);
             itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             itemView.showSpeed = showSpeed;
             itemView.showSizes = showSizes;
+            itemView.showTimeRemaining = showTimeRemaining;
             return itemView;
         }
 
@@ -894,7 +838,8 @@ namespace Seeker
             statusDot = FindViewById<View>(Resource.Id.statusDot);
             viewSize = FindViewById<TextView>(Resource.Id.textViewSize);
             viewSpeed = FindViewById<TextView>(Resource.Id.textViewSpeed);
-            viewSizeSeparator = FindViewById<TextView>(Resource.Id.textViewSizeSeparator);
+            viewTimeRemaining = FindViewById<TextView>(Resource.Id.textViewTimeRemaining);
+            viewTimeRemainingSeparator = FindViewById<TextView>(Resource.Id.textViewTimeRemainingSeparator);
 
             selectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
             actionContainer = FindViewById<FrameLayout>(Resource.Id.actionContainer);
@@ -914,7 +859,8 @@ namespace Seeker
             TransferItem ti = item as TransferItem;
             viewFilename.Text = ti.Filename;
             progressBar.Progress = ti.GetProgressForPresentation();
-            TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSizeSeparator, viewSize, viewSpeed, ti, ti.State, this.showSizes, this.showSpeed);
+            TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSize, viewSpeed, ti, ti.State, this.showSizes, this.showSpeed);
+            TransferViewHelper.SetTimeRemainingText(viewTimeRemainingSeparator, viewTimeRemaining, viewSpeed, ti, this.showTimeRemaining);
             viewUsername.Text = ti.Username;
             bool isFailedOrAborted = ti.Failed;
             if (item.IsUpload() && ti.State.HasFlag(TransferStates.Cancelled))
@@ -925,7 +871,7 @@ namespace Seeker
             {
                 progressBar.Progress = 100;
             }
-            TransferViewHelper.SetProgressBarTint(progressBar, ti.State, isFailedOrAborted);
+            TransferViewHelper.SetProgressBarTint(progressBar, ti.State, isFailedOrAborted, item.IsUpload());
 
             if (isInBatchMode)
             {

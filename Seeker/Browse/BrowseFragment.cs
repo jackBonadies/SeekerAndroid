@@ -632,7 +632,7 @@ namespace Seeker
             Browse.BrowseService.DownloadListOfFiles(filesToDownload, queuePaused, state.CurrentUsername);
         }
 
-        private void DownloadUserFilesEntryStage2(List<DataItem> dataItemsForDownload, List<DataItem> filteredDataItemsForDownload, bool justFilteredItems, bool queuePaused)
+        private void DownloadUserFilesEntryStage2(List<DataItem> dataItemsForDownload, List<DataItem> filteredDataItemsForDownload, bool justFilteredItems, bool queuePaused, bool multipleFolders)
         {
             var sourceList = justFilteredItems ? filteredDataItemsForDownload : dataItemsForDownload;
             if (sourceList.Count == 0)
@@ -648,21 +648,23 @@ namespace Seeker
             if (containsSubDirs)
             {
                 var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
-                builder.SetTitle(Resource.String.ThisFolderContainsSubfolders);
+                builder.SetTitle(multipleFolders ? Resource.String.SelectedFoldersContainSubfolders : Resource.String.ThisFolderContainsSubfolders);
 
                 string topLevelStr = string.Format(SeekerApplication.GetString(
                     toplevelItems == 1 ? Resource.String.item_total_singular : Resource.String.item_total_plural), toplevelItems);
                 string recursiveStr = string.Format(SeekerApplication.GetString(
                     totalItems == 1 ? Resource.String.item_total_singular : Resource.String.item_total_plural), totalItems);
 
-                if (queuePaused)
+                int messageResId;
+                if (multipleFolders)
                 {
-                    builder.SetMessage(string.Format(SeekerApplication.GetString(Resource.String.subfolders_warning_queue_paused), recursiveStr, topLevelStr));
+                    messageResId = queuePaused ? Resource.String.subfolders_warning_batch_queue_paused : Resource.String.subfolders_warning_batch;
                 }
                 else
                 {
-                    builder.SetMessage(string.Format(SeekerApplication.GetString(Resource.String.subfolders_warning), recursiveStr, topLevelStr));
+                    messageResId = queuePaused ? Resource.String.subfolders_warning_queue_paused : Resource.String.subfolders_warning;
                 }
+                builder.SetMessage(string.Format(SeekerApplication.GetString(messageResId), recursiveStr, topLevelStr));
                 EventHandler<DialogClickEventArgs> eventHandlerCurrentFolder = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
                     DownloadUserFilesEntryStage3(false, recursiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
@@ -672,7 +674,7 @@ namespace Seeker
                     DownloadUserFilesEntryStage3(true, recursiveFullFileInfo, topLevelFullFileInfoOnly, queuePaused);
                 });
                 builder.SetPositiveButton(Resource.String.all, eventHandlerRecursiveFolders);
-                builder.SetNegativeButton(Resource.String.current_folder_only, eventHandlerCurrentFolder);
+                builder.SetNegativeButton(multipleFolders ? Resource.String.skip_subfolders : Resource.String.current_folder_only, eventHandlerCurrentFolder);
                 builder.Show();
             }
             else
@@ -682,11 +684,12 @@ namespace Seeker
         }
 
         /// <param name="queuePaused"></param>
-        /// <param name="downloadShownInListView">True if to select everything currently shown in the listview.  False if the user is selecting a single folder.</param>
-        private void DownloadUserFilesEntry(bool queuePaused, bool downloadShownInListView, DataItem itemSelected = null)
+        /// <param name="downloadShownInListView">True if to select everything currently shown in the listview.  False if the user is selecting specific folders / files.</param>
+        private void DownloadUserFilesEntry(bool queuePaused, bool downloadShownInListView, List<DataItem> itemsSelected = null)
         {
             List<DataItem> dataItemsForDownload;
             List<DataItem> filteredDataItemsForDownload;
+            bool multipleFolders = false;
 
             if (downloadShownInListView)
             {
@@ -701,13 +704,29 @@ namespace Seeker
             }
             else
             {
-                if (itemSelected == null)
+                if (itemsSelected == null)
                 {
                     UiHelpers.ShowReportErrorDialog(SeekerState.ActiveActivityRef, "Browse User File Selection Issue");
                     return;
                 }
-                dataItemsForDownload = BrowseUtils.GetDataItemsForNode(itemSelected.Node);
-                filteredDataItemsForDownload = BrowseUtils.FilterBrowseList(dataItemsForDownload, state.Filter);
+                // concatenate each folder's children (rather than the folders themselves) so each folder stays its own root (depth)
+                dataItemsForDownload = new List<DataItem>();
+                filteredDataItemsForDownload = new List<DataItem>();
+                foreach (DataItem item in itemsSelected)
+                {
+                    if (item.IsDirectory())
+                    {
+                        var children = BrowseUtils.GetDataItemsForNode(item.Node);
+                        dataItemsForDownload.AddRange(children);
+                        filteredDataItemsForDownload.AddRange(BrowseUtils.FilterBrowseList(children, state.Filter));
+                    }
+                    else
+                    {
+                        dataItemsForDownload.Add(item);
+                        filteredDataItemsForDownload.Add(item);
+                    }
+                }
+                multipleFolders = itemsSelected.Count(di => di.IsDirectory()) > 1;
             }
 
             if (dataItemsForDownload.Count == 0)
@@ -719,14 +738,14 @@ namespace Seeker
             {
                 var b = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(SeekerState.ActiveActivityRef);
                 b.SetTitle(Resource.String.filter_is_on);
-                b.SetMessage(Resource.String.filter_is_on_body);
+                b.SetMessage(multipleFolders ? Resource.String.filter_is_on_body_batch : Resource.String.filter_is_on_body);
                 EventHandler<DialogClickEventArgs> eventHandlerAll = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    DownloadUserFilesEntryStage2(dataItemsForDownload, filteredDataItemsForDownload, false, queuePaused);
+                    DownloadUserFilesEntryStage2(dataItemsForDownload, filteredDataItemsForDownload, false, queuePaused, multipleFolders);
                 });
                 EventHandler<DialogClickEventArgs> eventHandlerFiltered = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
                 {
-                    DownloadUserFilesEntryStage2(dataItemsForDownload, filteredDataItemsForDownload, true, queuePaused);
+                    DownloadUserFilesEntryStage2(dataItemsForDownload, filteredDataItemsForDownload, true, queuePaused, multipleFolders);
                 });
                 b.SetPositiveButton(Resource.String.just_filtered, eventHandlerFiltered);
                 b.SetNegativeButton(Resource.String.all, eventHandlerAll);
@@ -734,7 +753,7 @@ namespace Seeker
             }
             else
             {
-                DownloadUserFilesEntryStage2(dataItemsForDownload, filteredDataItemsForDownload, false, queuePaused);
+                DownloadUserFilesEntryStage2(dataItemsForDownload, filteredDataItemsForDownload, false, queuePaused, multipleFolders);
             }
         }
 
@@ -1061,10 +1080,10 @@ namespace Seeker
                 switch (args.Which)
                 {
                     case 0: // Download Folder
-                        DownloadUserFilesEntry(false, false, dataItem);
+                        DownloadUserFilesEntry(false, false, new List<DataItem> { dataItem });
                         break;
                     case 1: // Queue Folder as Paused
-                        DownloadUserFilesEntry(true, false, dataItem);
+                        DownloadUserFilesEntry(true, false, new List<DataItem> { dataItem });
                         break;
                     case 2: // Show Folder Info
                         var folderSummary = BrowseUtils.GetFolderSummary(dataItem);

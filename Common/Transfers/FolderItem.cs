@@ -33,20 +33,99 @@ namespace Seeker
             TransferItems = new List<TransferItem>();
         }
 
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public TimeSpan? RemainingFolderTime; //this should never be serialized
+        // How long a speed sample is valid for.  Used by Folder Remaining Time / speed calculation
+        //  bc sometimes there are no valid speed samples (i.e. during initialization and the 1st second
+        //  of in progress it is blank)
+        private static readonly TimeSpan SpeedHoldWindow = TimeSpan.FromSeconds(15);
+
+        private readonly struct SpeedEstimate
+        {
+            public readonly double Speed;
+            public readonly long BytesRemaining;
+
+            public SpeedEstimate(double speed, long bytesRemaining)
+            {
+                Speed = speed;
+                BytesRemaining = bytesRemaining;
+            }
+        }
+
+        // Time remaining (speed vs bytes remaining) to finish files that will transfer on their own (does not 
+        //   count paused / failed since those require user intervention).  There will not always be a transfer 
+        //   in progress / with active speed (since it can be intializing and we dont calc speed for the first second), 
+        //   if thats the case hold the neweset one in our folder.
+        private SpeedEstimate Estimate(DateTime utcNow)
+        {
+            const TransferStates pending = TransferStates.Requested | TransferStates.Queued
+                | TransferStates.Initializing | TransferStates.InProgress | TransferStates.Aborted;
+            long bytesRemaining = 0;
+            double speed = 0;
+            bool anyPending = false;
+            double heldSpeed = 0;
+            DateTime heldSpeedSampledUtc = DateTime.MinValue;
+            lock (TransferItems)
+            {
+                foreach (TransferItem ti in TransferItems)
+                {
+                    if (ti.AvgSpeed > 0 && ti.AvgSpeedSampledUtc > heldSpeedSampledUtc)
+                    {
+                        heldSpeed = ti.AvgSpeed;
+                        heldSpeedSampledUtc = ti.AvgSpeedSampledUtc;
+                    }
+                    if (ti.State.HasFlag(TransferStates.Completed) || (ti.State & pending) == 0)
+                    {
+                        continue;
+                    }
+                    anyPending = true;
+                    bytesRemaining += Math.Max(0, ti.Size - ti.GetBytesTransferred());
+                    if (ti.State.HasFlag(TransferStates.InProgress))
+                    {
+                        speed += ti.AvgSpeed;
+                    }
+                }
+            }
+            if (!anyPending)
+            {
+                // just completed or just paused - a held sample would show a speed (and "0s") for nothing
+                return default;
+            }
+            if (speed <= 0 && utcNow - heldSpeedSampledUtc <= SpeedHoldWindow)
+            {
+                speed = heldSpeed;
+            }
+            return new SpeedEstimate(speed, bytesRemaining);
+        }
 
         public TimeSpan? GetRemainingTime()
         {
-            return RemainingFolderTime;
+            return GetRemainingTime(DateTime.UtcNow);
         }
 
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public double AvgSpeed; //this could one day be serialized if you want say speed history (like QT does)
+        public TimeSpan? GetRemainingTime(DateTime utcNow)
+        {
+            SpeedEstimate estimate = Estimate(utcNow);
+            // if nothing in progress and its been awhile since last speed update, hide time remaining,
+            //   we would be giving a misleading estimate otherwise.
+            if (estimate.Speed <= 0)
+            {
+                return null;
+            }
+            double seconds = estimate.BytesRemaining / estimate.Speed;
+            if (seconds > TimeSpan.MaxValue.TotalSeconds)
+            {
+                return null;
+            }
+            return TimeSpan.FromSeconds(seconds);
+        }
 
         public double GetAvgSpeed()
         {
-            return AvgSpeed;
+            return GetAvgSpeed(DateTime.UtcNow);
+        }
+
+        public double GetAvgSpeed(DateTime utcNow)
+        {
+            return Estimate(utcNow).Speed;
         }
 
         public bool IsUpload()
@@ -130,7 +209,7 @@ namespace Seeker
                 int queueLen = int.MaxValue;
                 foreach (TransferItem ti in TransferItems)
                 {
-                    if (ti.State == TransferStates.Queued)
+                    if (ti.State.HasFlag(TransferStates.Queued) && ti.State.HasFlag(TransferStates.Remotely))
                     {
                         queueLen = Math.Min(ti.QueueLength, queueLen);
                     }
@@ -147,7 +226,7 @@ namespace Seeker
                 TransferItem curLowest = null;
                 foreach (TransferItem ti in TransferItems)
                 {
-                    if (ti.State == TransferStates.Queued)
+                    if (ti.State.HasFlag(TransferStates.Queued) && ti.State.HasFlag(TransferStates.Remotely))
                     {
                         queueLen = Math.Min(ti.QueueLength, queueLen);
                         if (queueLen == ti.QueueLength)
@@ -204,7 +283,9 @@ namespace Seeker
                         {
                             folderState = state;
                         }
-                        else if (state.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested) && !folderState.HasFlag(TransferStates.Aborted))
+                        else if (state.HasFlag(TransferStates.Queued) && !folderState.HasFlag(TransferStates.Initializing) && !folderState.HasFlag(TransferStates.Requested) && !folderState.HasFlag(TransferStates.Aborted)
+                            // basically if folderState is remote queued dont override it with locally queued
+                            && !(folderState.HasFlag(TransferStates.Remotely) && state.HasFlag(TransferStates.Locally)))
                         {
                             folderState = state;
                         }

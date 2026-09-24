@@ -1,5 +1,6 @@
 using Common.Messages;
 using Seeker;
+using Seeker.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,6 +42,7 @@ namespace Common
 
         public static void ClearCredentials()
         {
+            Logger.Info("ClearCredentials");
             CurrentlyLoggedIn = false;
             Password = null;
             Username = null; // fires event last
@@ -107,6 +109,7 @@ namespace Common
         public static bool MemoryBackedDownload = false;
         public static bool TransferViewShowSizes = false;
         public static bool TransferViewShowSpeed = false;
+        public static bool TransferViewShowTimeRemaining = false;
         public static bool TransferViewGroupByFolder = false;
         public static volatile bool TransferViewInUploadsMode = false;
         public static bool AutoRetryBackOnline = true;

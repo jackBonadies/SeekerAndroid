@@ -33,6 +33,9 @@ namespace Seeker
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public TimeSpan? RemainingTime;
         public double AvgSpeed = 0;
+        // only used for live time remaining calculations so do not serialize
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public DateTime AvgSpeedSampledUtc;
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public bool CancelAndClearFlag = false;
         [System.Xml.Serialization.XmlIgnoreAttribute]
@@ -81,7 +84,7 @@ namespace Seeker
 
         public TimeSpan? GetRemainingTime()
         {
-            return RemainingTime;
+            return State.HasFlag(TransferStates.InProgress) ? RemainingTime : null;
         }
 
         public int GetQueueLength()
@@ -96,7 +99,9 @@ namespace Seeker
 
         public double GetAvgSpeed()
         {
-            return AvgSpeed;
+            const TransferStates showing = TransferStates.InProgress | TransferStates.Initializing
+                | TransferStates.Requested | TransferStates.Succeeded;
+            return (State & showing) != 0 ? AvgSpeed : 0;
         }
 
         public long? GetSizeForDL()

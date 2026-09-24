@@ -406,6 +406,7 @@ namespace Seeker.Services
 
             if (msgToLog != string.Empty)
             {
+                msgToLog = "Login Error: " + msgToLog;
                 Logger.Debug(msgToLog);
                 Logger.Firebase(msgToLog);
             }

@@ -69,7 +69,10 @@ namespace Seeker.Transfers
                 }
             }
 
-            if (!isUpload && e.Transfer.State.HasFlag(TransferStates.UserOffline))
+            // add useroffline flag if appilcable (slsk.net no longer adds it)
+            TransferStates state = e.Transfer.State | GetPeerFailureFlags(e.Transfer, isUpload);
+
+            if (state.HasFlag(TransferStates.UserOffline))
             {
                 //user offline.
                 Seeker.Services.DownloadService.Instance.AddToUserOffline(e.Transfer.Username);
@@ -80,7 +83,8 @@ namespace Seeker.Transfers
             {
                 Logger.InfoFirebase("relevantItem==null. state: " + e.Transfer.State.ToString());
             }
-            Logger.Debug("TransferStateChanged for user: " + e.Transfer.Username + " file: " + e.Transfer.Filename + " new state: " + e.Transfer.State.ToString());
+            Logger.Debug("TransferStateChanged for user: " + e.Transfer.Username + " file: " + e.Transfer.Filename + " new state: " + e.Transfer.State.ToString()
+                + (e.Transfer.Exception != null ? " reason: " + SimpleHelpers.DescribeException(e.Transfer.Exception) : string.Empty));
             TransferItemManager.MarkTransfersDirty();
             TransferPersistenceWrapper.SaveTransferItems(false, 30);
             if (relevantItem != null)
@@ -88,15 +92,17 @@ namespace Seeker.Transfers
                 //if the incoming transfer is not canclled, i.e. requested, then we replace the state (the user retried).
                 if (e.Transfer.State.HasFlag(TransferStates.Cancelled) && relevantItem.State.HasFlag(TransferStates.FallenFromQueue))
                 {
-                    Logger.Debug("fallen from queue");
+                    Logger.Debug("fallen from queue: cancelled " + relevantItem.State.ToString());
                     //the state is good as is.  do not add cancelled to it, since we used cancelled to mean "user cancelled" i.e. paused.
                     relevantItem.Failed = true;
                     relevantItem.Progress = 100;
                 }
                 else
                 {
-                    relevantItem.State = e.Transfer.State;
+                    relevantItem.State = state;
                 }
+                // this comes from speed, which if we just changed state we do not know yet
+                relevantItem.RemainingTime = null;
                 // IncompleteParentUri and IncompleteUri are now set directly by DownloadFileAsync
                 if (!relevantItem.State.HasFlag(TransferStates.Requested))
                 {
@@ -120,17 +126,9 @@ namespace Seeker.Transfers
                 {
                     return;
                 }
-                if (!relevantItem.IsUpload())
+                if (!relevantItem.IsUpload() && e.Transfer.State.HasFlag(TransferStates.Remotely))
                 {
-                    // TODO why is queue length max value
-                    if (relevantItem.QueueLength != 0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
-                    {
-                        Seeker.Services.DownloadService.Instance.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
-                    }
-                    else //this means that it came from a browse response where we may not know the users initial queue length... or if its unexpectedly queued.
-                    {
-                        Seeker.Services.DownloadService.Instance.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
-                    }
+                    Seeker.Services.DownloadService.Instance.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
                 }
                 StateChangedForItem?.Invoke(null, relevantItem);
             }
@@ -219,6 +217,24 @@ namespace Seeker.Transfers
             }
         }
 
+        // gets useroffline or cannot connect flags since slsk.net no longer adds it
+        private static TransferStates GetPeerFailureFlags(Transfer transfer, bool isUpload)
+        {
+            if (isUpload || !transfer.State.HasFlag(TransferStates.Errored))
+            {
+                return TransferStates.None;
+            }
+            switch (DownloadFailureClassifier.Classify(transfer.Exception))
+            {
+                case DownloadFailureKind.UserOffline:
+                    return TransferStates.UserOffline;
+                case DownloadFailureKind.CannotConnect:
+                    return TransferStates.CannotConnect;
+                default:
+                    return TransferStates.None;
+            }
+        }
+
         // Saves periodically. Republishes a UI-friendly ProgressUpdated event.
         private static void OnTransferProgressUpdated(object sender, TransferProgressUpdatedEventArgs e)
         {
@@ -254,6 +270,11 @@ namespace Seeker.Transfers
                 relevantItem.BytesTransferred = e.Transfer.BytesTransferred;
                 relevantItem.RemainingTime = e.Transfer.RemainingTime;
                 relevantItem.AvgSpeed = e.Transfer.AverageSpeed;
+                // a fresh transfer reports speed 0 for its first second; only a real sample is "recent"
+                if (e.Transfer.AverageSpeed > 0)
+                {
+                    relevantItem.AvgSpeedSampledUtc = DateTime.UtcNow;
+                }
 
                 bool wasFailed = false;
                 if (percentComplete != 0)
@@ -267,7 +288,7 @@ namespace Seeker.Transfers
 
                 }
 
-                ProgressUpdated?.Invoke(null, new ProgressUpdatedUIEventArgs(relevantItem, wasFailed, percentComplete, e.Transfer.AverageSpeed));
+                ProgressUpdated?.Invoke(null, new ProgressUpdatedUIEventArgs(relevantItem, wasFailed, percentComplete));
             }
         }
 

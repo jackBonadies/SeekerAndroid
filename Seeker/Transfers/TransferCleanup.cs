@@ -27,10 +27,11 @@ namespace Seeker
             DocumentFile df = parent.FindFile(ti.Filename);
             if (df == null || !df.Exists())
             {
+                // i.e. legacy storage only creates the file once the stream opens, so a download cleared while queued has none
                 Logger.Debug("delete failed - null or not exist");
                 Logger.InfoFirebase("df is null or not exist: " + parentIncompleteUri + " " + PreferencesState.CreateCompleteAndIncompleteFolders + " " + parent.Uri + " " + SettingsActivity.UseIncompleteManualFolder());
             }
-            if (!df.Delete()) //nullref
+            else if (!df.Delete())
             {
                 Logger.Debug("delete failed");
             }

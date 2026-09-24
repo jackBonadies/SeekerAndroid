@@ -88,6 +88,12 @@
                 app:showAsAction="never"
                 android:iconifiedByDefault="false"
             />
+            <item
+                android:id="@+id/action_show_time_remaining"
+                android:title="@string/ShowTimeRemaining"
+                app:showAsAction="never"
+                android:iconifiedByDefault="false"
+            />
         </menu>
     </item>
 </menu>

@@ -60,6 +60,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
             android:paddingBottom="4dp"
+            android:paddingEnd="6dp"
             android:gravity="center_vertical"
         >
             <View
@@ -81,17 +82,7 @@
             />
 
             <TextView
-                android:id="@+id/textViewSizeSeparator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=" &#x00b7; "
-                android:layout_marginStart="3dp"
-                android:layout_marginEnd="2dp"
-                android:textSize="11sp"
-                android:textColor="?attr/cellTextColor"
-            />
-
-            <TextView
+                android:layout_marginStart="6dp"
                 android:id="@+id/textViewSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -106,7 +97,7 @@
                 android:layout_weight="1"
                 android:layout_marginTop="1dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginEnd="6dp"
+                android:layout_marginEnd="0dp"
                 android:progressDrawable="@drawable/transfer_progress_bar"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:max="100"
@@ -117,7 +108,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="11sp"
-                android:layout_marginEnd="6dp"
+                android:layout_marginStart="6dp"
+            />
+
+            <TextView
+                android:id="@+id/textViewTimeRemainingSeparator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" &#x00b7; "
+                android:textSize="11sp"
+                android:textColor="?attr/cellTextColor"
+            />
+
+            <TextView
+                android:id="@+id/textViewTimeRemaining"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:textColor="?attr/cellTextColor"
             />
         </LinearLayout>
     </LinearLayout>

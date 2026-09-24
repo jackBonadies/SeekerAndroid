@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
+    android:paddingEnd="2dp"
 >
     <LinearLayout
         android:orientation="vertical"
@@ -14,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:paddingStart="7dp"
-        android:paddingEnd="4dp"
+        android:paddingEnd="2dp"
     >
         <LinearLayout
             android:orientation="horizontal"
@@ -59,6 +60,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
+            android:paddingEnd="6dp"
             android:gravity="center_vertical"
         >
             <View
@@ -73,29 +75,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="2dp"
                 android:textSize="10sp"
                 android:textStyle="bold"
                 android:singleLine="true"
                 android:background="@drawable/transfer_status_chip_bg"
                 android:paddingStart="6dp"
                 android:paddingEnd="6dp"
-                android:paddingTop="2dp"
-                android:paddingBottom="2dp"
+                android:paddingTop="1dp"
+                android:paddingBottom="1dp"
             />
 
             <TextView
-                android:id="@+id/textViewSizeSeparator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=" &#x00b7; "
-                android:layout_marginStart="3dp"
-                android:layout_marginEnd="2dp"
-                android:textSize="11sp"
-                android:textColor="?attr/cellTextColor"
-            />
-
-            <TextView
+                android:layout_marginStart="5dp"
                 android:id="@+id/textViewSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -109,7 +101,7 @@
                 android:layout_height="6dp"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:layout_marginEnd="6dp"
+                android:layout_marginEnd="0dp"
             />
 
             <TextView
@@ -117,7 +109,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="11sp"
-                android:layout_marginEnd="6dp"
+                android:layout_marginStart="6dp"
+            />
+
+            <TextView
+                android:id="@+id/textViewTimeRemainingSeparator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" &#x00b7; "
+                android:textSize="11sp"
+                android:textColor="?attr/cellTextColor"
+            />
+
+            <TextView
+                android:id="@+id/textViewTimeRemaining"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:textColor="?attr/cellTextColor"
             />
         </LinearLayout>
 
@@ -162,6 +171,7 @@
 
     <FrameLayout
         android:id="@+id/actionContainer"
+		android:layout_marginEnd="2dp"
         android:layout_width="28dp"
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical"

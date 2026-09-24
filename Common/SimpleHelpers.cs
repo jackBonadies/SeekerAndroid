@@ -29,6 +29,28 @@ namespace Seeker
         /// </summary>
         public const string FailedToEstablishDirectOrIndirectString = "failed to establish a direct or indirect";
 
+        // one-line unwrap i.e. "Type: message <- InnerType: message" for logs
+        public static string DescribeException(Exception e)
+        {
+            if (e == null)
+            {
+                return "null";
+            }
+            if (e is AggregateException agg && agg.InnerException != null)
+            {
+                e = agg.InnerException;
+            }
+            var sb = new System.Text.StringBuilder();
+            for (Exception cur = e; cur != null; cur = cur.InnerException)
+            {
+                if (sb.Length > 0)
+                {
+                    sb.Append(" <- ");
+                }
+                sb.Append(cur.GetType().Name).Append(": ").Append(cur.Message);
+            }
+            return sb.ToString();
+        }
 
         public static string AvoidLineBreaks(string orig)
         {
@@ -256,6 +278,29 @@ namespace Seeker
             }
         }
 
+        // "1d 4h" / "1h 2m" / "2m 3s" / "9s" - i.e. 2 units only
+        public static string FormatTimeRemaining(TimeSpan remaining)
+        {
+            long totalSeconds = (long)Math.Max(0, remaining.TotalSeconds);
+            long days = totalSeconds / 86400;
+            long hours = (totalSeconds % 86400) / 3600;
+            long minutes = (totalSeconds % 3600) / 60;
+            long seconds = totalSeconds % 60;
+            if (days > 0)
+            {
+                return $"{days}d {hours}h";
+            }
+            if (hours > 0)
+            {
+                return $"{hours}h {minutes}m";
+            }
+            if (minutes > 0)
+            {
+                return $"{minutes}m {seconds}s";
+            }
+            return $"{seconds}s";
+        }
+
         public static string GetDateTimeSinceAbbrev(DateTime dtThen)
         {
             var dtNow = GetDateTimeNowSafe(); //2.5 microseconds
@@ -322,7 +367,7 @@ namespace Seeker
         public static string GetSizeLengthAttrString(Soulseek.File f)
         {
 
-            string sizeString = string.Format("{0:0.##} MB", f.Size / (1024.0 * 1024.0));
+            string sizeString = GetHumanReadableSize(f.Size);
             string lengthString = f.Length.HasValue ? GetHumanReadableTime(f.Length.Value, true) : string.Empty;
             string attrString = GetHumanReadableAttributesForSingleItem(f);
             if (string.IsNullOrEmpty(attrString) && string.IsNullOrEmpty(lengthString))
@@ -386,35 +431,72 @@ namespace Seeker
             }
         }
 
+        public const double TOTAL_BYTES_KB = 1024;
         public const double TOTAL_BYTES_MB = 1048576;
         public const double TOTAL_BYTES_GB = 1073741824;
+        public const double TOTAL_BYTES_TB = 1099511627776;
 
-        public static string GetHumanReadableSize(long totalBytes)
+        private static (double Scale, string Unit) GetSizeUnit(long bytes)
         {
-            if (totalBytes > TOTAL_BYTES_GB)
+            if (bytes > TOTAL_BYTES_TB)
             {
-                return $"{totalBytes / TOTAL_BYTES_GB:0.##} GB";
+                return (TOTAL_BYTES_TB, "TB");
+            }
+            else if (bytes > TOTAL_BYTES_GB)
+            {
+                return (TOTAL_BYTES_GB, "GB");
+            }
+            else if (bytes > TOTAL_BYTES_MB)
+            {
+                return (TOTAL_BYTES_MB, "MB");
+            }
+            else if (bytes > TOTAL_BYTES_KB)
+            {
+                return (TOTAL_BYTES_KB, "KB");
             }
             else
             {
-                return $"{totalBytes / TOTAL_BYTES_MB:0.##} MB";
+                return (1, "B");
             }
+        }
+
+        // for 3 total sigfigs
+        private static int GetSizeDecimals(double scaled, string unit)
+        {
+            if (unit == "B")
+            {
+                return 0;
+            }
+            else if (scaled < 10)
+            {
+                return 2;
+            }
+            else if (scaled < 100)
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        public static string GetHumanReadableSize(long totalBytes)
+        {
+            var (scale, unit) = GetSizeUnit(totalBytes);
+            double scaled = totalBytes / scale;
+            int decimals = GetSizeDecimals(scaled, unit);
+            // trim trailing zeros
+            string format = decimals == 0 ? "0" : "0." + new string('#', decimals);
+            return scaled.ToString(format) + " " + unit;
         }
 
         public static string GetHumanReadableProgressSize(long currentBytes, long totalBytes)
         {
-            if (totalBytes > TOTAL_BYTES_GB)
-            {
-                return currentBytes == 0
-                    ? $"0 GB / {totalBytes / TOTAL_BYTES_GB:F1} GB"
-                    : $"{currentBytes / TOTAL_BYTES_GB:F1} GB / {totalBytes / TOTAL_BYTES_GB:F1} GB";
-            }
-            else
-            {
-                return currentBytes == 0
-                    ? $"0 MB / {totalBytes / TOTAL_BYTES_MB:F1} MB"
-                    : $"{currentBytes / TOTAL_BYTES_MB:F1} MB / {totalBytes / TOTAL_BYTES_MB:F1} MB";
-            }
+            var (scale, unit) = GetSizeUnit(totalBytes);
+            double total = totalBytes / scale;
+            string format = "F" + GetSizeDecimals(total, unit);
+            return (currentBytes / scale).ToString(format) + " / " + total.ToString(format) + " " + unit;
         }
 
         public static string GetHumanReadableTime(int totalSeconds, bool withSpace = false)
