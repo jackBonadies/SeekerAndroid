@@ -367,7 +367,7 @@ namespace Seeker
         public static string GetSizeLengthAttrString(Soulseek.File f)
         {
 
-            string sizeString = string.Format("{0:0.##} MB", f.Size / (1024.0 * 1024.0));
+            string sizeString = GetHumanReadableSize(f.Size);
             string lengthString = f.Length.HasValue ? GetHumanReadableTime(f.Length.Value, true) : string.Empty;
             string attrString = GetHumanReadableAttributesForSingleItem(f);
             if (string.IsNullOrEmpty(attrString) && string.IsNullOrEmpty(lengthString))
@@ -484,7 +484,11 @@ namespace Seeker
         public static string GetHumanReadableSize(long totalBytes)
         {
             var (scale, unit) = GetSizeUnit(totalBytes);
-            return $"{totalBytes / scale:0.##} {unit}";
+            double scaled = totalBytes / scale;
+            int decimals = GetSizeDecimals(scaled, unit);
+            // trim trailing zeros
+            string format = decimals == 0 ? "0" : "0." + new string('#', decimals);
+            return scaled.ToString(format) + " " + unit;
         }
 
         public static string GetHumanReadableProgressSize(long currentBytes, long totalBytes)

@@ -605,6 +605,19 @@ namespace UnitTestCommon
             Assert.That(result, Does.Contain("3m 5s"));
         }
 
+        [TestCase(5_624_222L, "5.36 MB")]
+        [TestCase(5L * 1024 * 1024, "5 MB")]
+        [TestCase(512_345_900L, "489 MB")]
+        [TestCase(1_234_567_890L, "1.15 GB")]
+        [TestCase(20_234_567_890L, "18.8 GB")]
+        public void GetSizeAttribute(long size, string expected)
+        {
+            var attrs = new List<FileAttribute> { new FileAttribute(FileAttributeType.Length, 185) };
+            var file = new File(1, "test.mp3", size, "mp3", attrs);
+            string result = SimpleHelpers.GetSizeLengthAttrString(file);
+            Assert.That(result, Does.Contain(expected));
+        }
+
         [Test]
         public void GetSizeLengthAttrString_WithLengthAndAttrs_IncludesBoth()
         {
