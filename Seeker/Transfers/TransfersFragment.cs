@@ -770,7 +770,7 @@ namespace Seeker
                         {
                             lock (folderItem.TransferItems)
                             {
-                                foreach (TransferItem transferItem in folderItem.TransferItems.Where(ti => ti.State == TransferStates.Queued))
+                                foreach (TransferItem transferItem in folderItem.TransferItems.Where(ti => ti.State.HasFlag(TransferStates.Queued) && ti.State.HasFlag(TransferStates.Remotely)))
                                 {
                                     GetQueuePosition(transferItem);
                                 }

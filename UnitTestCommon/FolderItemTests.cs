@@ -275,10 +275,10 @@ namespace UnitTestCommon
         public void GetQueueLength_ReturnsLowestQueuedPosition()
         {
             var ti1 = CreateTransferItem("alice", "\\music\\jazz\\song1.mp3", "jazz");
-            ti1.State = TransferStates.Queued;
+            ti1.State = TransferStates.Queued | TransferStates.Remotely;
             ti1.QueueLength = 50;
             var ti2 = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz");
-            ti2.State = TransferStates.Queued;
+            ti2.State = TransferStates.Queued | TransferStates.Remotely;
             ti2.QueueLength = 10;
             var folder = new FolderItem("jazz", "alice", ti1);
             folder.Add(ti2);
@@ -290,7 +290,7 @@ namespace UnitTestCommon
         public void GetQueueLength_IgnoresNonQueuedItems()
         {
             var ti1 = CreateTransferItem("alice", "\\music\\jazz\\song1.mp3", "jazz");
-            ti1.State = TransferStates.Queued;
+            ti1.State = TransferStates.Queued | TransferStates.Remotely;
             ti1.QueueLength = 50;
             var ti2 = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz");
             ti2.State = TransferStates.InProgress;
@@ -299,6 +299,22 @@ namespace UnitTestCommon
             folder.Add(ti2);
 
             Assert.AreEqual(50, folder.GetQueueLength());
+        }
+
+        [Test]
+        public void GetQueueLength_IgnoresLocallyQueuedItems()
+        {
+            var ti1 = CreateTransferItem("alice", "\\music\\jazz\\song1.mp3", "jazz");
+            ti1.State = TransferStates.Queued | TransferStates.Locally;
+            ti1.QueueLength = 5;
+            var ti2 = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz");
+            ti2.State = TransferStates.Queued | TransferStates.Remotely;
+            ti2.QueueLength = 50;
+            var folder = new FolderItem("jazz", "alice", ti1);
+            folder.Add(ti2);
+
+            Assert.AreEqual(50, folder.GetQueueLength());
+            Assert.AreEqual(ti2, folder.GetLowestQueuedTransferItem());
         }
 
         [Test]
@@ -317,13 +333,13 @@ namespace UnitTestCommon
         public void GetLowestQueuedTransferItem_ReturnsItemWithLowestQueue()
         {
             var ti1 = CreateTransferItem("alice", "\\music\\jazz\\song1.mp3", "jazz");
-            ti1.State = TransferStates.Queued;
+            ti1.State = TransferStates.Queued | TransferStates.Remotely;
             ti1.QueueLength = 50;
             var ti2 = CreateTransferItem("alice", "\\music\\jazz\\song2.mp3", "jazz");
-            ti2.State = TransferStates.Queued;
+            ti2.State = TransferStates.Queued | TransferStates.Remotely;
             ti2.QueueLength = 10;
             var ti3 = CreateTransferItem("alice", "\\music\\jazz\\song3.mp3", "jazz");
-            ti3.State = TransferStates.Queued;
+            ti3.State = TransferStates.Queued | TransferStates.Remotely;
             ti3.QueueLength = 30;
             var folder = new FolderItem("jazz", "alice", ti1);
             folder.Add(ti2);

@@ -123,17 +123,9 @@ namespace Seeker.Transfers
                 {
                     return;
                 }
-                if (!relevantItem.IsUpload())
+                if (!relevantItem.IsUpload() && e.Transfer.State.HasFlag(TransferStates.Remotely))
                 {
-                    // TODO why is queue length max value
-                    if (relevantItem.QueueLength != 0) //this means that it probably came from a search response where we know the users queuelength  ***BUT THAT IS NEVER THE ACTUAL QUEUE LENGTH*** its always much shorter...
-                    {
-                        Seeker.Services.DownloadService.Instance.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
-                    }
-                    else //this means that it came from a browse response where we may not know the users initial queue length... or if its unexpectedly queued.
-                    {
-                        Seeker.Services.DownloadService.Instance.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
-                    }
+                    Seeker.Services.DownloadService.Instance.GetDownloadPlaceInQueue(e.Transfer.Username, e.Transfer.Filename, true, true, relevantItem, null);
                 }
                 StateChangedForItem?.Invoke(null, relevantItem);
             }

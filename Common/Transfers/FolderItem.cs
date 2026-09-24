@@ -209,7 +209,7 @@ namespace Seeker
                 int queueLen = int.MaxValue;
                 foreach (TransferItem ti in TransferItems)
                 {
-                    if (ti.State == TransferStates.Queued)
+                    if (ti.State.HasFlag(TransferStates.Queued) && ti.State.HasFlag(TransferStates.Remotely))
                     {
                         queueLen = Math.Min(ti.QueueLength, queueLen);
                     }
@@ -226,7 +226,7 @@ namespace Seeker
                 TransferItem curLowest = null;
                 foreach (TransferItem ti in TransferItems)
                 {
-                    if (ti.State == TransferStates.Queued)
+                    if (ti.State.HasFlag(TransferStates.Queued) && ti.State.HasFlag(TransferStates.Remotely))
                     {
                         queueLen = Math.Min(ti.QueueLength, queueLen);
                         if (queueLen == ti.QueueLength)
