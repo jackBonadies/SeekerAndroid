@@ -68,39 +68,32 @@ namespace Seeker.Services
 
         private async Task EnqueueFiles(FullFileInfo[] files, bool queuePaused, string username)
         {
-            bool allExist = true; //only show the transfer exists if all transfers in question do already exist
             var isSingle = files.Count() == 1;
             List<DownloadInfo> downloadInfos = new List<DownloadInfo>();
             foreach (FullFileInfo file in files)
             {
-                var dlInfo = AddTransfer(username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded, isSingle, out bool transferExists);
-                downloadInfos.Add(dlInfo);
-                if (!transferExists)
+                var dlInfo = AddTransfer(username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded, isSingle);
+                if (dlInfo != null)
                 {
-                    allExist = false;
+                    downloadInfos.Add(dlInfo);
                 }
             }
 
-            if (allExist)
+            // if every file already exists
+            if (downloadInfos.Count == 0)
             {
                 toaster.ShowToastShort(StringKey.error_duplicate);
-            }
-            else
-            {
-                if (queuePaused)
-                {
-                    toaster.ShowToastShort(StringKey.QueuedForDownload);
-                }
-                else
-                {
-                    toaster.ShowToastShort(StringKey.download_is_starting);
-                }
+                return;
             }
 
-            if (!allExist && !queuePaused)
+            if (queuePaused)
             {
-                await StartDownloads(downloadInfos);
+                toaster.ShowToastShort(StringKey.QueuedForDownload);
+                return;
             }
+
+            toaster.ShowToastShort(StringKey.download_is_starting);
+            await StartDownloads(downloadInfos);
         }
 
         // common entrypoint for downloads - parallel dl loops per user
@@ -262,85 +255,59 @@ namespace Seeker.Services
 
 
         /// <summary>
-        /// Adds a transfer to the database. Does not
+        /// Adds a transfer to the list. Null if there is already a transfer either in motion or succeeded (and therefore we should not do anything)
         /// </summary>
-        public DownloadInfo AddTransfer(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, bool isSingle, out bool errorExists)
+        public DownloadInfo? AddTransfer(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, bool isSingle)
         {
-            errorExists = false;
-            Task dlTask = null;
-            System.Threading.CancellationTokenSource cancellationTokenSource = new System.Threading.CancellationTokenSource();
-            bool exists = false;
-            TransferItem transferItem = null;
-            DownloadInfo downloadInfo = null;
-            System.Threading.CancellationTokenSource oldCts = null;
-            try
+            var newItem = new TransferItem();
+            newItem.Filename = SimpleHelpers.GetFileNameFromFile(fname).ToString();
+            newItem.FolderName = SimpleHelpers.GetFolderNameFromFile(fname, depth).ToString();
+            newItem.Username = username;
+            newItem.FullFilename = fname;
+            newItem.Size = size;
+            newItem.QueueLength = queueLength;
+            newItem.WasFilenameLatin1Decoded = wasLatin1Decoded;
+            newItem.WasFolderLatin1Decoded = wasFolderLatin1Decoded;
+            if (isSingle && PreferencesState.NoSubfolderForSingle)
             {
+                newItem.TransferItemExtra = Transfers.TransferItemExtras.NoSubfolder;
+            }
+            newItem.State = queuePaused ? TransferStates.Cancelled : TransferStates.Queued | TransferStates.Locally;
 
-                downloadInfo = new DownloadInfo(username, fname, size, dlTask, cancellationTokenSource, queueLength, 0, depth);
-
-                transferItem = new TransferItem();
-                transferItem.Filename = SimpleHelpers.GetFileNameFromFile(downloadInfo.fullFilename).ToString();
-                transferItem.FolderName = SimpleHelpers.GetFolderNameFromFile(downloadInfo.fullFilename, depth).ToString();
-                transferItem.Username = downloadInfo.username;
-                transferItem.FullFilename = downloadInfo.fullFilename;
-                transferItem.Size = downloadInfo.Size;
-                transferItem.QueueLength = downloadInfo.QueueLength;
-                transferItem.WasFilenameLatin1Decoded = wasLatin1Decoded;
-                transferItem.WasFolderLatin1Decoded = wasFolderLatin1Decoded;
-                if (isSingle && PreferencesState.NoSubfolderForSingle)
+            var transferItem = TransferItems.TransferItemManagerDL.AddIfNotExistAndReturnTransfer(newItem, out bool exists);
+            DownloadInfo? downloadInfo;
+            if (exists)
+            {
+                // if in motion its state and CTS belong to the request already running.  If succeeded, dont re download just to fail (file already exists).
+                if (queuePaused || !IsSettled(transferItem.State) || transferItem.State.HasFlag(TransferStates.Succeeded))
                 {
-                    transferItem.TransferItemExtra = Transfers.TransferItemExtras.NoSubfolder;
+                    logger.Debug($"AddTransfer: {transferItem.Filename} already exists ({transferItem.State}), skipping");
+                    return null;
                 }
-
+                // re-request of a paused / failed / finished row is a retry of that row
+                downloadInfo = PrepareRetry(transferItem);
+                if (downloadInfo == null)
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                downloadInfo = new DownloadInfo(username, fname, size, null, new CancellationTokenSource(), queueLength, 0, depth) { TransferItemReference = transferItem };
                 if (!queuePaused)
                 {
-                    // this is the first state, set initialially (basically if local queue we know it will progress 
-                    //   through the library i.e. move to Requested or Errored unlike None)
-                    transferItem.State = TransferStates.Queued | TransferStates.Locally;
                     try
                     {
-                        TransferState.SetupCancellationToken(transferItem, downloadInfo.CancellationTokenSource, out oldCts); //if its already there we dont add it..
+                        TransferState.SetupCancellationToken(transferItem, downloadInfo.CancellationTokenSource, out _);
                     }
                     catch (Exception errr)
                     {
-                        logger.Firebase("concurrency issue: " + errr); //I think this is fixed by changing to concurrent dict but just in case...
+                        logger.Firebase("concurrency issue: " + errr);
                     }
                 }
-                transferItem = TransferItems.TransferItemManagerDL.AddIfNotExistAndReturnTransfer(transferItem, out exists);
-                logger.Debug($"Adding Transfer To Database: {transferItem.Filename}");
-                downloadInfo.TransferItemReference = transferItem;
-
-                if (queuePaused)
-                {
-                    transferItem.State = TransferStates.Cancelled;
-                    DownloadAddedUINotify?.Invoke(null, new DownloadAddedEventArgs(null));
-                }
-                else
-                {
-                    // same initial state for a re-request
-                    if (exists && IsSettled(transferItem.State))
-                    {
-                        transferItem.State = TransferStates.Queued | TransferStates.Locally;
-                    }
-                    var e = new DownloadAddedEventArgs(downloadInfo);
-                    DownloadAddedUINotify?.Invoke(null, e);
-                }
             }
-            catch (Exception e)
-            {
-                if (!exists)
-                {
-                    TransferItems.TransferItemManagerDL.Remove(transferItem); //if it did not previously exist then remove it..
-                }
-                else
-                {
-                    errorExists = exists;
-                }
-                if (oldCts != null)
-                {
-                    TransferState.SetupCancellationToken(transferItem, oldCts, out _); //put it back..
-                }
-            }
+            logger.Debug($"Adding Transfer To Database: {transferItem.Filename}");
+            DownloadAddedUINotify?.Invoke(null, new DownloadAddedEventArgs(queuePaused ? null : downloadInfo));
             return downloadInfo;
         }
 
