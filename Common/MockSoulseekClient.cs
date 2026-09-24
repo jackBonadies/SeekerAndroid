@@ -236,7 +236,9 @@ namespace Seeker
                         var directoryToDownload = nonEmptyDirectories[_random.Next(0, nonEmptyDirectories.Count)];
                         foreach (var file in directoryToDownload.Files)
                         {
-                            Options?.EnqueueDownload(username, IPEndPoint, directoryToDownload.Name + @"\" + file.Filename);
+                            var filename = directoryToDownload.Name + @"\" + file.Filename;
+                            await Options.EnqueueDownload(username, IPEndPoint, filename);
+                            await Options.PlaceInQueueResolver(username, IPEndPoint, filename);
                         }
                     }
                     await Task.Delay(BrowseUploadIntervalSec * 1000, ct);
@@ -2738,7 +2740,8 @@ namespace Seeker
                 searchResponseResolver: patch.SearchResponseResolver,
                 browseResponseResolver: patch.BrowseResponseResolver,
                 enqueueDownload: patch.EnqueueDownload,
-                directoryContentsResolver: patch.DirectoryContentsResolver);
+                directoryContentsResolver: patch.DirectoryContentsResolver,
+                placeInQueueResolver: patch.PlaceInQueueResolver);
             bool fast = _random.Next(0, 2) == 0;
             bool fault = _random.Next(0, 4) == 0;
             var delay = fast ? 100 : 2000;

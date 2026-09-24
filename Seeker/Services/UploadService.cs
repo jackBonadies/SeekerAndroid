@@ -61,6 +61,8 @@ namespace Seeker.Services
     {
         public static event EventHandler<TransferItem> TransferAddedUINotify;
 
+        private static readonly UploadQueue uploadQueue = new UploadQueue();
+
         public static Notification CreateUploadNotification(Context context, String username, List<String> directories, int numFiles)
         {
             string fileS = numFiles == 1 ? SeekerState.ActiveActivityRef.GetString(Resource.String.file) : SeekerState.ActiveActivityRef.GetString(Resource.String.files);
@@ -186,8 +188,8 @@ namespace Seeker.Services
             {
                 TransferAddedUINotify?.Invoke(null, transferItem);
             }
+            var queueEntry = uploadQueue.Enqueue(username, filename);
             // accept all download requests, and begin the upload immediately.
-            // normally there would be an internal queue, and uploads would be handled separately.
             Task.Run(async () =>
             {
                 CancellationTokenSource oldCts = null;
@@ -198,7 +200,10 @@ namespace Seeker.Services
                     var uploadUri = ourFile.Uri;
                     await SeekerState.SoulseekClient.UploadAsync(username, filename, transferItem.Size,
                         inputStreamFactory: (_) => Task.FromResult<System.IO.Stream>(SeekerState.MainActivityRef.ContentResolver.OpenInputStream(uploadUri)),
-                        options: new TransferOptions(governor: SpeedLimitHelper.OurUploadGovernor), cancellationToken: cts.Token);
+                        options: new TransferOptions(
+                            governor: SpeedLimitHelper.OurUploadGovernor,
+                            stateChanged: args => MarkStartedIfDequeued(queueEntry, args.Transfer.State)),
+                        cancellationToken: cts.Token);
 
                 }
                 catch (DuplicateTransferException dup) //not tested
@@ -211,12 +216,37 @@ namespace Seeker.Services
                     Logger.Debug("UPLOAD DUPL - " + dup.Message);
                     TransferState.SetupCancellationToken(transferItem, oldCts, out _);
                 }
+                finally
+                {
+                    uploadQueue.Remove(queueEntry);
+                }
             }).ContinueWith(t =>
             {
             }, TaskContinuationOptions.NotOnRanToCompletion);
 
             // return a completed task so that the invoking code can respond to the remote client.
             return Task.CompletedTask;
+        }
+
+        private static void MarkStartedIfDequeued(UploadQueue.Entry entry, TransferStates state)
+        {
+            if (!state.HasFlag(TransferStates.Queued))
+            {
+                uploadQueue.MarkStarted(entry);
+            }
+        }
+
+        // null result == no op
+        public static Task<int?> PlaceInQueueResolver(string username, IPEndPoint endpoint, string filename)
+        {
+            _ = endpoint;
+            if (UserListService.Instance.IsUserInIgnoreList(username))
+            {
+                return Task.FromResult<int?>(null);
+            }
+            int? place = uploadQueue.EstimatePosition(username, filename);
+            Logger.Debug($"place in queue of {filename} for {username}: {(place.HasValue ? place.Value.ToString() : "not queued")}");
+            return Task.FromResult(place);
         }
     }
 }

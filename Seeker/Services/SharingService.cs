@@ -32,6 +32,9 @@ namespace Seeker.Services
         private static readonly Func<string, IPEndPoint, string, Task> NoOpEnqueueDownload =
             (u, i, f) => Task.CompletedTask;
 
+        private static readonly Func<string, IPEndPoint, string, Task<int?>> NoOpPlaceInQueueResolver =
+            (u, i, f) => Task.FromResult<int?>(null);
+
         public static void TurnOnSharing()
         {
             if (SeekerState.SoulseekClient == null)
@@ -44,7 +47,8 @@ namespace Seeker.Services
                 searchResponseResolver: SearchResponseResolver,
                 browseResponseResolver: BrowseResponseResolver,
                 directoryContentsResolver: DirectoryContentsResponseResolver,
-                enqueueDownload: UploadService.EnqueueDownloadAction));
+                enqueueDownload: UploadService.EnqueueDownloadAction,
+                placeInQueueResolver: UploadService.PlaceInQueueResolver));
             _isActive = true;
         }
 
@@ -60,7 +64,8 @@ namespace Seeker.Services
                 searchResponseResolver: NoOpSearchResolver,
                 browseResponseResolver: NoOpBrowseResolver,
                 directoryContentsResolver: NoOpDirectoryResolver,
-                enqueueDownload: NoOpEnqueueDownload));
+                enqueueDownload: NoOpEnqueueDownload,
+                placeInQueueResolver: NoOpPlaceInQueueResolver));
             _isActive = false;
         }
 
