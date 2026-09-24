@@ -591,7 +591,7 @@ namespace Seeker
             bar.SetSegments(bytesSucceeded, bytesInProgress, bytesNotYet, bytesFailed, bytesPaused);
         }
 
-        public static void SetProgressBarTint(ProgressBar pb, TransferStates state, bool isFailed)
+        public static void SetProgressBarTint(ProgressBar pb, TransferStates state, bool isFailed, bool isUpload)
         {
             int colorResId;
             if (isFailed)
@@ -606,8 +606,9 @@ namespace Seeker
             {
                 colorResId = Resource.Color.transferChipPausedText;
             }
-            else if (state.HasFlag(TransferStates.Queued))
+            else if (state.HasFlag(TransferStates.Queued) || (!isUpload && state.HasFlag(TransferStates.Requested)))
             {
+                // if download & requested we are between queue local and queue remote, do not transfer to in progress colors
                 colorResId = Resource.Color.transferChipQueuedText;
             }
             else
@@ -646,7 +647,9 @@ namespace Seeker
             }
             else if (state.HasFlag(TransferStates.Requested))
             {
-                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.requested), TransferChipType.Downloading);
+                // if download & requested we are between queue local and queue remote, do not transfer to in progress colors
+                TransferChipType chipType = item.IsUpload() ? TransferChipType.Downloading : TransferChipType.Queued;
+                StyleStatus(statusDot, statusText, SeekerApplication.GetString(Resource.String.requested), chipType);
             }
             else if (!item.IsUpload() && state.HasFlag(TransferStates.Queued) && state.HasFlag(TransferStates.Locally))
             {
@@ -894,7 +897,7 @@ namespace Seeker
             {
                 progressBar.Progress = 100;
             }
-            TransferViewHelper.SetProgressBarTint(progressBar, ti.State, isFailedOrAborted);
+            TransferViewHelper.SetProgressBarTint(progressBar, ti.State, isFailedOrAborted, item.IsUpload());
 
             if (isInBatchMode)
             {

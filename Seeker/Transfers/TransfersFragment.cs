@@ -1047,7 +1047,7 @@ namespace Seeker
                     v.progressBar.Progress = progress;
                     TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeSeparatorView(), v.GetSizeTextView(), v.GetSpeedTextView(), relevantItem, relevantItem.State, v.GetShowProgressSize(), v.GetShowSpeed());
                     TransferViewHelper.SetTimeRemainingText(v.GetTimeRemainingSeparatorView(), v.GetTimeRemainingTextView(), v.GetSpeedTextView(), relevantItem, v.GetShowTimeRemaining());
-                    TransferViewHelper.SetProgressBarTint(v.progressBar, relevantItem.State, wasFailed);
+                    TransferViewHelper.SetProgressBarTint(v.progressBar, relevantItem.State, wasFailed, relevantItem.IsUpload());
                 }
             }
         }
