@@ -416,10 +416,7 @@ namespace Seeker.Services
             if (PreferencesState.MemoryBackedDownload)
             {
                 var memStream = new MemoryStream();
-                if (dlInfo != null)
-                {
-                    dlInfo.OutputMemoryStream = memStream;
-                }
+                dlInfo.OutputMemoryStream = memStream;
                 dlTask =
                     soulseekClientFactory().DownloadAsync(
                         username: username,
@@ -445,11 +442,8 @@ namespace Seeker.Services
                     // if GetOrCreateIncompleteLocation threw, rethrow
                     setupTask.GetAwaiter().GetResult();
 
-                    if (dlInfo?.TransferItemReference != null)
-                    {
-                        dlInfo.TransferItemReference.IncompleteUri = incompleteUri;
-                        dlInfo.TransferItemReference.IncompleteParentUri = incompleteUriDirectory;
-                    }
+                    dlInfo.TransferItemReference.IncompleteUri = incompleteUri;
+                    dlInfo.TransferItemReference.IncompleteParentUri = incompleteUriDirectory;
 
                     return soulseekClientFactory().DownloadAsync(
                         username: username,

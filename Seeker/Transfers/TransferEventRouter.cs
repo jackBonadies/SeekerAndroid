@@ -288,7 +288,7 @@ namespace Seeker.Transfers
 
                 }
 
-                ProgressUpdated?.Invoke(null, new ProgressUpdatedUIEventArgs(relevantItem, wasFailed, percentComplete, e.Transfer.AverageSpeed));
+                ProgressUpdated?.Invoke(null, new ProgressUpdatedUIEventArgs(relevantItem, wasFailed, percentComplete));
             }
         }
 
