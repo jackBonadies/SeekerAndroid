@@ -137,8 +137,45 @@ namespace Seeker.Services
         /// This would cause files do download out of order and other side effects.
         /// Update the logic to be more similar to slskd.
         /// </remarks>
+        private const int SlotPending = 0;
+        private const int SlotHandedOff = 1;
+        private const int SlotCancelledWhilePending = 2;
+
         private async Task DownloadFiles(List<DownloadInfo> dlInfos, string username)
         {
+            // rows waiting their turn unknown to both the library and not waiting on any cancellable task (they are waiting on
+            // previous transfers to be queued), so we must register lambda here.
+            // whoever moves a slot off SlotPending first owns that row.
+            var slots = new int[dlInfos.Count];
+            var registrations = new CancellationTokenRegistration[dlInfos.Count];
+            for (int j = 0; j < dlInfos.Count; j++)
+            {
+                int idx = j;
+                var pending = dlInfos[idx];
+                // runs synchronously inside Cancel() on the UI thread and under the locks
+                registrations[idx] = pending.CancellationTokenSource.Token.Register(() =>
+                {
+                    if (Interlocked.CompareExchange(ref slots[idx], SlotCancelledWhilePending, SlotPending) != SlotPending)
+                    {
+                        return;
+                    }
+                    // we got cancelled before we were started
+                    try
+                    {
+                        CompleteUnstartedAsCancelled(pending);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Firebase("cancel of pending download failed: " + ex);
+                    }
+                });
+            }
+            if (Array.IndexOf(slots, SlotCancelledWhilePending) >= 0)
+            {
+                // cancelled before we registered, the callback ran inline above
+                mainThreadRunner.RunOnUiThread(() => TransferListRefreshRequested?.Invoke(null, null!));
+            }
+
             Exception? peerFailure = null;
             bool anyUpdatedHere = false;
             for (int i = 0; i < dlInfos.Count; i++)
@@ -146,12 +183,17 @@ namespace Seeker.Services
                 var dlInfo = dlInfos[i];
                 Task dlTask;
                 Task waitForNext;
+                if (Interlocked.CompareExchange(ref slots[i], SlotHandedOff, SlotPending) != SlotPending)
+                {
+                    // paused/cancelled while waiting, its cancel already finished it
+                    continue;
+                }
+                registrations[i].Dispose(); // we got to the transfer in question, now we handle lifecycle
                 if (dlInfo.CancellationTokenSource.IsCancellationRequested)
                 {
-                    // cancel immediately - dont go ahead and create incomplete location, hand to library
-                    MarkTransferItemCancelled(dlInfo.TransferItemReference);
+                    // cancelled between the claim and here - dont go ahead and create incomplete location, hand to library
+                    CompleteUnstartedAsCancelled(dlInfo);
                     anyUpdatedHere = true;
-                    Task.FromCanceled(dlInfo.CancellationTokenSource.Token).ContinueWith(GetDownloadContinuationAction(new DownloadAddedEventArgs(dlInfo)));
                     continue;
                 }
                 if (peerFailure != null)
@@ -242,6 +284,15 @@ namespace Seeker.Services
             item.State = TransferStates.Completed | TransferStates.Cancelled;
             item.InProcessing = false;
             item.RemainingTime = null;
+        }
+
+        // never handed to the library, so TransferStateChanged not handle it
+        private void CompleteUnstartedAsCancelled(DownloadInfo dlInfo)
+        {
+            MarkTransferItemCancelled(dlInfo.TransferItemReference);
+            TransferItemManager.MarkTransfersDirty();
+            Task.FromCanceled(dlInfo.CancellationTokenSource.Token)
+                .ContinueWith(GetDownloadContinuationAction(new DownloadAddedEventArgs(dlInfo)), TaskScheduler.Default);
         }
 
         // i.e. is it going to move on its own
