@@ -895,7 +895,7 @@ namespace Seeker
                 for (int i = 0; i < fileCount; i++)
                 {
                     int trackNum = i + 1;
-                    long size = _random.Next(2_000_000, 60_000_000);
+                    long size = MockFileSize(directoryName);
                     int length = _random.Next(120, 480);
                     string filename = $"{trackNum:D2} Track {trackNum}.{ext}";
                     var fileAttributes = new[] { new FileAttribute(FileAttributeType.BitRate, bitRate), new FileAttribute(FileAttributeType.Length, length) };
@@ -1097,7 +1097,7 @@ namespace Seeker
                 for (int i = 0; i < trackCount; i++)
                 {
                     int trackNum = i + 1;
-                    long size = _random.Next(2_000_000, 60_000_000);
+                    long size = MockFileSize(term);
                     int length = _random.Next(120, 480);
                     string reallyLongTitle = "";
                     if (_random.Next(0,5) == 0) {
@@ -2015,6 +2015,22 @@ namespace Seeker
         private static bool HasToken(string name, string token)
         {
             return name.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        private static long MockFileSize(string name)
+        {
+            if (ParseIntToken(name, "size") is int mb)
+            {
+                return mb * 1048576L;
+            }
+            else if (ParseIntToken(name, "sizekb") is int kb)
+            {
+                return kb * 1024L;
+            }
+            else
+            {
+                return _random.Next(2_000_000, 60_000_000);
+            }
         }
 
         // Parses "key:N" out of a filename (case-insensitive); returns null if absent.
