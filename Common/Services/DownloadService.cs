@@ -682,6 +682,7 @@ namespace Seeker.Services
                 {
                     // nothing for us to do - the other transfer is currently processing
                     logger.Debug($"{e.dlInfo?.fullFilename} is already being processed");
+                    mainThreadRunner.RunOnUiThread(() => { toaster.ShowToastDebounced(StringKey.error_duplicate, "duplicate"); });
                     return;
                 }
                 try
