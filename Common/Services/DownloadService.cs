@@ -2,6 +2,7 @@
 using Seeker.Transfers;
 using Soulseek;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,6 +25,9 @@ namespace Seeker.Services
         private readonly ILoggerBackend logger;
         private readonly INetworkStatus networkStatus;
         private long taskWasCancelledToastDebouncer = DateTimeOffset.MinValue.ToUnixTimeMilliseconds();
+
+        // item -> the request that owns it. full lifecycle from queued|locally (before slsk.net has knowledge) to continuation action
+        private readonly ConcurrentDictionary<TransferItem, DownloadInfo> activeRequests = new ConcurrentDictionary<TransferItem, DownloadInfo>();
 
         public event EventHandler<int> TransferItemChanged;
         public event EventHandler<Action> TransferListRefreshRequested;
@@ -110,6 +114,11 @@ namespace Seeker.Services
                         logger.Firebase($"StartDownloads: no transfer item for {dlInfo.fullFilename}, skipping");
                         continue;
                     }
+                    if (!TryClaim(dlInfo))
+                    {
+                        logger.Debug($"StartDownloads: {dlInfo.fullFilename} is already being requested, skipping");
+                        continue;
+                    }
                     userInfos.Add(dlInfo);
                 }
                 if (userInfos.Count > 0)
@@ -118,6 +127,25 @@ namespace Seeker.Services
                 }
             }
             return Task.WhenAll(byUser);
+        }
+
+        // if doesnt exist, claims it and returns true (also returns true if we already own it)
+        private bool TryClaim(DownloadInfo dlInfo)
+        {
+            var item = dlInfo.TransferItemReference;
+            return activeRequests.TryAdd(item, dlInfo)
+                || (activeRequests.TryGetValue(item, out var owner) && owner == dlInfo);
+        }
+
+        private void ReleaseClaim(DownloadInfo? dlInfo)
+        {
+            var item = dlInfo?.TransferItemReference;
+            if (dlInfo == null || item == null)
+            {
+                return;
+            }
+            // still a dictionary lookup, just that it only removes if the value is the same
+            ((ICollection<KeyValuePair<TransferItem, DownloadInfo>>)activeRequests).Remove(new KeyValuePair<TransferItem, DownloadInfo>(item, dlInfo));
         }
 
         private void StartDownloadsFireAndForget(IEnumerable<DownloadInfo> dlInfos)
@@ -295,18 +323,8 @@ namespace Seeker.Services
                 .ContinueWith(GetDownloadContinuationAction(new DownloadAddedEventArgs(dlInfo)), TaskScheduler.Default);
         }
 
-        // i.e. is it going to move on its own
-        private static bool IsSettled(TransferStates state)
-        {
-            return state == TransferStates.None
-                || state.HasFlag(TransferStates.Completed)
-                || state.HasFlag(TransferStates.Cancelled)
-                || state.HasFlag(TransferStates.Errored);
-        }
-
-
         /// <summary>
-        /// Adds a transfer to the list. Null if there is already a transfer either in motion or succeeded (and therefore we should not do anything)
+        /// Adds a transfer to the list (i.e. for NEW items). Null if there is already a transfer either in motion or succeeded (and therefore we should not do anything)
         /// </summary>
         public DownloadInfo? AddTransfer(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, bool isSingle)
         {
@@ -329,16 +347,17 @@ namespace Seeker.Services
             DownloadInfo? downloadInfo;
             if (exists)
             {
-                // if in motion its state and CTS belong to the request already running.  If succeeded, dont re download just to fail (file already exists).
-                if (queuePaused || !IsSettled(transferItem.State) || transferItem.State.HasFlag(TransferStates.Succeeded))
+                // If succeeded, dont re download just to fail (file already exists).
+                if (queuePaused || transferItem.State.HasFlag(TransferStates.Succeeded))
                 {
                     logger.Debug($"AddTransfer: {transferItem.Filename} already exists ({transferItem.State}), skipping");
                     return null;
                 }
-                // re-request of a paused / failed / finished row is a retry of that row
-                downloadInfo = PrepareRetry(transferItem);
+                // re-request of a paused / failed / finished row is a retry of that row. null if a request already owns it (i.e. it is already in motion)
+                downloadInfo = PrepareRetry(transferItem, restartActive: false);
                 if (downloadInfo == null)
                 {
+                    logger.Debug($"AddTransfer: {transferItem.Filename} is already being requested, skipping");
                     return null;
                 }
             }
@@ -347,6 +366,11 @@ namespace Seeker.Services
                 downloadInfo = new DownloadInfo(username, fname, size, null, new CancellationTokenSource(), queueLength, 0, depth) { TransferItemReference = transferItem };
                 if (!queuePaused)
                 {
+                    // a concurrent add of the same file saw our row as existing and got there first
+                    if (!TryClaim(downloadInfo))
+                    {
+                        return null;
+                    }
                     try
                     {
                         TransferState.SetupCancellationToken(transferItem, downloadInfo.CancellationTokenSource, out _);
@@ -626,14 +650,16 @@ namespace Seeker.Services
                     {
                         transferItemInQuestion = TransferItems.TransferItemManagerDL.GetTransferItemWithIndexFromAll(fullFileName, username, out int _);
                     }
-                    //TransferItem item1 = transferItems[info.Position];  
-                    CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                    //TransferItem item1 = transferItems[info.Position];
                     try
                     {
-                        transferItemInQuestion.QueueLength = int.MaxValue;
-                        TransferState.SetupCancellationToken(transferItemInQuestion, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
-                        var dlInfo = new DownloadInfo(transferItemInQuestion.Username, transferItemInQuestion.FullFilename, transferItemInQuestion.Size, null, cancellationTokenSource, transferItemInQuestion.QueueLength, 0, transferItemInQuestion.GetDirectoryLevel()) { TransferItemReference = transferItemInQuestion };
-                        StartDownloadsFireAndForget(new[] { dlInfo });
+                        // null if a request for it is already pending
+                        var dlInfo = PrepareRetry(transferItemInQuestion, restartActive: false);
+                        if (dlInfo != null)
+                        {
+                            dlInfo.RetryCount = 0;
+                            StartDownloadsFireAndForget(new[] { dlInfo });
+                        }
                     }
                     catch (System.Exception error)
                     {
@@ -693,6 +719,8 @@ namespace Seeker.Services
             Action<Task> continuationActionSaveFile = new Action<Task>(
             task =>
             {
+                // before any retry below re-claims it
+                ReleaseClaim(e.dlInfo);
                 logger.Debug("DownloadContinuationActionUI started for " + e.dlInfo?.fullFilename + " with status: " + task.Status
                     + (task.IsFaulted ? " reason: " + SimpleHelpers.DescribeException(task.Exception) : string.Empty));
                 var failureKind = task.IsFaulted ? DownloadFailureClassifier.Classify(task.Exception) : DownloadFailureKind.Unknown;
@@ -720,10 +748,11 @@ namespace Seeker.Services
                             try
                             {
                                 //retry download.
-                                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                                TransferState.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
-                                var retryDlInfo = new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.TransferItemReference.Size, null, cancellationTokenSource, e.dlInfo.QueueLength, 0, task.Exception, e.dlInfo.Depth) { TransferItemReference = e.dlInfo.TransferItemReference };
-                                StartDownloadsFireAndForget(new[] { retryDlInfo });
+                                var retryDlInfo = PrepareRetry(e.dlInfo.TransferItemReference, restartActive: false);
+                                if (retryDlInfo != null)
+                                {
+                                    StartDownloadsFireAndForget(new[] { retryDlInfo });
+                                }
                             }
                             catch (System.Exception e)
                             {
@@ -903,10 +932,16 @@ namespace Seeker.Services
                 logger.Debug("Retrying the Download" + e.dlInfo.fullFilename);
                 try
                 {
-                    transferItem.ClearStateForRetry();
                     CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                    TransferState.SetupCancellationToken(transferItem, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
                     var retryDlInfo = new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, null, cancellationTokenSource, e.dlInfo.QueueLength, resetRetryCount ? 0 : 1, task.Exception, e.dlInfo.Depth) { TransferItemReference = transferItem };
+                    if (!TryClaim(retryDlInfo))
+                    {
+                        // the user already re-requested it
+                        logger.Debug($"auto retry of {e.dlInfo.fullFilename} skipped, it is already being requested");
+                        return;
+                    }
+                    transferItem.ClearStateForRetry();
+                    TransferState.SetupCancellationToken(transferItem, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
                     StartDownloadsFireAndForget(new[] { retryDlInfo });
                     return; //i.e. dont toast anything just retry.
                 }
@@ -1011,13 +1046,13 @@ namespace Seeker.Services
         }
 
         /// <summary>
-        /// Initiates a retry for a single transfer item. If the transfer is currently in-flight,
+        /// Initiates a retry for a single transfer item. If a request already owns it (pending or in the library),
         /// sets CancelAndRetryFlag and cancels it (the continuation will re-download).
         /// Returns true if a fresh download was initiated, false if cancel-and-retry.
         /// </summary>
         public bool RetryDownloadItem(TransferItem item)
         {
-            var dlInfo = PrepareRetry(item);
+            var dlInfo = PrepareRetry(item, restartActive: true);
             if (dlInfo == null)
             {
                 return false;
@@ -1026,29 +1061,37 @@ namespace Seeker.Services
             return true;
         }
 
-        // null if the download is in flight: it gets cancelled and its continuation re-requests it (CancelAndRetryFlag)
-        private DownloadInfo? PrepareRetry(TransferItem item)
+        // claims the item for a new request. null if a request already owns it - restartActive cancels that one
+        //   and its continuation re-requests it (CancelAndRetryFlag), bulk paths leave it alone.
+        private DownloadInfo? PrepareRetry(TransferItem item, bool restartActive)
         {
-            if (soulseekClientFactory().IsTransferInDownloads(item.Username, item.FullFilename))
+            if (activeRequests.TryGetValue(item, out var owner))
             {
+                if (!restartActive)
+                {
+                    return null;
+                }
                 item.CancelAndRetryFlag = true;
-                if (item.CancellationTokenSource != null)
+                if (!owner.CancellationTokenSource.IsCancellationRequested)
                 {
-                    if (!item.CancellationTokenSource.IsCancellationRequested)
-                    {
-                        item.CancellationTokenSource.Cancel();
-                    }
+                    owner.CancellationTokenSource.Cancel();
                 }
-                else
+                if (activeRequests.TryGetValue(item, out var current) && current == owner)
                 {
-                    logger.Firebase("CTS is null. this should not happen. we should always set it before downloading.");
+                    // its still the owner, it will see the flag and be good, we can return
+                    return null;
                 }
-                return null;
+                // it finished before it could see the flag, create a new download
+                item.CancelAndRetryFlag = false;
             }
 
             var cts = new CancellationTokenSource();
-            TransferState.SetupCancellationToken(item, cts, out _);
             var dlInfo = new DownloadInfo(item.Username, item.FullFilename, item.Size, null, cts, item.QueueLength, item.Failed ? 1 : 0, item.GetDirectoryLevel()) { TransferItemReference = item };
+            if (!TryClaim(dlInfo))
+            {
+                return null;
+            }
+            TransferState.SetupCancellationToken(item, cts, out _);
             item.ClearStateForRetry();
             // same initial state as AddTransfer
             item.State = TransferStates.Queued | TransferStates.Locally;
@@ -1062,7 +1105,7 @@ namespace Seeker.Services
             var dlInfos = new List<DownloadInfo>();
             foreach (TransferItem item in transferItemConditionList)
             {
-                var dlInfo = PrepareRetry(item);
+                var dlInfo = PrepareRetry(item, restartActive: false);
                 if (dlInfo != null)
                 {
                     dlInfos.Add(dlInfo);
