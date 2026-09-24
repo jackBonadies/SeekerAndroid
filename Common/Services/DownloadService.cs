@@ -158,7 +158,7 @@ namespace Seeker.Services
                     // cancel immediately - dont go ahead and create incomplete location, hand to library
                     MarkTransferItemCancelled(dlInfo.TransferItemReference);
                     anyUpdatedHere = true;
-                    Task.FromCanceled(dlInfo.CancellationTokenSource.Token).ContinueWith(DownloadContinuationActionUI(new DownloadAddedEventArgs(dlInfo)));
+                    Task.FromCanceled(dlInfo.CancellationTokenSource.Token).ContinueWith(GetDownloadContinuationAction(new DownloadAddedEventArgs(dlInfo)));
                     continue;
                 }
                 if (peerFailure != null)
@@ -186,7 +186,7 @@ namespace Seeker.Services
                     }
                 }
                 var e = new DownloadAddedEventArgs(dlInfo);
-                Action<Task> continuationActionSaveFile = DownloadContinuationActionUI(e);
+                Action<Task> continuationActionSaveFile = GetDownloadContinuationAction(e);
                 dlTask.ContinueWith(continuationActionSaveFile);
                 if (peerFailure != null)
                 {
@@ -212,19 +212,13 @@ namespace Seeker.Services
         private static bool TryGetPeerFailure(AggregateException ex, out Exception? inner)
         {
             inner = null;
-            var candidate = ex?.InnerException;
-            if (candidate == null)
+            var kind = DownloadFailureClassifier.Classify(ex);
+            if (kind != DownloadFailureKind.UserOffline && kind != DownloadFailureKind.CannotConnect)
             {
                 return false;
             }
-            bool isPeerFailure = candidate is UserOfflineException
-                || (candidate.Message?.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase) ?? false)
-                || (candidate.InnerException?.Message?.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase) ?? false);
-            if (isPeerFailure)
-            {
-                inner = candidate;
-            }
-            return isPeerFailure;
+            inner = ex?.InnerException;
+            return inner != null;
         }
 
         // mirrors what TransferEventRouter does for the library's Completed | Errored state, including the
@@ -676,13 +670,20 @@ namespace Seeker.Services
         /// </summary>
         /// <param name="e"></param>
         /// <returns></returns>
-        public Action<Task> DownloadContinuationActionUI(DownloadAddedEventArgs e)
+        public Action<Task> GetDownloadContinuationAction(DownloadAddedEventArgs e)
         {
             Action<Task> continuationActionSaveFile = new Action<Task>(
             task =>
             {
                 logger.Debug("DownloadContinuationActionUI started for " + e.dlInfo?.fullFilename + " with status: " + task.Status
                     + (task.IsFaulted ? " reason: " + SimpleHelpers.DescribeException(task.Exception) : string.Empty));
+                var failureKind = task.IsFaulted ? DownloadFailureClassifier.Classify(task.Exception) : DownloadFailureKind.Unknown;
+                if (failureKind == DownloadFailureKind.Duplicate)
+                {
+                    // nothing for us to do - the other transfer is currently processing
+                    logger.Debug($"{e.dlInfo?.fullFilename} is already being processed");
+                    return;
+                }
                 try
                 {
                     Action action = null;
@@ -735,268 +736,7 @@ namespace Seeker.Services
                     }
                     else if (task.Status == TaskStatus.Faulted)
                     {
-                        bool retriable = false;
-                        bool forceRetry = false;
-
-                        // in the cases where there is mojibake, and you undo it, you still cannot download from Nicotine older client.
-                        // reason being: the shared cache and disk do not match.
-                        // so if you send them the filename on disk they will say it is not in the cache.
-                        // and if you send them the filename from cache they will say they could not find it on disk.
-
-                        //bool tryUndoMojibake = false; //this is still needed even with keeping track of encodings.
-                        bool resetRetryCount = false;
-                        var transferItem = e.dlInfo.TransferItemReference;
-                        //bool wasTriedToUndoMojibake = transferItem.TryUndoMojibake;
-                        //transferItem.TryUndoMojibake = false;
-                        if (task.Exception.InnerException is System.TimeoutException)
-                        {
-                            action = () => { toaster.ShowToastLong(StringKey.timeout_peer); };
-                        }
-                        else if (task.Exception.InnerException is TransferSizeMismatchException sizeException)
-                        {
-                            // update the size and rerequest.
-                            // if we have partially downloaded the file already we need to delete it to prevent corruption.
-                            logger.Debug($"OLD SIZE {transferItem.Size} NEW SIZE {sizeException.RemoteSize}");
-                            transferItem.Size = sizeException.RemoteSize;
-                            e.dlInfo.Size = sizeException.RemoteSize;
-                            retriable = true;
-                            forceRetry = true;
-                            resetRetryCount = true;
-                            if (!string.IsNullOrEmpty(transferItem.IncompleteParentUri)/* && transferItem.Progress > 0*/)
-                            {
-                                try
-                                {
-                                    TransferItems.TransferItemManagerWrapped.PerformCleanup(transferItem);
-                                }
-                                catch (Exception ex)
-                                {
-                                    string exceptionString = "Failed to delete incomplete file on TransferSizeMismatchException: " + ex.ToString();
-                                    logger.Debug(exceptionString);
-                                    logger.Firebase(exceptionString);
-                                }
-                            }
-                        }
-                        else if (task.Exception.InnerException is DownloadDirectoryNotSetException || task.Exception?.InnerException?.InnerException is DownloadDirectoryNotSetException)
-                        {
-                            MarkTransferItemAsDirNotSet(transferItem);
-                            action = () => { toaster.ShowToastDebounced(StringKey.FailedDownloadDirectoryNotSet, "_17_"); };
-                        }
-                        else if (task.Exception.InnerException is Soulseek.TransferRejectedException tre) //derived class of TransferException...
-                        {
-                            //we go here when trying to download a locked file... (the exception only gets thrown on rejected with "not shared")
-                            bool isFileNotShared = tre.Message.Contains("file not shared", StringComparison.OrdinalIgnoreCase);
-                            // if we request a file from a soulseek NS client such as eÌe.jpg which when encoded in UTF fails to be decoded by Latin1
-                            // soulseek NS will send TransferRejectedException "File Not Shared." with our filename (the filename will be identical).
-                            // when we retry lets try a Latin1 encoding.  If no special characters this will not make any difference and it will be just a normal retry.
-                            // we only want to try this once. and if it fails reset it to normal and do not try it again.
-                            // if we encode the same way we decode, then such a thing will not occur.
-
-                            // in the nicotine 3.1.1 and earlier, if we request a file such as "fÃ¶r", nicotine will encode it in Latin1.  We will
-                            // decode it as UTF8, encode it back as UTF8 and then they will decode it as UTF-8 resulting in för".  So even though we encoded and decoded
-                            // in the same way there can still be an issue.  If we force legacy it will be fixed.
-
-                            //if (!wasTriedToUndoMojibake && isFileNotShared && HasNonASCIIChars(transferItem.FullFilename))
-                            //{
-                            //    tryUndoMojibake = true;
-                            //    transferItem.TryUndoMojibake = true;
-                            //    retriable = true;
-                            //}
-
-
-                            // always set this since it only shows if we DO NOT retry
-                            if (isFileNotShared)
-                            {
-                                action = () => { toaster.ShowToastDebounced(StringKey.transfer_rejected_file_not_shared, "_2_"); }; //needed
-                            }
-                            else
-                            {
-                                action = () => { toaster.ShowToastDebounced(StringKey.transfer_rejected, "_2_"); }; //needed
-                            }
-                            logger.Debug("rejected. is not shared: " + isFileNotShared);
-                        }
-                        else if (task.Exception.InnerException is Soulseek.TransferException)
-                        {
-                            action = () => { toaster.ShowToastDebounced(string.Format(toaster.GetString(StringKey.failed_to_establish_connection_to_peer), e.dlInfo.username), "_1_", e?.dlInfo?.username ?? string.Empty); };
-                        }
-                        else if (task.Exception.InnerException is Soulseek.UserOfflineException)
-                        {
-                            action = () => { toaster.ShowToastDebounced(task.Exception.InnerException.Message, "_3_", e?.dlInfo?.username ?? string.Empty); }; //needed. "User x appears to be offline"
-                        }
-                        else if (task.Exception.InnerException is Soulseek.SoulseekClientException &&
-                                task.Exception.InnerException.Message != null &&
-                                task.Exception.InnerException.Message.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase))
-                        {
-                            logger.Debug("Task Exception: " + task.Exception.InnerException.Message);
-                            action = () => { toaster.ShowToastDebounced(StringKey.failed_to_establish_direct_or_indirect, "_4_"); };
-                        }
-                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.Contains("read error: remote connection closed", StringComparison.OrdinalIgnoreCase))
-                        {
-                            retriable = true;
-                            //logger.Firebase("read error: remote connection closed"); //this is if someone cancels the upload on their end.
-                            logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                            action = () => { toaster.ShowToastLong(StringKey.remote_conn_closed); };
-                            if (networkStatus.HasHandoffOccuredRecently())
-                            {
-                                resetRetryCount = true;
-                            }
-                        }
-                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.Contains("network subsystem is down", StringComparison.OrdinalIgnoreCase))
-                        {
-                            //logger.Firebase("Network Subsystem is Down");
-                            if (networkStatus.DoWeHaveInternet())//if we have internet again by the time we get here then its retriable. this is often due to handoff. handoff either causes this or "remote connection closed"
-                            {
-                                logger.Debug("we do have internet");
-                                action = () => { toaster.ShowToastLong(StringKey.remote_conn_closed); };
-                                retriable = true;
-                                if (networkStatus.HasHandoffOccuredRecently())
-                                {
-                                    resetRetryCount = true;
-                                }
-                            }
-                            else
-                            {
-                                action = () => { toaster.ShowToastLong(StringKey.network_down); };
-                            }
-                            logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
-
-                        }
-                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.Contains("reported as failed by", StringComparison.OrdinalIgnoreCase))
-                        {
-                            // if we request a file from a soulseek NS client such as eÌÌÌe.jpg which when encoded in UTF fails to be decoded by Latin1
-                            // soulseek NS will send UploadFailed with our filename (the filename will be identical).
-                            // when we retry lets try a Latin1 encoding.  If no special characters this will not make any difference and it will be just a normal retry.
-                            // we only want to try this once. and if it fails reset it to normal and do not try it again.
-                            //if(!wasTriedToUndoMojibake && HasNonASCIIChars(transferItem.FullFilename))
-                            //{
-                            //    tryUndoMojibake = true;
-                            //    transferItem.TryUndoMojibake = true;
-                            //    retriable = true;
-                            //}
-                            retriable = true;
-                            //logger.Firebase("Reported as failed by uploader");
-                            logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                            action = () => { toaster.ShowToastLong(StringKey.reported_as_failed); };
-                        }
-                        else if (task.Exception.InnerException.Message != null && task.Exception.InnerException.Message.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase))
-                        {
-                            //logger.Firebase("failed to establish a direct or indirect message connection");
-                            logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                            action = () => { toaster.ShowToastDebounced(StringKey.failed_to_establish_direct_or_indirect, "_5_"); };
-                        }
-                        else
-                        {
-                            retriable = true;
-                            //the server connection task.Exception.InnerException.Message.Contains("The server connection was closed unexpectedly") //this seems to be retry able
-                            //or task.Exception.InnerException.InnerException.Message.Contains("The server connection was closed unexpectedly""
-                            //or task.Exception.InnerException.Message.Contains("Transfer failed: Read error: Object reference not set to an instance of an object
-                            bool unknownException = true;
-                            if (task.Exception != null && task.Exception.InnerException != null)
-                            {
-                                //I get a lot of null refs from task.Exception.InnerException.Message
-
-
-                                logger.Debug("Unhandled task exception: " + task.Exception.InnerException.Message);
-                                if (task.Exception.InnerException.Message.StartsWith("Disk full.")) //is thrown by Stream.Close()
-                                {
-                                    action = () => { toaster.ShowToastLong(StringKey.error_no_space); };
-                                    unknownException = false;
-                                }
-
-
-
-                                if (task.Exception.InnerException.InnerException != null && unknownException)
-                                {
-
-                                    if (task.Exception.InnerException.InnerException.Message.Contains("ENOSPC (No space left on device)") || task.Exception.InnerException.InnerException.Message.Contains("Read error: Disk full."))
-                                    {
-                                        action = () => { toaster.ShowToastLong(StringKey.error_no_space); };
-                                        unknownException = false;
-                                    }
-
-                                    //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
-                                    if (task.Exception.InnerException.InnerException.Message.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        unknownException = false;
-                                    }
-
-                                    if (unknownException)
-                                    {
-                                        logger.Firebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
-                                    }
-
-
-
-                                    //this is to help with the collection was modified
-                                    if (task.Exception.InnerException.InnerException.InnerException != null && unknownException)
-                                    {
-                                        logger.InfoFirebase("InnerInnerException: " + task.Exception.InnerException.InnerException.Message + task.Exception.InnerException.InnerException.StackTrace);
-                                        var innerInner = task.Exception.InnerException.InnerException.InnerException;
-                                        //1.983 - Non-fatal Exception: java.lang.Throwable: InnerInnerException: Transfer failed: Read error: Object reference not set to an instance of an object  at Soulseek.SoulseekClient.DownloadToStreamAsync (System.String username, System.String filename, System.IO.Stream outputStream, System.Nullable`1[T] size, System.Int64 startOffset, System.Int32 token, Soulseek.TransferOptions options, System.Threading.CancellationToken cancellationToken) [0x00cc2] in <bda1848b50e64cd7b441e1edf9da2d38>:0 
-                                        logger.Firebase("Innerx3_Exception: " + innerInner.Message + innerInner.StackTrace);
-                                        //this is to help with the collection was modified
-                                    }
-                                }
-
-                                if (unknownException)
-                                {
-                                    if (task.Exception.InnerException.StackTrace.Contains("System.Xml.Serialization.XmlSerializationWriterInterpreter"))
-                                    {
-                                        if (task.Exception.InnerException.StackTrace.Length > 1201)
-                                        {
-                                            logger.Firebase("xml Unhandled task exception 2nd part: " + task.Exception.InnerException.StackTrace.Skip(1000).ToString());
-                                        }
-                                        logger.Firebase("xml Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
-                                    }
-                                    else
-                                    {
-                                        logger.Firebase("dlcontaction Unhandled task exception: " + task.Exception.InnerException.Message + task.Exception.InnerException.StackTrace);
-                                    }
-                                }
-                            }
-                            else if (task.Exception != null && unknownException)
-                            {
-                                logger.Firebase("Unhandled task exception (little info): " + task.Exception.Message);
-                                logger.Debug("Unhandled task exception (little info):" + task.Exception.Message);
-                            }
-                        }
-
-
-                        if (forceRetry || ((resetRetryCount || e.dlInfo.RetryCount == 0) && (PreferencesState.AutoRetryDownload) && retriable))
-                        {
-                            logger.Debug("Retrying the Download" + e.dlInfo.fullFilename);
-                            //logger.Debug("!!! try undo mojibake " + tryUndoMojibake);
-                            try
-                            {
-                                //retry download.
-                                e.dlInfo.TransferItemReference.ClearStateForRetry();
-                                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                                TransferState.SetupCancellationToken(e.dlInfo.TransferItemReference, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
-                                var retryDlInfo = new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, null, cancellationTokenSource, e.dlInfo.QueueLength, resetRetryCount ? 0 : 1, task.Exception, e.dlInfo.Depth) { TransferItemReference = e.dlInfo.TransferItemReference };
-                                StartDownloadsFireAndForget(new[] { retryDlInfo });
-                                return; //i.e. dont toast anything just retry.
-                            }
-                            catch (System.Exception e)
-                            {
-                                logger.Firebase("retry creation failed: " + e.Message + e.StackTrace);
-                                //if this happens at least log the normal message....
-                            }
-
-                        }
-
-                        if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
-                        {
-                            logger.Firebase("auto retry failed: prev exception: " + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString() + "new exception: " + task.Exception?.InnerException?.Message?.ToString());
-                        }
-
-                        //Action action2 = () => { MainActivity.ToastUI(task.Exception.ToString());};
-                        //this.RunOnUiThread(action2);
-                        if (action == null)
-                        {
-                            //action = () => { MainActivity.ToastUI(msgDebug1); MainActivity.ToastUI(msgDebug2); };
-                            action = () => { toaster.ShowToastLong(StringKey.error_unspecified); };
-                        }
-                        mainThreadRunner.RunOnUiThread(action);
-                        //System.Console.WriteLine(task.Exception.ToString());
+                        HandleDownloadFaultAndRetryIfApplicable(e, task, failureKind);
                         return;
                     }
                     //failed downloads return before getting here...
@@ -1041,6 +781,132 @@ namespace Seeker.Services
                 }
             });
             return continuationActionSaveFile;
+        }
+
+        private void HandleDownloadFaultAndRetryIfApplicable(DownloadAddedEventArgs e, Task task, DownloadFailureKind kind)
+        {
+            var transferItem = e.dlInfo.TransferItemReference;
+            string username = e.dlInfo.username;
+            Action? action = null;
+            bool retriable = false;
+            bool forceRetry = false;
+            bool resetRetryCount = false;
+            switch (kind)
+            {
+                case DownloadFailureKind.TimedOut:
+                    action = () => { toaster.ShowToastLong(StringKey.timeout_peer); };
+                    break;
+                case DownloadFailureKind.SizeMismatch:
+                {
+                    // update the size and rerequest. delete any partial file to prevent corruption.
+                    var sizeException = (TransferSizeMismatchException)DownloadFailureClassifier.GetCause(task.Exception)!;
+                    logger.Debug($"OLD SIZE {transferItem.Size} NEW SIZE {sizeException.RemoteSize}");
+                    transferItem.Size = sizeException.RemoteSize;
+                    e.dlInfo.Size = sizeException.RemoteSize;
+                    forceRetry = true;
+                    resetRetryCount = true;
+                    if (!string.IsNullOrEmpty(transferItem.IncompleteParentUri))
+                    {
+                        try
+                        {
+                            TransferItems.TransferItemManagerWrapped.PerformCleanup(transferItem);
+                        }
+                        catch (Exception ex)
+                        {
+                            string exceptionString = "Failed to delete incomplete file on TransferSizeMismatchException: " + ex.ToString();
+                            logger.Debug(exceptionString);
+                            logger.Firebase(exceptionString);
+                        }
+                    }
+                    break;
+                }
+                case DownloadFailureKind.DirectoryNotSet:
+                    MarkTransferItemAsDirNotSet(transferItem);
+                    action = () => { toaster.ShowToastDebounced(StringKey.FailedDownloadDirectoryNotSet, "_17_"); };
+                    break;
+                case DownloadFailureKind.RejectedNotShared:
+                    // can be due to locked file or mojibake
+                    action = () => { toaster.ShowToastDebounced(StringKey.transfer_rejected_file_not_shared, "_2_"); };
+                    break;
+                case DownloadFailureKind.Rejected:
+                    action = () => { toaster.ShowToastDebounced(StringKey.transfer_rejected, "_2_"); };
+                    break;
+                case DownloadFailureKind.UserOffline:
+                    action = () => { toaster.ShowToastDebounced(string.Format(toaster.GetString(StringKey.UserXIsOffline), username), "_3_", username); };
+                    break;
+                case DownloadFailureKind.CannotConnect:
+                    action = () => { toaster.ShowToastDebounced(StringKey.failed_to_establish_direct_or_indirect, "_4_"); };
+                    break;
+                case DownloadFailureKind.NotLoggedIn:
+                    action = () => { toaster.ShowToastDebounced(StringKey.must_be_logged_to_download, "_18_"); };
+                    break;
+                case DownloadFailureKind.ReportedFailed:
+                    retriable = true;
+                    action = () => { toaster.ShowToastLong(StringKey.reported_as_failed); };
+                    break;
+                case DownloadFailureKind.ConnectionClosed:
+                    // also if someone cancels the upload on their end
+                    retriable = true;
+                    resetRetryCount = networkStatus.HasHandoffOccuredRecently();
+                    action = () => { toaster.ShowToastLong(StringKey.remote_conn_closed); };
+                    break;
+                case DownloadFailureKind.NetworkDown:
+                    // if we have internet again by the time we get here then its retriable. this is often due to handoff.
+                    if (networkStatus.DoWeHaveInternet())
+                    {
+                        retriable = true;
+                        resetRetryCount = networkStatus.HasHandoffOccuredRecently();
+                        action = () => { toaster.ShowToastLong(StringKey.remote_conn_closed); };
+                    }
+                    else
+                    {
+                        action = () => { toaster.ShowToastLong(StringKey.network_down); };
+                    }
+                    break;
+                case DownloadFailureKind.DiskFull:
+                    action = () => { toaster.ShowToastLong(StringKey.error_no_space); };
+                    break;
+                default:
+                {
+                    retriable = true;
+                    Exception? innermost = DownloadFailureClassifier.GetCause(task.Exception);
+                    while (innermost?.InnerException != null)
+                    {
+                        innermost = innermost.InnerException;
+                    }
+                    logger.Firebase("dlcontaction Unhandled task exception: " + SimpleHelpers.DescribeException(task.Exception) + " " + innermost?.StackTrace);
+                    break;
+                }
+            }
+
+            if (forceRetry || ((resetRetryCount || e.dlInfo.RetryCount == 0) && PreferencesState.AutoRetryDownload && retriable))
+            {
+                logger.Debug("Retrying the Download" + e.dlInfo.fullFilename);
+                try
+                {
+                    transferItem.ClearStateForRetry();
+                    CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                    TransferState.SetupCancellationToken(transferItem, cancellationTokenSource, out _); //else when you go to cancel you are cancelling an already cancelled useless token!!
+                    var retryDlInfo = new DownloadInfo(e.dlInfo.username, e.dlInfo.fullFilename, e.dlInfo.Size, null, cancellationTokenSource, e.dlInfo.QueueLength, resetRetryCount ? 0 : 1, task.Exception, e.dlInfo.Depth) { TransferItemReference = transferItem };
+                    StartDownloadsFireAndForget(new[] { retryDlInfo });
+                    return; //i.e. dont toast anything just retry.
+                }
+                catch (Exception ex)
+                {
+                    logger.Firebase("retry creation failed: " + ex.Message + ex.StackTrace);
+                }
+            }
+
+            if (e.dlInfo.RetryCount == 1 && e.dlInfo.PreviousFailureException != null)
+            {
+                logger.Firebase("auto retry failed: prev exception: " + e.dlInfo.PreviousFailureException.InnerException?.Message?.ToString() + "new exception: " + task.Exception?.InnerException?.Message?.ToString());
+            }
+
+            if (action == null)
+            {
+                action = () => { toaster.ShowToastLong(StringKey.error_unspecified); };
+            }
+            mainThreadRunner.RunOnUiThread(action);
         }
 
         public void AddToUserOffline(string username)

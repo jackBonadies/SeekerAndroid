@@ -224,16 +224,15 @@ namespace Seeker.Transfers
             {
                 return TransferStates.None;
             }
-            if (transfer.Exception is UserOfflineException)
+            switch (DownloadFailureClassifier.Classify(transfer.Exception))
             {
-                return TransferStates.UserOffline;
+                case DownloadFailureKind.UserOffline:
+                    return TransferStates.UserOffline;
+                case DownloadFailureKind.CannotConnect:
+                    return TransferStates.CannotConnect;
+                default:
+                    return TransferStates.None;
             }
-            if (transfer.Exception is ConnectionException
-                && (transfer.Exception.Message?.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase) ?? false))
-            {
-                return TransferStates.CannotConnect;
-            }
-            return TransferStates.None;
         }
 
         // Saves periodically. Republishes a UI-friendly ProgressUpdated event.

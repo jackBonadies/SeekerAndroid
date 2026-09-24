@@ -279,6 +279,7 @@
     <string name="must_be_logged_to_add_or_remove_user">Must be logged in to add or remove user</string>
     <string name="must_be_logged_to_set_ticker">Must be logged in to set ticker</string>
     <string name="must_be_logged_to_send_message">Must be logged in to send message</string>
+    <string name="must_be_logged_to_download">Must be logged in to download</string>
     <string name="must_be_logged_to_toggle_priv_invites">Must be logged in to toggle allow private invites</string>
     <string name="must_be_logged_in_to_check_privileges">Must be logged in to check privileges</string>
     <string name="must_be_logged_in_to_get_privileges">Must be logged in to get privileges</string>
@@ -424,7 +425,6 @@
     <!--In this case the placeholder {0} is for the username-->
     <string name="added_to_ignore">Added user \"{0}\" to ignore list</string>
     <string name="already_added_to_ignore">User \"{0}\" already added to ignore list</string>
-    <string name="failed_to_establish_connection_to_peer">Failed to establish connection to {0}</string>
     <string name="user_info_received">User info from {0} received</string>
     <string name="user_info_failed_conn">Failed to get info for user: {0}.  Could not establish connection.</string>
     <string name="user_info_failed_offline">Failed to get info for user: {0}.  User is offline.</string>
