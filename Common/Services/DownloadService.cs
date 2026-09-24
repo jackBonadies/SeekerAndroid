@@ -642,7 +642,7 @@ namespace Seeker.Services
                     Action action = null;
                     if (task.IsCanceled)
                     {
-                        logger.Debug((DateTimeOffset.Now.ToUnixTimeMilliseconds() - taskWasCancelledToastDebouncer).ToString());
+                        logger.Debug("Cancelled Delta: " + (DateTimeOffset.Now.ToUnixTimeMilliseconds() - taskWasCancelledToastDebouncer).ToString());
                         if ((DateTimeOffset.Now.ToUnixTimeMilliseconds() - taskWasCancelledToastDebouncer) > 1000)
                         {
                             taskWasCancelledToastDebouncer = DateTimeOffset.Now.ToUnixTimeMilliseconds();
