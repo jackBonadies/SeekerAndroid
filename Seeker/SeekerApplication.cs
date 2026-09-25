@@ -343,6 +343,7 @@ namespace Seeker
 
             SeekerState.SoulseekClient.PrivilegedUserListReceived += SoulseekClient_PrivilegedUserListReceived;
             SeekerState.SoulseekClient.PrivilegeNotificationReceived += SoulseekClient_PrivilegeNotificationReceived;
+            SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusPrivilegeChanged;
             SeekerState.SoulseekClient.ExcludedSearchPhrasesReceived += SoulseekClient_ExcludedSearchPhrasesReceived;
 
             MessageController.Initialize();
@@ -615,8 +616,13 @@ namespace Seeker
         {
             if (!e.Id.HasValue)
             {
-                PrivilegesManager.Instance.AddPrivilegedUser(e.Username);
+                PrivilegesManager.Instance.SetUserPrivileged(e.Username, true);
             }
+        }
+
+        private void SoulseekClient_UserStatusPrivilegeChanged(object sender, UserStatus e)
+        {
+            PrivilegesManager.Instance.SetUserPrivileged(e.Username, e.IsPrivileged);
         }
 
         private void SoulseekClient_ServerInfoReceived(object sender, ServerInfo e)

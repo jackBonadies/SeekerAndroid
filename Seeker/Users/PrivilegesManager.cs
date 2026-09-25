@@ -50,15 +50,20 @@ namespace Seeker.Managers
             }
         }
 
-        // server code 91
-        public void AddPrivilegedUser(string username)
+        // server code 91, and the privileged flag on every user status (code 7)
+        public void SetUserPrivileged(string username, bool privileged)
         {
             lock (PrivilegedUsersLock)
             {
-                PrivilegedUsers.Add(username);
+                bool changed = privileged ? PrivilegedUsers.Add(username) : PrivilegedUsers.Remove(username);
+                if (!changed)
+                {
+                    return;
+                }
+                Logger.Debug($"{username} privileged: {privileged}");
                 if (username == PreferencesState.Username)
                 {
-                    IsPrivileged = true;
+                    IsPrivileged = privileged;
                 }
             }
         }
