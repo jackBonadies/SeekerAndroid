@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Seeker
 {
@@ -16,10 +18,49 @@ namespace Seeker
             public string Username { get; }
             public string Filename { get; }
             public bool Started { get; internal set; }
+            public bool HasSlot { get; internal set; }
+
+            // non-null while waiting for a slot
+            internal TaskCompletionSource<bool> SlotWaiter;
+            // global order
+            internal long WaitSequence;
         }
 
         // In order of accepted upload requests
         private readonly List<Entry> entries = new List<Entry>();
+
+        private readonly Func<string, bool> isPrivileged;
+        private int slotLimit;
+        private int usedSlots;
+
+        // global wait counter
+        private long waitCounter;
+
+        public UploadQueue(Func<string, bool>? isPrivileged = null, int slotLimit = int.MaxValue)
+        {
+            this.isPrivileged = isPrivileged ?? (_ => false);
+            this.slotLimit = Math.Max(1, slotLimit);
+        }
+
+        // lowering it never revokes a slot, just let what is running finish
+        public int SlotLimit
+        {
+            get
+            {
+                lock (entries)
+                {
+                    return slotLimit;
+                }
+            }
+            set
+            {
+                lock (entries)
+                {
+                    slotLimit = Math.Max(1, value);
+                    GrantWaitingSlots();
+                }
+            }
+        }
 
         public int Count
         {
@@ -55,7 +96,117 @@ namespace Seeker
             lock (entries)
             {
                 entries.Remove(entry);
+                if (entry.SlotWaiter != null)
+                {
+                    var waiter = entry.SlotWaiter;
+                    entry.SlotWaiter = null;
+                    waiter.TrySetCanceled();
+                }
+                if (entry.HasSlot)
+                {
+                    entry.HasSlot = false;
+                    usedSlots--;
+                }
+                GrantWaitingSlots();
             }
+        }
+
+        // we pass this to the slsk.net
+        public Task AwaitSlotAsync(Entry entry, CancellationToken cancellationToken)
+        {
+            TaskCompletionSource<bool> waiter;
+            lock (entries)
+            {
+                if (entry.SlotWaiter != null || entry.HasSlot)
+                {
+                    throw new InvalidOperationException($"{entry.Filename} for {entry.Username} is already waiting for or holding a slot");
+                }
+                waiter = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                entry.SlotWaiter = waiter;
+                entry.WaitSequence = ++waitCounter;
+                GrantWaitingSlots();
+            }
+
+            if (!waiter.Task.IsCompleted && cancellationToken.CanBeCanceled)
+            {
+                var registration = cancellationToken.Register(() => CancelWait(entry, waiter, cancellationToken));
+                waiter.Task.ContinueWith(_ => registration.Dispose(), TaskScheduler.Default);
+            }
+            return waiter.Task;
+        }
+
+        // we pass this to the slsk.net
+        public void ReleaseSlot(Entry entry)
+        {
+            lock (entries)
+            {
+                if (!entry.HasSlot)
+                {
+                    return;
+                }
+                entry.HasSlot = false;
+                usedSlots--;
+                GrantWaitingSlots();
+            }
+        }
+
+        private void CancelWait(Entry entry, TaskCompletionSource<bool> waiter, CancellationToken cancellationToken)
+        {
+            lock (entries)
+            {
+                // already granted: the library will call ReleaseSlot
+                if (entry.SlotWaiter != waiter)
+                {
+                    return;
+                }
+                entry.SlotWaiter = null;
+                waiter.TrySetCanceled(cancellationToken);
+            }
+        }
+
+        private void GrantWaitingSlots()
+        {
+            while (usedSlots < slotLimit)
+            {
+                var next = SelectNextWaiter();
+                if (next == null)
+                {
+                    return;
+                }
+                var waiter = next.SlotWaiter;
+                next.SlotWaiter = null;
+                next.HasSlot = true;
+                usedSlots++;
+                waiter.TrySetResult(true);
+            }
+        }
+
+        // Privileged first, oldest request first (like slskd)
+        // Otherwise order by wait sequence.  We only assign a number after the transfer gets past
+        //   the per user semaphore (limit: 1) so this doesnt cause any issues (if say a userA requests 
+        //   a full folder. then later userA requests a full folder. we will still round robin
+        //   even though all userB's come in after).
+        private Entry? SelectNextWaiter()
+        {
+            Entry? best = null;
+            bool isBestPrivileged = false;
+            foreach (var entry in entries)
+            {
+                if (entry.SlotWaiter == null)
+                {
+                    continue;
+                }
+                bool privileged = isPrivileged(entry.Username);
+                bool better = best == null
+                    || (privileged && !isBestPrivileged)
+                    || (!privileged && !isBestPrivileged && entry.WaitSequence < best.WaitSequence);
+                if (better)
+                {
+                    best = entry;
+                    isBestPrivileged = privileged;
+                }
+            }
+            return best;
         }
 
         // round robin
