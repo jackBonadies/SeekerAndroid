@@ -176,6 +176,8 @@ namespace Seeker
                 var waiter = next.SlotWaiter;
                 next.SlotWaiter = null;
                 next.HasSlot = true;
+                // sticky, unlike HasSlot: the entry stays listed after release until the upload task ends
+                next.Started = true;
                 usedSlots++;
                 waiter.TrySetResult(true);
             }
@@ -197,9 +199,21 @@ namespace Seeker
                     continue;
                 }
                 bool privileged = isPrivileged(entry.Username);
-                bool better = best == null
-                    || (privileged && !isBestPrivileged)
-                    || (!privileged && !isBestPrivileged && entry.WaitSequence < best.WaitSequence);
+                bool better;
+                if (best == null)
+                {
+                    better = true;
+                }
+                else if (privileged != isBestPrivileged)
+                {
+                    // i.e. if we are privileged and they arent we are better
+                    //   vice versa we are worse. else we check wait sequence
+                    better = privileged;
+                }
+                else
+                {
+                    better = entry.WaitSequence < best.WaitSequence;
+                }
                 if (better)
                 {
                     best = entry;
@@ -210,12 +224,16 @@ namespace Seeker
         }
 
         // round robin
-        public int? EstimatePosition(string username, string filename)
+        // if we are privileged then we only consider other privileged
+        // if we are not privileged then all privileged has priority ahead of us
+        public int? EstimatePosition(string targetUsername, string filename)
         {
             lock (entries)
             {
+                bool targetPrivileged = isPrivileged(targetUsername);
                 Entry target = null;
                 int ahead = 0;
+                int privilegedQueued = 0;
                 var seen = new HashSet<(string, string)>();
                 var queuedPerOtherUser = new Dictionary<string, int>();
                 foreach (var entry in entries)
@@ -224,7 +242,7 @@ namespace Seeker
                     {
                         continue;
                     }
-                    if (entry.Username == username && entry.Filename == filename)
+                    if (entry.Username == targetUsername && entry.Filename == filename)
                     {
                         target = entry;
                         continue;
@@ -233,7 +251,19 @@ namespace Seeker
                     {
                         continue;
                     }
-                    if (entry.Username == username)
+                    bool privileged = entry.Username == targetUsername ? targetPrivileged : isPrivileged(entry.Username);
+                    if (!targetPrivileged && privileged)
+                    {
+                        // these are always ahead of us
+                        privilegedQueued++;
+                        continue;
+                    }
+                    if (targetPrivileged && !privileged)
+                    {
+                        // ignore non privileged users
+                        continue;
+                    }
+                    if (entry.Username == targetUsername)
                     {
                         // all of our downloads which were queued first will always be ahead of us
                         if (target == null)
@@ -253,7 +283,7 @@ namespace Seeker
                     return null;
                 }
 
-                int position = 1 + ahead;
+                int position = 1 + privilegedQueued + ahead;
                 foreach (int count in queuedPerOtherUser.Values)
                 {
                     // if we go round robin (i.e. for each of our transfers in front of us (n) we also service

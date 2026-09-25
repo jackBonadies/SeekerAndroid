@@ -82,6 +82,68 @@ namespace UnitTestCommon
             Assert.AreEqual(1 + 4 + 3 + 1, queue.EstimatePosition("userC", "c5"));
         }
 
+        private static UploadQueue MixedTierQueue()
+        {
+            var queue = new UploadQueue(u => u.StartsWith("priv"));
+            for (int i = 1; i <= 5; i++)
+            {
+                queue.Enqueue("userC", "c" + i);
+            }
+            queue.Enqueue("privX", "x1");
+            queue.Enqueue("privX", "x2");
+            queue.Enqueue("privX", "x3");
+            queue.Enqueue("privY", "y1");
+            queue.Enqueue("userA", "a1");
+            return queue;
+        }
+
+        [Test]
+        public void Privileged_RoundRobinAmongPrivilegedOnly()
+        {
+            var queue = MixedTierQueue();
+
+            Assert.AreEqual(1, queue.EstimatePosition("privX", "x1"));
+            Assert.AreEqual(1, queue.EstimatePosition("privY", "y1"));
+            Assert.AreEqual(1 + 2 + 1, queue.EstimatePosition("privX", "x3"));
+        }
+
+        [Test]
+        public void NonPrivileged_BehindEveryQueuedPrivileged()
+        {
+            var queue = MixedTierQueue();
+
+            Assert.AreEqual(1 + 4, queue.EstimatePosition("userA", "a1"));
+            // privileged files requested after c3 still go first
+            Assert.AreEqual(1 + 4 + 2 + 1, queue.EstimatePosition("userC", "c3"));
+        }
+
+        [Test]
+        public void StartedPrivileged_NoLongerAhead()
+        {
+            var queue = new UploadQueue(u => u.StartsWith("priv"));
+            var x1 = queue.Enqueue("privX", "x1");
+            queue.Enqueue("privX", "x2");
+            queue.Enqueue("userA", "a1");
+
+            queue.MarkStarted(x1);
+
+            Assert.AreEqual(1 + 1, queue.EstimatePosition("userA", "a1"));
+        }
+
+        [Test]
+        public void GrantedSlot_StaysStartedAfterRelease()
+        {
+            var queue = new UploadQueue(slotLimit: 1);
+            var a1 = queue.Enqueue("userA", "a1");
+            queue.Enqueue("userA", "a2");
+            Wait(queue, a1);
+
+            queue.ReleaseSlot(a1);
+
+            Assert.IsNull(queue.EstimatePosition("userA", "a1"));
+            Assert.AreEqual(1, queue.EstimatePosition("userA", "a2"));
+        }
+
         private static Task Wait(UploadQueue queue, UploadQueue.Entry entry, CancellationToken token = default)
         {
             return queue.AwaitSlotAsync(entry, token);
@@ -143,26 +205,32 @@ namespace UnitTestCommon
         }
 
         [Test]
-        public void Privileged_GoFirst_InRequestOrder()
+        public void Privileged_GoFirst_RoundRobinAmongThemselves()
         {
             var queue = new UploadQueue(u => u.StartsWith("priv"), slotLimit: 1);
             var a1 = queue.Enqueue("userA", "a1");
             var b1 = queue.Enqueue("userB", "b1");
-            var y1 = queue.Enqueue("privY", "y1");
             var x1 = queue.Enqueue("privX", "x1");
+            var x2 = queue.Enqueue("privX", "x2");
+            var y1 = queue.Enqueue("privY", "y1");
             Wait(queue, a1);
             var b1Wait = Wait(queue, b1);
             var x1Wait = Wait(queue, x1);
             var y1Wait = Wait(queue, y1);
 
             queue.ReleaseSlot(a1);
-            Assert.IsTrue(y1Wait.IsCompletedSuccessfully);
-
-            queue.ReleaseSlot(y1);
             Assert.IsTrue(x1Wait.IsCompletedSuccessfully);
             Assert.IsFalse(b1Wait.IsCompleted);
 
+            var x2Wait = Wait(queue, x2);
             queue.ReleaseSlot(x1);
+            Assert.IsTrue(y1Wait.IsCompletedSuccessfully);
+
+            queue.ReleaseSlot(y1);
+            Assert.IsTrue(x2Wait.IsCompletedSuccessfully);
+            Assert.IsFalse(b1Wait.IsCompleted);
+
+            queue.ReleaseSlot(x2);
             Assert.IsTrue(b1Wait.IsCompletedSuccessfully);
         }
 
