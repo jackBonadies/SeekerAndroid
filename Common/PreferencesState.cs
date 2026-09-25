@@ -169,6 +169,11 @@ namespace Common
         public static bool LimitSimultaneousDownloads = false;
         public static int MaxSimultaneousLimit = 1;
 
+        // Simultaneous uploads
+        public const int DefaultMaxSimultaneousUploads = 3;
+        public static bool LimitSimultaneousUploads = true;
+        public static int MaxSimultaneousUploadsLimit = DefaultMaxSimultaneousUploads;
+
         // Deep metadata
         public static bool PerformDeepMetadataSearch = true;
 

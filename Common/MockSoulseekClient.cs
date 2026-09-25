@@ -210,7 +210,7 @@ namespace Seeker
                             var current = _mockRoomUserPresence.GetOrAdd(user, UserPresence.Online);
                             var next = current == UserPresence.Away ? UserPresence.Online : UserPresence.Away;
                             _mockRoomUserPresence[user] = next;
-                            RaiseUserStatusChanged(new UserStatus(user, next, false));
+                            RaiseUserStatusChanged(new UserStatus(user, next, IsMockPrivileged(user)));
                         }
                     }
                 }
@@ -236,7 +236,9 @@ namespace Seeker
                         var directoryToDownload = nonEmptyDirectories[_random.Next(0, nonEmptyDirectories.Count)];
                         foreach (var file in directoryToDownload.Files)
                         {
-                            Options?.EnqueueDownload(username, IPEndPoint, directoryToDownload.Name + @"\" + file.Filename);
+                            var filename = directoryToDownload.Name + @"\" + file.Filename;
+                            await Options.EnqueueDownload(username, IPEndPoint, filename);
+                            await Options.PlaceInQueueResolver(username, IPEndPoint, filename);
                         }
                     }
                     await Task.Delay(BrowseUploadIntervalSec * 1000, ct);
@@ -297,7 +299,7 @@ namespace Seeker
                     }
                     var targetUser = combined[_random.Next(combined.Count)];
                     var newPresence = presenceValues[_random.Next(presenceValues.Length)];
-                    var status = new UserStatus(targetUser, newPresence, false);
+                    var status = new UserStatus(targetUser, newPresence, IsMockPrivileged(targetUser));
                     RaiseUserStatusChanged(status);
                 }
                 catch (OperationCanceledException)
@@ -616,16 +618,24 @@ namespace Seeker
             }
         }
 
+        public static readonly string[] PrivilegedTestUploaders = { "privuser_1", "privuser_2", "privuser_3" };
+
+        private volatile HashSet<string> _mockPrivilegedUsers = new HashSet<string>();
+
+        private bool IsMockPrivileged(string username)
+        {
+            return _mockPrivilegedUsers.Contains(username);
+        }
+
         private void RaisePrivilegedUserList()
         {
+            var privileged = new HashSet<string>(PrivilegedTestUploaders) { "test" };
             if (_random.Next(0, 3) == 0)
             {
-                RaisePrivilegedUserListReceived(new[] { Username, "test" });
+                privileged.Add(Username);
             }
-            else
-            {
-                RaisePrivilegedUserListReceived(new[] { "test" });
-            }
+            _mockPrivilegedUsers = privileged;
+            RaisePrivilegedUserListReceived(privileged.ToList());
         }
 
         // spotty, spotty_<seconds>, spotty_<seconds>_<failedAttempts>. a non-numeric part ends the match,
@@ -1962,6 +1972,12 @@ namespace Seeker
         public Task<Transfer> UploadAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
         {
             ThrowIfRejectRequested(username, "upload files");
+            // synchronous, like the real wrapper; UploadInternalAsync's TryAdd checks are the race backstop
+            if (UploadDictionary.Values.Any(u => u.Username == username && u.Filename == remoteFilename)
+                || UniqueKeyDictionary.ContainsKey($"{TransferDirection.Upload}:{username}:{remoteFilename}"))
+            {
+                throw new DuplicateTransferException($"An active or queued upload of {remoteFilename} to {username} is already in progress");
+            }
             return UploadFromStreamAsync(username, remoteFilename, size, inputStreamFactory, token, options, cancellationToken);
         }
 
@@ -2402,6 +2418,7 @@ namespace Seeker
 
             SemaphoreSlim userSemaphore = null;
             bool userSemaphoreAcquired = false;
+            bool uploadSlotAcquired = false;
             bool globalSemaphoreAcquired = false;
             Stream inputStream = null;
             long bytesUploaded = 0;
@@ -2420,6 +2437,7 @@ namespace Seeker
                 try
                 {
                     await options.SlotAwaiter(new Transfer(upload), cancellationToken).ConfigureAwait(false);
+                    uploadSlotAcquired = true;
                 }
                 catch (Exception ex) when (!(ex is OperationCanceledException))
                 {
@@ -2543,14 +2561,21 @@ namespace Seeker
                     }
                 }
 
-                if (globalSemaphoreAcquired)
-                {
-                    GlobalUploadSemaphore.Release();
-                }
-
+                // the real client's order: the user's next file reaches SlotAwaiter before this slot is released
                 if (userSemaphoreAcquired)
                 {
                     userSemaphore.Release();
+                }
+
+                if (uploadSlotAcquired)
+                {
+                    await Task.Delay(10, CancellationToken.None).ConfigureAwait(false);
+                    options.SlotReleased?.Invoke(new Transfer(upload));
+                }
+
+                if (globalSemaphoreAcquired)
+                {
+                    GlobalUploadSemaphore.Release();
                 }
 
                 UploadDictionary.TryRemove(token, out _);
@@ -2738,7 +2763,8 @@ namespace Seeker
                 searchResponseResolver: patch.SearchResponseResolver,
                 browseResponseResolver: patch.BrowseResponseResolver,
                 enqueueDownload: patch.EnqueueDownload,
-                directoryContentsResolver: patch.DirectoryContentsResolver);
+                directoryContentsResolver: patch.DirectoryContentsResolver,
+                placeInQueueResolver: patch.PlaceInQueueResolver);
             bool fast = _random.Next(0, 2) == 0;
             bool fault = _random.Next(0, 4) == 0;
             var delay = fast ? 100 : 2000;

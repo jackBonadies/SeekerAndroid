@@ -1205,6 +1205,10 @@ namespace Seeker
             return base.DispatchKeyEvent(e);
         }
 
+#if MOCK
+        private static int testEnqueueCount;
+#endif
+
         private void TestEnqueueSharedFolder()
         {
             var cache = SharedFileService.SharedFileCache;
@@ -1222,6 +1226,14 @@ namespace Seeker
             var rand = new Random();
             var chosenDir = filesByDir[rand.Next(filesByDir.Count)];
             string fakeUsername = "testuser_" + rand.Next(1000, 9999);
+#if MOCK
+            // every third one is privileged (the mock server lists them at login), to watch them go first
+            if (testEnqueueCount++ % 3 == 2)
+            {
+                var privileged = MockSoulseekClient.PrivilegedTestUploaders;
+                fakeUsername = privileged[rand.Next(privileged.Length)];
+            }
+#endif
             var fakeEndpoint = new IPEndPoint(IPAddress.Loopback, 0);
 
             Logger.Debug($"TestEnqueue: dir '{chosenDir.Key}' ({chosenDir.Count()} files) user '{fakeUsername}'");

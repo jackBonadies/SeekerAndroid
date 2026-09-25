@@ -321,6 +321,8 @@ namespace Seeker
                         acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations,
                         listenPort: PreferencesState.ListenerPort,
                         maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue,
+                        // UploadService's queue owns the upload slots (ahead of global semaphore)
+                        maximumConcurrentUploads: int.MaxValue,
                         maximumConcurrentSearches: 5,
                         serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
                         addressResolver: ResolveAddressAsync,
@@ -342,6 +344,8 @@ namespace Seeker
             BrowseService.BrowseResponseReceived += BrowseFragment.OnBrowseResponseReceived;
 
             SeekerState.SoulseekClient.PrivilegedUserListReceived += SoulseekClient_PrivilegedUserListReceived;
+            SeekerState.SoulseekClient.PrivilegeNotificationReceived += SoulseekClient_PrivilegeNotificationReceived;
+            SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusPrivilegeChanged;
             SeekerState.SoulseekClient.ExcludedSearchPhrasesReceived += SoulseekClient_ExcludedSearchPhrasesReceived;
 
             MessageController.Initialize();
@@ -608,6 +612,19 @@ namespace Seeker
         private void SoulseekClient_PrivilegedUserListReceived(object sender, IReadOnlyCollection<string> privilegedUsers)
         {
             PrivilegesManager.Instance.SetPrivilegedList(privilegedUsers);
+        }
+
+        private void SoulseekClient_PrivilegeNotificationReceived(object sender, PrivilegeNotificationReceivedEventArgs e)
+        {
+            if (!e.Id.HasValue)
+            {
+                PrivilegesManager.Instance.SetUserPrivileged(e.Username, true);
+            }
+        }
+
+        private void SoulseekClient_UserStatusPrivilegeChanged(object sender, UserStatus e)
+        {
+            PrivilegesManager.Instance.SetUserPrivileged(e.Username, e.IsPrivileged);
         }
 
         private void SoulseekClient_ServerInfoReceived(object sender, ServerInfo e)

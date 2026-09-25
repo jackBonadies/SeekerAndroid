@@ -168,6 +168,8 @@ namespace Seeker
             PreferencesState.LogDiagnostics = prefs.GetBoolean(KeyConsts.M_LOG_DIAGNOSTICS, false);
             PreferencesState.LimitSimultaneousDownloads = prefs.GetBoolean(KeyConsts.M_LimitSimultaneousDownloads, false);
             PreferencesState.MaxSimultaneousLimit = prefs.GetInt(KeyConsts.M_MaxSimultaneousLimit, 1);
+            PreferencesState.LimitSimultaneousUploads = prefs.GetBoolean(KeyConsts.M_LimitSimultaneousUploads, true);
+            PreferencesState.MaxSimultaneousUploadsLimit = prefs.GetInt(KeyConsts.M_MaxSimultaneousUploadsLimit, PreferencesState.DefaultMaxSimultaneousUploads);
         }
 
         public static void RestoreListeningState(ISharedPreferences prefs)
@@ -614,6 +616,17 @@ namespace Seeker
             }
         }
 
+        public static void SaveMaxConcurrentUploadsSettings(bool restrict, int max)
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutBoolean(KeyConsts.M_LimitSimultaneousUploads, restrict);
+                editor.PutInt(KeyConsts.M_MaxSimultaneousUploadsLimit, max);
+                editor.Apply();
+            }
+        }
+
         public static void SaveUPnPState(long ticks, int lifetime, int port, string localIP)
         {
             lock (SharedPrefLock)
@@ -878,6 +891,8 @@ namespace Seeker
                 editor.PutBoolean(KeyConsts.M_UploadPerTransfer,                  PreferencesState.SpeedLimitUploadIsPerTransfer);
                 editor.PutBoolean(KeyConsts.M_LimitSimultaneousDownloads,         PreferencesState.LimitSimultaneousDownloads);
                 editor.PutInt    (KeyConsts.M_MaxSimultaneousLimit,               PreferencesState.MaxSimultaneousLimit);
+                editor.PutBoolean(KeyConsts.M_LimitSimultaneousUploads,           PreferencesState.LimitSimultaneousUploads);
+                editor.PutInt    (KeyConsts.M_MaxSimultaneousUploadsLimit,        PreferencesState.MaxSimultaneousUploadsLimit);
                 // Account
                 editor.PutBoolean(KeyConsts.M_LOG_DIAGNOSTICS,                    PreferencesState.LogDiagnostics);
                 editor.Apply();

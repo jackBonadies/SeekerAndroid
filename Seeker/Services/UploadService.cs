@@ -3,6 +3,7 @@ using Android.Content;
 using AndroidX.Core.App;
 using AndroidX.DocumentFile.Provider;
 using Seeker.Helpers;
+using Seeker.Managers;
 using Seeker.Transfers;
 using Soulseek;
 using System;
@@ -60,6 +61,36 @@ namespace Seeker.Services
     public static class UploadService
     {
         public static event EventHandler<TransferItem> TransferAddedUINotify;
+
+        private static readonly UploadQueue uploadQueue = new UploadQueue(
+            PrivilegesManager.Instance.CheckIfPrivileged, CurrentSlotLimit());
+
+        private static int CurrentSlotLimit()
+        {
+            return PreferencesState.LimitSimultaneousUploads ? PreferencesState.MaxSimultaneousUploadsLimit : int.MaxValue;
+        }
+
+        public static void ApplySlotLimitSetting()
+        {
+            uploadQueue.SlotLimit = CurrentSlotLimit();
+        }
+
+        public static bool HasFreeUploadSlot()
+        {
+            return uploadQueue.HasFreeSlot;
+        }
+
+        public static int QueueLengthFor(string requester)
+        {
+            return uploadQueue.QueuedCount(requester);
+        }
+
+        public static int UploadSlotsToAdvertise()
+        {
+            int limit = uploadQueue.SlotLimit;
+            // if no limit then return currently used + 1
+            return limit == int.MaxValue ? uploadQueue.UsedSlots + 1 : limit;
+        }
 
         public static Notification CreateUploadNotification(Context context, String username, List<String> directories, int numFiles)
         {
@@ -136,7 +167,6 @@ namespace Seeker.Services
                 return Task.CompletedTask;
             }
 
-            //the filename is basically "the key"
             _ = endpoint;
             string errorMsg = null;
             Tuple<long, string, Tuple<int, int, int, int>, bool, bool> ourFileInfo = SharedFileService.SharedFileCache.GetFullInfoFromSearchableName(filename, out errorMsg);
@@ -151,8 +181,6 @@ namespace Seeker.Services
 
             if (ourFileInfo.Item4 || ourFileInfo.Item5)
             {
-                //locked or hidden (hidden shouldnt happen but just in case, it should still be userlist only)
-                //CHECK USER LIST
                 if (!SimpleHelpers.UserListService.ContainsUser(username))
                 {
                     throw new DownloadEnqueueException($"File not shared");
@@ -173,7 +201,6 @@ namespace Seeker.Services
                 throw new DownloadEnqueueException($"File not found.");
             }
 
-            // create a new cancellation token source so that we can cancel the upload from the UI.
             var cts = new CancellationTokenSource();
 
             TransferItem transferItem = new TransferItem();
@@ -190,37 +217,65 @@ namespace Seeker.Services
             {
                 TransferAddedUINotify?.Invoke(null, transferItem);
             }
-            // accept all download requests, and begin the upload immediately.
-            // normally there would be an internal queue, and uploads would be handled separately.
-            Task.Run(async () =>
-            {
-                CancellationTokenSource oldCts = null;
-                try
-                {
-                    TransferState.SetupCancellationToken(transferItem, cts, out oldCts);
+            var queueEntry = uploadQueue.Enqueue(username, filename);
+            TransferState.SetupCancellationToken(transferItem, cts, out CancellationTokenSource oldCts);
 
-                    var uploadUri = ourFile.Uri;
-                    await SeekerState.SoulseekClient.UploadAsync(username, filename, transferItem.Size,
-                        inputStreamFactory: (_) => Task.FromResult<System.IO.Stream>(SeekerState.MainActivityRef.ContentResolver.OpenInputStream(uploadUri)),
-                        options: new TransferOptions(governor: SpeedLimitHelper.OurUploadGovernor), cancellationToken: cts.Token);
-
-                }
-                catch (DuplicateTransferException dup) //not tested
-                {
-                    Logger.Debug("UPLOAD DUPL - " + dup.Message);
-                    TransferState.SetupCancellationToken(transferItem, oldCts, out _);
-                }
-                catch (DuplicateTokenException dup)
-                {
-                    Logger.Debug("UPLOAD DUPL - " + dup.Message);
-                    TransferState.SetupCancellationToken(transferItem, oldCts, out _);
-                }
-            }).ContinueWith(t =>
+            // inline so we each user's requests reach the per user semaphore in order (which seems to respect the order on Release)
+            Task uploadTask;
+            try
             {
-            }, TaskContinuationOptions.NotOnRanToCompletion); // fire and forget
+                var uploadUri = ourFile.Uri;
+                uploadTask = SeekerState.SoulseekClient.UploadAsync(username, filename, transferItem.Size,
+                    inputStreamFactory: (_) => Task.FromResult<System.IO.Stream>(SeekerState.MainActivityRef.ContentResolver.OpenInputStream(uploadUri)),
+                    options: new TransferOptions(
+                        governor: SpeedLimitHelper.OurUploadGovernor,
+                        slotAwaiter: async (_, token) =>
+                        {
+                            await uploadQueue.AwaitSlotAsync(queueEntry, token);
+                            Logger.Debug($"upload slot granted: {filename} to {username}");
+                        },
+                        slotReleased: _ =>
+                        {
+                            uploadQueue.ReleaseSlot(queueEntry);
+                            Logger.Debug($"upload slot released: {filename} to {username}");
+                        }),
+                    cancellationToken: cts.Token);
+            }
+            catch (Exception e)
+            {
+                uploadTask = Task.FromException(e);
+            }
+
+            // runs inline when the task already failed, so a duplicate's entry is gone before we answer
+            uploadTask.ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    var e = t.Exception.InnerException;
+                    if (e is DuplicateTransferException || e is DuplicateTokenException)
+                    {
+                        Logger.Debug("UPLOAD DUPL - " + e.Message);
+                        TransferState.SetupCancellationToken(transferItem, oldCts, out _);
+                    }
+                }
+                uploadQueue.Remove(queueEntry);
+            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
 
             // return a completed task so that the invoking code can respond to the remote client.
             return Task.CompletedTask;
+        }
+
+        // null result == no op
+        public static Task<int?> PlaceInQueueResolver(string username, IPEndPoint endpoint, string filename)
+        {
+            _ = endpoint;
+            if (UserListService.Instance.IsUserInIgnoreList(username))
+            {
+                return Task.FromResult<int?>(null);
+            }
+            int? place = uploadQueue.EstimatePosition(username, filename);
+            Logger.Debug($"place in queue of {filename} for {username}: {(place.HasValue ? place.Value.ToString() : "not queued")}");
+            return Task.FromResult(place);
         }
     }
 }

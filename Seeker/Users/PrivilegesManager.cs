@@ -13,7 +13,7 @@ namespace Seeker.Managers
     public class PrivilegesManager
     {
         public static object PrivilegedUsersLock = new object();
-        public IReadOnlyCollection<string> PrivilegedUsers = null;
+        private HashSet<string> PrivilegedUsers = new HashSet<string>();
         public bool IsPrivileged = false; //are we privileged
 
         public static Context Context = null;
@@ -35,9 +35,10 @@ namespace Seeker.Managers
         /// <param name="privUsers"></param>
         public void SetPrivilegedList(IReadOnlyCollection<string> privUsers)
         {
+            var privilegedUsers = new HashSet<string>(privUsers);
             lock (PrivilegedUsersLock)
             {
-                PrivilegedUsers = privUsers;
+                PrivilegedUsers = privilegedUsers;
                 if (PreferencesState.Username != null && PreferencesState.Username != string.Empty)
                 {
                     IsPrivileged = CheckIfPrivileged(PreferencesState.Username);
@@ -45,6 +46,24 @@ namespace Seeker.Managers
                     {
                         GetPrivilegesAPI(false);
                     }
+                }
+            }
+        }
+
+        // server code 91, and the privileged flag on every user status (code 7)
+        public void SetUserPrivileged(string username, bool privileged)
+        {
+            lock (PrivilegedUsersLock)
+            {
+                bool changed = privileged ? PrivilegedUsers.Add(username) : PrivilegedUsers.Remove(username);
+                if (!changed)
+                {
+                    return;
+                }
+                Logger.Debug($"{username} privileged: {privileged}");
+                if (username == PreferencesState.Username)
+                {
+                    IsPrivileged = privileged;
                 }
             }
         }
@@ -240,11 +259,7 @@ namespace Seeker.Managers
         {
             lock (PrivilegedUsersLock)
             {
-                if (PrivilegedUsers != null)
-                {
-                    return PrivilegedUsers.Contains(username);
-                }
-                return false;
+                return PrivilegedUsers.Contains(username);
             }
         }
     }

@@ -222,6 +222,8 @@ namespace Seeker
             PreferencesState.SpeedLimitUploadIsPerTransfer = true;
             PreferencesState.LimitSimultaneousDownloads = false;
             PreferencesState.MaxSimultaneousLimit = 1;
+            PreferencesState.LimitSimultaneousUploads = true;
+            PreferencesState.MaxSimultaneousUploadsLimit = PreferencesState.DefaultMaxSimultaneousUploads;
 
             PreferencesState.LogDiagnostics = false;
 
@@ -239,6 +241,8 @@ namespace Seeker
                 UPnP.UPnpManager.Instance.Feedback = true;
                 UPnP.UPnpManager.Instance.SearchAndSetMappingIfRequired();
             }
+
+            Seeker.Services.UploadService.ApplySlotLimitSetting();
 
             bool concurrentChanged = prevLimitSimDownloads != PreferencesState.LimitSimultaneousDownloads
                                   || prevMaxSimDownloads != PreferencesState.MaxSimultaneousLimit;
@@ -285,6 +289,14 @@ namespace Seeker
                 SeekerApplication.Toaster.ShowToastShort(
                     this.GetString(Resource.String.takes_effect_on_next_startup));
             }
+        }
+
+        public void UpdateSimultaneousUploadsLimit(bool enabled, int limit)
+        {
+            PreferencesState.LimitSimultaneousUploads = enabled;
+            PreferencesState.MaxSimultaneousUploadsLimit = limit;
+            PreferencesManager.SaveMaxConcurrentUploadsSettings(enabled, limit);
+            Seeker.Services.UploadService.ApplySlotLimitSetting();
         }
 
         internal void RefreshModernSharingRows(bool suppressAnimation = true)

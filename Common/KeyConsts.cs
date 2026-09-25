@@ -28,6 +28,8 @@ namespace Common
 
         public const string M_LimitSimultaneousDownloads = "Momento_LimitSimultaneousDownloads";
         public const string M_MaxSimultaneousLimit = "Momento_MaxSimultaneousLimit";
+        public const string M_LimitSimultaneousUploads = "Momento_LimitSimultaneousUploads";
+        public const string M_MaxSimultaneousUploadsLimit = "Momento_MaxSimultaneousUploadsLimit";
 
 
         public const string M_RoomUserListSortOrder = "Momento_RoomUserListSortOrder";

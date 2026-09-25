@@ -32,6 +32,9 @@ namespace Seeker.Services
         private static readonly Func<string, IPEndPoint, string, Task> NoOpEnqueueDownload =
             (u, i, f) => Task.CompletedTask;
 
+        private static readonly Func<string, IPEndPoint, string, Task<int?>> NoOpPlaceInQueueResolver =
+            (u, i, f) => Task.FromResult<int?>(null);
+
         public static void TurnOnSharing()
         {
             if (SeekerState.SoulseekClient == null)
@@ -44,7 +47,8 @@ namespace Seeker.Services
                 searchResponseResolver: SearchResponseResolver,
                 browseResponseResolver: BrowseResponseResolver,
                 directoryContentsResolver: DirectoryContentsResponseResolver,
-                enqueueDownload: UploadService.EnqueueDownloadAction));
+                enqueueDownload: UploadService.EnqueueDownloadAction,
+                placeInQueueResolver: UploadService.PlaceInQueueResolver));
             _isActive = true;
         }
 
@@ -60,7 +64,8 @@ namespace Seeker.Services
                 searchResponseResolver: NoOpSearchResolver,
                 browseResponseResolver: NoOpBrowseResolver,
                 directoryContentsResolver: NoOpDirectoryResolver,
-                enqueueDownload: NoOpEnqueueDownload));
+                enqueueDownload: NoOpEnqueueDownload,
+                placeInQueueResolver: NoOpPlaceInQueueResolver));
             _isActive = false;
         }
 
@@ -90,18 +95,12 @@ namespace Seeker.Services
         {
             var defaultResponse = Task.FromResult<SearchResponse>(null);
 
-            // some bots continually query for very common strings.  blacklist known names here.
-            var blacklist = new[] { "Lola45", "Lolo51", "rajah" };
-            if (blacklist.Contains(username))
-            {
-                return defaultResponse;
-            }
             if (UserListService.Instance.IsUserInIgnoreList(username))
             {
                 return defaultResponse;
             }
-            // some bots and perhaps users search for very short terms.  only respond to queries >= 3 characters.  sorry, U2 fans.
-            if (query.Query.Length < 5)
+            // only respond to meaningful requests, not short strings which might flood our results
+            if (query.Query.Length < 4)
             {
                 return defaultResponse;
             }
@@ -115,7 +114,6 @@ namespace Seeker.Services
 
             if (results.Any() || lockedResults.Any())
             {
-                //Console.WriteLine($"[SENDING SEARCH RESULTS]: {results.Count()} records to {username} for query {query.SearchText}");
                 int ourUploadSpeed = 1024 * 256;
                 if (PreferencesState.UploadSpeed > 0)
                 {
@@ -124,15 +122,12 @@ namespace Seeker.Services
                 return Task.FromResult(new SearchResponse(
                     PreferencesState.Username,
                     token,
-                    hasFreeUploadSlot: true,
+                    hasFreeUploadSlot: UploadService.HasFreeUploadSlot(),
                     uploadSpeed: ourUploadSpeed,
-                    queueLength: 0,
+                    queueLength: UploadService.QueueLengthFor(username),
                     fileList: results,
                     lockedFileList: lockedResults));
             }
-
-            // if no results, either return null or an instance of SearchResponse with a fileList of length 0
-            // in either case, no response will be sent to the requestor.
             return Task.FromResult<SearchResponse>(null);
         }
 
