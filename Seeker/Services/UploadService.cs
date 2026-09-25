@@ -75,6 +75,23 @@ namespace Seeker.Services
             uploadQueue.SlotLimit = CurrentSlotLimit();
         }
 
+        public static bool HasFreeUploadSlot()
+        {
+            return uploadQueue.HasFreeSlot;
+        }
+
+        public static int QueueLengthFor(string requester)
+        {
+            return uploadQueue.QueuedCount(requester);
+        }
+
+        public static int UploadSlotsToAdvertise()
+        {
+            int limit = uploadQueue.SlotLimit;
+            // if no limit then return currently used + 1
+            return limit == int.MaxValue ? uploadQueue.UsedSlots + 1 : limit;
+        }
+
         public static Notification CreateUploadNotification(Context context, String username, List<String> directories, int numFiles)
         {
             string fileS = numFiles == 1 ? SeekerState.ActiveActivityRef.GetString(Resource.String.file) : SeekerState.ActiveActivityRef.GetString(Resource.String.files);

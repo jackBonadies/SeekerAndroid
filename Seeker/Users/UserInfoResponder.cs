@@ -19,6 +19,7 @@
 using AndroidX.DocumentFile.Provider;
 using Common;
 using Seeker.Helpers;
+using Seeker.Services;
 using Soulseek;
 using System.Net;
 using System.Threading.Tasks;
@@ -37,9 +38,9 @@ namespace Seeker
             }
             string bio = PreferencesState.UserInfoBio ?? string.Empty;
             byte[] picture = GetUserInfoPicture();
-            int uploadSlots = 1;
-            int queueLength = 0;
-            bool hasFreeSlots = true;
+            int uploadSlots = UploadService.UploadSlotsToAdvertise();
+            int queueLength = UploadService.QueueLengthFor(uname);
+            bool hasFreeSlots = UploadService.HasFreeUploadSlot();
             if (!PreferencesState.SharingOn) //in my experience even if someone is sharing nothing they say 1 upload slot and yes free slots.. but idk maybe 0 and no makes more sense??
             {
                 uploadSlots = 0;

@@ -62,6 +62,51 @@ namespace Seeker
             }
         }
 
+        public bool HasFreeSlot
+        {
+            get
+            {
+                lock (entries)
+                {
+                    return usedSlots < slotLimit;
+                }
+            }
+        }
+
+        public int UsedSlots
+        {
+            get
+            {
+                lock (entries)
+                {
+                    return usedSlots;
+                }
+            }
+        }
+
+        // files not yet started. if privileged only count privileged ones.
+        public int QueuedCount(string requester)
+        {
+            lock (entries)
+            {
+                bool requesterPrivileged = isPrivileged(requester);
+                int count = 0;
+                foreach (var entry in entries)
+                {
+                    if (entry.Started)
+                    {
+                        continue;
+                    }
+                    if (requesterPrivileged && !isPrivileged(entry.Username))
+                    {
+                        continue;
+                    }
+                    count++;
+                }
+                return count;
+            }
+        }
+
         public int Count
         {
             get

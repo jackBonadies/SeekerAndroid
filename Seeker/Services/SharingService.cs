@@ -122,9 +122,9 @@ namespace Seeker.Services
                 return Task.FromResult(new SearchResponse(
                     PreferencesState.Username,
                     token,
-                    hasFreeUploadSlot: true,
+                    hasFreeUploadSlot: UploadService.HasFreeUploadSlot(),
                     uploadSpeed: ourUploadSpeed,
-                    queueLength: 0,
+                    queueLength: UploadService.QueueLengthFor(username),
                     fileList: results,
                     lockedFileList: lockedResults));
             }

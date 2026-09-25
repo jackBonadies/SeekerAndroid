@@ -343,5 +343,53 @@ namespace UnitTestCommon
 
             Assert.Throws<System.InvalidOperationException>(() => Wait(queue, a1));
         }
+
+        [Test]
+        public void HasFreeSlot_FollowsUsedSlots()
+        {
+            var queue = new UploadQueue(slotLimit: 2);
+            Assert.IsTrue(queue.HasFreeSlot);
+
+            var a1 = queue.Enqueue("userA", "a1");
+            Wait(queue, a1);
+            Assert.IsTrue(queue.HasFreeSlot);
+
+            Wait(queue, queue.Enqueue("userB", "b1"));
+            Wait(queue, queue.Enqueue("userC", "c1"));
+            Assert.IsFalse(queue.HasFreeSlot);
+            Assert.AreEqual(2, queue.UsedSlots);
+
+            // c1 takes the released slot
+            queue.ReleaseSlot(a1);
+            Assert.IsFalse(queue.HasFreeSlot);
+
+            queue.SlotLimit = int.MaxValue;
+            Assert.IsTrue(queue.HasFreeSlot);
+        }
+
+        [Test]
+        public void QueuedCount_PrivilegedRequesterCountsOnlyPrivileged()
+        {
+            var queue = MixedTierQueue();
+
+            Assert.AreEqual(10, queue.QueuedCount("userB"));
+            Assert.AreEqual(4, queue.QueuedCount("privZ"));
+        }
+
+        [Test]
+        public void QueuedCount_SkipsStarted()
+        {
+            var queue = new UploadQueue(u => u.StartsWith("priv"));
+            var x1 = queue.Enqueue("privX", "x1");
+            queue.Enqueue("privX", "x2");
+            var a1 = queue.Enqueue("userA", "a1");
+            queue.Enqueue("userA", "a2");
+
+            Wait(queue, x1);
+            Wait(queue, a1);
+
+            Assert.AreEqual(2, queue.QueuedCount("userB"));
+            Assert.AreEqual(1, queue.QueuedCount("privZ"));
+        }
     }
 }
