@@ -642,6 +642,23 @@ namespace Seeker.Settings.Rows
                     }),
             });
 
+            rows.Add(new ValueRow
+            {
+                Id = "network.concurrent_uploads",
+                TitleRes = Resource.String.LimitConcurrentUploads,
+                KeywordsRes = Resource.String.keywords_max_concurrent,
+                IconRes = Resource.Drawable.upload_material,
+                ValueProvider = ctx => SettingValueFormat.ConcurrentLimitSummary(ctx,
+                    PreferencesState.LimitSimultaneousUploads,
+                    PreferencesState.MaxSimultaneousUploadsLimit),
+                OnClick = (h, r) => EnableNumericBottomSheet.Show(h, r, 1, 99,
+                    () => (PreferencesState.LimitSimultaneousUploads,
+                           PreferencesState.MaxSimultaneousUploadsLimit),
+                    result => {
+                        h.UpdateSimultaneousUploadsLimit(result.Enabled, result.Value);
+                    }),
+            });
+
             // ============================== ACCOUNT ==============================
             rows.Add(new HeaderRow { Id = "h.account", TitleRes = Resource.String.section_account });
 

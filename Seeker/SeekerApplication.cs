@@ -321,6 +321,7 @@ namespace Seeker
                         acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations,
                         listenPort: PreferencesState.ListenerPort,
                         maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue,
+                        maximumConcurrentUploads: PreferencesState.LimitSimultaneousUploads ? PreferencesState.MaxSimultaneousUploadsLimit : int.MaxValue,
                         maximumConcurrentSearches: 5,
                         serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
                         addressResolver: ResolveAddressAsync,

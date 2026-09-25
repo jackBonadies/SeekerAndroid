@@ -171,6 +171,8 @@ namespace Seeker
             bool prevListenerEnabled = PreferencesState.ListenerEnabled;
             bool prevLimitSimDownloads = PreferencesState.LimitSimultaneousDownloads;
             int prevMaxSimDownloads = PreferencesState.MaxSimultaneousLimit;
+            bool prevLimitSimUploads = PreferencesState.LimitSimultaneousUploads;
+            int prevMaxSimUploads = PreferencesState.MaxSimultaneousUploadsLimit;
 
             PreferencesState.CreateCompleteAndIncompleteFolders = true;
             PreferencesState.CreateUsernameSubfolders = false;
@@ -222,6 +224,8 @@ namespace Seeker
             PreferencesState.SpeedLimitUploadIsPerTransfer = true;
             PreferencesState.LimitSimultaneousDownloads = false;
             PreferencesState.MaxSimultaneousLimit = 1;
+            PreferencesState.LimitSimultaneousUploads = true;
+            PreferencesState.MaxSimultaneousUploadsLimit = PreferencesState.DefaultMaxSimultaneousUploads;
 
             PreferencesState.LogDiagnostics = false;
 
@@ -241,7 +245,9 @@ namespace Seeker
             }
 
             bool concurrentChanged = prevLimitSimDownloads != PreferencesState.LimitSimultaneousDownloads
-                                  || prevMaxSimDownloads != PreferencesState.MaxSimultaneousLimit;
+                                  || prevMaxSimDownloads != PreferencesState.MaxSimultaneousLimit
+                                  || prevLimitSimUploads != PreferencesState.LimitSimultaneousUploads
+                                  || prevMaxSimUploads != PreferencesState.MaxSimultaneousUploadsLimit;
             if (concurrentChanged)
             {
                 SeekerApplication.Toaster.ShowToastShort(
@@ -280,6 +286,20 @@ namespace Seeker
             PreferencesState.LimitSimultaneousDownloads = enabled;
             PreferencesState.MaxSimultaneousLimit = limit;
             PreferencesManager.SaveMaxConcurrentDownloadsSettings(enabled, limit);
+            if (changed)
+            {
+                SeekerApplication.Toaster.ShowToastShort(
+                    this.GetString(Resource.String.takes_effect_on_next_startup));
+            }
+        }
+
+        public void UpdateSimultaneousUploadsLimit(bool enabled, int limit)
+        {
+            bool changed = PreferencesState.LimitSimultaneousUploads != enabled
+                        || (enabled && PreferencesState.MaxSimultaneousUploadsLimit != limit);
+            PreferencesState.LimitSimultaneousUploads = enabled;
+            PreferencesState.MaxSimultaneousUploadsLimit = limit;
+            PreferencesManager.SaveMaxConcurrentUploadsSettings(enabled, limit);
             if (changed)
             {
                 SeekerApplication.Toaster.ShowToastShort(
