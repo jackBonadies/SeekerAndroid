@@ -2404,6 +2404,7 @@ namespace Seeker
 
             SemaphoreSlim userSemaphore = null;
             bool userSemaphoreAcquired = false;
+            bool uploadSlotAcquired = false;
             bool globalSemaphoreAcquired = false;
             Stream inputStream = null;
             long bytesUploaded = 0;
@@ -2422,6 +2423,7 @@ namespace Seeker
                 try
                 {
                     await options.SlotAwaiter(new Transfer(upload), cancellationToken).ConfigureAwait(false);
+                    uploadSlotAcquired = true;
                 }
                 catch (Exception ex) when (!(ex is OperationCanceledException))
                 {
@@ -2545,14 +2547,21 @@ namespace Seeker
                     }
                 }
 
-                if (globalSemaphoreAcquired)
-                {
-                    GlobalUploadSemaphore.Release();
-                }
-
+                // the real client's order: the user's next file reaches SlotAwaiter before this slot is released
                 if (userSemaphoreAcquired)
                 {
                     userSemaphore.Release();
+                }
+
+                if (uploadSlotAcquired)
+                {
+                    await Task.Delay(10, CancellationToken.None).ConfigureAwait(false);
+                    options.SlotReleased?.Invoke(new Transfer(upload));
+                }
+
+                if (globalSemaphoreAcquired)
+                {
+                    GlobalUploadSemaphore.Release();
                 }
 
                 UploadDictionary.TryRemove(token, out _);
