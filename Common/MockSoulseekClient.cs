@@ -210,7 +210,7 @@ namespace Seeker
                             var current = _mockRoomUserPresence.GetOrAdd(user, UserPresence.Online);
                             var next = current == UserPresence.Away ? UserPresence.Online : UserPresence.Away;
                             _mockRoomUserPresence[user] = next;
-                            RaiseUserStatusChanged(new UserStatus(user, next, false));
+                            RaiseUserStatusChanged(new UserStatus(user, next, IsMockPrivileged(user)));
                         }
                     }
                 }
@@ -299,7 +299,7 @@ namespace Seeker
                     }
                     var targetUser = combined[_random.Next(combined.Count)];
                     var newPresence = presenceValues[_random.Next(presenceValues.Length)];
-                    var status = new UserStatus(targetUser, newPresence, false);
+                    var status = new UserStatus(targetUser, newPresence, IsMockPrivileged(targetUser));
                     RaiseUserStatusChanged(status);
                 }
                 catch (OperationCanceledException)
@@ -618,16 +618,24 @@ namespace Seeker
             }
         }
 
+        public static readonly string[] PrivilegedTestUploaders = { "privuser_1", "privuser_2", "privuser_3" };
+
+        private volatile HashSet<string> _mockPrivilegedUsers = new HashSet<string>();
+
+        private bool IsMockPrivileged(string username)
+        {
+            return _mockPrivilegedUsers.Contains(username);
+        }
+
         private void RaisePrivilegedUserList()
         {
+            var privileged = new HashSet<string>(PrivilegedTestUploaders) { "test" };
             if (_random.Next(0, 3) == 0)
             {
-                RaisePrivilegedUserListReceived(new[] { Username, "test" });
+                privileged.Add(Username);
             }
-            else
-            {
-                RaisePrivilegedUserListReceived(new[] { "test" });
-            }
+            _mockPrivilegedUsers = privileged;
+            RaisePrivilegedUserListReceived(privileged.ToList());
         }
 
         // spotty, spotty_<seconds>, spotty_<seconds>_<failedAttempts>. a non-numeric part ends the match,
