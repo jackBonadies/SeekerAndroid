@@ -47,13 +47,14 @@ namespace UnitTestCommon
         public void Removed_ReturnsNullAndLaterFilesMoveUp()
         {
             var queue = new UploadQueue();
-            for (int i = 1; i <= 10; i++)
+            var entries = new UploadQueue.Entry[10];
+            for (int i = 0; i < 10; i++)
             {
-                queue.Enqueue("userA", "a" + i);
+                entries[i] = queue.Enqueue("userA", "a" + (i + 1));
             }
-            for (int i = 1; i <= 9; i++)
+            for (int i = 0; i < 9; i++)
             {
-                queue.Enqueue("userA", "a" + i);
+                queue.Remove(entries[i]);
             }
             Assert.IsNull(queue.EstimatePosition("userA", "a1"));
             Assert.AreEqual(1, queue.EstimatePosition("userA", "a10"));
