@@ -226,14 +226,9 @@ namespace Seeker
                 Entry target = null;
                 int ahead = 0;
                 int privilegedQueued = 0;
-                var seen = new HashSet<(string, string)>();
                 var queuedPerOtherUser = new Dictionary<string, int>();
                 foreach (var entry in entries)
                 {
-                    if (!seen.Add((entry.Username, entry.Filename)))
-                    {
-                        continue;
-                    }
                     if (entry.Username == targetUsername && entry.Filename == filename)
                     {
                         target = entry;

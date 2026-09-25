@@ -201,49 +201,48 @@ namespace Seeker.Services
                 TransferAddedUINotify?.Invoke(null, transferItem);
             }
             var queueEntry = uploadQueue.Enqueue(username, filename);
-            // the library waits on its per user semaphore, then on uploadQueue for a slot
-            Task.Run(async () =>
-            {
-                CancellationTokenSource oldCts = null;
-                try
-                {
-                    TransferState.SetupCancellationToken(transferItem, cts, out oldCts);
+            TransferState.SetupCancellationToken(transferItem, cts, out CancellationTokenSource oldCts);
 
-                    var uploadUri = ourFile.Uri;
-                    await SeekerState.SoulseekClient.UploadAsync(username, filename, transferItem.Size,
-                        inputStreamFactory: (_) => Task.FromResult<System.IO.Stream>(SeekerState.MainActivityRef.ContentResolver.OpenInputStream(uploadUri)),
-                        options: new TransferOptions(
-                            governor: SpeedLimitHelper.OurUploadGovernor,
-                            slotAwaiter: async (_, token) =>
-                            {
-                                await uploadQueue.AwaitSlotAsync(queueEntry, token);
-                                Logger.Debug($"upload slot granted: {filename} to {username}");
-                            },
-                            slotReleased: _ =>
-                            {
-                                uploadQueue.ReleaseSlot(queueEntry);
-                                Logger.Debug($"upload slot released: {filename} to {username}");
-                            }),
-                        cancellationToken: cts.Token);
-
-                }
-                catch (DuplicateTransferException dup) //not tested
-                {
-                    Logger.Debug("UPLOAD DUPL - " + dup.Message);
-                    TransferState.SetupCancellationToken(transferItem, oldCts, out _);
-                }
-                catch (DuplicateTokenException dup)
-                {
-                    Logger.Debug("UPLOAD DUPL - " + dup.Message);
-                    TransferState.SetupCancellationToken(transferItem, oldCts, out _);
-                }
-                finally
-                {
-                    uploadQueue.Remove(queueEntry);
-                }
-            }).ContinueWith(t =>
+            // inline so we each user's requests reach the per user semaphore in order (which seems to respect the order on Release)
+            Task uploadTask;
+            try
             {
-            }, TaskContinuationOptions.NotOnRanToCompletion);
+                var uploadUri = ourFile.Uri;
+                uploadTask = SeekerState.SoulseekClient.UploadAsync(username, filename, transferItem.Size,
+                    inputStreamFactory: (_) => Task.FromResult<System.IO.Stream>(SeekerState.MainActivityRef.ContentResolver.OpenInputStream(uploadUri)),
+                    options: new TransferOptions(
+                        governor: SpeedLimitHelper.OurUploadGovernor,
+                        slotAwaiter: async (_, token) =>
+                        {
+                            await uploadQueue.AwaitSlotAsync(queueEntry, token);
+                            Logger.Debug($"upload slot granted: {filename} to {username}");
+                        },
+                        slotReleased: _ =>
+                        {
+                            uploadQueue.ReleaseSlot(queueEntry);
+                            Logger.Debug($"upload slot released: {filename} to {username}");
+                        }),
+                    cancellationToken: cts.Token);
+            }
+            catch (Exception e)
+            {
+                uploadTask = Task.FromException(e);
+            }
+
+            // runs inline when the task already failed, so a duplicate's entry is gone before we answer
+            uploadTask.ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    var e = t.Exception.InnerException;
+                    if (e is DuplicateTransferException || e is DuplicateTokenException)
+                    {
+                        Logger.Debug("UPLOAD DUPL - " + e.Message);
+                        TransferState.SetupCancellationToken(transferItem, oldCts, out _);
+                    }
+                }
+                uploadQueue.Remove(queueEntry);
+            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
 
             // return a completed task so that the invoking code can respond to the remote client.
             return Task.CompletedTask;
