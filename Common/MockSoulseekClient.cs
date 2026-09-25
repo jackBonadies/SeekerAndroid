@@ -1964,6 +1964,12 @@ namespace Seeker
         public Task<Transfer> UploadAsync(string username, string remoteFilename, long size, Func<long, Task<System.IO.Stream>> inputStreamFactory, int? token = null, TransferOptions options = null, CancellationToken? cancellationToken = null)
         {
             ThrowIfRejectRequested(username, "upload files");
+            // synchronous, like the real wrapper; UploadInternalAsync's TryAdd checks are the race backstop
+            if (UploadDictionary.Values.Any(u => u.Username == username && u.Filename == remoteFilename)
+                || UniqueKeyDictionary.ContainsKey($"{TransferDirection.Upload}:{username}:{remoteFilename}"))
+            {
+                throw new DuplicateTransferException($"An active or queued upload of {remoteFilename} to {username} is already in progress");
+            }
             return UploadFromStreamAsync(username, remoteFilename, size, inputStreamFactory, token, options, cancellationToken);
         }
 
