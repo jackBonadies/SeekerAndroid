@@ -3,6 +3,7 @@ using Android.Content;
 using AndroidX.Core.App;
 using AndroidX.DocumentFile.Provider;
 using Seeker.Helpers;
+using Seeker.Managers;
 using Seeker.Transfers;
 using Soulseek;
 using System;
@@ -61,7 +62,18 @@ namespace Seeker.Services
     {
         public static event EventHandler<TransferItem> TransferAddedUINotify;
 
-        private static readonly UploadQueue uploadQueue = new UploadQueue();
+        private static readonly UploadQueue uploadQueue = new UploadQueue(
+            PrivilegesManager.Instance.CheckIfPrivileged, CurrentSlotLimit());
+
+        private static int CurrentSlotLimit()
+        {
+            return PreferencesState.LimitSimultaneousUploads ? PreferencesState.MaxSimultaneousUploadsLimit : int.MaxValue;
+        }
+
+        public static void ApplySlotLimitSetting()
+        {
+            uploadQueue.SlotLimit = CurrentSlotLimit();
+        }
 
         public static Notification CreateUploadNotification(Context context, String username, List<String> directories, int numFiles)
         {
@@ -189,7 +201,7 @@ namespace Seeker.Services
                 TransferAddedUINotify?.Invoke(null, transferItem);
             }
             var queueEntry = uploadQueue.Enqueue(username, filename);
-            // accept all download requests, and begin the upload immediately.
+            // the library waits on its per user semaphore, then on uploadQueue for a slot
             Task.Run(async () =>
             {
                 CancellationTokenSource oldCts = null;
@@ -202,7 +214,16 @@ namespace Seeker.Services
                         inputStreamFactory: (_) => Task.FromResult<System.IO.Stream>(SeekerState.MainActivityRef.ContentResolver.OpenInputStream(uploadUri)),
                         options: new TransferOptions(
                             governor: SpeedLimitHelper.OurUploadGovernor,
-                            stateChanged: args => MarkStartedIfDequeued(queueEntry, args.Transfer.State)),
+                            slotAwaiter: async (_, token) =>
+                            {
+                                await uploadQueue.AwaitSlotAsync(queueEntry, token);
+                                Logger.Debug($"upload slot granted: {filename} to {username}");
+                            },
+                            slotReleased: _ =>
+                            {
+                                uploadQueue.ReleaseSlot(queueEntry);
+                                Logger.Debug($"upload slot released: {filename} to {username}");
+                            }),
                         cancellationToken: cts.Token);
 
                 }
@@ -226,14 +247,6 @@ namespace Seeker.Services
 
             // return a completed task so that the invoking code can respond to the remote client.
             return Task.CompletedTask;
-        }
-
-        private static void MarkStartedIfDequeued(UploadQueue.Entry entry, TransferStates state)
-        {
-            if (!state.HasFlag(TransferStates.Queued))
-            {
-                uploadQueue.MarkStarted(entry);
-            }
         }
 
         // null result == no op

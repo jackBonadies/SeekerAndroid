@@ -171,8 +171,6 @@ namespace Seeker
             bool prevListenerEnabled = PreferencesState.ListenerEnabled;
             bool prevLimitSimDownloads = PreferencesState.LimitSimultaneousDownloads;
             int prevMaxSimDownloads = PreferencesState.MaxSimultaneousLimit;
-            bool prevLimitSimUploads = PreferencesState.LimitSimultaneousUploads;
-            int prevMaxSimUploads = PreferencesState.MaxSimultaneousUploadsLimit;
 
             PreferencesState.CreateCompleteAndIncompleteFolders = true;
             PreferencesState.CreateUsernameSubfolders = false;
@@ -244,10 +242,10 @@ namespace Seeker
                 UPnP.UPnpManager.Instance.SearchAndSetMappingIfRequired();
             }
 
+            Seeker.Services.UploadService.ApplySlotLimitSetting();
+
             bool concurrentChanged = prevLimitSimDownloads != PreferencesState.LimitSimultaneousDownloads
-                                  || prevMaxSimDownloads != PreferencesState.MaxSimultaneousLimit
-                                  || prevLimitSimUploads != PreferencesState.LimitSimultaneousUploads
-                                  || prevMaxSimUploads != PreferencesState.MaxSimultaneousUploadsLimit;
+                                  || prevMaxSimDownloads != PreferencesState.MaxSimultaneousLimit;
             if (concurrentChanged)
             {
                 SeekerApplication.Toaster.ShowToastShort(
@@ -295,16 +293,10 @@ namespace Seeker
 
         public void UpdateSimultaneousUploadsLimit(bool enabled, int limit)
         {
-            bool changed = PreferencesState.LimitSimultaneousUploads != enabled
-                        || (enabled && PreferencesState.MaxSimultaneousUploadsLimit != limit);
             PreferencesState.LimitSimultaneousUploads = enabled;
             PreferencesState.MaxSimultaneousUploadsLimit = limit;
             PreferencesManager.SaveMaxConcurrentUploadsSettings(enabled, limit);
-            if (changed)
-            {
-                SeekerApplication.Toaster.ShowToastShort(
-                    this.GetString(Resource.String.takes_effect_on_next_startup));
-            }
+            Seeker.Services.UploadService.ApplySlotLimitSetting();
         }
 
         internal void RefreshModernSharingRows(bool suppressAnimation = true)

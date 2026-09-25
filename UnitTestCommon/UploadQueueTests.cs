@@ -39,7 +39,7 @@ namespace UnitTestCommon
             var a1 = queue.Enqueue("userA", "a1");
             queue.Enqueue("userA", "a2");
 
-            queue.MarkStarted(a1);
+            Wait(queue, a1);
 
             Assert.IsNull(queue.EstimatePosition("userA", "a1"));
             Assert.AreEqual(1, queue.EstimatePosition("userA", "a2"));
@@ -125,7 +125,7 @@ namespace UnitTestCommon
             queue.Enqueue("privX", "x2");
             queue.Enqueue("userA", "a1");
 
-            queue.MarkStarted(x1);
+            Wait(queue, x1);
 
             Assert.AreEqual(1 + 1, queue.EstimatePosition("userA", "a1"));
         }

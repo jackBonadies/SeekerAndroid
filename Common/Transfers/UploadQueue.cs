@@ -83,14 +83,6 @@ namespace Seeker
             return entry;
         }
 
-        public void MarkStarted(Entry entry)
-        {
-            lock (entries)
-            {
-                entry.Started = true;
-            }
-        }
-
         public void Remove(Entry entry)
         {
             lock (entries)
