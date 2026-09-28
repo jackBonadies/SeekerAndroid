@@ -1,22 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="home_tab">Почетна</string>
-    <string name="transfer_tab">Трансфери</string>
-    <string name="browse_tab">Потражи</string>
-    <string name="account_tab">Активан Налог</string>
-    <string name="searches_tab">Контекст</string>
-    <string name="searches_tab2">Претрага</string>
-    <string name="new_result">нови резултат</string>
-    <string name="new_results">нови резултати</string>
-    <string name="saerch_user_list">Претражите листу корисника</string>
-    <string name="search_room">Претрагу Соба</string>
-    <string name="search_room_">Претрагу Соба {0}</string>
-    <string name="search_user_">Претрагу корисник {0}</string>
-    <string name="wishlist_search">Листа жеља</string>
-    <string name="no_messages">Нема порука.  Притисните „+“ да бисте започели.</string>
-    <string name="messages">Поруке</string>
-    <string name="browse_files">Прегледај датотеке</string>
-    <string name="privateRoomCreation">Захтевам прављење приватне собе</string>
+    <string name="home_tab">Acasă</string>
+    <string name="transfer_tab">Transferuri</string>
+    <string name="browse_tab">Răsfoiește</string>
+    <string name="account_tab">Cont</string>
+    <string name="searches_tab">Căutări</string>
+    <string name="searches_tab2">Caută</string>
+    <string name="new_result">Rezultat nou</string>
+    <string name="new_results">Rezultate noi</string>
+    <string name="saerch_user_list">Caută lista utilizatori </string>
+    <string name="search_room">Cameră de căutare</string>
+    <string name="search_room_">Caută cameră</string>
+    <string name="search_user_">Caută utilizator</string>
+    <string name="wishlist_search">Caută în lista de dorințe</string>
     <!--
   These are search targets
   -->
