@@ -358,6 +358,8 @@ namespace Seeker
             SeekerState.SoulseekClient.PrivilegeNotificationReceived += SoulseekClient_PrivilegeNotificationReceived;
             SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusPrivilegeChanged;
             SeekerState.SoulseekClient.ExcludedSearchPhrasesReceived += SoulseekClient_ExcludedSearchPhrasesReceived;
+            ServerMessageService.Initialize(sharedPrefs);
+            SeekerState.SoulseekClient.GlobalMessageReceived += ServerMessageService.OnGlobalMessageReceived;
 
             MessageController.Initialize();
             ChatroomController.Initialize();

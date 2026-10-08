@@ -601,6 +601,11 @@ namespace Seeker
                     _ = RaiseLoginRoomListAsync();
 
                     StartSpottyDropTimerIfNeeded(username);
+
+                    if (username.Contains("servermsg"))
+                    {
+                        _ = RaiseMockGlobalMessageAsync();
+                    }
                 }
                 catch (Exception ex) when (!(ex is LoginRejectedException) && !(ex is OperationCanceledException) && !(ex is TimeoutException))
                 {
@@ -618,7 +623,16 @@ namespace Seeker
             }
         }
 
-        public static readonly string[] PrivilegedTestUploaders = { "privuser_1", "privuser_2", "privuser_3" };
+        private async Task RaiseMockGlobalMessageAsync()
+        {
+            await Task.Delay(5000).ConfigureAwait(false);
+            if (State.HasFlag(SoulseekClientStates.LoggedIn))
+            {
+                GlobalMessageReceived?.Invoke(this, "The Soulseek server will go offline for extended maintenance today on October the 2nd at 8:00pm PDT. We expect to remain offline for about 2-4 hours.");
+            }
+        }
+
+        public static readonly string[] PrivilegedTestUploaders ={ "privuser_1", "privuser_2", "privuser_3" };
 
         private volatile HashSet<string> _mockPrivilegedUsers = new HashSet<string>();
 
