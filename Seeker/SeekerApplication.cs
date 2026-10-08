@@ -84,23 +84,33 @@ namespace Seeker
         {
             try
             {
-                int size = 4;
-                byte[] keepAlive = new byte[size * 3];
-
-                // Turn keepalive on
-                Buffer.BlockCopy(BitConverter.GetBytes(1U), 0, keepAlive, 0, size);
-                // Amount of time without activity before sending a keepalive (3s)
-                Buffer.BlockCopy(BitConverter.GetBytes(3000U), 0, keepAlive, size, size);
-                // Keepalive interval (2s)
-                Buffer.BlockCopy(BitConverter.GetBytes(2000U), 0, keepAlive, size * 2, size);
-
-                socket.IOControl(IOControlCode.KeepAliveValues, keepAlive, null);
+                // 15s idle, retry every 5s, consider dead after 4 unanswered (~35s)
+                socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+                socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, 15);
+                socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 5);
+                socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, 4);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // if we can't set keep alive, just continue on.
+                Logger.Debug("failed to configure server keepalive: " + e.Message);
+            }
+
+            if (OperatingSystem.IsAndroid() || OperatingSystem.IsLinux())
+            {
+                try
+                {
+                    // keepalive does not probe while sent data is unacked.  after 45s unacked consider dead.
+                    // TCP_USER_TIMEOUT (IPPROTO_TCP 6, option 18), milliseconds
+                    socket.SetRawSocketOption(6, 18, BitConverter.GetBytes(ServerUserTimeoutMs));
+                }
+                catch (Exception e)
+                {
+                    Logger.Debug("failed to configure server TCP_USER_TIMEOUT: " + e.Message);
+                }
             }
         }
+
+        private const int ServerUserTimeoutMs = 45000;
 
         public enum DnsLookupResult
         {
@@ -114,6 +124,18 @@ namespace Seeker
         public static Exception DnsLookupException;
 
         private const int DnsTimeoutMs = 3000;
+
+        private const string ServerHost = "server.slsknet.org";
+        private const int ServerPort = 2271;
+
+        public static Task<IPAddress> ResolveServerAddressAsync()
+        {
+#if MOCK
+            return Task.Delay(250).ContinueWith(task => IPAddress.Loopback);
+#else
+            return ResolveAddressAsync(ServerHost);
+#endif
+        }
 
         private static async Task<IPAddress> ResolveAddressAsync(string address)
         {
@@ -325,7 +347,6 @@ namespace Seeker
                         maximumConcurrentUploads: int.MaxValue,
                         maximumConcurrentSearches: 5,
                         serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
-                        addressResolver: ResolveAddressAsync,
                         userInfoResolver: UserInfoResponder.HandleRequest));
             #endif
             NetworkStateService.RegisterDefaultNetworkCallback(this);
@@ -347,6 +368,8 @@ namespace Seeker
             SeekerState.SoulseekClient.PrivilegeNotificationReceived += SoulseekClient_PrivilegeNotificationReceived;
             SeekerState.SoulseekClient.UserStatusChanged += SoulseekClient_UserStatusPrivilegeChanged;
             SeekerState.SoulseekClient.ExcludedSearchPhrasesReceived += SoulseekClient_ExcludedSearchPhrasesReceived;
+            ServerMessageService.Initialize(sharedPrefs);
+            SeekerState.SoulseekClient.GlobalMessageReceived += ServerMessageService.OnGlobalMessageReceived;
 
             MessageController.Initialize();
             ChatroomController.Initialize();
@@ -800,9 +823,9 @@ namespace Seeker
 
         public static Task OurCurrentLoginTask = null;
         public static object OurCurrentLoginTaskSyncObject = new object();
-        public static Task ConnectAndPerformPostConnectTasks(string username, string password)
+        public static Task ConnectAndPerformPostConnectTasks(IPAddress server, string username, string password)
         {
-            Task t = SeekerState.SoulseekClient.ConnectAsync(username, password);
+            Task t = SeekerState.SoulseekClient.ConnectAsync(server.ToString(), ServerPort, username, password);
             OurCurrentLoginTask = t;
             t.ContinueWith(PerformPostConnectTasks);
             return t;

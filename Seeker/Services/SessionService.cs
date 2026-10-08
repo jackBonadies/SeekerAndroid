@@ -5,6 +5,7 @@ using Common;
 using Seeker.Helpers;
 using Soulseek;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Seeker.Services
@@ -108,23 +109,28 @@ namespace Seeker.Services
                 inFlightLogin = handle.Task;
             }
 
-            Task soulseekClientConnectTask;
-            try
-            {
-                soulseekClientConnectTask = SeekerApplication.ConnectAndPerformPostConnectTasks(username, password);
-            }
-            catch (InvalidOperationException)
-            {
-                soulseekClientConnectTask = AdoptConnectInProgress();
-            }
-            catch (Exception e)
-            {
-                soulseekClientConnectTask = Task.FromException(e);
-            }
+            Task soulseekClientConnectTask = ResolveThenConnectAsync(username, password);
 
             // We set the handle after the connect task finishes
             soulseekClientConnectTask.ContinueWith(t => OnLoginTaskCompleted(t, handle), TaskScheduler.Default);
             return handle.Task;
+        }
+
+        // async so all faults will be on the task
+        private static async Task ResolveThenConnectAsync(string username, string password)
+        {
+            IPAddress server = await SeekerApplication.ResolveServerAddressAsync().ConfigureAwait(false);
+            Task connect;
+            try
+            {
+                // throws state checks synchronously
+                connect = SeekerApplication.ConnectAndPerformPostConnectTasks(server, username, password);
+            }
+            catch (InvalidOperationException)
+            {
+                connect = AdoptConnectInProgress();
+            }
+            await connect.ConfigureAwait(false);
         }
 
         /// <summary>

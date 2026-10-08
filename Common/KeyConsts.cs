@@ -143,6 +143,10 @@ namespace Common
 
         public const string M_PostNotificationRequestAlreadyShown = "Momento_M_PostNotificationRequestAlreadyShown";
 
+        public const string M_ServerMessageText = "Momento_ServerMessageText";
+        public const string M_ServerMessageReceivedTicks = "Momento_ServerMessageReceivedTicks";
+        public const string M_ServerMessageDismissed = "Momento_ServerMessageDismissed";
+
         public const string M_FilterFormat = "Momento_FilterFormat";
         public const string M_FilterMinBitrateKbs = "Momento_FilterMinBitrateKbs";
 

@@ -432,6 +432,9 @@
     <string name="user_info_failed_timeout">Failed to get info for user: {0}.  Connection timed out.</string>
     <string name="deleted_message_history_with">Deleted message history with {0}</string>
     <string name="logged_in_as">Logged in as</string>
+    <string name="server_message_title">Message from the Soulseek server</string>
+    <string name="server_message_snackbar">Server message: {0}</string>
+    <string name="dismiss">Dismiss</string>
     <string name="status_connected">Connected</string>
     <string name="status_connecting">Connecting</string>
     <string name="status_disconnected">Disconnected</string>

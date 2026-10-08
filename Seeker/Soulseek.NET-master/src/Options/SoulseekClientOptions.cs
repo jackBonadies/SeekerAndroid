@@ -1,9 +1,6 @@
 ﻿// <copyright file="SoulseekClientOptions.cs" company="JP Dillingham">
 //     Copyright (c) JP Dillingham.
 //
-//     Copyright (c) 2021-2026 Jack Bonadies
-//     Modified: added AddressResolver option
-//
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
 //     the Free Software Foundation, version 3.
@@ -105,7 +102,6 @@ namespace Soulseek
         /// <param name="placeInQueueResolver">
         ///     The delegate used to resolve the <see cref="int"/> response for an incoming request.
         /// </param>
-        /// <param name="addressResolver">The delegate used to resolve an <see cref="IPAddress"/> from a hostname.</param>
         /// <param name="raiseEventsAsynchronously">(Experimental!) Raise events asynchronously to improve parallelism.</param>
         /// <exception cref="ArgumentOutOfRangeException">
         ///     Thrown when the value supplied for <paramref name="listenPort"/> is not between 1024 and 65535.
@@ -146,7 +142,6 @@ namespace Soulseek
             Func<string, IPEndPoint, Task<UserInfo>> userInfoResolver = null,
             Func<string, IPEndPoint, string, Task> enqueueDownload = null,
             Func<string, IPEndPoint, string, Task<int?>> placeInQueueResolver = null,
-            Func<string, Task<IPAddress>> addressResolver = null,
             bool raiseEventsAsynchronously = false)
         {
             EnableListener = enableListener;
@@ -226,7 +221,6 @@ namespace Soulseek
             UserInfoResolver = userInfoResolver ?? defaultUserInfoResolver;
             EnqueueDownload = enqueueDownload ?? defaultEnqueueDownload;
             PlaceInQueueResolver = placeInQueueResolver ?? defaultPlaceInQueueResolver;
-            AddressResolver = addressResolver;
 
             RaiseEventsAsynchronously = raiseEventsAsynchronously;
         }
@@ -373,11 +367,6 @@ namespace Soulseek
         public Func<string, IPEndPoint, string, Task<int?>> PlaceInQueueResolver { get; }
 
         /// <summary>
-        ///     Gets the delegate used to resolve an <see cref="IPAddress"/> from a hostname. (Default = Dns.GetHostEntry).
-        /// </summary>
-        public Func<string, Task<IPAddress>> AddressResolver { get; }
-
-        /// <summary>
         ///     Gets the search response cache to use when a response is not able to be delivered immediately.
         /// </summary>
         public ISearchResponseCache SearchResponseCache { get; }
@@ -504,7 +493,6 @@ namespace Soulseek
         /// <param name="placeInQueueResolver">
         ///     The delegate used to resolve the <see cref="int"/> response for an incoming request.
         /// </param>
-        /// <param name="addressResolver">The delegate used to resolve an <see cref="IPAddress"/> from a hostname.</param>
         /// <returns>The cloned instance.</returns>
         internal SoulseekClientOptions With(
             bool? enableListener = null,
@@ -532,8 +520,7 @@ namespace Soulseek
             Func<string, IPEndPoint, int, string, Task<IEnumerable<Directory>>> directoryContentsResolver = null,
             Func<string, IPEndPoint, Task<UserInfo>> userInfoResolver = null,
             Func<string, IPEndPoint, string, Task> enqueueDownload = null,
-            Func<string, IPEndPoint, string, Task<int?>> placeInQueueResolver = null,
-            Func<string, Task<IPAddress>> addressResolver = null)
+            Func<string, IPEndPoint, string, Task<int?>> placeInQueueResolver = null)
         {
             return new SoulseekClientOptions(
                 enableListener: enableListener ?? EnableListener,
@@ -568,7 +555,6 @@ namespace Soulseek
                 userInfoResolver: userInfoResolver ?? UserInfoResolver,
                 enqueueDownload: enqueueDownload ?? EnqueueDownload,
                 placeInQueueResolver: placeInQueueResolver ?? PlaceInQueueResolver,
-                addressResolver: addressResolver ?? AddressResolver,
                 raiseEventsAsynchronously: RaiseEventsAsynchronously);
         }
     }
