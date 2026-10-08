@@ -131,7 +131,7 @@ namespace Seeker
         public static Task<IPAddress> ResolveServerAddressAsync()
         {
 #if MOCK
-            return Task.Delay(250).ContinueWith(task => IPAddress.Loopback);
+            return Task.Delay(1000).ContinueWith(task => IPAddress.Loopback);
 #else
             return ResolveAddressAsync(ServerHost);
 #endif

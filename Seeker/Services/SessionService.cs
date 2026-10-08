@@ -79,6 +79,9 @@ namespace Seeker.Services
             }
         }
 
+        // for pre SoulseekClient.ConnectAsync tasks
+        public static event EventHandler LoginStarted;
+
         public static event EventHandler<LoginCompletedEventArgs> LoginCompleted;
 
         /// <summary>
@@ -113,6 +116,15 @@ namespace Seeker.Services
 
             // We set the handle after the connect task finishes
             soulseekClientConnectTask.ContinueWith(t => OnLoginTaskCompleted(t, handle), TaskScheduler.Default);
+
+            try
+            {
+                LoginStarted?.Invoke(null, EventArgs.Empty);
+            }
+            catch (Exception e)
+            {
+                Logger.FirebaseError("LoginStarted handler failed", e);
+            }
             return handle.Task;
         }
 

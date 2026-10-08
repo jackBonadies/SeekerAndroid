@@ -87,6 +87,7 @@ namespace Seeker
             MessagesBroadcastReceiver.MarkAsReadFromNotification += OnMarkAsReadUpdateBadge;
             UpdateUnreadBadge();
 
+            SessionService.LoginStarted += OnLoginStarted;
             SessionService.LoginCompleted += OnLoginCompleted;
             ServerMessageService.Changed += OnServerMessageChanged;
             RenderFromState();
@@ -99,6 +100,7 @@ namespace Seeker
             SeekerState.SoulseekClient.StateChanged -= SoulseekClient_StateChanged;
             MessageController.MessageReceived -= OnMessageReceivedUpdateBadge;
             MessagesBroadcastReceiver.MarkAsReadFromNotification -= OnMarkAsReadUpdateBadge;
+            SessionService.LoginStarted -= OnLoginStarted;
             SessionService.LoginCompleted -= OnLoginCompleted;
             ServerMessageService.Changed -= OnServerMessageChanged;
         }
@@ -125,6 +127,14 @@ namespace Seeker
             {
                 serverMessageCard.Visibility = ViewStates.Gone;
             }
+        }
+
+        private void OnLoginStarted(object sender, EventArgs e)
+        {
+            this.Activity?.RunOnUiThread(() =>
+            {
+                UpdateConnectionStatus(SeekerState.SoulseekClient.State);
+            });
         }
 
         private void OnLoginCompleted(object sender, LoginCompletedEventArgs e)
@@ -347,7 +357,8 @@ namespace Seeker
                         textColorResId = Resource.Color.statusConnectedText;
                         chipBgColorResId = Resource.Color.statusConnectedChipBg;
                     }
-                    else if (state.HasFlag(SoulseekClientStates.Connecting) || state.HasFlag(SoulseekClientStates.LoggingIn))
+                    else if (state.HasFlag(SoulseekClientStates.Connecting) || state.HasFlag(SoulseekClientStates.LoggingIn)
+                        || SessionService.InFlightLoginOrigin != null) // i.e. resolving DNS or any pre-connect step
                     {
                         textResId = Resource.String.status_connecting;
                         dotColorResId = Resource.Color.statusConnectingDot;
