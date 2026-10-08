@@ -115,6 +115,18 @@ namespace Seeker
 
         private const int DnsTimeoutMs = 3000;
 
+        private const string ServerHost = "server.slsknet.org";
+        private const int ServerPort = 2271;
+
+        public static Task<IPAddress> ResolveServerAddressAsync()
+        {
+#if MOCK
+            return Task.Delay(250).ContinueWith(task => IPAddress.Loopback);
+#else
+            return ResolveAddressAsync(ServerHost);
+#endif
+        }
+
         private static async Task<IPAddress> ResolveAddressAsync(string address)
         {
             DnsLookupStatus = DnsLookupResult.Success;
@@ -325,7 +337,6 @@ namespace Seeker
                         maximumConcurrentUploads: int.MaxValue,
                         maximumConcurrentSearches: 5,
                         serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
-                        addressResolver: ResolveAddressAsync,
                         userInfoResolver: UserInfoResponder.HandleRequest));
             #endif
             NetworkStateService.RegisterDefaultNetworkCallback(this);
@@ -800,9 +811,9 @@ namespace Seeker
 
         public static Task OurCurrentLoginTask = null;
         public static object OurCurrentLoginTaskSyncObject = new object();
-        public static Task ConnectAndPerformPostConnectTasks(string username, string password)
+        public static Task ConnectAndPerformPostConnectTasks(IPAddress server, string username, string password)
         {
-            Task t = SeekerState.SoulseekClient.ConnectAsync(username, password);
+            Task t = SeekerState.SoulseekClient.ConnectAsync(server.ToString(), ServerPort, username, password);
             OurCurrentLoginTask = t;
             t.ContinueWith(PerformPostConnectTasks);
             return t;

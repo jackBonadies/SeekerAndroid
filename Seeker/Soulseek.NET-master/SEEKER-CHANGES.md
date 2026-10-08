@@ -22,8 +22,7 @@ Changes:
   `OperatorInPrivateRoomAddedRemoved` event on `ISoulseekClient` / `IServerMessageHandler` /
   `ServerMessageHandler`.
 - **Android networking**: `Connection` uses dual-mode IPv6 socket (an IPv4-only socket cannot
-  connect at all on the IPv6-only networks mobile carriers use), a `SoulseekClientOptions.AddressResolver` hook 
-  (`Dns.GetHostEntry` fails sometimes on Android); and `GetListeningState()` on `SoulseekClient`
+  connect at all on the IPv6-only networks mobile carriers use); and `GetListeningState()` on `SoulseekClient`
   (we dont fail if listener fails)
 - **Concurrency**: `RemoveAndDisposeAll` race (`Common/Extensions.cs`); `SearchInternal.Dispose`
   swallows the `SynchronizationLockException` that `ReaderWriterLockSlim.Dispose()` throws when a

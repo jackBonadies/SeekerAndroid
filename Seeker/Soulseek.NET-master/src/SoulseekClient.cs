@@ -2,8 +2,8 @@
 //     Copyright (c) JP Dillingham.
 //
 //     Copyright (c) 2021-2026 Jack Bonadies
-//     Modified: added address resolver support, listener state and transfer lookup methods, Latin-1 encoding
-//     parameters, and socket exception handling around the listener
+//     Modified: added listener state and transfer lookup methods, Latin-1 encoding parameters, and
+//     socket exception handling around the listener
 //
 //     This program is free software: you can redistribute it and/or modify
 //     it under the terms of the GNU General Public License as published by
@@ -987,16 +987,9 @@ namespace Soulseek
             {
                 try
                 {
-                    if (Options.AddressResolver != null)
-                    {
-                        ipAddress = Options.AddressResolver(address).Result;
-                    }
-                    else
-                    {
-                        ipAddress = Dns.GetHostEntry(address).AddressList[0];
-                    }
+                    ipAddress = Dns.GetHostEntry(address).AddressList[0];
                 }
-                catch (Exception ex) when (ex is SocketException || ex is OperationCanceledException)
+                catch (SocketException ex)
                 {
                     throw new AddressException($"Failed to resolve address '{address}': {ex.Message}", ex);
                 }
