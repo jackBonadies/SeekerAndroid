@@ -1,22 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="home_tab">Почетна</string>
-    <string name="transfer_tab">Трансфери</string>
-    <string name="browse_tab">Потражи</string>
-    <string name="account_tab">Активан Налог</string>
-    <string name="searches_tab">Контекст</string>
-    <string name="searches_tab2">Претрага</string>
-    <string name="new_result">нови резултат</string>
-    <string name="new_results">нови резултати</string>
-    <string name="saerch_user_list">Претражите листу корисника</string>
-    <string name="search_room">Претрагу Соба</string>
-    <string name="search_room_">Претрагу Соба {0}</string>
-    <string name="search_user_">Претрагу корисник {0}</string>
-    <string name="wishlist_search">Листа жеља</string>
-    <string name="no_messages">Нема порука.  Притисните „+“ да бисте започели.</string>
-    <string name="messages">Поруке</string>
-    <string name="browse_files">Прегледај датотеке</string>
-    <string name="privateRoomCreation">Захтевам прављење приватне собе</string>
+    <string name="home_tab">Hem</string>
+    <string name="transfer_tab">Överföringar</string>
+    <string name="browse_tab">Sök</string>
+    <string name="account_tab">Konto</string>
+    <string name="searches_tab2">Sök</string>
+    <string name="new_result">nytt resultat</string>
+    <string name="new_results">nya resultat</string>
     <!--
   These are search targets
   -->
