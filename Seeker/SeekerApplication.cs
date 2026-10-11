@@ -131,7 +131,7 @@ namespace Seeker
         public static Task<IPAddress> ResolveServerAddressAsync()
         {
 #if MOCK
-            return Task.Delay(250).ContinueWith(task => IPAddress.Loopback);
+            return Task.Delay(1000).ContinueWith(task => IPAddress.Loopback);
 #else
             return ResolveAddressAsync(ServerHost);
 #endif
@@ -432,7 +432,7 @@ namespace Seeker
             Logger.Debug("disconnected");
             lock (OurCurrentLoginTaskSyncObject)
             {
-                OurCurrentLoginTask = null;
+                CurrentLoginTask = null;
             }
         }
 
@@ -723,7 +723,7 @@ namespace Seeker
         {
             lock (OurCurrentLoginTaskSyncObject)
             {
-                OurCurrentLoginTask = null;
+                CurrentLoginTask = null;
             }
             ChatroomController.JoinAutoJoinRoomsAndPreviousJoined();
             //ChatroomController.ConnectionLapse.Add(new Tuple<bool, DateTime>(true, DateTime.UtcNow)); //just testing obv remove later...
@@ -821,12 +821,23 @@ namespace Seeker
             }
         }
 
-        public static Task OurCurrentLoginTask = null;
+        // the full outer login task (including DNS resolution) or the task we chained on after
+        public static Task CurrentLoginTask = null;
+        // the inner SoulseekClient.ConnectAsync task
+        public static Task CurrentInnerConnectTask = null;
         public static object OurCurrentLoginTaskSyncObject = new object();
         public static Task ConnectAndPerformPostConnectTasks(IPAddress server, string username, string password)
         {
             Task t = SeekerState.SoulseekClient.ConnectAsync(server.ToString(), ServerPort, username, password);
-            OurCurrentLoginTask = t;
+            lock (OurCurrentLoginTaskSyncObject)
+            {
+                CurrentInnerConnectTask = t;
+                // only overwrite the loginTask if it is null or completed
+                if (CurrentLoginTask == null || CurrentLoginTask.IsCompleted)
+                {
+                    CurrentLoginTask = t;
+                }
+            }
             t.ContinueWith(PerformPostConnectTasks);
             return t;
         }

@@ -79,6 +79,9 @@ namespace Seeker.Services
             }
         }
 
+        // for pre SoulseekClient.ConnectAsync tasks
+        public static event EventHandler LoginStarted;
+
         public static event EventHandler<LoginCompletedEventArgs> LoginCompleted;
 
         /// <summary>
@@ -113,6 +116,15 @@ namespace Seeker.Services
 
             // We set the handle after the connect task finishes
             soulseekClientConnectTask.ContinueWith(t => OnLoginTaskCompleted(t, handle), TaskScheduler.Default);
+
+            try
+            {
+                LoginStarted?.Invoke(null, EventArgs.Empty);
+            }
+            catch (Exception e)
+            {
+                Logger.FirebaseError("LoginStarted handler failed", e);
+            }
             return handle.Task;
         }
 
@@ -146,8 +158,12 @@ namespace Seeker.Services
                 return Task.CompletedTask;
             }
 
-            Task adopted = SeekerApplication.OurCurrentLoginTask;
-            if (adopted == null)
+            Task adopted;
+            lock (SeekerApplication.OurCurrentLoginTaskSyncObject)
+            {
+                adopted = SeekerApplication.CurrentInnerConnectTask;
+            }
+            if (adopted == null || adopted.IsCompleted)
             {
                 return Task.FromException(new InvalidOperationException("BeginLogin: connect underway with no task to adopt"));
             }
@@ -462,7 +478,7 @@ namespace Seeker.Services
                 }
 
                 // both are fine to continue with on
-                Task loginTask = SeekerApplication.OurCurrentLoginTask ?? InFlightLogin;
+                Task loginTask = SeekerApplication.CurrentLoginTask ?? InFlightLogin;
                 if (loginTask == null)
                 {
                     // this should never happen
@@ -470,7 +486,7 @@ namespace Seeker.Services
                     loginTask = Task.FromException(new InvalidOperationException("not logged in and no login in flight"));
                 }
 
-                SeekerApplication.OurCurrentLoginTask = loginTask.ContinueWith(action, System.Threading.CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
+                SeekerApplication.CurrentLoginTask = loginTask.ContinueWith(action, System.Threading.CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default);
                 if (msg != null)
                 {
                     SeekerApplication.Toaster.ShowToast(msg, ToastLength.Short);
@@ -529,7 +545,10 @@ namespace Seeker.Services
                     Task.FromException(new Exception("could not start reconnect")).ContinueWith(continuationAction);
                     return;
                 }
-                SeekerApplication.OurCurrentLoginTask = t.ContinueWith(continuationAction);
+                lock (SeekerApplication.OurCurrentLoginTaskSyncObject)
+                {
+                    SeekerApplication.CurrentLoginTask = t.ContinueWith(continuationAction);
+                }
             }
             else if (IfLoggingInTaskCurrentlyBeingPerformedContinueWithAction(continuationAction, loggingInMsg, contextForMsg))
             {
