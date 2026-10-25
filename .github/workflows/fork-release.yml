@@ -1,0 +1,193 @@
+name: Publish fork APK
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Build APK and publish GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    env:
+      DOTNET_NOLOGO: "true"
+      DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install Android workload
+        run: dotnet workload restore Seeker/Seeker.csproj
+
+      - name: Install Android SDK platform
+        uses: android-actions/setup-android@v4
+        with:
+          packages: "platform-tools platforms;android-36 build-tools;36.0.0"
+
+      # Configure ANDROID_KEYSTORE_BASE64, ANDROID_KEY_ALIAS,
+      # ANDROID_KEY_PASSWORD and ANDROID_KEYSTORE_PASSWORD to sign consistently.
+      # Without them, builds use a temporary key and cannot update each other.
+      - name: Configure signing
+        shell: bash
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seeker-signing"
+          keystore="$RUNNER_TEMP/seeker-signing/release.keystore"
+
+          if [[ -n "$KEYSTORE_B64" && -n "$KEY_ALIAS" && -n "$KEY_PASSWORD" && -n "$STORE_PASSWORD" ]]; then
+            printf '%s' "$KEYSTORE_B64" | base64 --decode > "$keystore"
+            test -s "$keystore"
+            signing_mode="persistent (repository secret)"
+          elif [[ -z "$KEYSTORE_B64" && -z "$KEY_ALIAS" && -z "$KEY_PASSWORD" && -z "$STORE_PASSWORD" ]]; then
+            KEY_ALIAS="seeker-fork-ci"
+            KEY_PASSWORD="temporary-ci-key-password"
+            STORE_PASSWORD="$KEY_PASSWORD"
+            keytool -genkeypair -noprompt -storetype PKCS12 \
+              -keystore "$keystore" -alias "$KEY_ALIAS" \
+              -keyalg RSA -keysize 3072 -validity 3650 \
+              -storepass "$STORE_PASSWORD" -keypass "$KEY_PASSWORD" \
+              -dname "CN=Seeker Fork CI, O=Community Build"
+            signing_mode="temporary (changes every workflow run)"
+          else
+            echo "::error::Configure all four Android signing secrets, or none of them."
+            exit 1
+          fi
+
+          {
+            echo "AndroidSigningKeyStore=$keystore"
+            echo "AndroidSigningKeyAlias=$KEY_ALIAS"
+            echo "AndroidSigningKeyPass=$KEY_PASSWORD"
+            echo "AndroidSigningStorePass=$STORE_PASSWORD"
+            echo "SIGNING_MODE=$signing_mode"
+          } >> "$GITHUB_ENV"
+
+      - name: Set fork build version
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Upstream versionCode starts at 144. Increment it for fork builds.
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          manifest = Path("Seeker/Properties/AndroidManifest.xml")
+          source = manifest.read_text(encoding="utf-8-sig")
+          run_number = int(os.environ["GITHUB_RUN_NUMBER"])
+          source, count_code = re.subn(
+              r'android:versionCode="\d+"',
+              f'android:versionCode="{144 + run_number}"',
+              source,
+              count=1,
+          )
+          source, count_name = re.subn(
+              r'android:versionName="[^"]+"',
+              f'android:versionName="3.11.2-fork.{run_number}"',
+              source,
+              count=1,
+          )
+          if count_code != 1 or count_name != 1:
+              raise SystemExit("Could not update Android manifest version fields")
+          manifest.write_text(source, encoding="utf-8")
+          PY
+
+      - name: Restore .NET dependencies
+        run: dotnet restore Seeker/Seeker.csproj
+
+      - name: Build signed universal release APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          dotnet publish Seeker/Seeker.csproj \
+            --configuration "Release IzzySoft" \
+            --framework net10.0-android36.0 \
+            --no-restore \
+            -p:AndroidPackageFormats=apk \
+            -p:AndroidCreatePackagePerAbi=false \
+            -p:RunAOTCompilation=false \
+            -p:AndroidEnableProfiledAot=false \
+            -p:ContinuousIntegrationBuild=true
+
+      - name: Verify and stage APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk="$(find 'Seeker/bin/Release IzzySoft' -type f -name '*-Signed.apk' -print -quit)"
+          if [[ -z "$apk" || ! -s "$apk" ]]; then
+            echo "::error::Build succeeded but no signed APK was found."
+            find Seeker/bin -type f -name '*.apk' -print || true
+            exit 1
+          fi
+
+          mkdir -p release-apks
+          target="release-apks/Seeker-fork-${GITHUB_RUN_NUMBER}-universal.apk"
+          cp "$apk" "$target"
+          unzip -tqq "$target"
+
+          signer="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name apksigner | sort -V | tail -n 1)"
+          if [[ -z "$signer" ]]; then
+            echo "::error::Android apksigner was not found"
+            exit 1
+          fi
+          "$signer" verify "$target"
+          (cd release-apks && sha256sum *.apk > SHA256SUMS.txt)
+
+          {
+            echo "Seeker fork build #${GITHUB_RUN_NUMBER}"
+            echo
+            echo "Built from ${GITHUB_SHA} using the Release IzzySoft configuration."
+            echo
+            echo "Download the universal APK below. It includes ARM and x86 Android architectures."
+            echo
+            echo "Signing: ${SIGNING_MODE}."
+            if [[ "$SIGNING_MODE" == temporary* ]]; then
+              echo "This build uses a new temporary key; uninstall an earlier build before installing this one. Configure the four signing secrets to enable updates across releases."
+            fi
+          } > release-notes.md
+          ls -lh release-apks/
+
+      - name: Keep APK as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: seeker-fork-apk
+          path: |
+            release-apks/*.apk
+            release-apks/SHA256SUMS.txt
+          if-no-files-found: error
+
+      - name: Publish APK on GitHub Releases
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: fork-build-${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          name: Seeker fork build #${{ github.run_number }}
+          body_path: release-notes.md
+          files: |
+            release-apks/*.apk
+            release-apks/SHA256SUMS.txt
+          fail_on_unmatched_files: true
+          make_latest: true
