@@ -136,7 +136,7 @@
 			app:trackCornerRadius="5dp"
 			app:indicatorSize="120dp"
 			app:trackThickness="6dp"
-			app:indicatorColor="#3498DB"
+			app:indicatorColor="?attr/dsColorPrimary"
 			android:indeterminateOnly="true"
     />
 
@@ -236,7 +236,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/status_connected"
                         android:textSize="13sp"
-                        android:textColor="#2E7D32"
+                        android:textColor="?attr/dsColorSuccess"
                         android:layout_marginStart="6dp"
                     />
                 </LinearLayout>
@@ -373,7 +373,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/download_material"
-                            app:tint="#F44336"
+                            app:tint="?attr/dsColorError"
                         />
                         <TextView
                             android:layout_width="0dp"
@@ -381,7 +381,7 @@
                             android:layout_weight="1"
                             android:text="@string/choose_a_download_folder"
                             android:textSize="16sp"
-                            android:textColor="#F44336"
+                            android:textColor="?attr/dsColorError"
                             android:layout_marginStart="16dp"
                         />
                         <ImageView
@@ -656,7 +656,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/logout_material"
-                            app:tint="#F44336"
+                            app:tint="?attr/dsColorError"
                         />
                         <TextView
                             android:layout_width="0dp"
@@ -664,7 +664,7 @@
                             android:layout_weight="1"
                             android:text="@string/logout"
                             android:textSize="16sp"
-                            android:textColor="#F44336"
+                            android:textColor="?attr/dsColorError"
                             android:layout_marginStart="16dp"
                         />
                         <ImageView

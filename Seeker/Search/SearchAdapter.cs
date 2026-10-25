@@ -1,4 +1,4 @@
-using Android.Views;
+﻿using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
 using Common;
@@ -27,17 +27,20 @@ namespace Seeker
                 var item = localDataSet[position];
                 var view = (holder as SearchViewHolder).getSearchItemView();
                 view.setItem(item, position);
-                if (wishlistUnseenSet != null)
+                if (view is SearchItemViewUnifiedBase rowView)
                 {
-                    if (view is SearchItemViewUnifiedBase wishlistView)
+                    var fragment = GetSearchFragment();
+                    bool selectionMode = fragment?.IsSelectionMode ?? false;
+                    rowView.ApplySelectionState(selectionMode, selectionMode && fragment.IsResultSelected(item));
+                    if (wishlistUnseenSet != null)
                     {
-                        wishlistView.ApplyNewIndicator(wishlistUnseenSet.Contains(item));
+                        rowView.ApplyNewIndicator(wishlistUnseenSet.Contains(item));
                     }
-                }
-                // if we reuse a view from a wishlist tab, then set it to unseen
-                else if (view is SearchItemViewUnifiedBase recycledView && recycledView.HasNewIndicator)
-                {
-                    recycledView.ApplyNewIndicator(false);
+                    // if we reuse a view from a wishlist tab, then set it to unseen
+                    else if (rowView.HasNewIndicator)
+                    {
+                        rowView.ApplyNewIndicator(false);
+                    }
                 }
                 //(holder as TransferViewHolder).getTransferItemView().LongClick += TransferAdapterRecyclerVersion_LongClick; //I dont think we should be adding this here.  you get 3 after a short time...
             }
@@ -91,6 +94,21 @@ namespace Seeker
                 view.ApplyExpandableMode();
                 var mainLayout = view.FindViewById<LinearLayout>(Resource.Id.relativeLayout1);
                 mainLayout.Click += UnifiedRowClick;
+                mainLayout.LongClickable = true;
+                mainLayout.LongClick += UnifiedRowLongClick;
+                // The primary row also owns the selection checkbox, which sits beside relativeLayout1.
+                // A checkbox tap therefore reaches this same toggle/open handler.
+                var primaryRow = view.FindViewById<LinearLayout>(Resource.Id.searchItemPrimaryRow);
+                if (primaryRow != null && !ReferenceEquals(primaryRow, mainLayout))
+                {
+                    primaryRow.Click += UnifiedRowClick;
+                    primaryRow.LongClickable = true;
+                    primaryRow.LongClick += UnifiedRowLongClick;
+                }
+                if (view.DownloadActionButton != null)
+                {
+                    view.DownloadActionButton.Click += UnifiedDownloadClick;
+                }
                 if (view.IsExpandable)
                 {
                     view.FindViewById<FrameLayout>(Resource.Id.expandClickArea).Click += UnifiedChevronClick;
@@ -108,8 +126,81 @@ namespace Seeker
             // Parent chain in the unified XMLs: relativeLayout1 -> horizontal row -> item root (a SearchItemViewUnifiedBase).
             private void UnifiedRowClick(object sender, EventArgs e)
             {
-                var itemRoot = (sender as View).FindAncestor<ISearchItemViewBase>();
-                GetSearchFragment().ShowDownloadDialog(itemRoot.ViewHolder.BindingAdapterPosition);
+                if (!TryGetBoundPosition((sender as View).FindAncestor<ISearchItemViewBase>(), out int position))
+                {
+                    return;
+                }
+                var fragment = GetSearchFragment();
+                if (fragment == null)
+                {
+                    return;
+                }
+                if (fragment.IsSelectionMode)
+                {
+                    fragment.ToggleSelectionAt(position);
+                }
+                else
+                {
+                    fragment.ShowDownloadDialog(position);
+                }
+            }
+
+            // Long press starts the result multi-selection action mode. The per-result download
+            // dialog stays on the row tap and the dedicated download action.
+            private void UnifiedRowLongClick(object sender, View.LongClickEventArgs e)
+            {
+                if (!TryGetBoundPosition((sender as View).FindAncestor<ISearchItemViewBase>(), out int position))
+                {
+                    return;
+                }
+                e.Handled = true;
+                GetSearchFragment()?.EnterSelectionMode(position);
+            }
+
+            private void UnifiedDownloadClick(object sender, EventArgs e)
+            {
+                if (!TryGetBoundPosition((sender as View).FindAncestor<ISearchItemViewBase>(), out int position))
+                {
+                    return;
+                }
+                var fragment = GetSearchFragment();
+                if (fragment == null)
+                {
+                    return;
+                }
+                // While selecting, the row's contextual download affordance is hidden; if a
+                // recycled tap still reaches it, toggle the selection instead of opening the
+                // single-result download dialog behind the action mode.
+                if (fragment.IsSelectionMode)
+                {
+                    fragment.ToggleSelectionAt(position);
+                }
+                else
+                {
+                    fragment.ShowDownloadDialog(position);
+                }
+            }
+
+            // A tap can land on a view that is being recycled or rebound (e.g. while the wishlist
+            // results are replaced), where BindingAdapterPosition is NoPosition or already points
+            // past the current data set. Validating it keeps those taps from indexing the data.
+            private bool TryGetBoundPosition(ISearchItemViewBase itemRoot, out int position)
+            {
+                position = RecyclerView.NoPosition;
+                var holder = itemRoot?.ViewHolder;
+                if (holder == null || localDataSet == null)
+                {
+                    return false;
+                }
+                int adapterPosition = holder.BindingAdapterPosition;
+                if (adapterPosition == RecyclerView.NoPosition
+                    || adapterPosition < 0
+                    || adapterPosition >= localDataSet.Count)
+                {
+                    return false;
+                }
+                position = adapterPosition;
+                return true;
             }
 
             private SearchResultStyleEnum searchResultStyle;
@@ -132,7 +223,10 @@ namespace Seeker
             private void UnifiedChevronClick(object sender, EventArgs e)
             {
                 var itemRoot = (sender as View).FindAncestor<SearchItemViewUnifiedBase>();
-                int position = itemRoot.ViewHolder.BindingAdapterPosition;
+                if (!TryGetBoundPosition(itemRoot, out int position))
+                {
+                    return;
+                }
                 var v = itemRoot.FindViewById<LinearLayout>(Resource.Id.detailsExpandable);
                 var img = itemRoot.FindViewById<ImageView>(Resource.Id.expandableClick);
                 if (v.Visibility == ViewStates.Gone)
@@ -207,6 +301,10 @@ namespace Seeker
             }
 
             var tv = headerView.FindViewById<TextView>(Resource.Id.searchResultsHeaderText);
+            if (tv == null)
+            {
+                return;
+            }
 
             int total = SearchTabHelper.SearchResponses?.Count ?? 0;
             int shown = SearchTabHelper.UI_SearchResponses?.Count ?? total;
@@ -231,6 +329,67 @@ namespace Seeker
                 string full = string.Format(ctx.GetString(Resource.String.search_results_count), totalStr);
                 tv.TextFormatted = BuildEmphasizedCount(ctx, full, totalStr);
             }
+
+            BindHeaderActions(headerView, ctx);
+        }
+
+        /// <summary>
+        /// Compact sort entry and active-filter summary in the result header. The sort button
+        /// calls the existing dialog; filtering itself still runs in the existing pipeline.
+        /// </summary>
+        private static void BindHeaderActions(View headerView, Android.Content.Context ctx)
+        {
+            var sortButton = headerView.FindViewById<TextView>(Resource.Id.searchSortButton);
+            if (sortButton != null)
+            {
+                sortButton.Text = string.Format(
+                    ctx.GetString(Resource.String.search_sort_button),
+                    SearchSortLabels.Label(ctx, SearchTabHelper.SortHelperSorting));
+                sortButton.ContentDescription = sortButton.Text;
+                if (!sortButton.HasOnClickListeners)
+                {
+                    sortButton.Click += (_, __) => SearchFragment.Instance?.ShowChangeSortOrderDialog();
+                }
+            }
+
+            var filtersText = headerView.FindViewById<TextView>(Resource.Id.searchActiveFiltersText);
+            if (filtersText != null)
+            {
+                string summary = BuildActiveFilterSummary(ctx);
+                filtersText.Text = summary;
+                filtersText.Visibility = string.IsNullOrEmpty(summary) ? ViewStates.Gone : ViewStates.Visible;
+            }
+        }
+
+        private static string BuildActiveFilterSummary(Android.Content.Context ctx)
+        {
+            var parts = new List<string>();
+            if (SearchTabHelper.TextFilter.IsFiltered)
+            {
+                parts.Add(string.Format(ctx.GetString(Resource.String.search_filter_text_prefix), SearchTabHelper.TextFilter.FilterString));
+            }
+            if (PreferencesState.FilterFormat != FormatFilterType.Any)
+            {
+                string format = PreferencesState.FilterFormat == FormatFilterType.Lossless
+                    ? ctx.GetString(Resource.String.filter_format_lossless)
+                    : ctx.GetString(Resource.String.filter_format_lossy);
+                parts.Add(string.Format(ctx.GetString(Resource.String.search_filter_format_prefix), format));
+            }
+            if (PreferencesState.FilterMinBitrateKbs > 0)
+            {
+                parts.Add(string.Format(ctx.GetString(Resource.String.search_filter_bitrate_prefix), PreferencesState.FilterMinBitrateKbs));
+            }
+            if (AreChipsFiltering())
+            {
+                var chipItems = SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems;
+                int checkedChips = chipItems == null ? 0 : System.Linq.Enumerable.Count(chipItems, i => i.IsChecked);
+                parts.Add(string.Format(ctx.GetString(Resource.String.search_filter_chips), checkedChips));
+            }
+            if (parts.Count == 0)
+            {
+                return string.Empty;
+            }
+            return string.Format(ctx.GetString(Resource.String.search_active_filters), string.Join(" \u2022 ", parts));
         }
 
         private static Android.Text.SpannableString BuildEmphasizedCount(Android.Content.Context ctx, string full, params string[] tokens)

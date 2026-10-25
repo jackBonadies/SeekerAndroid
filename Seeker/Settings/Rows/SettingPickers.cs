@@ -1,6 +1,7 @@
-using Android.Content;
+﻿using Android.Content;
 using Common;
 using Seeker.Helpers;
+using Seeker.Search;
 using System.Collections.Generic;
 
 namespace Seeker.Settings.Rows
@@ -59,6 +60,34 @@ namespace Seeker.Settings.Rows
                 });
         }
 
+        /// <summary>All search-result sort options in the same order the search sort dialog uses.</summary>
+        public static List<(string label, SearchResultSorting value)> BuildSearchSortOptions(Context ctx)
+        {
+            return new List<(string label, SearchResultSorting value)>
+            {
+                (SearchSortLabels.Label(ctx, SearchResultSorting.Available), SearchResultSorting.Available),
+                (SearchSortLabels.Label(ctx, SearchResultSorting.Fastest), SearchResultSorting.Fastest),
+                (SearchSortLabels.Label(ctx, SearchResultSorting.FolderAlphabetical), SearchResultSorting.FolderAlphabetical),
+                (SearchSortLabels.Label(ctx, SearchResultSorting.BitRate), SearchResultSorting.BitRate),
+                (SearchSortLabels.Label(ctx, SearchResultSorting.Filename), SearchResultSorting.Filename),
+                (SearchSortLabels.Label(ctx, SearchResultSorting.FileSize), SearchResultSorting.FileSize),
+            };
+        }
+
+        public static void PickDefaultSearchSort(ISettingsHost host, ValueRow row)
+        {
+            OptionPickerBottomSheet.ShowOptions(host, row, BuildSearchSortOptions(host.Activity),
+                () => PreferencesState.DefaultSearchResultSortAlgorithm,
+                v => {
+                    if (PreferencesState.DefaultSearchResultSortAlgorithm == v)
+                    {
+                        return;
+                    }
+                    PreferencesState.DefaultSearchResultSortAlgorithm = v;
+                    PreferencesManager.SaveDefaultSearchResultSortAlgorithm();
+                });
+        }
+
         public static void PickDayNightMode(ISettingsHost host, ValueRow row)
         {
             var ctx = host.Activity;
@@ -86,7 +115,8 @@ namespace Seeker.Settings.Rows
             var ctx = host.Activity;
             var variants = new[]
             {
-                DayThemeType.ClassicPurple, DayThemeType.Red, DayThemeType.Blue, DayThemeType.Grey,
+                DayThemeType.Modern, DayThemeType.ClassicPurple, DayThemeType.Red, DayThemeType.Blue,
+                DayThemeType.Grey,
             };
             var options = new List<(string label, DayThemeType value)>(variants.Length);
             foreach (var variant in variants)
@@ -99,11 +129,10 @@ namespace Seeker.Settings.Rows
                     var old = PreferencesState.DayModeVariant;
                     PreferencesState.DayModeVariant = v;
                     PreferencesManager.SaveDayModeVariant();
-                    if (old != v && !host.Activity.Resources.Configuration.UiMode
-                            .HasFlag(Android.Content.Res.UiMode.NightYes))
+                    if (old != v && !ThemeHelper.IsNightMode(host.Activity))
                     {
-                        UiHelpers.SetActivityTheme(host.Activity);
-                        SeekerApplication.RecreateActivies();
+                        // recreates activities only - client/transfers keep running
+                        UiHelpers.ApplyThemeChange(host.Activity);
                     }
                 });
         }
@@ -113,8 +142,9 @@ namespace Seeker.Settings.Rows
             var ctx = host.Activity;
             var variants = new[]
             {
-                NightThemeType.ClassicPurple, NightThemeType.Grey, NightThemeType.Blue,
-                NightThemeType.Red, NightThemeType.AmoledClassicPurple, NightThemeType.AmoledGrey,
+                NightThemeType.Modern, NightThemeType.ClassicPurple, NightThemeType.Grey,
+                NightThemeType.Blue, NightThemeType.Red, NightThemeType.AmoledClassicPurple,
+                NightThemeType.AmoledGrey,
             };
             var options = new List<(string label, NightThemeType value)>(variants.Length);
             foreach (var variant in variants)
@@ -127,11 +157,10 @@ namespace Seeker.Settings.Rows
                     var old = PreferencesState.NightModeVariant;
                     PreferencesState.NightModeVariant = v;
                     PreferencesManager.SaveNightModeVariant();
-                    if (old != v && host.Activity.Resources.Configuration.UiMode
-                            .HasFlag(Android.Content.Res.UiMode.NightYes))
+                    if (old != v && ThemeHelper.IsNightMode(host.Activity))
                     {
-                        UiHelpers.SetActivityTheme(host.Activity);
-                        SeekerApplication.RecreateActivies();
+                        // recreates activities only - client/transfers keep running
+                        UiHelpers.ApplyThemeChange(host.Activity);
                     }
                 });
         }

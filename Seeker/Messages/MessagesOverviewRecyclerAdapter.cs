@@ -1,4 +1,4 @@
-﻿using Android.App;
+using Android.App;
 using Android.Content;
 using Android.Graphics;
 using Android.Graphics.Drawables;
@@ -26,10 +26,13 @@ namespace Seeker.Messages
         {
             containingFragment = outerFrag;
             adapter = _adapter;
+            // The swipe-to-delete background is semantic, so it is readable in every theme.
+            colorDrawable = new Android.Graphics.Drawables.ColorDrawable(
+                UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.dsColorError));
             iconDrawable = ContextCompat.GetDrawable(SeekerState.ActiveActivityRef, Resource.Drawable.baseline_delete_outline_white_24);
             clipDrawable = new ClipDrawable(iconDrawable, GravityFlags.Right, ClipDrawableOrientation.Horizontal);
         }
-        private Android.Graphics.Drawables.ColorDrawable colorDrawable = new Android.Graphics.Drawables.ColorDrawable(Color.ParseColor("#ed4a51"));
+        private Android.Graphics.Drawables.ColorDrawable colorDrawable;
         private Android.Graphics.Drawables.Drawable iconDrawable = null;
         private Android.Graphics.Drawables.ClipDrawable clipDrawable = null;
 
@@ -58,7 +61,7 @@ namespace Seeker.Messages
             MessageController.UndoDeleteMessagesFromUser(deletedData);
             if (fromOptionMenu)
             {
-                (SeekerState.ActiveActivityRef as MessagesActivity).GetOverviewFragment().RefreshAdapter();
+                (SeekerState.ActiveActivityRef as MessagesActivity)?.GetOverviewFragment()?.RefreshAdapter();
             }
             else
             {
@@ -80,7 +83,17 @@ namespace Seeker.Messages
             adapter.RemoveAt(pos); //removes from adapter data and notifies.
             var (deletedMessages, readCount) = MessageController.DeleteMessageFromUserWithUndo(usernameToDelete);
 
-            Snackbar sb = Snackbar.Make(containingFragment.View, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
+            // Anchor through the fragment (host agnostic): the overview may live in MainActivity's
+            // shell page instead of MessagesActivity, where the activity content view is not the
+            // right snackbar host.
+            View anchor = containingFragment is MessagesOverviewFragment overview
+                ? overview.SnackbarAnchor
+                : containingFragment.View;
+            if (anchor == null)
+            {
+                return;
+            }
+            Snackbar sb = Snackbar.Make(anchor, string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
                 usernameToDelete), Snackbar.LengthLong)
                 .SetAction(Resource.String.undo, (View view) => UndoSingleUserMessagesDeleteAction(this.adapter, (usernameToDelete, deletedMessages, readCount), pos, false)) ;
             sb.Show();
@@ -153,7 +166,8 @@ namespace Seeker.Messages
         public List<int> SelectedPositions = new List<int>();
         public bool IsInBatchSelectMode = false;
         public override int ItemCount => localDataSet.Count;
-        private int position = -1;
+        private readonly Action<int> onItemClick;
+        private readonly Action<int> onItemLongClick;
 
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
         {
@@ -173,37 +187,32 @@ namespace Seeker.Messages
 
         public void setPosition(int position)
         {
-            this.position = position;
         }
 
         public int getPosition()
         {
-            return this.position;
+            return -1;
         }
 
-
-        private void MessageOverviewClick(object sender, EventArgs e)
-        {
-            setPosition((sender as MessageOverviewView).ViewHolder.BindingAdapterPosition);
-            if (IsInBatchSelectMode)
-            {
-                (MessagesActivity.MessagesActivityRef as MessagesActivity).GetOverviewFragment()?.ToggleBatchSelect(position);
-                return;
-            }
-            MessagesActivity.MessagesActivityRef.ChangeToInnerFragment(localDataSet[position]);
-        }
 
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
         {
             MessageOverviewView view = MessageOverviewView.Create(parent);
-            (view as View).Click += MessageOverviewClick;
+            (view as View).Click += (sender, e) =>
+            {
+                int pos = (sender as MessageOverviewView)?.ViewHolder?.BindingAdapterPosition ?? RecyclerView.NoPosition;
+                if (pos != RecyclerView.NoPosition)
+                {
+                    onItemClick?.Invoke(pos);
+                }
+            };
             MessageOverviewHolder holder = new MessageOverviewHolder(view as View);
             (view as View).LongClick += (sender, e) =>
             {
                 int pos = holder.BindingAdapterPosition;
                 if (pos != RecyclerView.NoPosition)
                 {
-                    (MessagesActivity.MessagesActivityRef as MessagesActivity).GetOverviewFragment()?.OnItemLongClick(pos);
+                    onItemLongClick?.Invoke(pos);
                 }
             };
             return holder;
@@ -235,9 +244,11 @@ namespace Seeker.Messages
             }
         }
 
-        public MessagesOverviewRecyclerAdapter(List<string> ti)
+        public MessagesOverviewRecyclerAdapter(List<string> ti, Action<int> onItemClick, Action<int> onItemLongClick)
         {
             localDataSet = ti;
+            this.onItemClick = onItemClick;
+            this.onItemLongClick = onItemLongClick;
         }
 
     }
@@ -350,18 +361,23 @@ namespace Seeker.Messages
 
             viewStatusIndicator.Visibility = ViewStates.Visible;
             int colorRes;
+            int statusLabelRes;
             switch (status)
             {
                 case Soulseek.UserPresence.Online:
                     colorRes = Resource.Color.online;
+                    statusLabelRes = Resource.String.online;
                     break;
                 case Soulseek.UserPresence.Away:
                     colorRes = Resource.Color.away;
+                    statusLabelRes = Resource.String.away;
                     break;
                 default:
                     colorRes = Resource.Color.offline;
+                    statusLabelRes = Resource.String.offline;
                     break;
             }
+            viewStatusIndicator.ContentDescription = SeekerApplication.GetString(statusLabelRes);
             viewStatusIndicator.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, colorRes)));
         }
 
@@ -424,6 +440,12 @@ namespace Seeker.Messages
                 msgText = "\u21AA" + msgText;
             }
             viewMessage.Text = msgText;
+
+            // One sentence for screen readers: who, when, what, and how many are unread.
+            string unreadDescription = unreadCount > 0
+                ? ", " + string.Format(SeekerApplication.GetString(Resource.String.unread_count), unreadCount)
+                : string.Empty;
+            ContentDescription = username + ", " + viewDateTimeAgo.Text + ", " + msgText + unreadDescription;
         }
     }
 

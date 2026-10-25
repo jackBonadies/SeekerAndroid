@@ -38,7 +38,7 @@
         android:visibility="gone"
         app:trackCornerRadius="0dp"
         app:trackInnerCornerRadius="2dp"
-        app:indicatorColor="?attr/mainPurple"
+        app:indicatorColor="?attr/dsColorPrimary"
         android:indeterminateOnly="true" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -103,7 +103,7 @@
                     app:indicatorSize="120dp"
                     app:trackCornerRadius="5dp"
                     app:trackThickness="6dp"
-                    app:indicatorColor="?attr/mainPurple"
+                    app:indicatorColor="?attr/dsColorPrimary"
                     android:indeterminateOnly="true" />
 
                 <TextView
@@ -260,6 +260,7 @@
                     android:tint="?attr/cellTextColorSubdued" />
 
                 <TextView
+                    android:id="@+id/searchFailedTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxWidth="320dp"
@@ -322,9 +323,12 @@
                     android:id="@+id/filterText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="@dimen/ds_touch_target_min"
+                    android:paddingEnd="@dimen/ds_space_xl"
                     android:singleLine="true"
                     android:focusable="true"
                     android:imeOptions="actionDone"
+                    android:contentDescription="@string/filter_search_results_here"
                 />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -523,8 +527,8 @@
     <!--    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="?attr/mainPurple"
-        android:background="?attr/mainPurple"
+        android:backgroundTint="?attr/dsColorPrimary"
+        android:background="?attr/dsColorPrimary"
         app:layout_anchor="@id/bottomSheet"
         app:layout_dodgeInsetEdges="bottom"
         app:borderWidth="0dp"
@@ -537,14 +541,15 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="?attr/mainPurple"
-        android:background="?attr/mainPurple"
-        app:tint="@android:color/white"
+        android:backgroundTint="?attr/dsColorPrimary"
+        android:background="?attr/dsColorPrimary"
+        android:contentDescription="@string/advanced_filters_description"
+        app:tint="?attr/dsColorOnPrimary"
         app:layout_anchor="@id/bottomSheet"
         app:borderWidth="0dp"
         app:fabSize="mini"
         app:layout_anchorGravity="top|right|end"
         android:id="@+id/bsbutton"
-        android:layout_margin="16dp"
+        android:layout_margin="@dimen/ds_space_lg"
     />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

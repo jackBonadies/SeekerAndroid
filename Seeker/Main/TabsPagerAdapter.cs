@@ -43,23 +43,26 @@ namespace Seeker
         {
         }
 
-        public override int ItemCount => 4;
+        public override int ItemCount => MainNavigation.PageCount;
 
         //FragmentStateAdapter owns the fragment instances; this just produces a fresh fragment for a
         //given tab. The page titles that used to live here are gone with the (unused) TabLayout —
-        //tab labels come from the BottomNavigationView menu.
+        //tab labels come from the BottomNavigationView menu. Page 0 stays the account/login page
+        //(hidden from the bottom menu) and page 4 is the Messages overview.
         public override Fragment CreateFragment(int position)
         {
             switch (position)
             {
-                case 0:
+                case MainNavigation.AccountPage:
                     return new LoginFragment();
-                case 1:
+                case MainNavigation.SearchPage:
                     return new SearchFragment();
-                case 2:
+                case MainNavigation.TransfersPage:
                     return new TransfersFragment();
-                case 3:
+                case MainNavigation.BrowsePage:
                     return new BrowseFragment();
+                case MainNavigation.MessagesPage:
+                    return new Seeker.Messages.MessagesOverviewFragment();
                 default:
                     throw new System.Exception("Invalid Tab");
             }

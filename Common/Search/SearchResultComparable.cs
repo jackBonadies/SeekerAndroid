@@ -59,25 +59,72 @@ namespace Seeker.Search
             return -x.UploadSpeed.CompareTo(y.UploadSpeed);
         }
 
+        /// <summary>
+        /// The row's representative file: first unlocked file, falling back to the first locked
+        /// file. Result rows are folder groups, so this is only a stable ordering key, never an
+        /// aggregate. O(1) per call (the collections are already materialised on the response).
+        /// </summary>
+        private static Soulseek.File GetRepresentativeFile(SearchResponse response)
+        {
+            if (response.Files.Count != 0)
+            {
+                return response.Files.First();
+            }
+            if (response.LockedFiles.Count != 0)
+            {
+                return response.LockedFiles.First();
+            }
+            return null;
+        }
+
         private static int CompareByFiles(SearchResponse x, SearchResponse y)
         {
-            if (x.Files.Count != 0 && y.Files.Count != 0)
+            var xFile = GetRepresentativeFile(x);
+            var yFile = GetRepresentativeFile(y);
+            if (xFile == null || yFile == null)
             {
-                return x.Files.First().Filename.CompareTo(y.Files.First().Filename);
+                return (yFile != null).CompareTo(xFile != null);
             }
-            if (x.LockedFiles.Count != 0 && y.LockedFiles.Count != 0)
+            return string.Compare(xFile.Filename, yFile.Filename, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// File-name ordering compares the representative file's name only, not the whole path.
+        /// Case-insensitive first so "Alpha" and "alpha" are adjacent; an ordinal tie-break keeps
+        /// the order deterministic regardless of the current culture.
+        /// </summary>
+        private static int CompareByFilename(SearchResponse x, SearchResponse y)
+        {
+            var xFile = GetRepresentativeFile(x);
+            var yFile = GetRepresentativeFile(y);
+            if (xFile == null || yFile == null)
             {
-                return x.LockedFiles.First().Filename.CompareTo(y.LockedFiles.First().Filename);
+                // Empty responses sort last: a row without a file cannot meaningfully be named.
+                return (yFile != null).CompareTo(xFile != null);
             }
-            if (x.Files.Count != 0 && y.LockedFiles.Count != 0)
+
+            ReadOnlySpan<char> xName = SimpleHelpers.GetFileNameFromFile(xFile.Filename);
+            ReadOnlySpan<char> yName = SimpleHelpers.GetFileNameFromFile(yFile.Filename);
+            int cmp = xName.CompareTo(yName, StringComparison.OrdinalIgnoreCase);
+            if (cmp != 0)
             {
-                return x.Files.First().Filename.CompareTo(y.LockedFiles.First().Filename);
+                return cmp;
             }
-            if (x.LockedFiles.Count != 0 && y.Files.Count != 0)
-            {
-                return x.LockedFiles.First().Filename.CompareTo(y.Files.First().Filename);
-            }
-            return 0;
+            return xName.CompareTo(yName, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Descending size of the representative file. No sum is computed, so this stays O(1)
+        /// per comparison; an empty response only contributes its availability tie-breaks.
+        /// </summary>
+        private static int CompareByFileSize(SearchResponse x, SearchResponse y)
+        {
+            var xFile = GetRepresentativeFile(x);
+            var yFile = GetRepresentativeFile(y);
+            long xSize = xFile?.Size ?? -1;
+            long ySize = yFile?.Size ?? -1;
+            // descending - larger representative file first
+            return -xSize.CompareTo(ySize);
         }
 
         private int CompareByAvailable(SearchResponse x, SearchResponse y)
@@ -159,6 +206,18 @@ namespace Seeker.Search
                 {
                     // should not happen
                 }
+                return CompareByAvailable(x, y);
+            }
+            else if (searchResultSorting == SearchResultSorting.Filename)
+            {
+                int cmp = CompareByFilename(x, y);
+                if (cmp != 0) return cmp;
+                return CompareByAvailable(x, y);
+            }
+            else if (searchResultSorting == SearchResultSorting.FileSize)
+            {
+                int cmp = CompareByFileSize(x, y);
+                if (cmp != 0) return cmp;
                 return CompareByAvailable(x, y);
             }
             else

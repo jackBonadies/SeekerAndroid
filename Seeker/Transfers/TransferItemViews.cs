@@ -1,4 +1,4 @@
-﻿using Android.App;
+using Android.App;
 using Android.Content;
 using Android.Content.Res;
 using Android.Graphics;
@@ -53,6 +53,10 @@ namespace Seeker
 
         public TextView GetTimeRemainingSeparatorView();
 
+        public TextView GetPercentTextView();
+
+        public ImageButton GetRowActionButton();
+
         public bool GetShowProgressSize();
 
         public bool GetShowSpeed();
@@ -74,6 +78,8 @@ namespace Seeker
         private TextView viewSpeed;
         private TextView viewTimeRemaining;
         private TextView viewTimeRemainingSeparator;
+        private TextView viewPercent;
+        private ImageButton rowActionButton;
         private ImageView selectionCheckbox;
         private FrameLayout actionContainer;
 
@@ -116,6 +122,16 @@ namespace Seeker
         public TextView GetTimeRemainingSeparatorView()
         {
             return viewTimeRemainingSeparator;
+        }
+
+        public TextView GetPercentTextView()
+        {
+            return viewPercent;
+        }
+
+        public ImageButton GetRowActionButton()
+        {
+            return rowActionButton;
         }
 
         public bool showSize;
@@ -169,6 +185,8 @@ namespace Seeker
             viewSpeed = FindViewById<TextView>(Resource.Id.textViewSpeed);
             viewTimeRemaining = FindViewById<TextView>(Resource.Id.textViewTimeRemaining);
             viewTimeRemainingSeparator = FindViewById<TextView>(Resource.Id.textViewTimeRemainingSeparator);
+            viewPercent = FindViewById<TextView>(Resource.Id.textViewPercent);
+            rowActionButton = FindViewById<ImageButton>(Resource.Id.rowActionButton);
 
             selectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
             actionContainer = FindViewById<FrameLayout>(Resource.Id.actionContainer);
@@ -208,16 +226,19 @@ namespace Seeker
             InnerTransferItem = item;
             FolderItem folderItem = item as FolderItem;
             viewFoldername.Text = folderItem.GetDisplayFolderName();
-            var state = folderItem.GetState(out bool isFailed, out _);
+            var state = folderItem.GetState(out _, out _);
 
             TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSize, viewSpeed, item, state, this.showSize, this.showSpeed, isFolder: true);
-            TransferViewHelper.SetTimeRemainingText(viewTimeRemainingSeparator, viewTimeRemaining, viewSpeed, item, this.showTimeRemaining);
+            TransferViewHelper.SetTimeRemainingText(viewTimeRemainingSeparator, viewTimeRemaining, viewSpeed, item, state, this.showTimeRemaining);
+            var (totalFolderBytes, completedFolderBytes) = folderItem.GetFolderProgress();
+            TransferViewHelper.SetPercentText(viewPercent, completedFolderBytes, totalFolderBytes, state.HasFlag(TransferStates.Succeeded));
             var arrowSpan = folderItem.IsUpload() ? cachedUploadArrowSpan : cachedDownloadArrowSpan;
             TransferViewHelper.SetAdditionalFolderInfoState(viewNumRemaining, viewCurrentFilename, folderItem, state, arrowSpan, cachedDlColor);
             TransferViewHelper.UpdateSegmentedProgressBar(segmentedProgressBar, folderItem);
 
             viewUsername.Text = folderItem.Username;
 
+            rowActionButton.Visibility = isInBatchMode ? ViewStates.Gone : ViewStates.Visible;
             if (isInBatchMode)
             {
                 actionContainer.Visibility = ViewStates.Visible;
@@ -385,9 +406,17 @@ namespace Seeker
         }
 
 
-        public static void SetTimeRemainingText(TextView separator, TextView timeRemainingView, TextView speedView, ITransferItem item, bool showTimeRemaining)
+        public static void SetTimeRemainingText(TextView separator, TextView timeRemainingView, TextView speedView, ITransferItem item, TransferStates state, bool showTimeRemaining)
         {
-            TimeSpan? remaining = showTimeRemaining ? item.GetRemainingTime() : null;
+            // Both gates matter: the preference says the user wants an ETA, the row state says one
+            // actually exists. Queued / paused / finished rows keep a cached speed sample for a
+            // short while, so asking them for an estimate would surface a stale countdown. Bail out
+            // before querying so the engine estimate is not requested at all.
+            TimeSpan? remaining = null;
+            if (item != null && TransferPresentation.ShouldQueryEta(showTimeRemaining, state))
+            {
+                remaining = TransferPresentation.MeaningfulRemainingTime(item.GetRemainingTime(), showTimeRemaining, state);
+            }
             if (remaining == null)
             {
                 timeRemainingView.Visibility = ViewStates.Gone;
@@ -397,6 +426,16 @@ namespace Seeker
             timeRemainingView.Text = SimpleHelpers.FormatTimeRemaining(remaining.Value);
             timeRemainingView.Visibility = ViewStates.Visible;
             separator.Visibility = speedView.Visibility == ViewStates.Visible ? ViewStates.Visible : ViewStates.Gone;
+        }
+
+        public static void SetPercentText(TextView percentView, long bytesTransferred, long sizeBytes, bool terminal)
+        {
+            if (percentView == null)
+            {
+                return;
+            }
+            int percent = TransferPresentation.ProgressPercent(bytesTransferred, sizeBytes, terminal);
+            percentView.Text = string.Format(SeekerApplication.GetString(Resource.String.transfer_percent_format), percent);
         }
 
         private enum TransferChipType
@@ -756,6 +795,8 @@ namespace Seeker
         private TextView viewSpeed;
         private TextView viewTimeRemaining;
         private TextView viewTimeRemainingSeparator;
+        private TextView viewPercent;
+        private ImageButton rowActionButton;
         private ImageView selectionCheckbox;
         private FrameLayout actionContainer;
 
@@ -791,6 +832,16 @@ namespace Seeker
         public TextView GetTimeRemainingSeparatorView()
         {
             return viewTimeRemainingSeparator;
+        }
+
+        public TextView GetPercentTextView()
+        {
+            return viewPercent;
+        }
+
+        public ImageButton GetRowActionButton()
+        {
+            return rowActionButton;
         }
 
         public bool GetShowProgressSize()
@@ -840,6 +891,8 @@ namespace Seeker
             viewSpeed = FindViewById<TextView>(Resource.Id.textViewSpeed);
             viewTimeRemaining = FindViewById<TextView>(Resource.Id.textViewTimeRemaining);
             viewTimeRemainingSeparator = FindViewById<TextView>(Resource.Id.textViewTimeRemainingSeparator);
+            viewPercent = FindViewById<TextView>(Resource.Id.textViewPercent);
+            rowActionButton = FindViewById<ImageButton>(Resource.Id.rowActionButton);
 
             selectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
             actionContainer = FindViewById<FrameLayout>(Resource.Id.actionContainer);
@@ -860,7 +913,7 @@ namespace Seeker
             viewFilename.Text = ti.Filename;
             progressBar.Progress = ti.GetProgressForPresentation();
             TransferViewHelper.SetAdditionalStatusText(statusDot, viewStatusAdditionalInfo, viewSize, viewSpeed, ti, ti.State, this.showSizes, this.showSpeed);
-            TransferViewHelper.SetTimeRemainingText(viewTimeRemainingSeparator, viewTimeRemaining, viewSpeed, ti, this.showTimeRemaining);
+            TransferViewHelper.SetTimeRemainingText(viewTimeRemainingSeparator, viewTimeRemaining, viewSpeed, ti, ti.State, this.showTimeRemaining);
             viewUsername.Text = ti.Username;
             bool isFailedOrAborted = ti.Failed;
             if (item.IsUpload() && ti.State.HasFlag(TransferStates.Cancelled))
@@ -872,6 +925,9 @@ namespace Seeker
                 progressBar.Progress = 100;
             }
             TransferViewHelper.SetProgressBarTint(progressBar, ti.State, isFailedOrAborted, item.IsUpload());
+            TransferViewHelper.SetPercentText(viewPercent, ti.GetBytesTransferred(), ti.Size, ti.State.HasFlag(TransferStates.Succeeded));
+
+            rowActionButton.Visibility = isInBatchMode ? ViewStates.Gone : ViewStates.Visible;
 
             if (isInBatchMode)
             {

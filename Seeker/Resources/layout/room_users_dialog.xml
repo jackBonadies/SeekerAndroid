@@ -56,8 +56,8 @@
 
             <ImageButton
                 android:id="@+id/roomUsersHeaderSearch"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="@dimen/ds_touch_target_min"
+                android:layout_height="@dimen/ds_touch_target_min"
                 android:padding="8dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/baseline_search_white_24"
@@ -67,8 +67,8 @@
 
             <ImageButton
                 android:id="@+id/roomUsersHeaderSort"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="@dimen/ds_touch_target_min"
+                android:layout_height="@dimen/ds_touch_target_min"
                 android:padding="8dp"
                 android:layout_marginEnd="8dp"
                 android:scaleType="fitCenter"
@@ -101,8 +101,8 @@
 
             <ImageButton
                 android:id="@+id/roomUsersHeaderSearchClose"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="@dimen/ds_touch_target_min"
+                android:layout_height="@dimen/ds_touch_target_min"
                 android:padding="10dp"
                 android:layout_marginEnd="8dp"
                 android:scaleType="fitCenter"

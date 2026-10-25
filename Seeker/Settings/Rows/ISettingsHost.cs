@@ -19,6 +19,7 @@ namespace Seeker.Settings.Rows
 
         void LaunchChangePassword();
         void LaunchEditUserInfo();
+        void LaunchAccount();
         void LaunchImportClientData();
         void LaunchExportClientData();
         void LaunchRestoreDefaults();

@@ -5,6 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="@dimen/ds_touch_target_min"
     android:paddingStart="12dp"
     android:paddingEnd="12dp"
     android:paddingTop="10dp"
@@ -33,6 +34,7 @@
                 android:id="@+id/username"
                 android:text="usernameDummy"
                 android:textSize="16sp"
+                android:textColor="?attr/cellTextColor"
                 android:singleLine="true"
                 android:ellipsize="end"
             />
@@ -51,6 +53,7 @@
             android:id="@+id/dateTimeAgo"
             android:text="Dec 22"
             android:textSize="12sp"
+            android:textColor="?attr/cellTextColorSubdued"
             android:layout_gravity="center_vertical"
         />
         <ImageView
@@ -77,6 +80,7 @@
             android:text="messageDummy"
             android:id="@+id/message"
             android:textSize="14sp"
+            android:textColor="?attr/cellTextColor"
             android:maxLines="2"
             android:ellipsize="end"
         />

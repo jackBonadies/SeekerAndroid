@@ -5,6 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="@dimen/ds_touch_target_min"
     android:padding="4dp"
     android:foreground="?android:attr/selectableItemBackground"
     android:orientation="vertical"
@@ -27,6 +28,7 @@
             app:srcCompat="@drawable/checkbox_blank_circle"
             android:id="@+id/userStatus"
             android:tint="?attr/mainTextColor"
+            android:importantForAccessibility="no"
         />
         <TextView
             android:layout_width="0dp"
@@ -35,7 +37,7 @@
             android:textColor="?attr/normalTextColor"
             android:id="@+id/username"
             android:text="flag user"
-            android:textSize="22sp"
+            android:textSize="16sp"
         />
         <TextView
             android:layout_width="wrap_content"

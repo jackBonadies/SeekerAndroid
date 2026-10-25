@@ -5,6 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="@dimen/ds_touch_target_min"
 	android:paddingVertical="4dp"
 	android:paddingHorizontal="6dp"
     android:orientation="horizontal"
@@ -18,7 +19,8 @@
         android:text="roomNameDummy"
         android:maxLines="1"
 		android:ellipsize="end"
-        android:textSize="22sp"
+        android:textSize="18sp"
+        android:textColor="?attr/cellTextColor"
     />
     <TextView
         android:layout_width="wrap_content"
@@ -27,7 +29,8 @@
         android:text="90"
 		android:fontFamily="sans-serif-monospace"
         android:id="@+id/usersInRoom"
-        android:textSize="15sp"
+        android:textSize="14sp"
+        android:textColor="?attr/cellTextColorSubdued"
         android:maxLines="1"
     />
 </LinearLayout>

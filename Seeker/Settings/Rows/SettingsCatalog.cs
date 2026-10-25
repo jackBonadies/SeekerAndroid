@@ -1,4 +1,4 @@
-using AndroidX.AppCompat.App;
+﻿using AndroidX.AppCompat.App;
 using Common;
 using Seeker.Helpers;
 using Seeker.Managers;
@@ -43,6 +43,187 @@ namespace Seeker.Settings.Rows
         {
             var rows = new List<SettingRow>();
 
+            // =================== ACCOUNT & CONNECTION ===================
+            rows.Add(new HeaderRow { Id = "h.account_connection", TitleRes = Resource.String.section_account_connection });
+
+            rows.Add(new NavigationRow
+            {
+                Id = "account.open_account",
+                TitleRes = Resource.String.nav_account,
+                SubtitleRes = Resource.String.signin_or_create_account,
+                IconRes = Resource.Drawable.folder_account_outline,
+                OnClick = (h, r) => h.LaunchAccount(),
+            });
+
+            rows.Add(new ValueRow
+            {
+                Id = "account.privileges",
+                TitleRes = Resource.String.Privileges,
+                KeywordsRes = Resource.String.keywords_privileges,
+                IconRes = Resource.Drawable.account_star_outline,
+                OnClick = (h, r) => PrivilegesBottomSheet.Show(h),
+                StatusProvider = () =>
+                {
+                    var statusKind = SettingStatusKind.HideDot;
+                    if (Seeker.Managers.PrivilegesManager.Instance.IsCheckInProgress)
+                    {
+                        statusKind = SettingStatusKind.Running;
+                    }
+                    else if (Seeker.Managers.PrivilegesManager.Instance.IsPrivileged)
+                    {
+                        statusKind = SettingStatusKind.Success;
+                    }
+                    return new SettingStatus
+                    {
+                        Kind = statusKind,
+                        Text = Seeker.Managers.PrivilegesManager.Instance.IsCheckInProgress ?
+                            host.Activity.GetString(Resource.String.checking_priv_) : Seeker.Managers.PrivilegesManager.Instance.GetPrivilegeStatus()
+                    };
+                },
+                AddStatusListener = h2 => Seeker.Managers.PrivilegesManager.Instance.CheckStateChanged += h2,
+                RemoveStatusListener = h2 => Seeker.Managers.PrivilegesManager.Instance.CheckStateChanged -= h2,
+            });
+
+            rows.Add(new NavigationRow
+            {
+                Id = "account.change_password",
+                TitleRes = Resource.String.change_password,
+                IconRes = Resource.Drawable.lock_28dp,
+                OnClick = (h, r) => h.LaunchChangePassword(),
+            });
+
+            rows.Add(new NavigationRow
+            {
+                Id = "account.edit_user_info",
+                TitleRes = Resource.String.edit_your_user_info,
+                KeywordsRes = Resource.String.keywords_edit_user_info,
+                IconRes = Resource.Drawable.user_edit,
+                OnClick = (h, r) => h.LaunchEditUserInfo(),
+            });
+
+            rows.Add(new ToggleRow
+            {
+                Id = "network.listening",
+                TitleRes = Resource.String.enable_listening,
+                SubtitleRes = Resource.String.setting_subtitle_listening,
+                IconRes = Resource.Drawable.lan_connect,
+                Getter = () => PreferencesState.ListenerEnabled,
+                Setter = v => {
+                    PreferencesState.ListenerEnabled = v;
+                    PreferencesManager.SaveListeningState();
+                    host.Adapter?.NotifyParentToggled("network.listening");
+                    Seeker.Services.SessionService.Instance.ReconfigureOptions(null, v, null);
+                    if (v)
+                    {
+                        UPnpManager.Instance.Feedback = true;
+                        UPnpManager.Instance.SearchAndSetMappingIfRequired();
+                    }
+                },
+                DependentRowIds = new[] { "network.port", "network.port_check", "network.upnp" },
+            });
+
+            rows.Add(new ValueRow
+            {
+                Id = "network.port",
+                ParentId = "network.listening",
+                TitleRes = Resource.String.change_port,
+                SubtitleRes = Resource.String.setting_subtitle_port,
+                KeywordsRes = Resource.String.keywords_port,
+                ValueProvider = ctx => PreferencesState.ListenerPort.ToString(),
+                OnClick = (h, r) => NumericInputBottomSheet.Show(h, r, 1024, 65535,
+                    () => PreferencesState.ListenerPort,
+                    v => {
+                        bool changed = PreferencesState.ListenerPort != v;
+                        PreferencesState.ListenerPort = v;
+                        PreferencesManager.SaveListeningState();
+                        if (changed)
+                        {
+                            Seeker.Services.SessionService.Instance.ReconfigureOptions(null, null, v);
+                            RescanUpnp();
+                        }
+                    }),
+                VisiblePredicate = () => PreferencesState.ListenerEnabled,
+            });
+
+            rows.Add(new ActionRow
+            {
+                Id = "network.port_check",
+                ParentId = "network.listening",
+                TitleRes = Resource.String.check_your_port_status,
+                ButtonTextRes = Resource.String.check_your_port_status,
+                OnClick = (h, r) => h.CheckPortStatus(),
+                VisiblePredicate = () => PreferencesState.ListenerEnabled,
+            });
+
+            rows.Add(new ToggleRow
+            {
+                Id = "network.upnp",
+                ParentId = "network.listening",
+                TitleRes = Resource.String.use_pnp_for_port_forwarding,
+                SubtitleRes = Resource.String.setting_subtitle_upnp,
+                KeywordsRes = Resource.String.keywords_upnp,
+                Getter = () => PreferencesState.ListenerUPnpEnabled,
+                Setter = v => {
+                    PreferencesState.ListenerUPnpEnabled = v;
+                    PreferencesManager.SaveListeningState();
+                    if (v)
+                    {
+                        // rerun on enable
+                        RescanUpnp();
+                    }
+                },
+                StatusProvider = UpnpStatus,
+                AddStatusListener = h => {
+                    UPnpManager.Instance.SearchStarted += h;
+                    UPnpManager.Instance.SearchFinished += h;
+                    UPnpManager.Instance.DeviceSuccessfullyMapped += h;
+                },
+                RemoveStatusListener = h => {
+                    UPnpManager.Instance.SearchStarted -= h;
+                    UPnpManager.Instance.SearchFinished -= h;
+                    UPnpManager.Instance.DeviceSuccessfullyMapped -= h;
+                },
+                VisiblePredicate = () => PreferencesState.ListenerEnabled,
+            });
+
+            rows.Add(new ToggleRow
+            {
+                Id = "general.auto_away",
+                TitleRes = Resource.String.AwayOnInactivity,
+                SubtitleRes = Resource.String.setting_subtitle_auto_away,
+                KeywordsRes = Resource.String.keywords_auto_away,
+                IconRes = Resource.Drawable.schedule_clock_28dp,
+                Getter = () => PreferencesState.AutoAwayOnInactivity,
+                Setter = v => { PreferencesState.AutoAwayOnInactivity = v;
+                                PreferencesManager.SaveAutoAwayOnInactivity(); },
+            });
+
+            rows.Add(new ToggleRow
+            {
+                Id = "general.start_service",
+                TitleRes = Resource.String.start_service_on_startup,
+                SubtitleRes = Resource.String.keep_alive_service_subtitle,
+                IconRes = Resource.Drawable.power_settings_new_28dp,
+                Getter = () => PreferencesState.StartServiceOnStartup,
+                Setter = v => { PreferencesState.StartServiceOnStartup = v;
+                                PreferencesManager.SaveStartServiceOnStartup(); },
+                DependentRowIds = new[] { "general.startstop_service" },
+            });
+
+            rows.Add(new ActionRow
+            {
+                Id = "general.startstop_service",
+                ParentId = "general.start_service",
+                TitleRes = Resource.String.start_service_on_startup,
+                ButtonTextRes = Resource.String.start_service_on_startup,
+                ButtonTextProvider = ctx => ctx.GetString(
+                     Seeker.Services.ServiceLifecycle.IsStartUpServiceCurrentlyRunning
+                         ? Resource.String.stop_service
+                         : Resource.String.start_service),
+                DisableIfParentDisabled = false,
+                OnClick = (h, r) => { h.StartStopBackgroundService(); h.NotifyRowChanged(r.Id); },
+            });
+
             // ============================== DOWNLOADS ==============================
             rows.Add(new HeaderRow { Id = "h.downloads", TitleRes = Resource.String.section_downloads });
 
@@ -61,6 +242,7 @@ namespace Seeker.Settings.Rows
             {
                 Id = "downloads.create_subfolders",
                 TitleRes = Resource.String.CreateCompleteAndIncomplete,
+                SubtitleRes = Resource.String.setting_subtitle_subfolders,
                 IconRes = Resource.Drawable.browse_48dp,
                 Getter = () => PreferencesState.CreateCompleteAndIncompleteFolders,
                 Setter = v => { PreferencesState.CreateCompleteAndIncompleteFolders = v;
@@ -81,6 +263,7 @@ namespace Seeker.Settings.Rows
             {
                 Id = "downloads.skip_subfolders_single",
                 TitleRes = Resource.String.DoNotCreateSubfoldersForSingleDownloads,
+                SubtitleRes = Resource.String.setting_subtitle_no_single_subfolder,
                 IconRes = Resource.Drawable.browse_48dp,
                 Getter = () => PreferencesState.NoSubfolderForSingle,
                 Setter = v => { PreferencesState.NoSubfolderForSingle = v;
@@ -91,6 +274,7 @@ namespace Seeker.Settings.Rows
             {
                 Id = "downloads.override_incomplete",
                 TitleRes = Resource.String.ManuallySetIncompleteFolder,
+                SubtitleRes = Resource.String.setting_subtitle_override_incomplete,
                 KeywordsRes = Resource.String.keywords_override_incomplete,
                 IconRes = Resource.Drawable.browse_48dp,
                 Getter = () => PreferencesState.OverrideDefaultIncompleteLocations,
@@ -148,241 +332,17 @@ namespace Seeker.Settings.Rows
             {
                 Id = "downloads.auto_retry",
                 TitleRes = Resource.String.AutoRetryFailedOfflineOnline,
+                SubtitleRes = Resource.String.setting_subtitle_auto_retry,
                 IconRes = Resource.Drawable.autorenew_autojoin_30dp,
                 Getter = () => PreferencesState.AutoRetryBackOnline,
                 Setter = v => { PreferencesState.AutoRetryBackOnline = v;
                                 PreferencesManager.SaveAutoRetryBackOnline(); },
             });
 
-            // ============================== SEARCH ==============================
-            rows.Add(new HeaderRow { Id = "h.search", TitleRes = Resource.String.section_search });
-
-            rows.Add(new ValueRow
-            {
-                Id = "search.max_results",
-                TitleRes = Resource.String.max_search_results,
-                KeywordsRes = Resource.String.keywords_max_results,
-                IconRes = Resource.Drawable.baseline_search_white_24,
-                ValueProvider = ctx => PreferencesState.NumberSearchResults.ToString(),
-                OnClick = (h, r) => OptionPickerBottomSheet.ShowPresetInts(h, r, SearchResultPresets,
-                    () => PreferencesState.NumberSearchResults,
-                    v => { PreferencesState.NumberSearchResults = v;
-                           PreferencesManager.SaveInt(KeyConsts.M_NumberSearchResults, v); }),
-            });
-
-            rows.Add(new ToggleRow
-            {
-                Id = "search.smart_filter",
-                TitleRes = Resource.String.ShowSmartFilters,
-                IconRes = Resource.Drawable.ic_filter_list_black_32dp,
-                Getter = () => PreferencesState.ShowSmartFilters,
-                Setter = v => { PreferencesState.ShowSmartFilters = v;
-                                PreferencesManager.SaveShowSmartFilters(); },
-                DependentRowIds = new[] { "search.smart_filter_configure" },
-            });
-            rows.Add(new NavigationRow
-            {
-                Id = "search.smart_filter_configure",
-                ParentId = "search.smart_filter",
-                TitleRes = Resource.String.Configure,
-                SubtitleProvider = ctx => SettingValueFormat.SmartFilterSummary(ctx),
-                OnClick = (h, r) => h.ConfigureSmartFilters(),
-            });
-
-            rows.Add(new ToggleRow
-            {
-                Id = "search.free_slots",
-                TitleRes = Resource.String.only_show_free_slots,
-                IconRes = Resource.Drawable.bolt_28dp,
-                Getter = () => PreferencesState.FreeUploadSlotsOnly,
-                Setter = v => { PreferencesState.FreeUploadSlotsOnly = v;
-                                PreferencesManager.SaveBoolean(KeyConsts.M_OnlyFreeUploadSlots, v); },
-            });
-
-            rows.Add(new ToggleRow
-            {
-                Id = "search.show_locked_search",
-                TitleRes = Resource.String.ShowPrivateLockedSearch,
-                KeywordsRes = Resource.String.keywords_locked_search,
-                IconRes = Resource.Drawable.lock_28dp,
-                // Original checkbox represents "show locked" → !HideLocked.
-                Getter = () => !PreferencesState.HideLockedResultsInSearch,
-                Setter = v => { PreferencesState.HideLockedResultsInSearch = !v;
-                                PreferencesManager.SaveBoolean(KeyConsts.M_HideLockedSearch, PreferencesState.HideLockedResultsInSearch); },
-            });
-            rows.Add(new ToggleRow
-            {
-                Id = "search.show_locked_browse",
-                TitleRes = Resource.String.ShowPrivateLockedBrowse,
-                KeywordsRes = Resource.String.keywords_locked_browse,
-                IconRes = Resource.Drawable.lock_28dp,
-                Getter = () => !PreferencesState.HideLockedResultsInBrowse,
-                Setter = v => { PreferencesState.HideLockedResultsInBrowse = !v;
-                                PreferencesManager.SaveBoolean(KeyConsts.M_HideLockedBrowse, PreferencesState.HideLockedResultsInBrowse); },
-            });
-
-            rows.Add(new ToggleRow
-            {
-                Id = "search.remember_history",
-                TitleRes = Resource.String.remember_search_history,
-                KeywordsRes = Resource.String.keywords_remember_search_history,
-                IconRes = Resource.Drawable.history_28dp,
-                Getter = () => PreferencesState.RememberSearchHistory,
-                Setter = v => { PreferencesState.RememberSearchHistory = v;
-                                PreferencesManager.SaveBoolean(KeyConsts.M_RememberSearchHistory, v); },
-                //DependentRowIds = new[] { "search.clear_history" }, // Clear history is always enabled
-            });
-            rows.Add(new ActionRow
-            {
-                Id = "search.clear_history",
-                ParentId = "search.remember_history",
-                TitleRes = Resource.String.clear_search_history,
-                ButtonTextRes = Resource.String.clear_search_history,
-                Destructive = true,
-                DisableIfParentDisabled = false,
-                OnClick = (h, r) => h.ClearSearchHistory(),
-            });
-
-            // ============================== GENERAL ==============================
-            rows.Add(new HeaderRow { Id = "h.general", TitleRes = Resource.String.section_general });
-
-            rows.Add(new ToggleRow
-            {
-                Id = "general.start_service",
-                TitleRes = Resource.String.start_service_on_startup,
-                SubtitleRes = Resource.String.keep_alive_service_subtitle,
-                IconRes = Resource.Drawable.power_settings_new_28dp,
-                Getter = () => PreferencesState.StartServiceOnStartup,
-                Setter = v => { PreferencesState.StartServiceOnStartup = v;
-                                PreferencesManager.SaveStartServiceOnStartup(); },
-                DependentRowIds = new[] { "general.startstop_service" },
-            });
-            rows.Add(new ActionRow
-            {
-                Id = "general.startstop_service",
-                ParentId = "general.start_service",
-                TitleRes = Resource.String.start_service_on_startup,
-                ButtonTextRes = Resource.String.start_service_on_startup,
-                ButtonTextProvider = ctx => ctx.GetString(
-                     Seeker.Services.ServiceLifecycle.IsStartUpServiceCurrentlyRunning
-                         ? Resource.String.stop_service
-                         : Resource.String.start_service),
-                DisableIfParentDisabled = false,
-                OnClick = (h, r) => { h.StartStopBackgroundService(); h.NotifyRowChanged(r.Id); },
-            });
-
-            rows.Add(new ToggleRow
-            {
-                Id = "general.allow_private_invites",
-                TitleRes = Resource.String.allow_private_room_invitations,
-                IconRes = Resource.Drawable.mail_28dp,
-                Getter = () => PreferencesState.AllowPrivateRoomInvitations,
-                // PreferencesState is updated by ReconfigureOptionsLogic on server success; on
-                // failure or not-logged-in, ReconfigureOptions fires NotifyRowChanged to revert
-                // the optimistic switch flip done by ToggleViewHolder on click.
-                Setter = v => Seeker.Services.SessionService.Instance.ReconfigureOptions(v, null, null),
-            });
-
-            rows.Add(new ToggleRow
-            {
-                Id = "general.notif_folder_complete",
-                TitleRes = Resource.String.show_notifs_on_folder_complete,
-                KeywordsRes = Resource.String.keywords_notif_folder_complete,
-                IconRes = Resource.Drawable.notifications_outline_30dp,
-                Getter = () => PreferencesState.NotifyOnFolderCompleted,
-                Setter = v => { PreferencesState.NotifyOnFolderCompleted = v;
-                                PreferencesManager.SaveNotifyOnFolderCompleted(); },
-            });
-
-            rows.Add(new ToggleRow
-            {
-                Id = "general.notif_toast",
-                TitleRes = Resource.String.show_bottom_notifs_complete,
-                KeywordsRes = Resource.String.keywords_notif_toast,
-                IconRes = Resource.Drawable.notifications_outline_30dp,
-                // Original checkbox represents "show toast" → !DisableToastNotification.
-                Getter = () => !PreferencesState.DisableDownloadToastNotification,
-                Setter = v => { PreferencesState.DisableDownloadToastNotification = !v;
-                                PreferencesManager.SaveBoolean(KeyConsts.M_DisableToastNotifications, PreferencesState.DisableDownloadToastNotification); },
-            });
-
-            rows.Add(new ToggleRow
-            {
-                Id = "general.remember_recent_users",
-                TitleRes = Resource.String.RememberRecent,
-                KeywordsRes = Resource.String.keywords_remember_recent_users,
-                IconRes = Resource.Drawable.history_28dp,
-                Getter = () => PreferencesState.ShowRecentUsers,
-                Setter = v => { PreferencesState.ShowRecentUsers = v;
-                                PreferencesManager.SaveBoolean(KeyConsts.M_RememberUserHistory, v); },
-                //DependentRowIds = new[] { "general.clear_recent_users" },
-            });
-            rows.Add(new ActionRow
-            {
-                Id = "general.clear_recent_users",
-                ParentId = "general.remember_recent_users",
-                TitleRes = Resource.String.ClearRecentUsers,
-                ButtonTextRes = Resource.String.ClearRecentUsers,
-                Destructive = true,
-                DisableIfParentDisabled = false,
-                OnClick = (h, r) => h.ClearRecentUsers(),
-            });
-
-            rows.Add(new ToggleRow
-            {
-                Id = "general.auto_away",
-                TitleRes = Resource.String.AwayOnInactivity,
-                KeywordsRes = Resource.String.keywords_auto_away,
-                IconRes = Resource.Drawable.schedule_clock_28dp,
-                Getter = () => PreferencesState.AutoAwayOnInactivity,
-                Setter = v => { PreferencesState.AutoAwayOnInactivity = v;
-                                PreferencesManager.SaveAutoAwayOnInactivity(); },
-            });
-
-            // ============================== APPEARANCE ==============================
-            rows.Add(new HeaderRow { Id = "h.appearance", TitleRes = Resource.String.section_appearance });
-
-            rows.Add(new ValueRow
-            {
-                Id = "appearance.language",
-                TitleRes = Resource.String.SetLanguage,
-                IconRes = Resource.Drawable.language_28dp,
-                ValueProvider = ctx => SettingValueFormat.LanguageLabel(ctx),
-                OnClick = (h, r) => SettingPickers.PickLanguage(h, r),
-            });
-
-            rows.Add(new ValueRow
-            {
-                Id = "appearance.day_night",
-                TitleRes = Resource.String.night_mode_options,
-                KeywordsRes = Resource.String.keywords_night_mode,
-                IconRes = Resource.Drawable.dark_mode_28dp,
-                ValueProvider = ctx => SettingValueFormat.DayNightModeLabel(ctx, PreferencesState.DayNightMode),
-                OnClick = (h, r) => SettingPickers.PickDayNightMode(h, r),
-            });
-
-            rows.Add(new ValueRow
-            {
-                Id = "appearance.day_variant",
-                TitleRes = Resource.String.DayVarient_,
-                KeywordsRes = Resource.String.keywords_day_variant,
-                IconRes = Resource.Drawable.palette_28dp,
-                ValueProvider = ctx => SettingValueFormat.DayVariantLabel(ctx, PreferencesState.DayModeVariant),
-                OnClick = (h, r) => SettingPickers.PickDayVariant(h, r),
-            });
-
-            rows.Add(new ValueRow
-            {
-                Id = "appearance.night_variant",
-                TitleRes = Resource.String.NightVarient_,
-                KeywordsRes = Resource.String.keywords_night_variant,
-                IconRes = Resource.Drawable.palette_28dp,
-                ValueProvider = ctx => SettingValueFormat.NightVariantLabel(ctx, PreferencesState.NightModeVariant),
-                OnClick = (h, r) => SettingPickers.PickNightVariant(h, r),
-            });
-
-            // ============================== SHARING ==============================
-            rows.Add(new HeaderRow { Id = "h.sharing", TitleRes = Resource.String.section_sharing });
+            // ========================= UPLOADS & SHARING =========================
+            // The row id stays "h.sharing": it is the stable scroll anchor the sharing deep-link
+            // targets (SCROLL_TO_SHARING_SECTION); only the visible title changed.
+            rows.Add(new HeaderRow { Id = "h.sharing", TitleRes = Resource.String.section_uploads_sharing });
 
             rows.Add(new ToggleRow
             {
@@ -466,6 +426,7 @@ namespace Seeker.Settings.Rows
             {
                 Id = "sharing.metered",
                 TitleRes = Resource.String.PauseSharingIfMetered,
+                SubtitleRes = Resource.String.setting_subtitle_metered,
                 IconRes = Resource.Drawable.android_cell_4_bar_off_28dp,
                 Getter = () => !PreferencesState.AllowUploadsOnMetered,
                 Setter = v => { PreferencesState.AllowUploadsOnMetered = !v;
@@ -478,6 +439,7 @@ namespace Seeker.Settings.Rows
             {
                 Id = "sharing.require_vpn",
                 TitleRes = Resource.String.OnlyShareOnVpn,
+                SubtitleRes = Resource.String.setting_subtitle_vpn,
                 IconRes = Resource.Drawable.vpn_key_28dp,
                 Getter = () => PreferencesState.RequireVpnForSharing,
                 Setter = v => { PreferencesState.RequireVpnForSharing = v;
@@ -497,89 +459,214 @@ namespace Seeker.Settings.Rows
                                 PreferencesManager.SaveBoolean(KeyConsts.M_AutoClearCompleteUploads, v); },
             });
 
-            // ============================== NETWORK ==============================
-            rows.Add(new HeaderRow { Id = "h.network", TitleRes = Resource.String.section_network });
+            // ========================= SEARCH & WISHLIST =========================
+            rows.Add(new HeaderRow { Id = "h.search_wishlist", TitleRes = Resource.String.section_search_wishlist });
 
-            rows.Add(new ToggleRow
+            rows.Add(new ValueRow
             {
-                Id = "network.listening",
-                TitleRes = Resource.String.enable_listening,
-                SubtitleRes = Resource.String.setting_subtitle_listening,
-                IconRes = Resource.Drawable.lan_connect,
-                Getter = () => PreferencesState.ListenerEnabled,
-                Setter = v => {
-                    PreferencesState.ListenerEnabled = v;
-                    PreferencesManager.SaveListeningState();
-                    host.Adapter?.NotifyParentToggled("network.listening");
-                    Seeker.Services.SessionService.Instance.ReconfigureOptions(null, v, null);
-                    if (v)
-                    {
-                        UPnpManager.Instance.Feedback = true;
-                        UPnpManager.Instance.SearchAndSetMappingIfRequired();
-                    }
-                },
-                DependentRowIds = new[] { "network.port", "network.port_check", "network.upnp" },
+                Id = "search.max_results",
+                TitleRes = Resource.String.max_search_results,
+                KeywordsRes = Resource.String.keywords_max_results,
+                IconRes = Resource.Drawable.baseline_search_white_24,
+                ValueProvider = ctx => PreferencesState.NumberSearchResults.ToString(),
+                OnClick = (h, r) => OptionPickerBottomSheet.ShowPresetInts(h, r, SearchResultPresets,
+                    () => PreferencesState.NumberSearchResults,
+                    v => { PreferencesState.NumberSearchResults = v;
+                           PreferencesManager.SaveInt(KeyConsts.M_NumberSearchResults, v); }),
             });
 
             rows.Add(new ValueRow
             {
-                Id = "network.port",
-                ParentId = "network.listening",
-                TitleRes = Resource.String.change_port,
-                KeywordsRes = Resource.String.keywords_port,
-                ValueProvider = ctx => PreferencesState.ListenerPort.ToString(),
-                OnClick = (h, r) => NumericInputBottomSheet.Show(h, r, 1024, 65535,
-                    () => PreferencesState.ListenerPort,
-                    v => {
-                        bool changed = PreferencesState.ListenerPort != v;
-                        PreferencesState.ListenerPort = v;
-                        PreferencesManager.SaveListeningState();
-                        if (changed)
-                        {
-                            Seeker.Services.SessionService.Instance.ReconfigureOptions(null, null, v);
-                            RescanUpnp();
-                        }
-                    }),
-                VisiblePredicate = () => PreferencesState.ListenerEnabled,
+                Id = "search.default_sort",
+                TitleRes = Resource.String.default_search_sort,
+                KeywordsRes = Resource.String.keywords_default_search_sort,
+                IconRes = Resource.Drawable.arrow_down,
+                ValueProvider = ctx => SettingValueFormat.SearchResultSortLabel(ctx, PreferencesState.DefaultSearchResultSortAlgorithm),
+                OnClick = (h, r) => SettingPickers.PickDefaultSearchSort(h, r),
             });
-            rows.Add(new ActionRow
+
+            rows.Add(new ToggleRow
             {
-                Id = "network.port_check",
-                ParentId = "network.listening",
-                TitleRes = Resource.String.check_your_port_status,
-                ButtonTextRes = Resource.String.check_your_port_status,
-                OnClick = (h, r) => h.CheckPortStatus(),
-                VisiblePredicate = () => PreferencesState.ListenerEnabled,
+                Id = "search.smart_filter",
+                TitleRes = Resource.String.ShowSmartFilters,
+                IconRes = Resource.Drawable.ic_filter_list_black_32dp,
+                Getter = () => PreferencesState.ShowSmartFilters,
+                Setter = v => { PreferencesState.ShowSmartFilters = v;
+                                PreferencesManager.SaveShowSmartFilters(); },
+                DependentRowIds = new[] { "search.smart_filter_configure" },
+            });
+            rows.Add(new NavigationRow
+            {
+                Id = "search.smart_filter_configure",
+                ParentId = "search.smart_filter",
+                TitleRes = Resource.String.Configure,
+                SubtitleProvider = ctx => SettingValueFormat.SmartFilterSummary(ctx),
+                OnClick = (h, r) => h.ConfigureSmartFilters(),
+            });
+
+            rows.Add(new ToggleRow
+            {
+                Id = "search.free_slots",
+                TitleRes = Resource.String.only_show_free_slots,
+                IconRes = Resource.Drawable.bolt_28dp,
+                Getter = () => PreferencesState.FreeUploadSlotsOnly,
+                Setter = v => { PreferencesState.FreeUploadSlotsOnly = v;
+                                PreferencesManager.SaveBoolean(KeyConsts.M_OnlyFreeUploadSlots, v); },
+            });
+
+            rows.Add(new ToggleRow
+            {
+                Id = "search.show_locked_search",
+                TitleRes = Resource.String.ShowPrivateLockedSearch,
+                KeywordsRes = Resource.String.keywords_locked_search,
+                IconRes = Resource.Drawable.lock_28dp,
+                // Original checkbox represents "show locked" → !HideLocked.
+                Getter = () => !PreferencesState.HideLockedResultsInSearch,
+                Setter = v => { PreferencesState.HideLockedResultsInSearch = !v;
+                                PreferencesManager.SaveBoolean(KeyConsts.M_HideLockedSearch, PreferencesState.HideLockedResultsInSearch); },
             });
             rows.Add(new ToggleRow
             {
-                Id = "network.upnp",
-                ParentId = "network.listening",
-                TitleRes = Resource.String.use_pnp_for_port_forwarding,
-                KeywordsRes = Resource.String.keywords_upnp,
-                Getter = () => PreferencesState.ListenerUPnpEnabled,
-                Setter = v => {
-                    PreferencesState.ListenerUPnpEnabled = v;
-                    PreferencesManager.SaveListeningState();
-                    if (v)
-                    {
-                        // rerun on enable
-                        RescanUpnp();
-                    }
-                },
-                StatusProvider = UpnpStatus,
-                AddStatusListener = h => {
-                    UPnpManager.Instance.SearchStarted += h;
-                    UPnpManager.Instance.SearchFinished += h;
-                    UPnpManager.Instance.DeviceSuccessfullyMapped += h;
-                },
-                RemoveStatusListener = h => {
-                    UPnpManager.Instance.SearchStarted -= h;
-                    UPnpManager.Instance.SearchFinished -= h;
-                    UPnpManager.Instance.DeviceSuccessfullyMapped -= h;
-                },
-                VisiblePredicate = () => PreferencesState.ListenerEnabled,
+                Id = "search.show_locked_browse",
+                TitleRes = Resource.String.ShowPrivateLockedBrowse,
+                KeywordsRes = Resource.String.keywords_locked_browse,
+                IconRes = Resource.Drawable.lock_28dp,
+                Getter = () => !PreferencesState.HideLockedResultsInBrowse,
+                Setter = v => { PreferencesState.HideLockedResultsInBrowse = !v;
+                                PreferencesManager.SaveBoolean(KeyConsts.M_HideLockedBrowse, PreferencesState.HideLockedResultsInBrowse); },
             });
+
+            rows.Add(new ToggleRow
+            {
+                Id = "search.remember_history",
+                TitleRes = Resource.String.remember_search_history,
+                KeywordsRes = Resource.String.keywords_remember_search_history,
+                IconRes = Resource.Drawable.history_28dp,
+                Getter = () => PreferencesState.RememberSearchHistory,
+                Setter = v => { PreferencesState.RememberSearchHistory = v;
+                                PreferencesManager.SaveBoolean(KeyConsts.M_RememberSearchHistory, v); },
+                //DependentRowIds = new[] { "search.clear_history" }, // Clear history is always enabled
+            });
+            rows.Add(new ActionRow
+            {
+                Id = "search.clear_history",
+                ParentId = "search.remember_history",
+                TitleRes = Resource.String.clear_search_history,
+                ButtonTextRes = Resource.String.clear_search_history,
+                Destructive = true,
+                DisableIfParentDisabled = false,
+                OnClick = (h, r) => h.ClearSearchHistory(),
+            });
+
+            // ============================== NOTIFICATIONS ==============================
+            rows.Add(new HeaderRow { Id = "h.notifications", TitleRes = Resource.String.notification });
+
+            rows.Add(new ToggleRow
+            {
+                Id = "general.notif_folder_complete",
+                TitleRes = Resource.String.show_notifs_on_folder_complete,
+                KeywordsRes = Resource.String.keywords_notif_folder_complete,
+                IconRes = Resource.Drawable.notifications_outline_30dp,
+                Getter = () => PreferencesState.NotifyOnFolderCompleted,
+                Setter = v => { PreferencesState.NotifyOnFolderCompleted = v;
+                                PreferencesManager.SaveNotifyOnFolderCompleted(); },
+            });
+
+            rows.Add(new ToggleRow
+            {
+                Id = "general.notif_toast",
+                TitleRes = Resource.String.show_bottom_notifs_complete,
+                KeywordsRes = Resource.String.keywords_notif_toast,
+                IconRes = Resource.Drawable.notifications_outline_30dp,
+                // Original checkbox represents "show toast" → !DisableToastNotification.
+                Getter = () => !PreferencesState.DisableDownloadToastNotification,
+                Setter = v => { PreferencesState.DisableDownloadToastNotification = !v;
+                                PreferencesManager.SaveBoolean(KeyConsts.M_DisableToastNotifications, PreferencesState.DisableDownloadToastNotification); },
+            });
+
+            // ============================== APPEARANCE ==============================
+            rows.Add(new HeaderRow { Id = "h.appearance", TitleRes = Resource.String.section_appearance });
+
+            rows.Add(new ValueRow
+            {
+                Id = "appearance.language",
+                TitleRes = Resource.String.SetLanguage,
+                IconRes = Resource.Drawable.language_28dp,
+                ValueProvider = ctx => SettingValueFormat.LanguageLabel(ctx),
+                OnClick = (h, r) => SettingPickers.PickLanguage(h, r),
+            });
+
+            rows.Add(new ValueRow
+            {
+                Id = "appearance.day_night",
+                TitleRes = Resource.String.night_mode_options,
+                SubtitleRes = Resource.String.setting_subtitle_day_night,
+                KeywordsRes = Resource.String.keywords_night_mode,
+                IconRes = Resource.Drawable.dark_mode_28dp,
+                ValueProvider = ctx => SettingValueFormat.DayNightModeLabel(ctx, PreferencesState.DayNightMode),
+                OnClick = (h, r) => SettingPickers.PickDayNightMode(h, r),
+            });
+
+            rows.Add(new ValueRow
+            {
+                Id = "appearance.day_variant",
+                TitleRes = Resource.String.DayVarient_,
+                KeywordsRes = Resource.String.keywords_day_variant,
+                IconRes = Resource.Drawable.palette_28dp,
+                ValueProvider = ctx => SettingValueFormat.DayVariantLabel(ctx, PreferencesState.DayModeVariant),
+                OnClick = (h, r) => SettingPickers.PickDayVariant(h, r),
+            });
+
+            rows.Add(new ValueRow
+            {
+                Id = "appearance.night_variant",
+                TitleRes = Resource.String.NightVarient_,
+                KeywordsRes = Resource.String.keywords_night_variant,
+                IconRes = Resource.Drawable.palette_28dp,
+                ValueProvider = ctx => SettingValueFormat.NightVariantLabel(ctx, PreferencesState.NightModeVariant),
+                OnClick = (h, r) => SettingPickers.PickNightVariant(h, r),
+            });
+
+            // ============================== PRIVACY ==============================
+            rows.Add(new HeaderRow { Id = "h.privacy", TitleRes = Resource.String.section_privacy });
+
+            rows.Add(new ToggleRow
+            {
+                Id = "general.allow_private_invites",
+                TitleRes = Resource.String.allow_private_room_invitations,
+                SubtitleRes = Resource.String.setting_subtitle_private_invites,
+                IconRes = Resource.Drawable.mail_28dp,
+                Getter = () => PreferencesState.AllowPrivateRoomInvitations,
+                // PreferencesState is updated by ReconfigureOptionsLogic on server success; on
+                // failure or not-logged-in, ReconfigureOptions fires NotifyRowChanged to revert
+                // the optimistic switch flip done by ToggleViewHolder on click.
+                Setter = v => Seeker.Services.SessionService.Instance.ReconfigureOptions(v, null, null),
+            });
+
+            rows.Add(new ToggleRow
+            {
+                Id = "general.remember_recent_users",
+                TitleRes = Resource.String.RememberRecent,
+                KeywordsRes = Resource.String.keywords_remember_recent_users,
+                IconRes = Resource.Drawable.history_28dp,
+                Getter = () => PreferencesState.ShowRecentUsers,
+                Setter = v => { PreferencesState.ShowRecentUsers = v;
+                                PreferencesManager.SaveBoolean(KeyConsts.M_RememberUserHistory, v); },
+                //DependentRowIds = new[] { "general.clear_recent_users" },
+            });
+            rows.Add(new ActionRow
+            {
+                Id = "general.clear_recent_users",
+                ParentId = "general.remember_recent_users",
+                TitleRes = Resource.String.ClearRecentUsers,
+                ButtonTextRes = Resource.String.ClearRecentUsers,
+                Destructive = true,
+                DisableIfParentDisabled = false,
+                OnClick = (h, r) => h.ClearRecentUsers(),
+            });
+
+            // ============================== ADVANCED ==============================
+            rows.Add(new HeaderRow { Id = "h.advanced", TitleRes = Resource.String.section_advanced });
 
             rows.Add(new ValueRow
             {
@@ -629,6 +716,7 @@ namespace Seeker.Settings.Rows
             {
                 Id = "network.concurrent_downloads",
                 TitleRes = Resource.String.LimitConcurrentDownloads,
+                SubtitleRes = Resource.String.setting_subtitle_concurrent,
                 KeywordsRes = Resource.String.keywords_max_concurrent,
                 IconRes = Resource.Drawable.download_material,
                 ValueProvider = ctx => SettingValueFormat.ConcurrentLimitSummary(ctx,
@@ -646,6 +734,7 @@ namespace Seeker.Settings.Rows
             {
                 Id = "network.concurrent_uploads",
                 TitleRes = Resource.String.LimitConcurrentUploads,
+                SubtitleRes = Resource.String.setting_subtitle_concurrent,
                 KeywordsRes = Resource.String.keywords_max_concurrent,
                 IconRes = Resource.Drawable.upload_material,
                 ValueProvider = ctx => SettingValueFormat.ConcurrentLimitSummary(ctx,
@@ -659,65 +748,17 @@ namespace Seeker.Settings.Rows
                     }),
             });
 
-            // ============================== ACCOUNT ==============================
-            rows.Add(new HeaderRow { Id = "h.account", TitleRes = Resource.String.section_account });
-
-            rows.Add(new ValueRow
-            {
-                Id = "account.privileges",
-                TitleRes = Resource.String.Privileges,
-                KeywordsRes = Resource.String.keywords_privileges,
-                IconRes = Resource.Drawable.account_star_outline,
-                OnClick = (h, r) => PrivilegesBottomSheet.Show(h),
-                StatusProvider = () =>
-                {
-                    var statusKind = SettingStatusKind.HideDot;
-                    if (Seeker.Managers.PrivilegesManager.Instance.IsCheckInProgress)
-                    {
-                        statusKind = SettingStatusKind.Running;
-                    }
-                    else if (Seeker.Managers.PrivilegesManager.Instance.IsPrivileged)
-                    {
-                        statusKind = SettingStatusKind.Success;
-                    }
-                    return new SettingStatus
-                    {
-                        Kind = statusKind,
-                        Text = Seeker.Managers.PrivilegesManager.Instance.IsCheckInProgress ? 
-                            host.Activity.GetString(Resource.String.checking_priv_) : Seeker.Managers.PrivilegesManager.Instance.GetPrivilegeStatus()
-                    };
-                },
-                AddStatusListener = h2 => Seeker.Managers.PrivilegesManager.Instance.CheckStateChanged += h2,
-                RemoveStatusListener = h2 => Seeker.Managers.PrivilegesManager.Instance.CheckStateChanged -= h2,
-            });
-
             rows.Add(new ToggleRow
             {
                 Id = "account.diagnostics",
                 TitleRes = Resource.String.EnableDiagnostics,
+                SubtitleRes = Resource.String.setting_subtitle_diagnostics,
                 KeywordsRes = Resource.String.keywords_diagnostics,
                 IconRes = Resource.Drawable.frame_bug_28dp,
                 MoreInfoTextRes = Resource.String.diagnostics_more_info,
                 Getter = () => PreferencesState.LogDiagnostics,
                 Setter = v => { PreferencesState.LogDiagnostics = v;
                                 PreferencesManager.SaveLogDiagnostics(); },
-            });
-
-            rows.Add(new NavigationRow
-            {
-                Id = "account.change_password",
-                TitleRes = Resource.String.change_password,
-                IconRes = Resource.Drawable.lock_28dp,
-                OnClick = (h, r) => h.LaunchChangePassword(),
-            });
-
-            rows.Add(new NavigationRow
-            {
-                Id = "account.edit_user_info",
-                TitleRes = Resource.String.edit_your_user_info,
-                KeywordsRes = Resource.String.keywords_edit_user_info,
-                IconRes = Resource.Drawable.user_edit,
-                OnClick = (h, r) => h.LaunchEditUserInfo(),
             });
 
             rows.Add(new NavigationRow
@@ -760,6 +801,18 @@ namespace Seeker.Settings.Rows
                 KeywordsRes = Resource.String.keywords_restore_defaults,
                 IconRes = Resource.Drawable.settings_backup_restore_28dp,
                 OnClick = (h, r) => h.LaunchRestoreDefaults(),
+            });
+
+            // ============================== ABOUT ==============================
+            rows.Add(new HeaderRow { Id = "h.about", TitleRes = Resource.String.about_title });
+
+            rows.Add(new NavigationRow
+            {
+                Id = "about.open_about",
+                TitleRes = Resource.String.about_title,
+                SubtitleRes = Resource.String.setting_subtitle_about,
+                IconRes = Resource.Drawable.information_outline,
+                OnClick = (h, r) => AboutBottomSheet.Show((AppCompatActivity)h.Activity),
             });
 
             return rows;

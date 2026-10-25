@@ -1,10 +1,10 @@
 ﻿<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:id="@+id/navigation_home"
-        android:icon="@drawable/baseline_home_white_24"
-        android:title="@string/home_tab"
-    />
-
+    <!--
+        Shell order: Search | Transfers | Browse | Messages.
+        Account/login stays pager page 0 but is intentionally not a bottom-nav
+        item; it is reachable from the toolbar's secondary navigation sheet.
+        Existing ids are kept for notification/deep-link/Maestro compatibility.
+    -->
     <item
         android:id="@+id/navigation_search"
         android:icon="@drawable/baseline_search_white_24"
@@ -21,5 +21,11 @@
         android:id="@+id/navigation_browse"
         android:icon="@drawable/baseline_folder_white_24"
         android:title="@string/browse_tab"
+    />
+
+    <item
+        android:id="@+id/navigation_messages"
+        android:icon="@drawable/baseline_chat_bubble_white_24"
+        android:title="@string/messages"
     />
 </menu>

@@ -5,7 +5,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="4dp"
+    android:padding="8dp"
+    android:minHeight="@dimen/ds_touch_target_min"
     android:orientation="horizontal"
     android:id="@+id/linearLayoutChatroomConnectDisconnectItem"
 >
@@ -15,6 +16,7 @@
         android:id="@+id/statusMsg"
         android:gravity="center"
         android:text="@string/chatroom_disconnected"
-        android:textSize="16sp"
+        android:textSize="15sp"
+        android:textColor="?attr/cellTextColorSubdued"
     />
 </LinearLayout>

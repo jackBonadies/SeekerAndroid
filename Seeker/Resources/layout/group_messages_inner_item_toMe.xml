@@ -14,6 +14,7 @@
         android:layout_marginStart="0dp"
         android:text="@string/username"
         android:textSize="14sp"
+        android:textColor="?attr/dsColorTextSecondary"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
     />
@@ -22,7 +23,7 @@
         android:id="@+id/card_gchat_message_other"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="#eef1f6"
+        app:cardBackgroundColor="?attr/dsColorSurfaceContainer"
         app:cardCornerRadius="12dp"
         app:cardElevation="0dp"
         app:cardPreventCornerOverlap="false"
@@ -48,7 +49,7 @@
                 android:paddingTop="8dp"
                 android:paddingRight="12dp"
                 android:text="MessageDummy"
-                android:textColor="#000000"
+                android:textColor="?attr/dsColorTextPrimary"
                 android:textSize="16sp"
             />
         </LinearLayout>
@@ -59,8 +60,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="8:00"
-        android:textColor="#C0C0C0"
-        android:textSize="10sp"
+        android:textColor="?attr/dsColorTextSecondary"
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@+id/card_gchat_message_other"
         app:layout_constraintStart_toEndOf="@+id/card_gchat_message_other"
     />

@@ -24,9 +24,9 @@
             android:textColor="?attr/normalTextColor" />
         <ImageButton
             android:id="@+id/categoryFilterSheetClose"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:padding="2dp"
+            android:layout_width="@dimen/ds_touch_target_min"
+            android:layout_height="@dimen/ds_touch_target_min"
+            android:padding="@dimen/ds_space_md"
 			android:layout_marginEnd="10dp"
             android:src="@drawable/ic_close_small"
             android:tint="?attr/normalTextColor"
@@ -36,7 +36,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/slightTint" />
+        android:background="?attr/dsColorDivider" />
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/categoryFilterSheetRecycler"
         android:layout_width="match_parent"

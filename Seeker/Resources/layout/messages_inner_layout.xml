@@ -10,7 +10,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_messages"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="0dp"
         android:layout_weight="1"
         android:layout_marginBottom="16dp"
     />
@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_weight="0"
-        android:background="@color/chatBoxSplitterElevation"
+        android:background="?attr/dsColorDivider"
     />
 
     <RelativeLayout
@@ -36,7 +36,8 @@
         <EditText
             android:id="@+id/edit_gchat_message"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/ds_touch_target_min"
             android:layout_centerVertical="true"
             android:layout_toStartOf="@+id/button_gchat_send"
             android:layout_marginEnd="8dp"
@@ -52,13 +53,13 @@
 
         <ImageButton
             android:id="@+id/button_gchat_send"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/ds_touch_target_min"
+            android:layout_height="@dimen/ds_touch_target_min"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_send"
-            android:tint="?attr/mainTextColor"
+            android:tint="?attr/dsColorPrimary"
             android:contentDescription="@string/send_message"
             android:enabled="false"
         />

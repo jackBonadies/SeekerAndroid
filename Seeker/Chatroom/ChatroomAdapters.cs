@@ -614,6 +614,7 @@ namespace Seeker
         {
             viewRoomName.Text = roomInfo.Name;
             viewUsersInRoom.Text = roomInfo.UserCount.ToString();
+            ContentDescription = roomInfo.Name + ", " + roomInfo.UserCount;
         }
     }
 
@@ -671,6 +672,7 @@ namespace Seeker
             if (ChatroomController.UnreadRooms.ContainsKey(roomInfo.Name))
             {
                 unreadImageView.Visibility = ViewStates.Visible;
+                unreadImageView.ContentDescription = SeekerApplication.GetString(Resource.String.room_unread_desc);
 
                 viewRoomName.SetTypeface(null, TypefaceStyle.Bold);
                 viewUsersInRoom.SetTypeface(null, TypefaceStyle.Bold);
@@ -686,6 +688,8 @@ namespace Seeker
                 viewRoomName.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
                 viewUsersInRoom.SetTextColor(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.defaultTextColor)));
             }
+
+            ContentDescription = roomInfo.Name + ", " + roomInfo.UserCount;
 
             if (ChatroomController.CurrentlyJoinedRoomNames.ContainsKey(roomInfo.Name))
             {
@@ -729,11 +733,13 @@ namespace Seeker
         public void setItem(UserListItem usertype)
         {
             viewCategory.Text = usertype.Username;
+            ContentDescription = usertype.Username;
         }
 
         public void setItem(Soulseek.RoomInfo roomInfo)
         {
             viewCategory.Text = roomInfo.Name;
+            ContentDescription = roomInfo.Name;
         }
     }
 }

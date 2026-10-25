@@ -1,4 +1,4 @@
-﻿using Android.App;
+using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
@@ -310,6 +310,7 @@ namespace Seeker.Users
                 if (item.Role == UserRole.Ignored)
                 {
                     string ignoredString = SeekerState.ActiveActivityRef.GetString(Resource.String.ignored);
+                    viewUserStatus.ContentDescription = ignoredString;
                     if (OperatingSystem.IsAndroidVersionAtLeast(26))
                     {
                         viewUserStatus.TooltipText = ignoredString; //api26+ otherwise crash...
@@ -328,6 +329,7 @@ namespace Seeker.Users
                         case Soulseek.UserPresence.Away:
                             viewUserStatus.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.away)));
                             string awayString = SeekerState.ActiveActivityRef.GetString(Resource.String.away);
+                            viewUserStatus.ContentDescription = awayString;
                             if (OperatingSystem.IsAndroidVersionAtLeast(26))
                             {
                                 viewUserStatus.TooltipText = awayString;
@@ -340,6 +342,7 @@ namespace Seeker.Users
                         case Soulseek.UserPresence.Online:
                             viewUserStatus.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.online))); //added in api 8 :) SetTint made it a weird dark color..
                             string onlineString = SeekerState.ActiveActivityRef.GetString(Resource.String.online);
+                            viewUserStatus.ContentDescription = onlineString;
                             if (OperatingSystem.IsAndroidVersionAtLeast(26))
                             {
                                 viewUserStatus.TooltipText = onlineString;
@@ -352,6 +355,7 @@ namespace Seeker.Users
                         case Soulseek.UserPresence.Offline:
                             viewUserStatus.SetColorFilter(new Android.Graphics.Color(ContextCompat.GetColor(SeekerState.ActiveActivityRef, Resource.Color.offline)));
                             string offlineString = SeekerState.ActiveActivityRef.GetString(Resource.String.offline);
+                            viewUserStatus.ContentDescription = offlineString;
                             if (OperatingSystem.IsAndroidVersionAtLeast(26))
                             {
                                 viewUserStatus.TooltipText = offlineString;

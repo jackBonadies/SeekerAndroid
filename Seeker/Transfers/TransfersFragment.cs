@@ -32,6 +32,8 @@ namespace Seeker
         private TextView noTransfersHeader = null;
         private TextView noTransfersSubtitle = null;
         private Button setupUpSharing = null;
+        private TextView transfersTabDownloads = null;
+        private TextView transfersTabUploads = null;
         private RecyclerView.LayoutManager recycleLayoutManager;
         private RecyclerView recyclerViewTransferItems;
         public TransferAdapterRecyclerVersion recyclerTransferAdapter;
@@ -190,6 +192,34 @@ namespace Seeker
             SetRecyclerAdapter();
             SeekerState.MainActivityRef.SetTransferSupportActionBarState();
             SetNoTransfersMessage();
+            UpdateTransfersTabs();
+        }
+
+        /// <summary>
+        /// Switches the unified Downloads/Uploads mode using the same persisted state and
+        /// refresh path the toolbar toggle already used. Both the segmented tabs and the
+        /// toolbar item go through here so they can never disagree.
+        /// </summary>
+        private void SetUploadsMode(bool uploadsMode)
+        {
+            if (ViewState.InUploadsMode == uploadsMode)
+            {
+                return;
+            }
+            ViewState.InUploadsMode = uploadsMode;
+            PreferencesManager.SaveTransferViewInUploadsMode();
+            RefreshForModeSwitch();
+            SeekerState.MainActivityRef?.InvalidateOptionsMenu();
+        }
+
+        private void UpdateTransfersTabs()
+        {
+            if (transfersTabDownloads == null || transfersTabUploads == null)
+            {
+                return;
+            }
+            transfersTabDownloads.Selected = !ViewState.InUploadsMode;
+            transfersTabUploads.Selected = ViewState.InUploadsMode;
         }
 
         public override bool OnOptionsItemSelected(IMenuItem item)
@@ -246,9 +276,7 @@ namespace Seeker
                     refreshListView();
                     return true;
                 case Resource.Id.action_toggle_download_upload:
-                    ViewState.InUploadsMode = !ViewState.InUploadsMode;
-                    PreferencesManager.SaveTransferViewInUploadsMode();
-                    RefreshForModeSwitch();
+                    SetUploadsMode(!ViewState.InUploadsMode);
                     return true;
                 case Resource.Id.action_cancel_and_clear_all: //cancel and clear all
                     Logger.InfoFirebase("action_cancel_and_clear_all Pressed");
@@ -424,6 +452,12 @@ namespace Seeker
             this.noTransfersSubtitle = rootView.FindViewById<TextView>(Resource.Id.noTransfersSubtitle);
             this.setupUpSharing = rootView.FindViewById<Button>(Resource.Id.setUpSharing);
             this.setupUpSharing.Click += SetupUpSharing_Click;
+
+            this.transfersTabDownloads = rootView.FindViewById<TextView>(Resource.Id.transfersTabDownloads);
+            this.transfersTabUploads = rootView.FindViewById<TextView>(Resource.Id.transfersTabUploads);
+            this.transfersTabDownloads.Click += (sender, e) => SetUploadsMode(false);
+            this.transfersTabUploads.Click += (sender, e) => SetUploadsMode(true);
+            UpdateTransfersTabs();
 
             this.RegisterForContextMenu(recyclerViewTransferItems); //doesnt work for recycle views
 
@@ -1039,15 +1073,18 @@ namespace Seeker
                     var fi = v.InnerTransferItem as FolderItem;
                     var folderState = fi.GetState(out _, out _);
                     TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeTextView(), v.GetSpeedTextView(), fi, folderState, v.GetShowProgressSize(), v.GetShowSpeed(), isFolder: true);
-                    TransferViewHelper.SetTimeRemainingText(v.GetTimeRemainingSeparatorView(), v.GetTimeRemainingTextView(), v.GetSpeedTextView(), fi, v.GetShowTimeRemaining());
+                    TransferViewHelper.SetTimeRemainingText(v.GetTimeRemainingSeparatorView(), v.GetTimeRemainingTextView(), v.GetSpeedTextView(), fi, folderState, v.GetShowTimeRemaining());
                     TransferViewHelper.UpdateSegmentedProgressBar(folderView.segmentedProgressBar, fi);
+                    var (folderTotal, folderCompleted) = fi.GetFolderProgress();
+                    TransferViewHelper.SetPercentText(v.GetPercentTextView(), folderCompleted, folderTotal, folderState.HasFlag(TransferStates.Succeeded));
                 }
                 else
                 {
                     v.progressBar.Progress = progress;
                     TransferViewHelper.SetAdditionalStatusText(v.GetStatusDot(), v.GetAdditionalStatusInfoView(), v.GetSizeTextView(), v.GetSpeedTextView(), relevantItem, relevantItem.State, v.GetShowProgressSize(), v.GetShowSpeed());
-                    TransferViewHelper.SetTimeRemainingText(v.GetTimeRemainingSeparatorView(), v.GetTimeRemainingTextView(), v.GetSpeedTextView(), relevantItem, v.GetShowTimeRemaining());
+                    TransferViewHelper.SetTimeRemainingText(v.GetTimeRemainingSeparatorView(), v.GetTimeRemainingTextView(), v.GetSpeedTextView(), relevantItem, relevantItem.State, v.GetShowTimeRemaining());
                     TransferViewHelper.SetProgressBarTint(v.progressBar, relevantItem.State, wasFailed, relevantItem.IsUpload());
+                    TransferViewHelper.SetPercentText(v.GetPercentTextView(), relevantItem.GetBytesTransferred(), relevantItem.Size, relevantItem.State.HasFlag(TransferStates.Succeeded));
                 }
             }
         }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <!-- Simple style, bitrate/file-type on top row alongside folder name. Chevron + details container hidden by default; shown when used as Expandable. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -15,6 +15,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
     >
+        <ImageView
+            android:id="@+id/selectionCheckbox"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/check_circle_outline"
+            android:visibility="gone" />
         <LinearLayout
             android:orientation="vertical"
             android:id="@+id/relativeLayout1"
@@ -40,7 +49,7 @@
                     android:paddingStart="5dp"
                     android:textColor="?attr/cellTextColor"
                     android:textSize="14sp"
-                    android:singleLine="true"
+                    android:maxLines="2"
                 />
                 <TextView
                     android:id="@+id/fileTypeTextView"
@@ -90,7 +99,7 @@
                     android:id="@+id/availability"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/queueColor"
+                    android:textColor="?attr/dsColorWarning"
                     android:layout_weight=".5"
                     android:ellipsize="end"
                     android:focusable="false"
@@ -100,7 +109,28 @@
                     android:singleLine="true"
                 />
             </LinearLayout>
+            <TextView
+                android:id="@+id/resultMetaTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:paddingBottom="5dp"
+                android:maxLines="2"
+                android:textSize="12sp"
+                android:textColor="?attr/cellTextColorSubdued" />
         </LinearLayout>
+        <ImageButton
+            android:id="@+id/downloadActionButton"
+            android:layout_width="@dimen/ds_touch_target_min"
+            android:layout_height="@dimen/ds_touch_target_min"
+            android:layout_gravity="center_vertical"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/download_result_description"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_download_white_24"
+            android:tint="?attr/cellTextColor" />
         <FrameLayout
             android:id="@+id/expandClickArea"
             android:layout_width="40dp"

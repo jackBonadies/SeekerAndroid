@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright 2021 Seeker
  *
  * This file is part of Seeker
@@ -297,6 +297,7 @@ namespace Seeker
             this.noBrowseView = this.rootView.FindViewById<View>(Resource.Id.noBrowseView);
             this.separator = this.rootView.FindViewById<View>(Resource.Id.recyclerViewHorizontalPathSep);
             UpdatePathBarVisibility();
+            UpdateBrowseHeader();
             if (state.HasResponse())
             {
                 noBrowseView.Visibility = ViewStates.Gone;
@@ -494,6 +495,7 @@ namespace Seeker
                 BrowseResponseReceivedUI_Handler(null, new EventArgs());
             }
             Instance = this;
+            UpdateBrowseHeader();
             if (recyclerViewDirectories != null && browseLayoutManager != null && ScrollPositionRestoreRotate != null)
             {
                 //restore scroll
@@ -827,6 +829,35 @@ namespace Seeker
             }
         }
 
+        /// <summary>
+        /// Visible per-row download affordance. Files enqueue directly through the existing
+        /// download service; folders reuse DownloadUserFilesEntry so the existing
+        /// subfolder/filter safety prompts still apply. Batch mode reuses the same selection
+        /// toggle as a tap.
+        /// </summary>
+        public void OnDownloadButtonClick(int position)
+        {
+            if (BrowseActionMode != null)
+            {
+                ToggleBatchSelect(position);
+                return;
+            }
+            DataItem item = GetItemSelected(position, state.Filter.IsFiltered);
+            if (item == null)
+            {
+                return;
+            }
+            if (item.IsDirectory())
+            {
+                DownloadUserFilesEntry(false, false, new List<DataItem> { item });
+            }
+            else
+            {
+                var ffi = BrowseUtils.ToFullFileInfo(item);
+                SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(new[] { ffi }, false, state.CurrentUsername));
+            }
+        }
+
         private void PopulateDataItemsToItemSelected(List<DataItem> dirs, DataItem itemSelected)
         {
             dirs.Clear();
@@ -1017,6 +1048,80 @@ namespace Seeker
         }
 
         /// <summary>
+        /// Presence from the cached user list only. Returns null when the user is not cached or
+        /// their presence is unknown, so the header never claims a status it does not have.
+        /// </summary>
+        private static string GetCachedUserPresenceText(string username)
+        {
+            if (string.IsNullOrEmpty(username) || CommonState.UserList == null)
+            {
+                return null;
+            }
+            UserListItem cached = null;
+            lock (CommonState.UserList)
+            {
+                cached = CommonState.UserList.FirstOrDefault(u => u.Username == username);
+            }
+            if (cached == null)
+            {
+                return null;
+            }
+            if (cached.DoesNotExist)
+            {
+                return SeekerApplication.GetString(Resource.String.offline);
+            }
+            Soulseek.UserPresence presence = cached.GetStatusFromItem(out bool statusExists);
+            if (!statusExists)
+            {
+                return null;
+            }
+            return presence switch
+            {
+                Soulseek.UserPresence.Online => SeekerApplication.GetString(Resource.String.online),
+                Soulseek.UserPresence.Away => SeekerApplication.GetString(Resource.String.away),
+                _ => SeekerApplication.GetString(Resource.String.offline),
+            };
+        }
+
+        /// <summary>
+        /// Compact in-page username/status header. Uses the browse response the state already
+        /// holds (username + folder/file totals); no extra network or disk work.
+        /// </summary>
+        private void UpdateBrowseHeader()
+        {
+            if (rootView == null)
+            {
+                return;
+            }
+            View header = rootView.FindViewById<View>(Resource.Id.browseUserHeader);
+            TextView name = rootView.FindViewById<TextView>(Resource.Id.browseUserHeaderName);
+            TextView status = rootView.FindViewById<TextView>(Resource.Id.browseUserHeaderStatus);
+            if (header == null || name == null || status == null)
+            {
+                return;
+            }
+            if (string.IsNullOrEmpty(state.CurrentUsername))
+            {
+                header.Visibility = ViewStates.Gone;
+                return;
+            }
+            header.Visibility = ViewStates.Visible;
+            name.Text = state.CurrentUsername;
+            string statsText = string.Format(
+                SeekerApplication.GetString(Resource.String.browse_header_stats),
+                (int)state.Stats.NumFolders,
+                (int)state.Stats.NumFiles);
+
+            // Add the presence the app already has cached for this user. Never probe the network
+            // from the header: when no cached status exists we show only the honest totals.
+            string presenceText = GetCachedUserPresenceText(state.CurrentUsername);
+            status.Text = presenceText == null
+                ? statsText
+                : string.Format(SeekerApplication.GetString(Resource.String.browse_header_status), statsText, presenceText);
+            status.ContentDescription = status.Text;
+        }
+
+        /// <summary>
         /// Sets both the main and the Path Items adapters.  necessary when first loading or when going up or down directories (i.e. if path changes).  not necessary if just changing the filter.
         /// </summary>
         /// <param name="toFilter"></param>
@@ -1047,6 +1152,7 @@ namespace Seeker
                 treePathRecyclerView.ScrollToPosition(state.PathItems.Count - 1);
             }
             UpdatePathBarVisibility();
+            UpdateBrowseHeader();
             SeekerState.MainActivityRef?.InvalidateOptionsMenu();
             SeekerState.MainActivityRef?.RefreshBackCallbackState();
         }
@@ -1210,6 +1316,7 @@ namespace Seeker
                 noBrowseView.Visibility = ViewStates.Gone;
                 UpdatePathBarVisibility();
             }
+            UpdateBrowseHeader();
             recyclerViewDirectories = rootView.FindViewById<RecyclerView>(Resource.Id.listViewDirectories);
             if (browseLayoutManager == null)
             {

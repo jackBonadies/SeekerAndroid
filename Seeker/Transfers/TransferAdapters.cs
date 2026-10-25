@@ -31,6 +31,7 @@ namespace Seeker
                 ITransferItemView view = TransferItemViewDetails.Create(parent, this.showSizes, this.showSpeed, this.showTimeRemaining);
                 (view as View).Click += TransferAdapterRecyclerIndividualItem_Click;
                 (view as View).LongClick += TransferAdapterRecyclerVersion_LongClick;
+                WireRowAction(view);
                 return new TransferViewHolder(view as View);
             }
 
@@ -74,6 +75,7 @@ namespace Seeker
                 ITransferItemView view = TransferItemViewFolder.Create(parent, this.showSizes, this.showSpeed, this.showTimeRemaining);
                 (view as View).Click += TransferAdapterRecyclerFolderItem_Click;
                 (view as View).LongClick += TransferAdapterRecyclerVersion_LongClick;
+                WireRowAction(view);
                 return new TransferViewHolder(view as View);
             }
 
@@ -147,6 +149,29 @@ namespace Seeker
                 {
                     Logger.InfoFirebase("selected item was set as null");
                 }
+            }
+
+            /// <summary>
+            /// Wires the visible per-row action affordance to the exact same context menu and
+            /// selection flow the long-press uses, so pause/resume/retry/cancel/remove and the
+            /// user actions stay in one place. Hidden (and inert) in batch-selection mode.
+            /// </summary>
+            protected void WireRowAction(ITransferItemView view)
+            {
+                ImageButton actionButton = view.GetRowActionButton();
+                if (actionButton == null)
+                {
+                    return;
+                }
+                actionButton.Click += (sender, e) =>
+                {
+                    if (IsInBatchSelectMode)
+                    {
+                        return;
+                    }
+                    setSelectedItem(view.InnerTransferItem);
+                    (view as View).ShowContextMenu();
+                };
             }
 
             public ITransferItem getSelectedItem()

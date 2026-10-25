@@ -16,12 +16,41 @@
         android:focusableInTouchMode="true"
         android:id="@+id/relativeLayout1"
     >
+        <LinearLayout
+            android:id="@+id/browseUserHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/ds_space_md"
+            android:paddingEnd="@dimen/ds_space_md"
+            android:paddingTop="@dimen/ds_space_sm"
+            android:paddingBottom="@dimen/ds_space_xs"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/browseUserHeaderName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textColor="?attr/dsColorTextPrimary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/browseUserHeaderStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textColor="?attr/dsColorTextSecondary"
+                android:textSize="12sp" />
+        </LinearLayout>
         <androidx.recyclerview.widget.RecyclerView
             android:minWidth="25px"
-            android:minHeight="0px"
-            android:paddingStart="6dp"
-            android:paddingEnd="10dp"
+            android:minHeight="@dimen/ds_touch_target_min"
+            android:paddingStart="@dimen/ds_space_sm"
+            android:paddingEnd="@dimen/ds_space_md"
             android:clipToPadding="false"
+            android:layout_below="@id/browseUserHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/recyclerViewHorizontalPath"
@@ -129,8 +158,8 @@
     <!--    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="?attr/mainPurple"
-        android:background="?attr/mainPurple"
+        android:backgroundTint="?attr/dsColorPrimary"
+        android:background="?attr/dsColorPrimary"
         app:layout_anchor="@id/bottomSheet"
         app:layout_dodgeInsetEdges="bottom"
         app:borderWidth="0dp"
@@ -143,9 +172,9 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:backgroundTint="?attr/mainPurple"
-        android:background="?attr/mainPurple"
-        app:tint="@android:color/white"
+        android:backgroundTint="?attr/dsColorPrimary"
+        android:background="?attr/dsColorPrimary"
+        app:tint="?attr/dsColorOnPrimary"
         app:layout_anchor="@id/bottomSheet"
         app:borderWidth="0dp"
         app:fabSize="mini"

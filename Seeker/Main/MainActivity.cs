@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright 2021 Seeker
  *
  * This file is part of Seeker
@@ -56,7 +56,8 @@ namespace Seeker
     public partial class MainActivity :
         ThemeableActivity, 
         ActivityCompat.IOnRequestPermissionsResultCallback, 
-        BottomNavigationView.IOnNavigationItemSelectedListener
+        BottomNavigationView.IOnNavigationItemSelectedListener,
+        Seeker.Messages.IMessagesOverviewHost
     {
 
 
@@ -150,12 +151,18 @@ namespace Seeker
             bool consumable = false;
             if (pager != null)
             {
-                if (pager.CurrentItem == 3)
+                if (pager.CurrentItem == MainNavigation.AccountPage)
+                {
+                    // Account is not a bottom-nav destination: back returns to the last
+                    // primary destination (default Search) instead of leaving the app.
+                    consumable = true;
+                }
+                else if (pager.CurrentItem == MainNavigation.BrowsePage)
                 {
                     consumable = BrowseFragment.BrowseActionMode != null
                                  || (BrowseFragment.Instance?.HasBackStackToConsume() ?? false);
                 }
-                else if (pager.CurrentItem == 2)
+                else if (pager.CurrentItem == MainNavigation.TransfersPage)
                 {
                     consumable = TransfersViewState.Instance.GetCurrentlySelectedFolder() != null;
                 }
@@ -181,7 +188,7 @@ namespace Seeker
 
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.toolbar);
-            myToolbar.Title = this.GetString(Resource.String.home_tab);
+            myToolbar.Title = this.GetString(Resource.String.account_tab);
             SetSupportActionBar(myToolbar);
 
             backPressedCallback = new GenericOnBackPressedCallback(false, onBackPressedAction);
@@ -201,39 +208,55 @@ namespace Seeker
             TabsPagerAdapter adapter = new TabsPagerAdapter(this);
 
             pager.Adapter = adapter;
-            //keep all four tab fragments resident (FragmentPagerAdapter never destroyed them); the app
-            //relies on long-lived fragments via SearchFragment.Instance / BrowseFragment.Instance etc.
-            pager.OffscreenPageLimit = 3;
+            //keep every page resident (FragmentPagerAdapter never destroyed them); the app relies on
+            //long-lived fragments via SearchFragment.Instance / BrowseFragment.Instance etc.
+            pager.OffscreenPageLimit = MainNavigation.PageCount - 1;
+            //Swiping would allow reaching the hidden account page and would fight the bottom bar.
+            pager.UserInputEnabled = false;
             pager.RegisterOnPageChangeCallback(new OnPageChangeLister1());
+
+            int restoredPage = savedInstanceState != null
+                ? MainNavigation.NormalizeRestoredPage(savedInstanceState.GetInt(MainNavigation.CurrentPageStateKey, MainNavigation.DefaultLandingPage))
+                : MainNavigation.DefaultLandingPage;
+            lastPrimaryPage = savedInstanceState != null
+                ? savedInstanceState.GetInt(MainNavigation.LastPrimaryPageStateKey, MainNavigation.DefaultLandingPage)
+                : MainNavigation.DefaultLandingPage;
+            if (!MainNavigation.IsPrimaryDestination(lastPrimaryPage))
+            {
+                lastPrimaryPage = MainNavigation.DefaultLandingPage;
+            }
+            pager.SetCurrentItem(restoredPage, false);
+
             //this is a relatively safe way that prevents rotates from redoing the intent.
             bool alreadyHandled = Intent.GetBooleanExtra("ALREADY_HANDLED", false);
             Intent = Intent.PutExtra("ALREADY_HANDLED", true);
 
-            if (Intent != null)
+            //A restored activity keeps its saved page; only a fresh launch follows a deep link.
+            if (!reborn && Intent != null)
             {
                 if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
                 {
-                    pager.SetCurrentItem(2, false);
+                    pager.SetCurrentItem(MainNavigation.TransfersPage, false);
                 }
                 else if (Intent.GetBooleanExtra(FolderAlertExtra, false))
                 {
-                    pager.SetCurrentItem(2, false);
+                    pager.SetCurrentItem(MainNavigation.TransfersPage, false);
                 }
                 else if (Intent.GetBooleanExtra(GoToAccountExtra, false) && !alreadyHandled) //else every rotation returns to the account tab
                 {
-                    pager.SetCurrentItem(0, false);
+                    pager.SetCurrentItem(MainNavigation.AccountPage, false);
                 }
                 else if (Intent.GetBooleanExtra(GoToBrowseExtra, false))
                 {
-                    pager.SetCurrentItem(3, false);
+                    pager.SetCurrentItem(MainNavigation.BrowsePage, false);
                 }
                 else if (Intent.GetBooleanExtra(GoToSearchExtra, false))
                 {
-                    pager.SetCurrentItem(1, false);
+                    pager.SetCurrentItem(MainNavigation.SearchPage, false);
                 }
                 else if (Intent.GetIntExtra(IntentSearchRoomExtra, -1) == 1)
                 {
-                    pager.SetCurrentItem(1, false);
+                    pager.SetCurrentItem(MainNavigation.SearchPage, false);
                 }
                 else if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1 && !reborn) //if its not reborn then the OnNewIntent will handle it...
                 {
@@ -246,7 +269,7 @@ namespace Seeker
                 else if (Intent.GetBooleanExtra(GoToBrowseSelfExtra, false))
                 {
                     Logger.InfoFirebase("from browse self");
-                    pager.SetCurrentItem(3, false);
+                    pager.SetCurrentItem(MainNavigation.BrowsePage, false);
                 }
                 else if (SearchSendIntentHelper.IsFromActionSend(Intent) && !reborn) //this will always create a new instance, so if its reborn then its an old intent that we already followed.
                 {
@@ -604,6 +627,9 @@ namespace Seeker
         {
             switch (item.ItemId)
             {
+                case Resource.Id.action_shell_menu:
+                    ShowSecondaryNavigationSheet();
+                    return true;
                 case Resource.Id.user_list_action:
                     Intent intent = new Intent(SeekerState.MainActivityRef, typeof(UserListActivity));
                     SeekerState.MainActivityRef.StartActivityForResult(intent, 141);
@@ -681,11 +707,21 @@ namespace Seeker
             try
             {
                 var pager = (AndroidX.ViewPager2.Widget.ViewPager2)FindViewById(Resource.Id.pager);
-                if (pager.CurrentItem == 3) //browse tab
+                if (pager.CurrentItem == MainNavigation.AccountPage)
+                {
+                    // Account is hidden from the bottom menu; back goes to the last primary
+                    // destination (Search by default) rather than exiting the task.
+                    pager.SetCurrentItem(
+                        MainNavigation.IsPrimaryDestination(lastPrimaryPage)
+                            ? lastPrimaryPage
+                            : MainNavigation.DefaultLandingPage,
+                        false);
+                }
+                else if (pager.CurrentItem == MainNavigation.BrowsePage) //browse tab
                 {
                     BrowseFragment.Instance?.BackButton();
                 }
-                else if (pager.CurrentItem == 2) //transfer tab
+                else if (pager.CurrentItem == MainNavigation.TransfersPage) //transfer tab
                 {
                     if (TransfersViewState.Instance.GetCurrentlySelectedFolder() != null)
                     {
@@ -996,6 +1032,11 @@ namespace Seeker
 
         protected override void OnSaveInstanceState(Bundle outState)
         {
+            if (pager != null)
+            {
+                outState.PutInt(MainNavigation.CurrentPageStateKey, pager.CurrentItem);
+            }
+            outState.PutInt(MainNavigation.LastPrimaryPageStateKey, lastPrimaryPage);
             base.OnSaveInstanceState(outState);
         }
 
@@ -1009,8 +1050,22 @@ namespace Seeker
             var navigator = FindViewById<BottomNavigationView>(Resource.Id.navigation);
             if (navigator != null)
             {
-                navigator.Menu.GetItem(position).SetCheckable(true); //necessary if side scrolling...
-                navigator.Menu.GetItem(position).SetChecked(true);
+                //Account (page 0) is hidden from the bottom menu. Clear every item first so
+                //landing on account cannot leave Search looking selected (the old code indexed
+                //the menu by page number, which would check item 0 = Search).
+                var menu = navigator.Menu;
+                for (int i = 0; i < menu.Size(); i++)
+                {
+                    var menuItem = menu.GetItem(i);
+                    bool isBottomItem = MainNavigation.PageForMenuItem(menuItem.ItemId) >= 0;
+                    menuItem.SetCheckable(isBottomItem);
+                    menuItem.SetChecked(false);
+                }
+                int menuItemId = MainNavigation.MenuItemForPage(position);
+                if (menuItemId != 0)
+                {
+                    menu.FindItem(menuItemId)?.SetChecked(true);
+                }
             }
             //Gate options-menu visibility to the current tab. FragmentStateAdapter (unlike
             //FragmentPagerAdapter) does not call setMenuVisibility per primary item, so without this
@@ -1026,6 +1081,10 @@ namespace Seeker
 
         public void OnPagerPageSelected(int position)
         {
+            if (MainNavigation.IsPrimaryDestination(position))
+            {
+                lastPrimaryPage = position;
+            }
             //if we are changing modes and the transfers action mode is not null (i.e. is active)
             //then we need to get out of it.
             if (TransfersFragment.TransfersActionMode != null)
@@ -1036,8 +1095,18 @@ namespace Seeker
             {
                 BrowseFragment.BrowseActionMode.Finish();
             }
+            if (position != MainNavigation.MessagesPage && Seeker.Messages.MessagesOverviewFragment.MessagesOverviewActionMode != null)
+            {
+                Seeker.Messages.MessagesOverviewFragment.MessagesOverviewActionMode.Finish();
+            }
+            // The search result action mode belongs to the Search destination. Leaving it (including
+            // the hidden account page and deep-link page switches) must not leave an orphaned mode.
+            if (position != MainNavigation.SearchPage && (SearchFragment.Instance?.IsSelectionMode ?? false))
+            {
+                SearchFragment.Instance.ClearSelectionAndFinishActionMode();
+            }
             // Hide download dialog when leaving search tab (i.e. clicking browse user -> go to browse response), show when returning
-            if (position != 1)
+            if (position != MainNavigation.SearchPage)
             {
                 if (SearchFragment.dlDialogShown)
                 {
@@ -1056,16 +1125,16 @@ namespace Seeker
             //in addition each fragment is responsible for expanding their menu...
             switch (position)
             {
-                case 0:
+                case MainNavigation.AccountPage:
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                     this.SupportActionBar.SetHomeButtonEnabled(false);
 
                     this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
-                    this.SupportActionBar.Title = this.GetString(Resource.String.home_tab);
+                    this.SupportActionBar.Title = this.GetString(Resource.String.account_tab);
                     this.SupportActionBar.SubtitleFormatted = null;
                     break;
-                case 1:
+                case MainNavigation.SearchPage:
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                     this.SupportActionBar.SetHomeButtonEnabled(false);
 
@@ -1087,19 +1156,28 @@ namespace Seeker
                         }
                     }
                     break;
-                case 2:
+                case MainNavigation.TransfersPage:
                     this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
 
                     SetTransferSupportActionBarState();
                     break;
-                case 3:
+                case MainNavigation.BrowsePage:
                     this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
                     this.SupportActionBar.SetHomeButtonEnabled(false);
 
                     this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
                     BrowseFragment.SetActionBarTitle();
+                    break;
+                case MainNavigation.MessagesPage:
+                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
+                    this.SupportActionBar.SetHomeButtonEnabled(false);
+
+                    this.SupportActionBar.SetDisplayShowCustomEnabled(false);
+                    this.SupportActionBar.SetDisplayShowTitleEnabled(true);
+                    this.SupportActionBar.Title = this.GetString(Resource.String.messages);
+                    this.SupportActionBar.SubtitleFormatted = null;
                     break;
             }
             RefreshBackCallbackState();
@@ -1156,7 +1234,9 @@ namespace Seeker
 
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
-            //MenuInflater.Inflate(Resource.Menu.menu_main, menu);
+            // The shell menu is always available, including on Search where the toolbar
+            // uses a custom view for the search field.
+            MenuInflater.Inflate(Resource.Menu.shell_menu, menu);
             return base.OnCreateOptionsMenu(menu);
         }
 
@@ -1178,20 +1258,10 @@ namespace Seeker
 
         public bool OnNavigationItemSelected(IMenuItem item)
         {
-            switch (item.ItemId)
+            int page = MainNavigation.PageForMenuItem(item.ItemId);
+            if (page >= 0)
             {
-                case Resource.Id.navigation_home:
-                    pager.SetCurrentItem(0, false);
-                    break;
-                case Resource.Id.navigation_search:
-                    pager.SetCurrentItem(1, false);
-                    break;
-                case Resource.Id.navigation_transfers:
-                    pager.SetCurrentItem(2, false);
-                    break;
-                case Resource.Id.navigation_browse:
-                    pager.SetCurrentItem(3, false);
-                    break;
+                pager.SetCurrentItem(page, false);
             }
             return true;
         }

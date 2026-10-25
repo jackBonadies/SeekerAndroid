@@ -12,6 +12,11 @@
 
     <!-- Settings, should always be in the overflow -->
     <item
+        android:id="@+id/action_advanced_search"
+        android:title="@string/advanced_filters"
+        app:showAsAction="never"
+    />
+    <item
         android:id="@+id/action_search_target"
         android:title="@string/change_target"
         app:showAsAction="never"

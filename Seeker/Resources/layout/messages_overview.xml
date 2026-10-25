@@ -65,6 +65,6 @@
         android:layout_marginEnd="16dp"
         android:src="@drawable/new_message_48dp"
         android:contentDescription="@string/msg_user"
-        app:backgroundTint="?attr/mainPurple"
-        app:tint="@android:color/white" />
+        app:backgroundTint="?attr/dsColorPrimary"
+        app:tint="?attr/dsColorOnPrimary" />
 </RelativeLayout>

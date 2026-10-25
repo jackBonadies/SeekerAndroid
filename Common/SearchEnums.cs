@@ -1,4 +1,4 @@
-namespace Seeker
+﻿namespace Seeker
 {
     public enum SearchTarget
     {
@@ -42,6 +42,9 @@ namespace Seeker
         Fastest = 1,
         FolderAlphabetical = 2,
         BitRate = 3,
+        // Appended so persisted DefaultSearchResultSortAlgorithm ids keep their meaning.
+        Filename = 4,
+        FileSize = 5,
     }
 
     public enum ChipType

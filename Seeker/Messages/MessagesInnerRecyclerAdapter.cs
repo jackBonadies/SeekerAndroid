@@ -1,4 +1,4 @@
-﻿using Seeker.Chatroom;
+using Seeker.Chatroom;
 using Android.App;
 using Android.Content;
 using Android.Graphics;
@@ -183,25 +183,29 @@ namespace Seeker.Messages
 
         public static Color GetColorFromMsgStatus(SentStatus status)
         {
-            int resourceIntColor = -1;
             switch (status)
             {
                 case SentStatus.Pending:
                 case SentStatus.Success:
-                    return UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainPurple);
+                    // The outgoing bubble is a themed container, not the chrome colour: in the
+                    // modern light theme mainPurple is a white app-bar surface.
+                    return UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.dsColorPrimaryContainer);
                 case SentStatus.Failed:
-                    resourceIntColor = Resource.Color.hardErrorRed;
-                    return GetColorFromInteger(ContextCompat.GetColor(SeekerState.ActiveActivityRef, resourceIntColor));
+                    return UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.dsColorError);
                 case SentStatus.None:
                     throw new Exception("Sent status should not be none");
             }
-            return Color.Red; //unreachable
+            return Color.Transparent; //unreachable
         }
 
         public void setItem(Message msg)
         {
             DataItem = msg;
             cardView.CardBackgroundColor = Android.Content.Res.ColorStateList.ValueOf(GetColorFromMsgStatus(msg.SentMsgStatus));
+            int sentTextAttr = msg.SentMsgStatus == SentStatus.Failed
+                ? Resource.Attribute.dsColorOnError
+                : Resource.Attribute.dsColorOnPrimaryContainer;
+            viewMessage.SetTextColor(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, sentTextAttr));
             if (msg.SentMsgStatus == SentStatus.Pending)
             {
                 viewTimeStamp.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.pending_);

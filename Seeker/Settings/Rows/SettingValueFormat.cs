@@ -1,7 +1,8 @@
-using Android.Content;
+﻿using Android.Content;
 using Common;
 using Seeker.Helpers;
 using Seeker.Managers;
+using Seeker.Search;
 using Seeker.Services;
 using Seeker.Transfers;
 using System;
@@ -101,6 +102,11 @@ namespace Seeker.Settings.Rows
             return string.IsNullOrEmpty(current) ? ctx.GetString(Resource.String.Automatic) : current;
         }
 
+        public static string SearchResultSortLabel(Context ctx, SearchResultSorting sorting)
+        {
+            return SearchSortLabels.Label(ctx, sorting);
+        }
+
         public static string DayNightModeLabel(Context ctx, int mode)
         {
             return mode switch
@@ -113,6 +119,7 @@ namespace Seeker.Settings.Rows
 
         public static string DayVariantLabel(Context ctx, DayThemeType v) => v switch
         {
+            DayThemeType.Modern => ctx.GetString(Resource.String.theme_modern),
             DayThemeType.ClassicPurple => ctx.GetString(Resource.String.theme_purple),
             DayThemeType.Red => ctx.GetString(Resource.String.theme_red),
             DayThemeType.Blue => ctx.GetString(Resource.String.theme_blue),
@@ -122,6 +129,7 @@ namespace Seeker.Settings.Rows
 
         public static string NightVariantLabel(Context ctx, NightThemeType v) => v switch
         {
+            NightThemeType.Modern => ctx.GetString(Resource.String.theme_modern),
             NightThemeType.ClassicPurple => ctx.GetString(Resource.String.theme_purple),
             NightThemeType.Grey => ctx.GetString(Resource.String.theme_grey),
             NightThemeType.Blue => ctx.GetString(Resource.String.theme_blue),

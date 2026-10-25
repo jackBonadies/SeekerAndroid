@@ -5,6 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="@dimen/ds_touch_target_min"
 	android:paddingVertical="4dp"
 	android:paddingHorizontal="6dp"
     android:orientation="horizontal"
@@ -25,7 +26,8 @@
 			android:maxLines="1"
 			android:ellipsize="end"
             android:text="roomNameDummy"
-            android:textSize="22sp"
+            android:textSize="18sp"
+            android:textColor="?attr/cellTextColor"
         />
         <ImageView
             android:layout_width="12sp"
@@ -45,7 +47,8 @@
         android:text="1000"
 		android:fontFamily="sans-serif-monospace"
         android:id="@+id/usersInRoom"
-        android:textSize="15sp"
+        android:textSize="14sp"
+        android:textColor="?attr/cellTextColorSubdued"
         android:maxLines="1"
     />
     <ImageView
@@ -56,6 +59,7 @@
         android:clickable="true"
         app:srcCompat="@drawable/outline_cancel_white_24"
         android:id="@+id/leaveRoom"
-        android:tint="?attr/mainTextColor"
+        android:contentDescription="@string/leave_room_desc"
+        android:tint="?attr/cellTextColorSubdued"
     />
 </LinearLayout>

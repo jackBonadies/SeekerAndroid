@@ -118,7 +118,7 @@ namespace Seeker.Messages
                             UiHelpers.HandleCommonContextMenuActions(
                                 item.TitleFormatted.ToString(), selectedUsernames[0],
                                 SeekerState.ActiveActivityRef,
-                                SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId));
+                                Frag?.ContextMenuAnchor);
                         }
                         else
                         {
@@ -141,7 +141,7 @@ namespace Seeker.Messages
                             UiHelpers.HandleCommonContextMenuActions(
                                 item.TitleFormatted.ToString(), selectedUsernames[0],
                                 SeekerState.ActiveActivityRef,
-                                SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId));
+                                Frag?.ContextMenuAnchor);
                         }
                         else
                         {
@@ -295,7 +295,7 @@ namespace Seeker.Messages
                 return;
             }
 
-            var act = this.Activity as MessagesActivity ?? MessagesActivity.MessagesActivityRef;
+            var act = this.Activity as AndroidX.AppCompat.App.AppCompatActivity ?? MessagesActivity.MessagesActivityRef;
             if (act == null)
             {
                 Logger.Firebase("On Long Click Messages Activity is Null");

@@ -1,0 +1,15 @@
+﻿<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!--
+        The shell's secondary navigation entry point (top bar). It opens the
+        ActionSheet that holds Account/login, Users, Wishlist, Chatrooms,
+        Settings, About and Shutdown, so none of those destinations are lost
+        when Account leaves the bottom navigation.
+    -->
+    <item
+        android:id="@+id/action_shell_menu"
+        android:icon="@drawable/ds_ic_shell_menu"
+        android:title="@string/more_options"
+        app:showAsAction="always"
+    />
+</menu>

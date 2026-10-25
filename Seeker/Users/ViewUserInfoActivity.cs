@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright 2021 Seeker
  *
  * This file is part of Seeker
@@ -276,12 +276,12 @@ namespace Seeker
             if (userInfo.HasFreeUploadSlot)
             {
                 statFreeUploadValue.Text = SeekerApplication.GetString(Resource.String.yes);
-                statFreeUploadValue.SetTextColor(Color.ParseColor("#4CAF50"));
+                statFreeUploadValue.SetTextColor(UiHelpers.GetColorFromAttribute(this, Resource.Attribute.dsColorSuccess));
             }
             else
             {
                 statFreeUploadValue.Text = SeekerApplication.GetString(Resource.String.No);
-                statFreeUploadValue.SetTextColor(Color.ParseColor("#F44336"));
+                statFreeUploadValue.SetTextColor(UiHelpers.GetColorFromAttribute(this, Resource.Attribute.dsColorError));
             }
 
             if (userData == null)

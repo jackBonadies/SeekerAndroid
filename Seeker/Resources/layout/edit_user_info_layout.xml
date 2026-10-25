@@ -44,7 +44,7 @@
                 android:layout_marginStart="2dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="22sp"
+                android:textSize="18sp"
                 android:textColor="?attr/normalTextColor"
                 android:text="@string/user_info_bio"
             />
@@ -72,7 +72,7 @@
                 android:layout_marginStart="2dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="22sp"
+                android:textSize="18sp"
                 android:textColor="?attr/normalTextColor"
                 android:text="@string/user_info_picture"
             />

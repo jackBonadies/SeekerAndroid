@@ -49,7 +49,7 @@
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:text=""
-                    android:textColor="#ffffff"
+                    android:textColor="?attr/dsColorChromeForeground"
                     android:id="@+id/folderNameHeader"
                     android:ellipsize="middle"
                     android:singleLine="true"
@@ -59,7 +59,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
                     android:text="User: dummy"
-                    android:textColor="#ffffff"
+                    android:textColor="?attr/dsColorChromeForeground"
                     android:id="@+id/userHeader"
                 />
                 <TextView
@@ -68,7 +68,8 @@
                     android:textSize="12sp"
                     android:paddingBottom="2dp"
                     android:text="Total: 12 files x 60 MB x 12m16s"
-                    android:textColor="#ccffffff"
+                    android:textColor="?attr/dsColorChromeForeground"
+                    android:alpha="0.8"
                     android:id="@+id/userHeaderSub"
                 />
             </LinearLayout>
@@ -76,7 +77,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="6dp"
-                android:tint="#ffffff"
+                android:tint="?attr/dsColorChromeForeground"
                 app:srcCompat="@drawable/ic_more_vert_white_vector_32dp"
                 android:layout_gravity="center_vertical"
             />
@@ -129,7 +130,7 @@
             style="@style/SeekerButtonStyle"
             android:textSize="14sp"
             app:icon="@drawable/download_20dp"
-            app:iconTint="#ffffff"
+            app:iconTint="?attr/dsColorOnPrimary"
             app:iconPadding="8dp"
             app:iconGravity="textStart"
             android:layout_marginStart="16dp"
@@ -154,7 +155,7 @@
                 style="@style/SeekerButtonStyle"
                 android:textSize="13sp"
                 app:icon="@drawable/folder_20dp"
-                app:iconTint="#ffffff"
+                app:iconTint="?attr/dsColorOnPrimary"
                 app:iconPadding="6dp"
                 app:iconGravity="textStart"
                 android:layout_marginEnd="6dp"
@@ -169,7 +170,7 @@
                 style="@style/SeekerButtonStyle"
                 android:textSize="13sp"
                 app:icon="@drawable/close_20dp"
-                app:iconTint="#ffffff"
+                app:iconTint="?attr/dsColorOnPrimary"
                 app:iconPadding="6dp"
                 app:iconGravity="textStart"
                 android:layout_marginStart="6dp"

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright 2021 Seeker
  *
  * This file is part of Seeker
@@ -43,7 +43,7 @@ using Common.Messages;
 namespace Seeker
 {
 
-    [Activity(Label = "ChatroomActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, Exported = false)]
+    [Activity(Label = "ChatroomActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, Exported = false, WindowSoftInputMode = Android.Views.SoftInput.AdjustResize)]
     public class ChatroomActivity : SlskLinkMenuActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
         public static ChatroomActivity ChatroomActivityRef { private set; get; } = null;

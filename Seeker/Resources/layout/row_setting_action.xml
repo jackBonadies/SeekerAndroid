@@ -72,7 +72,7 @@
         android:layout_height="match_parent"
         android:layout_marginStart="0dp"
         app:strokeWidth="2dp"
-        android:minHeight="36dp"
+        android:minHeight="@dimen/ds_touch_target_min"
         android:paddingStart="0dp"
         android:paddingEnd="14dp"
         android:textAllCaps="false"

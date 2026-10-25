@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+    <item
+        android:id="@+id/action_download_batch"
+        android:title="@string/download_selected"
+        android:icon="@drawable/ic_download_white_24"
+        app:showAsAction="always"
+        android:iconifiedByDefault="true"
+    />
+
+    <item
+        android:id="@+id/action_queue_paused_batch"
+        android:title="@string/QueueSelectedAsPaused"
+        android:icon="@drawable/paused"
+        app:iconTint="?attr/colorOnSurface"
+        app:showAsAction="never"
+        android:iconifiedByDefault="false"
+    />
+
+    <item
+        android:id="@+id/select_all"
+        android:title="@string/SelectAll"
+        android:icon="@drawable/select_all"
+        app:iconTint="?attr/colorOnSurface"
+        app:showAsAction="never"
+        android:iconifiedByDefault="false"
+    />
+</menu>

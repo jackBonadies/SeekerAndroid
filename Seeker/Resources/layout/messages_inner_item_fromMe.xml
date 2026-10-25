@@ -10,7 +10,7 @@
         android:id="@+id/card_gchat_message_me"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="?attr/mainPurple"
+        app:cardBackgroundColor="?attr/dsColorPrimaryContainer"
         app:cardCornerRadius="12dp"
         app:cardElevation="0dp"
         app:cardPreventCornerOverlap="false"
@@ -36,7 +36,7 @@
                 android:linksClickable="true"
                 android:autoLink="web"
                 android:text="This is a MessageDummy"
-                android:textColor="#ffffff"
+                android:textColor="?attr/dsColorOnPrimaryContainer"
                 android:textSize="16sp"
             />
         </LinearLayout>
@@ -47,8 +47,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="10:00"
-        android:textColor="#C0C0C0"
-        android:textSize="10sp"
+        android:textColor="?attr/dsColorTextSecondary"
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@+id/card_gchat_message_me"
         app:layout_constraintRight_toLeftOf="@+id/card_gchat_message_me"
     />

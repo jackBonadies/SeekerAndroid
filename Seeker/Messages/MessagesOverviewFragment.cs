@@ -6,6 +6,7 @@ using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
 using Google.Android.Material.Snackbar;
+using Seeker.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,7 +54,7 @@ namespace Seeker.Messages
             {
                 internalList = GetSortedMessagesList();//MessageController.Messages.Keys.ToList();
             }
-            recyclerAdapter = new MessagesOverviewRecyclerAdapter(internalList); //this depends tightly on MessageController... since these are just strings..
+            recyclerAdapter = CreateAdapter(internalList); //this depends tightly on MessageController... since these are just strings..
             recyclerViewOverview.SetAdapter(recyclerAdapter);
             recyclerViewOverview.SetLayoutManager(recycleLayoutManager);
 
@@ -63,7 +64,7 @@ namespace Seeker.Messages
 
             var fabNewMessage = rootView.FindViewById<Google.Android.Material.FloatingActionButton.FloatingActionButton>(Resource.Id.fabNewMessage);
             AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(fabNewMessage, new Seeker.Helpers.BottomMarginInsetsListener(fabNewMessage));
-            fabNewMessage.Click += (s, e) => (Activity as MessagesActivity)?.ShowEditTextMessageUserDialog();
+            fabNewMessage.Click += (s, e) => (Activity as IMessagesOverviewHost)?.ShowNewMessageDialog();
 
             created = true;
             return rootView;
@@ -76,6 +77,14 @@ namespace Seeker.Messages
             base.OnResume();
             MessagesBroadcastReceiver.MarkAsReadFromNotification += UpdateMarkAsReadFromNotif;
             SeekerApplication.UserStatusChangedUIEvent += OnUserStatusChanged;
+
+            // The shell keeps this fragment alive while a thread is opened in MessagesActivity.
+            // Returning from that thread must re-read the read markers (and any deletions done
+            // there) instead of showing the stale snapshots from before the activity pause.
+            if (created && recyclerAdapter != null)
+            {
+                RefreshAdapter();
+            }
         }
 
         public override void OnPause()
@@ -138,13 +147,69 @@ namespace Seeker.Messages
             return listToSort.Select((pair) => pair.Key).ToList();
         }
 
+        private MessagesOverviewRecyclerAdapter CreateAdapter(List<string> list)
+        {
+            return new MessagesOverviewRecyclerAdapter(list, OnOverviewItemClick, OnItemLongClick);
+        }
+
+        /// <summary>
+        /// Single click. Batch mode toggles selection; otherwise the host opens the
+        /// conversation (thread inside MessagesActivity, MessagesActivity intent from
+        /// the shell), so no navigation logic is duplicated here.
+        /// </summary>
+        public void OnOverviewItemClick(int position)
+        {
+            var adapter = recyclerAdapter;
+            if (adapter == null || position < 0 || position >= adapter.localDataSet.Count)
+            {
+                return;
+            }
+            if (adapter.IsInBatchSelectMode)
+            {
+                ToggleBatchSelect(position);
+                return;
+            }
+            (Activity as IMessagesOverviewHost)?.OpenMessagesConversation(adapter.localDataSet[position]);
+        }
+
+        /// <summary>Anchors snackbars/action menus correctly in both host activities.</summary>
+        public Android.Views.View SnackbarAnchor => this.View ?? Activity?.FindViewById(Android.Resource.Id.Content);
+
+        public ViewGroup ContextMenuAnchor =>
+            this.View as ViewGroup ?? Activity?.FindViewById<ViewGroup>(Android.Resource.Id.Content);
+
         public void OnMessageReceived(object sender, Message msg)
         {
-            var activity = this.Activity != null ? this.Activity : MessagesActivity.MessagesActivityRef;
-            activity.RunOnUiThread(new Action(() =>
+            var activity = this.Activity ?? (Android.App.Activity)MessagesActivity.MessagesActivityRef ?? SeekerState.MainActivityRef;
+            activity?.RunOnUiThread(new Action(() =>
             {
                 this.RefreshAdapter();
             }));
+        }
+
+        /// <summary>Undo for "delete all" without depending on the hosting activity type.</summary>
+        public void UndoDeleteAllMessages(Dictionary<string, List<Message>> deletedMessageDictionary, Dictionary<string, int> deletedMessageCountDictionary)
+        {
+            if (deletedMessageDictionary == null)
+            {
+                Logger.Firebase("failure on undo delete all. dict was null");
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_undo), ToastLength.Short);
+                return;
+            }
+
+            foreach (var entry in deletedMessageDictionary)
+            {
+                MessageController.Messages[entry.Key] = entry.Value;
+            }
+
+            foreach (var entry in deletedMessageCountDictionary)
+            {
+                MessageController.LastReadMessageCounts[entry.Key] = entry.Value;
+            }
+
+            MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
+            MessageController.SaveLastReadCounts(SeekerState.SharedPreferences);
+            RefreshAdapter();
         }
 
         public void RefreshAdapter()
@@ -177,7 +242,7 @@ namespace Seeker.Messages
                 }
                 if (recyclerAdapter == null)
                 {
-                    recyclerAdapter = new MessagesOverviewRecyclerAdapter(internalList);
+                    recyclerAdapter = CreateAdapter(internalList);
                 }
                 var diff = DiffUtil.CalculateDiff(new MessageOverviewDiffCallback(internalList, newList), true);
                 internalList = newList;
@@ -223,11 +288,6 @@ namespace Seeker.Messages
 
             public bool OnMenuItemSelected(IMenuItem item)
             {
-                var activity = fragment.Activity as MessagesActivity;
-                if (activity == null)
-                {
-                    return false;
-                }
                 switch (item.ItemId)
                 {
                     case Resource.Id.mark_all_as_read_action:
@@ -243,8 +303,8 @@ namespace Seeker.Messages
                         }
                         var (deletedAllMessages, deletedAllLastReadMessageCounts) = MessageController.DeleteAllMessagesWithUndo();
                         fragment.RefreshAdapter();
-                        Snackbar sb = Snackbar.Make(fragment.View, SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong)
-                            .SetAction("Undo", (View v) => activity.GetUndoDeleteAllSnackBarAction(deletedAllMessages, deletedAllLastReadMessageCounts));
+                        Snackbar sb = Snackbar.Make(fragment.SnackbarAnchor, SeekerApplication.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong)
+                            .SetAction(Resource.String.undo, (View v) => fragment.UndoDeleteAllMessages(deletedAllMessages, deletedAllLastReadMessageCounts));
                         sb.Show();
                         return true;
                 }

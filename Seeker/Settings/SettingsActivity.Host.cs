@@ -150,6 +150,14 @@ namespace Seeker
 
         void ISettingsHost.LaunchChangePassword() => ChangePassword();
         void ISettingsHost.LaunchEditUserInfo() => EditUserInfo();
+        void ISettingsHost.LaunchAccount()
+        {
+            // Account/login is a hidden shell page now, so Settings keeps an explicit
+            // entry point for it (also used by the secondary navigation sheet).
+            Intent intent = new Intent(this, typeof(MainActivity));
+            intent.PutExtra(MainActivity.GoToAccountExtra, true);
+            StartActivity(intent);
+        }
         void ISettingsHost.LaunchImportClientData() => ImportData();
         void ISettingsHost.LaunchExportClientData() => ExportClientData();
 
@@ -204,8 +212,8 @@ namespace Seeker
             PreferencesState.AutoAwayOnInactivity = false;
 
             PreferencesState.DayNightMode = AndroidX.AppCompat.App.AppCompatDelegate.ModeNightFollowSystem;
-            PreferencesState.DayModeVariant = DayThemeType.ClassicPurple;
-            PreferencesState.NightModeVariant = NightThemeType.ClassicPurple;
+            PreferencesState.DayModeVariant = DayThemeType.Modern;
+            PreferencesState.NightModeVariant = NightThemeType.Modern;
 
             PreferencesState.SharingOn = false;
             PreferencesState.AllowUploadsOnMetered = true;

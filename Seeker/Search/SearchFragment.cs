@@ -43,6 +43,7 @@ namespace Seeker
         private TextView noResultsSubtitle = null;
         private TextView allFilteredTitle = null;
         private TextView searchFailedReason = null;
+        private TextView searchFailedTitle = null;
         private View linearProgressIndicator = null;
         private TextView searchLoadingQueryText = null;
         private TextView searchLoadingTitle = null;
@@ -163,6 +164,14 @@ namespace Seeker
 
         public override void OnPrepareOptionsMenu(IMenu menu)
         {
+            var searchItem = menu.FindItem(Resource.Id.action_search);
+            if (searchItem != null)
+            {
+                // The icon is a search/stop toggle; keep the accessibility label in sync too.
+                searchItem.SetTitle(SearchTabHelper.CurrentlySearching
+                    ? Resource.String.search_stop
+                    : Resource.String.searches_tab2);
+            }
             var toggleItem = menu.FindItem(Resource.Id.action_toggle_expand_all);
             if (toggleItem != null)
             {
@@ -283,6 +292,12 @@ namespace Seeker
             }
 
             int previousTab = SearchTabHelper.CurrentTab;
+            if (previousTab != tabToGoTo)
+            {
+                // Selection identities belong to the result list being left, not to the tab we
+                // are about to show. The action mode is torn down with them.
+                ClearSelectionAndFinishActionMode();
+            }
             SearchTabHelper.CurrentTab = tabToGoTo;
 
             if (previousTab != tabToGoTo)
@@ -385,6 +400,9 @@ namespace Seeker
                     return true;
                 case Resource.Id.action_sort_results_by:
                     ShowChangeSortOrderDialog();
+                    return true;
+                case Resource.Id.action_advanced_search:
+                    OpenAdvancedFilters();
                     return true;
                 case Resource.Id.action_search:
                     if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
@@ -840,9 +858,16 @@ namespace Seeker
                     SeekerApplication.GetString(Resource.String.results_hidden_title),
                     total);
             }
-            else if (state == SearchEmptyState.Failed && searchFailedReason != null)
+            else if (state == SearchEmptyState.Failed)
             {
-                searchFailedReason.Text = currentTab.LastSearchError;
+                if (searchFailedTitle != null)
+                {
+                    searchFailedTitle.Text = FailedStateTitle();
+                }
+                if (searchFailedReason != null)
+                {
+                    searchFailedReason.Text = currentTab.LastSearchError;
+                }
             }
 
             if (state == SearchEmptyState.None)
@@ -866,6 +891,24 @@ namespace Seeker
             {
                 linearProgressIndicator.Visibility = ViewStates.Gone;
             }
+        }
+
+        /// <summary>
+        /// Distinguishes a failed search from a disconnected / signed-out session using the
+        /// state the search pipeline already holds. No connection work happens here.
+        /// </summary>
+        private static string FailedStateTitle()
+        {
+            if (!PreferencesState.CurrentlyLoggedIn)
+            {
+                return SeekerApplication.GetString(Resource.String.search_not_logged_in_title);
+            }
+            var session = SessionService.Instance;
+            if (session != null && session.CurrentlyLoggedInButDisconnectedState())
+            {
+                return SeekerApplication.GetString(Resource.String.search_disconnected_title);
+            }
+            return SeekerApplication.GetString(Resource.String.search_failed_title);
         }
 
         private void StartSpinnerTimer()
@@ -1067,6 +1110,7 @@ namespace Seeker
             noResultsSubtitle = rootView.FindViewById<TextView>(Resource.Id.noResultsSubtitle);
             allFilteredTitle = rootView.FindViewById<TextView>(Resource.Id.allFilteredTitle);
             searchFailedReason = rootView.FindViewById<TextView>(Resource.Id.searchFailedReason);
+            searchFailedTitle = rootView.FindViewById<TextView>(Resource.Id.searchFailedTitle);
             wishlistBanner = rootView.FindViewById<View>(Resource.Id.wishlistBanner);
             wishlistBannerText = rootView.FindViewById<TextView>(Resource.Id.wishlistHeaderText);
             UpdateEmptyState();
@@ -1115,13 +1159,19 @@ namespace Seeker
             bitrateToggle.ButtonChecked += BitrateToggle_ButtonChecked;
         }
 
+        /// <summary>
+        /// Selected segment = dsColorPrimary, unselected = dsColorSurface.
+        /// The legacy chrome attribute (mainPurple) must NOT be used here: in the
+        /// modern light theme it is the (white) app-bar surface, which painted the
+        /// selected filter white-on-white.
+        /// </summary>
         private static Android.Content.Res.ColorStateList GetSegmentedButtonBgTint(Android.Content.Context ctx)
         {
             var typedValue = new Android.Util.TypedValue();
-            ctx.Theme.ResolveAttribute(Resource.Attribute.mainPurple, typedValue, true);
-            int accentColor = typedValue.Data;
+            ctx.Theme.ResolveAttribute(Resource.Attribute.dsColorPrimary, typedValue, true);
+            int selectedColor = typedValue.Data;
 
-            ctx.Theme.ResolveAttribute(Resource.Attribute.dialog_background, typedValue, true);
+            ctx.Theme.ResolveAttribute(Resource.Attribute.dsColorSurface, typedValue, true);
             int uncheckedColor = typedValue.Data;
 
             var states = new int[][]
@@ -1129,14 +1179,21 @@ namespace Seeker
                 new int[] { Android.Resource.Attribute.StateChecked },
                 new int[] { -Android.Resource.Attribute.StateChecked }
             };
-            var colors = new int[] { accentColor, uncheckedColor };
+            var colors = new int[] { selectedColor, uncheckedColor };
             return new Android.Content.Res.ColorStateList(states, colors);
         }
 
+        /// <summary>
+        /// Selected segment text = dsColorOnPrimary (the pair of the selected
+        /// background), unselected = dsColorTextPrimary. Never a literal white.
+        /// </summary>
         private static Android.Content.Res.ColorStateList GetSegmentedButtonTextTint(Android.Content.Context ctx)
         {
             var typedValue = new Android.Util.TypedValue();
-            ctx.Theme.ResolveAttribute(Resource.Attribute.normalTextColor, typedValue, true);
+            ctx.Theme.ResolveAttribute(Resource.Attribute.dsColorOnPrimary, typedValue, true);
+            int selectedColor = typedValue.Data;
+
+            ctx.Theme.ResolveAttribute(Resource.Attribute.dsColorTextPrimary, typedValue, true);
             int uncheckedColor = typedValue.Data;
 
             var states = new int[][]
@@ -1144,7 +1201,7 @@ namespace Seeker
                 new int[] { Android.Resource.Attribute.StateChecked },
                 new int[] { -Android.Resource.Attribute.StateChecked }
             };
-            var colors = new int[] { Android.Graphics.Color.White, uncheckedColor };
+            var colors = new int[] { selectedColor, uncheckedColor };
             return new Android.Content.Res.ColorStateList(states, colors);
         }
 
@@ -1320,6 +1377,21 @@ namespace Seeker
         {
             return PreferencesState.FilterFormat != FormatFilterType.Any
                 || PreferencesState.FilterMinBitrateKbs > 0;
+        }
+
+        /// <summary>Opens the existing advanced filter bottom sheet from the overflow menu.</summary>
+        public void OpenAdvancedFilters()
+        {
+            if (rootView == null)
+            {
+                return;
+            }
+            View bottomSheetView = rootView.FindViewById<View>(Resource.Id.bottomSheet);
+            if (bottomSheetView == null)
+            {
+                return;
+            }
+            BottomSheetBehavior.From(bottomSheetView).State = BottomSheetBehavior.StateExpanded;
         }
 
         private void B_Click(object sender, EventArgs e)
@@ -1501,6 +1573,8 @@ namespace Seeker
             AndroidX.AppCompat.Widget.AppCompatRadioButton sortSpeed = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.speed);
             AndroidX.AppCompat.Widget.AppCompatRadioButton sortFolderNameAlpha = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.folderNameAlpha);
             AndroidX.AppCompat.Widget.AppCompatRadioButton sortBitrate = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.bitRate);
+            AndroidX.AppCompat.Widget.AppCompatRadioButton sortFilename = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.fileName);
+            AndroidX.AppCompat.Widget.AppCompatRadioButton sortFileSize = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.fileSize);
             CheckBox checkBoxSetAsDefault = viewInflated.FindViewById<CheckBox>(Resource.Id.setAsDefault);
             switch (SearchTabHelper.SortHelperSorting)
             {
@@ -1516,12 +1590,20 @@ namespace Seeker
                 case SearchResultSorting.BitRate:
                     sortBitrate.Checked = true;
                     break;
+                case SearchResultSorting.Filename:
+                    sortFilename.Checked = true;
+                    break;
+                case SearchResultSorting.FileSize:
+                    sortFileSize.Checked = true;
+                    break;
             }
 
             sortAvailability.Click += SortAvailabilityClick;
             sortSpeed.Click += SortSpeedClick;
             sortFolderNameAlpha.Click += SortFoldernameAlphaClick;
             sortBitrate.Click += SortBitrate_Click;
+            sortFilename.Click += SortFilenameClick;
+            sortFileSize.Click += SortFileSizeClick;
 
             builder.SetView(viewInflated);
 
@@ -1571,6 +1653,16 @@ namespace Seeker
         private void SortFoldernameAlphaClick(object sender, EventArgs e)
         {
             UpdateSortAvailability(SearchResultSorting.FolderAlphabetical);
+        }
+
+        private void SortFilenameClick(object sender, EventArgs e)
+        {
+            UpdateSortAvailability(SearchResultSorting.Filename);
+        }
+
+        private void SortFileSizeClick(object sender, EventArgs e)
+        {
+            UpdateSortAvailability(SearchResultSorting.FileSize);
         }
 
         private void UpdateSortAvailability(SearchResultSorting searchResultSorting)
@@ -1957,6 +2049,8 @@ namespace Seeker
             // TODO: this next part should really just read "update UI from state"
             if (fromTab == SearchTabHelper.CurrentTab)
             {
+                // A new search replaces the old result set, so old selected identities must go.
+                SearchFragment.Instance?.ClearSelectionAndFinishActionMode();
                 SearchFragment.Instance.ResetFilterControlsUI(false);
 
                 SearchFragment.Instance.recyclerViewSearch.SetAdapter(SearchFragment.Instance.CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
@@ -1972,6 +2066,18 @@ namespace Seeker
         {
             Logger.Debug("search frag detach");
             base.OnDetach();
+        }
+
+        public override void OnDestroyView()
+        {
+            // A destroyed view must not keep owning a live contextual action mode. Normal tab
+            // switches clear it in MainActivity.OnPagerPageSelected, but activity recreation (or
+            // any future view teardown) reaches this path instead. Ordinary streaming/sorting
+            // never destroys the view, so this does not clear a live selection mid-search.
+            ClearSelectionAndFinishActionMode();
+            searchSelection.Clear();
+            searchActionMode = null;
+            base.OnDestroyView();
         }
         public override void OnAttach(Context context)
         {
@@ -1998,6 +2104,9 @@ namespace Seeker
         /// </summary>
         private void ResetAdapterAndBaseline()
         {
+            // Filter changes can hide a selected row; prune so the action-mode count and batch
+            // download only ever describe visible rows. Sorts keep every row, so they are lossless.
+            PruneSelectionToVisible();
             recyclerSearchAdapter.NotifyDataSetChanged();
             SetOldList(SearchTabHelper.TextFilter.FilterString, SearchTabHelper.UI_SearchResponses.ToList());
         }

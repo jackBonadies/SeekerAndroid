@@ -6,12 +6,48 @@
     tools:context="android.PageFragment"
     android:id="@+id/relativeLayout1"
 >
+    <LinearLayout
+        android:id="@+id/transfersTabs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/ds_space_xs"
+        android:background="?attr/dsColorSurface"
+        android:contentDescription="@string/transfers_tabs_description"
+    >
+        <TextView
+            android:id="@+id/transfersTabDownloads"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/ds_touch_target_min"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:background="@drawable/ds_cell_selector"
+            android:clickable="true"
+            android:focusable="true"
+            android:text="@string/Downloads"
+            android:textColor="@color/ds_segment_text"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/transfersTabUploads"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/ds_touch_target_min"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:background="@drawable/ds_cell_selector"
+            android:clickable="true"
+            android:focusable="true"
+            android:text="@string/Uploads"
+            android:textColor="@color/ds_segment_text"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_below="@id/header1"
+        android:layout_below="@id/transfersTabs"
         android:minWidth="25px"
         android:minHeight="25px"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:id="@+id/recyclerView1"
     />
     <LinearLayout

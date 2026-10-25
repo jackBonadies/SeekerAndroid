@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright 2021 Seeker
  *
  * This file is part of Seeker
@@ -49,8 +49,8 @@ using Common.Messages;
 namespace Seeker
 {
 
-    [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, Exported = false)]
-    public class MessagesActivity : SlskLinkMenuActivity//, Android.Widget.PopupMenu.IOnMenuItemClickListener
+    [Activity(Label = "MessagesActivity", Theme = "@style/AppTheme.NoActionBar", LaunchMode = Android.Content.PM.LaunchMode.SingleTop, Exported = false, WindowSoftInputMode = Android.Views.SoftInput.AdjustResize)]
+    public class MessagesActivity : SlskLinkMenuActivity, IMessagesOverviewHost//, Android.Widget.PopupMenu.IOnMenuItemClickListener
     {
         public const string InnerFragmentTag = "InnerUserFragment";
         public const string OuterFragmentTag = "OuterUserFragment";
@@ -100,28 +100,9 @@ namespace Seeker
 
         public void GetUndoDeleteAllSnackBarAction(Dictionary<string, List<Message>> deletedMessageDictionary, Dictionary<string, int> deletedMessageCountDictionary)
         {
-            if (deletedMessageDictionary == null)
-            {
-                //error
-                bool isNull = deletedMessageDictionary == null;
-                Logger.Firebase("failure on undo delete all. dict was null");
-                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_undo), ToastLength.Short);
-                return;
-            }
-
-            foreach (var entry in deletedMessageDictionary)
-            {
-                MessageController.Messages[entry.Key] = entry.Value;
-            }
-
-            foreach (var entry in deletedMessageCountDictionary)
-            {
-                MessageController.LastReadMessageCounts[entry.Key] = entry.Value;
-            }
-
-            MessageController.SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
-            MessageController.SaveLastReadCounts(SeekerState.SharedPreferences);
-            (SeekerState.ActiveActivityRef as MessagesActivity).GetOverviewFragment().RefreshAdapter();
+            // Delegate to the overview fragment so the undo logic lives in one place
+            // and works whether messages are hosted here or in MainActivity.
+            GetOverviewFragment()?.UndoDeleteAllMessages(deletedMessageDictionary, deletedMessageCountDictionary);
         }
 
         public MessagesOverviewFragment GetOverviewFragment()
@@ -129,89 +110,22 @@ namespace Seeker
             return (SupportFragmentManager.FindFragmentByTag(OuterFragmentTag) as MessagesOverviewFragment);
         }
 
-        private static AndroidX.AppCompat.App.AlertDialog messageUserDialog = null;
+        public void ShowNewMessageDialog()
+        {
+            MessagesComposeDialog.Show(this, ChangeToInnerFragment);
+        }
+
+        public void OpenMessagesConversation(string username)
+        {
+            ChangeToInnerFragment(username);
+        }
 
         public void ShowEditTextMessageUserDialog()
         {
-            if (SessionService.Instance.IsNotLoggedIn())
-            {
-                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_be_logged_to_send_message), ToastLength.Short);
-                return;
-            }
-
-            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
-            builder.SetTitle(SeekerState.ActiveActivityRef.GetString(Resource.String.msg_user));
-            var rootView = (ViewGroup)this.FindViewById(Android.Resource.Id.Content).RootView;
-            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.autocomplete_user_dialog_content, rootView, false);
-            AutoCompleteTextView input = (AutoCompleteTextView)viewInflated.FindViewById<AutoCompleteTextView>(Resource.Id.chosenUserEditText);
-            UiHelpers.SetupRecentUserAutoCompleteTextView(input);
-            // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
-            builder.SetView(viewInflated);
-
-            EventHandler<DialogClickEventArgs> eventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs okayArgs) =>
-            {
-                string userToMessage = UiHelpers.GetEnteredUsername(input);
-                if (userToMessage == null || userToMessage == string.Empty)
-                {
-                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.must_type_a_username_to_message), ToastLength.Short);
-                    if ((sender as AndroidX.AppCompat.App.AlertDialog) == null)
-                    {
-                        messageUserDialog.Dismiss();
-                    }
-                    else
-                    {
-                        (sender as AndroidX.AppCompat.App.AlertDialog).Dismiss();
-                    }
-                    return;
-                }
-
-                UserMetadataService.RecentUsersManager.AddUserToTop(userToMessage, true);
-
-                //Do Logic of going to Username View
-                this.ChangeToInnerFragment(userToMessage);
-
-
-                //BrowseService.RequestFilesApi(userToMessage, this.View, goSnackBarAction, null);
-
-                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
-                {
-                    aDiag.Dismiss();
-                }
-                else
-                {
-                    messageUserDialog.Dismiss();
-                }
-            });
-            EventHandler<DialogClickEventArgs> eventHandlerCancel = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
-            {
-                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
-                {
-                    aDiag.Dismiss();
-                }
-                else
-                {
-                    messageUserDialog.Dismiss();
-                }
-            });
-
-            var editorAction = UiHelpers.MakeDialogEditorAction(this.FindViewById(Android.Resource.Id.Content)?.RootView, eventHandler);
-
-
-            var keypressAction = UiHelpers.MakeDialogKeyPressAction(this.FindViewById(Android.Resource.Id.Content)?.RootView, eventHandler);
-
-            input.KeyPress += keypressAction;
-            input.EditorAction += editorAction;
-            input.FocusChange += UiHelpers.OnFocusAdjustNothing;
-
-            builder.SetPositiveButton(Resource.String.okay, eventHandler);
-            builder.SetNegativeButton(Resource.String.cancel, eventHandlerCancel);
-            // Set up the buttons
-
-            messageUserDialog = builder.Create();
-            messageUserDialog.Show();
-            UiHelpers.DoNotEnablePositiveUntilText(messageUserDialog, input);
+            // Kept for callers that already used the activity directly; the dialog
+            // itself is shared with MainActivity's Messages page.
+            ShowNewMessageDialog();
         }
-
 
         private void onBackPressedAction(OnBackPressedCallback callback)
         {

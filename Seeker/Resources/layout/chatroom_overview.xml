@@ -16,7 +16,7 @@
         android:visibility="gone"
         app:trackCornerRadius="0dp"
         app:trackInnerCornerRadius="2dp"
-        app:indicatorColor="?attr/mainPurple"
+        app:indicatorColor="?attr/dsColorPrimary"
         android:indeterminateOnly="true" />
     <SearchView
         android:layout_width="match_parent"
@@ -54,7 +54,7 @@
 			app:indicatorSize="120dp"
 			app:trackCornerRadius="5dp"
 			app:trackThickness="6dp"
-			app:indicatorColor="?attr/mainPurple"
+			app:indicatorColor="?attr/dsColorPrimary"
 			android:indeterminateOnly="true" />
 
 		<TextView
