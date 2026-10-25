@@ -1,27 +1,51 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!--<style name="OutlinedRoundedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-		<item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded</item>
-	</style>
+    <!--
+        ============================================================================
+        Concrete themes (Phase 2A)
 
-	<style name="ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded" parent="">
-		<item name="cornerFamily">rounded</item>
-		<item name="cornerSize">8dp</item>
-	</style>-->
+        A theme only declares:
+          * the semantic design-system tokens (dsColor* / dsShape*), and
+          * the legacy custom attributes whose meaning is screen specific.
+
+        Everything else (Material3 colour roles, dialog/sheet/popup/input
+        theming, legacy token mapping, shapes, typography) is inherited from
+        AppTheme.NoActionBar in values/styles.xml.
+
+        Legacy themes (DefaultLight*, DefaultDark*, Amoled*) keep their stored
+        preference ints (Common/ThemeEnums.cs) and their palettes. The token
+        layer only fills the shared window/launch background with the same
+        Material light/dark background the legacy themes used before; no legacy
+        palette value was dropped. New installs default to ModernLight /
+        ModernDark (see Seeker/Helpers/PreferencesManager.cs).
+        ============================================================================
+    -->
+
+    <!-- =========================== DAY — LEGACY ============================ -->
 
     <style name="DefaultLight" parent="AppTheme.NoActionBar">
         <item name="colorOnPrimary">#ffffff</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSecondaryContainer">#e4e6f6</item>
         <item name="colorSurface">#FEF7FF</item>
         <item name="colorSurfaceLogin">#FEF7FF</item>
         <item name="colorOnSurface">?attr/normalTextColor</item>
-		<item name="colorOnBackground">?attr/normalTextColor</item>
+        <item name="colorOnBackground">?attr/normalTextColor</item>
+
+        <!-- status/navigation bar icons: light chrome behind transparent bars -->
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+
+        <item name="swipeToRefreshProgress">?attr/dsColorPrimary</item>
+        <item name="swipeToRefreshBackground">#ffffffff</item>
 
         <item name="normalTextColor">#000000</item>
         <item name="normalTextColorNonTinted">#000000</item>
 
         <item name="destructiveColor">#B3261E</item>
 
-		<item name="chat_left">#a12e2e</item>
+        <item name="chat_left">#a12e2e</item>
         <item name="chat_join">#2e8a5f</item>
         <!--<item name="dialogBackground">#52000000</item>-->
         <item name="cellbackColor">#00000000</item>
@@ -32,20 +56,14 @@
         <item name="expandIconColor">#888CB5</item>
         <item name="cellStroke">#994f58c4</item>
 
-		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#8AB4F8</item>
 
-        <item name="rounded_input_edit">
-            @drawable/rounded_text_input_background_light
-        </item>
-        <item name="chatInputBackground">
-            @drawable/chat_input_background_light
-        </item>
+        <item name="rounded_input_edit">@drawable/rounded_text_input_background_light</item>
+        <item name="chatInputBackground">@drawable/chat_input_background_light</item>
 
         <item name="android_default_notification_blue_color">#4978B8</item>
-        <item name="android_default_notification_complementary_color">
-            #B88949
-        </item>
+        <item name="android_default_notification_complementary_color">#B88949</item>
         <item name="seeker_notification_other_person_color">#6449B7</item>
 
         <item name="floating_action_bar_to_bottom_icon">#5F5F5F</item>
@@ -80,28 +98,10 @@
 
         <item name="searchHeaderBackground">@android:color/transparent</item>
 
-        <item name="the_rounded_corner_background_drawable">
-            @drawable/rounded_corner_background_light
-        </item>
-        <item name="the_rounded_corner_dialog_background_drawable">
-            @drawable/rounded_corner_dialog_background_light
-        </item>
-        <item
-            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
-        >
-            ?attr/the_rounded_corner_dialog_background_drawable
-        </item>
-		<item name="actionModeStyle">@style/MyActionMode</item>
-	</style>
-
-	<style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
-		<item name="background">?attr/mainPurple</item>
-		<item name="titleTextStyle">@style/MyActionModeTitle</item>
-	</style>
-
-	<style name="MyActionModeTitle" parent="TextAppearance.AppCompat.Widget.ActionMode.Title">
-        <item name="android:textColor">?attr/colorOnPrimary</item>
-	</style>
+        <item name="the_rounded_corner_background_drawable">@drawable/rounded_corner_background_light</item>
+        <item name="the_rounded_corner_dialog_background_drawable">@drawable/rounded_corner_dialog_background_light</item>
+        <item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">?attr/the_rounded_corner_dialog_background_drawable</item>
+    </style>
 
     <style name="DefaultLight_Blue" parent="DefaultLight">
         <item name="colorPrimary">#126291</item>
@@ -116,7 +116,7 @@
         <item name="whitePurpleForNavBar">#4c8aae</item>
 
         <item name="expandIconColor">#7BA1D1</item>
-		<item name="searchTabHeader">#303030</item>
+        <item name="searchTabHeader">#303030</item>
         <item name="mainTextColorHinted">#4D4D4D</item>
         <item name="mainTextColorHintedFlair">#86b2cb</item>
         <item name="mainTextColor">#126291</item>
@@ -125,7 +125,7 @@
         <item name="colorAccent">#86b2cb</item>
         <item name="checkBoxColor">#4496ee</item>
 
-		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#86b2cb</item>
         <!--<item name="colorAccent">#054568</item>-->
     </style>
@@ -150,7 +150,7 @@
         <item name="colorAccent">#d57676</item>
         <item name="checkBoxColor">#FC4C02</item>
 
-		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#d57676</item>
     </style>
 
@@ -177,36 +177,297 @@
         <item name="colorAccent">#86b2cb</item>
         <item name="checkBoxColor">#4496ee</item>
 
-		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#86b2cb</item>
     </style>
 
+    <!-- =========================== DAY — MODERN =========================== -->
+
+    <!--
+        ModernLight / ModernDark are the Phase 2A default themes.
+
+        Palette (dark, as specified):
+            background   #101318   surface          #1B222C
+            elevated     #26313D   accent/primary   #5EE0C0
+            text         #F0F3F6   text secondary   #A8B3BF
+            outline      #34404D
+        Designed matching light palette (WCAG AA against the light surfaces):
+            background   #F5F7FA   surface          #FFFFFF
+            elevated     #FFFFFF   accent/primary   #0F7A68  (5.2:1 on #FFFFFF)
+            container    #EDF1F5   on-primary       #FFFFFF
+            text         #101318   text secondary   #52606E  (6.3:1 on #FFFFFF)
+            outline      #C4CDD6
+        Both themes only declare tokens; the legacy attributes are mapped onto
+        the tokens so existing screens/drawables follow automatically.
+        Misc/test_ui_contracts.py asserts these tokens and the contrast ratios.
+    -->
+
+    <style name="ModernLight" parent="DefaultLight">
+        <!-- chrome: light app bar / bottom navigation with dark foreground -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+        <item name="android:windowBackground">?attr/dsColorLaunchBackground</item>
+
+        <!-- tokens -->
+        <item name="dsColorBackground">#F5F7FA</item>
+        <item name="dsColorSurface">#FFFFFF</item>
+        <item name="dsColorSurfaceContainer">#EDF1F5</item>
+        <item name="dsColorSurfaceElevated">#FFFFFF</item>
+
+        <item name="dsColorPrimary">#0F7A68</item>
+        <item name="dsColorOnPrimary">#FFFFFF</item>
+        <item name="dsColorPrimaryContainer">#C9F2E7</item>
+        <item name="dsColorOnPrimaryContainer">#00382F</item>
+        <item name="dsColorAccent">#0F7A68</item>
+        <item name="dsColorOnAccent">#FFFFFF</item>
+
+        <item name="dsColorTextPrimary">#101318</item>
+        <item name="dsColorTextSecondary">#52606E</item>
+        <item name="dsColorTextDisabled">#858F9B</item>
+
+        <item name="dsColorOutline">#C4CDD6</item>
+        <item name="dsColorOutlineVariant">#E1E7ED</item>
+        <item name="dsColorDivider">#DCE3EA</item>
+
+        <item name="dsColorError">#B3261E</item>
+        <item name="dsColorOnError">#FFFFFF</item>
+        <item name="dsColorSuccess">#1B7F4B</item>
+        <item name="dsColorWarning">#8A5A00</item>
+        <item name="dsColorScrim">#000000</item>
+        <item name="dsColorControlHighlight">#1A0F7A68</item>
+
+        <item name="dsColorInputBackground">#FFFFFF</item>
+        <item name="dsColorInputStroke">#C4CDD6</item>
+
+        <item name="dsColorChromeSurface">#FFFFFF</item>
+        <item name="dsColorChromeForeground">#101318</item>
+        <item name="dsColorActionModeBackground">#0F7A68</item>
+        <item name="dsColorActionModeForeground">#FFFFFF</item>
+        <item name="dsColorNavigationBackground">#FFFFFF</item>
+        <item name="dsColorNavigationForeground">#0F7A68</item>
+        <item name="dsColorNavigationForegroundMuted">#52606E</item>
+        <item name="dsColorNavigationIndicator">#C9F2E7</item>
+        <item name="dsColorLaunchBackground">#F5F7FA</item>
+        <item name="dsColorSystemBar">#F5F7FA</item>
+
+        <item name="dsColorChipBackground">#EDF1F5</item>
+        <item name="dsColorChipText">#101318</item>
+        <item name="dsColorSnackbarAction">#5EE0C0</item>
+
+        <!-- legacy attributes mapped onto the tokens -->
+        <item name="mainPurple">?attr/dsColorChromeSurface</item>
+        <item name="mainPurpleForNavBar">?attr/dsColorNavigationBackground</item>
+        <item name="mainPurpleStatusBar">?attr/dsColorSystemBar</item>
+        <item name="whitePurpleForNavBar">?attr/dsColorNavigationIndicator</item>
+        <item name="slskAccent">?attr/dsColorPrimary</item>
+        <item name="searchTabHeader">?attr/dsColorTextSecondary</item>
+        <item name="mainTextColor">?attr/dsColorPrimary</item>
+        <item name="mainTextColorHinted">?attr/dsColorTextSecondary</item>
+        <item name="mainTextColorHintedFlair">?attr/dsColorPrimary</item>
+        <item name="searchTabButtonColor">?attr/dsColorPrimary</item>
+        <item name="cellStroke">?attr/dsColorOutline</item>
+        <item name="chat_join">?attr/dsColorSuccess</item>
+        <item name="chat_left">?attr/dsColorError</item>
+        <item name="checkBoxColor">?attr/dsColorPrimary</item>
+        <item name="expandIconColor">?attr/dsColorTextSecondary</item>
+        <item name="colorPrimary">?attr/dsColorPrimary</item>
+        <item name="colorAccent">?attr/dsColorPrimary</item>
+        <item name="colorSecondaryContainer">?attr/dsColorPrimaryContainer</item>
+        <item name="colorSurface">?attr/dsColorSurface</item>
+        <item name="colorSurfaceLogin">?attr/dsColorBackground</item>
+        <item name="normalTextColor">?attr/dsColorTextPrimary</item>
+        <item name="normalTextColorNonTinted">?attr/dsColorTextPrimary</item>
+        <item name="cellback">?attr/dsColorSurface</item>
+        <item name="cellbackColor">?attr/dsColorSurface</item>
+        <item name="cellbackColorDownloadDialog">?attr/dsColorSurfaceContainer</item>
+        <item name="secondaryColor">?attr/dsColorSurfaceContainer</item>
+        <item name="cellTextColor">?attr/dsColorTextPrimary</item>
+        <item name="cellTextColorSubdued">?attr/dsColorTextSecondary</item>
+        <item name="cellTextColorMoreSubdued">?attr/dsColorTextSecondary</item>
+        <item name="cellTextColorVerySubdued">?attr/dsColorTextDisabled</item>
+        <item name="slightestContrastColor">?attr/dsColorOutlineVariant</item>
+        <item name="slightContrastColor">?attr/dsColorOutline</item>
+        <item name="settingsDividerColor">?attr/dsColorDivider</item>
+        <item name="linkDividerColor">?attr/dsColorDivider</item>
+        <item name="dialog_background">?attr/dsColorSurfaceElevated</item>
+        <item name="surface_variant1">?attr/dsColorSurfaceContainer</item>
+        <item name="pseudo_window_background_color">?attr/dsColorBackground</item>
+        <item name="searchBottomSheetBackground">?attr/dsColorSurfaceElevated</item>
+        <item name="searchTabPillInactiveColor">?attr/dsColorSurfaceContainer</item>
+        <item name="user_info_chip_background">?attr/dsColorChipBackground</item>
+        <item name="swipeToRefreshProgress">?attr/dsColorPrimary</item>
+        <item name="swipeToRefreshBackground">?attr/dsColorSurface</item>
+        <item name="snackbarActionColor">?attr/dsColorSnackbarAction</item>
+        <item name="expandableModernChevronBg">#00FFFFFF</item>
+        <item name="expandableModernFilesBg">?attr/dsColorSurface</item>
+        <item name="expandableModernSeparatorColor">?attr/dsColorOutlineVariant</item>
+        <item name="searchHeaderBackground">?attr/dsColorBackground</item>
+        <item name="destructiveColor">?attr/dsColorError</item>
+        <item name="floating_action_bar_to_bottom_icon">?attr/dsColorTextSecondary</item>
+        <item name="floating_action_bar_to_bottom_background">?attr/dsColorSurfaceElevated</item>
+        <item name="android_default_notification_blue_color">#0F7A68</item>
+        <item name="android_default_notification_complementary_color">#8A5A00</item>
+        <item name="seeker_notification_other_person_color">#6D4BC4</item>
+
+        <!-- reusable token driven drawables -->
+        <item name="CustomSelector">@drawable/ds_cell_selector</item>
+        <item name="rounded_input_edit">@drawable/ds_input_background</item>
+        <item name="chatInputBackground">@drawable/ds_chat_input_background</item>
+        <item name="the_rounded_corner_background_drawable">@drawable/ds_rounded_corner_background</item>
+        <item name="the_rounded_corner_dialog_background_drawable">@drawable/ds_rounded_corner_dialog_background</item>
+        <item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">@drawable/ds_rounded_corner_dialog_background</item>
+    </style>
+
+    <style name="ModernDark" parent="DefaultDark">
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+        <item name="android:windowBackground">?attr/dsColorLaunchBackground</item>
+
+        <item name="dsColorBackground">#101318</item>
+        <item name="dsColorSurface">#1B222C</item>
+        <item name="dsColorSurfaceContainer">#1B222C</item>
+        <item name="dsColorSurfaceElevated">#26313D</item>
+
+        <item name="dsColorPrimary">#5EE0C0</item>
+        <item name="dsColorOnPrimary">#06231E</item>
+        <item name="dsColorPrimaryContainer">#1E3B36</item>
+        <item name="dsColorOnPrimaryContainer">#A9F2E2</item>
+        <item name="dsColorAccent">#5EE0C0</item>
+        <item name="dsColorOnAccent">#06231E</item>
+
+        <item name="dsColorTextPrimary">#F0F3F6</item>
+        <item name="dsColorTextSecondary">#A8B3BF</item>
+        <item name="dsColorTextDisabled">#6E7A87</item>
+
+        <item name="dsColorOutline">#34404D</item>
+        <item name="dsColorOutlineVariant">#2A3441</item>
+        <item name="dsColorDivider">#34404D</item>
+
+        <item name="dsColorError">#FFB4AB</item>
+        <item name="dsColorOnError">#3B0907</item>
+        <item name="dsColorSuccess">#7BD88F</item>
+        <item name="dsColorWarning">#FFD07A</item>
+        <item name="dsColorScrim">#000000</item>
+        <item name="dsColorControlHighlight">#335EE0C0</item>
+
+        <item name="dsColorInputBackground">#101318</item>
+        <item name="dsColorInputStroke">#34404D</item>
+
+        <item name="dsColorChromeSurface">#1B222C</item>
+        <item name="dsColorChromeForeground">#F0F3F6</item>
+        <item name="dsColorActionModeBackground">#26313D</item>
+        <item name="dsColorActionModeForeground">#F0F3F6</item>
+        <item name="dsColorNavigationBackground">#1B222C</item>
+        <item name="dsColorNavigationForeground">#5EE0C0</item>
+        <item name="dsColorNavigationForegroundMuted">#A8B3BF</item>
+        <item name="dsColorNavigationIndicator">#1E3B36</item>
+        <item name="dsColorLaunchBackground">#101318</item>
+        <item name="dsColorSystemBar">#101318</item>
+
+        <item name="dsColorChipBackground">#26313D</item>
+        <item name="dsColorChipText">#F0F3F6</item>
+        <item name="dsColorSnackbarAction">#0F7A68</item>
+
+        <item name="mainPurple">?attr/dsColorChromeSurface</item>
+        <item name="mainPurpleForNavBar">?attr/dsColorNavigationBackground</item>
+        <item name="mainPurpleStatusBar">?attr/dsColorSystemBar</item>
+        <item name="whitePurpleForNavBar">?attr/dsColorNavigationIndicator</item>
+        <item name="slskAccent">?attr/dsColorPrimary</item>
+        <item name="searchTabHeader">?attr/dsColorTextSecondary</item>
+        <item name="mainTextColor">?attr/dsColorPrimary</item>
+        <item name="mainTextColorHinted">?attr/dsColorTextSecondary</item>
+        <item name="mainTextColorHintedFlair">?attr/dsColorPrimary</item>
+        <item name="searchTabButtonColor">?attr/dsColorPrimary</item>
+        <item name="cellStroke">?attr/dsColorOutline</item>
+        <item name="chat_join">?attr/dsColorSuccess</item>
+        <item name="chat_left">?attr/dsColorError</item>
+        <item name="checkBoxColor">?attr/dsColorPrimary</item>
+        <item name="expandIconColor">?attr/dsColorTextSecondary</item>
+        <item name="colorPrimary">?attr/dsColorPrimary</item>
+        <item name="colorAccent">?attr/dsColorPrimary</item>
+        <item name="colorSecondaryContainer">?attr/dsColorPrimaryContainer</item>
+        <item name="colorSurface">?attr/dsColorSurface</item>
+        <item name="colorSurfaceLogin">?attr/dsColorBackground</item>
+        <item name="normalTextColor">?attr/dsColorTextPrimary</item>
+        <item name="normalTextColorNonTinted">?attr/dsColorTextPrimary</item>
+        <item name="cellback">?attr/dsColorSurface</item>
+        <item name="cellbackColor">?attr/dsColorSurface</item>
+        <item name="cellbackColorDownloadDialog">?attr/dsColorSurfaceContainer</item>
+        <item name="secondaryColor">?attr/dsColorSurfaceContainer</item>
+        <item name="cellTextColor">?attr/dsColorTextPrimary</item>
+        <item name="cellTextColorSubdued">?attr/dsColorTextSecondary</item>
+        <item name="cellTextColorMoreSubdued">?attr/dsColorTextSecondary</item>
+        <item name="cellTextColorVerySubdued">?attr/dsColorTextDisabled</item>
+        <item name="slightestContrastColor">?attr/dsColorOutlineVariant</item>
+        <item name="slightContrastColor">?attr/dsColorOutline</item>
+        <item name="settingsDividerColor">?attr/dsColorDivider</item>
+        <item name="linkDividerColor">?attr/dsColorDivider</item>
+        <item name="dialog_background">?attr/dsColorSurfaceElevated</item>
+        <item name="surface_variant1">?attr/dsColorSurfaceContainer</item>
+        <item name="pseudo_window_background_color">?attr/dsColorBackground</item>
+        <item name="searchBottomSheetBackground">?attr/dsColorSurfaceElevated</item>
+        <item name="searchTabPillInactiveColor">?attr/dsColorSurfaceContainer</item>
+        <item name="user_info_chip_background">?attr/dsColorChipBackground</item>
+        <item name="swipeToRefreshProgress">?attr/dsColorPrimary</item>
+        <item name="swipeToRefreshBackground">?attr/dsColorSurface</item>
+        <item name="snackbarActionColor">?attr/dsColorSnackbarAction</item>
+        <item name="expandableModernChevronBg">#00101318</item>
+        <item name="expandableModernFilesBg">?attr/dsColorSurface</item>
+        <item name="expandableModernSeparatorColor">?attr/dsColorOutlineVariant</item>
+        <item name="searchHeaderBackground">?attr/dsColorBackground</item>
+        <item name="destructiveColor">?attr/dsColorError</item>
+        <item name="floating_action_bar_to_bottom_icon">?attr/dsColorTextSecondary</item>
+        <item name="floating_action_bar_to_bottom_background">?attr/dsColorSurfaceElevated</item>
+        <item name="android_default_notification_blue_color">#5EE0C0</item>
+        <item name="android_default_notification_complementary_color">#FFD07A</item>
+        <item name="seeker_notification_other_person_color">#C7A8FF</item>
+
+        <item name="CustomSelector">@drawable/ds_cell_selector</item>
+        <item name="rounded_input_edit">@drawable/ds_input_background</item>
+        <item name="chatInputBackground">@drawable/ds_chat_input_background</item>
+        <item name="the_rounded_corner_background_drawable">@drawable/ds_rounded_corner_background</item>
+        <item name="the_rounded_corner_dialog_background_drawable">@drawable/ds_rounded_corner_dialog_background</item>
+        <item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">@drawable/ds_rounded_corner_dialog_background</item>
+    </style>
+
+    <!-- =========================== NIGHT — LEGACY ========================= -->
+
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
         <item name="colorOnPrimary">#ffffff</item>
-        <item name="colorPrimary">#7C8DEB</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorAccent</item>
         <item name="colorSurface">#303030</item>
         <item name="colorSurfaceLogin">#404040</item>
         <item name="colorOnSurface">?attr/normalTextColor</item>
-		<item name="colorOnBackground">?attr/normalTextColor</item>
+        <item name="colorOnBackground">?attr/normalTextColor</item>
         <item name="mainTextColor">#bcc1f7</item>
         <item name="checkBoxColor">#4f58c4</item>
 
+        <!-- dark chrome behind transparent bars: keep light icons -->
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+
+        <item name="swipeToRefreshProgress">#ffffffff</item>
+        <item name="swipeToRefreshBackground">#ff585858</item>
+
+        <!-- launch / window background matches the app surface instead of the
+             Material default, so there is no light flash before the first frame -->
+        <item name="dsColorBackground">?attr/pseudo_window_background_color</item>
+        <item name="dsColorLaunchBackground">?attr/pseudo_window_background_color</item>
+
         <item name="destructiveColor">#F2B8B5</item>
 
-		<item name="chat_left">#F7636A</item>
+        <item name="chat_left">#F7636A</item>
         <item name="chat_join">#89B38F</item>
 
-		<!-- this will be shown on opposite color background so use the colorPrimary light variant for it-->
+        <!-- this will be shown on opposite color background so use the colorPrimary light variant for it-->
         <item name="snackbarActionColor">#4f58c4</item>
-
 
         <item name="floating_action_bar_to_bottom_icon">#d4d4d4</item>
         <item name="floating_action_bar_to_bottom_background">#202020</item>
 
         <item name="android_default_notification_blue_color">#8AB4F8</item>
-        <item name="android_default_notification_complementary_color">
-            #f8ce8a
-        </item>
+        <item name="android_default_notification_complementary_color">#f8ce8a</item>
 
         <item name="seeker_notification_other_person_color">#AF9AF4</item>
 
@@ -223,12 +484,8 @@
 
         <item name="cellbackColorDownloadDialog">#ff424242</item>
 
-        <item name="rounded_input_edit">
-            @drawable/rounded_text_input_background_dark
-        </item>
-        <item name="chatInputBackground">
-            @drawable/chat_input_background_dark
-        </item>
+        <item name="rounded_input_edit">@drawable/rounded_text_input_background_dark</item>
+        <item name="chatInputBackground">@drawable/chat_input_background_dark</item>
 
         <item name="dialog_background">#ff424242</item>
         <item name="surface_variant1">#ff424242</item>
@@ -244,17 +501,9 @@
         <item name="settingsDividerColor">#595959</item>
         <item name="linkDividerColor">#70595959</item>
 
-        <item name="the_rounded_corner_background_drawable">
-            @drawable/rounded_corner_background_dark
-        </item>
-        <item name="the_rounded_corner_dialog_background_drawable">
-            @drawable/rounded_corner_dialog_background_dark
-        </item>
-        <item
-            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
-        >
-            ?attr/the_rounded_corner_dialog_background_drawable
-        </item>
+        <item name="the_rounded_corner_background_drawable">@drawable/rounded_corner_background_dark</item>
+        <item name="the_rounded_corner_dialog_background_drawable">@drawable/rounded_corner_dialog_background_dark</item>
+        <item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">?attr/the_rounded_corner_dialog_background_drawable</item>
 
         <item name="expandableModernChevronBg">#00424242</item>
         <item name="expandableModernFilesBg">#3A3A3A</item>
@@ -272,8 +521,8 @@
     <style name="DefaultDark_Blue" parent="DefaultDark">
         <item name="colorPrimary">#86b2cb</item>
         <item name="mainPurple">#126291</item>
-        <item name="mainPurpleStatusBar">#10496b</item>        
-		<item name="colorAccent">#86b2cb</item>
+        <item name="mainPurpleStatusBar">#10496b</item>
+        <item name="colorAccent">#86b2cb</item>
         <item name="checkBoxColor">#126291</item>
         <item name="whitePurpleForNavBar">#4c8aae</item>
         <item name="mainTextColor">#86b2cb</item>
@@ -288,7 +537,7 @@
         <item name="mainTextColorHinted">#dddddd</item>
         <item name="mainTextColorHintedFlair">#86b2cb</item>
 
-		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#10496b</item>
     </style>
 
@@ -303,7 +552,7 @@
 
         <item name="slskAccent">#d57676</item>
         <item name="cellStroke">#d57676</item>
-        <item name="secondaryColor">#3b3b40</item> 
+        <item name="secondaryColor">#3b3b40</item>
 
         <item name="seeker_notification_other_person_color">#E69A9A</item>
 
@@ -312,7 +561,7 @@
         <item name="mainTextColorHinted">#dddddd</item>
         <item name="mainTextColorHintedFlair">#d57676</item>
 
-		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#7B0000</item>
     </style>
 
@@ -335,13 +584,9 @@
         <item name="mainTextColorHinted">#dddddd</item>
         <item name="mainTextColorHintedFlair">#dddddd</item>
         <item name="slskAccent">#2A4C6D</item>
-        <item
-            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
-        >
-            @drawable/rounded_corner_dialog_background_dark_303030
-        </item>
+        <item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">@drawable/rounded_corner_dialog_background_dark_303030</item>
 
-		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#202124</item>
 
         <item name="cellbackColorDownloadDialog">#ff303030</item>
@@ -359,16 +604,18 @@
         <item name="normalTextColor">#bcc1f7</item>
         <item name="normalTextColorNonTinted">#FFFFFF</item>
 
-		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#bcc1f7</item>
 
         <!--Setting the window background color causes real bad UI issues on API19 emulator
-		    So therefore the pseudo window background color attribute is needed.
-		    Otherwise it will simply not draw the backgrouund causing a "smearing" effect
-			  where say a button when scrolling, the previously drawn buttons will not 
-			  invalidate.-->
+            So therefore the pseudo window background color attribute is needed.
+            Otherwise it will simply not draw the backgrouund causing a "smearing" effect
+              where say a button when scrolling, the previously drawn buttons will not
+              invalidate.-->
         <item name="android:windowBackground">#000000</item>
         <item name="pseudo_window_background_color">#ff000000</item>
+        <item name="dsColorBackground">#000000</item>
+        <item name="dsColorLaunchBackground">#000000</item>
 
         <item name="cellStroke">#90959BDC</item>
 
@@ -394,17 +641,9 @@
         <item name="cellTextColorMoreSubdued">#aaE4E4E4</item>
         <item name="cellTextColorVerySubdued">#a0E4E4E4</item>
 
-        <item name="the_rounded_corner_background_drawable">
-            @drawable/rounded_corner_background_dark_amoled
-        </item>
-        <item name="the_rounded_corner_dialog_background_drawable">
-            @drawable/rounded_corner_dialog_background_dark_amoled
-        </item>
-        <item
-            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
-        >
-            ?attr/the_rounded_corner_dialog_background_drawable
-        </item>
+        <item name="the_rounded_corner_background_drawable">@drawable/rounded_corner_background_dark_amoled</item>
+        <item name="the_rounded_corner_dialog_background_drawable">@drawable/rounded_corner_dialog_background_dark_amoled</item>
+        <item name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific">?attr/the_rounded_corner_dialog_background_drawable</item>
         <!--<item name="dialogBackground">#52000000</item>-->
         <item name="searchTabPillInactiveColor">#303030</item>
 
@@ -432,8 +671,7 @@
         <item name="slskAccent">#2A4C6D</item>
         <item name="normalTextColor">#FFFFFF</item>
 
-		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
+        <!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#333333</item>
     </style>
-
 </resources>

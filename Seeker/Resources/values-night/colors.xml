@@ -2,7 +2,12 @@
 <resources>
     <color name="colorPrimary">#2c3e50</color>
     <color name="colorPrimaryDark">#1B3147</color>
+    <!-- Material3 dark background for the inherited AppTheme fallback. Every
+         legacy night theme overrides dsColorBackground; this keeps the colour
+         resources name-for-name identical between day and night. -->
+    <color name="ds_default_background">#1C1B1F</color>
     <color name="colorAccent">#3498db</color>
+    <color name="colorSurface">#303030</color>
     <color name="cellbackSelected">#3498db</color>
     <color name="batchSelectHighlight">#364D63</color>
 
@@ -22,6 +27,19 @@
     <color name="mainPurpleTurnedOff">#77437eab</color>
     <color name="chatBoxSplitterElevation">#6E6E6E</color>
     <color name="header_chatroom_list">#787878</color>
+
+    <color name="currentPage">#ff0C9DCE</color>
+
+    <!--
+        These exist in values/colors.xml too. Colour resources must be
+        name-for-name identical between values/ and values-night/, otherwise a
+        reference (from a drawable or a style) silently falls back to the day
+        value in dark mode. See Misc/test_ui_contracts.py.
+    -->
+    <color name="dialog_background">#ff424242</color>
+    <color name="absoluteBackColor1">#ff000000</color>
+    <color name="absoluteBackColor2">#ff303030</color>
+    <color name="absoluteBackColor3">#ffffff</color>
 
     <color name="defaultTextColor">#ffC1C1C1</color>
 

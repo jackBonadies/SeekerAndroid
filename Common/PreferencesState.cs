@@ -69,9 +69,12 @@ namespace Common
         public static bool ExpandAllResults = false;
 
         // UI / Theme
+        // DayNightMode defaults to "follow system"; the per-mode variants default to
+        // the Phase 2A design system theme. Stored legacy values keep winning (they
+        // are only ever appended to, see Common/ThemeEnums.cs).
         public static int DayNightMode = -1; // AppCompatDelegate.ModeNightFollowSystem
-        public static NightThemeType NightModeVariant = NightThemeType.ClassicPurple;
-        public static DayThemeType DayModeVariant = DayThemeType.ClassicPurple;
+        public static NightThemeType NightModeVariant = NightThemeType.Modern;
+        public static DayThemeType DayModeVariant = DayThemeType.Modern;
         public static bool LegacyLanguageMigrated = false;
         public static string Language = FieldLangAuto;
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Downloads / Uploads segmented-tab text tint (Phase 4 transfers redesign).
+    The selected tab sits on the dsColorPrimaryContainer surface, so its label
+    uses dsColorOnPrimaryContainer; unselected tabs use dsColorTextSecondary.
+    Theme attributes in a ColorStateList require minSdk 23, which this app targets.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true" android:color="?attr/dsColorOnPrimaryContainer" />
+    <item android:color="?attr/dsColorTextSecondary" />
+</selector>

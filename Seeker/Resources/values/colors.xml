@@ -2,6 +2,14 @@
 <resources>
     <color name="colorPrimary">#437eab</color>
     <color name="colorPrimaryDark">#1B3147</color>
+    <!--
+        Non-recursive fallback for AppTheme.dsColorBackground. The legacy light
+        themes do not override dsColorBackground and android:colorBackground is
+        derived from it, so pointing the token at ?android:attr/colorBackground
+        would create a theme-attribute cycle. This is the Material3 light
+        background those themes already used.
+    -->
+    <color name="ds_default_background">#FFFBFE</color>
     <color name="colorAccent">#3498db</color>
     <color name="colorSurface">#FF0000</color>
     <color name="cellbackSelected">#3498db</color>
@@ -25,6 +33,9 @@
     <color name="chatBoxSplitterElevation">#e0e0e0</color>
 
     <color name="currentPage">#ff0C9DCE</color>
+
+    <!--chat room overview list header; day/night must stay name-for-name identical-->
+    <color name="header_chatroom_list">#ff6E6E6E</color>
 
     <color name="subTextColor">#ff757575</color>
     <color name="slightTint">#18000000</color>

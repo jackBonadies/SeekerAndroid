@@ -1,75 +1,342 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">?attr/mainPurpleStatusBar</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <!--
+        ========================================================================
+        Seeker design system (Phase 2A)
 
-        <item name="android:windowActionModeOverlay">true</item>
-        <item name="windowActionModeOverlay">true</item>
-		<item name="actionModeStyle">@style/MyActionMode</item>
-	</style>
+        Layout of this file:
 
-	<style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
-		<item name="background">?attr/mainPurple</item>
-		<item name="titleTextStyle">@style/MyActionModeTitle</item>
-	</style>
+          1. Seeker.Theme.Base     – config dependent Material3 parent. This is
+                                     the ONLY style that values-night/styles.xml
+                                     redefines (Theme.Material3.DayNight.
+                                     NoActionBar instead of the Light default),
+                                     so every shared item below is written once.
+          2. AppTheme              – window setup + the token layer: every
+                                     semantic token (dsColor* / dsShape*) and
+                                     every legacy custom attribute is mapped
+                                     onto Material3 colour roles here.
+          3. AppTheme.NoActionBar  – the theme the concrete themes inherit.
+          4. Shapes / typography / touch targets.
+          5. Component styles + theme overlays (dialogs, sheets, popups,
+                                     action mode, snackbar, settings chrome).
+          6. AppPopup*             – popup menu overlay used by UiHelpers.
 
-	<style name="MyActionModeTitle" parent="TextAppearance.AppCompat.Widget.ActionMode.Title">
-        <item name="android:textColor">?attr/colorOnPrimary</item>
-	</style>
+        A concrete theme (values/themes.xml) therefore only has to declare the
+        dsColor* / dsShape* tokens (plus the legacy attributes whose meaning is
+        screen specific). Legacy themes keep declaring their legacy attributes
+        and inherit the token mapping from AppTheme, so their look is unchanged.
+        ========================================================================
+    -->
 
-    <style name="OutlinedRoundedBox" parent="">
-        <item name="shapeAppearanceOverlay">
-            @style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded
-        </item>
-    </style>
+    <!-- 1. config dependent base -->
 
-    <style
-        name="ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded"
-        parent=""
-    >
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">8dp</item>
-    </style>
+    <style name="Seeker.Theme.Base" parent="Theme.Material3.Light.NoActionBar" />
 
-    <style name="AppTheme.NoActionBar">
+    <!-- 2. AppTheme -->
+
+    <style name="AppTheme" parent="Seeker.Theme.Base">
+        <!--
+             Window / system bars / launch background.
+             Bars are drawn behind the app (edge-to-edge); only the icon
+             contrast is theme specific, which the concrete themes set with
+             android:windowLightStatusBar / android:windowLightNavigationBar.
+             -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="colorPrimary">#4f58c4</item>
-        <item name="colorSecondaryContainer">#e4e6f6</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="android:windowBackground">?attr/dsColorLaunchBackground</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowSplashScreenBackground" tools:targetApi="31">
+            ?attr/dsColorLaunchBackground
+        </item>
+
+        <!--
+             Design system tokens – defaults.
+             These reference the legacy custom attributes, because those are
+             what every existing screen/drawable reads. Concrete themes that
+             want the modern palette override the tokens with plain colours
+             and map the legacy attributes back onto the tokens (see
+             ModernLight / ModernDark in values/themes.xml). No token may
+             reference a Material role that is itself mapped from a token
+             below, and no token may reference android:colorBackground: that
+             item is mapped from dsColorBackground below, so the pair would be
+             a self-referencing theme-attribute cycle. The background default
+             is therefore a concrete, non-recursive resource.
+             -->
+        <item name="dsColorBackground">@color/ds_default_background</item>
+        <item name="dsColorSurface">?attr/cellback</item>
+        <item name="dsColorSurfaceContainer">?attr/dialog_background</item>
+        <item name="dsColorSurfaceElevated">?attr/dialog_background</item>
+
+        <item name="dsColorPrimary">?attr/mainPurple</item>
+        <item name="dsColorOnPrimary">#FFFFFF</item>
+        <item name="dsColorPrimaryContainer">?attr/surface_variant1</item>
+        <item name="dsColorOnPrimaryContainer">?attr/normalTextColor</item>
+        <item name="dsColorAccent">?attr/mainTextColor</item>
+        <item name="dsColorOnAccent">#FFFFFF</item>
+
+        <item name="dsColorTextPrimary">?attr/normalTextColor</item>
+        <item name="dsColorTextSecondary">?attr/cellTextColorSubdued</item>
+        <item name="dsColorTextDisabled">?attr/cellTextColorVerySubdued</item>
+
+        <item name="dsColorOutline">?attr/slightContrastColor</item>
+        <item name="dsColorOutlineVariant">?attr/slightestContrastColor</item>
+        <item name="dsColorDivider">?attr/settingsDividerColor</item>
+
+        <item name="dsColorError">?attr/destructiveColor</item>
+        <item name="dsColorOnError">#FFFFFF</item>
+        <item name="dsColorSuccess">@color/online</item>
+        <item name="dsColorWarning">@color/away</item>
+        <item name="dsColorScrim">@color/absoluteBackColor1</item>
+        <item name="dsColorControlHighlight">@color/slightTint</item>
+
+        <item name="dsColorInputBackground">?attr/dialog_background</item>
+        <item name="dsColorInputStroke">?attr/slightContrastColor</item>
+
+        <item name="dsColorChromeSurface">?attr/mainPurple</item>
+        <item name="dsColorChromeForeground">#FFFFFF</item>
+        <item name="dsColorActionModeBackground">?attr/mainPurple</item>
+        <item name="dsColorActionModeForeground">#FFFFFF</item>
+        <item name="dsColorNavigationBackground">?attr/mainPurple</item>
+        <item name="dsColorNavigationForeground">#FFFFFF</item>
+        <item name="dsColorNavigationForegroundMuted">#FFFFFF</item>
+        <item name="dsColorNavigationIndicator">?attr/whitePurpleForNavBar</item>
+        <item name="dsColorLaunchBackground">?attr/dsColorBackground</item>
+        <item name="dsColorSystemBar">?attr/mainPurpleStatusBar</item>
+
+        <item name="dsColorChipBackground">?attr/user_info_chip_background</item>
+        <item name="dsColorChipText">?attr/cellTextColor</item>
+        <item name="dsColorSnackbarAction">?attr/snackbarActionColor</item>
+
+        <item name="dsShapeCard">@style/ShapeAppearance.Seeker.Card</item>
+        <item name="dsShapeSheet">@style/ShapeAppearance.Seeker.Sheet</item>
+        <item name="dsShapeInput">@style/ShapeAppearance.Seeker.Input</item>
+        <item name="dsShapeButton">@style/ShapeAppearance.Seeker.Button</item>
+
+        <!--
+             Material3 colour roles – derived from the tokens.
+             Any Material widget that is not explicitly styled (text fields,
+             checkboxes, chips, dialogs, popups, sheets, snackbars, ripple)
+             picks these up, which is what fixes the "inherited light widget"
+             leftovers in dark/AMOLED themes and vice versa.
+             -->
+        <item name="colorPrimary">?attr/dsColorPrimary</item>
+        <item name="colorOnPrimary">?attr/dsColorOnPrimary</item>
+        <item name="colorPrimaryContainer">?attr/dsColorPrimaryContainer</item>
+        <item name="colorOnPrimaryContainer">?attr/dsColorOnPrimaryContainer</item>
+        <item name="colorPrimaryInverse">?attr/dsColorPrimaryContainer</item>
+        <item name="colorSecondary">?attr/dsColorAccent</item>
+        <item name="colorOnSecondary">?attr/dsColorOnAccent</item>
+        <item name="colorTertiary">?attr/dsColorAccent</item>
+        <item name="colorOnTertiary">?attr/dsColorOnAccent</item>
+        <item name="colorTertiaryContainer">?attr/dsColorPrimaryContainer</item>
+        <item name="colorOnTertiaryContainer">?attr/dsColorOnPrimaryContainer</item>
+
+        <item name="colorSurface">?attr/dsColorSurface</item>
+        <item name="colorOnSurface">?attr/dsColorTextPrimary</item>
+        <item name="colorSurfaceVariant">?attr/dsColorSurfaceContainer</item>
+        <item name="colorOnSurfaceVariant">?attr/dsColorTextSecondary</item>
+        <item name="colorSurfaceContainer">?attr/dsColorSurfaceContainer</item>
+        <item name="colorSurfaceContainerLow">?attr/dsColorSurface</item>
+        <item name="colorSurfaceContainerHigh">?attr/dsColorSurfaceContainer</item>
+        <item name="colorSurfaceContainerHighest">?attr/dsColorSurfaceElevated</item>
+        <item name="colorSurfaceInverse">?attr/dsColorTextPrimary</item>
+        <item name="colorOnSurfaceInverse">?attr/dsColorSurface</item>
+        <item name="colorSurfaceBright">?attr/dsColorSurfaceElevated</item>
+        <item name="colorSurfaceDim">?attr/dsColorBackground</item>
+
+        <item name="colorOutline">?attr/dsColorOutline</item>
+        <item name="colorOutlineVariant">?attr/dsColorOutlineVariant</item>
+        <item name="colorError">?attr/dsColorError</item>
+        <item name="colorOnError">?attr/dsColorOnError</item>
+
+        <item name="android:colorBackground">?attr/dsColorBackground</item>
+        <item name="colorOnBackground">?attr/dsColorTextPrimary</item>
+        <item name="android:textColorPrimary">?attr/dsColorTextPrimary</item>
+        <item name="android:textColorSecondary">?attr/dsColorTextSecondary</item>
+        <item name="android:textColorTertiary">?attr/dsColorTextSecondary</item>
+        <item name="android:textColorHint">?attr/dsColorTextSecondary</item>
+        <item name="colorControlActivated">?attr/dsColorPrimary</item>
+        <item name="colorControlNormal">?attr/dsColorTextSecondary</item>
+        <item name="colorControlHighlight">?attr/dsColorControlHighlight</item>
+        <item name="colorAccent">?attr/dsColorPrimary</item>
+
+        <!--
+             Legacy base values (identical in day and night before Phase 2A,
+             which is why they live here instead of in a concrete theme).
+             -->
         <item name="mainPurple">#4f58c4</item>
-        <item name="swipeToRefreshProgress">#4f58c4</item>
-        <item name="swipeToRefreshBackground">#ffffffff</item>
+        <item name="mainPurpleForNavBar">?attr/dsColorChromeSurface</item>
         <item name="mainPurpleStatusBar">@color/colorPrimaryDark</item>
-
         <item name="whitePurpleForNavBar">#858ddd</item>
-
-        <item name="mainPurpleForNavBar">?attr/mainPurple</item>
-
+        <item name="slskAccent">#437eab</item>
         <item name="checkBoxColor">@color/colorAccent</item>
         <item name="checkboxStyle">@style/checkBoxStyle</item>
 
-        <item name="slskAccent">#437eab</item>
-
+        <!--
+             Inherited widget / dialog / popup / input theming.
+             -->
         <item name="snackbarButtonStyle">@style/Seeker.Snackbar.Action</item>
+        <item name="materialAlertDialogTheme">@style/Seeker.MaterialAlertDialog</item>
+        <item name="bottomSheetDialogTheme">@style/SeekerBottomSheetDialog</item>
+        <item name="popupMenuStyle">@style/AppPopupMenu</item>
+        <item name="android:popupMenuStyle">@style/AppPopupMenu</item>
 
-        <item name="windowActionModeOverlay">true</item>
-        <item name="android:actionModeBackground">?attr/mainPurple</item>
-        <item name="actionModeBackground">?attr/mainPurple</item>
+        <item name="actionModeStyle">@style/MyActionMode</item>
+        <item name="android:actionModeBackground">?attr/dsColorActionModeBackground</item>
+        <item name="actionModeBackground">?attr/dsColorActionModeBackground</item>
         <item name="actionModeTheme">@style/ThemeOverlay.Material3.Dark.ActionBar</item>
 
-        <!-- Without this, BottomSheetDialogFragment falls back to Theme.Design.Light.BottomSheetDialog,
-             whose colorPrimary is Material's default teal, not the app's purple. That mismatch is
-             visible on any MaterialButton/MaterialButtonToggleGroup/MaterialCheckBox inside a sheet. -->
-        <item name="bottomSheetDialogTheme">@style/SeekerBottomSheetDialog</item>
+        <item name="textInputStyle">@style/Seeker.TextInputLayout</item>
+        <item name="materialButtonStyle">@style/Seeker.Button</item>
     </style>
 
-    <style name="SeekerBottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog" />
+    <style name="AppTheme.NoActionBar" parent="AppTheme" />
+
+    <!-- 3. shapes / typography -->
+
+    <style name="ShapeAppearance.Seeker.Card" parent="ShapeAppearance.Material3.Corner.Large">
+        <item name="cornerSize">@dimen/ds_corner_lg</item>
+    </style>
+
+    <style name="ShapeAppearance.Seeker.Sheet" parent="ShapeAppearance.Material3.Corner.ExtraLarge">
+        <item name="cornerSizeTopLeft">@dimen/ds_corner_xl</item>
+        <item name="cornerSizeTopRight">@dimen/ds_corner_xl</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <style name="ShapeAppearance.Seeker.Input" parent="ShapeAppearance.Material3.Corner.Small">
+        <item name="cornerSize">@dimen/ds_corner_sm</item>
+    </style>
+
+    <style name="ShapeAppearance.Seeker.Button" parent="ShapeAppearance.Material3.Corner.Full" />
+
+    <style name="TextAppearance.Seeker.Headline" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textColor">?attr/dsColorTextPrimary</item>
+        <item name="android:textSize">22sp</item>
+    </style>
+
+    <style name="TextAppearance.Seeker.Title" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textColor">?attr/dsColorTextPrimary</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.Seeker.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">?attr/dsColorTextPrimary</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextAppearance.Seeker.BodySecondary" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">?attr/dsColorTextSecondary</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="TextAppearance.Seeker.Label" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textColor">?attr/dsColorTextPrimary</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:letterSpacing">0.04</item>
+    </style>
+
+    <style name="TextAppearance.Seeker.Caption" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">?attr/dsColorTextSecondary</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="TextAppearance.Seeker.ActionModeTitle" parent="TextAppearance.AppCompat.Widget.ActionMode.Title">
+        <item name="android:textColor">?attr/dsColorActionModeForeground</item>
+    </style>
+
+    <!-- Circle indicator behind the selected bottom navigation item. -->
+    <style name="ShapeAppearance.BottomNavIndicator" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="BottomNavActiveIndicator" parent="">
+        <item name="android:color">?attr/dsColorNavigationIndicator</item>
+        <item name="android:width">56dp</item>
+        <item name="android:height">32dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.BottomNavIndicator</item>
+    </style>
+
+    <style name="navTextInactive">
+        <item name="android:textColor">?attr/dsColorNavigationForegroundMuted</item>
+    </style>
+
+    <style name="navTextActive">
+        <item name="android:textColor">?attr/dsColorNavigationForeground</item>
+    </style>
+
+    <!-- 4. shared overlays (theme aware) -->
+
+    <!--
+        Replaces the previous forced dark toolbar overlays
+        (ThemeOverlay.Material3.Dark.ActionBar in values/ and
+        ThemeOverlay.MaterialComponents.Dark.ActionBar in values-night/).
+        The parent is deliberately the neutral Material3 overlay and every
+        visible chrome colour comes from the chrome tokens, so the same
+        definition works for light chrome (dark foreground) and dark chrome
+        (light foreground) without a per-configuration duplicate.
+    -->
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.Material3">
+        <item name="colorOnSurface">?attr/dsColorChromeForeground</item>
+        <item name="colorOnSurfaceVariant">?attr/dsColorChromeForeground</item>
+        <item name="android:textColorPrimary">?attr/dsColorChromeForeground</item>
+        <item name="android:textColorSecondary">?attr/dsColorChromeForeground</item>
+        <item name="colorControlNormal">?attr/dsColorChromeForeground</item>
+        <item name="actionMenuTextColor">?attr/dsColorChromeForeground</item>
+        <item name="android:colorBackground">?attr/dsColorChromeSurface</item>
+        <item name="colorSurface">?attr/dsColorChromeSurface</item>
+        <item name="actionModeStyle">@style/MyActionMode</item>
+        <item name="windowActionModeOverlay">true</item>
+    </style>
+
+    <!--
+        Popup / overflow menus. Same idea: neutral parent + explicit tokens,
+        instead of Light in values/ and Dark in values-night/.
+    -->
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3">
+        <item name="colorSurface">?attr/dsColorSurfaceContainer</item>
+        <item name="colorOnSurface">?attr/dsColorTextPrimary</item>
+        <item name="android:textColorPrimary">?attr/dsColorTextPrimary</item>
+        <item name="android:textColorSecondary">?attr/dsColorTextSecondary</item>
+        <item name="colorControlNormal">?attr/dsColorTextSecondary</item>
+        <item name="android:colorBackground">?attr/dsColorSurfaceContainer</item>
+        <item name="actionModeStyle">@style/MyActionMode</item>
+    </style>
+
+    <!-- 5. component styles -->
+
+    <style name="SeekerBottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="colorSurface">?attr/dsColorSurfaceElevated</item>
+        <item name="colorSurfaceContainerLow">?attr/dsColorSurfaceElevated</item>
+        <item name="colorOnSurface">?attr/dsColorTextPrimary</item>
+        <item name="colorOnSurfaceVariant">?attr/dsColorTextSecondary</item>
+        <item name="colorPrimary">?attr/dsColorPrimary</item>
+        <item name="colorOnPrimary">?attr/dsColorOnPrimary</item>
+        <item name="android:textColorPrimary">?attr/dsColorTextPrimary</item>
+        <item name="android:textColorSecondary">?attr/dsColorTextSecondary</item>
+        <item name="shapeAppearanceLargeComponent">?attr/dsShapeSheet</item>
+    </style>
+
+    <style name="Seeker.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorSurface">?attr/dsColorSurfaceElevated</item>
+        <item name="colorOnSurface">?attr/dsColorTextPrimary</item>
+        <item name="colorOnSurfaceVariant">?attr/dsColorTextSecondary</item>
+        <item name="colorPrimary">?attr/dsColorPrimary</item>
+        <item name="colorOnPrimary">?attr/dsColorOnPrimary</item>
+        <item name="colorError">?attr/dsColorError</item>
+        <item name="android:textColorPrimary">?attr/dsColorTextPrimary</item>
+        <item name="android:textColorSecondary">?attr/dsColorTextSecondary</item>
+        <item name="android:colorBackground">?attr/dsColorSurfaceElevated</item>
+        <item name="shapeAppearanceMediumComponent">?attr/dsShapeCard</item>
+    </style>
 
     <style name="Seeker.Snackbar.Action" parent="Widget.Material3.Button.TextButton.Snackbar">
-        <item name="android:textColor">?attr/snackbarActionColor</item>
+        <item name="android:textColor">?attr/dsColorSnackbarAction</item>
     </style>
 
     <style name="checkBoxStyle" parent="Widget.Material3.CompoundButton.CheckBox">
@@ -80,19 +347,32 @@
         <item name="colorPrimary">?attr/checkBoxColor</item>
     </style>
 
-    <style
-        name="CustomSpinnerTheme"
-        parent="@android:style/Widget.TextView.SpinnerItem"
-    >
+    <style name="Seeker.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">?attr/dsColorInputStroke</item>
+        <item name="boxBackgroundColor">?attr/dsColorInputBackground</item>
+        <item name="hintTextColor">?attr/dsColorTextSecondary</item>
+        <item name="boxCornerRadiusTopStart">@dimen/ds_corner_sm</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/ds_corner_sm</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/ds_corner_sm</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/ds_corner_sm</item>
+    </style>
+
+    <style name="Seeker.Button" parent="Widget.Material3.Button">
+        <item name="android:minHeight">@dimen/ds_touch_target_min</item>
+        <item name="android:minWidth">@dimen/ds_touch_target_min</item>
+    </style>
+
+    <style name="CustomSpinnerTheme" parent="@android:style/Widget.TextView.SpinnerItem">
         <item name="android:textSize">14sp</item>
-        <item name="android:textColor">?attr/normalTextColor</item>
+        <item name="android:textColor">?attr/dsColorTextPrimary</item>
     </style>
 
     <style name="SeekerButtonStyle">
-        <item name="android:textColor">#ffffff</item>
+        <item name="android:textColor">?attr/dsColorOnPrimary</item>
         <item name="android:paddingLeft">10dp</item>
         <item name="android:paddingRight">10dp</item>
         <item name="android:background">@drawable/rounded_button</item>
+        <item name="android:minHeight">@dimen/ds_touch_target_min</item>
         <item name="backgroundTint">@null</item>
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
@@ -100,78 +380,54 @@
         <item name="elevation">0dp</item>
     </style>
 
-    <style name="BottomNavActiveIndicator" parent="">
-        <item name="android:color">?attr/whitePurpleForNavBar</item>
-        <item name="android:width">56dp</item>
-        <item name="android:height">32dp</item>
-        <item name="shapeAppearance">
-            @style/ShapeAppearance.BottomNavIndicator
-        </item>
+    <style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
+        <item name="background">?attr/dsColorActionModeBackground</item>
+        <item name="titleTextStyle">@style/TextAppearance.Seeker.ActionModeTitle</item>
     </style>
 
-    <style name="ShapeAppearance.BottomNavIndicator" parent="">
+    <style name="OutlinedRoundedBox" parent="">
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded" parent="">
         <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">50%</item>
+        <item name="cornerSize">@dimen/ds_corner_sm</item>
     </style>
 
-    <style name="navTextInactive">
-        <item name="android:textColor">#ffffff</item>
-    </style>
-
-    <style name="navTextActive">
-        <item name="android:textColor">#ffffff</item>
-    </style>
-
-    <style
-        name="AppTheme.AppBarOverlay"
-        parent="ThemeOverlay.Material3.Dark.ActionBar"
-    >
-        <item name="actionModeStyle">@style/MyActionMode</item>
-    </style>
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Light" />
-
-    <!--<style name="Widget.App.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
-    <item name="materialThemeOverlay">@style/ThemeOverlay.App.BottomNavigationView</item>
-  </style>
-
-  <style name="ThemeOverlay.App.BottomNavigationView" parent="">
-    <item name="colorPrimary">@android:color/holo_blue_bright</item>
-    <item name="colorOnPrimary">@android:color/holo_blue_bright</item>
-  </style>-->
-
-    <!-- Settings screen styles -->
+    <!-- Settings screen -->
     <style name="SettingsSectionHeader">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:paddingStart">16dp</item>
-        <item name="android:paddingEnd">16dp</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">8dp</item>
+        <item name="android:textColor">?attr/dsColorTextSecondary</item>
+        <item name="android:paddingStart">@dimen/ds_space_lg</item>
+        <item name="android:paddingEnd">@dimen/ds_space_lg</item>
+        <item name="android:paddingTop">@dimen/ds_space_sm</item>
+        <item name="android:paddingBottom">@dimen/ds_space_sm</item>
     </style>
 
     <style name="SettingsDivider">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginStart">16dp</item>
-        <item name="android:layout_marginEnd">16dp</item>
-        <item name="android:layout_marginTop">16dp</item>
-        <item name="android:layout_marginBottom">4dp</item>
+        <item name="android:layout_marginStart">@dimen/ds_space_lg</item>
+        <item name="android:layout_marginEnd">@dimen/ds_space_lg</item>
+        <item name="android:layout_marginTop">@dimen/ds_space_lg</item>
+        <item name="android:layout_marginBottom">@dimen/ds_space_xs</item>
     </style>
 
     <style name="StatCard" parent="Widget.Material3.CardView.Outlined">
-        <item name="cardCornerRadius">12dp</item>
-        <item name="cardBackgroundColor">?attr/user_info_chip_background</item>
+        <item name="cardCornerRadius">@dimen/ds_corner_md</item>
+        <item name="strokeColor">?attr/dsColorOutlineVariant</item>
+        <item name="cardBackgroundColor">?attr/dsColorSurfaceContainer</item>
     </style>
 
     <style name="SettingsCard" parent="Widget.Material3.CardView.Outlined">
         <item name="cardElevation">0dp</item>
-        <item name="strokeWidth">1dp</item>
-        <item name="strokeColor">?attr/slightContrastColor</item>
-        <item name="cardCornerRadius">12dp</item>
-        <item name="cardBackgroundColor">@android:color/transparent</item>
+        <item name="strokeWidth">@dimen/ds_stroke_width</item>
+        <item name="strokeColor">?attr/dsColorOutlineVariant</item>
+        <item name="cardCornerRadius">@dimen/ds_corner_md</item>
+        <item name="cardBackgroundColor">?attr/dsColorSurface</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_margin">6dp</item>
@@ -180,9 +436,11 @@
     <style name="SettingsCheckBox" parent="">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:minWidth">@dimen/ds_touch_target_min</item>
+        <item name="android:minHeight">@dimen/ds_touch_target_min</item>
         <item name="android:layout_marginStart">10dp</item>
         <item name="android:layout_marginEnd">10dp</item>
-        <item name="android:paddingStart">4dp</item>
+        <item name="android:paddingStart">@dimen/ds_space_xs</item>
         <item name="android:paddingEnd">10dp</item>
         <item name="android:layout_marginTop">10dp</item>
         <item name="android:layout_marginBottom">10dp</item>
@@ -190,8 +448,8 @@
 
     <style name="SettingsSmallButton" parent="SeekerButtonStyle">
         <item name="android:textSize">12sp</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingTop">@dimen/ds_space_sm</item>
+        <item name="android:paddingBottom">@dimen/ds_space_sm</item>
         <item name="android:paddingStart">7dp</item>
         <item name="android:paddingEnd">7dp</item>
         <item name="android:textAllCaps">false</item>
@@ -204,13 +462,18 @@
         <item name="android:layout_height">30dp</item>
         <item name="android:layout_gravity">center_vertical</item>
         <item name="srcCompat">@drawable/help_circle_outline</item>
-        <item name="android:tint">?attr/mainTextColor</item>
+        <item name="android:tint">?attr/dsColorPrimary</item>
     </style>
 
-    <style name="AppPopupOverlay" parent="ThemeOverlay.Material3.Light">
+    <!-- 6. popup menus (code inflates) -->
+
+    <style name="AppPopupOverlay" parent="ThemeOverlay.Material3">
         <item name="popupMenuStyle">@style/AppPopupMenu</item>
         <item name="android:popupMenuStyle">@style/AppPopupMenu</item>
-        <item name="android:textColorPrimary">?attr/cellTextColor</item>
+        <item name="android:textColorPrimary">?attr/dsColorTextPrimary</item>
+        <item name="android:textColorSecondary">?attr/dsColorTextSecondary</item>
+        <item name="colorSurface">?attr/dsColorSurfaceContainer</item>
+        <item name="colorOnSurface">?attr/dsColorTextPrimary</item>
     </style>
 
     <style name="AppPopupMenu" parent="Widget.Material3.PopupMenu">

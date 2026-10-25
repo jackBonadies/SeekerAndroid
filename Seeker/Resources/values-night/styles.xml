@@ -1,101 +1,17 @@
 <resources>
-    <style name="OutlinedRoundedBox" parent="">
-        <item name="shapeAppearanceOverlay">
-            @style/ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded
-        </item>
-    </style>
+    <!--
+        ========================================================================
+        Night configuration overrides for the design system (Phase 2A).
 
-    <style
-        name="ShapeAppearanceOverlay.MyApp.TextInputLayout.Rounded"
-        parent=""
-    >
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">8dp</item>
-    </style>
-
-    <style name="AppTheme" parent="Theme.Material3.DayNight">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="colorPrimaryDark">?attr/mainPurpleStatusBar</item>
-
-        <item name="android:windowActionModeOverlay">true</item>
-        <item name="windowActionModeOverlay">true</item>
-    </style>
-
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-        <item name="colorPrimary">#4f58c4</item>
-        <item name="mainPurple">#4f58c4</item>
-        <item name="swipeToRefreshProgress">#ffffffff</item>
-        <item name="swipeToRefreshBackground">#ff585858</item>
-        <item name="mainPurpleStatusBar">@color/colorPrimaryDark</item>
-
-
-        <item name="whitePurpleForNavBar">#858ddd</item>
-
-        <item name="checkBoxColor">@color/colorAccent</item>
-        <item name="checkboxStyle">@style/checkBoxStyle</item>
-
-        <item name="mainPurpleForNavBar">?attr/mainPurple</item>
-
-        <item name="slskAccent">#437eab</item>
-
-        <item name="windowActionModeOverlay">true</item>
-        <item name="android:actionModeBackground">?attr/colorPrimary</item>
-        <item name="actionModeBackground">?attr/colorPrimary</item>
-        <!-- Needed, otherwise in dark mode, icons that the system provides (back, 3 dot menu) are 60% opacity -->
-        <item name="actionModeTheme">@style/ThemeOverlay.Material3.Dark.ActionBar</item>
-
-        <item name="bottomSheetDialogTheme">@style/SeekerBottomSheetDialog</item>
-    </style>
-
-    <style name="SeekerBottomSheetDialog" parent="ThemeOverlay.Material3.BottomSheetDialog" />
-
-    <style name="SeekerButtonStyle">
-        <item name="android:textColor">#ffffff</item>
-        <item name="android:paddingLeft">10dp</item>
-        <item name="android:paddingRight">10dp</item>
-        <item name="android:background">@drawable/rounded_button</item>
-        <item name="backgroundTint">@null</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
-        <item name="android:stateListAnimator">@null</item>
-        <item name="elevation">0dp</item>
-    </style>
-
-    <style name="checkBoxStyle" parent="Widget.Material3.CompoundButton.CheckBox">
-        <item name="materialThemeOverlay">@style/ThemeOverlay.Seeker.CheckBox</item>
-    </style>
-
-    <style name="ThemeOverlay.Seeker.CheckBox" parent="">
-        <item name="colorPrimary">?attr/checkBoxColor</item>
-    </style>
-
-    <style name="navTextInactive">
-        <item name="android:textColor">#ffffff</item>
-    </style>
-
-    <style name="navTextActive">
-        <item name="android:textColor">#ffffff</item>
-    </style>
-
-    <style
-        name="AppTheme.AppBarOverlay"
-        parent="ThemeOverlay.MaterialComponents.Dark.ActionBar"
-    >
-        <item name="actionModeStyle">@style/MyActionMode</item>
-    </style>
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Dark" />
-
-    <!--<style name="Widget.App.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
-    <item name="materialThemeOverlay">@style/ThemeOverlay.App.BottomNavigationView</item>
-  </style>
-
-  <style name="ThemeOverlay.App.BottomNavigationView" parent="">
-    <item name="colorPrimary">@android:color/holo_blue_bright</item>
-    <item name="colorOnPrimary">@android:color/holo_blue_bright</item>
-  </style>-->
+        This file intentionally contains a SINGLE style. Before Phase 2A it
+        redefined AppTheme / AppTheme.NoActionBar / SeekerBottomSheetDialog /
+        checkBoxStyle / SeekerButtonStyle / navText* / AppTheme.AppBarOverlay /
+        AppTheme.PopupOverlay, and the two definitions had already drifted apart
+        (the night copy was missing colorSecondaryContainer, snackbarButtonStyle,
+        actionModeStyle, …). Everything shared now lives once in
+        values/styles.xml and is driven by the semantic tokens, so the only
+        thing that still has to differ per configuration is the Material3 parent.
+        ========================================================================
+    -->
+    <style name="Seeker.Theme.Base" parent="Theme.Material3.DayNight.NoActionBar" />
 </resources>

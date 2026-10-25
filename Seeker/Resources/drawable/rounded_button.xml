@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Reusable primary button background (design system, Phase 2A).
+    Uses the primary token instead of the legacy chrome colour (mainPurple),
+    so a theme whose chrome is a light surface still gets a readable button.
+-->
 <shape
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle"
     android:padding="10dp"
 >
-    <solid android:color="?attr/mainPurple" />
-    <corners android:radius="4dp" />
+    <solid android:color="?attr/dsColorPrimary" />
+    <corners android:radius="@dimen/ds_corner_sm" />
 </shape>

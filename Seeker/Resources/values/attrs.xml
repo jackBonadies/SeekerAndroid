@@ -1,5 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <resources>
+    <!--
+        ====================================================================
+        Legacy per-screen attributes (pre Phase 2A).
+        These MUST keep their names: ~106 layouts, the action sheet / anchored
+        menu helpers and a lot of C# (Resource.Attribute.*) read them.
+        They are all mapped onto the semantic design-system tokens below, so a
+        theme only has to describe itself once (see values/themes.xml).
+        ====================================================================
+    -->
     <attr name="mainTextColor" format="color" />
     <attr name="normalTextColor" format="color" />
     <attr name="cellback" format="color" />
@@ -23,14 +32,13 @@
     <attr name="mainPurpleStatusBar" format="color" />
     <attr name="whitePurpleForNavBar" format="color" />
     <attr name="slskAccent" format="color" />
-	<attr name="searchTabHeader" format="color" />
-	<attr name="mainTextColorHinted" format="color" />
+    <attr name="searchTabHeader" format="color" />
+    <attr name="mainTextColorHinted" format="color" />
     <attr name="mainTextColorHintedFlair" format="color" />
     <attr name="searchTabButtonColor" format="color" />
     <attr name="cellStroke" format="color" />
     <attr name="chat_join" format="color" />
     <attr name="chat_left" format="color" />
-    <attr name="cellStroke" format="color" />
     <attr name="checkBoxColor" format="color" />
     <attr name="expandIconColor" format="color" />
     <attr name="mainPurpleForNavBar" format="color" />
@@ -74,4 +82,79 @@
     <attr name="searchHeaderBackground" format="color" />
 
     <attr name="destructiveColor" format="color" />
+
+    <!--
+        ====================================================================
+        Design system — semantic tokens (Phase 2A).
+        Themes describe themselves with these only; everything else (the
+        legacy attributes above and the Material3 color roles) is derived
+        from them by AppTheme.NoActionBar in values/styles.xml.
+        Do not read these from a layout unless the layout really is a
+        primitive: prefer the Material role (colorSurface, colorOnSurface, …).
+        ====================================================================
+    -->
+
+    <!-- Surfaces -->
+    <attr name="dsColorBackground" format="color" />
+    <attr name="dsColorSurface" format="color" />
+    <attr name="dsColorSurfaceContainer" format="color" />
+    <attr name="dsColorSurfaceElevated" format="color" />
+
+    <!-- Brand / accent -->
+    <attr name="dsColorPrimary" format="color" />
+    <attr name="dsColorOnPrimary" format="color" />
+    <attr name="dsColorPrimaryContainer" format="color" />
+    <attr name="dsColorOnPrimaryContainer" format="color" />
+    <attr name="dsColorAccent" format="color" />
+    <attr name="dsColorOnAccent" format="color" />
+
+    <!-- Text -->
+    <attr name="dsColorTextPrimary" format="color" />
+    <attr name="dsColorTextSecondary" format="color" />
+    <attr name="dsColorTextDisabled" format="color" />
+
+    <!-- Lines / dividers -->
+    <attr name="dsColorOutline" format="color" />
+    <attr name="dsColorOutlineVariant" format="color" />
+    <attr name="dsColorDivider" format="color" />
+
+    <!-- Semantics -->
+    <attr name="dsColorError" format="color" />
+    <attr name="dsColorOnError" format="color" />
+    <attr name="dsColorSuccess" format="color" />
+    <attr name="dsColorWarning" format="color" />
+    <attr name="dsColorScrim" format="color" />
+    <attr name="dsColorControlHighlight" format="color" />
+
+    <!-- Inputs -->
+    <attr name="dsColorInputBackground" format="color" />
+    <attr name="dsColorInputStroke" format="color" />
+
+    <!-- Chrome (app bar / bottom navigation / action mode / system bars) -->
+    <attr name="dsColorChromeSurface" format="color" />
+    <attr name="dsColorChromeForeground" format="color" />
+    <attr name="dsColorActionModeBackground" format="color" />
+    <attr name="dsColorActionModeForeground" format="color" />
+    <attr name="dsColorNavigationBackground" format="color" />
+    <attr name="dsColorNavigationForeground" format="color" />
+    <attr name="dsColorNavigationForegroundMuted" format="color" />
+    <attr name="dsColorNavigationIndicator" format="color" />
+    <attr name="dsColorLaunchBackground" format="color" />
+    <attr name="dsColorSystemBar" format="color" />
+
+    <!-- Chips -->
+    <attr name="dsColorChipBackground" format="color" />
+    <attr name="dsColorChipText" format="color" />
+    <attr name="dsColorSnackbarAction" format="color" />
+
+    <!--
+        Shape tokens (references to ShapeAppearance styles). Shapes cannot be
+        expressed by a <shape> drawable with a themeable corner size, so the
+        reusable drawables in Resources/drawable/ds_*.xml and the shared
+        widget styles point at these instead.
+    -->
+    <attr name="dsShapeCard" format="reference" />
+    <attr name="dsShapeSheet" format="reference" />
+    <attr name="dsShapeInput" format="reference" />
+    <attr name="dsShapeButton" format="reference" />
 </resources>

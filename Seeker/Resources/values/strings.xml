@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
     <string name="app_name">Seeker</string>
     <string name="com.google.firebase.crashlytics.mapping_file_id">1.0</string>
 
@@ -6,6 +6,7 @@
     <string name="transfer_tab">Transfers</string>
     <string name="browse_tab">Browse</string>
     <string name="account_tab">Account</string>
+    <string name="nav_account">Account &amp; sign in</string>
     <string name="searches_tab">Searches</string>
     <string name="searches_tab2">Search</string>
 
@@ -47,6 +48,14 @@
     <string name="no_uploads">No uploads</string>
     <string name="no_uploads_subtitle">Uploads will appear when other users download your files</string>
     <string name="no_uploads_not_sharing_subtitle">You are not currently sharing any files</string>
+    <string name="transfers_tabs_description">Switch between downloads and uploads</string>
+    <string name="transfer_row_actions">Transfer actions</string>
+    <string name="transfer_percent_format">{0}%</string>
+    <string name="browse_header_stats">{0} folders · {1} files</string>
+    <string name="browse_header_status">{0} · {1}</string>
+    <string name="browse_download_action">Download file or folder</string>
+    <string name="browse_row_actions">Folder actions</string>
+    <string name="browse_folder_meta">{0} files · {1} folders</string>
     <string name="no_searches">No searches</string>
     <string name="no_searches_subtitle">Enter a term to search the Soulseek network</string>
     <string name="searching_label">Searching</string>
@@ -128,6 +137,30 @@
     <string name="create_chatroom_private">Make private</string>
 
     <string name="search_here">Search here</string>
+    <string name="search_field_description">Search field</string>
+    <string name="search_tabs_description">Search tabs</string>
+    <string name="search_stop">Stop search</string>
+    <string name="advanced_filters">Filters and sort</string>
+    <string name="advanced_filters_description">Open advanced filters</string>
+    <string name="search_sort_button">Sort: {0}</string>
+    <string name="search_active_filters">Active filters: {0}</string>
+    <string name="search_filter_text_prefix">Text: {0}</string>
+    <string name="search_filter_format_prefix">Format: {0}</string>
+    <string name="search_filter_bitrate_prefix">&gt;= {0} kbps</string>
+    <string name="search_filter_chips">{0} smart filters</string>
+    <string name="search_disconnected_title">You are disconnected</string>
+    <string name="search_not_logged_in_title">Sign in to search</string>
+    <string name="search_result_bitrate_unit">kbps</string>
+    <string name="search_result_speed_unit">kb/s</string>
+    <string name="search_result_free_slot">Free slot</string>
+    <string name="search_result_queue">Queue</string>
+    <string name="search_result_files_suffix">files</string>
+    <string name="search_result_file_suffix">file</string>
+    <string name="download_result_description">Download result</string>
+    <string name="download_result_description_for">Download {0}</string>
+    <string name="download_group_result_description">Choose files to download from {0}</string>
+    <string name="search_result_row_description">{0} in {1} by {2}</string>
+    <string name="search_result_group_row_description">{0} folder, {1}, starting with {2}, by {3}</string>
 
     <string name="seeker_needs_dl_dir">Choose download location</string>
     <string name="seeker_needs_dl_dir_content">Select a folder where Seeker will save downloaded files</string>
@@ -201,6 +234,11 @@
     <string name="section_sharing">Sharing</string>
     <string name="section_network">Network</string>
     <string name="section_account">Account</string>
+    <string name="section_account_connection">Account &amp; connection</string>
+    <string name="section_uploads_sharing">Uploads &amp; sharing</string>
+    <string name="section_search_wishlist">Search &amp; wishlist</string>
+    <string name="section_privacy">Privacy</string>
+    <string name="section_advanced">Advanced</string>
 
     <string name="max_search_results">Max search results</string>
     <string name="only_show_free_slots">Only show results of users with free slots</string>
@@ -317,6 +355,8 @@
     <string name="always_dark">Always dark</string>
 
     <!-- theme variant color names (AMOLED variants are composed in code as "AMOLED - <color>") -->
+    <!-- Phase 2A default theme (design system palette); other themes are the legacy variants -->
+    <string name="theme_modern">Modern</string>
     <string name="theme_purple">Purple</string>
     <string name="theme_grey">Grey</string>
     <string name="theme_blue">Blue</string>
@@ -688,6 +728,11 @@
     <string name="Availability">Availability</string>
     <string name="Speed">Speed</string>
     <string name="FolderName">Folder name</string>
+    <string name="Filename">File name</string>
+    <string name="FileSize">File size</string>
+    <string name="default_search_sort">Default sort order</string>
+    <string name="keywords_default_search_sort">default sorting results order</string>
+    <string name="search_result_selected_state">Selected</string>
     <string name="SetAsDefault">Set as default</string>
     <string name="Check">Check</string>
     <string name="Keywords">Keywords</string>
@@ -968,6 +1013,22 @@
     <string name="setting_subtitle_import_client_data">Import data from SoulseekQT, Nicotine+</string>
     <string name="setting_subtitle_export_client_data">Export user list, ignore list, wishlist to xml · for backup or migration</string>
     <string name="setting_subtitle_listening">Allows connecting to users with closed ports</string>
+    <string name="setting_subtitle_subfolders">Group completed and incomplete files into subfolders</string>
+    <string name="setting_subtitle_no_single_subfolder">Save single-file downloads directly in the download folder</string>
+    <string name="setting_subtitle_override_incomplete">Choose a separate folder for unfinished downloads</string>
+    <string name="setting_subtitle_auto_retry">Retry failed downloads when the user comes back online</string>
+    <string name="setting_subtitle_port">Port other users connect to when downloading from you</string>
+    <string name="setting_subtitle_upnp">Automatically forward the listening port on the router</string>
+    <string name="setting_subtitle_metered">Pause sharing on metered connections</string>
+    <string name="setting_subtitle_vpn">Only share while connected to a VPN</string>
+    <string name="setting_subtitle_auto_away">Set your status to away after a period of inactivity</string>
+    <string name="setting_subtitle_private_invites">Allow room invitations from users you do not know</string>
+    <string name="setting_subtitle_concurrent">Maximum number of transfers that run at the same time</string>
+    <string name="setting_subtitle_diagnostics">Write diagnostic logs to help troubleshoot issues</string>
+    <string name="setting_subtitle_day_night">Follow the system or force light or dark mode</string>
+    <string name="setting_subtitle_about">Version, source code and translation links</string>
+    <string name="leave_room_desc">Leave room</string>
+    <string name="room_unread_desc">Unread messages</string>
 
     <!-- Search keyword synonyms -->
     <string name="keywords_download_folder">location directory save destination</string>

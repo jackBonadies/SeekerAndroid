@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    Reusable, token driven list/cell selector (design system, Phase 2A).
+
+    Unlike the legacy CustomSelector_<hex>.xml family (one file per theme, with
+    hardcoded colours) this resolves its colours from the semantic tokens, so it
+    works for light, dark and AMOLED themes without a drawable-night twin.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true" android:state_pressed="false">
+        <shape android:shape="rectangle">
+            <solid android:color="?attr/dsColorPrimaryContainer" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="?attr/dsColorControlHighlight" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="?attr/dsColorSurface" />
+        </shape>
+    </item>
+</selector>

@@ -1,4 +1,4 @@
-﻿using Android.App;
+using Android.App;
 using Android.Content;
 using Android.Content.Res;
 using Android.Graphics;
@@ -50,7 +50,7 @@ namespace Seeker
                     return;
                 }
 
-                RecolorStatusGuard(decor, top, GetColorFromAttribute(activity, Resource.Attribute.mainPurple));
+                RecolorStatusGuard(decor, top, GetColorFromAttribute(activity, Resource.Attribute.dsColorActionModeBackground));
             }
             catch (System.Exception e)
             {
@@ -942,14 +942,89 @@ namespace Seeker
         {
             //useless returns the same thing every time
             //int curTheme = a.PackageManager.GetActivityInfo(a.ComponentName, 0).ThemeResource;
-            if (a.Resources.Configuration.UiMode.HasFlag(Android.Content.Res.UiMode.NightYes))
+            // Day/night variant + theme id resolution lives in ThemeHelper so the
+            // mapping stays in one place (and stays total for stored legacy values).
+            a.SetTheme(ThemeHelper.GetActivityTheme(a));
+        }
+
+        /// <summary>
+        /// Light/dark system bar icons. The bars themselves are transparent
+        /// (edge-to-edge), so the icon contrast must match the concrete theme's
+        /// chrome, not just the day/night configuration: the legacy light themes
+        /// have a dark app bar and therefore need light (false) icons.
+        /// </summary>
+        public static void ApplySystemBarIconContrast(Activity activity)
+        {
+            try
             {
-                a.SetTheme(ThemeHelper.ToNightThemeProper(PreferencesState.NightModeVariant));
+                var window = activity?.Window;
+                if (window == null)
+                {
+                    return;
+                }
+
+                var controller = AndroidX.Core.View.WindowCompat.GetInsetsController(
+                    window, window.DecorView);
+                if (controller == null)
+                {
+                    return;
+                }
+
+                // Honour the actual android:windowLightStatusBar / windowLightNavigationBar
+                // values declared by the concrete theme (ModernLight sets true; every
+                // legacy light/dark theme sets false because their chrome is dark).
+                bool fallback = UseDarkSystemBarIcons(activity);
+                bool lightStatusBars = ReadThemeBoolean(
+                    activity, Android.Resource.Attribute.WindowLightStatusBar, fallback);
+                bool lightNavigationBars = OperatingSystem.IsAndroidVersionAtLeast(27)
+                    ? ReadThemeBoolean(activity, Android.Resource.Attribute.WindowLightNavigationBar, lightStatusBars)
+                    : lightStatusBars;
+
+                controller.AppearanceLightStatusBars = lightStatusBars;
+                controller.AppearanceLightNavigationBars = lightNavigationBars;
             }
-            else
+            catch (System.Exception e)
             {
-                a.SetTheme(ThemeHelper.ToDayThemeProper(PreferencesState.DayModeVariant));
+                Logger.Debug("ApplySystemBarIconContrast failed: " + e.Message);
             }
+        }
+
+        private static bool ReadThemeBoolean(Context context, int attribute, bool fallback)
+        {
+            using (TypedArray values = context.Theme.ObtainStyledAttributes(new[] { attribute }))
+            {
+                return values.GetBoolean(0, fallback);
+            }
+        }
+
+        /// <summary>
+        /// Last-resort fallback when a theme omits the window icon attributes:
+        /// dark chrome foreground means light system-bar icons.
+        /// </summary>
+        private static bool UseDarkSystemBarIcons(Context context)
+        {
+            Color chromeForeground = GetColorFromAttribute(
+                context, Resource.Attribute.dsColorChromeForeground);
+            int argb = chromeForeground.ToArgb();
+            double luminance = (0.2126 * ((argb >> 16) & 0xFF)
+                                + 0.7152 * ((argb >> 8) & 0xFF)
+                                + 0.0722 * (argb & 0xFF)) / 255.0;
+            return luminance < 0.5;
+        }
+
+        /// <summary>
+        /// Re-applies the theme after the user changed the day/night variant.
+        /// </summary>
+        /// <remarks>
+        /// Only activity re-creation is involved: the Soulseek client, the
+        /// foreground services and the transfer engine keep running untouched
+        /// (TransferPersistence is not saved for a configuration change, see
+        /// ThemeableActivity.OnDestroy).
+        /// </remarks>
+        public static void ApplyThemeChange(Activity activity)
+        {
+            ThemeHelper.ApplyThemeToAttachedActivity(activity);
+            SeekerApplication.RecreateActivies();
         }
 
         public static View GetViewForSnackbar()

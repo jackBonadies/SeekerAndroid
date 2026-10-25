@@ -4,4 +4,33 @@
     <dimen name="browse_no_details_top_bottom">4dp</dimen>
     <dimen name="browse_details_top">2dp</dimen>
     <dimen name="browse_details_bottom">1dp</dimen>
+
+    <!--
+        ====================================================================
+        Design system — spacing / radius / touch target / icon scale.
+        Configuration independent on purpose: one definition serves day, night
+        and AMOLED, so there is no values-night/dimens.xml anymore.
+        ====================================================================
+    -->
+    <dimen name="ds_space_xxs">2dp</dimen>
+    <dimen name="ds_space_xs">4dp</dimen>
+    <dimen name="ds_space_sm">8dp</dimen>
+    <dimen name="ds_space_md">12dp</dimen>
+    <dimen name="ds_space_lg">16dp</dimen>
+    <dimen name="ds_space_xl">24dp</dimen>
+    <dimen name="ds_space_xxl">32dp</dimen>
+
+    <dimen name="ds_corner_sm">8dp</dimen>
+    <dimen name="ds_corner_md">12dp</dimen>
+    <dimen name="ds_corner_lg">16dp</dimen>
+    <dimen name="ds_corner_xl">28dp</dimen>
+    <dimen name="ds_stroke_width">1dp</dimen>
+
+    <!-- WCAG 2.1 / Material minimum interactive size. -->
+    <dimen name="ds_touch_target_min">48dp</dimen>
+    <dimen name="ds_touch_target_comfortable">56dp</dimen>
+
+    <dimen name="ds_icon_sm">16dp</dimen>
+    <dimen name="ds_icon_md">24dp</dimen>
+    <dimen name="ds_icon_lg">32dp</dimen>
 </resources>

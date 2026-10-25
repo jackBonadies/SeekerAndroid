@@ -17,6 +17,15 @@ namespace Seeker
         {
             base.OnDestroy();
             SeekerApplication.Activities.Remove(ourWeakRef);
+            // A configuration change (day/night mode, theme variant, locale, rotation)
+            // is not "the app went to the background": do not persist transfer
+            // state for it. The client and the transfer engine are never touched
+            // by a theme switch.
+            if (IsChangingConfigurations)
+            {
+                Logger.Debug("----- On Destory ------ Configuration change ------");
+                return;
+            }
             if (SeekerApplication.Activities.Count == 0)
             {
                 Logger.Debug("----- On Destory ------ Last Activity ------");
@@ -45,6 +54,9 @@ namespace Seeker
 #pragma warning restore CA1422
             }
             base.OnCreate(savedInstanceState);
+            // the bars are transparent, so only the icon contrast is theme specific.
+            // Done after base.OnCreate so the decor view exists.
+            UiHelpers.ApplySystemBarIconContrast(this);
         }
 
         protected override void AttachBaseContext(Context @base)

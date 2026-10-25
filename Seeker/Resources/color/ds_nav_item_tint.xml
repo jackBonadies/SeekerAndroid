@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Bottom navigation item tint selector (Phase 2B).
+    Selected / unselected / disabled are all semantic navigation tokens, so the
+    selector follows the concrete theme instead of forcing white or black.
+    (Requires minSdk 23, which this app targets, for theme attributes in a
+    ColorStateList.)
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:color="?attr/dsColorTextDisabled" />
+    <item android:state_checked="true" android:color="?attr/dsColorNavigationForeground" />
+    <item android:color="?attr/dsColorNavigationForegroundMuted" />
+</selector>

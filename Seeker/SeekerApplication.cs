@@ -971,9 +971,18 @@ namespace Seeker
 
         public static List<WeakReference<ThemeableActivity>> Activities = new List<WeakReference<ThemeableActivity>>();
 
+        /// <summary>
+        /// Recreates the live activities so a new theme/configuration is picked up.
+        /// </summary>
+        /// <remarks>
+        /// This is deliberately limited to activities: the Soulseek client, the
+        /// foreground services and the transfer engine must survive a theme switch
+        /// (see UiHelpers.ApplyThemeChange). The list is snapshotted because
+        /// Recreate()/OnDestroy() mutate it.
+        /// </remarks>
         public static void RecreateActivies()
         {
-            foreach (var weakRef in Activities)
+            foreach (var weakRef in Activities.ToArray())
             {
                 if (weakRef.TryGetTarget(out var themeableActivity))
                 {
