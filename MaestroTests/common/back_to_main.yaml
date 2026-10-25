@@ -1,15 +1,17 @@
 appId: com.companyname.andriodapp1
 ---
 - back
+# Search is the primary shell destination and is always present; Account is not
+# in the bottom navigation anymore, so do not wait for a home destination.
 - runFlow:
     when:
       notVisible:
-        id: "navigation_home"
+        id: "navigation_search"
     commands:
       - back
 - runFlow:
     when:
       notVisible:
-        id: "navigation_home"
+        id: "navigation_search"
     commands:
       - back

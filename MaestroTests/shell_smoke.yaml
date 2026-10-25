@@ -1,0 +1,29 @@
+appId: com.companyname.andriodapp1
+---
+# Shell smoke: bottom order Search | Transfers | Browse | Messages, the real
+# Messages page, and account/login through the secondary navigation sheet.
+- launchApp
+- tapOn:
+    id: navigation_search
+- assertVisible:
+    id: searchHere
+- tapOn:
+    id: navigation_transfers
+- tapOn:
+    id: navigation_browse
+- tapOn:
+    id: navigation_messages
+- assertVisible:
+    id: fabNewMessage
+- tapOn:
+    id: fabNewMessage
+- tapOn:
+    text: "Cancel"
+    optional: true
+- tapOn:
+    id: action_shell_menu
+- tapOn:
+    text: "Account & sign in"
+- back
+- assertVisible:
+    id: navigation_search

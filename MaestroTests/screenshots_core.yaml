@@ -4,8 +4,6 @@ env:
   PREFIX: "0"
 ---
 - runFlow: ./common/optional_set_download_dir.yaml
-- tapOn:
-    id: navigation_home
 - runFlow: ./common/optional_login.yaml
 - runFlow:
     file: ./common/change_theme.yaml
@@ -22,7 +20,9 @@ env:
     env:
       TO_NIGHT: ${IS_NIGHT}
 - tapOn:
-    id: navigation_home
+    id: action_shell_menu
+- tapOn:
+    text: "Account & sign in"
 - takeScreenshot:
     path: ${PREFIX}1_home
 - tapOn:
@@ -67,6 +67,45 @@ env:
 - tapOn: Beethoven Complete Works
 - takeScreenshot:
     path: ${PREFIX}6_browse
+- tapOn:
+    id: navigation_messages
+- takeScreenshot:
+    path: ${PREFIX}7_messages
+# Secondary surfaces are representative of the shared chrome, rows, sheets and compose bars.
+- tapOn:
+    id: action_shell_menu
+- tapOn:
+    text: "Settings"
+- takeScreenshot:
+    path: ${PREFIX}8_settings
+- back
+- tapOn:
+    id: action_shell_menu
+- tapOn:
+    text: "Chatrooms"
+- takeScreenshot:
+    path: ${PREFIX}9_chatrooms
+- back
+# User info reuses the existing User list + action sheet path; no new navigation.
+- tapOn:
+    id: action_shell_menu
+- tapOn:
+    text: "User list"
+- tapOn:
+    id: add_user_action
+- tapOn:
+    id: chosenUserEditText
+- inputText: beethoven_fan
+- tapOn:
+    text: "Add"
+- tapOn:
+    text: "beethoven_fan"
+- tapOn:
+    text: "Get user info"
+- takeScreenshot:
+    path: ${PREFIX}10_userinfo
+- back
+- back
 - tapOn:
     id: navigation_transfers
 - tapOn:

@@ -1,5 +1,14 @@
 appId: com.companyname.andriodapp1
 ---
+# Account/login is no longer a bottom-nav tab; it lives behind the shell's
+# secondary navigation sheet. Both taps are optional so the flow also works
+# when the form is already showing or the user is already signed in.
+- tapOn:
+    id: action_shell_menu
+    optional: true
+- tapOn:
+    text: "Account & sign in"
+    optional: true
 - tapOn:
     id: etUsername
     optional: true

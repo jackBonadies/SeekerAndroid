@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "description": "Checked-in copy of the official Maestro flow command vocabulary. It exists so the repository can verify that every command used by MaestroTests/*.yaml is a real, current Maestro command - instead of assuming that a plausible looking command (for example a font-scale or theme-index command) exists. The list is mechanical: it is the set of properties of YamlFluentCommand (the class Maestro's YAML parser maps one flow step to), one property = one command key.",
+  "provenance": {
+    "retrieved": "2026-10-25",
+    "upstreamRepository": "https://github.com/mobile-dev-inc/Maestro",
+    "upstreamFile": "maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlFluentCommand.kt",
+    "upstreamFileUrl": "https://raw.githubusercontent.com/mobile-dev-inc/Maestro/main/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlFluentCommand.kt",
+    "upstreamCommitHint": "main branch, as fetched on the retrieval date",
+    "docsIndexUrl": "https://docs.maestro.dev/llms.txt",
+    "docsCommandsUrl": "https://docs.maestro.dev/reference/commands-available.md",
+    "docsPages": {
+      "setDarkMode": "https://docs.maestro.dev/reference/commands-available/setdarkmode.md",
+      "toggleDarkMode": "https://docs.maestro.dev/reference/commands-available/toggledarkmode.md",
+      "assertDarkMode": "https://docs.maestro.dev/reference/commands-available/assertdarkmode.md",
+      "assertLightMode": "https://docs.maestro.dev/reference/commands-available/assertlightmode.md"
+    },
+    "refreshedHow": "Refetch the upstream file and the docs command index, then diff the `val <key>:` property names against `commands` below."
+  },
+  "commands": [
+    "tapOn",
+    "doubleTapOn",
+    "longPressOn",
+    "assertVisible",
+    "assertNotVisible",
+    "assertTrue",
+    "assertNoDefectsWithAI",
+    "assertScreenshot",
+    "assertWithAI",
+    "extractTextWithAI",
+    "back",
+    "clearKeychain",
+    "hideKeyboard",
+    "pasteText",
+    "scroll",
+    "inputText",
+    "inputRandomText",
+    "inputRandomNumber",
+    "inputRandomEmail",
+    "inputRandomPersonName",
+    "inputRandomCityName",
+    "inputRandomCountryName",
+    "inputRandomColorName",
+    "launchApp",
+    "setPermissions",
+    "swipe",
+    "openLink",
+    "pressKey",
+    "eraseText",
+    "action",
+    "takeScreenshot",
+    "extendedWaitUntil",
+    "stopApp",
+    "killApp",
+    "clearState",
+    "runFlow",
+    "setLocation",
+    "setOrientation",
+    "repeat",
+    "copyTextFrom",
+    "setClipboard",
+    "runScript",
+    "waitForAnimationToEnd",
+    "evalScript",
+    "scrollUntilVisible",
+    "travel",
+    "startRecording",
+    "stopRecording",
+    "addMedia",
+    "setAirplaneMode",
+    "toggleAirplaneMode",
+    "setDarkMode",
+    "toggleDarkMode",
+    "assertDarkMode",
+    "assertLightMode",
+    "retry"
+  ],
+  "noArgumentCommands": [
+    "assertDarkMode",
+    "assertLightMode",
+    "toggleDarkMode",
+    "toggleAirplaneMode",
+    "back",
+    "hideKeyboard",
+    "clearKeychain",
+    "waitForAnimationToEnd",
+    "startRecording",
+    "stopRecording"
+  ],
+  "valueGrammar": {
+    "setDarkMode": [
+      "enabled",
+      "disabled"
+    ],
+    "setAirplaneMode": [
+      "enabled",
+      "disabled"
+    ],
+    "setOrientation": [
+      "PORTRAIT",
+      "LANDSCAPE_LEFT",
+      "LANDSCAPE_RIGHT",
+      "UPSIDE_DOWN"
+    ]
+  },
+  "notCommands": {
+    "setFontScale": "Maestro has no font-scale command; set adb shell settings put system font_scale externally (see MaestroTests/large_font_sample.yaml).",
+    "setLocale": "Not a Maestro command.",
+    "setTheme": "Not a Maestro command; the app theme is changed through the app UI."
+  },
+  "valueGrammarNotes": {
+    "setOrientation": "matched case-insensitively and ignoring underscores (maestro.device.DeviceOrientation.getByName), so PORTRAIT / landscapeLeft both work.",
+    "setDarkMode": "DarkModeValue.yamlValue - 'enabled' / 'disabled' only."
+  },
+  "argumentRequirement": {
+    "takeScreenshot": [
+      "path"
+    ],
+    "inputText": "scalar",
+    "setDarkMode": "scalar"
+  },
+  "bareFormAllowed": {
+    "_note": "Commands that may be written without a value ('- back', '- launchApp'). Either they take no parameters at all, or every parameter of the upstream Yaml* model is optional and the bare form is shown in the official docs (launchApp: 'To launch the app under test: - launchApp'). Anything else has to carry an explicit value.",
+    "commands": [
+      "assertDarkMode",
+      "assertLightMode",
+      "toggleDarkMode",
+      "toggleAirplaneMode",
+      "back",
+      "hideKeyboard",
+      "clearKeychain",
+      "waitForAnimationToEnd",
+      "startRecording",
+      "stopRecording",
+      "launchApp"
+    ]
+  }
+}

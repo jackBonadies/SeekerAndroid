@@ -3,27 +3,26 @@ env:
   TO_NIGHT: 'false'
 ---
 - tapOn:
-    id: navigation_home
+    id: action_shell_menu
 - tapOn:
-    id: menuSettings
+    text: "Settings"
 - scrollUntilVisible:
     element:
       id: 'nightModeSpinner'
     direction: DOWN
 - tapOn:
     id: nightModeSpinner
+# Label selectors, not list indexes (Follow system / Always light / Always dark).
 - runFlow:
     when:
       true: ${TO_NIGHT == 'true'}
     commands:
       - tapOn:
-          id: text1
-          index: 2
+          text: "Always dark"
 - runFlow:
     when:
       true: ${TO_NIGHT == 'false'}
     commands:
       - tapOn:
-          id: text1
-          index: 1
+          text: "Always light"
 - back

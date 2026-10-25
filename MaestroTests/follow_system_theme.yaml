@@ -1,0 +1,38 @@
+appId: com.companyname.andriodapp1
+---
+# Follow-system theme: the persisted preference stays "Follow system" (-1) and the
+# app must track the device appearance.
+#
+# setDarkMode / assertDarkMode / assertLightMode are real, current Maestro commands - see
+# MaestroTests/schema/maestro_commands.json for the evidence (upstream
+# YamlFluentCommand.kt + the docs command index and per-command pages, with the
+# retrieval date) and Misc/test_ui_contracts.py for the static validation of every
+# command key and value in this file. The equivalent external precondition
+# (`adb shell cmd uimode night yes|no`) lives in Misc/run_maestro_theme_matrix.sh
+# for older Maestro builds or when the appearance is set once for a whole matrix.
+# Nothing here has been executed on a device.
+- runFlow: ./common/optional_set_download_dir.yaml
+- runFlow: ./common/optional_login.yaml
+- tapOn:
+    id: action_shell_menu
+- tapOn:
+    text: "Settings"
+- scrollUntilVisible:
+    element:
+      id: nightModeSpinner
+    direction: DOWN
+- tapOn:
+    id: nightModeSpinner
+- tapOn:
+    text: "Follow system"
+- back
+- setDarkMode: enabled
+- assertDarkMode
+- assertVisible:
+    id: navigation_search
+- takeScreenshot:
+    path: follow_system_dark
+- setDarkMode: disabled
+- assertLightMode
+- takeScreenshot:
+    path: follow_system_light

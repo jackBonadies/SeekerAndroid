@@ -1,0 +1,40 @@
+appId: com.companyname.andriodapp1
+---
+# Activity recreation / background-return / tab preservation. Orientation changes
+# recreate MainActivity, exercising onSaveInstanceState and the pager page restore.
+# `launchApp: stopApp: false` brings the same activity back instead of restarting it.
+- runFlow: ./common/optional_set_download_dir.yaml
+- runFlow: ./common/optional_login.yaml
+- tapOn:
+    id: navigation_browse
+- assertVisible:
+    id: navigation_browse
+- setOrientation: LANDSCAPE_LEFT
+- assertVisible:
+    id: navigation_browse
+- setOrientation: PORTRAIT
+- assertVisible:
+    id: navigation_browse
+- tapOn:
+    id: navigation_messages
+- assertVisible:
+    id: fabNewMessage
+- pressKey: home
+- launchApp:
+    stopApp: false
+- assertVisible:
+    id: navigation_messages
+- tapOn:
+    id: navigation_search
+- tapOn:
+    id: searchHere
+- inputText: beethoven overture
+- tapOn:
+    id: action_search
+- waitForAnimationToEnd
+- setOrientation: LANDSCAPE_LEFT
+- assertVisible:
+    id: searchHere
+- setOrientation: PORTRAIT
+- assertVisible:
+    id: searchHere

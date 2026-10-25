@@ -1,0 +1,38 @@
+appId: com.companyname.andriodapp1
+---
+# Phase 6A: search result sorting + cross-result multi-selection.
+# Requires a live session that returns results for the term below. Not executed in the
+# source-only environment (no emulator/Maestro CLI); see docs/UI_REDESIGN.md.
+- runFlow: ./common/optional_set_download_dir.yaml
+- runFlow: ./common/optional_login.yaml
+- tapOn:
+    id: navigation_search
+- tapOn:
+    id: searchHere
+- inputText: beethoven overture
+- tapOn:
+    id: action_search
+- waitForAnimationToEnd
+# Both appended sort choices are offered and stay selectable after the header label updates.
+- tapOn:
+    id: searchSortButton
+- tapOn: "File name"
+- tapOn:
+    id: searchSortButton
+- tapOn: "File size"
+- tapOn:
+    id: searchSortButton
+- tapOn: "Availability"
+# Long-press enters the contextual action mode; row taps toggle selection.
+- longPressOn:
+    id: folderNameTextView
+    index: 0
+- assertVisible: "1 selected"
+- tapOn:
+    id: folderNameTextView
+    index: 1
+- assertVisible: "2 selected"
+- tapOn: "More options"
+- tapOn: "Select all"
+# Batch download uses the existing session/enqueue path and then leaves the action mode.
+- tapOn: "Download selected"

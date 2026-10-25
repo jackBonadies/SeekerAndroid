@@ -1,16 +1,17 @@
 appId: com.companyname.andriodapp1
 env:
   IS_NIGHT: 'true'
-  THEME_INDEX: '0'
 ---
 - tapOn:
-    id: navigation_home
+    id: action_shell_menu
 - tapOn:
-    id: menuSettings
+    text: "Settings"
 - scrollUntilVisible:
     element:
       id: 'nightVarientSpinner'
     direction: DOWN
+# Select by label instead of a list index: the variant lists start with Modern
+# since Phase 2A, so positional selectors are no longer valid.
 - runFlow:
     when:
       true: ${IS_NIGHT == 'true'}
@@ -18,8 +19,7 @@ env:
       - tapOn:
           id: nightVarientSpinner
       - tapOn:
-          id: text1
-          index: 2
+          text: "Modern"
 - runFlow:
     when:
       true: ${IS_NIGHT == 'false'}
@@ -27,6 +27,5 @@ env:
       - tapOn:
           id: dayVarientSpinner
       - tapOn:
-          id: text1
-          index: 1
+          text: "Modern"
 - runFlow: ./back_to_main.yaml

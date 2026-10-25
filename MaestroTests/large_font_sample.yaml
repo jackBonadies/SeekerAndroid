@@ -1,0 +1,39 @@
+appId: com.companyname.andriodapp1
+---
+# Large-font sample. Maestro has no font-scale command, so the *supported* API used
+# here is the ordinary flow: set the device font scale externally once, then run
+# this capture pass against the existing mock login path.
+#   adb shell settings put system font_scale 1.3
+#   maestro test MaestroTests/large_font_sample.yaml
+#   adb shell settings put system font_scale 1.0
+- runFlow: ./common/optional_set_download_dir.yaml
+- runFlow: ./common/optional_login.yaml
+- tapOn:
+    id: navigation_search
+- tapOn:
+    id: searchHere
+- inputText: beethoven overture
+- tapOn:
+    id: action_search
+- waitForAnimationToEnd
+- takeScreenshot:
+    path: large_font_search
+- tapOn:
+    id: navigation_transfers
+- takeScreenshot:
+    path: large_font_transfers
+- tapOn:
+    id: navigation_browse
+- takeScreenshot:
+    path: large_font_browse
+- tapOn:
+    id: navigation_messages
+- takeScreenshot:
+    path: large_font_messages
+- tapOn:
+    id: action_shell_menu
+- tapOn:
+    text: "Settings"
+- takeScreenshot:
+    path: large_font_settings
+- back
