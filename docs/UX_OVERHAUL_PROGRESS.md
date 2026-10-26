@@ -9,12 +9,12 @@
 - Main activity uses one guarded routing path for cold and warm intents, including shares, search/room, browse, wishlist, account, uploads, transfers, and completed-folder notifications. Completed-folder notifications select the matching transfer group when available.
 - Downloads/uploads mode switching clears incompatible folder/batch/action-mode state.
 - Chatroom filters restore both filter state and visible query. Messaging preserves reading position for new messages and exposes an indicator; user-list updates ignore absent rows.
-- Encrypted fixture tests are correctly marked `RealData`; CI runs the UI contract suite.
+- Encrypted fixture tests are correctly marked `RealData`; the UI contract suite can be run locally.
 - Global account/users/wishlist/chat/settings navigation now uses a left hamburger at root destinations; the redundant shell three-dot menu is no longer inflated.
 
 ## Files affected
 
-Core changes are in `Common/Services/DownloadService.cs`, `Seeker/Search/`, `Seeker/Main/MainActivity.cs`, `Seeker/Transfers/`, `Seeker/Messages/`, `Seeker/Chatroom/`, `Seeker/Users/`, resources, tests, and `.github/workflows/unittests.yml`.
+Core changes are in `Common/Services/DownloadService.cs`, `Seeker/Search/`, `Seeker/Main/MainActivity.cs`, `Seeker/Transfers/`, `Seeker/Messages/`, `Seeker/Chatroom/`, `Seeker/Users/`, resources, and tests.
 
 ## Verification
 
