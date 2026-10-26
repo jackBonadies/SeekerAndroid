@@ -150,10 +150,25 @@ namespace Seeker
 
         private Button downloadButton = null;
         private AndroidX.SwipeRefreshLayout.Widget.SwipeRefreshLayout swipeRefreshLayout = null;
+        // Positions change when the list is rebuilt; only file identities survive recreation.
+        private readonly HashSet<string> selectedFileIds = new HashSet<string>();
+        private const string SelectedFileIdsStateKey = "seeker.downloadDialog.selectedFileIds";
+
+        public override void OnSaveInstanceState(Bundle outState)
+        {
+            base.OnSaveInstanceState(outState);
+            CaptureSelectionIds();
+            outState.PutStringArrayList(SelectedFileIdsStateKey, selectedFileIds.ToList());
+        }
 
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
             base.OnViewCreated(view, savedInstanceState);
+            var savedSelection = savedInstanceState?.GetStringArrayList(SelectedFileIdsStateKey);
+            if (savedSelection != null)
+            {
+                foreach (var id in savedSelection) selectedFileIds.Add(id);
+            }
 
             var dialog = (BottomSheetDialog)Dialog;
             var bottomSheet = dialog.FindViewById<View>(Resource.Id.design_bottom_sheet);
@@ -227,7 +242,19 @@ namespace Seeker
             }
             this.customAdapter = new DownloadCustomAdapter(SeekerState.MainActivityRef, adapterList);
             this.customAdapter.Owner = this;
+            this.customAdapter.RestoreSelection(selectedFileIds);
             listView.Adapter = (customAdapter);
+        }
+
+        private void CaptureSelectionIds()
+        {
+            if (customAdapter == null) return;
+            selectedFileIds.Clear();
+            foreach (int position in customAdapter.SelectedPositions)
+            {
+                var item = customAdapter.GetItem(position);
+                if (item != null) selectedFileIds.Add(DownloadCustomAdapter.GetIdentity(item));
+            }
         }
 
         private void UpdateSubHeader()
@@ -283,6 +310,7 @@ namespace Seeker
                 e.View.FindViewById(Resource.Id.selectionCheck).Visibility = ViewStates.Gone;
                 this.customAdapter.SelectedPositions.Remove(e.Position);
             }
+            CaptureSelectionIds();
             UpdateDownloadButtonText();
         }
 
@@ -632,6 +660,21 @@ namespace Seeker
         public AndroidX.Fragment.App.DialogFragment Owner = null;
         public DownloadCustomAdapter(Context c, List<FileLockedUnlockedWrapper> items) : base(c, 0, items)
         {
+        }
+
+        public static string GetIdentity(FileLockedUnlockedWrapper item)
+        {
+            return (item.IsLocked ? "locked:" : "file:") + item.File.Filename + "\u001f" + item.File.Size;
+        }
+
+        public void RestoreSelection(IEnumerable<string> identities)
+        {
+            var wanted = new HashSet<string>(identities ?? Enumerable.Empty<string>());
+            for (int i = 0; i < Count; i++)
+            {
+                var item = GetItem(i);
+                if (item != null && wanted.Contains(GetIdentity(item))) SelectedPositions.Add(i);
+            }
         }
 
         public override View GetView(int position, View convertView, ViewGroup parent)

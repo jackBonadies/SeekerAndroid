@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Resource-backed ColourStateList for the chrome foreground used by app-bar /
+    popup theme overlays (android:textColorPrimary / android:textColorSecondary).
+
+    Same reason as ds_text_secondary_csl.xml: Material widgets resolve these theme
+    items with a resource ID, so an inline ?attr colour (resourceId 0) would crash
+    with Resources$NotFoundException. The selector stays token driven, so light
+    chrome (dark foreground) and dark chrome (light foreground) are both correct
+    without a per-configuration copy. Requires minSdk 23.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="?attr/dsColorChromeForeground" />
+</selector>

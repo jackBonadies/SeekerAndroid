@@ -19,7 +19,7 @@ namespace Seeker.Chatroom
         private LinearLayoutManager recycleLayoutManager;
         private ChatroomOverviewRecyclerAdapter recyclerAdapter;
         private SearchView filterChatroomView;
-        private static string FilterString = string.Empty;
+        private string filterString = string.Empty;
         private View chatroomsListLoadingView = null;
         private ProgressBar refreshProgressBar = null;
 
@@ -41,6 +41,12 @@ namespace Seeker.Chatroom
             refreshProgressBar.Visibility = ChatroomController.IsRoomListLoading ? ViewStates.Visible : ViewStates.Gone;
             filterChatroomView = rootView.FindViewById<SearchView>(Resource.Id.filterChatroom);
             filterChatroomView.QueryTextChange += FilterChatroomView_QueryTextChange;
+            filterString = savedInstanceState?.GetString("chatroom_filter") ?? string.Empty;
+            if (!string.IsNullOrEmpty(filterString))
+            {
+                // Keep the visible query and the applied predicate in sync after recreation.
+                filterChatroomView.SetQuery(filterString, false);
+            }
             recyclerViewOverview = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewOverview);
             recyclerViewOverview.AddItemDecoration(new DividerItemDecoration(this.Context, DividerItemDecoration.Vertical));
             AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(recyclerViewOverview, new BottomOnlyInsetsListener());
@@ -141,20 +147,26 @@ namespace Seeker.Chatroom
 
         private void FilterChatroomView_QueryTextChange(object sender, SearchView.QueryTextChangeEventArgs e)
         {
-            FilterString = e.NewText;
+            filterString = e.NewText ?? string.Empty;
             this.UpdateChatroomList();
         }
 
-        private static List<Soulseek.RoomInfo> FilterRoomList(List<Soulseek.RoomInfo> original)
+        private List<Soulseek.RoomInfo> FilterRoomList(List<Soulseek.RoomInfo> original)
         {
-            if (FilterString != string.Empty)
+            if (!string.IsNullOrEmpty(filterString))
             {
-                return original.Where((roomInfo) => { return roomInfo.Name.Contains(FilterString, StringComparison.InvariantCultureIgnoreCase); }).ToList();
+                return original.Where((roomInfo) => { return roomInfo.Name.Contains(filterString, StringComparison.InvariantCultureIgnoreCase); }).ToList();
             }
             else
             {
                 return original;
             }
+        }
+
+        public override void OnSaveInstanceState(Bundle outState)
+        {
+            outState.PutString("chatroom_filter", filterString);
+            base.OnSaveInstanceState(outState);
         }
 
         public void OnChatListReceived(object sender, EventArgs eventArgs)

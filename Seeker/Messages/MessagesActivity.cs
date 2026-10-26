@@ -194,7 +194,7 @@ namespace Seeker
             if (intent.GetBooleanExtra(MessageController.ComingFromMessageTapped, false))
             {
                 string goToUsersMessages = intent.GetStringExtra(MessageController.FromUserName);
-                if (goToUsersMessages == string.Empty)
+                if (string.IsNullOrEmpty(goToUsersMessages))
                 {
                     Logger.Firebase(EmptyGoToUsersMessagesLog);
                 }

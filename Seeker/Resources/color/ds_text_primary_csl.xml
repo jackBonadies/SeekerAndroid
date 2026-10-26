@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Resource-backed ColourStateList for android:textColorPrimary.
+
+    Material's NavigationView / NavigationBarView resolve android:textColorPrimary
+    and android:textColorSecondary with Theme.resolveAttribute(..., resolveRefs=true)
+    and then call AppCompatResources.getColorStateList(context, value.resourceId).
+    A theme item that points straight at a ?attr token resolves to an inline
+    colour with resourceId == 0, which throws Resources$NotFoundException at
+    inflate time. Pointing the theme item at this @color resource keeps it a real
+    resource ID while the selector below stays driven by the semantic token, so it
+    follows every concrete (modern / legacy) light and dark theme.
+
+    Theme attributes inside a ColourStateList require minSdk 23 (the app targets
+    23), and no night variant is needed because the tokens already answer for
+    the active configuration.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:color="?attr/dsColorTextDisabled" />
+    <item android:color="?attr/dsColorTextPrimary" />
+</selector>

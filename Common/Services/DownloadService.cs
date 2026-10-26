@@ -12,6 +12,18 @@ using System.Threading.Tasks;
 using Common;
 namespace Seeker.Services
 {
+    /// <summary>
+    /// The synchronous part of an enqueue request.  A file is considered queued when it was
+    /// accepted into Seeker's transfer list; the network transfer may start later.
+    /// </summary>
+    public sealed class DownloadEnqueueResult
+    {
+        public int Requested { get; internal set; }
+        public int Queued { get; internal set; }
+        public int AlreadyPresent { get; internal set; }
+        public int FailedToQueue { get; internal set; }
+    }
+
     // Owns the entire download lifecycle: initiate, queue-poll, complete/retry/save
     public class DownloadService
     {
@@ -61,6 +73,22 @@ namespace Seeker.Services
         }
 
         /// <summary>
+        /// Adds a batch and reports exactly what was accepted.  This is intentionally separate
+        /// from <see cref="EnqueueFilesAsync"/>: callers that need immediate UI feedback should
+        /// not have to wait for a remote peer to accept every transfer.
+        /// </summary>
+        public Task<DownloadEnqueueResult> EnqueueFilesWithSummaryAsync(FullFileInfo[] files, bool queuePaused, string username)
+        {
+            if (username == PreferencesState.Username)
+            {
+                toaster.ShowToastLong(StringKey.cannot_download_from_self);
+                return Task.FromResult(new DownloadEnqueueResult { Requested = files?.Length ?? 0, FailedToQueue = files?.Length ?? 0 });
+            }
+
+            return Task.Run(() => QueueFilesAndStart(files, queuePaused, username));
+        }
+
+        /// <summary>
         /// Fire and forget entry point for the UI call sites. Completely asynchronous (including adding DLs to transfer list).
         /// </summary>
         public void EnqueueFilesFireAndForget(FullFileInfo[] files, bool queuePaused, string username)
@@ -98,6 +126,46 @@ namespace Seeker.Services
 
             toaster.ShowToastShort(StringKey.download_is_starting);
             await StartDownloads(downloadInfos);
+        }
+
+        private DownloadEnqueueResult QueueFilesAndStart(FullFileInfo[] files, bool queuePaused, string username)
+        {
+            var result = new DownloadEnqueueResult { Requested = files?.Length ?? 0 };
+            if (files == null || files.Length == 0)
+            {
+                return result;
+            }
+
+            bool isSingle = files.Length == 1;
+            var accepted = new List<DownloadInfo>();
+            foreach (var file in files)
+            {
+                try
+                {
+                    var info = AddTransfer(username, file.FullFileName, file.Size, int.MaxValue, file.Depth,
+                        queuePaused, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded, isSingle);
+                    if (info == null)
+                    {
+                        result.AlreadyPresent++;
+                    }
+                    else
+                    {
+                        result.Queued++;
+                        accepted.Add(info);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    result.FailedToQueue++;
+                    logger.Firebase("Unable to add download to transfer list: " + ex);
+                }
+            }
+
+            if (!queuePaused && accepted.Count > 0)
+            {
+                StartDownloadsFireAndForget(accepted);
+            }
+            return result;
         }
 
         // common entrypoint for downloads - parallel dl loops per user

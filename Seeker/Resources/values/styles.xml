@@ -153,10 +153,10 @@
 
         <item name="android:colorBackground">?attr/dsColorBackground</item>
         <item name="colorOnBackground">?attr/dsColorTextPrimary</item>
-        <item name="android:textColorPrimary">?attr/dsColorTextPrimary</item>
-        <item name="android:textColorSecondary">?attr/dsColorTextSecondary</item>
-        <item name="android:textColorTertiary">?attr/dsColorTextSecondary</item>
-        <item name="android:textColorHint">?attr/dsColorTextSecondary</item>
+        <item name="android:textColorPrimary">@color/ds_text_primary_csl</item>
+        <item name="android:textColorSecondary">@color/ds_text_secondary_csl</item>
+        <item name="android:textColorTertiary">@color/ds_text_secondary_csl</item>
+        <item name="android:textColorHint">@color/ds_text_secondary_csl</item>
         <item name="colorControlActivated">?attr/dsColorPrimary</item>
         <item name="colorControlNormal">?attr/dsColorTextSecondary</item>
         <item name="colorControlHighlight">?attr/dsColorControlHighlight</item>
@@ -284,8 +284,8 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.Material3">
         <item name="colorOnSurface">?attr/dsColorChromeForeground</item>
         <item name="colorOnSurfaceVariant">?attr/dsColorChromeForeground</item>
-        <item name="android:textColorPrimary">?attr/dsColorChromeForeground</item>
-        <item name="android:textColorSecondary">?attr/dsColorChromeForeground</item>
+        <item name="android:textColorPrimary">@color/ds_chrome_foreground_csl</item>
+        <item name="android:textColorSecondary">@color/ds_chrome_foreground_csl</item>
         <item name="colorControlNormal">?attr/dsColorChromeForeground</item>
         <item name="actionMenuTextColor">?attr/dsColorChromeForeground</item>
         <item name="android:colorBackground">?attr/dsColorChromeSurface</item>
@@ -301,8 +301,8 @@
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3">
         <item name="colorSurface">?attr/dsColorSurfaceContainer</item>
         <item name="colorOnSurface">?attr/dsColorTextPrimary</item>
-        <item name="android:textColorPrimary">?attr/dsColorTextPrimary</item>
-        <item name="android:textColorSecondary">?attr/dsColorTextSecondary</item>
+        <item name="android:textColorPrimary">@color/ds_text_primary_csl</item>
+        <item name="android:textColorSecondary">@color/ds_text_secondary_csl</item>
         <item name="colorControlNormal">?attr/dsColorTextSecondary</item>
         <item name="android:colorBackground">?attr/dsColorSurfaceContainer</item>
         <item name="actionModeStyle">@style/MyActionMode</item>
@@ -317,8 +317,8 @@
         <item name="colorOnSurfaceVariant">?attr/dsColorTextSecondary</item>
         <item name="colorPrimary">?attr/dsColorPrimary</item>
         <item name="colorOnPrimary">?attr/dsColorOnPrimary</item>
-        <item name="android:textColorPrimary">?attr/dsColorTextPrimary</item>
-        <item name="android:textColorSecondary">?attr/dsColorTextSecondary</item>
+        <item name="android:textColorPrimary">@color/ds_text_primary_csl</item>
+        <item name="android:textColorSecondary">@color/ds_text_secondary_csl</item>
         <item name="shapeAppearanceLargeComponent">?attr/dsShapeSheet</item>
     </style>
 
@@ -329,8 +329,8 @@
         <item name="colorPrimary">?attr/dsColorPrimary</item>
         <item name="colorOnPrimary">?attr/dsColorOnPrimary</item>
         <item name="colorError">?attr/dsColorError</item>
-        <item name="android:textColorPrimary">?attr/dsColorTextPrimary</item>
-        <item name="android:textColorSecondary">?attr/dsColorTextSecondary</item>
+        <item name="android:textColorPrimary">@color/ds_text_primary_csl</item>
+        <item name="android:textColorSecondary">@color/ds_text_secondary_csl</item>
         <item name="android:colorBackground">?attr/dsColorSurfaceElevated</item>
         <item name="shapeAppearanceMediumComponent">?attr/dsShapeCard</item>
     </style>
@@ -470,8 +470,8 @@
     <style name="AppPopupOverlay" parent="ThemeOverlay.Material3">
         <item name="popupMenuStyle">@style/AppPopupMenu</item>
         <item name="android:popupMenuStyle">@style/AppPopupMenu</item>
-        <item name="android:textColorPrimary">?attr/dsColorTextPrimary</item>
-        <item name="android:textColorSecondary">?attr/dsColorTextSecondary</item>
+        <item name="android:textColorPrimary">@color/ds_text_primary_csl</item>
+        <item name="android:textColorSecondary">@color/ds_text_secondary_csl</item>
         <item name="colorSurface">?attr/dsColorSurfaceContainer</item>
         <item name="colorOnSurface">?attr/dsColorTextPrimary</item>
     </style>

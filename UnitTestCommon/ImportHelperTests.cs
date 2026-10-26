@@ -83,6 +83,9 @@ namespace UnitTestCommon
             }
         }
 
+        // The QT fixtures are encrypted using the developer-only
+        // SeekerEncryptKey and are real exported configuration data.
+        [Category("RealData")]
         [TestCase("linux_empty_wish")]
         [TestCase("test")]
         [TestCase("test2")]

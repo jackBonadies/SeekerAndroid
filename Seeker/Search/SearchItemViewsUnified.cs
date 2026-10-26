@@ -162,8 +162,8 @@ namespace Seeker
             }
             if (downloadActionButton != null)
             {
-                // The action opens the existing file selection download dialog, so for a group
-                // it must describe the folder, not the representative file.
+                // This is the fast complete-folder action; row taps still open the detailed
+                // chooser for partial selection.
                 downloadActionButton.ContentDescription = meta.IsGroup
                     ? string.Format(
                         Context.GetString(Resource.String.download_group_result_description),
@@ -196,7 +196,7 @@ namespace Seeker
             }
             if (downloadActionButton != null)
             {
-                // The download action opens the per-result dialog; during multi-select the row
+                // The download action queues the result folder; during multi-select the row
                 // tap/checkbox already owns the interaction, so hide it instead of offering a
                 // second, unexpected dialog path behind the action mode.
                 downloadActionButton.Visibility = selectionMode ? ViewStates.Gone : ViewStates.Visible;

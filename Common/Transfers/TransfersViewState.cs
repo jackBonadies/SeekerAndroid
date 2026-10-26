@@ -49,7 +49,17 @@ namespace Seeker
 
         public void SwitchToUploadsMode()
         {
-            InUploadsMode = true;
+            SwitchToMode(true);
+        }
+
+        /// <summary>
+        /// A downloads/uploads change is a change of dataset, not just a visual toggle.
+        /// Folder and batch selections refer to objects in the old dataset and must never
+        /// be carried into the new one.
+        /// </summary>
+        public void SwitchToMode(bool uploadsMode)
+        {
+            InUploadsMode = uploadsMode;
             CurrentlySelectedDLFolder = null;
             CurrentlySelectedUploadFolder = null;
             BatchSelectedItems.Clear();

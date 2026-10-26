@@ -200,13 +200,17 @@ namespace Seeker
         /// refresh path the toolbar toggle already used. Both the segmented tabs and the
         /// toolbar item go through here so they can never disagree.
         /// </summary>
-        private void SetUploadsMode(bool uploadsMode)
+        private void SetUploadsMode(bool uploadsMode, bool resetCurrentMode = false)
         {
-            if (ViewState.InUploadsMode == uploadsMode)
+            if (ViewState.InUploadsMode == uploadsMode && !resetCurrentMode)
             {
                 return;
             }
-            ViewState.InUploadsMode = uploadsMode;
+
+            // A contextual action mode belongs to the current adapter/dataset. Finish it
+            // before replacing the adapter so delayed row clicks cannot act on the other mode.
+            TransfersActionMode?.Finish();
+            ViewState.SwitchToMode(uploadsMode);
             PreferencesManager.SaveTransferViewInUploadsMode();
             RefreshForModeSwitch();
             SeekerState.MainActivityRef?.InvalidateOptionsMenu();
@@ -602,10 +606,9 @@ namespace Seeker
 
         public void MoveToUploadForNotif()
         {
-            ViewState.SwitchToUploadsMode();
-            PreferencesManager.SaveTransferViewInUploadsMode();
-            this.RefreshForModeSwitch();
-            SeekerState.MainActivityRef.InvalidateOptionsMenu();
+            // A notification is a top-level destination even when uploads was already
+            // selected, so do not leave it inside an unrelated folder or batch mode.
+            SetUploadsMode(true, resetCurrentMode: true);
         }
 
         public override void OnPause()

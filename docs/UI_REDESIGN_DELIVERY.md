@@ -262,3 +262,45 @@ Not introduced by this work, reported honestly:
   Without it the suite exits non-zero with that instruction; it does not pass on a fallback.
 
 No dependency upgrades were attempted.
+
+## 9. Device validation addendum — launch crash fix (Pixel 6 / Android 16)
+
+The `v147` fork build force-closed on launch at `17:28:25`:
+
+```
+InflateException layout/activity_main (BottomNavigationView)
+  -> AppCompatResources.getColorStateList
+  -> NavigationBarMenuView.createDefaultColorStateList
+  -> Resources$NotFoundException: Resource ID #0x0
+```
+
+**Root cause.** Material's `NavigationBarView` reads `android:textColorSecondary`
+with `NavigationBarMenuView.createDefaultColorStateList(android.R.attr.textColorSecondary)`:
+it resolves the theme item and calls
+`AppCompatResources.getColorStateList(context, value.resourceId)`. `AppTheme` set the
+item to the bare token `?attr/dsColorTextSecondary`, which resolves to an inline
+literal colour, so `value.resourceId` was `0`. The same pattern applied to
+`android:textColorPrimary` (read by `NavigationView`) and to the overlay themes.
+
+**Fix.** `android:textColorPrimary/Secondary/Tertiary/Hint` now reference real
+`@color` state lists (`ds_text_primary_csl`, `ds_text_secondary_csl`,
+`ds_chrome_foreground_csl`). Each selector is token driven (`?attr/dsColor*`), so
+modern/legacy light/dark themes keep their own semantic palette and no per-theme
+copy is needed. `Misc/test_ui_contracts.py::check_text_color_state_lists` guards
+the resource-backed, token-driven contract statically.
+
+**Validated on device** (Pixel 6, Android 16, `com.companyname.andriodapp1`):
+
+* `dotnet build Seeker/Seeker.csproj -c Debug -p:AndroidKeyStore=false -p:EmbedAssembliesIntoApk=true -p:AndroidPackageFormats=apk` — 0 errors.
+* `python3 Misc/test_ui_contracts.py` — 867 checks passed, 0 failed.
+* Existing install had a different signing certificate (`CN=Seeker Fork CI` vs debug
+  `CN=Android Debug`); after the authorized uninstall of Seeker only, the Debug APK
+  installed and `am start -W -n …/MainActivity` returned `Status: ok` (cold, ~945 ms).
+* Same process PID stayed alive; `MainActivity` stayed resumed; tapping Search,
+  Transfers, Browse and Messages produced no `InflateException`/`Resources$NotFoundException`.
+* Switched the app's own Night theme to the legacy **Purple** variant (activity
+  recreation in night config) and returned to Main: the `BottomNavigationView`
+  inflated with all four items, no crash.
+
+Not reproduced on device: login-gated flows and Maestro flows (no credentials were
+entered).

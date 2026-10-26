@@ -141,6 +141,10 @@ namespace Seeker
         {
             if (SeekerApplication.OnUIThread())
             {
+                if (recyclerAdapter == null || string.IsNullOrEmpty(username))
+                {
+                    return;
+                }
                 if (UserListSortOrder == SortOrder.OnlineStatus)
                 {
 
@@ -153,16 +157,25 @@ namespace Seeker
                     //SearchTabHelper.SearchTabCollection[fromTab].FilteredResponses.AddRange(newList);
                     res.DispatchUpdatesTo(recyclerAdapter);
 
-                    recyclerAdapter.NotifyItemChanged(recyclerAdapter.GetPositionForUsername(username));
+                    NotifyUserStatusChanged(username);
                 }
                 else
                 {
-                    recyclerAdapter.NotifyItemChanged(recyclerAdapter.GetPositionForUsername(username));
+                    NotifyUserStatusChanged(username);
                 }
             }
             else
             {
                 SeekerState.ActiveActivityRef.RunOnUiThread(() => { OnUserStatusChanged(null, username); });
+            }
+        }
+
+        private void NotifyUserStatusChanged(string username)
+        {
+            int position = recyclerAdapter.GetPositionForUsername(username);
+            if (position >= 0 && position < recyclerAdapter.ItemCount)
+            {
+                recyclerAdapter.NotifyItemChanged(position);
             }
         }
 

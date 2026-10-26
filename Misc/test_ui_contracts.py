@@ -417,6 +417,23 @@ COLOR_REF = re.compile(r"^@color/([A-Za-z0-9_]+)$")
 FRAMEWORK_REF = re.compile(r"^[@?]android:")
 
 
+def is_token_backed_color_ref(value: str) -> bool:
+    """True for ``?attr/ds*`` or an ``@color/<name>`` selector that uses ``?attr/ds*``.
+
+    Theme items Material consumes through ``AppCompatResources.getColorStateList``
+    must be resource backed, but they must stay token driven so every concrete
+    theme keeps its own palette (no hardcoded per-theme colours).
+    """
+    value = (value or "").strip()
+    if value.startswith("?attr/ds"):
+        return True
+    match = COLOR_REF.match(value)
+    if not match:
+        return False
+    path = os.path.join(RES, "color", f"{match.group(1)}.xml")
+    return os.path.exists(path) and "?attr/ds" in read(path)
+
+
 def is_transparent(value: str) -> bool:
     """True for #00RRGGBB / #00000000 style fully transparent colours."""
     match = re.fullmatch(r"#([0-9a-fA-F]{8})", (value or "").strip())
@@ -850,7 +867,7 @@ def check_overlays_and_chrome() -> None:
         foreground = [key for key in style.items if key.endswith("textColorPrimary") or key == "colorOnSurface"]
         check(
             "overlays.theme_aware",
-            foreground and all(style.items[key].startswith("?attr/ds") for key in foreground),
+            foreground and all(is_token_backed_color_ref(style.items[key]) for key in foreground),
             f"{name} foregrounds come from tokens ({foreground})",
         )
 
@@ -1280,6 +1297,112 @@ def check_color_parity() -> None:
         f"{len(day)} colour resources have day/night parity"
         + (f" (day only {only_day}, night only {only_night})" if only_day or only_night else ""),
     )
+
+
+# Theme items Material resolves with AppCompatResources.getColorStateList. They
+# must reference a real @color state list; an inline ?attr colour has
+# TypedValue.resourceId == 0 and throws Resources$NotFoundException.
+TEXT_COLOR_THEME_ATTRS = (
+    "android:textColorPrimary",
+    "android:textColorSecondary",
+    "android:textColorTertiary",
+    "android:textColorHint",
+)
+
+# Primary/secondary are the two items Material resolves through
+# AppCompatResources.getColorStateList, so every intended style must declare them.
+# Tertiary/hint stay optional (overlays legitimately inherit or skip them).
+TEXT_COLOR_REQUIRED_ATTRS = (
+    "android:textColorPrimary",
+    "android:textColorSecondary",
+)
+
+TEXT_COLOR_STYLES = (
+    "AppTheme",
+    "AppTheme.AppBarOverlay",
+    "AppTheme.PopupOverlay",
+    "SeekerBottomSheetDialog",
+    "Seeker.MaterialAlertDialog",
+    "AppPopupOverlay",
+)
+
+# Tokens a text / chrome colour state list may legitimately paint with.
+TEXT_COLOR_TOKENS = {
+    "dsColorTextPrimary",
+    "dsColorTextSecondary",
+    "dsColorTextDisabled",
+    "dsColorChromeForeground",
+}
+
+
+def color_list_tokens(name: str) -> list[str] | None:
+    """Tokens referenced by ``res/color/<name>.xml``; None if missing, not a
+    ``<selector>``, or has a literal item."""
+    path = os.path.join(RES, "color", f"{name}.xml")
+    if not os.path.exists(path):
+        return None
+    root = ET.parse(path).getroot()
+    if root.tag != "selector":
+        return None
+    tokens: list[str] = []
+    for item in root.iter("item"):
+        value = (item.get("{http://schemas.android.com/apk/res/android}color") or "").strip()
+        match = ATTR_REF.match(value)
+        if not match:
+            return None
+        tokens.append(match.group(1))
+    return tokens
+
+
+def check_text_color_state_lists() -> None:
+    """android:textColor* must be resource-backed, token-driven ColourStateLists.
+
+    Material's NavigationBarView / NavigationView call
+    ``createDefaultColorStateList(android.R.attr.textColorSecondary|Primary)``,
+    which resolves the theme attribute and then calls
+    ``AppCompatResources.getColorStateList(context, value.resourceId)``. A theme
+    item written as ``?attr`` resolves to an inline colour with ``resourceId == 0``
+    and inflating BottomNavigationView throws Resources$NotFoundException (the
+    10-25 17:28:25 launch crash). Every such item must reference a real
+    ``@color`` state list, and that selector must stay token driven so the modern
+    and legacy light/dark themes keep their own semantic palettes.
+    """
+    for style_name in TEXT_COLOR_STYLES:
+        items = resolved_items("values", style_name)
+        for attr in TEXT_COLOR_THEME_ATTRS:
+            value = items.get(attr)
+            if value is None:
+                if attr in TEXT_COLOR_REQUIRED_ATTRS:
+                    check(
+                        "textcolor.resource",
+                        False,
+                        f"{style_name}.{attr} declares a real @color state list",
+                    )
+                continue
+            match = COLOR_REF.match(value)
+            check(
+                "textcolor.resource",
+                match is not None,
+                f"{style_name}.{attr} references a real @color state list (got {value})",
+            )
+            if not match:
+                continue
+            tokens = color_list_tokens(match.group(1))
+            check(
+                "textcolor.tokens",
+                tokens is not None and bool(tokens),
+                f"color/{match.group(1)}.xml is a token-driven <selector>"
+                + (" (missing, not a selector, or has a literal item)" if tokens is None else ""),
+            )
+            if tokens is None:
+                continue
+            unexpected = sorted(set(tokens) - TEXT_COLOR_TOKENS)
+            check(
+                "textcolor.tokens",
+                not unexpected,
+                f"color/{match.group(1)}.xml uses only text/chrome tokens"
+                + (f" (unexpected {unexpected})" if unexpected else ""),
+            )
 
 
 def check_dimens() -> None:
@@ -2836,6 +2959,7 @@ def main() -> int:
     check_maestro_command_schema()
     check_drawables()
     check_color_parity()
+    check_text_color_state_lists()
     check_semantic_color_usage()
     check_color_contrast_contracts()
     check_dimens()

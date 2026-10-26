@@ -141,7 +141,7 @@ namespace Seeker
                 }
                 else
                 {
-                    fragment.ShowDownloadDialog(position);
+                    fragment.DownloadResultFolder(position);
                 }
             }
 

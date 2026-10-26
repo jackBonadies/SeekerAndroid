@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Resource-backed ColourStateList for android:textColorSecondary (also used for
+    android:textColorTertiary and android:textColorHint).
+
+    This is the exact resource the BottomNavigationView inflate crash came from:
+    NavigationBarMenuView.createDefaultColorStateList(android.R.attr.textColorSecondary)
+    resolves the theme item and demands a real resource ID for
+    AppCompatResources.getColorStateList. Referencing this @color file keeps the
+    item resource backed while the selector stays token driven (see
+    docs/UI_REDESIGN_DELIVERY.md, section 9 "Device validation addendum").
+    Requires minSdk 23; theme
+    attributes make the same file correct for every modern/legacy light/dark theme.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:color="?attr/dsColorTextDisabled" />
+    <item android:color="?attr/dsColorTextSecondary" />
+</selector>

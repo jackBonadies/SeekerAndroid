@@ -28,6 +28,7 @@ namespace Seeker.Messages
         private View rootView = null;
         private EditText editTextEnterMessage = null;
         private ImageButton sendMessage = null;
+        private TextView newMessagesIndicator = null;
         public string Username = null;
 
         public MessagesInnerFragment() : base()
@@ -87,19 +88,42 @@ namespace Seeker.Messages
             recycleLayoutManager.StackFromEnd = true;
             recycleLayoutManager.ReverseLayout = false;
             recyclerViewInner.SetLayoutManager(recycleLayoutManager);
+            newMessagesIndicator = rootView.FindViewById<TextView>(Resource.Id.new_messages_indicator);
+            newMessagesIndicator.Click += (sender, e) => ScrollToNewestMessage();
             RebuildMessagesAdapter();
             created = true;
             return rootView;
         }
 
-        private void RebuildMessagesAdapter()
+        private void RebuildMessagesAdapter(bool scrollToBottom = true)
         {
             var messages = MessageController.Messages.GetValueOrDefault(Username, new List<Message>()).ToList();
             recyclerAdapter = new MessagesInnerRecyclerAdapter(messages); //this depends tightly on MessageController... since these are just strings..
             recyclerViewInner.SetAdapter(recyclerAdapter);
-            if (messages.Count != 0)
+            if (scrollToBottom && messages.Count != 0)
             {
-                recyclerViewInner.ScrollToPosition(messages.Count - 1);
+                ScrollToNewestMessage();
+            }
+        }
+
+        private bool IsNearBottom()
+        {
+            if (recyclerAdapter == null || recyclerAdapter.ItemCount == 0 || recycleLayoutManager == null)
+            {
+                return true;
+            }
+            return recycleLayoutManager.FindLastVisibleItemPosition() >= recyclerAdapter.ItemCount - 2;
+        }
+
+        private void ScrollToNewestMessage()
+        {
+            if (recyclerAdapter?.ItemCount > 0)
+            {
+                recyclerViewInner.ScrollToPosition(recyclerAdapter.ItemCount - 1);
+            }
+            if (newMessagesIndicator != null)
+            {
+                newMessagesIndicator.Visibility = ViewStates.Gone;
             }
         }
 
@@ -301,7 +325,12 @@ namespace Seeker.Messages
             {
                 try
                 {
-                    RebuildMessagesAdapter();
+                    bool shouldAutoScroll = IsNearBottom();
+                    RebuildMessagesAdapter(shouldAutoScroll);
+                    if (!shouldAutoScroll && newMessagesIndicator != null)
+                    {
+                        newMessagesIndicator.Visibility = ViewStates.Visible;
+                    }
                     if (IsResumed)
                     {
                         MessageController.MarkAsRead(Username);

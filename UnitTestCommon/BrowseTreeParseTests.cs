@@ -63,6 +63,10 @@ namespace UnitTestCommon
         }
 
 
+        // These fixtures are intentionally encrypted with the developer-only
+        // SeekerEncryptKey.  They exercise captured real shares, so ordinary
+        // CI must not attempt to decrypt them without that secret.
+        [Category("RealData")]
         [TestCase("RealUser1")]
         [TestCase("RealUser2")]
         public async Task TestRealUserParsingBrowseResponseTestData(string username)

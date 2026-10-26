@@ -16,6 +16,7 @@
     <string name="set_up_sharing">Set up sharing</string>
     <string name="manage_user_list">Manage user list</string>
     <string name="unread_count">{0} unread</string>
+    <string name="new_messages">New messages</string>
     <string name="section_caps_setup">SETUP</string>
     <string name="section_caps_communication">COMMUNICATION</string>
     <string name="section_caps_account">ACCOUNT</string>
@@ -177,6 +178,7 @@
   Download Dialog Buttons
   -->
     <string name="download_folder">Download folder</string>
+    <string name="download_enqueue_summary">Queued {0}; already queued or complete: {1}; unable to queue: {2}</string>
     <string name="download_selected">Download selected</string>
     <string name="close_download_diag">Close</string>
 
@@ -817,6 +819,7 @@
 
     <string name="PermissionErrorShared">Permission error, cannot write (please reselect).</string>
     <string name="FolderNotAccessible">Folder is not accessible (please reselect).</string>
+    <string name="completed_folder_not_available">The completed folder is no longer available. Showing transfers instead.</string>
     <string name="UnknownErrorShared">Unknown error. See dev.</string>
     <string name="MessagesWithUser">Messages with {0}</string>
 

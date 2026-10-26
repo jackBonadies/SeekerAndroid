@@ -2303,7 +2303,6 @@ namespace Seeker
             {
                 if (dlDialogShown)
                 {
-                    dlDialogShown = false; //just in the worst case we dont want to prevent too badly.
                     return;
                 }
                 dlDialogShown = true;
@@ -2333,8 +2332,60 @@ namespace Seeker
                 }
 
                 Logger.Firebase(msg + " showEditDialog" + e.Message);
+                // Show() can fail before the DialogFragment receives a lifecycle callback.
+                // Never leave the one-dialog guard latched in that case.
+                dlDialogShown = false;
                 SeekerApplication.Toaster.ShowToast("Error, please try again: " + msg, ToastLength.Long);
             }
+        }
+
+        /// <summary>
+        /// Fast path for the result-row download action.  The row continues to open the detailed
+        /// chooser; this explicit action queues the complete result folder without an extra tap.
+        /// </summary>
+        public void DownloadResultFolder(int position)
+        {
+            SearchResponse response;
+            try
+            {
+                response = (SearchTabHelper.TextFilter.IsFiltered || AreChipsFiltering() || AreFilterControlsActive())
+                    ? SearchTabHelper.UI_SearchResponses.ElementAt(position)
+                    : SearchTabHelper.SearchResponses.ElementAt(position);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return; // result list changed between bind and tap
+            }
+
+            var files = Common.Browse.BrowseUtils.GetFullFileInfos(
+                response.GetFiles(PreferencesState.HideLockedResultsInSearch));
+            if (files.Length == 0)
+            {
+                SeekerApplication.Toaster.ShowToast(GetString(Resource.String.nothing_to_download), ToastLength.Short);
+                return;
+            }
+
+            SessionService.Instance.RunWithReconnect(() =>
+            {
+                DownloadService.Instance.EnqueueFilesWithSummaryAsync(files, false, response.Username)
+                    .ContinueWith(task =>
+                    {
+                        if (task.IsFaulted)
+                        {
+                            Logger.Firebase("Direct folder download failed: " + task.Exception?.InnerException);
+                            SeekerState.MainActivityRef?.RunOnUiThread(() =>
+                                SeekerApplication.Toaster.ShowToast(GetString(Resource.String.error_), ToastLength.Short));
+                            return;
+                        }
+                        var result = task.Result;
+                        SeekerState.MainActivityRef?.RunOnUiThread(() =>
+                        {
+                            string message = string.Format(GetString(Resource.String.download_enqueue_summary),
+                                result.Queued, result.AlreadyPresent, result.FailedToQueue);
+                            SeekerApplication.Toaster.ShowToast(message, ToastLength.Short);
+                        });
+                    });
+            }, silent: false);
         }
 
         public const int SearchToCloseDuration = 300;

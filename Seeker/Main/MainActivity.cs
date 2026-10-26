@@ -227,97 +227,14 @@ namespace Seeker
             }
             pager.SetCurrentItem(restoredPage, false);
 
-            //this is a relatively safe way that prevents rotates from redoing the intent.
-            bool alreadyHandled = Intent.GetBooleanExtra("ALREADY_HANDLED", false);
-            Intent = Intent.PutExtra("ALREADY_HANDLED", true);
-
-            //A restored activity keeps its saved page; only a fresh launch follows a deep link.
-            if (!reborn && Intent != null)
+            // A restored activity keeps its saved page.  Every *new* intent, however,
+            // goes through the same route as a warm SingleTop delivery.
+            bool alreadyHandled = Intent?.GetBooleanExtra("ALREADY_HANDLED", false) ?? false;
+            if (!reborn && !alreadyHandled)
             {
-                if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
-                {
-                    pager.SetCurrentItem(MainNavigation.TransfersPage, false);
-                }
-                else if (Intent.GetBooleanExtra(FolderAlertExtra, false))
-                {
-                    pager.SetCurrentItem(MainNavigation.TransfersPage, false);
-                }
-                else if (Intent.GetBooleanExtra(GoToAccountExtra, false) && !alreadyHandled) //else every rotation returns to the account tab
-                {
-                    pager.SetCurrentItem(MainNavigation.AccountPage, false);
-                }
-                else if (Intent.GetBooleanExtra(GoToBrowseExtra, false))
-                {
-                    pager.SetCurrentItem(MainNavigation.BrowsePage, false);
-                }
-                else if (Intent.GetBooleanExtra(GoToSearchExtra, false))
-                {
-                    pager.SetCurrentItem(MainNavigation.SearchPage, false);
-                }
-                else if (Intent.GetIntExtra(IntentSearchRoomExtra, -1) == 1)
-                {
-                    pager.SetCurrentItem(MainNavigation.SearchPage, false);
-                }
-                else if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1 && !reborn) //if its not reborn then the OnNewIntent will handle it...
-                {
-                    HandleWishlistIntent();
-                }
-                else if ((Intent.GetBooleanExtra(GoToUploadsForegroundExtra, false) || Intent.GetBooleanExtra(GoToUploadsExtra, false)) && !alreadyHandled) //else every rotation will change Downloads to Uploads.
-                {
-                    HandleFromNotificationUploadIntent();
-                }
-                else if (Intent.GetBooleanExtra(GoToBrowseSelfExtra, false))
-                {
-                    Logger.InfoFirebase("from browse self");
-                    pager.SetCurrentItem(MainNavigation.BrowsePage, false);
-                }
-                else if (SearchSendIntentHelper.IsFromActionSend(Intent) && !reborn) //this will always create a new instance, so if its reborn then its an old intent that we already followed.
-                {
-                    Logger.Debug("MainActivity action send intent");
-                    //give us a new fresh tab if the current one has a search in it...
-                    if (!string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm))
-                    {
-                        Logger.Debug("lets go to a new fresh tab");
-                        int newTabToGoTo = SearchTabHelper.AddSearchTab();
-
-                        Logger.Debug("search fragment null? " + (SearchFragment.Instance == null).ToString());
-
-                        if (SearchFragment.Instance?.IsResumed ?? false)
-                        {
-                            //if resumed is true
-                            SearchFragment.Instance.GoToTab(newTabToGoTo, false, true);
-                        }
-                        else
-                        {
-                            Logger.Debug("we are on the search page but we need to wait for OnResume search frag");
-                            goToSearchTab = newTabToGoTo; //we read this we resume
-                        }
-                    }
-
-                    //go to search tab
-                    Logger.Debug("prev search term: " + SearchDialog.SearchTerm);
-                    SearchDialog.SearchTerm = Intent.GetStringExtra(Intent.ExtraText);
-                    SearchDialog.IsFollowingLink = false;
-                    pager.SetCurrentItem(1, false);
-                    if (SearchSendIntentHelper.TryParseIntent(Intent, out string searchTermFound))
-                    {
-                        //we are done parsing the intent
-                        SearchDialog.SearchTerm = searchTermFound;
-                    }
-                    else if (SearchSendIntentHelper.FollowLinkTaskIfApplicable(Intent))
-                    {
-                        SearchDialog.IsFollowingLink = true;
-                    }
-                    //close previous instance
-                    if (SearchDialog.Instance != null)
-                    {
-                        Logger.Debug("previous instance exists");
-                        //SearchDialog.Instance.Dismiss(); //throws exception, cannot perform this action after onSaveInstanceState
-                    }
-                    var searchDialog = new SearchDialog(SearchDialog.SearchTerm, SearchDialog.IsFollowingLink);
-                    searchDialog.Show(SupportFragmentManager, "Search Dialog");
-                }
+                HandleIncomingIntent(Intent);
             }
+            Intent = Intent?.PutExtra("ALREADY_HANDLED", true);
 
             //Sync the chrome to the landed tab once the pager is laid out. Needed (a) because a deep
             //link above may have moved off home via SetCurrentItem before layout, which ViewPager2
@@ -374,13 +291,13 @@ namespace Seeker
         }
 
 
-        private void HandleWishlistIntent()
+        private void HandleWishlistIntent(Intent incomingIntent)
         {
             Logger.InfoFirebase("is resumed: " + (SearchFragment.Instance?.IsResumed ?? false).ToString());
             Logger.InfoFirebase("from wishlist clicked");
             int currentPage = pager.CurrentItem;
-            int tabID = Intent.GetIntExtra(WishlistController.FromWishlistStringID, int.MaxValue);
-            if (currentPage == 1) //this is the case even if process previously got am state killed.
+            int tabID = incomingIntent.GetIntExtra(WishlistController.FromWishlistStringID, int.MaxValue);
+            if (currentPage == MainNavigation.SearchPage) //this is the case even if process previously got am state killed.
             {
                 Logger.InfoFirebase("from wishlist clicked - current page");
                 if (tabID == int.MaxValue)
@@ -410,8 +327,48 @@ namespace Seeker
                 Logger.InfoFirebase("from wishlist clicked - different page");
                 //when we move to the page, lets move to our tab, if its not the current one..
                 goToSearchTab = tabID; //we read this when we move tab...
-                pager.SetCurrentItem(1, false);
+                pager.SetCurrentItem(MainNavigation.SearchPage, false);
             }
+        }
+
+        private void NavigateToCompletedFolder(string username, string folderName)
+        {
+            pager.SetCurrentItem(MainNavigation.TransfersPage, false);
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(folderName))
+            {
+                return;
+            }
+
+            FolderItem folder = null;
+            var manager = TransferItems.TransferItemManagerDL;
+            lock (manager.AllFolderItems)
+            {
+                folder = manager.AllFolderItems.FirstOrDefault(item =>
+                    item.Username == username && item.FolderName == folderName);
+            }
+
+            if (folder == null)
+            {
+                SeekerApplication.Toaster.ShowToast(GetString(Resource.String.completed_folder_not_available), ToastLength.Long);
+                return;
+            }
+
+            // Folder selection only has meaning in the grouped view.  This is a deliberate
+            // notification destination, so show the completed group rather than a broad list.
+            TransfersViewState.Instance.InUploadsMode = false;
+            TransfersViewState.Instance.BatchSelectedItems.Clear();
+            TransfersViewState.Instance.CurrentlySelectedUploadFolder = null;
+            TransfersViewState.Instance.CurrentlySelectedDLFolder = folder;
+            TransfersViewState.Instance.GroupByFolder = true;
+            PreferencesManager.SaveTransferViewGroupByFolder();
+
+            pager.Post(() =>
+            {
+                StaticHacks.TransfersFrag?.RefreshForModeSwitch();
+                SetTransferSupportActionBarState();
+                InvalidateOptionsMenu();
+                RefreshBackCallbackState();
+            });
         }
 
         public void FallbackFileSelection(int requestCode)
@@ -556,44 +513,74 @@ namespace Seeker
         {
             Logger.Debug("OnNewIntent");
             base.OnNewIntent(intent);
+            Intent = intent;
+            HandleIncomingIntent(intent);
             Intent = intent.PutExtra("ALREADY_HANDLED", true);
-            if (Intent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1)
+        }
+
+        /// <summary>Routes cold-start and warm-start intents identically.</summary>
+        private void HandleIncomingIntent(Intent incomingIntent)
+        {
+            if (incomingIntent == null || pager == null)
             {
-                HandleWishlistIntent();
+                return;
             }
-            else if ((Intent.GetBooleanExtra(GoToUploadsForegroundExtra, false) || Intent.GetBooleanExtra(GoToUploadsExtra, false))) //else every rotation will change Downloads to Uploads.
+
+            if (incomingIntent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
+            {
+                pager.SetCurrentItem(MainNavigation.TransfersPage, false);
+            }
+            else if (incomingIntent.GetBooleanExtra(FolderAlertExtra, false))
+            {
+                NavigateToCompletedFolder(incomingIntent.GetStringExtra(FolderAlertUsernameExtra), incomingIntent.GetStringExtra(FolderAlertFoldernameExtra));
+            }
+            else if (incomingIntent.GetIntExtra(WishlistController.FromWishlistString, -1) == 1)
+            {
+                HandleWishlistIntent(incomingIntent);
+            }
+            else if (incomingIntent.GetBooleanExtra(GoToUploadsForegroundExtra, false) || incomingIntent.GetBooleanExtra(GoToUploadsExtra, false))
             {
                 HandleFromNotificationUploadIntent();
             }
-            else if (Intent.GetBooleanExtra(GoToBrowseSelfExtra, false))
+            else if (incomingIntent.GetBooleanExtra(GoToBrowseSelfExtra, false) || incomingIntent.GetBooleanExtra(GoToBrowseExtra, false))
             {
-                Logger.InfoFirebase("from browse self");
-                pager.SetCurrentItem(3, false);
+                pager.SetCurrentItem(MainNavigation.BrowsePage, false);
             }
-            else if (Intent.GetBooleanExtra(GoToBrowseExtra, false))
+            else if (incomingIntent.GetBooleanExtra(GoToSearchExtra, false) || incomingIntent.GetIntExtra(IntentSearchRoomExtra, -1) == 1)
             {
-                pager.SetCurrentItem(3, false);
+                pager.SetCurrentItem(MainNavigation.SearchPage, false);
             }
-            else if (Intent.GetBooleanExtra(GoToSearchExtra, false))
+            else if (incomingIntent.GetBooleanExtra(GoToAccountExtra, false))
             {
-                //var navigator = SeekerState.MainActivityRef?.FindViewById<BottomNavigationView>(Resource.Id.navigation);
-                //navigator.NavigationItemReselected += Navigator_NavigationItemReselected;
-                //navigator.NavigationItemSelected += Navigator_NavigationItemSelected;
-                //navigator.ViewAttachedToWindow += Navigator_ViewAttachedToWindow;
-                pager.SetCurrentItem(1, false);
+                pager.SetCurrentItem(MainNavigation.AccountPage, false);
             }
-            else if (Intent.GetIntExtra(DownloadForegroundService.FromTransferString, -1) == 2)
+            else if (SearchSendIntentHelper.IsFromActionSend(incomingIntent))
             {
-                pager.SetCurrentItem(2, false);
+                HandleSearchSendIntent(incomingIntent);
             }
-            else if (Intent.GetBooleanExtra(FolderAlertExtra, false))
+        }
+
+        private void HandleSearchSendIntent(Intent incomingIntent)
+        {
+            if (!string.IsNullOrEmpty(SearchTabHelper.LastSearchTerm))
             {
-                pager.SetCurrentItem(2, false);
+                int newTabToGoTo = SearchTabHelper.AddSearchTab();
+                if (SearchFragment.Instance?.IsResumed ?? false)
+                    SearchFragment.Instance.GoToTab(newTabToGoTo, false, true);
+                else
+                    goToSearchTab = newTabToGoTo;
             }
-            else if (Intent.GetBooleanExtra(GoToAccountExtra, false))
-            {
-                pager.SetCurrentItem(0, false);
-            }
+
+            SearchDialog.SearchTerm = incomingIntent.GetStringExtra(Intent.ExtraText);
+            SearchDialog.IsFollowingLink = false;
+            pager.SetCurrentItem(MainNavigation.SearchPage, false);
+            if (SearchSendIntentHelper.TryParseIntent(incomingIntent, out string searchTermFound))
+                SearchDialog.SearchTerm = searchTermFound;
+            else if (SearchSendIntentHelper.FollowLinkTaskIfApplicable(incomingIntent))
+                SearchDialog.IsFollowingLink = true;
+
+            new SearchDialog(SearchDialog.SearchTerm, SearchDialog.IsFollowingLink)
+                .Show(SupportFragmentManager, "Search Dialog");
         }
 
         private void HandleFromNotificationUploadIntent()
@@ -602,7 +589,7 @@ namespace Seeker
 
             Logger.InfoFirebase("from uploads clicked");
             int currentPage = pager.CurrentItem;
-            if (currentPage == 2)
+            if (currentPage == MainNavigation.TransfersPage)
             {
                 if (StaticHacks.TransfersFrag?.Activity == null || (StaticHacks.TransfersFrag?.IsResumed ?? false))
                 {
@@ -619,7 +606,7 @@ namespace Seeker
             else
             {
                 fromNotificationMoveToUploads = true; //we read this in onresume
-                pager.SetCurrentItem(2, false);
+                pager.SetCurrentItem(MainNavigation.TransfersPage, false);
             }
         }
 
@@ -689,7 +676,7 @@ namespace Seeker
             try
             {
                 var pager = (AndroidX.ViewPager2.Widget.ViewPager2)FindViewById(Resource.Id.pager);
-                return pager.CurrentItem == 3;
+                return pager.CurrentItem == MainNavigation.BrowsePage;
             }
             catch
             {
