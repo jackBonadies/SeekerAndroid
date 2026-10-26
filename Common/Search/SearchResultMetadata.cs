@@ -134,38 +134,7 @@ namespace Common.Search
                 first = response.LockedFiles.FirstOrDefault();
             }
 
-            if (first != null)
-            {
-                string path = first.Filename ?? string.Empty;
-                string name = SimpleHelpers.GetFileNameFromFile(path).ToString();
-                string folder = SimpleHelpers.GetFolderNameFromFile(path).ToString();
-                if (meta.IsLockedOnly)
-                {
-                    name = SimpleHelpers.LOCK_EMOJI + name;
-                    folder = SimpleHelpers.LOCK_EMOJI + folder;
-                }
-                meta.FileName = name;
-                meta.FolderName = folder;
-
-                if (first.Size > 0)
-                {
-                    meta.Size = SimpleHelpers.GetHumanReadableSize(first.Size);
-                }
-                if (first.Length.HasValue && first.Length.Value > 0)
-                {
-                    meta.Duration = SimpleHelpers.GetHumanReadableTime(first.Length.Value, true);
-                }
-
-                // The dominant type/quality belongs to the whole group and stays in the format
-                // chip. The row metadata must only describe the representative file itself.
-                meta.DominantFileType = response.GetDominantFileTypeAndBitRate(hideLocked, out _);
-                meta.FormatName = ExtractFormatName(meta.DominantFileType);
-                meta.Bitrate = FormatFileBitrate(first, labels);
-            }
-            else
-            {
-                meta.DominantFileType = string.Empty;
-            }
+            PopulateRepresentativeFile(meta, response, first, hideLocked, labels);
 
             if (response.UploadSpeed > 0)
             {
@@ -224,6 +193,46 @@ namespace Common.Search
                 meta.Summary);
 
             return meta;
+        }
+
+        private static void PopulateRepresentativeFile(
+            SearchResultMetadata meta,
+            SearchResponse response,
+            Soulseek.File first,
+            bool hideLocked,
+            SearchMetadataLabels labels)
+        {
+            if (first == null)
+            {
+                meta.DominantFileType = string.Empty;
+                return;
+            }
+
+            string path = first.Filename ?? string.Empty;
+            string name = SimpleHelpers.GetFileNameFromFile(path).ToString();
+            string folder = SimpleHelpers.GetFolderNameFromFile(path).ToString();
+            if (meta.IsLockedOnly)
+            {
+                name = SimpleHelpers.LOCK_EMOJI + name;
+                folder = SimpleHelpers.LOCK_EMOJI + folder;
+            }
+            meta.FileName = name;
+            meta.FolderName = folder;
+
+            if (first.Size > 0)
+            {
+                meta.Size = SimpleHelpers.GetHumanReadableSize(first.Size);
+            }
+            if (first.Length.HasValue && first.Length.Value > 0)
+            {
+                meta.Duration = SimpleHelpers.GetHumanReadableTime(first.Length.Value, true);
+            }
+
+            // The dominant type/quality belongs to the whole group and stays in the format
+            // chip. The row metadata must only describe the representative file itself.
+            meta.DominantFileType = response.GetDominantFileTypeAndBitRate(hideLocked, out _);
+            meta.FormatName = ExtractFormatName(meta.DominantFileType);
+            meta.Bitrate = FormatFileBitrate(first, labels);
         }
 
         private static string ExtractFormatName(string dominantFileType)

@@ -126,7 +126,7 @@ namespace Seeker
             // Parent chain in the unified XMLs: relativeLayout1 -> horizontal row -> item root (a SearchItemViewUnifiedBase).
             private void UnifiedRowClick(object sender, EventArgs e)
             {
-                if (!TryGetBoundPosition((sender as View).FindAncestor<ISearchItemViewBase>(), out int position))
+                if (!TryGetBoundPosition((sender as View).FindAncestor<ISearchItemViewBase>(), out int boundPosition))
                 {
                     return;
                 }
@@ -137,11 +137,11 @@ namespace Seeker
                 }
                 if (fragment.IsSelectionMode)
                 {
-                    fragment.ToggleSelectionAt(position);
+                    fragment.ToggleSelectionAt(boundPosition);
                 }
                 else
                 {
-                    fragment.DownloadResultFolder(position);
+                    fragment.DownloadResultFolder(boundPosition);
                 }
             }
 
@@ -149,17 +149,17 @@ namespace Seeker
             // dialog stays on the row tap and the dedicated download action.
             private void UnifiedRowLongClick(object sender, View.LongClickEventArgs e)
             {
-                if (!TryGetBoundPosition((sender as View).FindAncestor<ISearchItemViewBase>(), out int position))
+                if (!TryGetBoundPosition((sender as View).FindAncestor<ISearchItemViewBase>(), out int boundPosition))
                 {
                     return;
                 }
                 e.Handled = true;
-                GetSearchFragment()?.EnterSelectionMode(position);
+                GetSearchFragment()?.EnterSelectionMode(boundPosition);
             }
 
             private void UnifiedDownloadClick(object sender, EventArgs e)
             {
-                if (!TryGetBoundPosition((sender as View).FindAncestor<ISearchItemViewBase>(), out int position))
+                if (!TryGetBoundPosition((sender as View).FindAncestor<ISearchItemViewBase>(), out int boundPosition))
                 {
                     return;
                 }
@@ -173,11 +173,11 @@ namespace Seeker
                 // single-result download dialog behind the action mode.
                 if (fragment.IsSelectionMode)
                 {
-                    fragment.ToggleSelectionAt(position);
+                    fragment.ToggleSelectionAt(boundPosition);
                 }
                 else
                 {
-                    fragment.ShowDownloadDialog(position);
+                    fragment.ShowDownloadDialog(boundPosition);
                 }
             }
 
@@ -223,7 +223,7 @@ namespace Seeker
             private void UnifiedChevronClick(object sender, EventArgs e)
             {
                 var itemRoot = (sender as View).FindAncestor<SearchItemViewUnifiedBase>();
-                if (!TryGetBoundPosition(itemRoot, out int position))
+                if (!TryGetBoundPosition(itemRoot, out int boundPosition))
                 {
                     return;
                 }
@@ -233,15 +233,15 @@ namespace Seeker
                 {
                     img.Animate().RotationBy(180f).SetDuration(100).Start();
                     v.Visibility = ViewStates.Visible;
-                    itemRoot.PopulateFiles(this.localDataSet[position]);
+                    itemRoot.PopulateFiles(this.localDataSet[boundPosition]);
                     if (!SearchFragment.ExpandAllResults)
                     {
-                        oppositePositions.Add(position);
+                        oppositePositions.Add(boundPosition);
                         oppositePositions.Sort();
                     }
                     else
                     {
-                        oppositePositions.Remove(position);
+                        oppositePositions.Remove(boundPosition);
                     }
                 }
                 else
@@ -250,11 +250,11 @@ namespace Seeker
                     v.Visibility = ViewStates.Gone;
                     if (!SearchFragment.ExpandAllResults)
                     {
-                        oppositePositions.Remove(position);
+                        oppositePositions.Remove(boundPosition);
                     }
                     else
                     {
-                        oppositePositions.Add(position);
+                        oppositePositions.Add(boundPosition);
                         oppositePositions.Sort();
                     }
                 }

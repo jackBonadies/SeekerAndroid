@@ -2049,15 +2049,21 @@ namespace Seeker
             // TODO: this next part should really just read "update UI from state"
             if (fromTab == SearchTabHelper.CurrentTab)
             {
+                SearchFragment instance = SearchFragment.Instance;
+                if (instance == null)
+                {
+                    return;
+                }
+
                 // A new search replaces the old result set, so old selected identities must go.
-                SearchFragment.Instance?.ClearSelectionAndFinishActionMode();
-                SearchFragment.Instance.ResetFilterControlsUI(false);
+                instance.ClearSelectionAndFinishActionMode();
+                instance.ResetFilterControlsUI(false);
 
-                SearchFragment.Instance.recyclerViewSearch.SetAdapter(SearchFragment.Instance.CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
+                instance.recyclerViewSearch?.SetAdapter(instance.CreateSearchAdapter(SearchTabHelper.CurrentSearchTab, SearchTabHelper.UI_SearchResponses));
 
-                SearchFragment.Instance.RefreshUIChipAdapterFromData();
-                SearchFragment.Instance.UpdateEmptyState();
-                SearchFragment.Instance.NotifySearchHeaderChanged();
+                instance.RefreshUIChipAdapterFromData();
+                instance.UpdateEmptyState();
+                instance.NotifySearchHeaderChanged();
             }
         }
 

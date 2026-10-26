@@ -2665,6 +2665,32 @@ def check_selection_lifecycle_and_actions() -> None:
     check("search.lifecycle",
           "ClearSelectionAndFinishActionMode" in clear_tab,
           "a new search still clears identities that belong to the replaced result set")
+    # Static source contract only (no runtime/nullability claim): ClearTab must read the
+    # static Instance exactly once, snapshot it in a null-guarded local, and route every
+    # UI reset through that local, so no direct Instance.UI access is left in the branch.
+    instance_reads = re.findall(r"\bInstance\b", clear_tab)
+    local_ui_members = (
+        "ClearSelectionAndFinishActionMode",
+        "ResetFilterControlsUI",
+        "recyclerViewSearch",
+        "CreateSearchAdapter",
+        "RefreshUIChipAdapterFromData",
+        "UpdateEmptyState",
+        "NotifySearchHeaderChanged",
+    )
+    missing_local_uses = [
+        member for member in local_ui_members if f"instance.{member}" not in clear_tab
+    ]
+    check("search.lifecycle.static",
+          "SearchFragment instance = SearchFragment.Instance;" in clear_tab
+          and "if (instance == null)" in clear_tab
+          and "instance.recyclerViewSearch?.SetAdapter(" in clear_tab
+          and len(instance_reads) == 1
+          and not missing_local_uses,
+          "static source check (not runtime): ClearTab reads SearchFragment.Instance exactly once "
+          "(no other direct Instance access), null-guards the local snapshot, and resets the UI "
+          f"through that local (got {len(instance_reads)} Instance read(s), "
+          f"local uses missing {missing_local_uses})")
 
     item_views = strip_cs_comments(read(os.path.join(REPO, "Seeker", "Search", "SearchItemViewsUnified.cs")))
     check("search.contextual_download",

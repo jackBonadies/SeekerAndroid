@@ -220,5 +220,63 @@ namespace UnitTestCommon
             Assert.AreEqual(string.Empty, meta.DetailLine);
             Assert.AreEqual(0, meta.FileCount);
         }
+
+        [Test]
+        public void Create_EmptyResponse_ReturnsEmptyMetadata()
+        {
+            var response = MakeResponse(new List<File>());
+
+            var meta = SearchResultMetadata.Create(response, hideLocked: true);
+
+            Assert.AreEqual(string.Empty, meta.FileName);
+            Assert.AreEqual(string.Empty, meta.FolderName);
+            Assert.AreEqual(string.Empty, meta.FormatName);
+            Assert.AreEqual(string.Empty, meta.DominantFileType);
+            Assert.AreEqual(string.Empty, meta.PrimaryText);
+            Assert.AreEqual(string.Empty, meta.SecondaryText);
+            Assert.AreEqual(string.Empty, meta.DetailLine);
+            Assert.AreEqual(0, meta.FileCount);
+            Assert.IsFalse(meta.IsGroup);
+            Assert.IsFalse(meta.IsLockedOnly);
+            Assert.AreEqual("0 files", meta.FileCountText);
+        }
+
+        [Test]
+        public void Create_HiddenLockedOnly_DoesNotFallBackToHiddenFile()
+        {
+            var response = MakeResponse(
+                files: new List<File>(),
+                lockedFiles: new[] { MakeFile(@"@peer\Music\Locked\locked.flac", size: 3 * 1024 * 1024) });
+
+            var meta = SearchResultMetadata.Create(response, hideLocked: true);
+
+            // The locked file is the only result and is hidden, so there is no representative
+            // file to describe. The row still knows it is a locked-only result.
+            Assert.IsTrue(meta.IsLockedOnly);
+            Assert.AreEqual(string.Empty, meta.FileName);
+            Assert.AreEqual(string.Empty, meta.FolderName);
+            Assert.AreEqual(string.Empty, meta.Size);
+            Assert.AreEqual(string.Empty, meta.FormatName);
+            Assert.AreEqual(string.Empty, meta.DominantFileType);
+            Assert.AreEqual(0, meta.FileCount);
+        }
+
+        [Test]
+        public void Create_RepresentativeFallsBackToLockedFileOnlyWhenShown()
+        {
+            var response = MakeResponse(
+                files: new List<File>(),
+                lockedFiles: new[] { MakeFile(@"@peer\Music\Locked\locked.flac", size: 3 * 1024 * 1024, length: 60) });
+
+            var hidden = SearchResultMetadata.Create(response, hideLocked: true);
+            var shown = SearchResultMetadata.Create(response, hideLocked: false);
+
+            Assert.AreEqual(string.Empty, hidden.FileName);
+            Assert.IsTrue(shown.IsLockedOnly);
+            Assert.IsTrue(shown.FileName.EndsWith("locked.flac"));
+            Assert.IsTrue(shown.FileName.StartsWith(SimpleHelpers.LOCK_EMOJI));
+            Assert.AreEqual("3 MB", shown.Size);
+            Assert.AreEqual("1m 0s", shown.Duration);
+        }
     }
 }
