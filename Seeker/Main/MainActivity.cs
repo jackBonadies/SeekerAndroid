@@ -29,6 +29,7 @@ using AndroidX.Activity;
 using AndroidX.Core.App;
 using AndroidX.Core.Content;
 using AndroidX.DocumentFile.Provider;
+using AndroidX.DrawerLayout.Widget;
 using AndroidX.Lifecycle;
 using Common;
 using Google.Android.Material.BottomNavigation;
@@ -132,6 +133,7 @@ namespace Seeker
         public const int SETTINGS_EXTERNAL = 0x430;
 
         private AndroidX.ViewPager2.Widget.ViewPager2 pager = null;
+        private DrawerLayout navigationDrawer = null;
 
 
 
@@ -178,6 +180,8 @@ namespace Seeker
             base.OnCreate(savedInstanceState);
             //System.Threading.Thread.CurrentThread.Name = "Main Activity Thread";
             SetContentView(Resource.Layout.activity_main);
+            navigationDrawer = FindViewById<DrawerLayout>(Resource.Id.navigationDrawer);
+            InitializeNavigationDrawer();
 
             // in horizontal mode this prevents content under the 3-button navigation bar
             AndroidX.Core.View.ViewCompat.SetOnApplyWindowInsetsListener(

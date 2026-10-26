@@ -1,8 +1,9 @@
 using Android.Content;
 using Android.Widget;
+using Android.Views;
+using AndroidX.Core.View;
 using Common;
 using Google.Android.Material.BottomNavigation;
-using Seeker.Helpers.ActionSheet;
 using Seeker.Messages;
 using System;
 
@@ -80,85 +81,38 @@ namespace Seeker
         }
 
         /// <summary>
-        /// Secondary navigation. Account/login, Users, Wishlist, Chatrooms, Settings,
-        /// About and Shutdown all live here now that Account is not a bottom-nav tab.
-        /// Built on the existing ActionSheet primitive.
+        /// Secondary navigation lives in the app's left drawer.  Keeping it out of a bottom
+        /// sheet makes the hamburger behave like standard Android navigation.
         /// </summary>
         private void ShowSecondaryNavigationSheet()
         {
-            var config = new ActionSheetConfig();
+            navigationDrawer?.OpenDrawer(GravityCompat.Start);
+        }
 
-            var account = new ActionSheetSection { HeaderText = GetString(Resource.String.section_caps_account) };
-            account.Rows.Add(new ActionSheetRow
+        private void InitializeNavigationDrawer()
+        {
+            BindDrawerItem(Resource.Id.drawerAccount, GoToAccountPage);
+            BindDrawerItem(Resource.Id.drawerUsers, () => StartActivityForResult(new Intent(this, typeof(UserListActivity)), 141));
+            BindDrawerItem(Resource.Id.drawerWishlist, GoToWishlist);
+            BindDrawerItem(Resource.Id.drawerChatrooms, () => StartActivityForResult(new Intent(this, typeof(ChatroomActivity)), 143));
+            BindDrawerItem(Resource.Id.drawerSettings, () => StartActivityForResult(new Intent(this, typeof(SettingsActivity)), 140));
+            BindDrawerItem(Resource.Id.drawerAbout, () => Seeker.Settings.Rows.AboutBottomSheet.Show(this));
+            BindDrawerItem(Resource.Id.drawerShutdown, () =>
             {
-                IconResId = Resource.Drawable.folder_account_outline,
-                Label = GetString(Resource.String.nav_account),
-                OnClick = GoToAccountPage,
+                var intent = new Intent(this, typeof(CloseActivity));
+                intent.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
+                StartActivity(intent);
+                FinishAndRemoveTask();
             });
-            account.Rows.Add(new ActionSheetRow
-            {
-                IconResId = Resource.Drawable.baseline_group_white_24,
-                Label = GetString(Resource.String.target_user_list),
-                OnClick = () =>
-                {
-                    Intent intent = new Intent(this, typeof(UserListActivity));
-                    StartActivityForResult(intent, 141);
-                },
-            });
-            account.Rows.Add(new ActionSheetRow
-            {
-                IconResId = Resource.Drawable.schedule_clock_wishlist,
-                Label = GetString(Resource.String.wishlist),
-                OnClick = GoToWishlist,
-            });
-            config.Sections.Add(account);
+        }
 
-            var communication = new ActionSheetSection { HeaderText = GetString(Resource.String.section_caps_communication) };
-            communication.Rows.Add(new ActionSheetRow
+        private void BindDrawerItem(int viewId, Action action)
+        {
+            FindViewById<View>(viewId)?.Click += (sender, args) =>
             {
-                IconResId = Resource.Drawable.outline_forum_white_24,
-                Label = GetString(Resource.String.chatrooms),
-                OnClick = () =>
-                {
-                    Intent intent = new Intent(this, typeof(ChatroomActivity));
-                    StartActivityForResult(intent, 143);
-                },
-            });
-            config.Sections.Add(communication);
-
-            var setup = new ActionSheetSection { HeaderText = GetString(Resource.String.section_caps_setup) };
-            setup.Rows.Add(new ActionSheetRow
-            {
-                IconResId = Resource.Drawable.baseline_settings_white_24,
-                Label = GetString(Resource.String.settings),
-                OnClick = () =>
-                {
-                    Intent intent = new Intent(this, typeof(SettingsActivity));
-                    StartActivityForResult(intent, 140);
-                },
-            });
-            setup.Rows.Add(new ActionSheetRow
-            {
-                IconResId = Resource.Drawable.information_outline,
-                Label = GetString(Resource.String.about_title),
-                OnClick = () => Seeker.Settings.Rows.AboutBottomSheet.Show(this),
-            });
-            setup.Rows.Add(new ActionSheetRow
-            {
-                Destructive = true,
-                IconResId = Resource.Drawable.power_settings_new_28dp,
-                Label = GetString(Resource.String.shutdown),
-                OnClick = () =>
-                {
-                    Intent intent = new Intent(this, typeof(CloseActivity));
-                    intent.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
-                    StartActivity(intent);
-                    FinishAndRemoveTask();
-                },
-            });
-            config.Sections.Add(setup);
-
-            UiHelpers.ShowActionSheetDialogSafe(SupportFragmentManager, config);
+                navigationDrawer?.CloseDrawer(GravityCompat.Start);
+                action();
+            };
         }
 
         private void GoToAccountPage()

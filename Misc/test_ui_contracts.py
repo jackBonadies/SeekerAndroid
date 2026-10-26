@@ -954,16 +954,18 @@ def check_navigation_shell() -> None:
     )
 
     navigation = strip_cs_comments(read(os.path.join(REPO, "Seeker", "Main", "MainActivity.Navigation.cs")))
+    main_layout = read(os.path.join(RES, "layout", "activity_main.xml"))
     check(
-        "nav.secondary_sheet",
-        "ShowSecondaryNavigationSheet" in navigation and "ActionSheetConfig" in navigation,
-        "secondary navigation is built on the existing ActionSheet primitive",
+        "nav.secondary_drawer",
+        "navigationDrawer?.OpenDrawer(GravityCompat.Start)" in navigation
+        and "androidx.drawerlayout.widget.DrawerLayout" in main_layout,
+        "secondary navigation opens as a left drawer from the hamburger",
     )
-    for symbol in ("target_user_list", "wishlist", "chatrooms", "settings", "about_title", "shutdown", "nav_account"):
+    for symbol in ("drawerUsers", "drawerWishlist", "drawerChatrooms", "drawerSettings", "drawerAbout", "drawerShutdown", "drawerAccount"):
         check(
             "nav.preserved",
-            f"Resource.String.{symbol}" in navigation,
-            f"secondary navigation preserves {symbol}",
+            f"@+id/{symbol}" in main_layout,
+            f"drawer preserves {symbol}",
         )
 
     shell_menu = ET.parse(os.path.join(RES, "menu", "shell_menu.xml")).getroot()

@@ -1,12 +1,17 @@
-<RelativeLayout
+<androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_root"
+    android:id="@+id/navigationDrawer"
     android:layout_width="match_parent"
     android:background="?attr/pseudo_window_background_color"
     android:layout_height="match_parent"
 >
+<RelativeLayout
+    android:id="@+id/main_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/pseudo_window_background_color">
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbarLayout"
         android:layout_width="match_parent"
@@ -67,3 +72,38 @@
         />
     </RelativeLayout>
 </RelativeLayout>
+
+    <ScrollView
+        android:id="@+id/navigationDrawerContent"
+        android:layout_width="320dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="?attr/colorSurface"
+        android:fitsSystemWindows="true">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="24dp"
+            android:paddingBottom="24dp">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="8dp"
+                android:text="@string/section_caps_account"
+                android:textColor="?attr/cellTextColorSubdued"
+                android:textStyle="bold" />
+            <TextView android:id="@+id/drawerAccount" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingStart="24dp" android:paddingEnd="24dp" android:background="?attr/selectableItemBackground" android:text="@string/nav_account" android:textColor="?attr/normalTextColor" />
+            <TextView android:id="@+id/drawerUsers" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingStart="24dp" android:paddingEnd="24dp" android:background="?attr/selectableItemBackground" android:text="@string/target_user_list" android:textColor="?attr/normalTextColor" />
+            <TextView android:id="@+id/drawerWishlist" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingStart="24dp" android:paddingEnd="24dp" android:background="?attr/selectableItemBackground" android:text="@string/wishlist" android:textColor="?attr/normalTextColor" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="24dp" android:paddingEnd="24dp" android:paddingTop="16dp" android:paddingBottom="8dp" android:text="@string/section_caps_communication" android:textColor="?attr/cellTextColorSubdued" android:textStyle="bold" />
+            <TextView android:id="@+id/drawerChatrooms" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingStart="24dp" android:paddingEnd="24dp" android:background="?attr/selectableItemBackground" android:text="@string/chatrooms" android:textColor="?attr/normalTextColor" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingStart="24dp" android:paddingEnd="24dp" android:paddingTop="16dp" android:paddingBottom="8dp" android:text="@string/section_caps_setup" android:textColor="?attr/cellTextColorSubdued" android:textStyle="bold" />
+            <TextView android:id="@+id/drawerSettings" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingStart="24dp" android:paddingEnd="24dp" android:background="?attr/selectableItemBackground" android:text="@string/settings" android:textColor="?attr/normalTextColor" />
+            <TextView android:id="@+id/drawerAbout" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingStart="24dp" android:paddingEnd="24dp" android:background="?attr/selectableItemBackground" android:text="@string/about_title" android:textColor="?attr/normalTextColor" />
+            <TextView android:id="@+id/drawerShutdown" android:layout_width="match_parent" android:layout_height="56dp" android:gravity="center_vertical" android:paddingStart="24dp" android:paddingEnd="24dp" android:background="?attr/selectableItemBackground" android:text="@string/shutdown" android:textColor="?attr/colorError" />
+        </LinearLayout>
+    </ScrollView>
+</androidx.drawerlayout.widget.DrawerLayout>
