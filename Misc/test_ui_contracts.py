@@ -980,6 +980,13 @@ def check_navigation_shell() -> None:
         and "MenuInflater.Inflate(Resource.Menu.shell_menu, menu)" not in activity,
         "global navigation uses the left hamburger rather than a second toolbar overflow",
     )
+    login = strip_cs_comments(read(os.path.join(REPO, "Seeker", "Login", "LoginFragment.cs")))
+    check(
+        "nav.account_menu_isolated",
+        "bool accountIsVisible = pager?.CurrentItem == MainNavigation.AccountPage" in login
+        and "menu.FindItem(itemId)?.SetVisible(accountIsVisible)" in login,
+        "the account menu cannot contribute overflow items outside the account destination",
+    )
 
     messages = strip_cs_comments(read(os.path.join(REPO, "Seeker", "Messages", "MessagesOverviewFragment.cs")))
     check(

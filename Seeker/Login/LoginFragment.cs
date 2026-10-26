@@ -76,6 +76,29 @@ namespace Seeker
             base.OnCreateOptionsMenu(menu, inflater);
         }
 
+        public override void OnPrepareOptionsMenu(IMenu menu)
+        {
+            // ViewPager keeps every root fragment alive.  Android may therefore aggregate this
+            // fragment's legacy menu even while Search is visible; never let Account's overflow
+            // leak into another destination.
+            var pager = Activity?.FindViewById<AndroidX.ViewPager2.Widget.ViewPager2>(Resource.Id.pager);
+            bool accountIsVisible = pager?.CurrentItem == MainNavigation.AccountPage;
+            int[] accountMenuItems =
+            {
+                Resource.Id.user_list_action,
+                Resource.Id.messages_action,
+                Resource.Id.chatroom_action,
+                Resource.Id.settings_action,
+                Resource.Id.shutdown_action,
+                Resource.Id.about_action,
+            };
+            foreach (int itemId in accountMenuItems)
+            {
+                menu.FindItem(itemId)?.SetVisible(accountIsVisible);
+            }
+            base.OnPrepareOptionsMenu(menu);
+        }
+
         public override void OnResume()
         {
             base.OnResume();
