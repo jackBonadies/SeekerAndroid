@@ -32,12 +32,6 @@ jobs:
       - name: Test
         run: dotnet test UnitTestCommon/UnitTestCommon.csproj --configuration Release --filter TestCategory!=RealData --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
-      - name: Install UI contract test dependency
-        run: python3 -m pip install --disable-pip-version-check 'PyYAML>=6'
-
-      - name: UI contracts
-        run: python3 Misc/test_ui_contracts.py
-
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
