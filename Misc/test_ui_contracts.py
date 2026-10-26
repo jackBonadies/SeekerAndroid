@@ -980,6 +980,12 @@ def check_navigation_shell() -> None:
         and "MenuInflater.Inflate(Resource.Menu.shell_menu, menu)" not in activity,
         "global navigation uses the left hamburger rather than a second toolbar overflow",
     )
+    shell_icon = read(os.path.join(RES, "drawable", "ds_ic_shell_menu.xml"))
+    check(
+        "nav.hamburger_icon",
+        "M3,6h18v2H3zM3,11h18v2H3zM3,16h18v2H3z" in shell_icon,
+        "global navigation uses a three-line hamburger icon, not a vertical overflow icon",
+    )
     login = strip_cs_comments(read(os.path.join(REPO, "Seeker", "Login", "LoginFragment.cs")))
     check(
         "nav.account_menu_isolated",
