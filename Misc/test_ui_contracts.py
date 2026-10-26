@@ -973,6 +973,11 @@ def check_navigation_shell() -> None:
         shell_ids == ["action_shell_menu"],
         f"toolbar exposes the secondary navigation entry (got {shell_ids})",
     )
+    check(
+        "nav.search_single_overflow",
+        "shellMenu.SetVisible(pager?.CurrentItem != MainNavigation.SearchPage)" in activity,
+        "Search hides the shell/account menu so its own overflow is the only three-dot menu",
+    )
 
     messages = strip_cs_comments(read(os.path.join(REPO, "Seeker", "Messages", "MessagesOverviewFragment.cs")))
     check(

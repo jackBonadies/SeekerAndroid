@@ -1221,10 +1221,22 @@ namespace Seeker
 
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
-            // The shell menu is always available, including on Search where the toolbar
-            // uses a custom view for the search field.
+            // Search owns the toolbar overflow for filters, sort, target and wishlist actions.
+            // Keeping this separate shell entry visible there creates two indistinguishable
+            // three-dot menus. Account remains reachable from the shell menu on the other
+            // primary destinations (and from notification/deep-link routing).
             MenuInflater.Inflate(Resource.Menu.shell_menu, menu);
             return base.OnCreateOptionsMenu(menu);
+        }
+
+        public override bool OnPrepareOptionsMenu(IMenu menu)
+        {
+            var shellMenu = menu?.FindItem(Resource.Id.action_shell_menu);
+            if (shellMenu != null)
+            {
+                shellMenu.SetVisible(pager?.CurrentItem != MainNavigation.SearchPage);
+            }
+            return base.OnPrepareOptionsMenu(menu);
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
