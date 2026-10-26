@@ -614,6 +614,19 @@ namespace Seeker
         {
             switch (item.ItemId)
             {
+                case Android.Resource.Id.Home:
+                    // At a root destination this is the app's global hamburger.  Once a
+                    // folder/breadcrumb is open the same position returns to the standard
+                    // Android Up affordance instead.
+                    if (backPressedCallback?.Enabled ?? false)
+                    {
+                        onBackPressedAction(backPressedCallback);
+                    }
+                    else
+                    {
+                        ShowSecondaryNavigationSheet();
+                    }
+                    return true;
                 case Resource.Id.action_shell_menu:
                     ShowSecondaryNavigationSheet();
                     return true;
@@ -1122,8 +1135,7 @@ namespace Seeker
                     this.SupportActionBar.SubtitleFormatted = null;
                     break;
                 case MainNavigation.SearchPage:
-                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
-                    this.SupportActionBar.SetHomeButtonEnabled(false);
+                    ShowHamburgerNavigation();
 
                     this.SupportActionBar.SetDisplayShowCustomEnabled(true);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(false);
@@ -1150,16 +1162,21 @@ namespace Seeker
                     SetTransferSupportActionBarState();
                     break;
                 case MainNavigation.BrowsePage:
-                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
-                    this.SupportActionBar.SetHomeButtonEnabled(false);
+                    if (BrowseFragment.Instance?.HasBackStackToConsume() ?? false)
+                    {
+                        ShowUpNavigation();
+                    }
+                    else
+                    {
+                        ShowHamburgerNavigation();
+                    }
 
                     this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
                     BrowseFragment.SetActionBarTitle();
                     break;
                 case MainNavigation.MessagesPage:
-                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
-                    this.SupportActionBar.SetHomeButtonEnabled(false);
+                    ShowHamburgerNavigation();
 
                     this.SupportActionBar.SetDisplayShowCustomEnabled(false);
                     this.SupportActionBar.SetDisplayShowTitleEnabled(true);
@@ -1178,15 +1195,13 @@ namespace Seeker
                 {
                     this.SupportActionBar.Title = this.GetString(Resource.String.Uploads);
                     this.SupportActionBar.SubtitleFormatted = null;
-                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
-                    this.SupportActionBar.SetHomeButtonEnabled(false);
+                    ShowHamburgerNavigation();
                 }
                 else
                 {
                     this.SupportActionBar.Title = TransfersViewState.Instance.CurrentlySelectedUploadFolder.GetDisplayFolderName();
                     this.SupportActionBar.SubtitleFormatted = GetFolderSubtitle(TransfersViewState.Instance.CurrentlySelectedUploadFolder);
-                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
-                    this.SupportActionBar.SetHomeButtonEnabled(true);
+                    ShowUpNavigation();
                 }
             }
             else
@@ -1195,15 +1210,13 @@ namespace Seeker
                 {
                     this.SupportActionBar.Title = this.GetString(Resource.String.Downloads);
                     this.SupportActionBar.SubtitleFormatted = null;
-                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(false);
-                    this.SupportActionBar.SetHomeButtonEnabled(false);
+                    ShowHamburgerNavigation();
                 }
                 else
                 {
                     this.SupportActionBar.Title = TransfersViewState.Instance.CurrentlySelectedDLFolder.GetDisplayFolderName();
                     this.SupportActionBar.SubtitleFormatted = GetFolderSubtitle(TransfersViewState.Instance.CurrentlySelectedDLFolder);
-                    this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
-                    this.SupportActionBar.SetHomeButtonEnabled(true);
+                    ShowUpNavigation();
                 }
             }
         }
@@ -1221,22 +1234,23 @@ namespace Seeker
 
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
-            // Search owns the toolbar overflow for filters, sort, target and wishlist actions.
-            // Keeping this separate shell entry visible there creates two indistinguishable
-            // three-dot menus. Account remains reachable from the shell menu on the other
-            // primary destinations (and from notification/deep-link routing).
-            MenuInflater.Inflate(Resource.Menu.shell_menu, menu);
+            // Global navigation is the left hamburger, never a second three-dot menu.
+            // Destination fragments own any contextual overflow actions.
             return base.OnCreateOptionsMenu(menu);
         }
 
-        public override bool OnPrepareOptionsMenu(IMenu menu)
+        private void ShowHamburgerNavigation()
         {
-            var shellMenu = menu?.FindItem(Resource.Id.action_shell_menu);
-            if (shellMenu != null)
-            {
-                shellMenu.SetVisible(pager?.CurrentItem != MainNavigation.SearchPage);
-            }
-            return base.OnPrepareOptionsMenu(menu);
+            SupportActionBar.SetHomeAsUpIndicator(Resource.Drawable.ds_ic_shell_menu);
+            SupportActionBar.SetDisplayHomeAsUpEnabled(true);
+            SupportActionBar.SetHomeButtonEnabled(true);
+        }
+
+        private void ShowUpNavigation()
+        {
+            SupportActionBar.SetHomeAsUpIndicator(0);
+            SupportActionBar.SetDisplayHomeAsUpEnabled(true);
+            SupportActionBar.SetHomeButtonEnabled(true);
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)

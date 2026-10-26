@@ -10,6 +10,7 @@
 - Downloads/uploads mode switching clears incompatible folder/batch/action-mode state.
 - Chatroom filters restore both filter state and visible query. Messaging preserves reading position for new messages and exposes an indicator; user-list updates ignore absent rows.
 - Encrypted fixture tests are correctly marked `RealData`; CI runs the UI contract suite.
+- Global account/users/wishlist/chat/settings navigation now uses a left hamburger at root destinations; the redundant shell three-dot menu is no longer inflated.
 
 ## Files affected
 

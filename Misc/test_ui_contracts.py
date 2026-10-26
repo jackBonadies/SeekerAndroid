@@ -974,9 +974,11 @@ def check_navigation_shell() -> None:
         f"toolbar exposes the secondary navigation entry (got {shell_ids})",
     )
     check(
-        "nav.search_single_overflow",
-        "shellMenu.SetVisible(pager?.CurrentItem != MainNavigation.SearchPage)" in activity,
-        "Search hides the shell/account menu so its own overflow is the only three-dot menu",
+        "nav.global_hamburger",
+        "ShowHamburgerNavigation" in activity
+        and "SetHomeAsUpIndicator(Resource.Drawable.ds_ic_shell_menu)" in activity
+        and "MenuInflater.Inflate(Resource.Menu.shell_menu, menu)" not in activity,
+        "global navigation uses the left hamburger rather than a second toolbar overflow",
     )
 
     messages = strip_cs_comments(read(os.path.join(REPO, "Seeker", "Messages", "MessagesOverviewFragment.cs")))
