@@ -80,17 +80,6 @@
 
         <item name="searchHeaderBackground">@android:color/transparent</item>
 
-        <item name="the_rounded_corner_background_drawable">
-            @drawable/rounded_corner_background_light
-        </item>
-        <item name="the_rounded_corner_dialog_background_drawable">
-            @drawable/rounded_corner_dialog_background_light
-        </item>
-        <item
-            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
-        >
-            ?attr/the_rounded_corner_dialog_background_drawable
-        </item>
 		<item name="actionModeStyle">@style/MyActionMode</item>
 
         <item name="navItemSelectedColor">#ffffff</item>
@@ -256,18 +245,6 @@
         <item name="settingsDividerColor">#595959</item>
         <item name="linkDividerColor">#70595959</item>
 
-        <item name="the_rounded_corner_background_drawable">
-            @drawable/rounded_corner_background_dark
-        </item>
-        <item name="the_rounded_corner_dialog_background_drawable">
-            @drawable/rounded_corner_dialog_background_dark
-        </item>
-        <item
-            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
-        >
-            ?attr/the_rounded_corner_dialog_background_drawable
-        </item>
-
         <item name="expandableModernChevronBg">#00424242</item>
         <item name="expandableModernFilesBg">#3A3A3A</item>
         <item name="expandableModernSeparatorColor">#18FFFFFF</item>
@@ -371,11 +348,6 @@
         <item name="mainTextColorHinted">#dddddd</item>
         <item name="mainTextColorHintedFlair">#dddddd</item>
         <item name="slskAccent">#2A4C6D</item>
-        <item
-            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
-        >
-            @drawable/rounded_corner_dialog_background_dark_303030
-        </item>
 
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#202124</item>
@@ -433,17 +405,6 @@
         <item name="cellTextColorMoreSubdued">#aaE4E4E4</item>
         <item name="cellTextColorVerySubdued">#a0E4E4E4</item>
 
-        <item name="the_rounded_corner_background_drawable">
-            @drawable/rounded_corner_background_dark_amoled
-        </item>
-        <item name="the_rounded_corner_dialog_background_drawable">
-            @drawable/rounded_corner_dialog_background_dark_amoled
-        </item>
-        <item
-            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
-        >
-            ?attr/the_rounded_corner_dialog_background_drawable
-        </item>
         <!--<item name="dialogBackground">#52000000</item>-->
         <item name="searchTabPillInactiveColor">#303030</item>
 

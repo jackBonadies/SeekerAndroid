@@ -64,7 +64,7 @@
                 android:layout_weight="1"
                 android:id="@+id/editTextBio"
                 android:padding="6dp"
-                android:background="?the_rounded_corner_background_drawable"
+                android:background="@drawable/rounded_corner_background"
                 android:layout_marginBottom="12dp"
             />
 
@@ -87,7 +87,7 @@
                 android:id="@+id/user_info_picture_textview"
                 android:padding="6dp"
                 android:textColor="?attr/normalTextColor"
-                android:background="?the_rounded_corner_background_drawable"
+                android:background="@drawable/rounded_corner_background"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="6dp"
             />
