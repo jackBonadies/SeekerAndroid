@@ -40,18 +40,9 @@ namespace Seeker
                 {
                     ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.BindingAdapterPosition);
                 }
-            }
-
-            protected void TransferAdapterRecyclerVersion_LongClick(object sender, View.LongClickEventArgs e)
-            {
-                if (!IsInBatchSelectMode)
-                {
-                    setSelectedItem((sender as ITransferItemView).InnerTransferItem);
-                    (sender as View).ShowContextMenu();
-                }
                 else
                 {
-                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.BindingAdapterPosition);
+                    ShowItemContextMenu(sender as View);
                 }
             }
 
@@ -71,10 +62,21 @@ namespace Seeker
 
             public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
             {
-                ITransferItemView view = TransferItemViewFolder.Create(parent, this.showSizes, this.showSpeed, this.showTimeRemaining);
-                (view as View).Click += TransferAdapterRecyclerFolderItem_Click;
-                (view as View).LongClick += TransferAdapterRecyclerVersion_LongClick;
-                return new TransferViewHolder(view as View);
+                TransferItemViewFolder view = TransferItemViewFolder.Create(parent, this.showSizes, this.showSpeed, this.showTimeRemaining);
+                view.Click += TransferAdapterRecyclerFolderItem_Click;
+                view.LongClick += TransferAdapterRecyclerVersion_LongClick;
+                view.FolderIndicator.Click += (sender, e) =>
+                {
+                    if (IsInBatchSelectMode)
+                    {
+                        ToggleItemBatchSelect(this, view.ViewHolder.BindingAdapterPosition);
+                    }
+                    else
+                    {
+                        ShowItemContextMenu(view);
+                    }
+                };
+                return new TransferViewHolder(view);
             }
 
             private void TransferAdapterRecyclerFolderItem_Click(object sender, EventArgs e)
@@ -101,19 +103,6 @@ namespace Seeker
                     SeekerState.MainActivityRef.SetTransferSupportActionBarState();
                     SeekerState.MainActivityRef.InvalidateOptionsMenu();
                     SeekerState.MainActivityRef.RefreshBackCallbackState();
-                }
-            }
-
-            protected void TransferAdapterRecyclerVersion_LongClick(object sender, View.LongClickEventArgs e)
-            {
-                if (IsInBatchSelectMode)
-                {
-                    ToggleItemBatchSelect(this, (sender as ITransferItemView).ViewHolder.BindingAdapterPosition);
-                }
-                else
-                {
-                    setSelectedItem((sender as ITransferItemView).InnerTransferItem);
-                    (sender as View).ShowContextMenu();
                 }
             }
 
@@ -154,6 +143,29 @@ namespace Seeker
                 return this.selectedItem;
             }
 
+            protected void ShowItemContextMenu(View rowView)
+            {
+                setSelectedItem((rowView as ITransferItemView).InnerTransferItem);
+                rowView.ShowContextMenu();
+            }
+
+            protected void TransferAdapterRecyclerVersion_LongClick(object sender, View.LongClickEventArgs e)
+            {
+                int position = (sender as ITransferItemView).ViewHolder.BindingAdapterPosition;
+                if (position == RecyclerView.NoPosition)
+                {
+                    return;
+                }
+                if (IsInBatchSelectMode)
+                {
+                    ToggleItemBatchSelect(this, position);
+                }
+                else
+                {
+                    TransfersFragment.EnterBatchSelect(position);
+                }
+            }
+
             protected readonly bool showSpeed = false;
             protected readonly bool showSizes = false;
             protected readonly bool showTimeRemaining = false;
@@ -188,7 +200,6 @@ namespace Seeker
             RetryFailedFiles = 102,
             AbortUpload = 103,
             IgnoreUnshareUser = 104,
-            BatchSelect = 105,
         }
 
         public const int UNIQUE_TRANSFER_GROUP_ID = 303;
@@ -403,7 +414,6 @@ namespace Seeker
                 {
                     menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.IgnoreUnshareUser, 6, Resource.String.IgnoreUnshareUser);
                 }
-                menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.BatchSelect, 16, Resource.String.BatchSelect);
             }
         }
     }

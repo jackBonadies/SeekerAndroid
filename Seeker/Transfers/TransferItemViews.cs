@@ -76,6 +76,7 @@ namespace Seeker
         private TextView viewTimeRemainingSeparator;
         private ImageView selectionCheckbox;
         private FrameLayout actionContainer;
+        public ImageView FolderIndicator;
 
         public ITransferItem InnerTransferItem { get; set; }
         //private TextView viewQueue;
@@ -172,6 +173,7 @@ namespace Seeker
 
             selectionCheckbox = FindViewById<ImageView>(Resource.Id.selectionCheckbox);
             actionContainer = FindViewById<FrameLayout>(Resource.Id.actionContainer);
+            FolderIndicator = FindViewById<ImageView>(Resource.Id.folderIndicator);
 
             if (OperatingSystem.IsAndroidVersionAtLeast(28))
             {
@@ -220,7 +222,7 @@ namespace Seeker
 
             if (isInBatchMode)
             {
-                actionContainer.Visibility = ViewStates.Visible;
+                FolderIndicator.Visibility = ViewStates.Invisible;
                 selectionCheckbox.Visibility = ViewStates.Visible;
                 bool isSelected = TransfersViewState.Instance.BatchSelectedItems.Contains(item);
                 selectionCheckbox.SetImageResource(isSelected ? Resource.Drawable.check_circle : Resource.Drawable.check_circle_outline);
@@ -228,7 +230,7 @@ namespace Seeker
             }
             else
             {
-                actionContainer.Visibility = ViewStates.Gone;
+                FolderIndicator.Visibility = ViewStates.Visible;
                 selectionCheckbox.Visibility = ViewStates.Invisible;
                 this.Background = null;
             }

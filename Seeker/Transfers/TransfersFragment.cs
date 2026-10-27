@@ -875,17 +875,23 @@ namespace Seeker
                         }
                         UserListService.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, ti.GetUsername());
                         break;
-                    case TransferContextMenuItem.BatchSelect: //batch selection mode
-                        TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
-                        ForceOutIfZeroSelected = true;
-                        TransfersActionMode = SeekerState.MainActivityRef.StartSupportActionMode(TransfersActionModeCallback);
-                        recyclerTransferAdapter.IsInBatchSelectMode = true;
-                        recyclerTransferAdapter.NotifyDataSetChanged();
-                        ToggleItemBatchSelect(recyclerTransferAdapter, position);
-                        break;
                 }
             }
             return base.OnContextItemSelected(item);
+        }
+
+        public void EnterBatchSelect(int position)
+        {
+            if (TransfersActionMode != null)
+            {
+                return;
+            }
+            TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
+            ForceOutIfZeroSelected = true;
+            TransfersActionMode = SeekerState.MainActivityRef.StartSupportActionMode(TransfersActionModeCallback);
+            recyclerTransferAdapter.IsInBatchSelectMode = true;
+            recyclerTransferAdapter.NotifyDataSetChanged();
+            ToggleItemBatchSelect(recyclerTransferAdapter, position);
         }
 
         public static bool ForceOutIfZeroSelected = true;
