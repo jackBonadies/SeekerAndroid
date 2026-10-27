@@ -269,6 +269,15 @@
         <item name="searchHeaderBackground">#120f08</item>
     </style>
 
+    <style name="DefaultDark_Modern" parent="DefaultDark">
+        <!--<item name="appBarColor">#221e17</item>-->
+        <item name="appBarColor">#1d1c2a</item>
+        <item name="whitePurpleForNavBar">#3d4170</item>
+        <!--<item name="mainPurple">#3b417f</item>-->
+		<!-- a bit brighter for dark mode -->
+        <item name="mainPurple">#5C67E6</item>
+    </style>
+
     <style name="DefaultDark_Blue" parent="DefaultDark">
         <item name="colorPrimary">#86b2cb</item>
         <item name="mainPurple">#126291</item>

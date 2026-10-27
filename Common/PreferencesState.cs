@@ -70,7 +70,7 @@ namespace Common
 
         // UI / Theme
         public static int DayNightMode = -1; // AppCompatDelegate.ModeNightFollowSystem
-        public static NightThemeType NightModeVariant = NightThemeType.ClassicPurple;
+        public static NightThemeType NightModeVariant = NightThemeType.Modern;
         public static DayThemeType DayModeVariant = DayThemeType.ClassicPurple;
         public static bool LegacyLanguageMigrated = false;
         public static string Language = FieldLangAuto;

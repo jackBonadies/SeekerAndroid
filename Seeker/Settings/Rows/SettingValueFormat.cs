@@ -128,6 +128,7 @@ namespace Seeker.Settings.Rows
             NightThemeType.Red => ctx.GetString(Resource.String.theme_red),
             NightThemeType.AmoledClassicPurple => Amoled(ctx, Resource.String.theme_purple),
             NightThemeType.AmoledGrey => Amoled(ctx, Resource.String.theme_grey),
+            NightThemeType.Modern => ctx.GetString(Resource.String.theme_modern),
             _ => v.ToString(),
         };
 

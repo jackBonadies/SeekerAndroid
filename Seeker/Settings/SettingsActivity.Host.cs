@@ -205,7 +205,7 @@ namespace Seeker
 
             PreferencesState.DayNightMode = AndroidX.AppCompat.App.AppCompatDelegate.ModeNightFollowSystem;
             PreferencesState.DayModeVariant = DayThemeType.ClassicPurple;
-            PreferencesState.NightModeVariant = NightThemeType.ClassicPurple;
+            PreferencesState.NightModeVariant = NightThemeType.Modern;
 
             PreferencesState.SharingOn = false;
             PreferencesState.AllowUploadsOnMetered = true;

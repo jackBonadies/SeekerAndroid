@@ -39,6 +39,8 @@ namespace Seeker
                     return Resource.Style.Amoled;
                 case NightThemeType.AmoledGrey:
                     return Resource.Style.Amoled_Grey;
+                case NightThemeType.Modern:
+                    return Resource.Style.DefaultDark_Modern;
                 default:
                     throw new Exception("unknown");
             }
@@ -64,6 +66,7 @@ namespace Seeker
                     {
                         case NightThemeType.ClassicPurple:
                         case NightThemeType.AmoledClassicPurple:
+                        case NightThemeType.Modern:
                             return ThemeHelper.ToDayThemeProper(DayThemeType.ClassicPurple);
                         case NightThemeType.Blue:
                             return ThemeHelper.ToDayThemeProper(DayThemeType.Blue);

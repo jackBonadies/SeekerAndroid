@@ -113,7 +113,7 @@ namespace Seeker.Settings.Rows
             var ctx = host.Activity;
             var variants = new[]
             {
-                NightThemeType.ClassicPurple, NightThemeType.Grey, NightThemeType.Blue,
+                NightThemeType.Modern, NightThemeType.ClassicPurple, NightThemeType.Grey, NightThemeType.Blue,
                 NightThemeType.Red, NightThemeType.AmoledClassicPurple, NightThemeType.AmoledGrey,
             };
             var options = new List<(string label, NightThemeType value)>(variants.Length);
