@@ -36,7 +36,7 @@
     <attr name="mainPurpleForNavBar" format="color" />
     <attr name="appBarColor" format="color" />
     <attr name="pseudo_window_background_color" format="color" />
-    <attr name="searchBottomSheetBackground" format="color" />
+    <attr name="filterBottomSheetBackground" format="color" />
     <attr name="searchTabPillInactiveColor" format="color" />
     <attr name="user_info_chip_background" format="color" />
 
@@ -75,4 +75,7 @@
     <attr name="searchHeaderBackground" format="color" />
 
     <attr name="destructiveColor" format="color" />
+
+    <attr name="navItemSelectedColor" format="color" />
+    <attr name="navItemUnselectedColor" format="color" />
 </resources>

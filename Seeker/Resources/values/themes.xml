@@ -53,7 +53,7 @@
 
         <item name="dialog_background">#ffffffff</item>
         <item name="surface_variant1">#F3EDF7</item>
-        <item name="searchBottomSheetBackground">#F2F5FA</item>
+        <item name="filterBottomSheetBackground">#F2F5FA</item>
 
         <item name="pseudo_window_background_color">#00000000</item>
 
@@ -92,6 +92,9 @@
             ?attr/the_rounded_corner_dialog_background_drawable
         </item>
 		<item name="actionModeStyle">@style/MyActionMode</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
 	</style>
 
 	<style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
@@ -128,6 +131,9 @@
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#86b2cb</item>
         <!--<item name="colorAccent">#054568</item>-->
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="DefaultLight_Red" parent="DefaultLight">
@@ -152,6 +158,9 @@
 
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#d57676</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="DefaultLight_Grey" parent="DefaultLight">
@@ -179,6 +188,9 @@
 
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#86b2cb</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
@@ -232,7 +244,7 @@
 
         <item name="dialog_background">#ff424242</item>
         <item name="surface_variant1">#ff424242</item>
-        <item name="searchBottomSheetBackground">#ff424242</item>
+        <item name="filterBottomSheetBackground">#ff424242</item>
 
         <item name="secondaryColor">#ff424242</item>
         <item name="cellTextColor">#ffffffff</item>
@@ -267,15 +279,24 @@
         <item name="searchTabButtonColor">?attr/mainTextColorHinted</item>
 
         <item name="searchHeaderBackground">#120f08</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="DefaultDark_Modern" parent="DefaultDark">
         <!--<item name="appBarColor">#221e17</item>-->
         <item name="appBarColor">#1d1c2a</item>
-        <item name="whitePurpleForNavBar">#3d4170</item>
+        <item name="whitePurpleForNavBar">#3b417f</item>
+		<item name="filterBottomSheetBackground">#1d1c2a</item>
+        <item name="surface_variant1">#ff202020</item>
+        <item name="dialog_background">#ff282828</item>
         <!--<item name="mainPurple">#3b417f</item>-->
 		<!-- a bit brighter for dark mode -->
         <item name="mainPurple">#5C67E6</item>
+
+        <item name="navItemSelectedColor">#c9ceff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="DefaultDark_Blue" parent="DefaultDark">
@@ -299,6 +320,9 @@
 
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#10496b</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="DefaultDark_Red" parent="DefaultDark">
@@ -323,6 +347,9 @@
 
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#7B0000</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="DefaultDark_Grey" parent="DefaultDark">
@@ -354,6 +381,9 @@
         <item name="snackbarActionColor">#202124</item>
 
         <item name="cellbackColorDownloadDialog">#ff303030</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="Amoled" parent="DefaultDark">
@@ -395,7 +425,7 @@
 
         <item name="dialog_background">#ff202020</item>
         <item name="surface_variant1">#ff202020</item>
-        <item name="searchBottomSheetBackground">#ff202020</item>
+        <item name="filterBottomSheetBackground">#ff202020</item>
 
         <item name="secondaryColor">#ff202020</item>
         <item name="cellTextColor">#ffE4E4E4</item>
@@ -418,6 +448,9 @@
         <item name="searchTabPillInactiveColor">#303030</item>
 
         <item name="searchHeaderBackground">#00000000</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="Amoled_Grey" parent="Amoled">
@@ -443,6 +476,9 @@
 
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#333333</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
 </resources>

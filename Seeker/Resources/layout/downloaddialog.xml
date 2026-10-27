@@ -7,14 +7,13 @@
     android:background="@drawable/bottom_sheet_header_bg"
     android:backgroundTint="?attr/dialog_background"
 >
-    <!-- Purple header wrapper -->
     <LinearLayout
 		android:id="@+id/mainContentHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/bottom_sheet_header_bg"
-        android:backgroundTint="?attr/mainPurple"
+        android:backgroundTint="?attr/appBarColor"
     >
         <View
             android:layout_width="32dp"

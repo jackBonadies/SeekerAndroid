@@ -10,7 +10,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 	android:background="@drawable/bottom_sheet_header_bg"
-	android:backgroundTint="?attr/searchBottomSheetBackground"
+	android:backgroundTint="?attr/filterBottomSheetBackground"
 >
 	<View
 		android:layout_width="32dp"
