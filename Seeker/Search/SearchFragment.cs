@@ -971,6 +971,7 @@ namespace Seeker
         public static volatile SearchFragment Instance = null;
         public RecyclerView recyclerViewChips;
         public RecyclerView.Adapter recyclerChipsAdapter;
+        private View chipsSeparator;
 
         private static RecyclerView.Adapter CreateChipsAdapter(List<ChipDataItem> items)
         {
@@ -1006,6 +1007,7 @@ namespace Seeker
 
             recyclerViewChips = rootView.FindViewById<RecyclerView>(Resource.Id.recyclerViewChips);
             recyclerViewChips.Visibility = ViewStates.Visible;
+            chipsSeparator = rootView.FindViewById<View>(Resource.Id.chipsSeparator);
 
             var manager = new LinearLayoutManager(this.Context, LinearLayoutManager.Horizontal, false);
             recyclerViewChips.SetItemAnimator(null);
@@ -1281,6 +1283,10 @@ namespace Seeker
         {
             recyclerChipsAdapter = CreateChipsAdapter(SearchTabHelper.SearchTabCollection[SearchTabHelper.CurrentTab].ChipDataItems);
             recyclerViewChips.SetAdapter(recyclerChipsAdapter);
+            if (chipsSeparator != null)
+            {
+                chipsSeparator.Visibility = recyclerChipsAdapter.ItemCount > 0 ? ViewStates.Visible : ViewStates.Gone;
+            }
         }
 
         private void FilterText_Touch(object sender, View.TouchEventArgs e)

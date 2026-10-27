@@ -48,8 +48,10 @@
             android:background="?attr/searchHeaderBackground"
             app:layout_scrollFlags="scroll|enterAlways" />
 		<View
+			android:id="@+id/chipsSeparator"
 			android:layout_width="match_parent"
 			android:layout_height="1dp"
+			android:visibility="gone"
 			app:layout_scrollFlags="scroll|enterAlways"
 			android:background="@color/bolderTint" />
         <include
