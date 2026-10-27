@@ -39,6 +39,7 @@
         <item name="checkboxStyle">@style/checkBoxStyle</item>
 
         <item name="mainPurpleForNavBar">?attr/mainPurple</item>
+        <item name="appBarColor">?attr/mainPurple</item>
 
         <item name="slskAccent">#437eab</item>
 
