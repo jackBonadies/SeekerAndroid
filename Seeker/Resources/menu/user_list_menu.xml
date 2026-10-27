@@ -8,6 +8,7 @@
         android:id="@+id/add_user_action"
         android:icon="@drawable/baseline_add_white_24"
         android:title="@string/add_user"
+        app:iconTint="?attr/appBarIconColor"
         app:showAsAction="always"
     />
 
@@ -15,6 +16,7 @@
         android:id="@+id/sort_user_list_action"
         android:icon="@drawable/baseline_swap_vert_white_24"
         android:title="@string/SortOrder"
+        app:iconTint="?attr/appBarIconColor"
         app:showAsAction="always"
     />
 

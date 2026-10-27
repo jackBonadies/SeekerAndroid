@@ -19,7 +19,7 @@
         <ImageView
             android:id="@+id/search_tabs_icon"
             app:srcCompat="@drawable/numeric_tab_outline"
-            android:tint="@android:color/white"
+            android:tint="?attr/appBarIconColor"
             android:layout_gravity="center"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textColor="@android:color/white"
+            android:textColor="?attr/appBarIconColor"
             android:textSize="15sp"
             android:textStyle="bold"
             android:includeFontPadding="false"

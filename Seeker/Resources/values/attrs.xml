@@ -35,6 +35,7 @@
     <attr name="expandIconColor" format="color" />
     <attr name="mainPurpleForNavBar" format="color" />
     <attr name="appBarColor" format="color" />
+    <attr name="appBarIconColor" format="color" />
     <attr name="pseudo_window_background_color" format="color" />
     <attr name="filterBottomSheetBackground" format="color" />
     <attr name="searchTabPillInactiveColor" format="color" />

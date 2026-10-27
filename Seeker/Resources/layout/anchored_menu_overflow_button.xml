@@ -6,5 +6,6 @@
     android:layout_height="48dp"
     android:background="?attr/actionBarItemBackground"
     android:src="@drawable/ic_more_vert_white_vector_32dp"
+    android:tint="?attr/appBarIconColor"
     android:scaleType="centerInside"
     android:contentDescription="@string/Options" />

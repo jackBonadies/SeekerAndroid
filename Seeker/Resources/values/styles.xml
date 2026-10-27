@@ -48,6 +48,7 @@
 
         <item name="mainPurpleForNavBar">?attr/mainPurple</item>
         <item name="appBarColor">?attr/mainPurple</item>
+        <item name="appBarIconColor">@android:color/white</item>
 
         <item name="checkBoxColor">@color/colorAccent</item>
         <item name="checkboxStyle">@style/checkBoxStyle</item>
@@ -128,6 +129,7 @@
         parent="ThemeOverlay.Material3.Dark.ActionBar"
     >
         <item name="actionModeStyle">@style/MyActionMode</item>
+        <item name="colorControlNormal">?attr/appBarIconColor</item>
     </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Light" />
