@@ -50,7 +50,7 @@ namespace Seeker
                     return;
                 }
 
-                RecolorStatusGuard(decor, top, GetColorFromAttribute(activity, Resource.Attribute.mainPurple));
+                RecolorStatusGuard(decor, top, GetColorFromAttribute(activity, Resource.Attribute.appBarColor));
             }
             catch (System.Exception e)
             {

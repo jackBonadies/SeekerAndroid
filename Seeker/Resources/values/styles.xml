@@ -12,7 +12,7 @@
 	</style>
 
 	<style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
-		<item name="background">?attr/mainPurple</item>
+		<item name="background">?attr/appBarColor</item>
 		<item name="titleTextStyle">@style/MyActionModeTitle</item>
 	</style>
 
@@ -58,9 +58,9 @@
         <item name="snackbarButtonStyle">@style/Seeker.Snackbar.Action</item>
 
         <item name="windowActionModeOverlay">true</item>
-        <item name="android:actionModeBackground">?attr/mainPurple</item>
-        <item name="actionModeBackground">?attr/mainPurple</item>
-        <item name="actionModeTheme">@style/ThemeOverlay.Material3.Dark.ActionBar</item>
+        <item name="android:actionModeBackground">?attr/appBarColor</item>
+        <item name="actionModeBackground">?attr/appBarColor</item>
+        <item name="actionModeTheme">@style/AppTheme.ActionModeOverlay</item>
 
         <!-- Without this, BottomSheetDialogFragment falls back to Theme.Design.Light.BottomSheetDialog,
              whose colorPrimary is Material's default teal, not the app's purple. That mismatch is
@@ -129,6 +129,10 @@
         parent="ThemeOverlay.Material3.Dark.ActionBar"
     >
         <item name="actionModeStyle">@style/MyActionMode</item>
+        <item name="colorControlNormal">?attr/appBarIconColor</item>
+    </style>
+
+    <style name="AppTheme.ActionModeOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar">
         <item name="colorControlNormal">?attr/appBarIconColor</item>
     </style>
 
