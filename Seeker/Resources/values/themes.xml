@@ -184,8 +184,8 @@
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
         <item name="colorOnPrimary">#ffffff</item>
         <item name="colorPrimary">#7C8DEB</item>
-        <item name="colorSurface">#303030</item>
-        <item name="colorSurfaceLogin">#404040</item>
+        <item name="colorSurface">#120f08</item>
+        <item name="colorSurfaceLogin">#202020</item>
         <item name="colorOnSurface">?attr/normalTextColor</item>
 		<item name="colorOnBackground">?attr/normalTextColor</item>
         <item name="mainTextColor">#bcc1f7</item>
@@ -210,16 +210,16 @@
 
         <item name="seeker_notification_other_person_color">#AF9AF4</item>
 
-        <item name="pseudo_window_background_color">#ff303030</item>
+        <item name="pseudo_window_background_color">#ff120f08</item>
         <item name="expandIconColor">#ffffffff</item>
         <item name="normalTextColor">#FFFFFF</item>
         <item name="normalTextColorNonTinted">#FFFFFF</item>
         <item name="cellStroke">#959BDC</item>
         <!--<item name="dialogBackground">#52000000</item>-->
-        <item name="cellbackColor">#ff303030</item>
-        <item name="cellback">#ff303030</item>
+        <item name="cellbackColor">#ff120f08</item>
+        <item name="cellback">#ff120f08</item>
         <item name="user_info_chip_background">#ff404040</item>
-        <item name="CustomSelector">@drawable/CustomSelector_ff303030</item>
+        <item name="CustomSelector">@drawable/CustomSelector_ff120f08</item>
 
         <item name="cellbackColorDownloadDialog">#ff424242</item>
 
@@ -266,7 +266,7 @@
         <item name="mainTextColorHintedFlair">#bcc1f7</item>
         <item name="searchTabButtonColor">?attr/mainTextColorHinted</item>
 
-        <item name="searchHeaderBackground">#303030</item>
+        <item name="searchHeaderBackground">#120f08</item>
     </style>
 
     <style name="DefaultDark_Blue" parent="DefaultDark">
