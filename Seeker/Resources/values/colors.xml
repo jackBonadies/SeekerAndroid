@@ -40,6 +40,7 @@
 
     <color name="checkCircleSelected">#303030</color>
     <color name="checkCircleUnselected">#303030</color>
+    <color name="checkCircleCheck">#FFFFFF</color>
 
     <color name="transferChipCompletedText">#2E9E5E</color>
     <color name="transferChipCompletedBg">#1A2E9E5E</color>

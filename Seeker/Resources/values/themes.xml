@@ -280,6 +280,7 @@
         <item name="navItemUnselectedColor">#cac4d0</item>
         <!-- same fill as the checked MaterialSwitch track -->
         <item name="checkCircleSelectedColor">#595BFF</item>
+        <item name="checkCircleCheckColor">#FFFFFF</item>
         <item name="batchSelectHighlightColor">#40528FDC</item>
     </style>
 

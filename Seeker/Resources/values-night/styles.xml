@@ -42,6 +42,7 @@
         <item name="appBarColor">?attr/mainPurple</item>
         <item name="appBarIconColor">@android:color/white</item>
         <item name="checkCircleSelectedColor">@color/checkCircleSelected</item>
+        <item name="checkCircleCheckColor">@color/checkCircleCheck</item>
         <item name="batchSelectHighlightColor">@color/batchSelectHighlight</item>
 
         <item name="slskAccent">#437eab</item>
