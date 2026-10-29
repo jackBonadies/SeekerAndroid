@@ -270,8 +270,8 @@ namespace Seeker
             if (!alreadySelected)
             {
 #pragma warning disable 0618
-                e.View.Background = Resources.GetDrawable(Resource.Color.batchSelectHighlight, this.Activity.Theme);
-                e.View.FindViewById(Resource.Id.mainDlLayout).Background = Resources.GetDrawable(Resource.Color.batchSelectHighlight, this.Activity.Theme);
+                e.View.Background = UiHelpers.GetBatchSelectHighlight(e.View.Context);
+                e.View.FindViewById(Resource.Id.mainDlLayout).Background = UiHelpers.GetBatchSelectHighlight(e.View.Context);
 #pragma warning restore 0618
                 e.View.FindViewById(Resource.Id.selectionCheck).Visibility = ViewStates.Visible;
                 this.customAdapter.SelectedPositions.Add(e.Position);
@@ -646,7 +646,7 @@ namespace Seeker
             if (SelectedPositions.Contains(position))
             {
 #pragma warning disable 0618
-                var highlight = Owner.Resources.GetDrawable(Resource.Color.batchSelectHighlight, SeekerState.ActiveActivityRef.Theme);
+                var highlight = UiHelpers.GetBatchSelectHighlight(itemView.Context);
                 itemView.Background = highlight;
                 itemView.FindViewById<View>(Resource.Id.mainDlLayout).Background = highlight;
 #pragma warning restore 0618

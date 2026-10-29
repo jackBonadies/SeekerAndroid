@@ -50,6 +50,7 @@
         <item name="appBarColor">?attr/mainPurple</item>
         <item name="appBarIconColor">@android:color/white</item>
         <item name="checkCircleSelectedColor">@color/checkCircleSelected</item>
+        <item name="batchSelectHighlightColor">@color/batchSelectHighlight</item>
 
         <item name="checkBoxColor">@color/colorAccent</item>
         <item name="checkboxStyle">@style/checkBoxStyle</item>

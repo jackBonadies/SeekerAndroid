@@ -226,7 +226,7 @@ namespace Seeker
                 selectionCheckbox.Visibility = ViewStates.Visible;
                 bool isSelected = TransfersViewState.Instance.BatchSelectedItems.Contains(item);
                 selectionCheckbox.SetImageResource(isSelected ? Resource.Drawable.check_circle : Resource.Drawable.check_circle_outline);
-                this.Background = isSelected ? Resources.GetDrawable(Resource.Color.batchSelectHighlight, null) : null;
+                this.Background = isSelected ? UiHelpers.GetBatchSelectHighlight(this.Context) : null;
             }
             else
             {
@@ -881,7 +881,7 @@ namespace Seeker
                 selectionCheckbox.Visibility = ViewStates.Visible;
                 bool isSelected = TransfersViewState.Instance.BatchSelectedItems.Contains(item);
                 selectionCheckbox.SetImageResource(isSelected ? Resource.Drawable.check_circle : Resource.Drawable.check_circle_outline);
-                this.Background = isSelected ? Resources.GetDrawable(Resource.Color.batchSelectHighlight, null) : null;
+                this.Background = isSelected ? UiHelpers.GetBatchSelectHighlight(this.Context) : null;
             }
             else
             {

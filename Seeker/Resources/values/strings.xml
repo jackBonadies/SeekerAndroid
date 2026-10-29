@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Seeker</string>
+    <string name="app_name">Seeker Dark</string>
     <string name="com.google.firebase.crashlytics.mapping_file_id">1.0</string>
 
     <string name="home_tab">Home</string>

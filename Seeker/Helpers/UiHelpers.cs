@@ -125,6 +125,11 @@ namespace Seeker
             return c.Resources.GetDrawable(drawableRes, c.Theme);
         }
 
+        public static Android.Graphics.Drawables.Drawable GetBatchSelectHighlight(Context c)
+        {
+            return new Android.Graphics.Drawables.ColorDrawable(GetColorFromAttribute(c, Resource.Attribute.batchSelectHighlightColor));
+        }
+
         public static Color GetColorFromInteger(int color)
         {
             return Color.Argb(Color.GetAlphaComponent(color), Color.GetRedComponent(color), Color.GetGreenComponent(color), Color.GetBlueComponent(color));
