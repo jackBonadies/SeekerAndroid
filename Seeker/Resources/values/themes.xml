@@ -200,6 +200,8 @@
         <item name="navItemSelectedColor">#2E3478</item>
         <item name="navItemUnselectedColor">#49454F</item>
         <item name="filterBottomSheetBackground">#F3EDF7</item>
+        <!-- surface_variant1 is the app bar colour here, so the room ticker / statuses would blend into it -->
+        <item name="roomStatusesColor">#E7E1EB</item>
 
         <item name="checkCircleSelectedColor">#4f58c4</item>
         <item name="checkCircleCheckColor">#FFFFFF</item>

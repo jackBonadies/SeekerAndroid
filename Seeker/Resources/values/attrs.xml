@@ -36,6 +36,7 @@
     <attr name="expandIconColor" format="color" />
     <attr name="mainPurpleForNavBar" format="color" />
     <attr name="appBarColor" format="color" />
+    <attr name="roomStatusesColor" format="color" />
     <attr name="appBarIconColor" format="color" />
     <attr name="appBarTextColor" format="color" />
     <attr name="appBarHintColor" format="color" />

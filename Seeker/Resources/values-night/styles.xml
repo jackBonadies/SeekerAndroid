@@ -40,6 +40,7 @@
 
         <item name="mainPurpleForNavBar">?attr/mainPurple</item>
         <item name="appBarColor">?attr/mainPurple</item>
+        <item name="roomStatusesColor">?attr/surface_variant1</item>
         <item name="appBarIconColor">@android:color/white</item>
         <item name="appBarTextColor">@android:color/white</item>
         <item name="appBarHintColor">@android:color/white</item>
