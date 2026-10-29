@@ -275,6 +275,8 @@
 
         <item name="navItemSelectedColor">#c9ceff</item>
         <item name="navItemUnselectedColor">#cac4d0</item>
+        <!-- same fill as the checked MaterialSwitch track -->
+        <item name="checkCircleSelectedColor">?attr/colorPrimary</item>
     </style>
 
     <style name="DefaultDark_Blue" parent="DefaultDark">
