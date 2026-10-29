@@ -271,12 +271,12 @@
         <item name="dialog_background">#ff282828</item>
         <!--<item name="mainPurple">#3b417f</item>-->
 		<!-- a bit brighter for dark mode -->
-        <item name="mainPurple">#5C67E6</item>
+        <item name="mainPurple">#535DEE</item>
 
         <item name="navItemSelectedColor">#c9ceff</item>
         <item name="navItemUnselectedColor">#cac4d0</item>
         <!-- same fill as the checked MaterialSwitch track -->
-        <item name="checkCircleSelectedColor">?attr/colorPrimary</item>
+        <item name="checkCircleSelectedColor">#595BFF</item>
         <item name="batchSelectHighlightColor">#40528FDC</item>
     </style>
 
