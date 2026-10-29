@@ -52,8 +52,9 @@
         <item name="floating_action_bar_to_bottom_background">#FAFAFA</item>
 
         <item name="dialog_background">#ffffffff</item>
+        <item name="download_dialog_background">?attr/dialog_background</item>
         <item name="surface_variant1">#F3EDF7</item>
-        <item name="searchBottomSheetBackground">#F2F5FA</item>
+        <item name="filterBottomSheetBackground">#F2F5FA</item>
 
         <item name="pseudo_window_background_color">#00000000</item>
 
@@ -80,27 +81,20 @@
 
         <item name="searchHeaderBackground">@android:color/transparent</item>
 
-        <item name="the_rounded_corner_background_drawable">
-            @drawable/rounded_corner_background_light
-        </item>
-        <item name="the_rounded_corner_dialog_background_drawable">
-            @drawable/rounded_corner_dialog_background_light
-        </item>
-        <item
-            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
-        >
-            ?attr/the_rounded_corner_dialog_background_drawable
-        </item>
 		<item name="actionModeStyle">@style/MyActionMode</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
+        <item name="sectionHeaderTextColor">#2E3478</item>
 	</style>
 
 	<style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
-		<item name="background">?attr/mainPurple</item>
+		<item name="background">?attr/appBarColor</item>
 		<item name="titleTextStyle">@style/MyActionModeTitle</item>
 	</style>
 
 	<style name="MyActionModeTitle" parent="TextAppearance.AppCompat.Widget.ActionMode.Title">
-        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="android:textColor">?attr/appBarTextColor</item>
 	</style>
 
     <style name="DefaultLight_Blue" parent="DefaultLight">
@@ -128,6 +122,9 @@
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#86b2cb</item>
         <!--<item name="colorAccent">#054568</item>-->
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="DefaultLight_Red" parent="DefaultLight">
@@ -152,6 +149,9 @@
 
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#d57676</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="DefaultLight_Grey" parent="DefaultLight">
@@ -179,13 +179,44 @@
 
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#86b2cb</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
+    </style>
+
+    <!-- light neutral app bar, dark text / icons -->
+    <style name="DefaultLight_Modern" parent="DefaultLight">
+        <item name="appBarColor">#F3EDF7</item>
+        <item name="appBarIconColor">#49454F</item>
+        <item name="appBarTextColor">#1D1B20</item>
+        <item name="appBarHintColor">#49454F</item>
+        <item name="appBarOverlayTheme">@style/AppTheme.AppBarOverlay.Light</item>
+        <item name="actionModeTheme">@style/AppTheme.ActionModeOverlay.Light</item>
+        <item name="searchBarColor">#E6E0E9</item>
+        <item name="searchBarHighlightColor">#C8CBF5</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+
+        <item name="whitePurpleForNavBar">#DEE0FF</item>
+        <item name="navItemSelectedColor">#2E3478</item>
+        <item name="navItemUnselectedColor">#49454F</item>
+        <item name="filterBottomSheetBackground">#F3EDF7</item>
+        <!-- surface_variant1 is the app bar colour here, so the room ticker / statuses would blend into it -->
+        <item name="roomStatusesColor">#E7E1EB</item>
+
+        <item name="checkCircleSelectedColor">#4f58c4</item>
+        <item name="checkCircleCheckColor">#FFFFFF</item>
+        <!-- #CCCEE3 over the #FEF7FF background -->
+        <item name="batchSelectHighlightColor">#4037548F</item>
+
+        <item name="snackbarActionColor">#BCC1F7</item>
     </style>
 
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
         <item name="colorOnPrimary">#ffffff</item>
         <item name="colorPrimary">#7C8DEB</item>
-        <item name="colorSurface">#303030</item>
-        <item name="colorSurfaceLogin">#404040</item>
+        <item name="colorSurface">#120f08</item>
+        <item name="colorSurfaceLogin">#202020</item>
         <item name="colorOnSurface">?attr/normalTextColor</item>
 		<item name="colorOnBackground">?attr/normalTextColor</item>
         <item name="mainTextColor">#bcc1f7</item>
@@ -210,16 +241,16 @@
 
         <item name="seeker_notification_other_person_color">#AF9AF4</item>
 
-        <item name="pseudo_window_background_color">#ff303030</item>
+        <item name="pseudo_window_background_color">#ff120f08</item>
         <item name="expandIconColor">#ffffffff</item>
         <item name="normalTextColor">#FFFFFF</item>
         <item name="normalTextColorNonTinted">#FFFFFF</item>
         <item name="cellStroke">#959BDC</item>
         <!--<item name="dialogBackground">#52000000</item>-->
-        <item name="cellbackColor">#ff303030</item>
-        <item name="cellback">#ff303030</item>
+        <item name="cellbackColor">#ff120f08</item>
+        <item name="cellback">#ff120f08</item>
         <item name="user_info_chip_background">#ff404040</item>
-        <item name="CustomSelector">@drawable/CustomSelector_ff303030</item>
+        <item name="CustomSelector">@drawable/CustomSelector_ff120f08</item>
 
         <item name="cellbackColorDownloadDialog">#ff424242</item>
 
@@ -231,8 +262,9 @@
         </item>
 
         <item name="dialog_background">#ff424242</item>
+        <item name="download_dialog_background">?attr/dialog_background</item>
         <item name="surface_variant1">#ff424242</item>
-        <item name="searchBottomSheetBackground">#ff424242</item>
+        <item name="filterBottomSheetBackground">#ff424242</item>
 
         <item name="secondaryColor">#ff424242</item>
         <item name="cellTextColor">#ffffffff</item>
@@ -244,18 +276,6 @@
         <item name="settingsDividerColor">#595959</item>
         <item name="linkDividerColor">#70595959</item>
 
-        <item name="the_rounded_corner_background_drawable">
-            @drawable/rounded_corner_background_dark
-        </item>
-        <item name="the_rounded_corner_dialog_background_drawable">
-            @drawable/rounded_corner_dialog_background_dark
-        </item>
-        <item
-            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
-        >
-            ?attr/the_rounded_corner_dialog_background_drawable
-        </item>
-
         <item name="expandableModernChevronBg">#00424242</item>
         <item name="expandableModernFilesBg">#3A3A3A</item>
         <item name="expandableModernSeparatorColor">#18FFFFFF</item>
@@ -266,7 +286,32 @@
         <item name="mainTextColorHintedFlair">#bcc1f7</item>
         <item name="searchTabButtonColor">?attr/mainTextColorHinted</item>
 
-        <item name="searchHeaderBackground">#303030</item>
+        <item name="searchHeaderBackground">#120f08</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
+        <item name="sectionHeaderTextColor">#c9ceff</item>
+    </style>
+
+    <style name="DefaultDark_Modern" parent="DefaultDark">
+        <!--<item name="appBarColor">#221e17</item>-->
+        <item name="appBarColor">#1d1c2a</item>
+        <item name="appBarIconColor">#DFD8E6</item>
+        <item name="whitePurpleForNavBar">#3b417f</item>
+		<item name="filterBottomSheetBackground">#1d1c2a</item>
+        <item name="surface_variant1">#ff202020</item>
+        <item name="dialog_background">#ff282828</item>
+        <item name="download_dialog_background">@color/absoluteBackColor2</item>
+        <!--<item name="mainPurple">#3b417f</item>-->
+		<!-- a bit brighter for dark mode -->
+        <item name="mainPurple">#535DEE</item>
+
+        <item name="navItemSelectedColor">#c9ceff</item>
+        <item name="navItemUnselectedColor">#cac4d0</item>
+        <!-- same fill as the checked MaterialSwitch track -->
+        <item name="checkCircleSelectedColor">#595BFF</item>
+        <item name="checkCircleCheckColor">#FFFFFF</item>
+        <item name="batchSelectHighlightColor">#40528FDC</item>
     </style>
 
     <style name="DefaultDark_Blue" parent="DefaultDark">
@@ -290,6 +335,9 @@
 
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#10496b</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="DefaultDark_Red" parent="DefaultDark">
@@ -314,6 +362,9 @@
 
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#7B0000</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="DefaultDark_Grey" parent="DefaultDark">
@@ -335,16 +386,14 @@
         <item name="mainTextColorHinted">#dddddd</item>
         <item name="mainTextColorHintedFlair">#dddddd</item>
         <item name="slskAccent">#2A4C6D</item>
-        <item
-            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
-        >
-            @drawable/rounded_corner_dialog_background_dark_303030
-        </item>
 
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#202124</item>
 
         <item name="cellbackColorDownloadDialog">#ff303030</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="Amoled" parent="DefaultDark">
@@ -386,7 +435,7 @@
 
         <item name="dialog_background">#ff202020</item>
         <item name="surface_variant1">#ff202020</item>
-        <item name="searchBottomSheetBackground">#ff202020</item>
+        <item name="filterBottomSheetBackground">#ff202020</item>
 
         <item name="secondaryColor">#ff202020</item>
         <item name="cellTextColor">#ffE4E4E4</item>
@@ -394,21 +443,13 @@
         <item name="cellTextColorMoreSubdued">#aaE4E4E4</item>
         <item name="cellTextColorVerySubdued">#a0E4E4E4</item>
 
-        <item name="the_rounded_corner_background_drawable">
-            @drawable/rounded_corner_background_dark_amoled
-        </item>
-        <item name="the_rounded_corner_dialog_background_drawable">
-            @drawable/rounded_corner_dialog_background_dark_amoled
-        </item>
-        <item
-            name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
-        >
-            ?attr/the_rounded_corner_dialog_background_drawable
-        </item>
         <!--<item name="dialogBackground">#52000000</item>-->
         <item name="searchTabPillInactiveColor">#303030</item>
 
         <item name="searchHeaderBackground">#00000000</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
     <style name="Amoled_Grey" parent="Amoled">
@@ -434,6 +475,9 @@
 
 		<!-- this will be shown on opposite color background so use the colorPrimary dark variant for it-->
         <item name="snackbarActionColor">#333333</item>
+
+        <item name="navItemSelectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#ffffff</item>
     </style>
 
 </resources>

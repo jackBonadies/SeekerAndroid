@@ -117,6 +117,7 @@ namespace Seeker
             noUsersView = this.FindViewById<View>(Resource.Id.noUsersView);
             recycleLayoutManager = new LinearLayoutManager(this);
             recyclerViewUserList.SetLayoutManager(recycleLayoutManager);
+            recyclerViewUserList.AddItemDecoration(new UserListDividerDecoration(this));
 
             RefreshUserList();
         }

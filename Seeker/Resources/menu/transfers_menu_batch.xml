@@ -5,6 +5,7 @@
     <item
         android:id="@+id/action_cancel_and_clear_all_batch"
         android:title="@string/cancel_and_clear_all"
+        app:iconTint="?attr/appBarIconColor"
         app:showAsAction="always"
         android:iconifiedByDefault="true"
         android:icon="@drawable/trash_can_outline"

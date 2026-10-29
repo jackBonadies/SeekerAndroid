@@ -193,7 +193,7 @@ namespace Seeker
         {
             if (isSelected)
             {
-                this.Background = Resources.GetDrawable(Resource.Color.batchSelectHighlight, null);
+                this.Background = UiHelpers.GetBatchSelectHighlight(this.Context);
             }
             else
             {

@@ -86,7 +86,7 @@ namespace Seeker.Settings.Rows
             var ctx = host.Activity;
             var variants = new[]
             {
-                DayThemeType.ClassicPurple, DayThemeType.Red, DayThemeType.Blue, DayThemeType.Grey,
+                DayThemeType.Modern, DayThemeType.ClassicPurple, DayThemeType.Red, DayThemeType.Blue, DayThemeType.Grey,
             };
             var options = new List<(string label, DayThemeType value)>(variants.Length);
             foreach (var variant in variants)
@@ -113,7 +113,7 @@ namespace Seeker.Settings.Rows
             var ctx = host.Activity;
             var variants = new[]
             {
-                NightThemeType.ClassicPurple, NightThemeType.Grey, NightThemeType.Blue,
+                NightThemeType.Modern, NightThemeType.ClassicPurple, NightThemeType.Grey, NightThemeType.Blue,
                 NightThemeType.Red, NightThemeType.AmoledClassicPurple, NightThemeType.AmoledGrey,
             };
             var options = new List<(string label, NightThemeType value)>(variants.Length);

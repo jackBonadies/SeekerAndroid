@@ -15,6 +15,7 @@
     <attr name="settingsDividerColor" format="color" />
     <attr name="linkDividerColor" format="color" />
     <attr name="dialog_background" format="color" />
+    <attr name="download_dialog_background" format="color" />
     <attr name="surface_variant1" format="color" />
     <attr name="normalTextColorNonTinted" format="color" />
     <attr name="mainPurple" format="color" />
@@ -34,8 +35,19 @@
     <attr name="checkBoxColor" format="color" />
     <attr name="expandIconColor" format="color" />
     <attr name="mainPurpleForNavBar" format="color" />
+    <attr name="appBarColor" format="color" />
+    <attr name="roomStatusesColor" format="color" />
+    <attr name="appBarIconColor" format="color" />
+    <attr name="appBarTextColor" format="color" />
+    <attr name="appBarHintColor" format="color" />
+    <attr name="appBarOverlayTheme" format="reference" />
+    <attr name="searchBarColor" format="color" />
+    <attr name="searchBarHighlightColor" format="color" />
+    <attr name="checkCircleSelectedColor" format="color" />
+    <attr name="checkCircleCheckColor" format="color" />
+    <attr name="batchSelectHighlightColor" format="color" />
     <attr name="pseudo_window_background_color" format="color" />
-    <attr name="searchBottomSheetBackground" format="color" />
+    <attr name="filterBottomSheetBackground" format="color" />
     <attr name="searchTabPillInactiveColor" format="color" />
     <attr name="user_info_chip_background" format="color" />
 
@@ -48,16 +60,6 @@
 
     <attr name="floating_action_bar_to_bottom_background" format="color" />
     <attr name="floating_action_bar_to_bottom_icon" format="color" />
-
-    <attr name="the_rounded_corner_background_drawable" format="reference" />
-    <attr
-        name="the_rounded_corner_dialog_background_drawable"
-        format="reference"
-    />
-    <attr
-        name="the_rounded_corner_dialog_background_drawable_dl_dialog_specific"
-        format="reference"
-    />
 
     <attr name="CustomSelector" format="reference" />
 
@@ -74,4 +76,8 @@
     <attr name="searchHeaderBackground" format="color" />
 
     <attr name="destructiveColor" format="color" />
+
+    <attr name="navItemSelectedColor" format="color" />
+    <attr name="sectionHeaderTextColor" format="color" />
+    <attr name="navItemUnselectedColor" format="color" />
 </resources>

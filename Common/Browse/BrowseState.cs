@@ -23,18 +23,23 @@ namespace Seeker
         public List<PathItem> PathItems { get; set; } = new List<PathItem>();
         public TextFilter Filter { get; } = new TextFilter();
         public string? CurrentUsername { get; set; }
-        public BrowseStats Stats { get; private set; } 
+        public BrowseStats Stats { get; private set; }
+        private bool hasTree;
 
         public bool HasResponse()
         {
-            return !string.IsNullOrEmpty(CurrentUsername);
+            return !string.IsNullOrEmpty(CurrentUsername) || hasTree;
         }
+
+        // browsing our own shares before ever logging in - username is null but has tree
+        public bool IsAnonymousSelf => HasResponse() && string.IsNullOrEmpty(CurrentUsername);
 
         public BrowseStateError SetBrowseResponse(string username, TreeNode<Directory> browseResponseTree, BrowseResponse originalBrowseResponse, string startingLocation)
         {
             BrowseStateError errorState = BrowseStateError.None;
             ClearFilter();
             CurrentUsername = username;
+            hasTree = browseResponseTree != null;
             Stats = originalBrowseResponse != null ? BrowseUtils.GetBrowseStats(originalBrowseResponse) : default;
 
             lock (DataItems) //on non UI thread.

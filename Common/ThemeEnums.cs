@@ -6,6 +6,7 @@ namespace Common
         Red = 1,
         Blue = 2,
         Grey = 3,
+        Modern = 4,
     }
 
     public enum NightThemeType : ushort
@@ -15,6 +16,7 @@ namespace Common
         Blue = 2,
         Red = 3,
         AmoledClassicPurple = 4,
-        AmoledGrey = 5
+        AmoledGrey = 5,
+        Modern = 6,
     }
 }

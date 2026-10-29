@@ -6,6 +6,7 @@
         android:id="@+id/user_list_action"
         android:icon="@drawable/baseline_group_white_24"
         android:title="@string/target_user_list"
+        app:iconTint="?attr/appBarIconColor"
         app:showAsAction="always"
     />
 
@@ -13,6 +14,7 @@
         android:id="@+id/messages_action"
         android:icon="@drawable/baseline_chat_bubble_white_24"
         android:title="@string/messages"
+        app:iconTint="?attr/appBarIconColor"
         app:showAsAction="ifRoom"
     />
 
@@ -20,6 +22,7 @@
         android:id="@+id/chatroom_action"
         android:icon="@drawable/outline_forum_white_24"
         android:title="@string/chatrooms"
+        app:iconTint="?attr/appBarIconColor"
         app:showAsAction="ifRoom"
     />
 
@@ -27,6 +30,7 @@
         android:id="@+id/settings_action"
         android:icon="@drawable/baseline_settings_white_24"
         android:title="@string/settings"
+        app:iconTint="?attr/appBarIconColor"
         app:showAsAction="always"
     />
 

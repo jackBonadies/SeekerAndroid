@@ -39,14 +39,25 @@
         <item name="checkboxStyle">@style/checkBoxStyle</item>
 
         <item name="mainPurpleForNavBar">?attr/mainPurple</item>
+        <item name="appBarColor">?attr/mainPurple</item>
+        <item name="roomStatusesColor">?attr/surface_variant1</item>
+        <item name="appBarIconColor">@android:color/white</item>
+        <item name="appBarTextColor">@android:color/white</item>
+        <item name="appBarHintColor">@android:color/white</item>
+        <item name="appBarOverlayTheme">@style/AppTheme.AppBarOverlay</item>
+        <item name="searchBarColor">#33FFFFFF</item>
+        <item name="searchBarHighlightColor">@android:color/white</item>
+        <item name="checkCircleSelectedColor">@color/checkCircleSelected</item>
+        <item name="checkCircleCheckColor">@color/checkCircleCheck</item>
+        <item name="batchSelectHighlightColor">@color/batchSelectHighlight</item>
 
         <item name="slskAccent">#437eab</item>
 
         <item name="windowActionModeOverlay">true</item>
-        <item name="android:actionModeBackground">?attr/colorPrimary</item>
-        <item name="actionModeBackground">?attr/colorPrimary</item>
+        <item name="android:actionModeBackground">?attr/appBarColor</item>
+        <item name="actionModeBackground">?attr/appBarColor</item>
         <!-- Needed, otherwise in dark mode, icons that the system provides (back, 3 dot menu) are 60% opacity -->
-        <item name="actionModeTheme">@style/ThemeOverlay.Material3.Dark.ActionBar</item>
+        <item name="actionModeTheme">@style/AppTheme.ActionModeOverlay</item>
 
         <item name="bottomSheetDialogTheme">@style/SeekerBottomSheetDialog</item>
     </style>
@@ -86,6 +97,7 @@
         parent="ThemeOverlay.MaterialComponents.Dark.ActionBar"
     >
         <item name="actionModeStyle">@style/MyActionMode</item>
+        <item name="colorControlNormal">?attr/appBarIconColor</item>
     </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Dark" />

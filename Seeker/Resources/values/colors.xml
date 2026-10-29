@@ -35,11 +35,12 @@
     <color name="chipSeparatorColor">#ff606060</color>
 
     <color name="absoluteBackColor1">#ff000000</color>
-    <color name="absoluteBackColor2">#ff303030</color>
+    <color name="absoluteBackColor2">#ff120f08</color>
     <color name="absoluteBackColor3">#ffffff</color>
 
     <color name="checkCircleSelected">#303030</color>
     <color name="checkCircleUnselected">#303030</color>
+    <color name="checkCircleCheck">#FFFFFF</color>
 
     <color name="transferChipCompletedText">#2E9E5E</color>
     <color name="transferChipCompletedBg">#1A2E9E5E</color>

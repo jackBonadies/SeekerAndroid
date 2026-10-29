@@ -42,8 +42,8 @@ namespace Seeker
             PreferencesState.DayNightMode = prefs.GetInt(KeyConsts.M_DayNightMode, -1); // ModeNightFollowSystem
             PreferencesState.Language = prefs.GetString(KeyConsts.M_Lanuage, PreferencesState.FieldLangAuto);
             PreferencesState.LegacyLanguageMigrated = prefs.GetBoolean(KeyConsts.M_LegacyLanguageMigrated, false);
-            PreferencesState.NightModeVariant = (NightThemeType)(prefs.GetInt(KeyConsts.M_NightVariant, (int)NightThemeType.ClassicPurple));
-            PreferencesState.DayModeVariant = (DayThemeType)(prefs.GetInt(KeyConsts.M_DayVariant, (int)DayThemeType.ClassicPurple));
+            PreferencesState.NightModeVariant = (NightThemeType)(prefs.GetInt(KeyConsts.M_NightVariant, (int)NightThemeType.Modern));
+            PreferencesState.DayModeVariant = (DayThemeType)(prefs.GetInt(KeyConsts.M_DayVariant, (int)DayThemeType.Modern));
             PreferencesState.ShowSmartFilters = prefs.GetBoolean(KeyConsts.M_ShowSmartFilters, true);
             PreferencesState.SmartFilterStyle = (Seeker.SmartFilterStyle)prefs.GetInt(KeyConsts.M_SmartFilterStyle, (int)Seeker.SmartFilterStyle.Flat);
             RestoreSmartFilterState(prefs);

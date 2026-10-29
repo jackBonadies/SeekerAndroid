@@ -84,7 +84,11 @@ namespace Seeker.Search
         public static void SearchCompleted(int id)
         {
             OldResultsToCompare.TryRemove(id, out _);
-            var completedTab = SearchTabHelper.SearchTabCollection[id];
+            // the tab can be closed between the search continuation's stale check and here
+            if (!SearchTabHelper.SearchTabCollection.TryGetValue(id, out SearchTab completedTab))
+            {
+                return;
+            }
             lock (completedTab.SortHelperLockObject)
             {
                 completedTab.UnseenCount = completedTab.UnseenResults?.Count ?? 0;
@@ -106,7 +110,7 @@ namespace Seeker.Search
                         {
                             description = newUniqueResults + " " + SeekerState.ActiveActivityRef.GetString(Resource.String.new_result);
                         }
-                        string lastTerm = SearchTabHelper.SearchTabCollection[id].LastSearchTerm;
+                        string lastTerm = completedTab.LastSearchTerm;
 
                         CommonHelpers.CreateNotificationChannel(SeekerState.ActiveActivityRef, AppNotifications.CHANNEL_ID_WISHLIST, AppNotifications.CHANNEL_NAME_WISHLIST, NotificationImportance.High); //only high will "peek"
                         Intent notifIntent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));

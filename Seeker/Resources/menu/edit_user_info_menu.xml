@@ -8,6 +8,7 @@
         android:id="@+id/save_user_action"
         android:icon="@drawable/content_save_outline"
         android:title="@string/Save"
+        app:iconTint="?attr/appBarIconColor"
         app:showAsAction="always"
     />
 

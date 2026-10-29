@@ -11,15 +11,15 @@
         android:id="@+id/appbarLayout"
         android:layout_width="match_parent"
         android:fitsSystemWindows="true"
-        android:background="?attr/mainPurple"
-        android:theme="@style/AppTheme.AppBarOverlay"
+        android:background="?attr/appBarColor"
+        android:theme="?attr/appBarOverlayTheme"
         android:layout_height="wrap_content"
     >
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/edit_user_info_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/mainPurple"
+            android:background="?attr/appBarColor"
             android:minHeight="100dp"
             app:popupTheme="@style/AppTheme.PopupOverlay"
             tools:layout_editor_absoluteX="0dp"
@@ -64,7 +64,7 @@
                 android:layout_weight="1"
                 android:id="@+id/editTextBio"
                 android:padding="6dp"
-                android:background="?the_rounded_corner_background_drawable"
+                android:background="@drawable/rounded_corner_background"
                 android:layout_marginBottom="12dp"
             />
 
@@ -87,7 +87,7 @@
                 android:id="@+id/user_info_picture_textview"
                 android:padding="6dp"
                 android:textColor="?attr/normalTextColor"
-                android:background="?the_rounded_corner_background_drawable"
+                android:background="@drawable/rounded_corner_background"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="6dp"
             />

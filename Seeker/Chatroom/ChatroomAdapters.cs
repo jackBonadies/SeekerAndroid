@@ -708,15 +708,20 @@ namespace Seeker
         public ChatroomOverviewCategoryHolder ViewHolder { get; set; }
         private TextView viewCategory;
 
-        public ChatroomOverviewCategoryView(Context context) : base(context)
+        public ChatroomOverviewCategoryView(Context context, int layoutId) : base(context)
         {
-            LayoutInflater.From(context).Inflate(Resource.Layout.chatroom_overview_category_item, this, true);
+            LayoutInflater.From(context).Inflate(layoutId, this, true);
             setupChildren();
         }
 
         public static ChatroomOverviewCategoryView Create(ViewGroup parent)
         {
-            var itemView = new ChatroomOverviewCategoryView(parent.Context);
+            return Create(parent, Resource.Layout.chatroom_overview_category_item);
+        }
+
+        public static ChatroomOverviewCategoryView Create(ViewGroup parent, int layoutId)
+        {
+            var itemView = new ChatroomOverviewCategoryView(parent.Context, layoutId);
             itemView.LayoutParameters = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.WrapContent);
             return itemView;
         }

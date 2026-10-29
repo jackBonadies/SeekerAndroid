@@ -48,8 +48,10 @@
             android:background="?attr/searchHeaderBackground"
             app:layout_scrollFlags="scroll|enterAlways" />
 		<View
+			android:id="@+id/chipsSeparator"
 			android:layout_width="match_parent"
 			android:layout_height="1dp"
+			android:visibility="gone"
 			app:layout_scrollFlags="scroll|enterAlways"
 			android:background="@color/bolderTint" />
         <include
@@ -291,7 +293,7 @@
         app:layout_behavior="@string/bottom_sheet_behavior"
         android:id="@+id/bottomSheet"
         android:background="@drawable/bottom_sheet_header_bg"
-        android:backgroundTint="?attr/searchBottomSheetBackground"
+        android:backgroundTint="?attr/filterBottomSheetBackground"
     >
         <LinearLayout
             android:layout_width="match_parent"
@@ -520,19 +522,6 @@
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-    <!--    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="?attr/mainPurple"
-        android:background="?attr/mainPurple"
-        app:layout_anchor="@id/bottomSheet"
-        app:layout_dodgeInsetEdges="bottom"
-        app:borderWidth="0dp"
-        android:src="@drawable/ic_filter_list_white_24dp"
-        app:layout_anchorGravity="top|right|end"
-        android:id="@+id/bsbutton"
-        android:layout_margin="0dp"
-        />-->
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_width="wrap_content"

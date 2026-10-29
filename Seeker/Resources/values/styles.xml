@@ -12,12 +12,12 @@
 	</style>
 
 	<style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
-		<item name="background">?attr/mainPurple</item>
+		<item name="background">?attr/appBarColor</item>
 		<item name="titleTextStyle">@style/MyActionModeTitle</item>
 	</style>
 
 	<style name="MyActionModeTitle" parent="TextAppearance.AppCompat.Widget.ActionMode.Title">
-        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="android:textColor">?attr/appBarTextColor</item>
 	</style>
 
     <style name="OutlinedRoundedBox" parent="">
@@ -47,6 +47,17 @@
         <item name="whitePurpleForNavBar">#858ddd</item>
 
         <item name="mainPurpleForNavBar">?attr/mainPurple</item>
+        <item name="appBarColor">?attr/mainPurple</item>
+        <item name="roomStatusesColor">?attr/surface_variant1</item>
+        <item name="appBarIconColor">@android:color/white</item>
+        <item name="appBarTextColor">@android:color/white</item>
+        <item name="appBarHintColor">@android:color/white</item>
+        <item name="appBarOverlayTheme">@style/AppTheme.AppBarOverlay</item>
+        <item name="searchBarColor">#33FFFFFF</item>
+        <item name="searchBarHighlightColor">@android:color/white</item>
+        <item name="checkCircleSelectedColor">@color/checkCircleSelected</item>
+        <item name="checkCircleCheckColor">@color/checkCircleCheck</item>
+        <item name="batchSelectHighlightColor">@color/batchSelectHighlight</item>
 
         <item name="checkBoxColor">@color/colorAccent</item>
         <item name="checkboxStyle">@style/checkBoxStyle</item>
@@ -56,9 +67,9 @@
         <item name="snackbarButtonStyle">@style/Seeker.Snackbar.Action</item>
 
         <item name="windowActionModeOverlay">true</item>
-        <item name="android:actionModeBackground">?attr/mainPurple</item>
-        <item name="actionModeBackground">?attr/mainPurple</item>
-        <item name="actionModeTheme">@style/ThemeOverlay.Material3.Dark.ActionBar</item>
+        <item name="android:actionModeBackground">?attr/appBarColor</item>
+        <item name="actionModeBackground">?attr/appBarColor</item>
+        <item name="actionModeTheme">@style/AppTheme.ActionModeOverlay</item>
 
         <!-- Without this, BottomSheetDialogFragment falls back to Theme.Design.Light.BottomSheetDialog,
              whose colorPrimary is Material's default teal, not the app's purple. That mismatch is
@@ -127,6 +138,22 @@
         parent="ThemeOverlay.Material3.Dark.ActionBar"
     >
         <item name="actionModeStyle">@style/MyActionMode</item>
+        <item name="colorControlNormal">?attr/appBarIconColor</item>
+    </style>
+
+    <style name="AppTheme.ActionModeOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar">
+        <item name="colorControlNormal">?attr/appBarIconColor</item>
+    </style>
+
+    <!-- light app bar (Modern light), needs dark title / icons -->
+    <style name="AppTheme.AppBarOverlay.Light" parent="ThemeOverlay.Material3.ActionBar">
+        <item name="actionModeStyle">@style/MyActionMode</item>
+        <item name="colorControlNormal">?attr/appBarIconColor</item>
+        <item name="android:textColorPrimary">?attr/appBarTextColor</item>
+    </style>
+
+    <style name="AppTheme.ActionModeOverlay.Light" parent="ThemeOverlay.Material3.ActionBar">
+        <item name="colorControlNormal">?attr/appBarIconColor</item>
     </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Light" />

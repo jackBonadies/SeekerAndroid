@@ -220,6 +220,7 @@
     <string name="check_your_port_status">Check status</string>
     <string name="use_pnp_for_port_forwarding">UPnP port forwarding</string>
     <string name="edit_your_user_info">Edit user info</string>
+    <string name="user_info">User info</string>
     <string name="restore_default_settings">Restore default settings</string>
     <string name="restore_default_settings_body">This will reset all settings to their defaults. This can\'t be undone.</string>
     <string name="restore_defaults_subtitle">Resets every setting to factory state</string>
@@ -317,6 +318,7 @@
     <string name="always_dark">Always dark</string>
 
     <!-- theme variant color names (AMOLED variants are composed in code as "AMOLED - <color>") -->
+    <string name="theme_modern">Modern</string>
     <string name="theme_purple">Purple</string>
     <string name="theme_grey">Grey</string>
     <string name="theme_blue">Blue</string>

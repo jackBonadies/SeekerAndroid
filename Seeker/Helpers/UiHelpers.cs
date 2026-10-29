@@ -50,7 +50,7 @@ namespace Seeker
                     return;
                 }
 
-                RecolorStatusGuard(decor, top, GetColorFromAttribute(activity, Resource.Attribute.mainPurple));
+                RecolorStatusGuard(decor, top, GetColorFromAttribute(activity, Resource.Attribute.appBarColor));
             }
             catch (System.Exception e)
             {
@@ -123,6 +123,11 @@ namespace Seeker
             c.Theme.ResolveAttribute(attr, typedValue, true);
             int drawableRes = (typedValue.ResourceId != 0) ? typedValue.ResourceId : typedValue.Data;
             return c.Resources.GetDrawable(drawableRes, c.Theme);
+        }
+
+        public static Android.Graphics.Drawables.Drawable GetBatchSelectHighlight(Context c)
+        {
+            return new Android.Graphics.Drawables.ColorDrawable(GetColorFromAttribute(c, Resource.Attribute.batchSelectHighlightColor));
         }
 
         public static Color GetColorFromInteger(int color)

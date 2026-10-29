@@ -6,6 +6,7 @@
         android:id="@+id/action_up_directory"
         android:title="Up Directory"
         android:icon="@drawable/baseline_arrow_upward_white_24"
+        app:iconTint="?attr/appBarIconColor"
         app:showAsAction="always"
         android:iconifiedByDefault="false"
     />

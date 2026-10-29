@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="?attr/mainPurple"
+    android:background="?attr/appBarColor"
     android:paddingStart="12dp"
     android:paddingEnd="12dp"
     android:paddingTop="4dp"
@@ -15,19 +15,19 @@
         android:layout_weight="1"
         android:text="@string/wishlist"
         android:textSize="13sp"
-        android:textColor="@android:color/white"
+        android:textColor="?attr/appBarTextColor"
         android:gravity="center_vertical|start"
         android:drawableStart="@drawable/star_wishlist"
-        android:drawableTint="#ffffff"
+        android:drawableTint="?attr/appBarTextColor"
         android:drawablePadding="6dp" />
     <TextView
         android:id="@+id/wishlistHeaderText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="13sp"
-        android:textColor="@android:color/white"
+        android:textColor="?attr/appBarTextColor"
         android:gravity="center_vertical|end"
         android:drawableStart="@drawable/schedule_clock_wishlist"
-        android:drawableTint="#ffffff"
+        android:drawableTint="?attr/appBarTextColor"
         android:drawablePadding="4dp" />
 </LinearLayout>
