@@ -203,7 +203,8 @@
 
         <item name="checkCircleSelectedColor">#4f58c4</item>
         <item name="checkCircleCheckColor">#FFFFFF</item>
-        <item name="batchSelectHighlightColor">#334F58C4</item>
+        <!-- #CCCEE3 over the #FEF7FF background -->
+        <item name="batchSelectHighlightColor">#4037548F</item>
 
         <item name="snackbarActionColor">#BCC1F7</item>
     </style>
