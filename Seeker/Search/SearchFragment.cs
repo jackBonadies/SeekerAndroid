@@ -2493,7 +2493,7 @@ namespace Seeker
                 {
                     return;
                 }
-                tab.LastSearchError =string.IsNullOrEmpty(reason) ? SeekerApplication.GetString(Resource.String.search_failed_title) : reason;
+                tab.LastSearchError = string.IsNullOrEmpty(reason) ? SeekerApplication.GetString(Resource.String.search_failed_title) : reason;
                 bool failedStateWillShow = tabId == SearchTabHelper.CurrentTab && tab.SearchResponses.Count == 0;
                 if (!failedStateWillShow)
                 {

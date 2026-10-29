@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- a color state list can only be directly used as a View background from API 29 hence the user of a shape -->
+<!-- a color state list can only be directly used as a View background from API 29 hence the use of a shape -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <solid android:color="@color/chatroom_category_band" />
