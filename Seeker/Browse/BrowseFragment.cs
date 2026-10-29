@@ -192,6 +192,13 @@ namespace Seeker
             {
                 upItem.SetVisible(!state.IsAtRoot());
             }
+            if (state.IsAnonymousSelf)
+            {
+                menu.FindItem(Resource.Id.userOptions)?.SetVisible(false);
+                menu.FindItem(Resource.Id.action_download_files)?.SetVisible(false);
+                menu.FindItem(Resource.Id.action_queue_folder_paused)?.SetVisible(false);
+                menu.FindItem(Resource.Id.action_copy_folder_url)?.SetVisible(false);
+            }
             base.OnPrepareOptionsMenu(menu);
         }
 
@@ -199,7 +206,7 @@ namespace Seeker
         {
             if (item.ItemId != Resource.Id.action_browse_user) //special handling (this browse user means browse user dialog).
             {
-                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), state.CurrentUsername, SeekerState.ActiveActivityRef, null))
+                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted?.ToString(), state.CurrentUsername, SeekerState.ActiveActivityRef, null))
                 {
                     return true;
                 }
@@ -435,7 +442,7 @@ namespace Seeker
 
         public static string GetTabTitle(Android.Content.Context context)
         {
-            if (string.IsNullOrEmpty(state.CurrentUsername))
+            if (!state.HasResponse() || state.IsAnonymousSelf)
             {
                 return context.GetString(Resource.String.browse_tab);
             }
@@ -466,7 +473,7 @@ namespace Seeker
         public static void SetActionBarTitle()
         {
             SeekerState.MainActivityRef.SupportActionBar.Title = GetTabTitle(SeekerState.MainActivityRef);
-            if (string.IsNullOrEmpty(state.CurrentUsername))
+            if (!state.HasResponse())
             {
                 SeekerState.MainActivityRef.SupportActionBar.SubtitleFormatted = null;
             } 
@@ -481,8 +488,8 @@ namespace Seeker
         public override void OnResume()
         {
             base.OnResume();
-            if (SeekerState.MainActivityRef?.SupportActionBar?.Title != null && !string.IsNullOrEmpty(state.CurrentUsername)
-                && !SeekerState.MainActivityRef.SupportActionBar.Title.EndsWith(": " + state.CurrentUsername)
+            if (SeekerState.MainActivityRef?.SupportActionBar?.Title != null && state.HasResponse()
+                && SeekerState.MainActivityRef.SupportActionBar.Title != GetTabTitle(SeekerState.MainActivityRef)
                 && SeekerState.MainActivityRef.OnBrowseTab())
             {
                 SetActionBarTitle();
@@ -887,6 +894,11 @@ namespace Seeker
 
         private void ShowFileContextMenu(int position, DataItem dataItem)
         {
+            if (state.IsAnonymousSelf)
+            {
+                // if browsing self with no username dont show download, copy, queue links
+                return;
+            }
             var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
             string[] items = new string[]
             {
@@ -1055,6 +1067,12 @@ namespace Seeker
 
         private void ShowFolderContextMenu(DataItem dataItem)
         {
+            if (state.IsAnonymousSelf)
+            {
+                // folder info is the only action that does not need a username
+                ShowFolderSummaryDialog(BrowseUtils.GetFolderSummary(dataItem), dataItem.GetDisplayName());
+                return;
+            }
             var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
             string[] items = new string[]
             {

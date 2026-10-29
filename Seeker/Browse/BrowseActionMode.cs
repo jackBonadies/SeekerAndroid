@@ -22,6 +22,12 @@ namespace Seeker
             public bool OnCreateActionMode(ActionMode mode, IMenu menu)
             {
                 mode.MenuInflater.Inflate(Resource.Menu.browse_menu_batch, menu);
+                if (state.IsAnonymousSelf)
+                {
+                    menu.FindItem(Resource.Id.action_download_batch)?.SetVisible(false);
+                    menu.FindItem(Resource.Id.action_queue_paused_batch)?.SetVisible(false);
+                    menu.FindItem(Resource.Id.action_copy_selected_url_batch)?.SetVisible(false);
+                }
                 UiHelpers.ApplyActionModeStatusBarInset(SeekerState.ActiveActivityRef);
                 return true;
             }
