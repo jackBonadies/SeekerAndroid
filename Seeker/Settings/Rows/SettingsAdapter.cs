@@ -865,7 +865,7 @@ namespace Seeker.Settings.Rows
             }
             else
             {
-                ShowIcon(Resource.Drawable.check_circle, SuccessColor);
+                ShowIcon(Resource.Drawable.check_circle_tintable, SuccessColor);
                 SetSubtitle(SettingValueFormat.SharedFolderSubtitle(ctx, entry));
             }
 
