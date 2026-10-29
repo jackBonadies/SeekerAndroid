@@ -167,6 +167,9 @@ namespace Seeker.Messages
             {
                 UiHelpers.SetMenuTitles(menu, fragment.Username);
                 UiHelpers.SetIgnoreAddExclusive(menu, fragment.Username);
+                // new convos are not yet persisted with entries so nothing to delete
+                bool hasMessages = fragment.Username != null && MessageController.Messages.TryGetValue(fragment.Username, out var msgs) && msgs?.Count > 0;
+                menu.FindItem(Resource.Id.action_delete_messages)?.SetVisible(hasMessages);
             }
 
 #pragma warning disable S1186 // Required override - omitting causes java.lang.AbstractMethodError at runtime

@@ -628,6 +628,7 @@ namespace Seeker.Messages
             else
             {
                 RootMessages = SerializationHelper.RestoreMessagesFromString(messages);
+                RemoveNullConversations(RootMessages);
                 MessagesUsername = PreferencesState.Username;
                 Messages = new System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>();
                 if (!string.IsNullOrEmpty(PreferencesState.Username) && RootMessages.ContainsKey(PreferencesState.Username))
@@ -638,6 +639,34 @@ namespace Seeker.Messages
                 {
                     RootMessages[MessagesUsername] = Messages;
                 }
+            }
+        }
+
+        // older versions could persist null conversations by deleting an empty convo and then undoing that delete
+        //   this would lead to crashes as we always assumed the convo was non null.  This cleans that up.
+        private static void RemoveNullConversations(System.Collections.Concurrent.ConcurrentDictionary<string, System.Collections.Concurrent.ConcurrentDictionary<string, List<Message>>> rootMessages)
+        {
+            int removed = 0;
+            foreach (var account in rootMessages)
+            {
+                if (account.Value == null)
+                {
+                    rootMessages.TryRemove(account.Key, out _);
+                    removed++;
+                    continue;
+                }
+                foreach (var conversation in account.Value)
+                {
+                    if (conversation.Value == null)
+                    {
+                        account.Value.TryRemove(conversation.Key, out _);
+                        removed++;
+                    }
+                }
+            }
+            if (removed > 0)
+            {
+                Logger.Firebase("removed null message conversations: " + removed);
             }
         }
 
@@ -688,7 +717,7 @@ namespace Seeker.Messages
         {
             var messages = Messages;
             var lastReadCounts = LastReadMessageCounts;
-            if (messages == null || !messages.TryGetValue(username, out var msgList))
+            if (messages == null || !messages.TryGetValue(username, out var msgList) || msgList == null)
             {
                 return 0;
             }
@@ -708,6 +737,10 @@ namespace Seeker.Messages
             int total = 0;
             foreach (var kvp in messages)
             {
+                if (kvp.Value == null)
+                {
+                    continue;
+                }
                 int currentCount = kvp.Value.Count;
                 int lastRead = lastReadCounts.TryGetValue(kvp.Key, out int val) ? val : 0;
                 total += Math.Max(currentCount - lastRead, 0);
@@ -886,6 +919,11 @@ namespace Seeker.Messages
 
         public static void UndoDeleteMessagesFromUser((string username, List<Message> messages, int readCount) deletedData)
         {
+            // null when the deleted conversation has no messages (i.e. started new chat with user but never sent message)
+            if (deletedData.messages == null)
+            {
+                return;
+            }
             Messages[deletedData.username] = deletedData.messages;
             LastReadMessageCounts[deletedData.username] = deletedData.readCount;
             SaveMessagesToSharedPrefs(SeekerState.SharedPreferences);
