@@ -40,8 +40,15 @@ namespace Seeker
     public class ViewUserInfoActivity : ThemeableActivity
     {
         public const string USERNAME_TO_VIEW = "USERNAME_TO_VIEW";
+        // can occur if viewing self before we are logged in
+        private bool HasNoUsername => string.IsNullOrEmpty(userToView);
+
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
+            if (HasNoUsername)
+            {
+                return false;
+            }
             MenuInflater.Inflate(Resource.Menu.view_user_info_menu, menu);
             return base.OnCreateOptionsMenu(menu);
         }
@@ -54,7 +61,7 @@ namespace Seeker
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), userToView, this, null))
+            if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted?.ToString(), userToView, this, null))
             {
                 return true;
             }
@@ -194,11 +201,7 @@ namespace Seeker
             {
                 userToView = Intent.GetStringExtra(USERNAME_TO_VIEW);
             }
-            if (userToView == null)
-            {
-                Logger.Firebase("UserToView==null");
-            }
-            myToolbar.Title = userToView;
+            myToolbar.Title = HasNoUsername ? GetString(Resource.String.user_info) : userToView;
             this.SetSupportActionBar(myToolbar);
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);
             this.SupportActionBar.SetHomeButtonEnabled(true);
