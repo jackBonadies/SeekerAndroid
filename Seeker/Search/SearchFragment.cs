@@ -235,7 +235,11 @@ namespace Seeker
         /// </summary>
         public static void SetSearchingState(int tabId, bool searching)
         {
-            SearchTab tab = SearchTabHelper.SearchTabCollection[tabId];
+            if (!SearchTabHelper.SearchTabCollection.TryGetValue(tabId, out SearchTab tab))
+            {
+                Logger.InfoFirebase("SetSearchingState: tab no longer exists i.e. closed while search was finishing");
+                return;
+            }
             bool changed = tab.CurrentlySearching != searching;
             tab.CurrentlySearching = searching;
             if (tabId != SearchTabHelper.CurrentTab)
@@ -2291,9 +2295,20 @@ namespace Seeker
 
                 t.ContinueWith(new Action<Task<(Soulseek.Search, IReadOnlyCollection<SearchResponse>)>>(t =>
                 {
-                    var searchTab = SearchTabHelper.SearchTabCollection[fromTab];
-                    // Superseded by a newer search on this tab (SubmitSearch replaced the token, then cancelled old token)
-                    bool IsStale() => !fromWishlist && searchTab.CancellationTokenSource?.Token != cancellationToken;
+                    // Closing a tab cancels its search and removes it in one UI message, so the
+                    // continuation (and its UI post) can run after the tab is gone
+                    if (!SearchTabHelper.SearchTabCollection.TryGetValue(fromTab, out SearchTab searchTab))
+                    {
+                        Logger.Debug("search continuation for closed tab " + fromTab);
+                        if (fromWishlist)
+                        {
+                            WishlistController.SearchFailed(fromTab);
+                        }
+                        return;
+                    }
+                    // Closed, or superseded by a newer search on this tab (SubmitSearch replaced the token, then cancelled old token)
+                    bool IsStale() => !SearchTabHelper.SearchTabCollection.TryGetValue(fromTab, out SearchTab current) || current != searchTab
+                        || (!fromWishlist && searchTab.CancellationTokenSource?.Token != cancellationToken);
                     if (IsStale())
                     {
                         Logger.Debug("stale search continuation, tab " + fromTab);
@@ -2474,8 +2489,11 @@ namespace Seeker
             }
             SeekerApplication.RunOnUIThread(() =>
             {
-                SearchTab tab = SearchTabHelper.SearchTabCollection[tabId];
-                tab.LastSearchError = string.IsNullOrEmpty(reason) ? SeekerApplication.GetString(Resource.String.search_failed_title) : reason;
+                if (!SearchTabHelper.SearchTabCollection.TryGetValue(tabId, out SearchTab tab))
+                {
+                    return;
+                }
+                tab.LastSearchError =string.IsNullOrEmpty(reason) ? SeekerApplication.GetString(Resource.String.search_failed_title) : reason;
                 bool failedStateWillShow = tabId == SearchTabHelper.CurrentTab && tab.SearchResponses.Count == 0;
                 if (!failedStateWillShow)
                 {
