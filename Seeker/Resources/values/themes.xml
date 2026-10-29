@@ -52,6 +52,7 @@
         <item name="floating_action_bar_to_bottom_background">#FAFAFA</item>
 
         <item name="dialog_background">#ffffffff</item>
+        <item name="download_dialog_background">?attr/dialog_background</item>
         <item name="surface_variant1">#F3EDF7</item>
         <item name="filterBottomSheetBackground">#F2F5FA</item>
 
@@ -232,6 +233,7 @@
         </item>
 
         <item name="dialog_background">#ff424242</item>
+        <item name="download_dialog_background">?attr/dialog_background</item>
         <item name="surface_variant1">#ff424242</item>
         <item name="filterBottomSheetBackground">#ff424242</item>
 
@@ -269,6 +271,7 @@
 		<item name="filterBottomSheetBackground">#1d1c2a</item>
         <item name="surface_variant1">#ff202020</item>
         <item name="dialog_background">#ff282828</item>
+        <item name="download_dialog_background">@color/absoluteBackColor2</item>
         <!--<item name="mainPurple">#3b417f</item>-->
 		<!-- a bit brighter for dark mode -->
         <item name="mainPurple">#535DEE</item>

@@ -15,6 +15,7 @@
     <attr name="settingsDividerColor" format="color" />
     <attr name="linkDividerColor" format="color" />
     <attr name="dialog_background" format="color" />
+    <attr name="download_dialog_background" format="color" />
     <attr name="surface_variant1" format="color" />
     <attr name="normalTextColorNonTinted" format="color" />
     <attr name="mainPurple" format="color" />

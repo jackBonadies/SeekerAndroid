@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bottom_sheet_header_bg"
-    android:backgroundTint="?attr/dialog_background"
+    android:backgroundTint="?attr/download_dialog_background"
 >
     <LinearLayout
 		android:id="@+id/mainContentHeader"
@@ -86,7 +86,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:background="?attr/dialog_background"
+        android:background="?attr/download_dialog_background"
     >
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeToRefreshLayout"
@@ -111,7 +111,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="?attr/dialog_background"
+        android:background="?attr/download_dialog_background"
     >
         <View
             android:layout_width="match_parent"
