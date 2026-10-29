@@ -85,6 +85,7 @@
 
         <item name="navItemSelectedColor">#ffffff</item>
         <item name="navItemUnselectedColor">#ffffff</item>
+        <item name="sectionHeaderTextColor">#2E3478</item>
 	</style>
 
 	<style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
@@ -289,6 +290,7 @@
 
         <item name="navItemSelectedColor">#ffffff</item>
         <item name="navItemUnselectedColor">#ffffff</item>
+        <item name="sectionHeaderTextColor">#c9ceff</item>
     </style>
 
     <style name="DefaultDark_Modern" parent="DefaultDark">

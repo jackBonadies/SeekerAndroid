@@ -78,5 +78,6 @@
     <attr name="destructiveColor" format="color" />
 
     <attr name="navItemSelectedColor" format="color" />
+    <attr name="sectionHeaderTextColor" format="color" />
     <attr name="navItemUnselectedColor" format="color" />
 </resources>
