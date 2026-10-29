@@ -110,7 +110,7 @@ namespace Seeker.Users
             }
             else// if(viewType == CATEGORY)
             {
-                ChatroomOverviewCategoryView view = ChatroomOverviewCategoryView.Create(parent);
+                ChatroomOverviewCategoryView view = ChatroomOverviewCategoryView.Create(parent, Resource.Layout.user_list_category_item);
                 // .inflate(R.layout.text_row_item, viewGroup, false);
                 //(view as View).Click += MessageOverviewClick;
                 return new ChatroomOverviewCategoryHolder(view as View);
@@ -289,7 +289,7 @@ namespace Seeker.Users
                     viewNoteLayout.Visibility = ViewStates.Visible;
                     string note = null;
                     UserMetadataService.UserNotes.TryGetValue(item.Username, out note);
-                    viewNote.Text = SeekerState.ActiveActivityRef.GetString(Resource.String.note) + ": " + note;
+                    viewNote.Text = note;
                 }
                 else
                 {

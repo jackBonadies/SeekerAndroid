@@ -5,11 +5,11 @@
     android:id="@+id/relativeLayout1"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
-    android:background="@drawable/header_cell_shape_bottom"
     android:foreground="?android:attr/selectableItemBackground"
     android:layout_height="wrap_content"
     android:paddingStart="6dp"
-    android:paddingBottom="4dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="8dp"
 >
     <LinearLayout
         android:orientation="horizontal"
@@ -117,6 +117,7 @@
             android:ellipsize="end"
             android:text="Note: dummy testing testing testing testing testing testing testing testing"
             android:textSize="14sp"
+            android:textStyle="italic"
             android:singleLine="true"
         />
     </LinearLayout>
