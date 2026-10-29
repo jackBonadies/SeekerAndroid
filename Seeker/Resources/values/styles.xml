@@ -17,7 +17,7 @@
 	</style>
 
 	<style name="MyActionModeTitle" parent="TextAppearance.AppCompat.Widget.ActionMode.Title">
-        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="android:textColor">?attr/appBarTextColor</item>
 	</style>
 
     <style name="OutlinedRoundedBox" parent="">
@@ -49,6 +49,11 @@
         <item name="mainPurpleForNavBar">?attr/mainPurple</item>
         <item name="appBarColor">?attr/mainPurple</item>
         <item name="appBarIconColor">@android:color/white</item>
+        <item name="appBarTextColor">@android:color/white</item>
+        <item name="appBarHintColor">@android:color/white</item>
+        <item name="appBarOverlayTheme">@style/AppTheme.AppBarOverlay</item>
+        <item name="searchBarColor">#33FFFFFF</item>
+        <item name="searchBarHighlightColor">@android:color/white</item>
         <item name="checkCircleSelectedColor">@color/checkCircleSelected</item>
         <item name="checkCircleCheckColor">@color/checkCircleCheck</item>
         <item name="batchSelectHighlightColor">@color/batchSelectHighlight</item>
@@ -136,6 +141,17 @@
     </style>
 
     <style name="AppTheme.ActionModeOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar">
+        <item name="colorControlNormal">?attr/appBarIconColor</item>
+    </style>
+
+    <!-- light app bar (Modern light), needs dark title / icons -->
+    <style name="AppTheme.AppBarOverlay.Light" parent="ThemeOverlay.Material3.ActionBar">
+        <item name="actionModeStyle">@style/MyActionMode</item>
+        <item name="colorControlNormal">?attr/appBarIconColor</item>
+        <item name="android:textColorPrimary">?attr/appBarTextColor</item>
+    </style>
+
+    <style name="AppTheme.ActionModeOverlay.Light" parent="ThemeOverlay.Material3.ActionBar">
         <item name="colorControlNormal">?attr/appBarIconColor</item>
     </style>
 

@@ -37,6 +37,11 @@
     <attr name="mainPurpleForNavBar" format="color" />
     <attr name="appBarColor" format="color" />
     <attr name="appBarIconColor" format="color" />
+    <attr name="appBarTextColor" format="color" />
+    <attr name="appBarHintColor" format="color" />
+    <attr name="appBarOverlayTheme" format="reference" />
+    <attr name="searchBarColor" format="color" />
+    <attr name="searchBarHighlightColor" format="color" />
     <attr name="checkCircleSelectedColor" format="color" />
     <attr name="checkCircleCheckColor" format="color" />
     <attr name="batchSelectHighlightColor" format="color" />

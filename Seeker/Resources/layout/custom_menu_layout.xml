@@ -56,8 +56,8 @@
         android:singleLine="true"
         android:focusable="true"
         android:imeOptions="actionSearch"
-        android:textColorHighlight="@android:color/white"
-        android:textColorHint="@android:color/white"
+        android:textColorHighlight="?attr/searchBarHighlightColor"
+        android:textColorHint="?attr/appBarHintColor"
         android:popupBackground="?attr/colorSurface"
     />
 </RelativeLayout>

@@ -93,7 +93,7 @@
 	</style>
 
 	<style name="MyActionModeTitle" parent="TextAppearance.AppCompat.Widget.ActionMode.Title">
-        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="android:textColor">?attr/appBarTextColor</item>
 	</style>
 
     <style name="DefaultLight_Blue" parent="DefaultLight">
@@ -181,6 +181,31 @@
 
         <item name="navItemSelectedColor">#ffffff</item>
         <item name="navItemUnselectedColor">#ffffff</item>
+    </style>
+
+    <!-- light neutral app bar, dark text / icons -->
+    <style name="DefaultLight_Modern" parent="DefaultLight">
+        <item name="appBarColor">#F3EDF7</item>
+        <item name="appBarIconColor">#49454F</item>
+        <item name="appBarTextColor">#1D1B20</item>
+        <item name="appBarHintColor">#49454F</item>
+        <item name="appBarOverlayTheme">@style/AppTheme.AppBarOverlay.Light</item>
+        <item name="actionModeTheme">@style/AppTheme.ActionModeOverlay.Light</item>
+        <item name="searchBarColor">#E6E0E9</item>
+        <item name="searchBarHighlightColor">#C8CBF5</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+
+        <item name="whitePurpleForNavBar">#DEE0FF</item>
+        <item name="navItemSelectedColor">#2E3478</item>
+        <item name="navItemUnselectedColor">#49454F</item>
+        <item name="filterBottomSheetBackground">#F3EDF7</item>
+
+        <item name="checkCircleSelectedColor">#4f58c4</item>
+        <item name="checkCircleCheckColor">#FFFFFF</item>
+        <item name="batchSelectHighlightColor">#334F58C4</item>
+
+        <item name="snackbarActionColor">#BCC1F7</item>
     </style>
 
     <style name="DefaultDark" parent="AppTheme.NoActionBar">

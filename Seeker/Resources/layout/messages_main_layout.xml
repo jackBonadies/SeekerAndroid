@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:fitsSystemWindows="true"
         android:background="?attr/appBarColor"
-        android:theme="@style/AppTheme.AppBarOverlay"
+        android:theme="?attr/appBarOverlayTheme"
         android:layout_height="wrap_content"
     >
         <androidx.appcompat.widget.Toolbar

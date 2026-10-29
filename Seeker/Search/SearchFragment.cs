@@ -576,6 +576,12 @@ namespace Seeker
                     //https://developer.android.com/reference/android/graphics/PorterDuff.Mode
                     cancel.SetColorFilter(UiHelpers.GetColorFromAttribute(SeekerState.ActiveActivityRef, Resource.Attribute.mainTextColor), PorterDuff.Mode.SrcAtop);
                 }
+                else
+                {
+                    // the app bar search box
+                    cancel = cancel.Mutate();
+                    cancel.SetTint(UiHelpers.GetColorFromAttribute(actv.Context, Resource.Attribute.appBarIconColor));
+                }
                 actv.SetCompoundDrawables(null, null, cancel, null);
             }
         }

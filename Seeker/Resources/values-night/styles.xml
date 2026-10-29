@@ -41,6 +41,11 @@
         <item name="mainPurpleForNavBar">?attr/mainPurple</item>
         <item name="appBarColor">?attr/mainPurple</item>
         <item name="appBarIconColor">@android:color/white</item>
+        <item name="appBarTextColor">@android:color/white</item>
+        <item name="appBarHintColor">@android:color/white</item>
+        <item name="appBarOverlayTheme">@style/AppTheme.AppBarOverlay</item>
+        <item name="searchBarColor">#33FFFFFF</item>
+        <item name="searchBarHighlightColor">@android:color/white</item>
         <item name="checkCircleSelectedColor">@color/checkCircleSelected</item>
         <item name="checkCircleCheckColor">@color/checkCircleCheck</item>
         <item name="batchSelectHighlightColor">@color/batchSelectHighlight</item>

@@ -86,7 +86,7 @@ namespace Seeker.Settings.Rows
             var ctx = host.Activity;
             var variants = new[]
             {
-                DayThemeType.ClassicPurple, DayThemeType.Red, DayThemeType.Blue, DayThemeType.Grey,
+                DayThemeType.Modern, DayThemeType.ClassicPurple, DayThemeType.Red, DayThemeType.Blue, DayThemeType.Grey,
             };
             var options = new List<(string label, DayThemeType value)>(variants.Length);
             foreach (var variant in variants)

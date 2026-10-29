@@ -117,6 +117,7 @@ namespace Seeker.Settings.Rows
             DayThemeType.Red => ctx.GetString(Resource.String.theme_red),
             DayThemeType.Blue => ctx.GetString(Resource.String.theme_blue),
             DayThemeType.Grey => ctx.GetString(Resource.String.theme_grey),
+            DayThemeType.Modern => ctx.GetString(Resource.String.theme_modern),
             _ => v.ToString(),
         };
 
