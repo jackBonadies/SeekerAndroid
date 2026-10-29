@@ -264,7 +264,7 @@
     <style name="DefaultDark_Modern" parent="DefaultDark">
         <!--<item name="appBarColor">#221e17</item>-->
         <item name="appBarColor">#1d1c2a</item>
-        <item name="appBarIconColor">#cac4d0</item>
+        <item name="appBarIconColor">#DFD8E6</item>
         <item name="whitePurpleForNavBar">#3b417f</item>
 		<item name="filterBottomSheetBackground">#1d1c2a</item>
         <item name="surface_variant1">#ff202020</item>
@@ -274,7 +274,7 @@
         <item name="mainPurple">#5C67E6</item>
 
         <item name="navItemSelectedColor">#c9ceff</item>
-        <item name="navItemUnselectedColor">#ffffff</item>
+        <item name="navItemUnselectedColor">#cac4d0</item>
     </style>
 
     <style name="DefaultDark_Blue" parent="DefaultDark">
