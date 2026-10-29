@@ -8,7 +8,7 @@
     android:paddingStart="6dp"
     android:paddingEnd="6dp"
     android:paddingTop="6dp"
-    android:background="@color/chatroom_category_band"
+    android:background="@drawable/chatroom_category_band_bg"
     android:paddingBottom="6dp"
     android:orientation="horizontal"
     android:id="@+id/linearLayoutChatroomCategoryOverview"
