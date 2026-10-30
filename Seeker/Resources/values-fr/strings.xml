@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Seeker</string>
-    <string name="com.google.firebase.crashlytics.mapping_file_id">1.0</string>
     <string name="home_tab">Accueil</string>
     <string name="transfer_tab">Transferts</string>
     <string name="browse_tab">Parcourir</string>
@@ -237,7 +235,6 @@
     <string name="must_type_text_to_send">Vous devez taper le texte à envoyer</string>
     <string name="error">Erreur</string>
     <string name="error_">Erreur :</string>
-    <string name="error_duplicate">Erreur : requête double détectée</string>
     <string name="error_browse_at_location">Échec de l\'obtention des dossiers utilisateur au chemin spécifié</string>
     <string name="room_data_still_loading">Trop vite ! La récupération des donnés de la salle est toujours en cours...</string>
     <string name="must_be_logged_to_browse">Vous devez être connecté pour parcourir un utilisateur</string>
@@ -367,7 +364,6 @@
     <!--In this case the placeholder {0} is for the username-->
     <string name="added_to_ignore">Utilisateur \"{0}\" ajouté à la liste d\'ignorés</string>
     <string name="already_added_to_ignore">Utilisateur \"{0}\" est déjà dans la liste d\'ignorés</string>
-    <string name="failed_to_establish_connection_to_peer">Échec de la connexion à {0}</string>
     <string name="user_info_received">Information de l\'utilisateur {0} reçue</string>
     <string name="user_info_failed_conn">Échec de l\'obtention d\'info d\'utilisateur : {0}. Impossible d\'établir une connexion.</string>
     <string name="user_info_failed_offline">Échec de l\'obtention d\'info d\'utilisateur : {0}. L\'utilisateur est hors-ligne.</string>
@@ -460,9 +456,7 @@
     <!--Transfer States-->
     <string name="completed">Complété</string>
     <string name="in_progress">En cours</string>
-    <string name="not_started">Pas commencé</string>
     <string name="paused">En pause</string>
-    <string name="in_queue">En file d\'attente</string>
     <string name="unknown">Inconnu</string>
     <string name="retry_dl">Réessayer téléchargement</string>
     <string name="clear_from_list">Effacer de la liste</string>
