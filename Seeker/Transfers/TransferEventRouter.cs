@@ -112,7 +112,6 @@ namespace Seeker.Transfers
 
             if (e.Transfer.State.HasFlag(TransferStates.Errored) || e.Transfer.State.HasFlag(TransferStates.TimedOut) || e.Transfer.State.HasFlag(TransferStates.Rejected))
             {
-                SpeedLimitHelper.RemoveDownloadUser(e.Transfer.Username);
                 if (relevantItem == null)
                 {
                     return;
@@ -144,7 +143,6 @@ namespace Seeker.Transfers
             }
             else if (e.Transfer.State.HasFlag(TransferStates.Completed))
             {
-                SpeedLimitHelper.RemoveDownloadUser(e.Transfer.Username);
                 if (relevantItem == null)
                 {
                     return;

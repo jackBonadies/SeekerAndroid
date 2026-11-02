@@ -24,6 +24,9 @@ namespace Seeker
 
         public int SimulatedDelayMs { get; set; } = 200;
 
+        private TokenBucket DownloadTokenBucket { get; } = new TokenBucket((int.MaxValue * 1024L) / 10, 100);
+        private TokenBucket UploadTokenBucket { get; } = new TokenBucket((int.MaxValue * 1024L) / 10, 100);
+
         public int BrowseUploadIntervalSec { get; set; } = 180;
         public int PrivateMessageIntervalSec { get; set; } = 20;
         public int ExcludedPhrasesIntervalSec { get; set; } = 60;
@@ -2271,7 +2274,10 @@ namespace Seeker
                 for (int i = 1; i <= steps; i++)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    await Task.Delay(delayMsPerStep, cancellationToken).ConfigureAwait(false);
+                    // the step delay is network time; a speed limit overlaps it, as with a real socket
+                    await Task.WhenAll(
+                        Task.Delay(delayMsPerStep, cancellationToken),
+                        GovernBytesAsync(download, chunkSize, options, DownloadTokenBucket, cancellationToken)).ConfigureAwait(false);
 
                     if (!noFail && _random.Next(5000) == 0)
                     {
@@ -2302,6 +2308,8 @@ namespace Seeker
                         await Task.Delay(stallMs, cancellationToken).ConfigureAwait(false);
                     }
                 }
+
+                await GovernBytesAsync(download, (size - startOffset) - chunkSize * steps, options, DownloadTokenBucket, cancellationToken).ConfigureAwait(false);
 
                 if (realFile)
                 {
@@ -2384,6 +2392,19 @@ namespace Seeker
 
                 DownloadDictionary.TryRemove(token, out _);
                 UniqueKeyDictionary.TryRemove(uniqueKey, out _);
+            }
+        }
+
+        private async Task GovernBytesAsync(TransferInternal transfer, long bytes, TransferOptions options, TokenBucket bucket, CancellationToken cancellationToken)
+        {
+            int bufferSize = Options?.TransferConnectionOptions?.ReadBufferSize ?? 16384;
+            while (bytes > 0)
+            {
+                int requested = (int)Math.Min(bytes, bufferSize);
+                int callerGrant = await options.Governor(new Transfer(transfer), requested, cancellationToken).ConfigureAwait(false);
+                int granted = await bucket.GetAsync(Math.Min(requested, callerGrant), cancellationToken).ConfigureAwait(false);
+                options.Reporter?.Invoke(new Transfer(transfer), requested, granted, granted);
+                bytes -= granted;
             }
         }
 
@@ -2508,9 +2529,10 @@ namespace Seeker
                 for (int i = 1; i <= steps && bytesUploaded < remaining; i++)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
-
                     long chunkTarget = i == steps ? remaining : Math.Min(remaining, chunkSize * i);
+                    await Task.WhenAll(
+                        Task.Delay(1000, cancellationToken),
+                        GovernBytesAsync(upload, chunkTarget - bytesUploaded, options, UploadTokenBucket, cancellationToken)).ConfigureAwait(false);
                     while (bytesUploaded < chunkTarget)
                     {
                         int want = (int)Math.Min(buffer.Length, chunkTarget - bytesUploaded);
@@ -2778,7 +2800,17 @@ namespace Seeker
                 browseResponseResolver: patch.BrowseResponseResolver,
                 enqueueDownload: patch.EnqueueDownload,
                 directoryContentsResolver: patch.DirectoryContentsResolver,
-                placeInQueueResolver: patch.PlaceInQueueResolver);
+                placeInQueueResolver: patch.PlaceInQueueResolver,
+                maximumUploadSpeed: patch.MaximumUploadSpeed,
+                maximumDownloadSpeed: patch.MaximumDownloadSpeed);
+            if (patch.MaximumUploadSpeed.HasValue)
+            {
+                UploadTokenBucket.SetCapacity((patch.MaximumUploadSpeed.Value * 1024L) / 10);
+            }
+            if (patch.MaximumDownloadSpeed.HasValue)
+            {
+                DownloadTokenBucket.SetCapacity((patch.MaximumDownloadSpeed.Value * 1024L) / 10);
+            }
             bool fast = _random.Next(0, 2) == 0;
             bool fault = _random.Next(0, 4) == 0;
             var delay = fast ? 100 : 2000;

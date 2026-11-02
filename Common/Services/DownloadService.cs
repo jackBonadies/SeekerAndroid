@@ -413,6 +413,7 @@ namespace Seeker.Services
                     waitUntilEnqueue.TrySetResult(true);
                 }
             });
+            var rateLimiter = SpeedLimitHelper.CreateDownloadLimiter();
             if (PreferencesState.MemoryBackedDownload)
             {
                 var memStream = new MemoryStream();
@@ -423,7 +424,7 @@ namespace Seeker.Services
                         remoteFilename: fullfilename,
                         outputStreamFactory: () => Task.FromResult<Stream>((Stream)memStream),
                         size: size,
-                        options: new TransferOptions(governor: SpeedLimitHelper.OurDownloadGovernor, stateChanged: updateForEnqueue),
+                        options: new TransferOptions(governor: rateLimiter.GovernAsync, reporter: rateLimiter.Report, stateChanged: updateForEnqueue),
                         cancellationToken: cts.Token);
             }
             else
@@ -453,7 +454,7 @@ namespace Seeker.Services
                         size: size,
                         startOffset: partialLength,
                         options: new TransferOptions(disposeOutputStreamOnCompletion: true,
-                            governor: SpeedLimitHelper.OurDownloadGovernor, stateChanged: updateForEnqueue,
+                            governor: rateLimiter.GovernAsync, reporter: rateLimiter.Report, stateChanged: updateForEnqueue,
                             // we are not seekable, however, we already set our streams to start writing
                             // at partialLength/startOffset.  This way we tell the library we are handling it.
                             seekOutputStreamAutomatically: false),

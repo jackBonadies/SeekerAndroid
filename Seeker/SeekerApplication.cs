@@ -323,6 +323,7 @@ namespace Seeker
             #endif
             #if MOCK
                 SeekerState.SoulseekClient = new MockSoulseekClient();
+                SpeedLimitHelper.ApplyTotalLimits(SeekerState.SoulseekClient);
                 SharingService.TurnOnSharing();
                 if (Seeker.Debug.MockTransferStress.AutoStartOnLaunch)
                 {
@@ -346,6 +347,8 @@ namespace Seeker
                         // UploadService's queue owns the upload slots (ahead of global semaphore)
                         maximumConcurrentUploads: int.MaxValue,
                         maximumConcurrentSearches: 5,
+                        maximumUploadSpeed: SpeedLimitHelper.GetTotalUploadLimitKiB(),
+                        maximumDownloadSpeed: SpeedLimitHelper.GetTotalDownloadLimitKiB(),
                         serverConnectionOptions: ServerConnectionOptionsWithKeepAlive,
                         userInfoResolver: UserInfoResponder.HandleRequest));
             #endif
