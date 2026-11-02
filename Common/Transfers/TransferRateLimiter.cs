@@ -41,23 +41,26 @@ namespace Common.Transfers
                 return int.MaxValue;
             }
 
-            double capacity = GetCapacity(rate);
+            // the bucket holds BucketSeconds worth of bytes
+            double amount = Math.Max(1.0, rate * BucketSeconds);
             long now = getTimestamp();
             if (lastRate == 0)
             {
-                tokens = capacity;
+                // if first time take the full amount
+                tokens = amount;
             }
             else
             {
                 // here we always min, we dont allow "catch up" rather the speed limit is more like a ceiling
                 //  there will never be bursts above the ceiling
-                tokens = Math.Min(capacity, tokens + ((now - lastTimestamp) * (double)rate / timestampFrequency));
+                // this is for if we are calling this say 20x a second, we will take .05 * rate, so half of "amount"
+                tokens = Math.Min(amount, tokens + ((now - lastTimestamp) * (double)rate / timestampFrequency));
             }
             lastTimestamp = now;
             lastRate = rate;
 
             // take the grant now and wait off any debt, so the wait is at most one bucket
-            int grant = (int)Math.Max(1, Math.Min(requestedBytes, capacity));
+            int grant = (int)Math.Max(1, Math.Min(requestedBytes, amount));
             tokens -= grant;
             double waitSeconds = tokens < 0 ? -tokens / rate : 0;
 
@@ -83,7 +86,5 @@ namespace Common.Transfers
         public Task<int> GovernAsync(Soulseek.Transfer transfer, int requestedBytes, CancellationToken cancellationToken) => GetAsync(requestedBytes, cancellationToken);
 
         public void Report(Soulseek.Transfer transfer, int attemptedBytes, int grantedBytes, int actualBytes) => Return(grantedBytes, actualBytes);
-
-        private static double GetCapacity(int rate) => Math.Max(1.0, rate * BucketSeconds);
     }
 }
