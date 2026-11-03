@@ -44,6 +44,8 @@
     <attr name="searchBarColor" format="color" />
     <attr name="searchBarHighlightColor" format="color" />
     <attr name="checkCircleSelectedColor" format="color" />
+    <attr name="homeBadgeColor" format="color" />
+    <attr name="homeBadgeTextColor" format="color" />
     <attr name="checkCircleCheckColor" format="color" />
     <attr name="batchSelectHighlightColor" format="color" />
     <attr name="pseudo_window_background_color" format="color" />

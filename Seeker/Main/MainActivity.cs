@@ -33,6 +33,7 @@ using AndroidX.Lifecycle;
 using Common;
 using Google.Android.Material.BottomNavigation;
 using Seeker.Helpers;
+using Seeker.Messages;
 using Seeker.Search;
 using Seeker.Services;
 using Soulseek;
@@ -178,6 +179,7 @@ namespace Seeker
 
             BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
             navigation.SetOnNavigationItemSelectedListener(this);
+            SubscribeHomeBadgeSources();
 
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.toolbar);
@@ -527,6 +529,101 @@ namespace Seeker
             //so then the FragmentManager will be null among other things...
             SeekerState.MainActivityRef = this;
             base.OnStart();
+            // reads / deletes / undo in MessagesActivity happen while we are stopped
+            UpdateHomeBadge();
+        }
+
+        protected override void OnDestroy()
+        {
+            UnsubscribeHomeBadgeSources();
+            base.OnDestroy();
+        }
+
+        // Home tab badge: number if unread messages, else badge if unread announcement, else nothing
+        private void SubscribeHomeBadgeSources()
+        {
+            UnsubscribeHomeBadgeSources();
+            MessageController.MessageReceived += OnHomeBadgeMessageReceived;
+            MessagesBroadcastReceiver.MarkAsReadFromNotification += OnHomeBadgeMarkedAsRead;
+            ServerMessageService.Changed += OnHomeBadgeSourceChanged;
+            SessionService.LoginCompleted += OnHomeBadgeLoginCompleted;
+            PreferencesState.UsernameChanged += OnHomeBadgeUsernameChanged;
+        }
+
+        private void UnsubscribeHomeBadgeSources()
+        {
+            MessageController.MessageReceived -= OnHomeBadgeMessageReceived;
+            MessagesBroadcastReceiver.MarkAsReadFromNotification -= OnHomeBadgeMarkedAsRead;
+            ServerMessageService.Changed -= OnHomeBadgeSourceChanged;
+            SessionService.LoginCompleted -= OnHomeBadgeLoginCompleted;
+            PreferencesState.UsernameChanged -= OnHomeBadgeUsernameChanged;
+        }
+
+        private void OnHomeBadgeMessageReceived(object sender, Message msg)
+        {
+            SeekerApplication.RunOnUIThread(UpdateHomeBadge);
+        }
+
+        private void OnHomeBadgeMarkedAsRead(object sender, string username)
+        {
+            SeekerApplication.RunOnUIThread(UpdateHomeBadge);
+        }
+
+        private void OnHomeBadgeSourceChanged(object sender, EventArgs e)
+        {
+            SeekerApplication.RunOnUIThread(UpdateHomeBadge);
+        }
+
+        private void OnHomeBadgeLoginCompleted(object sender, LoginCompletedEventArgs e)
+        {
+            SeekerApplication.RunOnUIThread(UpdateHomeBadge);
+        }
+
+        // logout and account switch
+        private void OnHomeBadgeUsernameChanged(string username)
+        {
+            SeekerApplication.RunOnUIThread(UpdateHomeBadge);
+        }
+
+        private void UpdateHomeBadge()
+        {
+            if (IsDestroyed)
+            {
+                return;
+            }
+            try
+            {
+                var navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
+                if (navigation == null)
+                {
+                    return;
+                }
+                bool loggedIn = !SessionService.Instance.IsNotLoggedIn();
+                int unread = loggedIn ? MessageController.GetTotalUnreadCount() : 0;
+                bool announcement = loggedIn && ServerMessageService.HasActiveMessage;                
+                if (unread == 0 && !announcement)
+                {
+                    navigation.RemoveBadge(Resource.Id.navigation_home);
+                    return;
+                }
+                var badge = navigation.GetOrCreateBadge(Resource.Id.navigation_home);
+                badge.BackgroundColor = UiHelpers.GetColorFromAttribute(this, Resource.Attribute.homeBadgeColor).ToArgb();
+                badge.BadgeTextColor = UiHelpers.GetColorFromAttribute(this, Resource.Attribute.homeBadgeTextColor).ToArgb();
+                badge.MaxNumber = 99;
+                if (unread > 0)
+                {
+                    badge.Number = unread;
+                }
+                else
+                {
+                    badge.ClearNumber();
+                }
+                badge.SetVisible(true);
+            }
+            catch (Exception e)
+            {
+                Logger.FirebaseError("UpdateHomeBadge failed", e);
+            }
         }
         public static bool fromNotificationMoveToUploads = false;
         protected override void OnNewIntent(Intent intent)

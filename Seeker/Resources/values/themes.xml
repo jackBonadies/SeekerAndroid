@@ -86,6 +86,9 @@
         <item name="navItemSelectedColor">#ffffff</item>
         <item name="navItemUnselectedColor">#ffffff</item>
         <item name="sectionHeaderTextColor">#2E3478</item>
+
+        <item name="homeBadgeColor">#D93025</item>
+        <item name="homeBadgeTextColor">#FFFFFF</item>
 	</style>
 
 	<style name="MyActionMode" parent="Widget.AppCompat.ActionMode">
@@ -128,6 +131,9 @@
     </style>
 
     <style name="DefaultLight_Red" parent="DefaultLight">
+        <!-- inverted since bar is red -->
+        <item name="homeBadgeColor">#FFFFFF</item>
+        <item name="homeBadgeTextColor">#B22525</item>
         <item name="colorPrimary">#B22525</item>
         <item name="colorSecondaryContainer">#f5dfdf</item>
         <item name="mainPurple">#B22525</item>
@@ -210,6 +216,9 @@
         <item name="batchSelectHighlightColor">#4037548F</item>
 
         <item name="snackbarActionColor">#BCC1F7</item>
+
+        <item name="homeBadgeColor">#4f58c4</item>
+        <item name="homeBadgeTextColor">#FFFFFF</item>
     </style>
 
     <style name="DefaultDark" parent="AppTheme.NoActionBar">
@@ -291,6 +300,9 @@
         <item name="navItemSelectedColor">#ffffff</item>
         <item name="navItemUnselectedColor">#ffffff</item>
         <item name="sectionHeaderTextColor">#c9ceff</item>
+
+        <item name="homeBadgeColor">#E5534B</item>
+        <item name="homeBadgeTextColor">#FFFFFF</item>
     </style>
 
     <style name="DefaultDark_Modern" parent="DefaultDark">
@@ -312,6 +324,8 @@
         <item name="checkCircleSelectedColor">#595BFF</item>
         <item name="checkCircleCheckColor">#FFFFFF</item>
         <item name="batchSelectHighlightColor">#40528FDC</item>
+        <item name="homeBadgeColor">#595BFF</item>
+        <item name="homeBadgeTextColor">#FFFFFF</item>
     </style>
 
     <style name="DefaultDark_Blue" parent="DefaultDark">
@@ -341,6 +355,8 @@
     </style>
 
     <style name="DefaultDark_Red" parent="DefaultDark">
+        <item name="homeBadgeColor">#FFFFFF</item>
+        <item name="homeBadgeTextColor">#B22525</item>
         <item name="colorPrimary">#d57676</item>
         <item name="mainPurple">#B22525</item>
         <item name="mainPurpleStatusBar">#7B0000</item>
