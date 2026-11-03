@@ -94,6 +94,11 @@ namespace Soulseek.Messaging.Messages
                 directoryList.Add(reader.ReadDirectory());
             }
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Peer.FolderContentsResponse)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new FolderContentsResponse(token, rootDirectory, directoryList);
         }
 

@@ -72,6 +72,11 @@ namespace Soulseek.Messaging.Messages
             var id = reader.ReadInteger();
             var username = reader.ReadString();
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.NotifyPrivileges)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new PrivilegeNotification(id, username);
         }
     }

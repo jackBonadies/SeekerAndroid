@@ -85,6 +85,11 @@ namespace Soulseek.Messaging.Messages
                 parents.Add((username, ipAddress, port));
             }
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.NetInfo)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new NetInfoNotification(parentCount, parents.AsReadOnly());
         }
     }

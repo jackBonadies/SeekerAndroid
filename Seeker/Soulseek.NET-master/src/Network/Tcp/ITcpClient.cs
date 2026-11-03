@@ -98,7 +98,7 @@ namespace Soulseek.Network.Tcp
             int destinationPort,
             string username = null,
             string password = null,
-            CancellationToken? cancellationToken = null);
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         ///     Returns the <see cref="NetworkStream"/> used to send and receive data.

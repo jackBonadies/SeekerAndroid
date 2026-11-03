@@ -734,6 +734,123 @@ namespace Soulseek.Tests.Unit.Messaging.Messages
             Assert.Equal(username, reader.ReadString());
         }
 
+        [Trait("Category", "Instantiation")]
+        [Trait("Request", "UserInterestsRequest")]
+        [Theory(DisplayName = "UserInterestsRequest instantiates properly"), AutoData]
+        public void UserInterestsRequest_Instantiates_Properly(string username)
+        {
+            var a = new UserInterestsRequest(username);
+
+            Assert.Equal(username, a.Username);
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "UserInterestsRequest")]
+        [Theory(DisplayName = "UserInterestsRequest constructs the correct message"), AutoData]
+        public void UserInterestsRequest_Constructs_The_Correct_Message(string username)
+        {
+            var a = new UserInterestsRequest(username);
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.GetUserInterests, code);
+            Assert.Equal(username, reader.ReadString());
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "PersonalRecommendationsRequest")]
+        [Fact(DisplayName = "PersonalRecommendationsRequest constructs the correct message")]
+        public void PersonalRecommendationsRequest_Constructs_The_Correct_Message()
+        {
+            var a = new PersonalRecommendationsRequest();
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.GetPersonalRecommendations, code);
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "GlobalRecommendationsRequest")]
+        [Fact(DisplayName = "GlobalRecommendationsRequest constructs the correct message")]
+        public void GlobalRecommendationsRequest_Constructs_The_Correct_Message()
+        {
+            var a = new GlobalRecommendationsRequest();
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.GetGlobalRecommendations, code);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Trait("Request", "InterestRecommendationsRequest")]
+        [Theory(DisplayName = "InterestRecommendationsRequest instantiates properly"), AutoData]
+        public void InterestRecommendationsRequest_Instantiates_Properly(string interest)
+        {
+            var a = new InterestRecommendationsRequest(interest);
+
+            Assert.Equal(interest, a.Interest);
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "InterestRecommendationsRequest")]
+        [Theory(DisplayName = "InterestRecommendationsRequest constructs the correct message"), AutoData]
+        public void InterestRecommendationsRequest_Constructs_The_Correct_Message(string interest)
+        {
+            var a = new InterestRecommendationsRequest(interest);
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.GetInterestRecommendations, code);
+            Assert.Equal(interest, reader.ReadString());
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "PersonalSimilarUsersRequest")]
+        [Fact(DisplayName = "PersonalSimilarUsersRequest constructs the correct message")]
+        public void PersonalSimilarUsersRequest_Constructs_The_Correct_Message()
+        {
+            var a = new PersonalSimilarUsersRequest();
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.GetPersonalSimilarUsers, code);
+        }
+
+        [Trait("Category", "Instantiation")]
+        [Trait("Request", "InterestSimilarUsersRequest")]
+        [Theory(DisplayName = "InterestSimilarUsersRequest instantiates properly"), AutoData]
+        public void InterestSimilarUsersRequest_Instantiates_Properly(string interest)
+        {
+            var a = new InterestSimilarUsersRequest(interest);
+
+            Assert.Equal(interest, a.Interest);
+        }
+
+        [Trait("Category", "ToByteArray")]
+        [Trait("Request", "InterestSimilarUsersRequest")]
+        [Theory(DisplayName = "InterestSimilarUsersRequest constructs the correct message"), AutoData]
+        public void InterestSimilarUsersRequest_Constructs_The_Correct_Message(string interest)
+        {
+            var a = new InterestSimilarUsersRequest(interest);
+            var msg = a.ToByteArray();
+
+            var reader = new MessageReader<MessageCode.Server>(msg);
+            var code = reader.ReadCode();
+
+            Assert.Equal(MessageCode.Server.GetInterestSimilarUsers, code);
+            Assert.Equal(interest, reader.ReadString());
+        }
+
         [Trait("Category", "ToByteArray")]
         [Trait("Request", "PrivateRoomDropMembershipCommand")]
         [Theory(DisplayName = "PrivateRoomDropMembershipCommand constructs the correct message"), AutoData]

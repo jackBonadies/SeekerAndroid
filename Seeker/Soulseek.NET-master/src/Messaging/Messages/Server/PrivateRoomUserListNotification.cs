@@ -55,6 +55,11 @@ namespace Soulseek.Messaging.Messages
                 userList.Add(reader.ReadString());
             }
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.PrivateRoomUsers)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new RoomInfo(roomName, userList);
         }
     }

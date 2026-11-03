@@ -255,7 +255,7 @@ namespace Soulseek.Tests.Unit.Client
             var (client, mocks) = GetFixture();
 
             mocks.ServerConnection
-                .Setup(m => m.ConnectAsync(It.IsAny<CancellationToken?>())).Throws(new ConnectionException());
+                .Setup(m => m.ConnectAsync(It.IsAny<CancellationToken>())).Throws(new ConnectionException());
 
             using (client)
             {
@@ -341,7 +341,7 @@ namespace Soulseek.Tests.Unit.Client
                 .Concat(new SetListenPortCommand(client.Options.ListenPort).ToByteArray())
                 .ToArray();
 
-            mocks.ServerConnection.Verify(m => m.WriteAsync(It.Is<byte[]>(msg => msg.Matches(expectedBytes)), It.IsAny<CancellationToken?>()));
+            mocks.ServerConnection.Verify(m => m.WriteAsync(It.Is<byte[]>(msg => msg.Matches(expectedBytes)), It.IsAny<CancellationToken>()));
         }
 
         [Trait("Category", "Connect")]
@@ -367,7 +367,7 @@ namespace Soulseek.Tests.Unit.Client
             var (client, mocks) = GetFixture();
 
             mocks.ServerConnection
-                .Setup(m => m.ConnectAsync(It.IsAny<CancellationToken?>()))
+                .Setup(m => m.ConnectAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask)
                 .Callback(() => client.InvokeMethod("ChangeState", SoulseekClientStates.Connected, "Connected", null));
 
@@ -495,7 +495,7 @@ namespace Soulseek.Tests.Unit.Client
                 Assert.Equal(user, client.Username);
             }
 
-            mocks.ServerConnection.Verify(m => m.WriteAsync(It.IsAny<SetListenPortCommand>(), It.IsAny<CancellationToken?>()));
+            mocks.ServerConnection.Verify(m => m.WriteAsync(It.IsAny<SetListenPortCommand>(), It.IsAny<CancellationToken>()));
         }
 
         [Trait("Category", "Connect")]
@@ -509,7 +509,7 @@ namespace Soulseek.Tests.Unit.Client
                 await client.ConnectAsync(user, password);
             }
 
-            mocks.DistributedConnectionManager.Verify(m => m.UpdateStatusAsync(It.IsAny<CancellationToken?>()));
+            mocks.DistributedConnectionManager.Verify(m => m.UpdateStatusAsync(It.IsAny<CancellationToken>()));
         }
 
         [Trait("Category", "Connect")]
@@ -523,7 +523,7 @@ namespace Soulseek.Tests.Unit.Client
                 await client.ConnectAsync(user, password);
             }
 
-            mocks.ServerConnection.Verify(m => m.WriteAsync(It.IsAny<PrivateRoomToggle>(), It.IsAny<CancellationToken?>()));
+            mocks.ServerConnection.Verify(m => m.WriteAsync(It.IsAny<PrivateRoomToggle>(), It.IsAny<CancellationToken>()));
         }
 
         [Trait("Category", "Connect")]

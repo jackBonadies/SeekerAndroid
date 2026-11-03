@@ -93,6 +93,11 @@ namespace Soulseek.Messaging.Messages
                 user = new UserData(username, status, averageSpeed, downloadCount, fileCount, directoryCount, countryCode);
             }
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.WatchUser)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new WatchUserResponse(username, exists, user);
         }
     }

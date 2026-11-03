@@ -15,5 +15,7 @@
         void Fill();
 
         IEnumerable<Soulseek.File> Search(SearchQuery query);
+
+        bool Contains(string filename);
     }
 }

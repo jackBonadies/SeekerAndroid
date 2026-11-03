@@ -12,6 +12,7 @@ using Soulseek;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Seeker.Browse
@@ -49,7 +50,7 @@ namespace Seeker.Browse
                     Task<IReadOnlyCollection<Directory>> t;
                     try
                     {
-                        t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, null, null, isLegacy);
+                        t = SeekerState.SoulseekClient.GetDirectoryContentsAsync(username, dirname, null, CancellationToken.None, isLegacy);
                     }
                     catch (Exception e)
                     {

@@ -445,6 +445,36 @@ namespace Soulseek.Messaging.Handlers
                         UserStatisticsChanged?.Invoke(this, stats);
                         break;
 
+                    case MessageCode.Server.GetUserInterests:
+                        var interests = UserInterestsResponse.FromByteArray(message);
+                        SoulseekClient.Waiter.Complete(new WaitKey(code, interests.Username), interests);
+                        break;
+
+                    case MessageCode.Server.GetPersonalSimilarUsers:
+                        var personalSimilarUsers = PersonalSimilarUsersResponse.FromByteArray(message);
+                        SoulseekClient.Waiter.Complete(new WaitKey(code), personalSimilarUsers);
+                        break;
+
+                    case MessageCode.Server.GetInterestSimilarUsers:
+                        var interestSimilarUsers = InterestSimilarUsersResponse.FromByteArray(message);
+                        SoulseekClient.Waiter.Complete(new WaitKey(code, interestSimilarUsers.Interest), interestSimilarUsers);
+                        break;
+
+                    case MessageCode.Server.GetPersonalRecommendations:
+                        var personalRecommendations = PersonalRecommendationsResponse.FromByteArray(message);
+                        SoulseekClient.Waiter.Complete(new WaitKey(code), personalRecommendations);
+                        break;
+
+                    case MessageCode.Server.GetGlobalRecommendations:
+                        var globalRecommendations = GlobalRecommendationsResponse.FromByteArray(message);
+                        SoulseekClient.Waiter.Complete(new WaitKey(code), globalRecommendations);
+                        break;
+
+                    case MessageCode.Server.GetInterestRecommendations:
+                        var interestRecommendations = InterestRecommendationsResponse.FromByteArray(message);
+                        SoulseekClient.Waiter.Complete(new WaitKey(code, interestRecommendations.Interest), interestRecommendations);
+                        break;
+
                     case MessageCode.Server.PrivateMessage:
                         var pm = PrivateMessageNotification.FromByteArray(message);
                         PrivateMessageReceived?.Invoke(this, new PrivateMessageReceivedEventArgs(pm));

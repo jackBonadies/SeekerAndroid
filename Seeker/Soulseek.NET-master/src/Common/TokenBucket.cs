@@ -33,6 +33,8 @@ namespace Soulseek
     internal sealed class TokenBucket : ITokenBucket
     {
         private TaskCompletionSource<bool> waitForReset = new TaskCompletionSource<bool>();
+        private long currentCount;
+        private long currentCapacity;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="TokenBucket"/> class.
@@ -52,12 +54,15 @@ namespace Soulseek
             }
 
             Capacity = capacity;
-            CurrentCount = Capacity;
+
+            currentCapacity = Capacity;
+            currentCount = Capacity;
 
             Clock = new System.Timers.Timer(interval);
             Clock.Elapsed += (sender, e) =>
             {
-                CurrentCount = Capacity;
+                Interlocked.Exchange(ref currentCapacity, Capacity);
+                Interlocked.Exchange(ref currentCount, currentCapacity);
                 Reset();
             };
 
@@ -68,11 +73,10 @@ namespace Soulseek
         ///     Gets the bucket capacity.
         /// </summary>
         public long Capacity { get; private set; }
-
         private System.Timers.Timer Clock { get; set; }
-        private long CurrentCount { get; set; }
         private bool Disposed { get; set; }
         private SemaphoreSlim SyncRoot { get; } = new SemaphoreSlim(1, 1);
+        private TaskCompletionSource<bool> Disposal { get; } = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         /// <summary>
         ///     Disposes this instance.
@@ -101,7 +105,12 @@ namespace Soulseek
         /// <returns>A Task that completes when tokens have been provided.</returns>
         public Task<int> GetAsync(int count, CancellationToken cancellationToken = default)
         {
-            return GetInternalAsync(Math.Min(count, (int)Math.Min(int.MaxValue, Capacity)), cancellationToken);
+            if (count <= 0)
+            {
+                return Task.FromResult(0);
+            }
+
+            return GetInternalAsync(Math.Min(count, (int)Math.Min(int.MaxValue, currentCapacity)), cancellationToken);
         }
 
         /// <summary>
@@ -119,7 +128,23 @@ namespace Soulseek
         /// <param name="count">The number of tokens to return.</param>
         public void Return(int count)
         {
-            CurrentCount += Math.Min(Math.Max(count, 0), Capacity);
+            if (count <= 0)
+            {
+                return;
+            }
+
+            long current, updated;
+
+            // lock-free read-then-act operation; the while loop is the backstop against the value changing between
+            // when it was read and when we go to update it; if it changed CompareExchange returns false and we do it
+            // again until we get a 'clean' update, which shouldn't take more than one iteration typically.
+            do
+            {
+                var capacity = Interlocked.Read(ref currentCapacity);
+                current = Interlocked.Read(ref currentCount);
+                updated = Math.Min(current + Math.Min(count, capacity), capacity * 2);
+            }
+            while (Interlocked.CompareExchange(ref currentCount, value: updated, comparand: current) != current);
         }
 
         /// <summary>
@@ -135,7 +160,6 @@ namespace Soulseek
             }
 
             Capacity = capacity;
-            CurrentCount = Math.Min(CurrentCount, Capacity);
         }
 
         private void Dispose(bool disposing)
@@ -145,7 +169,7 @@ namespace Soulseek
                 if (disposing)
                 {
                     Clock.Dispose();
-                    SyncRoot.Dispose();
+                    Disposal.TrySetException(new ObjectDisposedException(nameof(TokenBucket)));
                 }
 
                 Disposed = true;
@@ -158,18 +182,47 @@ namespace Soulseek
 
             try
             {
+                if (Disposed)
+                {
+                    throw new ObjectDisposedException(nameof(TokenBucket));
+                }
+
+                // capture the present value of the wait so we have the right one if reset fires between when we check the
+                // count and enter the body below to wait. if we get the new reset instead of the one that exist now,
+                // we could wait another interval needlessly
+                var currentWaitForReset = Volatile.Read(ref waitForReset);
+
                 // if the bucket is empty, wait for a reset, then replenish it before continuing
                 // this ensures tokens are distributed in the order in which callers obtain the semaphore,
                 // which is as close to a FIFO as .NET synchronization primitives will allow
-                if (CurrentCount == 0)
+                if (Interlocked.Read(ref currentCount) == 0)
                 {
-                    await waitForReset.Task.ConfigureAwait(false);
+                    // wait for the reset or for cancellation, whichever comes first
+                    var cancelled = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+                    using (cancellationToken.Register(() => cancelled.TrySetResult(true)))
+                    {
+                        var winner = await Task.WhenAny(currentWaitForReset.Task, cancelled.Task, Disposal.Task).ConfigureAwait(false);
+                        await winner.ConfigureAwait(false);
+                    }
+
+                    cancellationToken.ThrowIfCancellationRequested();
                 }
 
-                // take the minimum of requested count or CurrentCount, deduct it from
-                // CurrentCount (potentially zeroing the bucket), and return it
-                var availableCount = Math.Min(CurrentCount, count);
-                CurrentCount -= availableCount;
+                long current, availableCount;
+
+                // lock-free read-then-act operation as seen above. this protects us against over- or under- granting
+                // counts if another thread increments or decrements the count between the time we read it and the time
+                // we go to update it with the deducted amount
+                do
+                {
+                    // take the minimum of requested count or currentCount, deduct it from
+                    // currentCount (potentially zeroing the bucket), and return it
+                    current = Interlocked.Read(ref currentCount);
+                    availableCount = Math.Min(current, count);
+                }
+                while (Interlocked.CompareExchange(ref currentCount, value: current - availableCount, comparand: current) != current);
+
                 return (int)availableCount;
             }
             finally
@@ -179,6 +232,6 @@ namespace Soulseek
         }
 
         private void Reset()
-            => Interlocked.Exchange(ref waitForReset, new TaskCompletionSource<bool>()).SetResult(true);
+            => Interlocked.Exchange(ref waitForReset, new TaskCompletionSource<bool>()).TrySetResult(true);
     }
 }

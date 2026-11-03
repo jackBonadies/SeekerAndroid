@@ -78,7 +78,7 @@
 
                     o($"\nDownloading {response.Files.Count()} file{(response.Files.Count() > 1 ? "s" : string.Empty)} from {response.Username}...\n");
 
-                    await DownloadFilesAsync(client, response.Username, response.Files.Select(f => f.Filename).ToList()).ConfigureAwait(false);
+                    await DownloadFilesAsync(client, response.Username, response.Files.ToList()).ConfigureAwait(false);
 
                     o($"\nDownload{(response.Files.Count() > 1 ? "s" : string.Empty)} complete.");
                 }
@@ -102,7 +102,7 @@
 
                     o($"\nDownloading {response.Files.Count()} file{(response.Files.Count() > 1 ? "s" : string.Empty)} from {response.Username}...\n");
 
-                    await DownloadFilesAsync(client, response.Username, response.Files.Select(f => f.Filename).ToList()).ConfigureAwait(false);
+                    await DownloadFilesAsync(client, response.Username, response.Files.ToList()).ConfigureAwait(false);
 
                     o($"\nDownload{(response.Files.Count() > 1 ? "s" : string.Empty)} complete.");
                 }
@@ -119,18 +119,20 @@
             }
         }
 
-        private static async Task DownloadFilesAsync(SoulseekClient client, string username, List<string> files)
+        private static async Task DownloadFilesAsync(SoulseekClient client, string username, List<Soulseek.File> files)
         {
             var index = 0;
 
-            var tasks = files.Select(async file =>
+            var tasks = files.Select(async f =>
             {
+                var file = f.Filename;
+
                 try
                 {
                     var path = $"{OutputDirectory}{Path.DirectorySeparatorChar}{Path.GetDirectoryName(file).Replace(Path.GetDirectoryName(Path.GetDirectoryName(file)), "")}";
                     var filename = Path.Combine(path, Path.GetFileName(file));
 
-                    var transfer = await client.DownloadAsync(username, file, filename, startOffset: 0, token: index++, options: new TransferOptions(stateChanged: (e) =>
+                    var transfer = await client.DownloadAsync(username, file, filename, size: f.Size, startOffset: 0, token: index++, options: new TransferOptions(stateChanged: (e) =>
                     {
                         var key = (e.Transfer.Username, e.Transfer.Filename, e.Transfer.Token);
                         var progress = Downloads.GetOrAdd(key, (e.Transfer.State, null, new ProgressBar(10)));

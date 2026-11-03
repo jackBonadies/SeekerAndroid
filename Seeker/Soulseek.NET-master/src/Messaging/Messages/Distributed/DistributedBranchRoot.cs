@@ -59,6 +59,11 @@ namespace Soulseek.Messaging.Messages
 
             var username = reader.ReadString();
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Distributed.BranchRoot)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new DistributedBranchRoot(username);
         }
 

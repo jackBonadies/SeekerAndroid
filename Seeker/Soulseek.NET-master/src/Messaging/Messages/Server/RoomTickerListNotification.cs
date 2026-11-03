@@ -89,6 +89,11 @@ namespace Soulseek.Messaging.Messages
                 tickers.Add(new RoomTicker(username, message));
             }
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.RoomTickers)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new RoomTickerListNotification(roomName, tickerCount, tickers);
         }
     }

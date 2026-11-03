@@ -67,6 +67,11 @@ namespace Soulseek.Messaging.Messages
             var username = reader.ReadString();
             var privileged = reader.ReadByte() > 0;
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.UserPrivileges)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new UserPrivilegeResponse(username, privileged);
         }
     }

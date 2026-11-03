@@ -69,6 +69,11 @@ namespace Soulseek.Messaging.Messages
             var roomName = reader.ReadString();
             var username = reader.ReadString();
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.RoomTickerRemove)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new RoomTickerRemovedNotification(roomName, username);
         }
     }

@@ -100,18 +100,29 @@ namespace Soulseek.Messaging.Messages
             var token = reader.ReadInteger();
             var allowed = reader.ReadByte() == 1;
 
+            TransferResponse response;
+
             if (allowed && reader.HasMoreData)
             {
                 var fileSize = reader.ReadLong();
-                return new TransferResponse(token, fileSize);
+                response = new TransferResponse(token, fileSize);
             }
             else if (!allowed)
             {
                 var msg = reader.ReadString();
-                return new TransferResponse(token, msg);
+                response = new TransferResponse(token, msg);
+            }
+            else
+            {
+                response = new TransferResponse(token);
             }
 
-            return new TransferResponse(token);
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Peer.TransferResponse)} finalized with {reader.Remaining} unread bytes");
+            }
+
+            return response;
         }
 
         /// <summary>

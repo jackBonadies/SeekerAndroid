@@ -21,10 +21,8 @@
 //     SPDX-License-Identifier: GPL-3.0-only
 // </copyright>
 
-namespace Soulseek
+namespace Soulseek.Messaging.Messages
 {
-    using Soulseek.Messaging;
-
     /// <summary>
     ///     The response to a user info request.
     /// </summary>
@@ -58,6 +56,11 @@ namespace Soulseek
             var uploadSlots = reader.ReadInteger();
             var queueLength = reader.ReadInteger();
             var hasFreeUploadSlot = reader.ReadByte() > 0;
+
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Peer.InfoResponse)} finalized with {reader.Remaining} unread bytes");
+            }
 
             return new UserInfo(description, uploadSlots, queueLength, hasFreeUploadSlot, picture);
         }

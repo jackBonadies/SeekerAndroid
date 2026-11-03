@@ -65,7 +65,7 @@ namespace Soulseek.Tests.Unit.Client
                 .Returns(ConnectionState.Connected);
 
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait(It.IsAny<WaitKey>(), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+            waiter.Setup(m => m.Wait(It.IsAny<WaitKey>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))
@@ -126,7 +126,7 @@ namespace Soulseek.Tests.Unit.Client
                 .Throws(new TimeoutException());
 
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait(It.IsAny<WaitKey>(), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+            waiter.Setup(m => m.Wait(It.IsAny<WaitKey>(), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromException(new TimeoutException()));
 
             using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))

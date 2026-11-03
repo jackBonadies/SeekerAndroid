@@ -67,6 +67,11 @@ namespace Soulseek.Messaging.Messages
             var filename = reader.ReadString();
             var msg = reader.ReadString();
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Peer.UploadDenied)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new UploadDenied(filename, msg);
         }
 

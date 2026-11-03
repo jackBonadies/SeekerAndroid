@@ -84,6 +84,11 @@ namespace Soulseek.Messaging.Messages
 
             var userData = new UserData(username, status, averageSpeed, downloadCount, fileCount, directoryCount, countryCode, slotsFree);
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.UserJoinedRoom)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new UserJoinedRoomNotification(roomName, username, userData);
         }
     }

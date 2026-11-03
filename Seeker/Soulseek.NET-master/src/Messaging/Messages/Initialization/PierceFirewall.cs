@@ -63,6 +63,11 @@ namespace Soulseek.Messaging.Messages
 
                 var token = reader.ReadInteger();
 
+                if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+                {
+                    Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Initialization.PierceFirewall)} finalized with {reader.Remaining} unread bytes");
+                }
+
                 response = new PierceFirewall(token);
                 return true;
             }

@@ -396,7 +396,7 @@ namespace Seeker.Services
         {
             string username = dlInfo.username;
             string fullfilename = dlInfo.fullFilename;
-            long? size = dlInfo.TransferItemReference.GetSizeForDL();
+            long size = dlInfo.TransferItemReference.GetSizeForDL();
             CancellationTokenSource cts = dlInfo.CancellationTokenSource;
             int depth = dlInfo.Depth;
 
@@ -657,7 +657,7 @@ namespace Seeker.Services
             Task<int> getDownloadPlace = null;
             try
             {
-                getDownloadPlace = soulseekClientFactory().GetDownloadPlaceInQueueAsync(username, fullFileName, null, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
+                getDownloadPlace = soulseekClientFactory().GetDownloadPlaceInQueueAsync(username, fullFileName, CancellationToken.None, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
             }
             catch (TransferNotFoundException)
             {
@@ -699,7 +699,7 @@ namespace Seeker.Services
                     //TODO: THIS OCCURS TO SOON, ITS NOT gaurentted for the transfer to be in downloads yet...
                     try
                     {
-                        getDownloadPlace = soulseekClientFactory().GetDownloadPlaceInQueueAsync(username, fullFileName, null, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
+                        getDownloadPlace = soulseekClientFactory().GetDownloadPlaceInQueueAsync(username, fullFileName, CancellationToken.None, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
                         getDownloadPlace.ContinueWith(updateTask);
                     }
                     catch (Exception e)

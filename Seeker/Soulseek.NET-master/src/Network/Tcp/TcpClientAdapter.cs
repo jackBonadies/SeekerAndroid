@@ -124,7 +124,7 @@ namespace Soulseek.Network.Tcp
             int destinationPort,
             string username = null,
             string password = null,
-            CancellationToken? cancellationToken = null)
+            CancellationToken cancellationToken = default)
         {
             if (proxyAddress == default)
             {
@@ -161,7 +161,7 @@ namespace Soulseek.Network.Tcp
                 throw new ArgumentOutOfRangeException(nameof(password), "The password length must be less than or equal to 255 characters");
             }
 
-            return ConnectThroughProxyInternalAsync(proxyAddress, proxyPort, destinationAddress, destinationPort, cancellationToken ?? CancellationToken.None, username, password);
+            return ConnectThroughProxyInternalAsync(proxyAddress, proxyPort, destinationAddress, destinationPort, cancellationToken, username, password);
         }
 
         /// <summary>
