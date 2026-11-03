@@ -55,9 +55,9 @@ dotnet publish -c "Release IzzySoft" -f net10.0-android36.0 .\Seeker\Seeker.cspr
 To speed up startup time for Release builds we use AOT compilation of methods based on a custom profile.
 To generate this profile:
 ```powershell
-dotnet build .\Seeker\Seeker.csproj -c Release -t:BuildAndStartAotProfiling -p:Device=R5CW7238Q0D -p:RunAOTCompilation=false -p:CustomAfterMicrosoftCommonTargets=C:\Users\jack\.aotprof\profile.target
+dotnet build .\Seeker\Seeker.csproj -c Release -t:BuildAndStartAotProfiling -p:Device=$env:SID -p:RunAOTCompilation=false -p:CustomAfterMicrosoftCommonTargets=C:\Users\jack\.aotprof\profile.target
 # Login, Perform Search and Browse
-dotnet build .\Seeker\Seeker.csproj -c Release -t:FinishAotProfiling -p:Device=R5CW7238Q0D -p:CustomAfterMicrosoftCommonTargets=C:\Users\jack\.aotprof\profile.targets
+dotnet build .\Seeker\Seeker.csproj -c Release -t:FinishAotProfiling -p:Device=$env:SID -p:CustomAfterMicrosoftCommonTargets=C:\Users\jack\.aotprof\profile.targets
 ```
 
 This will generate the custom.aprof file in Seeker\custom.aproj with a list of methods that should be AOT compiled during the build step.  To inspect the file run:
@@ -67,7 +67,7 @@ This will generate the custom.aprof file in Seeker\custom.aproj with a list of m
 
 Reset device state with:
 ```
-adb -s R5CW7238Q0D shell setprop debug.mono.profile ""
+adb -s $env:SID shell setprop debug.mono.profile ""
 ```
 
 
@@ -76,11 +76,11 @@ To measure speedup:
 # building
 
 # default (i.e. AOT Enabled with Custom Profile)
-dotnet build .\Seeker\Seeker.csproj -c Release -t:Install -p:Device=R5CW7238Q0D 
+dotnet build .\Seeker\Seeker.csproj -c Release -t:Install -p:Device=$env:SID 
 # with default profile
-dotnet build .\Seeker\Seeker.csproj -c Release -t:Install -p:Device=R5CW7238Q0D -p:RunAOTCompilation=true -p:AndroidEnableProfiledAot=true -p:AndroidUseDefaultAotProfile=true -p:AndroidUseCustomAotProfile=false
+dotnet build .\Seeker\Seeker.csproj -c Release -t:Install -p:Device=$env:SID -p:RunAOTCompilation=true -p:AndroidEnableProfiledAot=true -p:AndroidUseDefaultAotProfile=true -p:AndroidUseCustomAotProfile=false
 # off
-dotnet build .\Seeker\Seeker.csproj -c Release -t:Install -p:Device=R5CW7238Q0D -p:RunAOTCompilation=false -p:AndroidEnableProfiledAot=false
+dotnet build .\Seeker\Seeker.csproj -c Release -t:Install -p:Device=$env:SID -p:RunAOTCompilation=false -p:AndroidEnableProfiledAot=false
 ```
 # testing
 Run `.\Misc\benchmark-aot-vs-jit.ps1` it will build both variants and start up the app in both.
@@ -92,18 +92,18 @@ Run `.\Misc\benchmark-aot-vs-jit.ps1` it will build both variants and start up t
 # Install tools
 dotnet tool install -g dotnet-trace
 dotnet tool install -g dotnet-dsrouter
-dotnet tool insall -g dotnet-gcdump
+dotnet tool install -g dotnet-gcdump
 
 # build with diagnostics component
-dotnet build ./Seeker/Seeker.csproj -c Release -t:Install -p:EnableDiagnostics=true -p:AdbTarget="-s R5CW7238Q0D"
+dotnet build ./Seeker/Seeker.csproj -c Release -t:Install -p:EnableDiagnostics=true -p:AdbTarget="-s $env:SID"
 
 # terminal 1
-adb -s R5CW7238Q0D reverse tcp:9000 tcp:9001
+adb -s $env:SID reverse tcp:9000 tcp:9001
 dotnet-dsrouter android
 
 # terminal 2
-adb -s R5CW7238Q0D shell setprop debug.mono.profile '127.0.0.1:9000,suspend,connect'
-adb -s R5CW7238Q0D shell am start -n com.companyname.andriodapp1/crc646350f44cde9e1cf7.MainActivity
+adb -s $env:SID shell setprop debug.mono.profile '127.0.0.1:9000,suspend,connect'
+adb -s $env:SID shell am start -n com.companyname.andriodapp1/crc646350f44cde9e1cf7.MainActivity
 dotnet-trace collect -p <dsrouter PID>
 dotnet-trace convert <filename>.nettrace --format speedscope
 ```
