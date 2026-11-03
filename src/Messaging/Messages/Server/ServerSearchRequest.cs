@@ -79,6 +79,11 @@ namespace Soulseek.Messaging.Messages
             var token = reader.ReadInteger();
             var query = reader.ReadString();
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.FileSearch)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new ServerSearchRequest(username, token, query);
         }
     }

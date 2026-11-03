@@ -52,6 +52,49 @@ namespace Soulseek.Tests.Unit
         }
 
         [Trait("Category", "Extension")]
+        [Fact(DisplayName = "RemoveAndDisposeAll removes and disposes all")]
+        public void RemoveAndDisposeAll_Removes_And_Disposes_All()
+        {
+            var obj1 = new Mock<IDisposable>();
+            var obj2 = new Mock<IDisposable>();
+
+            var dict = new ConcurrentDictionary<int, IDisposable>();
+            dict.TryAdd(1, obj1.Object);
+            dict.TryAdd(2, obj2.Object);
+
+            dict.RemoveAndDisposeAll();
+
+            Assert.Empty(dict);
+
+            obj1.Verify(m => m.Dispose(), Times.Once);
+            obj2.Verify(m => m.Dispose(), Times.Once);
+        }
+
+        [Trait("Category", "Extension")]
+        [Fact(DisplayName = "RemoveAndDisposeAll swallows ObjectDisposedException and continues")]
+        public void RemoveAndDisposeAll_Swallows_ObjectDisposedException_And_Continues()
+        {
+            var bad = new Mock<IDisposable>();
+            bad.Setup(m => m.Dispose()).Throws(new ObjectDisposedException("bad"));
+
+            var good = new Mock<IDisposable>();
+
+            var dict = new ConcurrentDictionary<int, IDisposable>();
+            dict.TryAdd(1, bad.Object);
+            dict.TryAdd(2, good.Object);
+
+            var ex = Record.Exception(() => dict.RemoveAndDisposeAll());
+
+            Assert.Null(ex);
+
+            // the failed dispose must not strand entries in the dictionary, and must not
+            // abort the loop before the remaining item is disposed
+            Assert.Empty(dict);
+
+            good.Verify(m => m.Dispose(), Times.Once);
+        }
+
+        [Trait("Category", "Extension")]
         [Fact(DisplayName = "Timer reset does not throw given a disposed timer")]
         public void Timer_Reset_Does_Not_Throw_On_Disposed_Timer()
         {

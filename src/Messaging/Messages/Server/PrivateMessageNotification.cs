@@ -97,6 +97,11 @@ namespace Soulseek.Messaging.Messages
 
             var replayed = reader.ReadByte() != 1;
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.PrivateMessage)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new PrivateMessageNotification(id, timestamp, username, msg, replayed);
         }
     }

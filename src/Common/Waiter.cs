@@ -168,7 +168,7 @@ namespace Soulseek
         /// <param name="timeout">The wait timeout, in milliseconds.</param>
         /// <param name="cancellationToken">The cancellation token for the wait.</param>
         /// <returns>A Task representing the wait.</returns>
-        public Task Wait(WaitKey key, int? timeout = null, CancellationToken? cancellationToken = null)
+        public Task Wait(WaitKey key, int? timeout = null, CancellationToken cancellationToken = default)
         {
             return Wait<object>(key, timeout, cancellationToken);
         }
@@ -181,10 +181,9 @@ namespace Soulseek
         /// <param name="timeout">The wait timeout, in milliseconds.</param>
         /// <param name="cancellationToken">The cancellation token for the wait.</param>
         /// <returns>A Task representing the wait.</returns>
-        public Task<T> Wait<T>(WaitKey key, int? timeout = null, CancellationToken? cancellationToken = null)
+        public Task<T> Wait<T>(WaitKey key, int? timeout = null, CancellationToken cancellationToken = default)
         {
             timeout ??= DefaultTimeout;
-            cancellationToken ??= CancellationToken.None;
 
             var taskCompletionSource = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -193,7 +192,7 @@ namespace Soulseek
                 timeout.Value,
                 cancelAction: () => Cancel(key),
                 timeoutAction: () => Timeout(key),
-                cancellationToken.Value);
+                cancellationToken);
 
             // obtain a read lock for the key. this is necessary to prevent this code from adding a wait to the ConcurrentQueue
             // while the containing dictionary entry is being cleaned up in Disposition(), effectively discarding the new wait.
@@ -226,7 +225,7 @@ namespace Soulseek
         /// <param name="key">A unique WaitKey for the wait.</param>
         /// <param name="cancellationToken">The cancellation token for the wait.</param>
         /// <returns>A Task representing the wait.</returns>
-        public Task WaitIndefinitely(WaitKey key, CancellationToken? cancellationToken = null)
+        public Task WaitIndefinitely(WaitKey key, CancellationToken cancellationToken = default)
         {
             return WaitIndefinitely<object>(key, cancellationToken);
         }
@@ -238,7 +237,7 @@ namespace Soulseek
         /// <param name="key">A unique WaitKey for the wait.</param>
         /// <param name="cancellationToken">The cancellation token for the wait.</param>
         /// <returns>A Task representing the wait.</returns>
-        public Task<T> WaitIndefinitely<T>(WaitKey key, CancellationToken? cancellationToken = null)
+        public Task<T> WaitIndefinitely<T>(WaitKey key, CancellationToken cancellationToken = default)
         {
             return Wait<T>(key, int.MaxValue, cancellationToken);
         }

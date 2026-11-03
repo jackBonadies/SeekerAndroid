@@ -59,6 +59,11 @@ namespace Soulseek.Messaging.Messages
 
             var password = reader.ReadString();
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.NewPassword)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new NewPassword(password);
         }
 

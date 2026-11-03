@@ -41,7 +41,14 @@ namespace Soulseek.Messaging.Messages
             where T : Enum
         {
             var reader = new MessageReader<T>(bytes);
-            return reader.ReadString();
+            var value = reader.ReadString();
+
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {reader.ReadCode()} finalized with {reader.Remaining} unread bytes");
+            }
+
+            return value;
         }
     }
 }

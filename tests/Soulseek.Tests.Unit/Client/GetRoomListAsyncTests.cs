@@ -68,7 +68,7 @@ namespace Soulseek.Tests.Unit.Client
 
             var key = new WaitKey(MessageCode.Server.RoomList);
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<RoomList>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+            waiter.Setup(m => m.Wait<RoomList>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(rooms));
 
             using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))
@@ -93,7 +93,7 @@ namespace Soulseek.Tests.Unit.Client
 
             var key = new WaitKey(MessageCode.Server.RoomList);
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<RoomList>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+            waiter.Setup(m => m.Wait<RoomList>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(rooms));
 
             using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))

@@ -79,6 +79,11 @@ namespace Soulseek.Messaging.Messages
                 var transferType = reader.ReadString();
                 var token = reader.ReadInteger();
 
+                if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+                {
+                    Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Initialization.PeerInit)} finalized with {reader.Remaining} unread bytes");
+                }
+
                 response = new PeerInit(username, transferType, token);
                 return true;
             }

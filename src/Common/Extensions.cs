@@ -81,9 +81,19 @@ namespace Soulseek
         {
             while (!concurrentDictionary.IsEmpty)
             {
-                if (concurrentDictionary.TryRemove(concurrentDictionary.Keys.First(), out var value))
+                foreach (var key in concurrentDictionary.Keys)
                 {
-                    value.Dispose();
+                    if (concurrentDictionary.TryRemove(key, out var value))
+                    {
+                        try
+                        {
+                            value.Dispose();
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            // noop; something beat us to it. don't kill the loop
+                        }
+                    }
                 }
             }
         }

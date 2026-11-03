@@ -50,6 +50,11 @@ namespace Soulseek.Messaging.Messages
                 throw new MessageException($"Message Code mismatch creating {nameof(ServerPing)} (expected: {(int)MessageCode.Server.Ping}, received: {(int)code})");
             }
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.Ping)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new ServerPing();
         }
 

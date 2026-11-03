@@ -70,6 +70,11 @@ namespace Soulseek.Messaging.Messages
             var username = reader.ReadString();
             var message = reader.ReadString();
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.RoomTickerAdd)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new RoomTickerAddedNotification(roomName, new RoomTicker(username, message));
         }
     }

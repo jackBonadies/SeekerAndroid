@@ -52,7 +52,7 @@ namespace Soulseek.Tests.Unit.Client
         public async Task GetPrivilegesAsync_Throws_OperationCanceledException_When_Canceled()
         {
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<int>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken?>()))
+            waiter.Setup(m => m.Wait<int>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
                 .Throws(new OperationCanceledException());
 
             using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object))
@@ -71,7 +71,7 @@ namespace Soulseek.Tests.Unit.Client
         public async Task GetPrivilegesAsync_Throws_TimeoutException_When_Timed_Out()
         {
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<int>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken?>()))
+            waiter.Setup(m => m.Wait<int>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
                 .Throws(new TimeoutException());
 
             using (var s = new SoulseekClient(minorVersion: 9999, waiter: waiter.Object))
@@ -109,11 +109,11 @@ namespace Soulseek.Tests.Unit.Client
         public async Task GetPrivilegesAsync_Returns_Expected_Values(int days)
         {
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<int>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken?>()))
+            waiter.Setup(m => m.Wait<int>(It.IsAny<WaitKey>(), null, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(days));
 
             var conn = new Mock<IMessageConnection>();
-            conn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken?>()))
+            conn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))

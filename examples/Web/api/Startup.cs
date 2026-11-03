@@ -49,6 +49,8 @@ namespace WebAPI
         internal static int RoomMessageLimit { get; set; }
         internal static int ReadBufferSize { get; set; }
         internal static int WriteBufferSize { get; set; }
+        internal static string Server { get; set; }
+        internal static int Port { get; set; }
 
         internal static SymmetricSecurityKey JwtSigningKey { get; set; }
 
@@ -81,6 +83,9 @@ namespace WebAPI
             RoomMessageLimit = Configuration.GetValue<int>("ROOM_MESSAGE_LIMIT", 250);
             ReadBufferSize = Configuration.GetValue<int>("READ_BUFFER_SIZE", 16384);
             WriteBufferSize = Configuration.GetValue<int>("WRITE_BUFFER_SIZE", 16384);
+
+            Server = Configuration.GetValue<string>("SERVER", "server.slsknet.org");
+            Port = Configuration.GetValue<int>("PORT", 2242);
 
             EnableDistributedNetwork = false;
 
@@ -445,7 +450,7 @@ namespace WebAPI
 
             Task.Run(async () =>
             {
-                await Client.ConnectAsync(Username, Password);
+                await Client.ConnectAsync(Server, Port, Username, Password);
                 CurrentReconnectAttempts = 0;
             }).GetAwaiter().GetResult();
 
@@ -498,6 +503,23 @@ namespace WebAPI
         /// <returns>A Task resolving an instance of Soulseek.Directory containing the contents of the requested directory.</returns>
         private Task<IEnumerable<Soulseek.Directory>> DirectoryContentsResponseResolver(string username, IPEndPoint endpoint, int token, string directory)
         {
+            if (string.IsNullOrWhiteSpace(SharedDirectory))
+            {
+                Console.WriteLine($"[FOLDER CONTENTS REJECTED] [{username}/{directory}] No shared directory is configured.");
+                throw new UnauthorizedAccessException("Directory not shared.");
+            }
+
+            // 1) the directory must start with the expected prefix. shared directory names are built from the shared
+            // directory with forward slashes replaced; see BrowseResponseResolver(). the trailing separator keeps a
+            // sibling like 'shared-other' from matching 'shared'.
+            var expectedPrefix = SharedDirectory.Replace("/", @"\").TrimEnd('\\') + @"\";
+
+            if (!directory.StartsWith(expectedPrefix) || directory.Split('\\', '/').Contains(".."))
+            {
+                Console.WriteLine($"[FOLDER CONTENTS REJECTED] [{username}/{directory}] Directory is outside of the shared directory.");
+                throw new UnauthorizedAccessException("Directory not shared.");
+            }
+
             static Soulseek.Directory MakeDirectory(string dir) => new Soulseek.Directory(
                 name: dir.Replace("/", @"\"),
                 fileList: System.IO.Directory.GetFiles(dir)
@@ -601,6 +623,35 @@ namespace WebAPI
         private Task EnqueueDownloadAction(string username, IPEndPoint endpoint, string filename, ITransferTracker tracker)
         {
             _ = endpoint;
+
+            /*
+                make sure the external client is requesting a file that we intended to share. the requested file MUST:
+
+                1. not be null or whitespace
+                2. be within the shared directory (filename prefixed with directory path)
+                3. not contain path traversal ('..') segments, which is likely a malicious attack
+                4. have been indexed by the shared file cache (which likely meets 1-3 as well)
+            */
+            if (string.IsNullOrWhiteSpace(SharedDirectory))
+            {
+                Console.WriteLine($"[UPLOAD REJECTED] [{username}/{filename}] No shared directory is configured.");
+                throw new DownloadEnqueueException($"File not shared.");
+            }
+
+            var expectedPrefix = SharedDirectory.Replace("/", @"\").TrimEnd('\\') + @"\";
+
+            if (!filename.StartsWith(expectedPrefix) || filename.Split('\\', '/').Contains(".."))
+            {
+                Console.WriteLine($"[UPLOAD REJECTED] [{username}/{filename}] File is outside of the shared directory.");
+                throw new DownloadEnqueueException($"File not shared.");
+            }
+
+            if (!SharedFileCache.Contains(filename))
+            {
+                Console.WriteLine($"[UPLOAD REJECTED] [{username}/{filename}] File is not in the shared file cache.");
+                throw new DownloadEnqueueException($"File not shared.");
+            }
+
             var localFilename = filename.ToLocalOSPath();
             var fileInfo = new FileInfo(localFilename);
             var enqueuedTimestamp = DateTime.UtcNow;

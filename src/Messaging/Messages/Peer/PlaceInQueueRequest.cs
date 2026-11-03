@@ -59,6 +59,11 @@ namespace Soulseek.Messaging.Messages
 
             var filename = reader.ReadString();
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Peer.PlaceInQueueRequest)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new PlaceInQueueRequest(filename);
         }
 

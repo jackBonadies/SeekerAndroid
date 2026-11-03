@@ -89,6 +89,11 @@ namespace Soulseek.Messaging.Messages
                 fileSize = reader.ReadLong();
             }
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Peer.TransferRequest)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new TransferRequest(direction, token, filename, fileSize);
         }
 

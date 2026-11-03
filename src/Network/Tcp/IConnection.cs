@@ -114,7 +114,7 @@ namespace Soulseek.Network.Tcp
         ///     Thrown when <paramref name="cancellationToken"/> cancellation is requested.
         /// </exception>
         /// <exception cref="ConnectionException">Thrown when an unexpected error occurs.</exception>
-        Task ConnectAsync(CancellationToken? cancellationToken = null);
+        Task ConnectAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         ///     Disconnects the client.
@@ -143,7 +143,7 @@ namespace Soulseek.Network.Tcp
         ///     is not connected.
         /// </exception>
         /// <exception cref="ConnectionReadException">Thrown when an unexpected error occurs.</exception>
-        Task<byte[]> ReadAsync(long length, CancellationToken? cancellationToken = null);
+        Task<byte[]> ReadAsync(long length, CancellationToken cancellationToken = default);
 
         /// <summary>
         ///     Asynchronously reads the specified number of bytes from the connection.
@@ -165,7 +165,7 @@ namespace Soulseek.Network.Tcp
         ///     is not connected.
         /// </exception>
         /// <exception cref="ConnectionReadException">Thrown when an unexpected error occurs.</exception>
-        Task ReadAsync(long length, Stream outputStream, Func<int, CancellationToken, Task<int>> governor, Action<int, int, int> reporter = null, CancellationToken? cancellationToken = null);
+        Task ReadAsync(long length, Stream outputStream, Func<int, CancellationToken, Task<int>> governor, Action<int, int, int> reporter = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         ///     Waits for the connection to disconnect, returning the message or throwing the Exception which caused the disconnect.
@@ -173,7 +173,7 @@ namespace Soulseek.Network.Tcp
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <returns>The message describing the reason for the disconnect.</returns>
         /// <exception cref="Exception">Thrown when the connection is disconnected as the result of an Exception.</exception>
-        Task<string> WaitForDisconnect(CancellationToken? cancellationToken = null);
+        Task<string> WaitForDisconnect(CancellationToken cancellationToken = default);
 
         /// <summary>
         ///     Asynchronously writes the specified bytes to the connection.
@@ -188,7 +188,7 @@ namespace Soulseek.Network.Tcp
         ///     is not connected.
         /// </exception>
         /// <exception cref="ConnectionWriteException">Thrown when an unexpected error occurs.</exception>
-        Task WriteAsync(byte[] bytes, CancellationToken? cancellationToken = null);
+        Task WriteAsync(byte[] bytes, CancellationToken cancellationToken = default);
 
         /// <summary>
         ///     Asynchronously writes the specified bytes to the connection.
@@ -210,6 +210,6 @@ namespace Soulseek.Network.Tcp
         ///     is not connected.
         /// </exception>
         /// <exception cref="ConnectionWriteException">Thrown when an unexpected error occurs.</exception>
-        Task WriteAsync(long length, Stream inputStream, Func<int, CancellationToken, Task<int>> governor = null, Action<int, int, int> reporter = null, CancellationToken? cancellationToken = null);
+        Task WriteAsync(long length, Stream inputStream, Func<int, CancellationToken, Task<int>> governor = null, Action<int, int, int> reporter = null, CancellationToken cancellationToken = default);
     }
 }

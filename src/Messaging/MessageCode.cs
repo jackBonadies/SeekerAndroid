@@ -360,7 +360,7 @@ namespace Soulseek.Messaging
             /// <summary>
             ///     54
             /// </summary>
-            GetRecommendations = 54,
+            GetPersonalRecommendations = 54,
 
             /// <summary>
             ///     56
@@ -470,17 +470,17 @@ namespace Soulseek.Messaging
             /// <summary>
             ///     110
             /// </summary>
-            GetSimilarUsers = 110,
+            GetPersonalSimilarUsers = 110,
 
             /// <summary>
             ///     111
             /// </summary>
-            GetItemRecommendations = 111,
+            GetInterestRecommendations = 111,
 
             /// <summary>
             ///     112
             /// </summary>
-            GetItemSimilarUsers = 112,
+            GetInterestSimilarUsers = 112,
 
             /// <summary>
             ///     113

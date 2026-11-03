@@ -72,6 +72,11 @@ namespace Soulseek.Messaging.Messages
                 }
             }
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Peer.BrowseResponse)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new BrowseResponse(directoryList, lockedDirectoryList);
         }
 

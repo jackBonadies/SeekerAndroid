@@ -99,6 +99,11 @@ namespace Soulseek.Messaging.Messages
 
             var port = reader.ReadInteger();
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.GetPeerAddress)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new UserAddressResponse(username, ipAddress, port);
         }
     }

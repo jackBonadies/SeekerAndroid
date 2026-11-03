@@ -59,6 +59,11 @@ namespace Soulseek.Messaging.Messages
 
             var acceptInvitations = reader.ReadByte() > 0;
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.PrivateRoomToggle)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new PrivateRoomToggle(acceptInvitations);
         }
 

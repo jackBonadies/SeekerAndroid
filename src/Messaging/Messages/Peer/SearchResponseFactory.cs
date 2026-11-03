@@ -73,6 +73,11 @@ namespace Soulseek.Messaging.Messages
                 lockedFileList = reader.ReadFiles(count);
             }
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Peer.SearchResponse)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new SearchResponse(username, token, hasFreeUploadSlot: freeUploadSlots > 0, uploadSpeed, queueLength, fileList, lockedFileList);
         }
 

@@ -126,6 +126,11 @@ namespace Soulseek.Messaging.Messages
             var token = reader.ReadInteger();
             var isPrivileged = reader.ReadByte() > 0;
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.ConnectToPeer)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new ConnectToPeerResponse(username, type, ipAddress, port, token, isPrivileged);
         }
     }

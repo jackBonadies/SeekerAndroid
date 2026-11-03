@@ -121,6 +121,11 @@ namespace Soulseek.Messaging.Messages
                 }
             }
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.JoinRoom)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new RoomData(roomName, users, owner != null, owner, operatorList);
         }
     }
