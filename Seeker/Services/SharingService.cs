@@ -142,19 +142,33 @@ namespace Seeker.Services
         private static Task<IEnumerable<Soulseek.Directory>> DirectoryContentsResponseResolver(string username, IPEndPoint endpoint, int token, string directory)
         {
             Logger.Debug("Directory Request Received");
-            //the directory is the presentable name.
-            //the old EndsWith(dir) fails if the directory is not unique i.e. document structure of Soulseek Complete > some dirs and files, Soulseek Complete > more dirs and files..
-            Tuple<string, string> fullDirUri = SharedFileService.SharedFileCache.FriendlyDirNameToUriMapping.Where((Tuple<string, string> t) => { return t.Item1 == directory; }).FirstOrDefault(); //TODO DICTIONARY>>>>>
+            var noReply = Task.FromResult<IEnumerable<Soulseek.Directory>>(null);
+            if (UserListService.Instance.IsUserInIgnoreList(username))
+            {
+                return noReply;
+            }
 
+            var mapping = SharedFileService.SharedFileCache?.FriendlyDirNameToUriMapping;
+            if (mapping == null || string.IsNullOrEmpty(directory))
+            {
+                return noReply;
+            }
+
+            // the directory is the presentable name, exactly as it appears in our browse / search responses
+            Tuple<string, string> fullDirUri = mapping.FirstOrDefault(t => t.Item1 == directory);
             if (fullDirUri == null)
             {
-                //as fallback safety.  I dont think this will ever happen.....
-                fullDirUri = SharedFileService.SharedFileCache.FriendlyDirNameToUriMapping.Where((Tuple<string, string> t) => { return t.Item1.EndsWith(directory); }).FirstOrDefault();
+                Logger.Debug($"Directory Request for unknown folder {directory} from {username}");
+                return noReply;
             }
-            if (fullDirUri == null)
+
+            // this can only occur if a rogue client probes us. still better to be safe
+            if (FileFilterHelper.IsHiddenFolder(fullDirUri.Item1) && !SimpleHelpers.UserListService.ContainsUser(username))
             {
-                //could not find...
+                Logger.Debug($"Directory Request for hidden folder from {username}, not on user list");
+                return noReply;
             }
+
             DocumentFile fullDir = null;
             if (!UploadDirectoryManager.IsFromTree(fullDirUri.Item2)) //todo
             {
