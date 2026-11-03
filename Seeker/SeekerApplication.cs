@@ -322,7 +322,9 @@ namespace Seeker
                 }
             #endif
             #if MOCK
-                SeekerState.SoulseekClient = new MockSoulseekClient();
+                SeekerState.SoulseekClient = new MockSoulseekClient(
+                    new SoulseekClientOptions(
+                        maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue));
                 SpeedLimitHelper.ApplyTotalLimits(SeekerState.SoulseekClient);
                 SharingService.TurnOnSharing();
                 if (Seeker.Debug.MockTransferStress.AutoStartOnLaunch)

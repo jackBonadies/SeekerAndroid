@@ -17,8 +17,11 @@ namespace Seeker
 
     public class MockSoulseekClient : ISoulseekClient
     {
-        public MockSoulseekClient()
+        public MockSoulseekClient(SoulseekClientOptions? options = null)
         {
+            Options = options;
+            int maxDownloads = options?.MaximumConcurrentDownloads ?? int.MaxValue;
+            GlobalDownloadSemaphore = new SemaphoreSlim(initialCount: maxDownloads, maxCount: maxDownloads);
             StartBackgroundTimers();
         }
 
@@ -2004,7 +2007,7 @@ namespace Seeker
             return await UploadInternalAsync(username, remoteFilename, size, 0, token ?? GetNextToken(), inputStreamFactory, options, cancellationToken ?? CancellationToken.None);
         }
 
-        SemaphoreSlim GlobalDownloadSemaphore = new SemaphoreSlim(initialCount: int.MaxValue, maxCount: int.MaxValue);
+        private readonly SemaphoreSlim GlobalDownloadSemaphore;
         SemaphoreSlim GlobalUploadSemaphore = new SemaphoreSlim(initialCount: 10, maxCount: 10);
         ConcurrentDictionary<string, SemaphoreSlim> UploadSemaphores = new ConcurrentDictionary<string, SemaphoreSlim>();
         ConcurrentDictionary<string, SemaphoreSlim> PeerUploadSlots = new ConcurrentDictionary<string, SemaphoreSlim>();
