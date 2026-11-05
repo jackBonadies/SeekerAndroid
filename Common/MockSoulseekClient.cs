@@ -2235,7 +2235,9 @@ namespace Seeker
                 peerSlot = PeerUploadSlots.GetOrAdd(username, _ => new SemaphoreSlim(peerSlots, peerSlots));
                 peerSlotAcquired = peerSlot.Wait(0);
 
-                if (peerSlotAcquired && queueSeconds == null)
+                // Nicotine+ and Soulseek.NET always answer "Queued" and then offer at once if a slot is free.
+                // "allowed" in the filename takes the immediately-allowed path older clients use
+                if (peerSlotAcquired && queueSeconds == null && HasToken(filename, "allowed"))
                 {
                     if (sizeMismatch)
                     {

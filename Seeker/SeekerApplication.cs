@@ -323,8 +323,8 @@ namespace Seeker
             #endif
             #if MOCK
                 SeekerState.SoulseekClient = new MockSoulseekClient(
-                    new SoulseekClientOptions(
-                        maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue));
+                    // DownloadUserSlots owns download slots (ahead of global semaphore)
+                    new SoulseekClientOptions(maximumConcurrentDownloads: int.MaxValue));
                 SpeedLimitHelper.ApplyTotalLimits(SeekerState.SoulseekClient);
                 SharingService.TurnOnSharing();
                 if (Seeker.Debug.MockTransferStress.AutoStartOnLaunch)
@@ -345,7 +345,8 @@ namespace Seeker
                         autoAcknowledgePrivateMessages: false,
                         acceptPrivateRoomInvitations: PreferencesState.AllowPrivateRoomInvitations,
                         listenPort: PreferencesState.ListenerPort,
-                        maximumConcurrentDownloads: PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue,
+                        // DownloadUserSlots owns download slots (ahead of global semaphore)
+                        maximumConcurrentDownloads: int.MaxValue,
                         // UploadService's queue owns the upload slots (ahead of global semaphore)
                         maximumConcurrentUploads: int.MaxValue,
                         maximumConcurrentSearches: 5,

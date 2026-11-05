@@ -41,6 +41,21 @@ namespace Seeker.Services
             this.soulseekClientFactory = soulseekClientFactory ?? throw new ArgumentNullException(nameof(soulseekClientFactory));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.networkStatus = networkStatus ?? throw new ArgumentNullException(nameof(networkStatus));
+            this.userSlotsLimiter = new DownloadUserSlotsLimiter(GetUserSlotLimit, DownloadUserSlotsLimiter.DefaultGracePeriod, log: logger.Debug);
+        }
+
+        // controls the number of simultaneous users we download from
+        private readonly DownloadUserSlotsLimiter userSlotsLimiter;
+
+        private static int GetUserSlotLimit()
+        {
+            return PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue;
+        }
+
+        public void ApplyDownloadLimitSetting()
+        {
+            // applies immediately
+            userSlotsLimiter.AdmitWaiters();
         }
 
         public event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
@@ -152,7 +167,7 @@ namespace Seeker.Services
                     logger.Debug($"{username}: batch of {dlInfos.Count} waiting for the previous batch to be enqueued");
                 }
                 nextBatch = (previousBatch ?? Task.CompletedTask)
-                    .ContinueWith(_ => DownloadFiles(batch, username), CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default)
+                    .ContinueWith(_ => RunUserBatch(batch, username), CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default)
                     .Unwrap();
                 userBatches[username] = nextBatch;
             }
@@ -167,6 +182,27 @@ namespace Seeker.Services
                 }
             }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
             return nextBatch;
+        }
+
+        private async Task RunUserBatch(PendingBatch batch, string username)
+        {
+            try
+            {
+                await userSlotsLimiter.AcquireBatchAsync(username, batch.AllCancelled.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug($"{username}: every row of a batch waiting for a download slot was cancelled");
+                return;
+            }
+            try
+            {
+                await DownloadFiles(batch, username);
+            }
+            finally
+            {
+                userSlotsLimiter.ReleaseBatch(username);
+            }
         }
 
         // if doesnt exist, claims it and returns true (also returns true if we already own it)
@@ -205,6 +241,8 @@ namespace Seeker.Services
             // whoever moves a slot off SlotPending first owns that row
             public readonly int[] Slots;
             public readonly CancellationTokenRegistration[] Registrations;
+            // cancelled once no row is left pending before the loop got to it, withdraws the wait for a user slot
+            public readonly CancellationTokenSource AllCancelled = new CancellationTokenSource();
 
             public PendingBatch(List<DownloadInfo> infos)
             {
@@ -236,6 +274,10 @@ namespace Seeker.Services
                     try
                     {
                         CompleteUnstartedAsCancelled(pending);
+                        if (Array.IndexOf(slots, SlotPending) < 0)
+                        {
+                            batch.AllCancelled.Cancel();
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -454,12 +496,14 @@ namespace Seeker.Services
             int depth = dlInfo.Depth;
 
             var waitUntilEnqueue = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var slotTracker = userSlotsLimiter.Track(username);
 
             logger.Debug($"DownloadFileAsync: {fullfilename}");
             Task dlTask = null;
             Action<(TransferStates PreviousState, Transfer Transfer)> updateForEnqueue = new Action<(TransferStates PreviousState, Transfer Transfer)>( (args) =>
             {
                 dlInfo.HandedToLibrary = true;
+                slotTracker.Update(args.Transfer.State);
                 if (args.Transfer.State.HasFlag(TransferStates.Queued) && args.Transfer.State.HasFlag(TransferStates.Remotely))
                 {
                     logger.Debug($"Queued | Remotely: {fullfilename} We can proceed to download next file.");
@@ -514,6 +558,7 @@ namespace Seeker.Services
                         cancellationToken: cts.Token);
                 }, TaskContinuationOptions.ExecuteSynchronously).Unwrap();
             }
+            dlTask.ContinueWith(_ => slotTracker.Finish(), CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
             waitForNext = Task.WhenAny(waitUntilEnqueue.Task, dlTask);
             return dlTask;
         }
