@@ -123,10 +123,50 @@ namespace Seeker.Services
                 }
                 if (userInfos.Count > 0)
                 {
-                    byUser.Add(Task.Run(() => DownloadFiles(userInfos, group.Key)));
+                    byUser.Add(StartUserBatch(userInfos, group.Key));
                 }
             }
             return Task.WhenAll(byUser);
+        }
+
+        // username -> the last batch loop queued for that user
+        private readonly Dictionary<string, Task> userBatches = new Dictionary<string, Task>();
+        private readonly object userBatchesLock = new object();
+
+        // start user batch, lock serializes this, enforcing order. if no current batch start immediately, else wait
+        //   for the last batch to finish. the last batch in the chain cleans up the dictionary entry.
+        // this prevent round robining between folders - the users intent is that the first folder they queue finishes
+        //   before the next one proceeds, instead of the arbitrary bouncing and ordering of the global semaphore.
+        private Task StartUserBatch(List<DownloadInfo> dlInfos, string username)
+        {
+            // registered now rather than when the loop starts, so a row paused while its batch waits is finished at once
+            var batch = new PendingBatch(dlInfos);
+            RegisterPendingCancellation(batch);
+
+            Task nextBatch;
+            lock (userBatchesLock)
+            {
+                userBatches.TryGetValue(username, out var previousBatch);
+                if (previousBatch != null)
+                {
+                    logger.Debug($"{username}: batch of {dlInfos.Count} waiting for the previous batch to be enqueued");
+                }
+                nextBatch = (previousBatch ?? Task.CompletedTask)
+                    .ContinueWith(_ => DownloadFiles(batch, username), CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default)
+                    .Unwrap();
+                userBatches[username] = nextBatch;
+            }
+            nextBatch.ContinueWith(_ =>
+            {
+                lock (userBatchesLock)
+                {
+                    if (userBatches.TryGetValue(username, out var tail) && tail == nextBatch)
+                    {
+                        userBatches.Remove(username);
+                    }
+                }
+            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+            return nextBatch;
         }
 
         // if doesnt exist, claims it and returns true (also returns true if we already own it)
@@ -155,27 +195,32 @@ namespace Seeker.Services
                 TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="files"></param>
-        /// <param name="username"></param>
-        /// <remarks>
-        /// Previously we would fireoff DownloadFileAsync tasks one after another.
-        /// This would cause files do download out of order and other side effects.
-        /// Update the logic to be more similar to slskd.
-        /// </remarks>
         private const int SlotPending = 0;
         private const int SlotHandedOff = 1;
         private const int SlotCancelledWhilePending = 2;
 
-        private async Task DownloadFiles(List<DownloadInfo> dlInfos, string username)
+        private sealed class PendingBatch
         {
-            // rows waiting their turn unknown to both the library and not waiting on any cancellable task (they are waiting on
-            // previous transfers to be queued), so we must register lambda here.
-            // whoever moves a slot off SlotPending first owns that row.
-            var slots = new int[dlInfos.Count];
-            var registrations = new CancellationTokenRegistration[dlInfos.Count];
+            public readonly List<DownloadInfo> Infos;
+            // whoever moves a slot off SlotPending first owns that row
+            public readonly int[] Slots;
+            public readonly CancellationTokenRegistration[] Registrations;
+
+            public PendingBatch(List<DownloadInfo> infos)
+            {
+                Infos = infos;
+                Slots = new int[infos.Count];
+                Registrations = new CancellationTokenRegistration[infos.Count];
+            }
+        }
+
+        // rows waiting their turn are unknown to both the library and not waiting on any cancellable task (they are waiting on
+        // previous transfers or batch to be queued), so we must register lambda here.
+        private void RegisterPendingCancellation(PendingBatch batch)
+        {
+            var dlInfos = batch.Infos;
+            var slots = batch.Slots;
+            var registrations = batch.Registrations;
             for (int j = 0; j < dlInfos.Count; j++)
             {
                 int idx = j;
@@ -203,7 +248,15 @@ namespace Seeker.Services
                 // cancelled before we registered, the callback ran inline above
                 mainThreadRunner.RunOnUiThread(() => TransferListRefreshRequested?.Invoke(null, null!));
             }
+        }
 
+        // requests the files one at a time, waiting for each to be queued at the peer, enforcing queue order (like slskd)
+        //   instead of arbitrary order
+        private async Task DownloadFiles(PendingBatch batch, string username)
+        {
+            var dlInfos = batch.Infos;
+            var slots = batch.Slots;
+            var registrations = batch.Registrations;
             Exception? batchFailure = null;
             DownloadFailureKind batchFailureKind = DownloadFailureKind.Unknown;
             bool anyUpdatedHere = false;
