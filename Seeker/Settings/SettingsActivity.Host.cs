@@ -242,6 +242,7 @@ namespace Seeker
 
             Seeker.Services.UploadService.ApplySlotLimitSetting();
             Seeker.Services.DownloadService.Instance?.ApplyDownloadLimitSetting();
+            SpeedLimitHelper.ApplyTotalLimits(SeekerState.SoulseekClient);
 
             _settingsAdapter?.RebuildRows(SettingsCatalog.Build(this));
             _settingsAdapter?.NotifyDataSetChanged();
