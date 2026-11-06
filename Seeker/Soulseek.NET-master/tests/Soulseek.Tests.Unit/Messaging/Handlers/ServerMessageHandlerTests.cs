@@ -1001,6 +1001,158 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
         }
 
         [Trait("Category", "Message")]
+        [Theory(DisplayName = "Handles GetUserInterests"), AutoData]
+        public void Handles_GetUserInterests(string username, List<string> likes, List<string> hates)
+        {
+            UserInterestsResponse result = null;
+            var (handler, mocks) = GetFixture();
+
+            mocks.Waiter.Setup(m => m.Complete(It.IsAny<WaitKey>(), It.IsAny<UserInterestsResponse>()))
+                .Callback<WaitKey, UserInterestsResponse>((key, response) => result = response);
+
+            var builder = new MessageBuilder()
+                .WriteCode(MessageCode.Server.GetUserInterests)
+                .WriteString(username)
+                .WriteInteger(likes.Count);
+
+            likes.ForEach(like => builder.WriteString(like));
+
+            builder.WriteInteger(hates.Count);
+
+            hates.ForEach(hate => builder.WriteString(hate));
+
+            handler.HandleMessageRead(null, builder.Build());
+
+            Assert.Equal(username, result.Username);
+            Assert.Equal(likes, result.Likes);
+            Assert.Equal(hates, result.Hates);
+        }
+
+        [Trait("Category", "Message")]
+        [Theory(DisplayName = "Handles GetPersonalSimilarUsers"), AutoData]
+        public void Handles_GetPersonalSimilarUsers(List<(string Username, int Rating)> users)
+        {
+            PersonalSimilarUsersResponse result = null;
+            var (handler, mocks) = GetFixture();
+
+            mocks.Waiter.Setup(m => m.Complete(It.IsAny<WaitKey>(), It.IsAny<PersonalSimilarUsersResponse>()))
+                .Callback<WaitKey, PersonalSimilarUsersResponse>((key, response) => result = response);
+
+            var builder = new MessageBuilder()
+                .WriteCode(MessageCode.Server.GetPersonalSimilarUsers)
+                .WriteInteger(users.Count);
+
+            users.ForEach(user =>
+            {
+                builder
+                    .WriteString(user.Username)
+                    .WriteInteger(user.Rating);
+            });
+
+            handler.HandleMessageRead(null, builder.Build());
+
+            Assert.Equal(users, result.Users);
+        }
+
+        [Trait("Category", "Message")]
+        [Theory(DisplayName = "Handles GetInterestSimilarUsers"), AutoData]
+        public void Handles_GetInterestSimilarUsers(string interest, List<string> usernames)
+        {
+            InterestSimilarUsersResponse result = null;
+            var (handler, mocks) = GetFixture();
+
+            mocks.Waiter.Setup(m => m.Complete(It.IsAny<WaitKey>(), It.IsAny<InterestSimilarUsersResponse>()))
+                .Callback<WaitKey, InterestSimilarUsersResponse>((key, response) => result = response);
+
+            var builder = new MessageBuilder()
+                .WriteCode(MessageCode.Server.GetInterestSimilarUsers)
+                .WriteString(interest)
+                .WriteInteger(usernames.Count);
+
+            usernames.ForEach(username => builder.WriteString(username));
+
+            handler.HandleMessageRead(null, builder.Build());
+
+            Assert.Equal(interest, result.Interest);
+            Assert.Equal(usernames, result.Usernames);
+        }
+
+        [Trait("Category", "Message")]
+        [Theory(DisplayName = "Handles GetPersonalRecommendations"), AutoData]
+        public void Handles_GetPersonalRecommendations(List<(string Recommendation, int Count)> recommendations, List<(string Unrecommendation, int Count)> unrecommendations)
+        {
+            PersonalRecommendationsResponse result = null;
+            var (handler, mocks) = GetFixture();
+
+            mocks.Waiter.Setup(m => m.Complete(It.IsAny<WaitKey>(), It.IsAny<PersonalRecommendationsResponse>()))
+                .Callback<WaitKey, PersonalRecommendationsResponse>((key, response) => result = response);
+
+            var builder = new MessageBuilder()
+                .WriteCode(MessageCode.Server.GetPersonalRecommendations)
+                .WriteInteger(recommendations.Count);
+
+            recommendations.ForEach(r => builder.WriteString(r.Recommendation).WriteInteger(r.Count));
+
+            builder.WriteInteger(unrecommendations.Count);
+
+            unrecommendations.ForEach(r => builder.WriteString(r.Unrecommendation).WriteInteger(r.Count));
+
+            handler.HandleMessageRead(null, builder.Build());
+
+            Assert.Equal(recommendations, result.Recommendations);
+            Assert.Equal(unrecommendations, result.Unrecommendations);
+        }
+
+        [Trait("Category", "Message")]
+        [Theory(DisplayName = "Handles GetGlobalRecommendations"), AutoData]
+        public void Handles_GetGlobalRecommendations(List<(string Recommendation, int Count)> recommendations, List<(string Unrecommendation, int Count)> unrecommendations)
+        {
+            GlobalRecommendationsResponse result = null;
+            var (handler, mocks) = GetFixture();
+
+            mocks.Waiter.Setup(m => m.Complete(It.IsAny<WaitKey>(), It.IsAny<GlobalRecommendationsResponse>()))
+                .Callback<WaitKey, GlobalRecommendationsResponse>((key, response) => result = response);
+
+            var builder = new MessageBuilder()
+                .WriteCode(MessageCode.Server.GetGlobalRecommendations)
+                .WriteInteger(recommendations.Count);
+
+            recommendations.ForEach(r => builder.WriteString(r.Recommendation).WriteInteger(r.Count));
+
+            builder.WriteInteger(unrecommendations.Count);
+
+            unrecommendations.ForEach(r => builder.WriteString(r.Unrecommendation).WriteInteger(r.Count));
+
+            handler.HandleMessageRead(null, builder.Build());
+
+            Assert.Equal(recommendations, result.Recommendations);
+            Assert.Equal(unrecommendations, result.Unrecommendations);
+        }
+
+        [Trait("Category", "Message")]
+        [Theory(DisplayName = "Handles GetInterestRecommendations"), AutoData]
+        public void Handles_GetInterestRecommendations(string interest, List<(string Recommendation, int Count)> recommendations)
+        {
+            InterestRecommendationsResponse result = null;
+            var (handler, mocks) = GetFixture();
+
+            mocks.Waiter.Setup(m => m.Complete(It.IsAny<WaitKey>(), It.IsAny<InterestRecommendationsResponse>()))
+                .Callback<WaitKey, InterestRecommendationsResponse>((key, response) => result = response);
+
+            var builder = new MessageBuilder()
+                .WriteCode(MessageCode.Server.GetInterestRecommendations)
+                .WriteString(interest)
+                .WriteInteger(recommendations.Count);
+
+            recommendations.ForEach(r => builder.WriteString(r.Recommendation).WriteInteger(r.Count));
+
+            handler.HandleMessageRead(null, builder.Build());
+
+            Assert.Equal(interest, result.Interest);
+            Assert.Equal(recommendations, result.Recommendations);
+        }
+
+        [Trait("Category", "Message")]
         [Theory(DisplayName = "Handles NetInfo"), AutoData]
         public void Handles_NetInfo(List<(string Username, IPEndPoint IPEndPoint)> parents)
         {
@@ -1518,7 +1670,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
             handler.HandleMessageRead(null, message);
 
-            mocks.Client.Verify(m => m.AcknowledgePrivilegeNotificationAsync(id, It.IsAny<CancellationToken?>()), Times.Once);
+            mocks.Client.Verify(m => m.AcknowledgePrivilegeNotificationAsync(id, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Trait("Category", "Message")]
@@ -1538,7 +1690,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
             handler.HandleMessageRead(null, message);
 
-            mocks.Client.Verify(m => m.AcknowledgePrivilegeNotificationAsync(id, It.IsAny<CancellationToken?>()), Times.Never);
+            mocks.Client.Verify(m => m.AcknowledgePrivilegeNotificationAsync(id, It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Trait("Category", "Message")]
@@ -2052,7 +2204,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
             var options = new SoulseekClientOptions(searchResponseResolver: (u, t, q) => Task.FromResult<SearchResponse>(null));
             var (handler, mocks) = GetFixture(options);
 
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(new IPEndPoint(IPAddress.None, 0)));
 
             var endpoint = new IPEndPoint(IPAddress.None, 0);
@@ -2067,11 +2219,11 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
             handler.HandleMessageRead(conn.Object, message);
 
-            mocks.Client.Verify(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()), Times.Never);
+            mocks.Client.Verify(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()), Times.Never);
             mocks.PeerConnectionManager.Verify(m => m.GetOrAddMessageConnectionAsync(username, endpoint, It.IsAny<CancellationToken>()), Times.Never);
 
             // cheap hack here to compare the contents of the resulting byte arrays, since they are distinct arrays but contain the same bytes
-            peerConn.Verify(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), null), Times.Never);
+            peerConn.Verify(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), CancellationToken.None), Times.Never);
         }
 
         [Trait("Category", "Message")]
@@ -2084,7 +2236,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
             var endpoint = new IPEndPoint(IPAddress.None, 0);
 
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(endpoint));
 
             var peerConn = new Mock<IMessageConnection>();
@@ -2097,11 +2249,11 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
             handler.HandleMessageRead(conn.Object, message);
 
-            mocks.Client.Verify(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()), Times.Never);
+            mocks.Client.Verify(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()), Times.Never);
             mocks.PeerConnectionManager.Verify(m => m.GetOrAddMessageConnectionAsync(username, endpoint, It.IsAny<CancellationToken>()), Times.Never);
 
             // cheap hack here to compare the contents of the resulting byte arrays, since they are distinct arrays but contain the same bytes
-            peerConn.Verify(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), null), Times.Never);
+            peerConn.Verify(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), CancellationToken.None), Times.Never);
         }
 
         [Trait("Category", "Message")]
@@ -2126,7 +2278,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
             handler.HandleMessageRead(conn.Object, message);
 
-            mocks.Client.Verify(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()), Times.Never);
+            mocks.Client.Verify(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()), Times.Never);
             mocks.PeerConnectionManager.Verify(m => m.GetOrAddMessageConnectionAsync(username, endpoint, It.IsAny<CancellationToken>()), Times.Never);
 
             // verify that SearchResponder is NOT called since this is not an intentional self-search

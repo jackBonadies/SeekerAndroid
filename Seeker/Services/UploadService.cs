@@ -225,10 +225,12 @@ namespace Seeker.Services
             try
             {
                 var uploadUri = ourFile.Uri;
+                var rateLimiter = SpeedLimitHelper.CreateUploadLimiter();
                 uploadTask = SeekerState.SoulseekClient.UploadAsync(username, filename, transferItem.Size,
                     inputStreamFactory: (_) => Task.FromResult<System.IO.Stream>(SeekerState.MainActivityRef.ContentResolver.OpenInputStream(uploadUri)),
                     options: new TransferOptions(
-                        governor: SpeedLimitHelper.OurUploadGovernor,
+                        governor: rateLimiter.GovernAsync,
+                        reporter: rateLimiter.Report,
                         slotAwaiter: async (_, token) =>
                         {
                             await uploadQueue.AwaitSlotAsync(queueEntry, token);

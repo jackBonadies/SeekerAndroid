@@ -600,6 +600,7 @@ namespace Seeker.Settings.Rows
                         PreferencesState.SpeedLimitDownloadBytesSec = result.BytesPerSec;
                         PreferencesState.SpeedLimitDownloadIsPerTransfer = result.PerTransfer;
                         PreferencesManager.SaveSpeedLimitState();
+                        SpeedLimitHelper.ApplyTotalLimits(SeekerState.SoulseekClient);
                     }),
             });
 
@@ -622,6 +623,7 @@ namespace Seeker.Settings.Rows
                         PreferencesState.SpeedLimitUploadBytesSec = result.BytesPerSec;
                         PreferencesState.SpeedLimitUploadIsPerTransfer = result.PerTransfer;
                         PreferencesManager.SaveSpeedLimitState();
+                        SpeedLimitHelper.ApplyTotalLimits(SeekerState.SoulseekClient);
                     }),
             });
 

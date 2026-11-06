@@ -169,8 +169,6 @@ namespace Seeker
         private void RestoreModernSettingsDefaults()
         {
             bool prevListenerEnabled = PreferencesState.ListenerEnabled;
-            bool prevLimitSimDownloads = PreferencesState.LimitSimultaneousDownloads;
-            int prevMaxSimDownloads = PreferencesState.MaxSimultaneousLimit;
 
             PreferencesState.CreateCompleteAndIncompleteFolders = true;
             PreferencesState.CreateUsernameSubfolders = false;
@@ -243,14 +241,8 @@ namespace Seeker
             }
 
             Seeker.Services.UploadService.ApplySlotLimitSetting();
-
-            bool concurrentChanged = prevLimitSimDownloads != PreferencesState.LimitSimultaneousDownloads
-                                  || prevMaxSimDownloads != PreferencesState.MaxSimultaneousLimit;
-            if (concurrentChanged)
-            {
-                SeekerApplication.Toaster.ShowToastShort(
-                    this.GetString(Resource.String.takes_effect_on_next_startup));
-            }
+            Seeker.Services.DownloadService.Instance?.ApplyDownloadLimitSetting();
+            SpeedLimitHelper.ApplyTotalLimits(SeekerState.SoulseekClient);
 
             _settingsAdapter?.RebuildRows(SettingsCatalog.Build(this));
             _settingsAdapter?.NotifyDataSetChanged();
@@ -279,16 +271,10 @@ namespace Seeker
         void ISettingsHost.RefreshSharingFolders() => RefreshModernSharingRows();
         public void UpdateSimulataneousDownloadsLimit(bool enabled, int limit)
         {
-            bool changed = PreferencesState.LimitSimultaneousDownloads != enabled
-                        || (enabled && PreferencesState.MaxSimultaneousLimit != limit);
             PreferencesState.LimitSimultaneousDownloads = enabled;
             PreferencesState.MaxSimultaneousLimit = limit;
             PreferencesManager.SaveMaxConcurrentDownloadsSettings(enabled, limit);
-            if (changed)
-            {
-                SeekerApplication.Toaster.ShowToastShort(
-                    this.GetString(Resource.String.takes_effect_on_next_startup));
-            }
+            Seeker.Services.DownloadService.Instance?.ApplyDownloadLimitSetting();
         }
 
         public void UpdateSimultaneousUploadsLimit(bool enabled, int limit)

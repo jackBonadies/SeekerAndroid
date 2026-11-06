@@ -24,7 +24,7 @@ Changes:
 - **Android networking**: `Connection` uses dual-mode IPv6 socket (an IPv4-only socket cannot
   connect at all on the IPv6-only networks mobile carriers use); and `GetListeningState()` on `SoulseekClient`
   (we dont fail if listener fails)
-- **Concurrency**: `RemoveAndDisposeAll` race (`Common/Extensions.cs`); `SearchInternal.Dispose`
+- **Concurrency**: `SearchInternal.Dispose`
   swallows the `SynchronizationLockException` that `ReaderWriterLockSlim.Dispose()` throws when a
   late `TryAddResponse` / timeout `Complete` is still parked on the lock - thrown from
   `SearchToCallbackAsync`'s `finally`, it replaced the search's real outcome.

@@ -90,7 +90,7 @@ namespace Soulseek
         /// <param name="timeout">The wait timeout.</param>
         /// <param name="cancellationToken">The cancellation token for the wait.</param>
         /// <returns>A Task representing the wait.</returns>
-        Task<T> Wait<T>(WaitKey key, int? timeout = null, CancellationToken? cancellationToken = null);
+        Task<T> Wait<T>(WaitKey key, int? timeout = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         ///     Adds a new wait for the specified <paramref name="key"/> and with the specified <paramref name="timeout"/>.
@@ -99,7 +99,7 @@ namespace Soulseek
         /// <param name="timeout">The wait timeout.</param>
         /// <param name="cancellationToken">The cancellation token for the wait.</param>
         /// <returns>A Task representing the wait.</returns>
-        Task Wait(WaitKey key, int? timeout = null, CancellationToken? cancellationToken = null);
+        Task Wait(WaitKey key, int? timeout = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         ///     Adds a new wait for the specified <paramref name="key"/> which does not time out.
@@ -108,7 +108,7 @@ namespace Soulseek
         /// <param name="key">A unique WaitKey for the wait.</param>
         /// <param name="cancellationToken">The cancellation token for the wait.</param>
         /// <returns>A Task representing the wait.</returns>
-        Task<T> WaitIndefinitely<T>(WaitKey key, CancellationToken? cancellationToken = null);
+        Task<T> WaitIndefinitely<T>(WaitKey key, CancellationToken cancellationToken = default);
 
         /// <summary>
         ///     Adds a new wait for the specified <paramref name="key"/> which does not time out.
@@ -116,6 +116,6 @@ namespace Soulseek
         /// <param name="key">A unique WaitKey for the wait.</param>
         /// <param name="cancellationToken">The cancellation token for the wait.</param>
         /// <returns>A Task representing the wait.</returns>
-        Task WaitIndefinitely(WaitKey key, CancellationToken? cancellationToken = null);
+        Task WaitIndefinitely(WaitKey key, CancellationToken cancellationToken = default);
     }
 }

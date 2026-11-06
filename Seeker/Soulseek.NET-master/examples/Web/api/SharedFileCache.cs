@@ -90,6 +90,30 @@
             return QueryTable(query.Query);
         }
 
+        /// <summary>
+        ///     Determines whether the specified <paramref name="filename"/> is shared.
+        /// </summary>
+        /// <param name="filename">The fully qualified filename, as returned in search and browse results.</param>
+        /// <returns>A value indicating whether the file is shared.</returns>
+        public bool Contains(string filename)
+        {
+            if (!LastFill.HasValue || LastFill.Value.AddMilliseconds(TTL) < DateTime.UtcNow)
+            {
+                Fill();
+            }
+
+            SyncRoot.EnterReadLock();
+
+            try
+            {
+                return Files.ContainsKey(filename);
+            }
+            finally
+            {
+                SyncRoot.ExitReadLock();
+            }
+        }
+
         private void CreateTable()
         {
             SQLite = new SqliteConnection("Data Source=:memory:");

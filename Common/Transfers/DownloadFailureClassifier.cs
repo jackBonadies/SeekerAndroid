@@ -10,6 +10,7 @@ namespace Seeker
         NotLoggedIn,
         DirectoryNotSet,
         SizeMismatch,
+        StartOffsetExceedsSize,
         RejectedNotShared,
         Rejected,
         UserOffline,
@@ -57,6 +58,10 @@ namespace Seeker
                     return DownloadFailureKind.NotLoggedIn;
                 case TransferSizeMismatchException:
                     return DownloadFailureKind.SizeMismatch;
+                // thrown synchronously by DownloadAsync when the incomplete file size is longer than the expected transfer size
+                //   this shouldn't happen in practice, but if it does we truncate the file (otherwise it would fail forever)
+                case ArgumentOutOfRangeException { ParamName: "startOffset" } when MessageContains(cause, "exceeds the size"):
+                    return DownloadFailureKind.StartOffsetExceedsSize;
                 case TransferRejectedException:
                     return MessageContains(cause, "file not shared") ? DownloadFailureKind.RejectedNotShared : DownloadFailureKind.Rejected;
                 case UserOfflineException:

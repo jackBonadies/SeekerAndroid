@@ -41,13 +41,30 @@ namespace Seeker.Services
             this.soulseekClientFactory = soulseekClientFactory ?? throw new ArgumentNullException(nameof(soulseekClientFactory));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.networkStatus = networkStatus ?? throw new ArgumentNullException(nameof(networkStatus));
+            this.userSlotsLimiter = new DownloadUserSlotsLimiter(GetUserSlotLimit, DownloadUserSlotsLimiter.DefaultGracePeriod, log: logger.Debug);
+        }
+
+        // controls the number of simultaneous users we download from
+        private readonly DownloadUserSlotsLimiter userSlotsLimiter;
+
+        private static int GetUserSlotLimit()
+        {
+            return PreferencesState.LimitSimultaneousDownloads ? PreferencesState.MaxSimultaneousLimit : int.MaxValue;
+        }
+
+        public void ApplyDownloadLimitSetting()
+        {
+            // applies immediately
+            userSlotsLimiter.AdmitWaiters();
         }
 
         public event EventHandler<DownloadAddedEventArgs> DownloadAddedUINotify;
 
         /// <summary>
         /// Adds the files to the transfer list and kicks off the downloads.
-        /// The returned task completes once the last file has been handed to the library.
+        /// The returned task completes once the last file has been handed to the library
+        ///   (which may take time - i.e. we need to wait for a download slot (if limit is on) + 
+        ///      previous transfers need to be remotely queued)
         /// </summary>
         public Task EnqueueFilesAsync(FullFileInfo[] files, bool queuePaused, string username)
         {
@@ -123,10 +140,71 @@ namespace Seeker.Services
                 }
                 if (userInfos.Count > 0)
                 {
-                    byUser.Add(Task.Run(() => DownloadFiles(userInfos, group.Key)));
+                    byUser.Add(StartUserBatch(userInfos, group.Key));
                 }
             }
             return Task.WhenAll(byUser);
+        }
+
+        // username -> the last batch loop queued for that user
+        private readonly Dictionary<string, Task> userBatches = new Dictionary<string, Task>();
+        private readonly object userBatchesLock = new object();
+
+        // start user batch, lock serializes this, enforcing order. if no current batch start immediately, else wait
+        //   for the last batch to finish. the last batch in the chain cleans up the dictionary entry.
+        // this prevent round robining between folders - the users intent is that the first folder they queue finishes
+        //   before the next one proceeds, instead of the arbitrary bouncing and ordering of the global semaphore.
+        private Task StartUserBatch(List<DownloadInfo> dlInfos, string username)
+        {
+            // registered now rather than when the loop starts, so a row paused while its batch waits is finished at once
+            var batch = new PendingBatch(dlInfos);
+            RegisterPendingCancellation(batch);
+
+            Task nextBatch;
+            lock (userBatchesLock)
+            {
+                userBatches.TryGetValue(username, out var previousBatch);
+                if (previousBatch != null)
+                {
+                    logger.Debug($"{username}: batch of {dlInfos.Count} waiting for the previous batch to be enqueued");
+                }
+                nextBatch = (previousBatch ?? Task.CompletedTask)
+                    .ContinueWith(_ => RunUserBatch(batch, username), CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.Default)
+                    .Unwrap();
+                userBatches[username] = nextBatch;
+            }
+            nextBatch.ContinueWith(_ =>
+            {
+                lock (userBatchesLock)
+                {
+                    if (userBatches.TryGetValue(username, out var tail) && tail == nextBatch)
+                    {
+                        userBatches.Remove(username);
+                    }
+                }
+            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+            return nextBatch;
+        }
+
+        private async Task RunUserBatch(PendingBatch batch, string username)
+        {
+            try
+            {
+                await userSlotsLimiter.AcquireBatchAsync(username, batch.AllCancelled.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                logger.Debug($"{username}: every row of a batch waiting for a download slot was cancelled");
+                return;
+            }
+            try
+            {
+                await DownloadFiles(batch, username);
+            }
+            finally
+            {
+                userSlotsLimiter.ReleaseBatch(username);
+            }
         }
 
         // if doesnt exist, claims it and returns true (also returns true if we already own it)
@@ -155,27 +233,34 @@ namespace Seeker.Services
                 TaskContinuationOptions.OnlyOnFaulted);
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="files"></param>
-        /// <param name="username"></param>
-        /// <remarks>
-        /// Previously we would fireoff DownloadFileAsync tasks one after another.
-        /// This would cause files do download out of order and other side effects.
-        /// Update the logic to be more similar to slskd.
-        /// </remarks>
         private const int SlotPending = 0;
         private const int SlotHandedOff = 1;
         private const int SlotCancelledWhilePending = 2;
 
-        private async Task DownloadFiles(List<DownloadInfo> dlInfos, string username)
+        private sealed class PendingBatch
         {
-            // rows waiting their turn unknown to both the library and not waiting on any cancellable task (they are waiting on
-            // previous transfers to be queued), so we must register lambda here.
-            // whoever moves a slot off SlotPending first owns that row.
-            var slots = new int[dlInfos.Count];
-            var registrations = new CancellationTokenRegistration[dlInfos.Count];
+            public readonly List<DownloadInfo> Infos;
+            // whoever moves a slot off SlotPending first owns that row
+            public readonly int[] Slots;
+            public readonly CancellationTokenRegistration[] Registrations;
+            // cancelled once no row is left pending before the loop got to it, withdraws the wait for a user slot
+            public readonly CancellationTokenSource AllCancelled = new CancellationTokenSource();
+
+            public PendingBatch(List<DownloadInfo> infos)
+            {
+                Infos = infos;
+                Slots = new int[infos.Count];
+                Registrations = new CancellationTokenRegistration[infos.Count];
+            }
+        }
+
+        // rows waiting their turn are unknown to both the library and not waiting on any cancellable task (they are waiting on
+        // previous transfers or batch to be queued), so we must register lambda here.
+        private void RegisterPendingCancellation(PendingBatch batch)
+        {
+            var dlInfos = batch.Infos;
+            var slots = batch.Slots;
+            var registrations = batch.Registrations;
             for (int j = 0; j < dlInfos.Count; j++)
             {
                 int idx = j;
@@ -191,6 +276,10 @@ namespace Seeker.Services
                     try
                     {
                         CompleteUnstartedAsCancelled(pending);
+                        if (Array.IndexOf(slots, SlotPending) < 0)
+                        {
+                            batch.AllCancelled.Cancel();
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -203,7 +292,15 @@ namespace Seeker.Services
                 // cancelled before we registered, the callback ran inline above
                 mainThreadRunner.RunOnUiThread(() => TransferListRefreshRequested?.Invoke(null, null!));
             }
+        }
 
+        // requests the files one at a time, waiting for each to be queued at the peer, enforcing queue order (like slskd)
+        //   instead of arbitrary order
+        private async Task DownloadFiles(PendingBatch batch, string username)
+        {
+            var dlInfos = batch.Infos;
+            var slots = batch.Slots;
+            var registrations = batch.Registrations;
             Exception? batchFailure = null;
             DownloadFailureKind batchFailureKind = DownloadFailureKind.Unknown;
             bool anyUpdatedHere = false;
@@ -396,23 +493,26 @@ namespace Seeker.Services
         {
             string username = dlInfo.username;
             string fullfilename = dlInfo.fullFilename;
-            long? size = dlInfo.TransferItemReference.GetSizeForDL();
+            long size = dlInfo.TransferItemReference.GetSizeForDL();
             CancellationTokenSource cts = dlInfo.CancellationTokenSource;
             int depth = dlInfo.Depth;
 
             var waitUntilEnqueue = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var slotTracker = userSlotsLimiter.Track(username);
 
             logger.Debug($"DownloadFileAsync: {fullfilename}");
             Task dlTask = null;
             Action<(TransferStates PreviousState, Transfer Transfer)> updateForEnqueue = new Action<(TransferStates PreviousState, Transfer Transfer)>( (args) =>
             {
                 dlInfo.HandedToLibrary = true;
+                slotTracker.Update(args.Transfer.State);
                 if (args.Transfer.State.HasFlag(TransferStates.Queued) && args.Transfer.State.HasFlag(TransferStates.Remotely))
                 {
                     logger.Debug($"Queued | Remotely: {fullfilename} We can proceed to download next file.");
                     waitUntilEnqueue.TrySetResult(true);
                 }
             });
+            var rateLimiter = SpeedLimitHelper.CreateDownloadLimiter();
             if (PreferencesState.MemoryBackedDownload)
             {
                 var memStream = new MemoryStream();
@@ -423,7 +523,7 @@ namespace Seeker.Services
                         remoteFilename: fullfilename,
                         outputStreamFactory: () => Task.FromResult<Stream>((Stream)memStream),
                         size: size,
-                        options: new TransferOptions(governor: SpeedLimitHelper.OurDownloadGovernor, stateChanged: updateForEnqueue),
+                        options: new TransferOptions(governor: rateLimiter.GovernAsync, reporter: rateLimiter.Report, stateChanged: updateForEnqueue),
                         cancellationToken: cts.Token);
             }
             else
@@ -453,13 +553,14 @@ namespace Seeker.Services
                         size: size,
                         startOffset: partialLength,
                         options: new TransferOptions(disposeOutputStreamOnCompletion: true,
-                            governor: SpeedLimitHelper.OurDownloadGovernor, stateChanged: updateForEnqueue,
+                            governor: rateLimiter.GovernAsync, reporter: rateLimiter.Report, stateChanged: updateForEnqueue,
                             // we are not seekable, however, we already set our streams to start writing
                             // at partialLength/startOffset.  This way we tell the library we are handling it.
                             seekOutputStreamAutomatically: false),
                         cancellationToken: cts.Token);
                 }, TaskContinuationOptions.ExecuteSynchronously).Unwrap();
             }
+            dlTask.ContinueWith(_ => slotTracker.Finish(), CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
             waitForNext = Task.WhenAny(waitUntilEnqueue.Task, dlTask);
             return dlTask;
         }
@@ -656,7 +757,7 @@ namespace Seeker.Services
             Task<int> getDownloadPlace = null;
             try
             {
-                getDownloadPlace = soulseekClientFactory().GetDownloadPlaceInQueueAsync(username, fullFileName, null, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
+                getDownloadPlace = soulseekClientFactory().GetDownloadPlaceInQueueAsync(username, fullFileName, CancellationToken.None, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
             }
             catch (TransferNotFoundException)
             {
@@ -698,7 +799,7 @@ namespace Seeker.Services
                     //TODO: THIS OCCURS TO SOON, ITS NOT gaurentted for the transfer to be in downloads yet...
                     try
                     {
-                        getDownloadPlace = soulseekClientFactory().GetDownloadPlaceInQueueAsync(username, fullFileName, null, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
+                        getDownloadPlace = soulseekClientFactory().GetDownloadPlaceInQueueAsync(username, fullFileName, CancellationToken.None, transferItemInQuestion.ShouldEncodeFileLatin1(), transferItemInQuestion.ShouldEncodeFolderLatin1());
                         getDownloadPlace.ContinueWith(updateTask);
                     }
                     catch (Exception e)
@@ -884,6 +985,13 @@ namespace Seeker.Services
                     DeleteIncompleteFile(transferItem, "on TransferSizeMismatchException");
                     break;
                 }
+                case DownloadFailureKind.StartOffsetExceedsSize:
+                    // the partial incomplete file is longer than the expected size. shouldn't happen in practice but this
+                    // block prevents forever retrying. Delete and start over.
+                    logger.Debug($"start offset exceeds size {transferItem.Size} for {e.dlInfo.fullFilename}, deleting the incomplete file");
+                    DeleteIncompleteFile(transferItem, "on start offset exceeding size");
+                    forceRetry = e.dlInfo.RetryCount == 0;
+                    break;
                 case DownloadFailureKind.DirectoryNotSet:
                     MarkTransferItemAsDirNotSet(transferItem);
                     action = () => { toaster.ShowToastDebounced(StringKey.FailedDownloadDirectoryNotSet, "_17_"); };

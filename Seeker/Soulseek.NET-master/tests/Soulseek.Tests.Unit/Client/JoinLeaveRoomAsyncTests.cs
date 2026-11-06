@@ -89,7 +89,7 @@ namespace Soulseek.Tests.Unit.Client
 
             var key = new WaitKey(MessageCode.Server.JoinRoom, roomName);
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<RoomData>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+            waiter.Setup(m => m.Wait<RoomData>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(expectedResponse));
 
             using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))
@@ -118,7 +118,7 @@ namespace Soulseek.Tests.Unit.Client
 
             var key = new WaitKey(MessageCode.Server.JoinRoom, roomName);
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<RoomData>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+            waiter.Setup(m => m.Wait<RoomData>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(expectedResponse));
 
             using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))
@@ -182,7 +182,7 @@ namespace Soulseek.Tests.Unit.Client
 
             var key = new WaitKey(MessageCode.Server.JoinRoom, roomName);
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<RoomData>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+            waiter.Setup(m => m.Wait<RoomData>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromException<RoomData>(new TimeoutException()));
 
             using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object))
@@ -225,7 +225,7 @@ namespace Soulseek.Tests.Unit.Client
 
             var key = new WaitKey(MessageCode.Server.JoinRoom, roomName);
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait<RoomData>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+            waiter.Setup(m => m.Wait<RoomData>(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .Throws(new RoomJoinForbiddenException());
 
             using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))
@@ -295,7 +295,7 @@ namespace Soulseek.Tests.Unit.Client
 
             var key = new WaitKey(MessageCode.Server.LeaveRoom, roomName);
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+            waiter.Setup(m => m.Wait(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))
@@ -318,7 +318,7 @@ namespace Soulseek.Tests.Unit.Client
 
             var key = new WaitKey(MessageCode.Server.LeaveRoom, roomName);
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+            waiter.Setup(m => m.Wait(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromException(new TimeoutException()));
 
             using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))
@@ -344,7 +344,7 @@ namespace Soulseek.Tests.Unit.Client
 
             var key = new WaitKey(MessageCode.Server.LeaveRoom, roomName);
             var waiter = new Mock<IWaiter>();
-            waiter.Setup(m => m.Wait(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken?>()))
+            waiter.Setup(m => m.Wait(It.Is<WaitKey>(k => k.Equals(key)), It.IsAny<int?>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             using (var s = new SoulseekClient(minorVersion: 9999, serverConnection: conn.Object, waiter: waiter.Object))

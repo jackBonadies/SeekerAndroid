@@ -292,19 +292,29 @@ namespace Seeker
         {
             SetFolderStatusSpannable(filesLongStatus, fi);
 
-            if (folderState.HasFlag(TransferStates.InProgress) || folderState.HasFlag(TransferStates.Initializing) || folderState.HasFlag(TransferStates.Requested) || folderState.HasFlag(TransferStates.Aborted))
+            bool isUpload = fi.IsUpload();
+            bool requestedCounts = isUpload && folderState.HasFlag(TransferStates.Requested);
+            if (folderState.HasFlag(TransferStates.InProgress) || folderState.HasFlag(TransferStates.Initializing) || requestedCounts || folderState.HasFlag(TransferStates.Aborted))
             {
-                string currentFilename = string.Empty;
+                string currentFilename = null;
                 lock (fi.TransferItems)
                 {
+                    if (fi.TransferItems.Count == 0)
+                    {
+                        currentFile.Visibility = ViewStates.Gone;
+                        return;
+                    }
+                    int bestRank = 0;
                     foreach (var ti in fi.TransferItems)
                     {
-                        if (ti.State.HasFlag(TransferStates.InProgress))
+                        int rank = GetCurrentFileRank(ti.State, isUpload);
+                        if (rank > bestRank)
                         {
+                            bestRank = rank;
                             currentFilename = ti.Filename;
                         }
                     }
-                    if (currentFilename == string.Empty)
+                    if (currentFilename == null)
                     {
                         currentFilename = fi.TransferItems.First().Filename;
                     }
@@ -324,6 +334,29 @@ namespace Seeker
             {
                 currentFile.Visibility = ViewStates.Gone;
             }
+        }
+
+        // for determining which file the folder's current-file line shows
+        private static int GetCurrentFileRank(TransferStates state, bool isUpload)
+        {
+            if (state.HasFlag(TransferStates.InProgress))
+            {
+                return 4;
+            }
+            if (state.HasFlag(TransferStates.Initializing))
+            {
+                return 3;
+            }
+            if (state.HasFlag(TransferStates.Aborted))
+            {
+                return 2;
+            }
+            if (isUpload && state.HasFlag(TransferStates.Requested))
+            {
+                return 1;
+            }
+            // if 0 do not show
+            return 0;
         }
 
         private static void SetFolderStatusSpannable(TextView view, FolderItem fi)

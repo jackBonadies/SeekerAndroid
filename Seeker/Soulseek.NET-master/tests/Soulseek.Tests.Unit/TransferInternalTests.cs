@@ -48,7 +48,7 @@ namespace Soulseek.Tests.Unit
             Assert.Null(d.Connection);
             Assert.Null(d.IPEndPoint);
             Assert.Null(d.RemoteToken);
-            Assert.Null(d.Size);
+            Assert.Equal(0, d.Size);
             Assert.Equal(TransferStates.None, d.State);
             Assert.Equal(0, d.AverageSpeed);
             Assert.Equal(0, d.BytesTransferred);
@@ -409,6 +409,68 @@ namespace Soulseek.Tests.Unit
             d.UpdateProgress(10000L);
 
             Assert.True(d.AverageSpeed > 0);
+        }
+
+        [Trait("Category", "UpdateProgress")]
+        [Fact(DisplayName = "UpdateProgress uses moving average when Size has not yet been reached")]
+        internal void UpdateProgress_Uses_Moving_Average_When_Size_Has_Not_Yet_Been_Reached()
+        {
+            // Size must exceed bytesTransferred, otherwise UpdateProgress takes the "transfer complete"
+            // shortcut instead of the moving-average branch this test is meant to exercise. with lastProgressTime
+            // unset, the moving average falls back to StartTime for its elapsed-time calculation.
+            var d = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0)
+            {
+                Size = 1_000_000,
+            };
+
+            d.SetField("progressUpdateLimit", 0);
+            d.SetProperty("State", TransferStates.InProgress);
+
+            // force StartTime back 1 second so the math works
+            d.SetProperty(nameof(d.StartTime), DateTime.UtcNow.AddSeconds(-1));
+
+            Assert.Equal(0, d.AverageSpeed);
+            Assert.Null(d.GetField<DateTime?>("lastProgressTime"));
+            Assert.False(d.GetField<bool>("speedInitialized"));
+
+            d.InvokeMethod("UpdateProgress", 100000);
+
+            Assert.True(d.AverageSpeed > 0);
+            Assert.NotNull(d.GetField<DateTime?>("lastProgressTime"));
+            Assert.True(d.GetField<bool>("speedInitialized"));
+        }
+
+        [Trait("Category", "UpdateProgress")]
+        [Fact(DisplayName = "UpdateProgress applies weighted moving average on subsequent call when Size has not yet been reached")]
+        internal void UpdateProgress_Applies_Weighted_Moving_Average_On_Subsequent_Call_When_Size_Has_Not_Yet_Been_Reached()
+        {
+            // Size must exceed bytesTransferred throughout, otherwise UpdateProgress takes the "transfer complete"
+            // shortcut instead of the moving-average branch this test is meant to exercise. once lastProgressTime
+            // has been set by the first call, the second call must use it (rather than StartTime) and apply the
+            // weighted average formula (rather than setting AverageSpeed outright).
+            var d = new TransferInternal(TransferDirection.Download, string.Empty, string.Empty, 0)
+            {
+                Size = 1_000_000,
+            };
+
+            d.SetField("progressUpdateLimit", 0);
+            d.SetProperty("State", TransferStates.InProgress);
+
+            // force StartTime back 1 second so the math works
+            d.SetProperty(nameof(d.StartTime), DateTime.UtcNow.AddSeconds(-1));
+
+            d.InvokeMethod("UpdateProgress", 100000);
+
+            var v1 = d.AverageSpeed;
+            Assert.True(v1 > 0);
+            Assert.True(d.GetField<bool>("speedInitialized"));
+
+            var lastProgressTimeAfterFirstCall = d.GetField<DateTime?>("lastProgressTime");
+
+            d.InvokeMethod("UpdateProgress", 200000);
+
+            Assert.NotEqual(v1, d.AverageSpeed);
+            Assert.NotEqual(lastProgressTimeAfterFirstCall, d.GetField<DateTime?>("lastProgressTime"));
         }
     }
 }

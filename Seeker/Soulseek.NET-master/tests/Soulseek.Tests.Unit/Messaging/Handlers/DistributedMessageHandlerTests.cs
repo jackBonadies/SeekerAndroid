@@ -97,7 +97,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
             mocks.Diagnostic.Setup(m => m.Debug(It.IsAny<string>()));
 
             var conn = new Mock<IMessageConnection>();
-            conn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken?>()))
+            conn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Throws(new Exception());
 
             var msg = new MessageBuilder()
@@ -255,7 +255,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
             handler.HandleMessageRead(conn.Object, message);
 
-            mocks.DistributedConnectionManager.Verify(m => m.BroadcastMessageAsync(message, It.IsAny<CancellationToken?>()), Times.Once);
+            mocks.DistributedConnectionManager.Verify(m => m.BroadcastMessageAsync(message, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Trait("Category", "Message")]
@@ -280,7 +280,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
             handler.HandleMessageRead(conn.Object, message);
 
             mocks.DistributedConnectionManager
-                .Verify(m => m.BroadcastMessageAsync(forwardedMessage, It.IsAny<CancellationToken?>()), Times.Once);
+                .Verify(m => m.BroadcastMessageAsync(forwardedMessage, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Trait("Category", "Message")]
@@ -359,7 +359,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
             var options = new SoulseekClientOptions(searchResponseResolver: (u, t, q) => Task.FromResult<SearchResponse>(null));
             var (handler, mocks) = GetFixture(options);
 
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(new IPEndPoint(IPAddress.None, 0)));
 
             var endpoint = new IPEndPoint(IPAddress.None, 0);
@@ -374,10 +374,10 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
             handler.HandleMessageRead(conn.Object, message);
 
-            mocks.Client.Verify(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()), Times.Never);
+            mocks.Client.Verify(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()), Times.Never);
             mocks.PeerConnectionManager.Verify(m => m.GetOrAddMessageConnectionAsync(username, endpoint, It.IsAny<CancellationToken>()), Times.Never);
 
-            peerConn.Verify(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), null), Times.Never);
+            peerConn.Verify(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), CancellationToken.None), Times.Never);
         }
 
         [Trait("Category", "Message")]
@@ -394,7 +394,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
             var endpoint = new IPEndPoint(IPAddress.None, 0);
 
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(endpoint));
 
             var peerConn = new Mock<IMessageConnection>();
@@ -407,10 +407,10 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
             handler.HandleMessageRead(conn.Object, message);
 
-            mocks.Client.Verify(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()), Times.Never);
+            mocks.Client.Verify(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()), Times.Never);
             mocks.PeerConnectionManager.Verify(m => m.GetOrAddMessageConnectionAsync(username, endpoint, It.IsAny<CancellationToken>()), Times.Never);
 
-            peerConn.Verify(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), null), Times.Never);
+            peerConn.Verify(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), CancellationToken.None), Times.Never);
         }
 
         [Trait("Category", "Message")]
@@ -446,7 +446,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
             handler.HandleChildMessageRead(conn.Object, message);
 
-            conn.Verify(m => m.WriteAsync(It.Is<IOutgoingMessage>(msg => msg.ToByteArray().Matches(new DistributedPingResponse(token).ToByteArray())), It.IsAny<CancellationToken?>()), Times.Once);
+            conn.Verify(m => m.WriteAsync(It.Is<IOutgoingMessage>(msg => msg.ToByteArray().Matches(new DistributedPingResponse(token).ToByteArray())), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Trait("Category", "HandleChildMessageRead")]
@@ -464,7 +464,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
             handler.HandleChildMessageRead(conn.Object, new MessageEventArgs(message));
 
-            conn.Verify(m => m.WriteAsync(It.Is<IOutgoingMessage>(msg => msg.ToByteArray().Matches(new DistributedPingResponse(token).ToByteArray())), It.IsAny<CancellationToken?>()), Times.Once);
+            conn.Verify(m => m.WriteAsync(It.Is<IOutgoingMessage>(msg => msg.ToByteArray().Matches(new DistributedPingResponse(token).ToByteArray())), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Trait("Category", "HandleChildMessageRead")]
@@ -495,7 +495,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
                 .Returns(token);
 
             var conn = new Mock<IMessageConnection>();
-            conn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken?>()))
+            conn.Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromException(new Exception()));
 
             var message = new DistributedPingRequest().ToByteArray();
@@ -588,7 +588,7 @@ namespace Soulseek.Tests.Unit.Messaging.Handlers
 
             handler.HandleEmbeddedMessage(message);
 
-            mocks.DistributedConnectionManager.Verify(m => m.BroadcastMessageAsync(expected, It.IsAny<CancellationToken?>()), Times.Once);
+            mocks.DistributedConnectionManager.Verify(m => m.BroadcastMessageAsync(expected, It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Trait("Category", "HandleEmbeddedMessage")]

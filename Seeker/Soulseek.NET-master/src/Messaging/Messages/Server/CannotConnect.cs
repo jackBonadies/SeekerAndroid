@@ -73,6 +73,11 @@ namespace Soulseek.Messaging.Messages
                 username = reader.ReadString();
             }
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.CannotConnect)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new CannotConnect(token, username);
         }
 

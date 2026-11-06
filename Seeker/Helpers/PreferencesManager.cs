@@ -181,13 +181,15 @@ namespace Seeker
 
         public static void RestoreSmartFilterState(ISharedPreferences prefs)
         {
-            PreferencesState.SmartFilterOptions = new PreferencesState.SmartFilterState();
-            PreferencesState.SmartFilterOptions.KeywordsEnabled = prefs.GetBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, true);
-            PreferencesState.SmartFilterOptions.KeywordsOrder = prefs.GetInt(KeyConsts.M_SmartFilter_KeywordsOrder, 0);
-            PreferencesState.SmartFilterOptions.FileTypesEnabled = prefs.GetBoolean(KeyConsts.M_SmartFilter_TypesEnabled, true);
-            PreferencesState.SmartFilterOptions.FileTypesOrder = prefs.GetInt(KeyConsts.M_SmartFilter_TypesOrder, 1);
-            PreferencesState.SmartFilterOptions.NumFilesEnabled = prefs.GetBoolean(KeyConsts.M_SmartFilter_CountsEnabled, true);
-            PreferencesState.SmartFilterOptions.NumFilesOrder = prefs.GetInt(KeyConsts.M_SmartFilter_CountsOrder, 2);
+            PreferencesState.SmartFilterOptions = new PreferencesState.SmartFilterState
+            {
+                KeywordsEnabled = prefs.GetBoolean(KeyConsts.M_SmartFilter_KeywordsEnabled, true),
+                KeywordsOrder = prefs.GetInt(KeyConsts.M_SmartFilter_KeywordsOrder, 0),
+                FileTypesEnabled = prefs.GetBoolean(KeyConsts.M_SmartFilter_TypesEnabled, true),
+                FileTypesOrder = prefs.GetInt(KeyConsts.M_SmartFilter_TypesOrder, 1),
+                NumFilesEnabled = prefs.GetBoolean(KeyConsts.M_SmartFilter_CountsEnabled, true),
+                NumFilesOrder = prefs.GetInt(KeyConsts.M_SmartFilter_CountsOrder, 2)
+            };
         }
 
         // Save Methods

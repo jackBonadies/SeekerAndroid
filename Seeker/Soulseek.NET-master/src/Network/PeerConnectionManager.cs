@@ -79,6 +79,7 @@ namespace Soulseek.Network
         private IConnectionFactory ConnectionFactory { get; }
         private IDiagnosticFactory Diagnostic { get; }
         private bool Disposed { get; set; }
+        private bool Disposing { get; set; }
 
         private ConcurrentDictionary<string, Lazy<Task<IMessageConnection>>> MessageConnectionDictionary { get; set; } =
             new ConcurrentDictionary<string, Lazy<Task<IMessageConnection>>>();
@@ -104,6 +105,11 @@ namespace Soulseek.Network
         /// <returns>The operation context.</returns>
         public async Task AddOrUpdateMessageConnectionAsync(string username, IConnection incomingConnection)
         {
+            if (Disposing || Disposed)
+            {
+                throw new ObjectDisposedException(nameof(PeerConnectionManager));
+            }
+
             var c = incomingConnection;
 
             try
@@ -287,6 +293,11 @@ namespace Soulseek.Network
         /// <returns>The operation context, including the new or updated connection.</returns>
         public async Task<IMessageConnection> GetOrAddMessageConnectionAsync(ConnectToPeerResponse connectToPeerResponse)
         {
+            if (Disposing || Disposed)
+            {
+                throw new ObjectDisposedException(nameof(PeerConnectionManager));
+            }
+
             bool cached = true;
             var r = connectToPeerResponse;
 
@@ -412,6 +423,11 @@ namespace Soulseek.Network
         /// <returns>The operation context, including the new or existing connection.</returns>
         public async Task<IMessageConnection> GetOrAddMessageConnectionAsync(string username, IPEndPoint ipEndPoint, int solicitationToken, CancellationToken cancellationToken)
         {
+            if (Disposing || Disposed)
+            {
+                throw new ObjectDisposedException(nameof(PeerConnectionManager));
+            }
+
             bool cached = true;
 
             try
@@ -657,15 +673,18 @@ namespace Soulseek.Network
 
             while (!MessageConnectionDictionary.IsEmpty)
             {
-                if (MessageConnectionDictionary.TryRemove(MessageConnectionDictionary.Keys.First(), out var connection))
+                foreach (var key in MessageConnectionDictionary.Keys)
                 {
-                    try
+                    if (MessageConnectionDictionary.TryRemove(key, out var connection))
                     {
-                        (await connection.Value.ConfigureAwait(false))?.Dispose();
-                    }
-                    catch
-                    {
-                        // noop
+                        try
+                        {
+                            (await connection.Value.ConfigureAwait(false))?.Dispose();
+                        }
+                        catch
+                        {
+                            // noop
+                        }
                     }
                 }
             }
@@ -689,6 +708,8 @@ namespace Soulseek.Network
             {
                 if (disposing)
                 {
+                    Disposing = true;
+
                     RemoveAndDisposeAll();
                 }
 

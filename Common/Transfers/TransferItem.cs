@@ -104,16 +104,14 @@ namespace Seeker
             return (State & showing) != 0 ? AvgSpeed : 0;
         }
 
-        public long? GetSizeForDL()
+        // -1 for legacy "unknown" sentinel. We re-request size if 0.
+        public long GetSizeForDL()
         {
-            if (this.Size == -1)
+            if (this.Size < 0)
             {
-                return null;
+                return 0;
             }
-            else
-            {
-                return this.Size;
-            }
+            return this.Size;
         }
 
         public bool ShouldEncodeFolderLatin1()

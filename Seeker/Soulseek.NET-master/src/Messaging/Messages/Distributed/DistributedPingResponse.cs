@@ -64,6 +64,11 @@ namespace Soulseek.Messaging.Messages
                 token = reader.ReadInteger();
             }
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Distributed.Ping)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new DistributedPingResponse(token);
         }
 

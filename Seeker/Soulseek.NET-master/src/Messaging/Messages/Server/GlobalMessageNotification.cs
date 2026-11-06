@@ -45,6 +45,11 @@ namespace Soulseek.Messaging.Messages
 
             var msg = reader.ReadString();
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.GlobalAdminMessage)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return msg;
         }
     }

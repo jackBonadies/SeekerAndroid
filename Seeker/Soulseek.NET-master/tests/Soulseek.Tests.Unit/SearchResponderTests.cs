@@ -304,7 +304,7 @@ namespace Soulseek.Tests.Unit
         {
             var (responder, mocks) = GetFixture(new SoulseekClientOptions(searchResponseResolver: (u, t, q) => Task.FromResult(searchResponse)));
 
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(endpoint));
             mocks.Client.Setup(m => m.GetNextToken())
                 .Returns(responseToken);
@@ -318,7 +318,7 @@ namespace Soulseek.Tests.Unit
 
             Assert.True(responded);
 
-            conn.Verify(m => m.WriteAsync(It.Is<byte[]>(b => b.Matches(searchResponse.ToByteArray())), It.IsAny<CancellationToken?>()), Times.Once);
+            conn.Verify(m => m.WriteAsync(It.Is<byte[]>(b => b.Matches(searchResponse.ToByteArray())), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Trait("Category", "TryRespondAsync")]
@@ -327,7 +327,7 @@ namespace Soulseek.Tests.Unit
         {
             var (responder, mocks) = GetFixture(new SoulseekClientOptions(searchResponseResolver: (u, t, q) => Task.FromResult(searchResponse)));
 
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(endpoint));
             mocks.Client.Setup(m => m.GetNextToken())
                 .Returns(responseToken);
@@ -357,7 +357,7 @@ namespace Soulseek.Tests.Unit
         {
             var (responder, mocks) = GetFixture(new SoulseekClientOptions(searchResponseResolver: (u, t, q) => Task.FromResult(searchResponse)));
 
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(endpoint));
             mocks.Client.Setup(m => m.GetNextToken())
                 .Returns(responseToken);
@@ -380,7 +380,7 @@ namespace Soulseek.Tests.Unit
         {
             var (responder, mocks) = GetFixture(new SoulseekClientOptions(searchResponseResolver: (u, t, q) => Task.FromResult(searchResponse)));
 
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(endpoint));
             mocks.Client.Setup(m => m.GetNextToken())
                 .Returns(responseToken);
@@ -412,7 +412,7 @@ namespace Soulseek.Tests.Unit
 
                 var (responder, mocks) = GetFixture(new SoulseekClientOptions(searchResponseResolver: (u, t, q) => Task.FromResult<SearchResponse>(rawResponse)));
 
-                mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+                mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                     .Returns(Task.FromResult(endpoint));
                 mocks.Client.Setup(m => m.GetNextToken())
                     .Returns(responseToken);
@@ -438,7 +438,7 @@ namespace Soulseek.Tests.Unit
 
                 var (responder, mocks) = GetFixture(new SoulseekClientOptions(searchResponseResolver: (u, t, q) => Task.FromResult<SearchResponse>(rawResponse)));
 
-                mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+                mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                     .Returns(Task.FromResult(endpoint));
                 mocks.Client.Setup(m => m.GetNextToken())
                     .Returns(responseToken);
@@ -452,8 +452,8 @@ namespace Soulseek.Tests.Unit
 
                 Assert.True(responded);
 
-                conn.Verify(m => m.WriteAsync(rawResponse.Length, rawResponse.Stream, It.IsAny<Func<int, CancellationToken, Task<int>>>(), It.IsAny<Action<int, int, int>>(), It.IsAny<CancellationToken?>()), Times.Once);
-                conn.Verify(m => m.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken?>()), Times.Never);
+                conn.Verify(m => m.WriteAsync(rawResponse.Length, rawResponse.Stream, It.IsAny<Func<int, CancellationToken, Task<int>>>(), It.IsAny<Action<int, int, int>>(), It.IsAny<CancellationToken>()), Times.Once);
+                conn.Verify(m => m.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()), Times.Never);
             }
         }
 
@@ -466,7 +466,7 @@ namespace Soulseek.Tests.Unit
 
             var (responder, mocks) = GetFixture(new SoulseekClientOptions(searchResponseResolver: (u, t, q) => Task.FromResult<SearchResponse>(rawResponse)));
 
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(endpoint));
             mocks.Client.Setup(m => m.GetNextToken())
                 .Returns(responseToken);
@@ -491,7 +491,7 @@ namespace Soulseek.Tests.Unit
 
             var (responder, mocks) = GetFixture(new SoulseekClientOptions(searchResponseResolver: (u, t, q) => Task.FromResult<SearchResponse>(rawResponse)));
 
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(endpoint));
             mocks.Client.Setup(m => m.GetNextToken())
                 .Returns(responseToken);
@@ -512,7 +512,7 @@ namespace Soulseek.Tests.Unit
         {
             var (responder, mocks) = GetFixture(new SoulseekClientOptions(searchResponseResolver: (u, t, q) => Task.FromResult(searchResponse)));
 
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(endpoint));
             mocks.Client.Setup(m => m.GetNextToken())
                 .Returns(responseToken);
@@ -537,7 +537,7 @@ namespace Soulseek.Tests.Unit
                 searchResponseCache: cache.Object,
                 searchResponseResolver: (u, t, q) => Task.FromResult(searchResponse)));
 
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(endpoint));
             mocks.Client.Setup(m => m.GetNextToken())
                 .Returns(responseToken);
@@ -570,7 +570,7 @@ namespace Soulseek.Tests.Unit
                 searchResponseCache: cache.Object,
                 searchResponseResolver: (u, t, q) => Task.FromResult(searchResponse)));
 
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(endpoint));
             mocks.Client.Setup(m => m.GetNextToken())
                 .Returns(responseToken);
@@ -593,7 +593,7 @@ namespace Soulseek.Tests.Unit
         {
             var (responder, mocks) = GetFixture(new SoulseekClientOptions(searchResponseResolver: (u, t, q) => Task.FromResult(searchResponse)));
 
-            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken?>()))
+            mocks.Client.Setup(m => m.GetUserEndPointAsync(username, It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(endpoint));
             mocks.Client.Setup(m => m.GetNextToken())
                 .Returns(responseToken);
@@ -696,7 +696,7 @@ namespace Soulseek.Tests.Unit
 
             Assert.True(responded);
 
-            conn.Verify(m => m.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken?>()), Times.Once);
+            conn.Verify(m => m.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Trait("Category", "TryRespondAsync")]

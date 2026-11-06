@@ -183,7 +183,7 @@ namespace Soulseek.Tests.Unit.Client
                 await client.ReconfigureOptionsAsync(patch);
             }
 
-            mocks.DistributedConnectionManager.Verify(m => m.UpdateStatusAsync(It.IsAny<CancellationToken?>()));
+            mocks.DistributedConnectionManager.Verify(m => m.UpdateStatusAsync(It.IsAny<CancellationToken>()));
         }
 
         [Trait("Category", "ReconfigureOptions")]
@@ -274,7 +274,7 @@ namespace Soulseek.Tests.Unit.Client
                 await client.ReconfigureOptionsAsync(patch);
             }
 
-            mocks.ServerConnection.Verify(m => m.WriteAsync(It.IsAny<SetListenPortCommand>(), It.IsAny<CancellationToken?>()));
+            mocks.ServerConnection.Verify(m => m.WriteAsync(It.IsAny<SetListenPortCommand>(), It.IsAny<CancellationToken>()));
         }
 
         [Trait("Category", "ReconfigureOptions")]
@@ -461,7 +461,7 @@ namespace Soulseek.Tests.Unit.Client
                 await client.ReconfigureOptionsAsync(patch);
             }
 
-            mocks.ServerConnection.Verify(m => m.WriteAsync(It.IsAny<PrivateRoomToggle>(), It.IsAny<CancellationToken?>()));
+            mocks.ServerConnection.Verify(m => m.WriteAsync(It.IsAny<PrivateRoomToggle>(), It.IsAny<CancellationToken>()));
         }
 
         [Trait("Category", "ReconfigureOptions")]
@@ -479,7 +479,7 @@ namespace Soulseek.Tests.Unit.Client
                 await client.ReconfigureOptionsAsync(patch);
             }
 
-            mocks.ServerConnection.Verify(m => m.WriteAsync(It.IsAny<PrivateRoomToggle>(), It.IsAny<CancellationToken?>()), Times.Never);
+            mocks.ServerConnection.Verify(m => m.WriteAsync(It.IsAny<PrivateRoomToggle>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Trait("Category", "ReconfigureOptions")]
@@ -646,7 +646,7 @@ namespace Soulseek.Tests.Unit.Client
         {
             var (client, mocks) = GetFixture(new SoulseekClientOptions());
             mocks.ServerConnection
-                .Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken?>()))
+                .Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Throws(new OperationCanceledException());
 
             var patch = new SoulseekClientOptionsPatch();
@@ -668,7 +668,7 @@ namespace Soulseek.Tests.Unit.Client
         {
             var (client, mocks) = GetFixture(new SoulseekClientOptions());
             mocks.ServerConnection
-                .Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken?>()))
+                .Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Throws(new TimeoutException());
 
             var patch = new SoulseekClientOptionsPatch();
@@ -692,7 +692,7 @@ namespace Soulseek.Tests.Unit.Client
 
             var (client, mocks) = GetFixture(new SoulseekClientOptions());
             mocks.ServerConnection
-                .Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken?>()))
+                .Setup(m => m.WriteAsync(It.IsAny<IOutgoingMessage>(), It.IsAny<CancellationToken>()))
                 .Throws(expectedEx);
 
             var patch = new SoulseekClientOptionsPatch();

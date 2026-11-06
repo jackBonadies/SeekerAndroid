@@ -43,7 +43,7 @@ namespace Soulseek.Tests.Unit.Client
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
-                var ex = await Record.ExceptionAsync(() => s.EnqueueDownloadAsync(username, "filename", Guid.NewGuid().ToString()));
+                var ex = await Record.ExceptionAsync(() => s.EnqueueDownloadAsync(username, "filename", Guid.NewGuid().ToString(), size: 42));
 
                 Assert.NotNull(ex);
                 Assert.IsType<ArgumentException>(ex);
@@ -60,10 +60,43 @@ namespace Soulseek.Tests.Unit.Client
             using (var stream = new MemoryStream())
             using (var s = new SoulseekClient(minorVersion: 9999))
             {
-                var ex = await Record.ExceptionAsync(() => s.EnqueueDownloadAsync(username, "filename", () => Task.FromResult((Stream)stream)));
+                var ex = await Record.ExceptionAsync(() => s.EnqueueDownloadAsync(username, "filename", () => Task.FromResult((Stream)stream), size: 42));
 
                 Assert.NotNull(ex);
                 Assert.IsType<ArgumentException>(ex);
+            }
+        }
+
+        [Trait("Category", "EnqueueDownloadAsync")]
+        [Fact(DisplayName = "EnqueueDownloadAsync throws ArgumentOutOfRangeException given startOffset greater than size")]
+        public async Task EnqueueDownloadAsync_Throws_ArgumentOutOfRangeException_Given_StartOffset_Greater_Than_Size()
+        {
+            using (var s = new SoulseekClient(minorVersion: 9999))
+            {
+                s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+                var ex = await Record.ExceptionAsync(() => s.EnqueueDownloadAsync("username", "filename", Guid.NewGuid().ToString(), size: 10, startOffset: 11));
+
+                Assert.NotNull(ex);
+                Assert.IsType<ArgumentOutOfRangeException>(ex);
+                Assert.Equal("startOffset", ((ArgumentOutOfRangeException)ex).ParamName);
+            }
+        }
+
+        [Trait("Category", "EnqueueDownloadAsync")]
+        [Fact(DisplayName = "EnqueueDownloadAsync stream throws ArgumentOutOfRangeException given startOffset greater than size")]
+        public async Task EnqueueDownloadAsync_Stream_Throws_ArgumentOutOfRangeException_Given_StartOffset_Greater_Than_Size()
+        {
+            using (var stream = new MemoryStream())
+            using (var s = new SoulseekClient(minorVersion: 9999))
+            {
+                s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
+
+                var ex = await Record.ExceptionAsync(() => s.EnqueueDownloadAsync("username", "filename", () => Task.FromResult((Stream)stream), size: 10, startOffset: 11));
+
+                Assert.NotNull(ex);
+                Assert.IsType<ArgumentOutOfRangeException>(ex);
+                Assert.Equal("startOffset", ((ArgumentOutOfRangeException)ex).ParamName);
             }
         }
 
@@ -119,7 +152,7 @@ namespace Soulseek.Tests.Unit.Client
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
-                var downloadTask = await s.EnqueueDownloadAsync(username, filename, localFilename, (long?)size, 0, token);
+                var downloadTask = await s.EnqueueDownloadAsync(username, filename, localFilename, size, 0, token);
 
                 Assert.NotNull(downloadTask);
 
@@ -187,7 +220,7 @@ namespace Soulseek.Tests.Unit.Client
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
-                var downloadTask = await s.EnqueueDownloadAsync(username, filename, () => Task.FromResult((Stream)stream), (long?)size, 0, token);
+                var downloadTask = await s.EnqueueDownloadAsync(username, filename, () => Task.FromResult((Stream)stream), size, 0, token);
 
                 Assert.NotNull(downloadTask);
 
@@ -258,7 +291,7 @@ namespace Soulseek.Tests.Unit.Client
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
-                var downloadTask = await s.EnqueueDownloadAsync(username, filename, () => Task.FromResult((Stream)stream), (long?)size, 0, token);
+                var downloadTask = await s.EnqueueDownloadAsync(username, filename, () => Task.FromResult((Stream)stream), size, 0, token);
 
                 Assert.NotNull(downloadTask);
 
@@ -327,7 +360,7 @@ namespace Soulseek.Tests.Unit.Client
             {
                 s.SetProperty("State", SoulseekClientStates.Connected | SoulseekClientStates.LoggedIn);
 
-                var downloadTask = await s.EnqueueDownloadAsync(username, filename, localFilename, (long?)size, 0, token);
+                var downloadTask = await s.EnqueueDownloadAsync(username, filename, localFilename, size, 0, token);
 
                 Assert.NotNull(downloadTask);
 

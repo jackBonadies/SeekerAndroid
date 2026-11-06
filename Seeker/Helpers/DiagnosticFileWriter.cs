@@ -74,7 +74,7 @@ namespace Seeker.Helpers
 
         private static string CreateMessage(Soulseek.Diagnostics.DiagnosticEventArgs e)
         {
-            string timestamp = e.Timestamp.ToString("[MM_dd-hh:mm:ss] ");
+            string timestamp = e.Timestamp.ToString("[MM_dd-HH:mm:ss.fff] ");
             string body = null;
             if (e.IncludesException)
             {
@@ -89,7 +89,7 @@ namespace Seeker.Helpers
 
         private static string CreateMessage(string line)
         {
-            string timestamp = DateTime.UtcNow.ToString("[MM_dd-hh:mm:ss] ");
+            string timestamp = DateTime.UtcNow.ToString("[MM_dd-HH:mm:ss.fff] ");
             return timestamp + line;
         }
 

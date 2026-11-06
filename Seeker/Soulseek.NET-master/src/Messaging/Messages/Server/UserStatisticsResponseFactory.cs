@@ -49,6 +49,11 @@ namespace Soulseek.Messaging.Messages
             var fileCount = reader.ReadInteger();
             var directoryCount = reader.ReadInteger();
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.GetUserStats)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new UserStatistics(username, averageSpeed, uploadCount, fileCount, directoryCount);
         }
     }

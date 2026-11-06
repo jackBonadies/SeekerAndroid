@@ -114,6 +114,11 @@ namespace Soulseek.Messaging.Messages
                 msg += string.IsNullOrWhiteSpace(detail) ? string.Empty : ": " + detail;
             }
 
+            if (SoulseekClient.ReportUnreadMessageData && reader.HasMoreData)
+            {
+                Diagnostics.GlobalDiagnostic.Warning($"Message reader for {nameof(MessageCode.Server.Login)} finalized with {reader.Remaining} unread bytes");
+            }
+
             return new LoginResponse(succeeded, msg, ipAddress, hash, isSupporter);
         }
     }

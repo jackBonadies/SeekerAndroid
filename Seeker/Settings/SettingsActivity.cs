@@ -1333,7 +1333,7 @@ namespace Seeker
                     this.RunOnUiThread(new Action(() =>
                     {
                         StorageState.SetRootDownloadDirectory(this, data.Data, isFromTree: true, raiseUpdatedEvent: true);
-                        SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), data.Data), ToastLength.Long);
+                        //SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_dl_dir), data.Data), ToastLength.Long);
                     }));
                 }
             }
@@ -1353,7 +1353,7 @@ namespace Seeker
                     this.RunOnUiThread(new Action(() =>
                     {
                         StorageState.SetRootIncompleteDirectory(this, data.Data, isFromTree: true, raiseUpdatedEvent: true);
-                        SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), data.Data), ToastLength.Long);
+                        //SeekerApplication.Toaster.ShowToast(string.Format(this.GetString(Resource.String.successfully_changed_incomplete_dir), data.Data), ToastLength.Long);
                     }));
                 }
             }
