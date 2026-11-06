@@ -176,6 +176,7 @@ namespace Seeker
                 return Task.FromCanceled(cancellationToken);
             }
             Waiter waiter;
+            int counted;
             lock (syncRoot)
             {
                 var now = utcNow();
@@ -186,9 +187,10 @@ namespace Seeker
                 }
                 waiter = new Waiter { Username = username };
                 waiters.AddLast(waiter);
-                log?.Invoke($"download slots: {username} waiting ({CountedUsers(now)}/{CurrentLimit()} users)");
+                counted = CountedUsers(now);
                 ScheduleTimer(now);
             }
+            log?.Invoke($"download slots: {username} waiting ({counted}/{CurrentLimit()} users)");
             if (cancellationToken.CanBeCanceled)
             {
                 var registration = cancellationToken.Register(() =>
@@ -278,9 +280,14 @@ namespace Seeker
         // admits waiters in order while there is room. a waiter whose user holds a slot is always admitted.
         public void AdmitWaiters()
         {
-            var admitted = new List<Waiter>();
+            List<Waiter>? admitted = null;
+            List<string>? messages = null;
             lock (syncRoot)
             {
+                if (waiters.Count == 0)
+                {
+                    return;
+                }
                 var now = utcNow();
                 int counted = CountedUsers(now);
                 int max = CurrentLimit();
@@ -298,12 +305,26 @@ namespace Seeker
                         }
                         GetOrAdd(w.Username).Batches++;
                         waiters.Remove(node);
-                        admitted.Add(w);
-                        log?.Invoke($"download slots: {w.Username} admitted ({counted}/{max} users)");
+                        (admitted ??= new List<Waiter>()).Add(w);
+                        if (log != null)
+                        {
+                            (messages ??= new List<string>()).Add($"download slots: {w.Username} admitted ({counted}/{max} users)");
+                        }
                     }
                     node = next;
                 }
                 ScheduleTimer(now);
+            }
+            if (admitted == null)
+            {
+                return;
+            }
+            if (messages != null)
+            {
+                foreach (var m in messages)
+                {
+                    log!.Invoke(m);
+                }
             }
             foreach (var w in admitted)
             {
