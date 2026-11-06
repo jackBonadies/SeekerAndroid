@@ -62,7 +62,9 @@ namespace Seeker.Services
 
         /// <summary>
         /// Adds the files to the transfer list and kicks off the downloads.
-        /// The returned task completes once the last file has been handed to the library.
+        /// The returned task completes once the last file has been handed to the library
+        ///   (which may take time - i.e. we need to wait for a download slot (if limit is on) + 
+        ///      previous transfers need to be remotely queued)
         /// </summary>
         public Task EnqueueFilesAsync(FullFileInfo[] files, bool queuePaused, string username)
         {
@@ -983,6 +985,13 @@ namespace Seeker.Services
                     DeleteIncompleteFile(transferItem, "on TransferSizeMismatchException");
                     break;
                 }
+                case DownloadFailureKind.StartOffsetExceedsSize:
+                    // the partial incomplete file is longer than the expected size. shouldn't happen in practice but this
+                    // block prevents forever retrying. Delete and start over.
+                    logger.Debug($"start offset exceeds size {transferItem.Size} for {e.dlInfo.fullFilename}, deleting the incomplete file");
+                    DeleteIncompleteFile(transferItem, "on start offset exceeding size");
+                    forceRetry = e.dlInfo.RetryCount == 0;
+                    break;
                 case DownloadFailureKind.DirectoryNotSet:
                     MarkTransferItemAsDirNotSet(transferItem);
                     action = () => { toaster.ShowToastDebounced(StringKey.FailedDownloadDirectoryNotSet, "_17_"); };

@@ -59,6 +59,14 @@ namespace UnitTestCommon
         }
 
         [Test]
+        public void StartOffsetExceedsSize()
+        {
+            AssertKind(DownloadFailureKind.StartOffsetExceedsSize, new ArgumentOutOfRangeException("startOffset", "The start offset exceeds the size of the file"));
+            AssertKind(DownloadFailureKind.Unknown, new ArgumentOutOfRangeException("startOffset", "The start offset must be greater than or equal to zero"));
+            AssertKind(DownloadFailureKind.Unknown, new ArgumentOutOfRangeException("size", "The size, if supplied, must be greater than or equal to zero"));
+        }
+
+        [Test]
         public void Rejected()
         {
             AssertKind(DownloadFailureKind.RejectedNotShared, new TransferRejectedException("Transfer rejected: File not shared."));
