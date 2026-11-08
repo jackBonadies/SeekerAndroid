@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Android.App;
+using Android.Content;
 using Android.OS;
 using Android.Util;
 using Android.Widget;
@@ -15,6 +16,7 @@ namespace InstrumentationTests
     public class MainActivity : Activity
     {
         const string Tag = "SeekerTests";
+        const int PickTreeRequest = 1;
         TextView _output;
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -27,6 +29,32 @@ namespace InstrumentationTests
             scrollView.AddView(_output);
             SetContentView(scrollView);
 
+            // for ProviderFileNameParityTests (needs SAF tree)
+            if (ContentResolver.PersistedUriPermissions.Count == 0)
+            {
+                if (savedInstanceState == null)
+                {
+                    AppendLine("No folder granted yet for ProviderFileNameParityTests\n");
+                    StartActivityForResult(new Intent(Intent.ActionOpenDocumentTree), PickTreeRequest);
+                }
+                return;
+            }
+
+            _ = RunTestsAsync();
+        }
+
+        protected override void OnActivityResult(int requestCode, [Android.Runtime.GeneratedEnum] Result resultCode, Intent data)
+        {
+            base.OnActivityResult(requestCode, resultCode, data);
+            if (requestCode != PickTreeRequest)
+            {
+                return;
+            }
+            if (resultCode == Result.Ok && data?.Data != null)
+            {
+                ContentResolver.TakePersistableUriPermission(data.Data, ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission);
+                AppendLine("Granted " + data.Data + "\n");
+            }
             _ = RunTestsAsync();
         }
 
