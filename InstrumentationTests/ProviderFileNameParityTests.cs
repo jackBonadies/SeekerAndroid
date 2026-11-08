@@ -6,6 +6,7 @@ using Android.Provider;
 using Android.Util;
 using Common;
 using Seeker;
+using Seeker.Helpers;
 using NUnit.Framework;
 
 namespace InstrumentationTests
@@ -40,6 +41,27 @@ namespace InstrumentationTests
             yield return ("ascii 254 + 3-byte char", new string('a', 254) + "東");
             yield return ("ascii 255", new string('a', 255));
             yield return ("ascii 256", new string('a', 256));
+        }
+
+        private static IEnumerable<string> MediaFileNames()
+        {
+            foreach (string ext in new[] { "mp3", "flac", "ogg", "oga", "opus", "m4a", "aac", "ape", "wav", "aiff", "aif", "wma", "wv", "alac", "mp4", "mka", "dsf", "weirdext" })
+            {
+                yield return "01 Track." + ext;
+            }
+            yield return "cover.jpg";
+            yield return "folder.jpeg";
+            yield return "cover.png";
+            yield return "album.cue";
+            yield return "rip.log";
+            yield return "info.nfo";
+            yield return "playlist.m3u";
+            yield return "readme.txt";
+            yield return "01 Track.FLAC";
+            yield return "01 Track.Mp3";
+            yield return "a.b.flac";
+            yield return "noextension";
+            yield return "trailing.";
         }
 
         [SetUp]
@@ -78,20 +100,41 @@ namespace InstrumentationTests
             Assert.That(mismatches, Is.Empty, string.Join("\n", mismatches));
         }
 
-        private void CheckOne(string label, string requested, string mimeType, string original, List<string> mismatches)
+        // CommonHelpers.CreateMediaFile now passes the full name with MediaMimeTypes.GetMimeTypeForCreate.
+        [Test]
+        public void MediaFilesKeepTheirName()
+        {
+            Log.Info(Tag, "provider: " + _scratchDir.Authority + " api " + (int)Android.OS.Build.VERSION.SdkInt);
+            var mismatches = new List<string>();
+            foreach (string name in MediaFileNames())
+            {
+                string mime = MediaMimeTypes.GetMimeTypeForCreate(name);
+                CheckOne(name + " [" + (mime ?? "null") + "]", name, mime, name, mismatches);
+
+                // PREVIOUS BEHAVIOR: since we stripped the extension, Android would take the liberty or renaming 
+                //   track.ogg -> track.oga
+                //   track.opus -> track.oga
+                //   noexttrack -> noexttrack.mp3
+                string legacyMime = MediaMimeTypes.GetMimeTypeFromFilename(name);
+                bool legacyFullName = legacyMime == null || legacyMime == MediaMimeTypes.M4A_MIME || legacyMime == MediaMimeTypes.APE_MIME;
+                string legacyRequested = legacyFullName ? name : System.IO.Path.GetFileNameWithoutExtension(name);
+                Log.Info(Tag, "      legacy would store '" + CreateAndReadName(legacyRequested, legacyMime) + "'");
+            }
+            Assert.That(mismatches, Is.Empty, string.Join("\n", mismatches));
+        }
+
+        private string CreateAndReadName(string requested, string mimeType)
         {
             var resolver = Application.Context.ContentResolver;
-            string expected = SimpleHelpers.ToValidFileName(original);
-            string actual;
             Android.Net.Uri created = null;
             try
             {
                 created = DocumentsContract.CreateDocument(resolver, _scratchDir, mimeType, requested);
-                actual = created == null ? "<null>" : QueryDisplayName(created);
+                return created == null ? "<null>" : QueryDisplayName(created);
             }
             catch (Exception e)
             {
-                actual = "<threw " + e.GetType().Name + ": " + e.Message + ">";
+                return "<threw " + e.GetType().Name + ": " + e.Message + ">";
             }
             finally
             {
@@ -100,6 +143,12 @@ namespace InstrumentationTests
                     DocumentsContract.DeleteDocument(resolver, created);
                 }
             }
+        }
+
+        private void CheckOne(string label, string requested, string mimeType, string original, List<string> mismatches)
+        {
+            string expected = SimpleHelpers.ToValidFileName(original);
+            string actual = CreateAndReadName(requested, mimeType);
 
             bool ok = actual == expected;
             Log.Info(Tag, (ok ? "  same " : "  DIFF ") + label + ": expected '" + Escape(expected) + "' actual '" + Escape(actual) + "'");

@@ -282,9 +282,8 @@ namespace Seeker.Services
                 else
                 {
                     partialLength = 0;
-                    DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name); //on samsung api 19 it renames song.mp3 to song.mp3.mp3. //TODO fix this! (tho below api 29 doesnt use this path anymore)
+                    DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
                     LogIfProviderRenamed(mFile, name); // a renamed incomplete file will NOT be found again. every resume will restart from 0
-                    //String: name of new document, without any file extension appended; the underlying provider may choose to append the extension.. Whoops...
                     incompleteUri = mFile.Uri; //nullref TODO TODO: if null throw custom exception so you can better handle it later on in DL continuation action
                 }
             }
