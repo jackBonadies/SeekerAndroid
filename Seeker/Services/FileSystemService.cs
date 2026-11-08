@@ -4,6 +4,7 @@ using Java.IO;
 using AndroidX.DocumentFile.Provider;
 using Seeker.Helpers;
 using System;
+using System.Linq;
 using static Android.Provider.DocumentsContract;
 
 using Common;
@@ -25,8 +26,7 @@ namespace Seeker.Services
 
         private void GetOrCreateIncompleteLocationInternal(string username, string fullfilename, int depth, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
         {
-            string name = SimpleHelpers.GetFileNameFromFile(fullfilename).ToString();
-            //string dir = Helpers.GetFolderNameFromFile(fullfilename);
+            string name = SimpleHelpers.ToValidFileName(SimpleHelpers.GetFileNameFromFile(fullfilename).ToString());
             string filePath = string.Empty;
 
             bool useDownloadDir = false;
@@ -215,7 +215,7 @@ namespace Seeker.Services
                         folderDir1 = slskDir1.FindFile(album_folder_name); //does the folder we want to save to exist
                         if (folderDir1 == null || !folderDir1.Exists())
                         {
-                            folderDir1 = slskDir1.CreateDirectory(album_folder_name);
+                            folderDir1 = CreateDirectoryChecked(slskDir1, album_folder_name);
                             //folderDir1 = slskDir1.FindFile(album_folder_name); //if it does not exist you then have to get it again!!
                             if (folderDir1 == null)
                             {
@@ -283,6 +283,7 @@ namespace Seeker.Services
                 {
                     partialLength = 0;
                     DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name); //on samsung api 19 it renames song.mp3 to song.mp3.mp3. //TODO fix this! (tho below api 29 doesnt use this path anymore)
+                    LogIfProviderRenamed(mFile, name); // a renamed incomplete file will NOT be found again. every resume will restart from 0
                     //String: name of new document, without any file extension appended; the underlying provider may choose to append the extension.. Whoops...
                     incompleteUri = mFile.Uri; //nullref TODO TODO: if null throw custom exception so you can better handle it later on in DL continuation action
                 }
@@ -399,8 +400,10 @@ namespace Seeker.Services
             bool noSubFolder,
             out string finalUri)
         {
-            string name = SimpleHelpers.GetFileNameFromFile(fullfilename).ToString();
+            string name = SimpleHelpers.ToValidFileName(SimpleHelpers.GetFileNameFromFile(fullfilename).ToString());
             string dir = SimpleHelpers.GetFolderNameFromFile(fullfilename, depth).ToString();
+            string[] dirParts = dir.Split('\\').Select(SimpleHelpers.ToValidFileName).ToArray();
+            string safeUsername = SimpleHelpers.ToValidFileName(username);
             string filePath = string.Empty;
 
             if (memoryMode && bytes.Count == 0)
@@ -440,9 +443,9 @@ namespace Seeker.Services
                 }
                 if (PreferencesState.CreateUsernameSubfolders)
                 {
-                    intermediateFolder = intermediateFolder + username + @"/"; //TODO: escape? slashes? etc... can easily test by just setting username to '/' in debugger
+                    intermediateFolder = intermediateFolder + safeUsername + @"/";
                 }
-                string fullDir = rootdir + intermediateFolder + (noSubFolder ? "" : dir); //+ @"/" + name;
+                string fullDir = rootdir + intermediateFolder + (noSubFolder || dir.Length == 0 ? "" : string.Join("/", dirParts));
                 Java.IO.File musicDir = new Java.IO.File(fullDir);
                 musicDir.Mkdirs();
                 filePath = fullDir + @"/" + name;
@@ -545,10 +548,10 @@ namespace Seeker.Services
                         DocumentFile tempUsernameDir1 = null;
                         lock (string.Intern("IfNotExistCreateAtomic_1"))
                         {
-                            tempUsernameDir1 = slskDir1.FindFile(username); //does username folder exist
+                            tempUsernameDir1 = slskDir1.FindFile(safeUsername); //does username folder exist
                             if (tempUsernameDir1 == null || !tempUsernameDir1.Exists())
                             {
-                                tempUsernameDir1 = slskDir1.CreateDirectory(username);
+                                tempUsernameDir1 = CreateDirectoryChecked(slskDir1, safeUsername);
                                 Logger.Debug(string.Format("Creating {0} dir", username));
                             }
                         }
@@ -566,11 +569,11 @@ namespace Seeker.Services
                         {
                             lock (string.Intern("IfNotExistCreateAtomic_2"))
                             {
-                                folderDir1 = slskDir1.FindFile(dir); //does the folder we want to save to exist
+                                folderDir1 = slskDir1.FindFile(dirParts[dirParts.Length - 1]); //does the folder we want to save to exist
                                 if (folderDir1 == null || !folderDir1.Exists())
                                 {
                                     Logger.Debug("Creating " + dir);
-                                    folderDir1 = slskDir1.CreateDirectory(dir);
+                                    folderDir1 = CreateDirectoryChecked(slskDir1, dirParts[dirParts.Length - 1]);
                                 }
                                 if (folderDir1 == null || !folderDir1.Exists())
                                 {
@@ -586,15 +589,14 @@ namespace Seeker.Services
                         int _depth = depth;
                         while (_depth > 0)
                         {
-                            var parts = dir.Split('\\');
-                            string singleDir = parts[parts.Length - _depth];
+                            string singleDir = dirParts[dirParts.Length - _depth];
                             lock (string.Intern("IfNotExistCreateAtomic_3"))
                             {
                                 folderDirNext = folderDir1.FindFile(singleDir); //does the folder we want to save to exist
                                 if (folderDirNext == null || !folderDirNext.Exists())
                                 {
                                     Logger.Debug("Creating " + dir);
-                                    folderDirNext = folderDir1.CreateDirectory(singleDir);
+                                    folderDirNext = CreateDirectoryChecked(folderDir1, singleDir);
                                 }
                                 if (folderDirNext == null || !folderDirNext.Exists())
                                 {
@@ -940,6 +942,36 @@ namespace Seeker.Services
         private static void CreateNoMediaFile(DocumentFile atDirectory)
         {
             atDirectory.CreateFile("nomedia/customnomedia", ".nomedia");
+        }
+
+        // creates directory and logs if the provider renamed it.
+        private static DocumentFile CreateDirectoryChecked(DocumentFile parent, string name)
+        {
+            DocumentFile created = parent.CreateDirectory(name);
+            LogIfProviderRenamed(created, name);
+            return created;
+        }
+
+        // If the filesystem creates a different name than ToValidFileName predicts then every later FindFile will miss
+        //   both resulting in extra folder creation and inability to resume downloads.
+        private static void LogIfProviderRenamed(DocumentFile created, string requestedName)
+        {
+            if (created == null)
+            {
+                return;
+            }
+            try
+            {
+                string actualName = created.Name;
+                if (actualName != requestedName)
+                {
+                    Logger.Firebase("NAME MISMATCH: requested: '" + requestedName + "' actual: '" + actualName + "' (" + created.Uri.Authority + ")");
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Debug("LogIfProviderRenamed failed: " + e.Message);
+            }
         }
     }
 }

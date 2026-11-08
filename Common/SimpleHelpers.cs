@@ -83,7 +83,59 @@ namespace Seeker
             {
                 incompleteFolderName = incompleteFolderName.Replace(c, '_');
             }
-            return incompleteFolderName;
+            return ToValidFileName(incompleteFolderName);
+        }
+
+        public const int MaxFileNameBytes = 255;
+
+        // Direct port of AOSP FileUtils.buildValidFatFilename
+        // https://android.googlesource.com/platform/frameworks/base/+/HEAD/core/java/android/os/FileUtils.java
+        // We need to transform the filename exactly how Android does, otherwise subsequent FindFile will miss
+        public static string ToValidFileName(string name)
+        {
+            if (string.IsNullOrEmpty(name) || name == "." || name == "..")
+            {
+                return "(invalid)";
+            }
+            var res = new System.Text.StringBuilder(name.Length);
+            foreach (char c in name)
+            {
+                res.Append(IsValidFatFileNameChar(c) ? c : '_');
+            }
+            if (System.Text.Encoding.UTF8.GetByteCount(res.ToString()) > MaxFileNameBytes)
+            {
+                while (System.Text.Encoding.UTF8.GetByteCount(res.ToString()) > MaxFileNameBytes - 3)
+                {
+                    res.Remove(res.Length / 2, 1);
+                }
+                res.Insert(res.Length / 2, "...");
+            }
+            return res.ToString();
+        }
+
+        // https://android.googlesource.com/platform/frameworks/base/+/HEAD/core/java/android/os/FileUtils.java
+        private static bool IsValidFatFileNameChar(char c)
+        {
+            if (c <= 0x1f)
+            {
+                return false;
+            }
+            switch (c)
+            {
+                case '"':
+                case '*':
+                case '/':
+                case ':':
+                case '<':
+                case '>':
+                case '?':
+                case '\\':
+                case '|':
+                case (char)0x7F:
+                    return false;
+                default:
+                    return true;
+            }
         }
 
         private static string GetLockedFileName(SearchResponse item)
