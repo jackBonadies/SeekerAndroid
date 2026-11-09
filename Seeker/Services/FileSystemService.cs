@@ -17,11 +17,48 @@ namespace Seeker.Services
         private readonly object lock_toplevel_ifexist_create = new object();
         private readonly object lock_album_ifexist_create = new object();
 
-        public void GetOrCreateIncompleteLocation(string username, string fullfilename, int depth, out string incompleteUri, out string parentUri, out long partialLength)
+        public void GetOrCreateIncompleteLocation(string username, string fullfilename, int depth, string storedIncompleteUri, string storedParentUri, out string incompleteUri, out string parentUri, out long partialLength)
         {
+            if (!string.IsNullOrEmpty(storedParentUri))
+            {
+                DocumentFile stored = GetDocumentFromStoredUri(storedIncompleteUri);
+                if (stored != null)
+                {
+                    incompleteUri = storedIncompleteUri;
+                    parentUri = storedParentUri;
+                    partialLength = stored.Length();
+                    Logger.Debug("resuming from stored incomplete file " + stored.Name + " at " + partialLength);
+                    return;
+                }
+            }
             GetOrCreateIncompleteLocationInternal(username, fullfilename, depth, out var incompleteUriNative, out var parentUriNative, out partialLength);
             incompleteUri = incompleteUriNative?.ToString();
             parentUri = parentUriNative?.ToString();
+        }
+
+        public static DocumentFile GetDocumentFromStoredUri(string uriString)
+        {
+            if (string.IsNullOrEmpty(uriString))
+            {
+                return null;
+            }
+            try
+            {
+                Android.Net.Uri uri = Android.Net.Uri.Parse(uriString);
+                DocumentFile df = uri.Scheme == "file"
+                    ? DocumentFile.FromFile(new Java.IO.File(uri.Path))
+                    : DocumentFile.FromSingleUri(Android.App.Application.Context, uri);
+                if (df == null || !df.Exists() || df.IsDirectory)
+                {
+                    return null;
+                }
+                return df;
+            }
+            catch (Exception e)
+            {
+                Logger.Debug("stored uri not usable: " + uriString + " " + e.Message);
+                return null;
+            }
         }
 
         private void GetOrCreateIncompleteLocationInternal(string username, string fullfilename, int depth, out Android.Net.Uri incompleteUri, out Android.Net.Uri parentUri, out long partialLength)
@@ -244,11 +281,6 @@ namespace Seeker.Services
                             CreateNoMediaFile(folderDir1);
                         }
                     }
-
-                    //THE VALID GOOD flags for a directory is Supports Dir Create.  The write is off in all of my cases and not necessary..
-
-                    //string diagMessage2 = CheckPermissions(slskDir1.Uri); //TEST CODE DELETE
-                    //string diagMessage3 = CheckPermissions(folderDir1.Uri); //TEST CODE DELETE
 
 
                 }

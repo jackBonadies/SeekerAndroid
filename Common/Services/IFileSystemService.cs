@@ -6,6 +6,7 @@ namespace Seeker.Services
     public interface IFileSystemService
     {
         void GetOrCreateIncompleteLocation(string username, string fullfilename, int depth,
+            string storedIncompleteUri, string storedParentUri,
             out string incompleteUri, out string parentUri, out long partialLength);
 
         Stream OpenIncompleteStream(string incompleteUri, long partialLength);

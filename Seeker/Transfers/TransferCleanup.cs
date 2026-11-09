@@ -24,7 +24,7 @@ namespace Seeker
                 parent = DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, parentIncompleteUri); //if from single uri then listing files will give unsupported operation exception...  //if temp (file: //)this will throw (which makes sense as it did not come from open tree uri)
             }
 
-            DocumentFile df = parent.FindFile(SimpleHelpers.ToValidFileName(ti.Filename));
+            DocumentFile df = FileSystemService.GetDocumentFromStoredUri(ti.IncompleteUri) ?? parent.FindFile(SimpleHelpers.ToValidFileName(ti.Filename));
             if (df == null || !df.Exists())
             {
                 // i.e. legacy storage only creates the file once the stream opens, so a download cleared while queued has none
