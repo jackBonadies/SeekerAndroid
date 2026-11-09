@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_tab">Ana menü</string>
+    <string name="transfer_tab">Transferler</string>
+    <string name="browse_tab">Keşfet</string>
+    <string name="account_tab">Hesap</string>
+    <string name="searches_tab">Aramalar</string>
+    <string name="searches_tab2">Ara</string>
+    <string name="new_result">yeni sonuç</string>
+    <string name="new_results">yeni sonuçlar</string>
+    <string name="saerch_user_list">Kullanıcı Listesini Ara</string>
+    <string name="search_room">Oda Ara</string>
+    <string name="search_room_">Oda Ara {0}</string>
+    <string name="search_user_">Kullanıcı Ara {0}</string>
+    <string name="wishlist_search">İstek Listesi Ara</string>
+    <string name="no_messages">Mesaj yok. \"+\" tuşuna basarak başla.</string>
+    <string name="messages">Mesajlar</string>
+    <string name="browse_files">Dosyaları İncele</string>
+    <string name="privateRoomCreation">Özel oda yaratma isteniyor</string>
+    <string name="requesting_room_list">Oda Listesi İsteniyor</string>
+    <string name="requesting_user_info">Kullanıcının Bilgisi İsteniyor</string>
+    <string name="room_list_received">Oda Listesi Yüklendi</string>
+    <string name="kilobytes_per_second">kbps</string>
+    <string name="kilohertz">kHz</string>
+    <string name="wishlist">İstek Listesi</string>
+    <string name="unsaved_changes_title">Kaydedilmeyen değişiklikler silinsin mi?</string>
+    <string name="add_user">Kullanıcı Ekle</string>
+    <string name="get_user_info">Kullanıcı Bilgisi Al</string>
+    <string name="quick_info">Kısa Bilgiler</string>
+    <!--
+  These are search targets
+  -->
+    <string name="all_target">Tüm Kullanıcılar</string>
+    <string name="target_user_list">Kullanıcı Listesi</string>
+    <string name="target_room">Oda</string>
+    <string name="target_room_name">Oda İsmi</string>
+    <string name="target_choose_user">Kullanıcı Seç</string>
+    <string name="username">Kullanıcı İsmi</string>
+    <string name="search_target_">Hedef Seç:</string>
+    <!--Where placeholder {0} is time -->
+    <!--
+  Download Dialog Columns
+  -->
+    <!--
+  Download Dialog Buttons
+  -->
+    <string name="settings">Ayarlar</string>
+    <!--Search Result Styles-->
+    <!--Toasts-->
+    <!-- theme variant color names (AMOLED variants are composed in code as "AMOLED - <color>") -->
+    <!-- info -->
+    <!--For someone translating, position {0} to where the words membership or ownership will occur -->
+    <!--For someone translating, position {0} to where the words membership or ownership will occur and {1} is where the roomanme will occur -->
+    <!--For someone translating, position {0} is a placeholder for the roomname-->
+    <!--For someone translating, position {0} is a placeholder for the allowed/denied-->
+    <!--In this case the placeholder {0} is for the username-->
+    <!--Room Categories-->
+    <!--Title-->
+    <!--Dialog Action-->
+    <!--Menu Items-->
+    <!--Internal File Selector-->
+    <!--Upnp-->
+    <!--Sharing-->
+    <!--Transfer States-->
+    <!--Notification-->
+    <!--Privileges-->
+    <!--meaning duration of song / songs-->
+    <!-- Modern settings screen -->
+    <!-- Search keyword synonyms -->
+</resources>

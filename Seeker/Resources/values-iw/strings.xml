@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+  These are search targets
+  -->
+    <!--Where placeholder {0} is time -->
+    <!--
+  Download Dialog Columns
+  -->
+    <!--
+  Download Dialog Buttons
+  -->
+    <!--Search Result Styles-->
+    <!--Toasts-->
+    <!-- theme variant color names (AMOLED variants are composed in code as "AMOLED - <color>") -->
+    <!-- info -->
+    <!--For someone translating, position {0} to where the words membership or ownership will occur -->
+    <!--For someone translating, position {0} to where the words membership or ownership will occur and {1} is where the roomanme will occur -->
+    <!--For someone translating, position {0} is a placeholder for the roomname-->
+    <!--For someone translating, position {0} is a placeholder for the allowed/denied-->
+    <!--In this case the placeholder {0} is for the username-->
+    <!--Room Categories-->
+    <!--Title-->
+    <!--Dialog Action-->
+    <!--Menu Items-->
+    <!--Internal File Selector-->
+    <!--Upnp-->
+    <!--Sharing-->
+    <!--Transfer States-->
+    <!--Notification-->
+    <!--Privileges-->
+    <!--meaning duration of song / songs-->
+    <!-- Modern settings screen -->
+    <!-- Search keyword synonyms -->
+</resources>
