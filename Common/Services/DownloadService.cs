@@ -536,6 +536,7 @@ namespace Seeker.Services
                 dlTask = Task.Run(() =>
                 {
                     fileSystemService.GetOrCreateIncompleteLocation(username, fullfilename, depth,
+                        dlInfo.TransferItemReference.IncompleteUri, dlInfo.TransferItemReference.IncompleteParentUri,
                         out incompleteUri, out incompleteUriDirectory, out partialLength);
                 }).ContinueWith(setupTask =>
                 {

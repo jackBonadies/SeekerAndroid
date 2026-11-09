@@ -794,7 +794,7 @@ namespace Seeker
                             }
                             Intent playFileIntent = new Intent(Intent.ActionView);
                             //playFileIntent.SetDataAndType(uriToUse,"audio/*");
-                            playFileIntent.SetDataAndType(uriToUse, CommonHelpers.GetMimeTypeFromFilename(tiPlay.FullFilename));   //works
+                            playFileIntent.SetDataAndType(uriToUse, MediaMimeTypes.GetMimeTypeFromFilename(tiPlay.FullFilename));   //works
                             playFileIntent.AddFlags(ActivityFlags.GrantReadUriPermission | /*ActivityFlags.NewTask |*/ ActivityFlags.GrantWriteUriPermission); //works.  newtask makes it go to foobar and immediately jump back
                             //Intent chooser = Intent.CreateChooser(playFileIntent, "Play song with");
                             this.StartActivity(playFileIntent); //also the chooser isnt needed.  if you show without the chooser, it will show you the options and you can check Only Once, Always.

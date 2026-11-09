@@ -19,6 +19,91 @@ namespace UnitTestCommon
             SimpleHelpers.STRINGS_KHZ = " kHz";
         }
 
+        // --- ToValidFileName ---
+
+        [TestCase(":4", "_4")]
+        [TestCase("begin\"*/:<>?\\|end", "begin_________end")]
+        [TestCase("begin\tend", "begin_end")]
+        [TestCase("del\u007f", "del_")]
+        [TestCase("Valid (Valid) & 'Valid'.flac", "Valid (Valid) & 'Valid'.flac")] // &, (), ' are all good
+        [TestCase("日本語.mp3", "日本語.mp3")]
+        [TestCase("", "(invalid)")]
+        [TestCase(".", "(invalid)")]
+        [TestCase("..", "(invalid)")]
+        [TestCase("...", "...")]
+        public void ToValidFileName_MatchesAndroidProvider(string input, string expected)
+        {
+            Assert.That(SimpleHelpers.ToValidFileName(input), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void ToValidFileName_IsIdempotent()
+        {
+            string once = SimpleHelpers.ToValidFileName(":4 - a/b?" + new string('x', 300));
+            Assert.That(SimpleHelpers.ToValidFileName(once), Is.EqualTo(once));
+        }
+
+        [Test]
+        public void ToValidFileName_TrimsMiddleTo255Bytes()
+        {
+            string result = SimpleHelpers.ToValidFileName(new string('a', 150) + new string('b', 150));
+            Assert.That(System.Text.Encoding.UTF8.GetByteCount(result), Is.EqualTo(255));
+            Assert.That(result, Does.StartWith(new string('a', 126) + "..."));
+            Assert.That(result, Does.EndWith(new string('b', 126)));
+        }
+
+        [Test]
+        public void ToValidFileName_TrimsMultiByteNames()
+        {
+            string result = SimpleHelpers.ToValidFileName(new string('日', 100));
+            Assert.That(System.Text.Encoding.UTF8.GetByteCount(result), Is.LessThanOrEqualTo(255));
+            Assert.That(result, Does.Contain("..."));
+        }
+
+        [Test]
+        public void ToValidFileName_TrimKeepsSurrogatePairsWhole()
+        {
+            string emoji = "😀";
+            string result = SimpleHelpers.ToValidFileName(string.Concat(Enumerable.Repeat(emoji, 75)));
+            string expected = string.Concat(Enumerable.Repeat(emoji, 32)) + "..." + string.Concat(Enumerable.Repeat(emoji, 31));
+            Assert.That(result, Is.EqualTo(expected));
+        }
+
+        private static IEnumerable<string> SurrogateTrimCases()
+        {
+            string e = "😀";
+            yield return string.Concat(Enumerable.Repeat(e, 75));
+            yield return string.Concat(Enumerable.Repeat(e, 75)) + ".mp3";
+            yield return new string('a', 101) + string.Concat(Enumerable.Repeat(e, 9)) + new string('b', 119);
+            yield return new string('a', 100) + string.Concat(Enumerable.Repeat(e, 11)) + new string('b', 115);
+            yield return string.Concat(Enumerable.Repeat("東" + e, 50));
+            yield return string.Concat(Enumerable.Repeat("é🎵a東" + e, 30));
+        }
+
+        // a lone surrogate cannot be created on disk ("Failed to mkdir")
+        [TestCaseSource(nameof(SurrogateTrimCases))]
+        public void ToValidFileName_TrimNeverLeavesLoneSurrogate(string input)
+        {
+            string result = SimpleHelpers.ToValidFileName(input);
+            for (int i = 0; i < result.Length; i++)
+            {
+                if (char.IsHighSurrogate(result[i]) && i + 1 < result.Length && char.IsLowSurrogate(result[i + 1]))
+                {
+                    i++;
+                    continue;
+                }
+                Assert.That(char.IsSurrogate(result[i]), Is.False, "lone surrogate at " + i);
+            }
+            Assert.That(System.Text.Encoding.UTF8.GetByteCount(result), Is.LessThanOrEqualTo(255));
+            Assert.That(SimpleHelpers.ToValidFileName(result), Is.EqualTo(result));
+        }
+
+        [Test]
+        public void GenerateIncompleteFolderName_ReplacesColon()
+        {
+            Assert.That(SimpleHelpers.GenerateIncompleteFolderName("user", @"Music\PARENT\:4\01.flac", 1), Is.EqualTo("user__4"));
+        }
+
         // --- AvoidLineBreaks ---
 
         [Test]

@@ -20,6 +20,10 @@
     <ProjectReference Include="..\Seeker\Soulseek.NET-master\src\Soulseek.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\Seeker\Helpers\MediaMimeTypes.cs" Link="SeekerSources\MediaMimeTypes.cs" />
+  </ItemGroup>
+
   <!--
     To test Seeker-specific (Android) types, include individual source files:
     <ItemGroup>

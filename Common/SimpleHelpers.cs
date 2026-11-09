@@ -83,7 +83,82 @@ namespace Seeker
             {
                 incompleteFolderName = incompleteFolderName.Replace(c, '_');
             }
-            return incompleteFolderName;
+            return ToValidFileName(incompleteFolderName);
+        }
+
+        public const int MaxFileNameBytes = 255;
+
+        // Port of AOSP FileUtils.buildValidFatFilename
+        // https://android.googlesource.com/platform/frameworks/base/+/HEAD/core/java/android/os/FileUtils.java
+        // We need to transform the filename exactly how Android does, otherwise subsequent FindFile will miss
+        // One difference: the trim never splits a surrogate pair (otherwise it will fail to be created)
+        public static string ToValidFileName(string name)
+        {
+            if (string.IsNullOrEmpty(name) || name == "." || name == "..")
+            {
+                return "(invalid)";
+            }
+            var res = new System.Text.StringBuilder(name.Length);
+            foreach (char c in name)
+            {
+                res.Append(IsValidFatFileNameChar(c) ? c : '_');
+            }
+            if (System.Text.Encoding.UTF8.GetByteCount(res.ToString()) > MaxFileNameBytes)
+            {
+                while (System.Text.Encoding.UTF8.GetByteCount(res.ToString()) > MaxFileNameBytes - 3)
+                {
+                    int mid = res.Length / 2;
+                    if (IsSecondHalfOfPair(res, mid))
+                    {
+                        res.Remove(mid - 1, 2);
+                    }
+                    else if (IsSecondHalfOfPair(res, mid + 1))
+                    {
+                        res.Remove(mid, 2);
+                    }
+                    else
+                    {
+                        res.Remove(mid, 1);
+                    }
+                }
+                int insertAt = res.Length / 2;
+                if (IsSecondHalfOfPair(res, insertAt))
+                {
+                    insertAt++;
+                }
+                res.Insert(insertAt, "...");
+            }
+            return res.ToString();
+        }
+
+        private static bool IsSecondHalfOfPair(System.Text.StringBuilder sb, int index)
+        {
+            return index > 0 && index < sb.Length && char.IsLowSurrogate(sb[index]) && char.IsHighSurrogate(sb[index - 1]);
+        }
+
+        // https://android.googlesource.com/platform/frameworks/base/+/HEAD/core/java/android/os/FileUtils.java
+        private static bool IsValidFatFileNameChar(char c)
+        {
+            if (c <= 0x1f)
+            {
+                return false;
+            }
+            switch (c)
+            {
+                case '"':
+                case '*':
+                case '/':
+                case ':':
+                case '<':
+                case '>':
+                case '?':
+                case '\\':
+                case '|':
+                case (char)0x7F:
+                    return false;
+                default:
+                    return true;
+            }
         }
 
         private static string GetLockedFileName(SearchResponse item)

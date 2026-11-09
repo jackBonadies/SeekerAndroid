@@ -144,79 +144,11 @@ namespace Seeker
             clipboardManager.PrimaryClip = clip;
         }
 
-        //this is a helper for this issue:
-        //var name1 = df.CreateFile("audio/m4a", "name1").Name;
-        //var name2 = df.CreateFile("audio/x-m4a", "name2").Name;
-        //  are both extensionless....
+        // Always the full name: if we strip the extension it lets the provider pick one from the MIME type (.ogg became .oga).
+        //   We always want to respect whatever filename the uploader gave us.
         public static DocumentFile CreateMediaFile(DocumentFile parent, string name)
         {
-            if (CommonHelpers.GetMimeTypeFromFilename(name) == M4A_MIME)
-            {
-                return parent.CreateFile(CommonHelpers.GetMimeTypeFromFilename(name), name); //we use just name since it will not add the .m4a extension for us..
-            }
-            else if (CommonHelpers.GetMimeTypeFromFilename(name) == APE_MIME)
-            {
-                return parent.CreateFile(CommonHelpers.GetMimeTypeFromFilename(name), name); //we use just name since it will not add the .ape extension for us..
-            }
-            else if (CommonHelpers.GetMimeTypeFromFilename(name) == null)
-            {
-                //a null mimetype is fine, it just defaults to application/octet-stream
-                return parent.CreateFile(null, name); //we use just name since it will not add the extension for us..
-            }
-            else
-            {
-                return parent.CreateFile(CommonHelpers.GetMimeTypeFromFilename(name), System.IO.Path.GetFileNameWithoutExtension(name));
-            }
-        }
-
-
-
-        //examples..
-        //Helpers.GetMimeTypeFromFilename("x.flac");//"audio/flac"
-        //Helpers.GetMimeTypeFromFilename("x.mp3"); //"audio/mpeg"
-        //Helpers.GetMimeTypeFromFilename("x.wmv"); //"video/x-ms-wmv"
-        //Helpers.GetMimeTypeFromFilename("x.wma"); // good
-        //Helpers.GetMimeTypeFromFilename("x.png"); //"image/png"
-        //THIS FAILS MISERABLY FOR M4A FILES. it regards them as mp3, causing both android and windows foobar to deem them corrupted and refuse to play them!
-        //[seeker] .wma === audio/x-ms-wma
-        //[seeker] .flac === audio/flac
-        //[seeker] .aac === audio/aac
-        //[seeker] .m4a === audio/mpeg  --- miserable failure should be audio/m4a or audio/x-m4a
-        //[seeker] .mp3 === audio/mpeg
-        //[seeker] .oga === audio/ogg
-        //[seeker] .ogg === audio/ogg
-        //[seeker] .opus === audio/ogg
-        //[seeker] .wav === audio/x-wav
-        //[seeker] .mp4 === video/mp4
-
-        //other problematic -
-        //        ".alac", -> null
-        //        ".ape",  -> null  // audio/x-ape
-        //        ".m4p" //aac with apple drm. similar to the drm free m4a. audio/m4p not mp4 which is reported. I am not sure...
-        public const string M4A_MIME = "audio/m4a";
-        public const string APE_MIME = "audio/x-ape";
-        public static string GetMimeTypeFromFilename(string filename)
-        {
-            string ext = System.IO.Path.GetExtension(filename).ToLowerInvariant();
-            string mimeType = @"audio/mpeg"; //default
-            if (ext != null && ext != string.Empty)
-            {
-                switch (ext)
-                {
-                    case ".ape":
-                        mimeType = APE_MIME;
-                        break;
-                    case ".m4a":
-                        mimeType = M4A_MIME;
-                        break;
-                    default:
-                        ext = ext.TrimStart('.');
-                        mimeType = Android.Webkit.MimeTypeMap.Singleton.GetMimeTypeFromExtension(ext);
-                        break;
-                }
-
-            }
-            return mimeType;
+            return parent.CreateFile(MediaMimeTypes.GetMimeTypeForCreate(name), name);
         }
 
         public static void ViewUri(Android.Net.Uri httpUri, Context c)
