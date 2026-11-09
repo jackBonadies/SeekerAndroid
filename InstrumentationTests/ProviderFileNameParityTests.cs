@@ -41,6 +41,13 @@ namespace InstrumentationTests
             yield return ("ascii 254 + 3-byte char", new string('a', 254) + "東");
             yield return ("ascii 255", new string('a', 255));
             yield return ("ascii 256", new string('a', 256));
+            // trimming deletes single UTF-16 chars from the middle, so these split surrogate pairs
+            yield return ("emoji 300 bytes", string.Concat(Enumerable.Repeat("😀", 75)));
+            yield return ("ascii + emoji middle", new string('a', 140) + string.Concat(Enumerable.Repeat("😀", 5)) + new string('b', 140));
+            yield return ("ascii + emoji middle odd", new string('a', 141) + string.Concat(Enumerable.Repeat("😀", 5)) + new string('b', 140));
+            yield return ("mixed emoji cjk", string.Concat(Enumerable.Repeat("東😀", 50)));
+            // AOSP and a .NET byte count disagree here (a lone surrogate is 1 byte in Java, 3 in .NET)
+            yield return ("emoji count divergence", new string('a', 101) + string.Concat(Enumerable.Repeat("😀", 9)) + new string('b', 119));
         }
 
         private static IEnumerable<string> MediaFileNames()
@@ -94,8 +101,23 @@ namespace InstrumentationTests
             var mismatches = new List<string>();
             foreach (var (label, name) in Cases())
             {
-                CheckOne(label + " (dir)", name, DocumentsContract.Document.MimeTypeDir, name, mismatches);
-                CheckOne(label + " (file)", name + ".mp3", "audio/mpeg", name + ".mp3", mismatches);
+                CheckOne(label + " (dir)", name, DocumentsContract.Document.MimeTypeDir, name, mismatches, providerMayFail: true);
+                CheckOne(label + " (file)", name + ".mp3", "audio/mpeg", name + ".mp3", mismatches, providerMayFail: true);
+            }
+            Assert.That(mismatches, Is.Empty, string.Join("\n", mismatches));
+        }
+
+        [Test]
+        public void SanitizedNamesRoundTrip()
+        {
+            Log.Info(Tag, "provider: " + _scratchDir.Authority + " api " + (int)Android.OS.Build.VERSION.SdkInt);
+            var mismatches = new List<string>();
+            foreach (var (label, name) in Cases())
+            {
+                string dirName = SimpleHelpers.ToValidFileName(name);
+                string fileName = SimpleHelpers.ToValidFileName(name + ".mp3");
+                CheckOne(label + " (dir, sanitized)", dirName, DocumentsContract.Document.MimeTypeDir, dirName, mismatches, providerMayFail: false);
+                CheckOne(label + " (file, sanitized)", fileName, "audio/mpeg", fileName, mismatches, providerMayFail: false);
             }
             Assert.That(mismatches, Is.Empty, string.Join("\n", mismatches));
         }
@@ -109,7 +131,7 @@ namespace InstrumentationTests
             foreach (string name in MediaFileNames())
             {
                 string mime = MediaMimeTypes.GetMimeTypeForCreate(name);
-                CheckOne(name + " [" + (mime ?? "null") + "]", name, mime, name, mismatches);
+                CheckOne(name + " [" + (mime ?? "null") + "]", name, mime, name, mismatches, providerMayFail: false);
 
                 // PREVIOUS BEHAVIOR: since we stripped the extension, Android would take the liberty or renaming 
                 //   track.ogg -> track.oga
@@ -134,7 +156,8 @@ namespace InstrumentationTests
             }
             catch (Exception e)
             {
-                return "<threw " + e.GetType().Name + ": " + e.Message + ">";
+                Log.Warn(Tag, "      create threw for '" + requested + "': " + e);
+                return "<threw" + e.GetType().Name + ": " + e.Message + ">";
             }
             finally
             {
@@ -145,10 +168,16 @@ namespace InstrumentationTests
             }
         }
 
-        private void CheckOne(string label, string requested, string mimeType, string original, List<string> mismatches)
+        private void CheckOne(string label, string requested, string mimeType, string original, List<string> mismatches, bool providerMayFail)
         {
             string expected = SimpleHelpers.ToValidFileName(original);
             string actual = CreateAndReadName(requested, mimeType);
+            if (providerMayFail && actual.StartsWith("<threw"))
+            {
+                // android cannot create this name itself (i.e. its trim left half a surrogate pair), nothing to match
+                Log.Info(Tag, "  skip " + label + ": provider cannot create it, ours '" + Escape(expected) + "'");
+                return;
+            }
 
             bool ok = actual == expected;
             Log.Info(Tag, (ok ? "  same " : "  DIFF ") + label + ": expected '" + Escape(expected) + "' actual '" + Escape(actual) + "'");
