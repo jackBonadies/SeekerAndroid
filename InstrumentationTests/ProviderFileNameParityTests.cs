@@ -71,6 +71,13 @@ namespace InstrumentationTests
             yield return "trailing.";
         }
 
+        // same text, NFC (precomposed) vs NFD (base + combining mark). print identically.
+        private static readonly (string label, string nfc, string nfd)[] NormalizationCases =
+        {
+            ("dia", "Otro día", "Otro día"),
+            ("cafe", "Café", "Café"),
+        };
+
         [SetUp]
         public void SetUp()
         {
@@ -122,16 +129,16 @@ namespace InstrumentationTests
             Assert.That(mismatches, Is.Empty, string.Join("\n", mismatches));
         }
 
-        // CommonHelpers.CreateMediaFile now passes the full name with MediaMimeTypes.GetMimeTypeForCreate.
+        // MediaFileCreator.CreateMediaFile on a SAF tree folder.
         [Test]
         public void MediaFilesKeepTheirName()
         {
             Log.Info(Tag, "provider: " + _scratchDir.Authority + " api " + (int)Android.OS.Build.VERSION.SdkInt);
+            var parent = AndroidX.DocumentFile.Provider.DocumentFile.FromTreeUri(Application.Context, _scratchDir);
             var mismatches = new List<string>();
             foreach (string name in MediaFileNames())
             {
-                string mime = MediaMimeTypes.GetMimeTypeForCreate(name);
-                CheckOne(name + " [" + (mime ?? "null") + "]", name, mime, name, mismatches, providerMayFail: false);
+                CheckMediaCreate(parent, name, mismatches);
 
                 // PREVIOUS BEHAVIOR: since we stripped the extension, Android would take the liberty or renaming 
                 //   track.ogg -> track.oga
@@ -143,6 +150,164 @@ namespace InstrumentationTests
                 Log.Info(Tag, "      legacy would store '" + CreateAndReadName(legacyRequested, legacyMime) + "'");
             }
             Assert.That(mismatches, Is.Empty, string.Join("\n", mismatches));
+        }
+
+        // Create one normalization form, then the other, in the same folder. Logs what the listing holds, what
+        //   DocumentFile.FindFile finds for each form, and whether the second create collides into " (1)".
+        [Test]
+        public void NormalizationFormsInListing()
+        {
+            Log.Info(Tag, "provider: " + _scratchDir.Authority + " api " + (int)Android.OS.Build.VERSION.SdkInt);
+            var resolver = Application.Context.ContentResolver;
+            var mismatches = new List<string>();
+            int n = 0;
+            foreach (var (label, nfc, nfd) in NormalizationCases)
+            {
+                foreach (bool dir in new[] { true, false })
+                {
+                    foreach (bool nfcFirst in new[] { true, false })
+                    {
+                        string suffix = dir ? "" : ".flac";
+                        string mime = dir ? DocumentsContract.Document.MimeTypeDir : "audio/flac";
+                        string first = (nfcFirst ? nfc : nfd) + suffix;
+                        string second = (nfcFirst ? nfd : nfc) + suffix;
+                        string caseLabel = label + (dir ? " dir " : " file ") + (nfcFirst ? "nfc->nfd" : "nfd->nfc");
+
+                        var sub = DocumentsContract.CreateDocument(resolver, _scratchDir, DocumentsContract.Document.MimeTypeDir, "norm" + n++);
+                        var firstUri = DocumentsContract.CreateDocument(resolver, sub, mime, first);
+                        var listed1 = ListChildNames(sub);
+                        var subDoc = AndroidX.DocumentFile.Provider.DocumentFile.FromTreeUri(Application.Context, sub);
+                        string findNfc = subDoc.FindFile(nfc + suffix)?.Name;
+                        string findNfd = subDoc.FindFile(nfd + suffix)?.Name;
+                        var secondUri = DocumentsContract.CreateDocument(resolver, sub, mime, second);
+                        string secondName = secondUri == null ? "<null>" : QueryDisplayName(secondUri);
+                        var listed2 = ListChildNames(sub);
+
+                        Log.Info(Tag, "  " + caseLabel + ": created '" + EscapeCodePoints(first) + "' (returned '" + EscapeCodePoints(firstUri == null ? "<null>" : QueryDisplayName(firstUri)) + "')");
+                        Log.Info(Tag, "      listing: " + string.Join(", ", listed1.Select(s => "'" + EscapeCodePoints(s) + "'")));
+                        Log.Info(Tag, "      FindFile(nfc) -> " + (findNfc == null ? "null" : "'" + EscapeCodePoints(findNfc) + "'") + "  FindFile(nfd) -> " + (findNfd == null ? "null" : "'" + EscapeCodePoints(findNfd) + "'"));
+                        Log.Info(Tag, "      then created '" + EscapeCodePoints(second) + "' -> '" + EscapeCodePoints(secondName) + "'; listing: " + string.Join(", ", listed2.Select(s => "'" + EscapeCodePoints(s) + "'")));
+
+                        if (listed1.Count != 1 || listed1[0] != first)
+                        {
+                            mismatches.Add(caseLabel + ": stored '" + string.Join(", ", listed1.Select(EscapeCodePoints)) + "' for requested '" + EscapeCodePoints(first) + "'");
+                        }
+                    }
+                }
+            }
+            Assert.That(mismatches, Is.Empty, string.Join("\n", mismatches));
+        }
+
+        // MediaFileCreator.CreateMediaFile on a file:// folder (temp dir, legacy storage), i.e. a RawDocumentFile parent.
+        [Test]
+        public void RawFilesKeepTheirName()
+        {
+            var root = new Java.IO.File(Application.Context.GetExternalFilesDir(null), "parity_" + Guid.NewGuid().ToString("N"));
+            root.Mkdirs();
+            try
+            {
+                var parent = AndroidX.DocumentFile.Provider.DocumentFile.FromFile(root);
+                Log.Info(Tag, "raw parent: " + parent.Uri + " api " + (int)Android.OS.Build.VERSION.SdkInt);
+                var mismatches = new List<string>();
+                foreach (string name in MediaFileNames())
+                {
+                    CheckMediaCreate(parent, name, mismatches);
+                }
+                Assert.That(mismatches, Is.Empty, string.Join("\n", mismatches));
+            }
+            finally
+            {
+                System.IO.Directory.Delete(root.AbsolutePath, true);
+            }
+        }
+
+        // Checks both the returned DocumentFile's name and the parent's listing, then deletes what was created.
+        private static void CheckMediaCreate(AndroidX.DocumentFile.Provider.DocumentFile parent, string name, List<string> mismatches)
+        {
+            string label = name + " [" + (MediaMimeTypes.GetMimeTypeForCreate(name) ?? "null") + "]";
+            string actual;
+            string listed;
+            try
+            {
+                var created = MediaFileCreator.CreateMediaFile(parent, name);
+                actual = created == null ? "<null>" : created.Name;
+                listed = string.Join(", ", parent.ListFiles().Select(f => f.Name));
+                created?.Delete();
+            }
+            catch (Exception e)
+            {
+                actual = "<threw " + e.GetType().Name + ": " + e.Message + ">";
+                listed = "?";
+            }
+            bool ok = actual == name && listed == name;
+            Log.Info(Tag, (ok ? "  same " : "  DIFF ") + label + ": returned '" + Escape(actual) + "' listing '" + Escape(listed) + "'");
+            if (!ok)
+            {
+                mismatches.Add(label + ": returned '" + Escape(actual) + "' listing '" + Escape(listed) + "'");
+            }
+        }
+
+        // java.io on app-internal storage (no casefold) and app-external (emulated / FUSE).
+        [Test]
+        public void RawNormalizationForms()
+        {
+            var mismatches = new List<string>();
+            foreach (var baseDir in new[] { Application.Context.FilesDir, Application.Context.GetExternalFilesDir(null) })
+            {
+                var root = new Java.IO.File(baseDir, "parity_" + Guid.NewGuid().ToString("N"));
+                root.Mkdirs();
+                try
+                {
+                    foreach (var (label, nfc, nfd) in NormalizationCases)
+                    {
+                        foreach (bool nfcFirst in new[] { true, false })
+                        {
+                            string first = nfcFirst ? nfc : nfd;
+                            string second = nfcFirst ? nfd : nfc;
+                            string caseLabel = label + " " + (nfcFirst ? "nfc->nfd" : "nfd->nfc") + " in " + baseDir.AbsolutePath;
+                            var sub = new Java.IO.File(root, label + (nfcFirst ? "_a" : "_b"));
+                            sub.Mkdirs();
+
+                            bool made1 = new Java.IO.File(sub, first).Mkdir();
+                            var listed1 = sub.List()?.ToList() ?? new List<string>();
+                            bool otherExists = new Java.IO.File(sub, second).Exists();
+                            bool made2 = new Java.IO.File(sub, second).Mkdir();
+                            var listed2 = sub.List()?.ToList() ?? new List<string>();
+
+                            Log.Info(Tag, "  " + caseLabel + ": mkdir '" + EscapeCodePoints(first) + "' " + made1 + "; listing: " + string.Join(", ", listed1.Select(s => "'" + EscapeCodePoints(s) + "'")));
+                            Log.Info(Tag, "      exists('" + EscapeCodePoints(second) + "') " + otherExists + "; mkdir it " + made2 + "; listing: " + string.Join(", ", listed2.Select(s => "'" + EscapeCodePoints(s) + "'")));
+
+                            if (listed1.Count != 1 || listed1[0] != first)
+                            {
+                                mismatches.Add(caseLabel + ": stored '" + string.Join(", ", listed1.Select(EscapeCodePoints)) + "' for requested '" + EscapeCodePoints(first) + "'");
+                            }
+                        }
+                    }
+                }
+                finally
+                {
+                    System.IO.Directory.Delete(root.AbsolutePath, true);
+                }
+            }
+            Assert.That(mismatches, Is.Empty, string.Join("\n", mismatches));
+        }
+
+        private static List<string> ListChildNames(Android.Net.Uri dir)
+        {
+            var names = new List<string>();
+            var children = DocumentsContract.BuildChildDocumentsUriUsingTree(dir, DocumentsContract.GetDocumentId(dir));
+            using var cursor = Application.Context.ContentResolver.Query(children, new[] { DocumentsContract.Document.ColumnDisplayName }, null, null, null);
+            while (cursor != null && cursor.MoveToNext())
+            {
+                names.Add(cursor.GetString(0));
+            }
+            names.Sort(StringComparer.Ordinal);
+            return names;
+        }
+
+        private static string EscapeCodePoints(string s)
+        {
+            return string.Concat(s.Select(c => c < 0x20 || c >= 0x7f ? "\\u" + ((int)c).ToString("X4") : c.ToString()));
         }
 
         private string CreateAndReadName(string requested, string mimeType)

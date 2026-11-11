@@ -144,12 +144,6 @@ namespace Seeker
             clipboardManager.PrimaryClip = clip;
         }
 
-        // Always the full name: if we strip the extension it lets the provider pick one from the MIME type (.ogg became .oga).
-        //   We always want to respect whatever filename the uploader gave us.
-        public static DocumentFile CreateMediaFile(DocumentFile parent, string name)
-        {
-            return parent.CreateFile(MediaMimeTypes.GetMimeTypeForCreate(name), name);
-        }
 
         public static void ViewUri(Android.Net.Uri httpUri, Context c)
         {
