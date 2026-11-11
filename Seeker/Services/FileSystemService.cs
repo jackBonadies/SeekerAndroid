@@ -990,13 +990,42 @@ namespace Seeker.Services
                 string actualName = created.Name;
                 if (actualName != requestedName)
                 {
-                    Logger.Firebase("NAME MISMATCH: requested: '" + requestedName + "' actual: '" + actualName + "' (" + created.Uri.Authority + ")");
+                    string msg = "NAME MISMATCH: requested: '" + requestedName + "' actual: '" + actualName + "' (" + created.Uri.Authority + ")";
+                    string requestedEscaped = EscapeNonAscii(requestedName);
+                    string actualEscaped = EscapeNonAscii(actualName);
+                    if (requestedEscaped != requestedName || actualEscaped != actualName)
+                    {
+                        msg += " escaped: requested: '" + requestedEscaped + "' actual: '" + actualEscaped + "'";
+                    }
+                    Logger.Firebase(msg);
                 }
             }
             catch (Exception e)
             {
                 Logger.Debug("LogIfProviderRenamed failed: " + e.Message);
             }
+        }
+
+        // NFC and NFD look identical when printed, i.e. U+00ED vs i + U+0301
+        private static string EscapeNonAscii(string s)
+        {
+            if (s == null)
+            {
+                return null;
+            }
+            var sb = new System.Text.StringBuilder(s.Length);
+            foreach (char c in s)
+            {
+                if (c < 0x80)
+                {
+                    sb.Append(c);
+                }
+                else
+                {
+                    sb.Append("\\u").Append(((int)c).ToString("X4"));
+                }
+            }
+            return sb.ToString();
         }
     }
 }
