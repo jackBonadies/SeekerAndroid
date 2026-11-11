@@ -180,6 +180,8 @@ namespace Seeker
             BottomNavigationView navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
             navigation.SetOnNavigationItemSelectedListener(this);
             SubscribeHomeBadgeSources();
+            TabBadgeState.Changed -= OnTabBadgeStateChanged;
+            TabBadgeState.Changed += OnTabBadgeStateChanged;
 
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById(Resource.Id.toolbar);
@@ -531,12 +533,72 @@ namespace Seeker
             base.OnStart();
             // reads / deletes / undo in MessagesActivity happen while we are stopped
             UpdateHomeBadge();
+            UpdateTabBadges();
         }
 
         protected override void OnDestroy()
         {
             UnsubscribeHomeBadgeSources();
+            TabBadgeState.Changed -= OnTabBadgeStateChanged;
+            if (SeekerState.MainActivityRef == this)
+            {
+                TabBadgeState.VisiblePage = -1;
+            }
             base.OnDestroy();
+        }
+
+        private void OnTabBadgeStateChanged(object sender, EventArgs e)
+        {
+            SeekerApplication.RunOnUIThread(UpdateTabBadges);
+        }
+
+        public void OnTransfersModeChanged()
+        {
+            if (pager?.CurrentItem == TabBadgeState.TransfersPage)
+            {
+                TabBadgeState.OnPageVisible(TabBadgeState.TransfersPage);
+                UpdateTabBadges();
+            }
+        }
+
+        // updates state on both the browse and transfers tabs
+        private void UpdateTabBadges()
+        {
+            if (IsDestroyed)
+            {
+                return;
+            }
+            try
+            {
+                var navigation = FindViewById<BottomNavigationView>(Resource.Id.navigation);
+                if (navigation == null)
+                {
+                    return;
+                }
+                if (pager != null)
+                {
+                    TabBadgeState.OnPageVisible(pager.CurrentItem);
+                }
+                SetDotBadge(navigation, Resource.Id.navigation_transfers, TabBadgeState.HasNewTransfers);
+                SetDotBadge(navigation, Resource.Id.navigation_browse, TabBadgeState.HasNewBrowse);
+            }
+            catch (Exception e)
+            {
+                Logger.FirebaseError("UpdateTabBadges failed", e);
+            }
+        }
+
+        private void SetDotBadge(BottomNavigationView navigation, int itemId, bool show)
+        {
+            if (!show)
+            {
+                navigation.RemoveBadge(itemId);
+                return;
+            }
+            var badge = navigation.GetOrCreateBadge(itemId);
+            badge.BackgroundColor = UiHelpers.GetColorFromAttribute(this, Resource.Attribute.homeBadgeColor).ToArgb();
+            badge.ClearNumber();
+            badge.SetVisible(true);
         }
 
         // Home tab badge: number if unread messages, else badge if unread announcement, else nothing
@@ -1199,6 +1261,8 @@ namespace Seeker
                     BrowseFragment.SetActionBarTitle();
                     break;
             }
+            TabBadgeState.OnPageVisible(position);
+            UpdateTabBadges();
             RefreshBackCallbackState();
         }
 

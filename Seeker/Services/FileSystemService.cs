@@ -310,7 +310,7 @@ namespace Seeker.Services
                 else
                 {
                     partialLength = 0;
-                    DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
+                    DocumentFile mFile = MediaFileCreator.CreateMediaFile(folderDir1, name);
                     LogIfProviderRenamed(mFile, name); // a renamed incomplete file will NOT be found again. every resume will restart from 0
                     incompleteUri = mFile.Uri; //nullref TODO TODO: if null throw custom exception so you can better handle it later on in DL continuation action
                 }
@@ -657,7 +657,7 @@ namespace Seeker.Services
                 //FileOutputStream stream = new FileOutputStream(mFile);
                 if (memoryMode)
                 {
-                    DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
+                    DocumentFile mFile = MediaFileCreator.CreateMediaFile(folderDir1, name);
                     finalUri = mFile.Uri.ToString();
                     using System.IO.Stream stream = SeekerState.ActiveActivityRef.ContentResolver.OpenOutputStream(mFile.Uri);
                     ChunkedStreamWriter.WriteChunked(stream, bytes);
@@ -674,7 +674,7 @@ namespace Seeker.Services
                     {
                         try
                         {
-                            DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
+                            DocumentFile mFile = MediaFileCreator.CreateMediaFile(folderDir1, name);
                             uri = mFile.Uri;
                             finalUri = mFile.Uri.ToString();
                             using System.IO.Stream inStream = SeekerState.ActiveActivityRef.ContentResolver.OpenInputStream(uriOfIncomplete);
@@ -753,7 +753,7 @@ namespace Seeker.Services
                                     try
                                     {
 
-                                        DocumentFile mFile = CommonHelpers.CreateMediaFile(folderDir1, name);
+                                        DocumentFile mFile = MediaFileCreator.CreateMediaFile(folderDir1, name);
                                         uri = mFile.Uri;
                                         finalUri = mFile.Uri.ToString();
                                         Logger.InfoFirebase("retrying: incomplete: " + uriOfIncomplete + " complete: " + finalUri + " parent: " + parentUriOfIncomplete);
@@ -990,13 +990,42 @@ namespace Seeker.Services
                 string actualName = created.Name;
                 if (actualName != requestedName)
                 {
-                    Logger.Firebase("NAME MISMATCH: requested: '" + requestedName + "' actual: '" + actualName + "' (" + created.Uri.Authority + ")");
+                    string msg = "NAME MISMATCH: requested: '" + requestedName + "' actual: '" + actualName + "' (" + created.Uri.Authority + ")";
+                    string requestedEscaped = EscapeNonAscii(requestedName);
+                    string actualEscaped = EscapeNonAscii(actualName);
+                    if (requestedEscaped != requestedName || actualEscaped != actualName)
+                    {
+                        msg += " escaped: requested: '" + requestedEscaped + "' actual: '" + actualEscaped + "'";
+                    }
+                    Logger.Firebase(msg);
                 }
             }
             catch (Exception e)
             {
                 Logger.Debug("LogIfProviderRenamed failed: " + e.Message);
             }
+        }
+
+        // NFC and NFD look identical when printed, i.e. U+00ED vs i + U+0301
+        private static string EscapeNonAscii(string s)
+        {
+            if (s == null)
+            {
+                return null;
+            }
+            var sb = new System.Text.StringBuilder(s.Length);
+            foreach (char c in s)
+            {
+                if (c < 0x80)
+                {
+                    sb.Append(c);
+                }
+                else
+                {
+                    sb.Append("\\u").Append(((int)c).ToString("X4"));
+                }
+            }
+            return sb.ToString();
         }
     }
 }

@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0-android36.0</TargetFramework>
+    <SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
     <RuntimeIdentifiers>android-arm;android-x86;android-x64;android-arm64</RuntimeIdentifiers>
     <ApplicationId>com.seeker.instrumentationtests</ApplicationId>
     <ApplicationVersion>1</ApplicationVersion>
@@ -13,6 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="NUnit" Version="4.2.2" />
+    <PackageReference Include="Xamarin.AndroidX.DocumentFile" Version="1.1.0.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +24,7 @@
 
   <ItemGroup>
     <Compile Include="..\Seeker\Helpers\MediaMimeTypes.cs" Link="SeekerSources\MediaMimeTypes.cs" />
+    <Compile Include="..\Seeker\Helpers\MediaFileCreator.cs" Link="SeekerSources\MediaFileCreator.cs" />
   </ItemGroup>
 
   <!--

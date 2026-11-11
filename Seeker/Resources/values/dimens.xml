@@ -4,4 +4,8 @@
     <dimen name="browse_no_details_top_bottom">4dp</dimen>
     <dimen name="browse_details_top">2dp</dimen>
     <dimen name="browse_details_bottom">1dp</dimen>
+    <!-- numberless bottom nav badge (doesnt effect numbered one), otherwise its very tiny -->
+    <dimen name="nav_badge_dot_size">12dp</dimen>
+    <!-- dot offset = 6dp + nav_badge_dot_size / 2 to share center with numbered badge (16dp, offset 14dp) -->
+    <dimen name="nav_badge_dot_vertical_offset">12dp</dimen>
 </resources>

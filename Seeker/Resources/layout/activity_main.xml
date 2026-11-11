@@ -55,6 +55,7 @@
             android:layout_marginStart="0dp"
             android:layout_marginBottom="0dp"
             android:background="?attr/appBarColor"
+            app:materialThemeOverlay="@style/ThemeOverlay.Seeker.BottomNavigationView"
             app:itemActiveIndicatorStyle="@style/BottomNavActiveIndicator"
             app:itemTextColor="@color/nav_item_tint"
             app:itemTextAppearanceActive="@style/navTextActive"
