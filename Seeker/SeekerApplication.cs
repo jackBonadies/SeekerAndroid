@@ -369,6 +369,7 @@ namespace Seeker
             SeekerState.SoulseekClient.Disconnected += SoulseekClient_Disconnected;
             SeekerState.SoulseekClient.ServerInfoReceived += SoulseekClient_ServerInfoReceived;
             BrowseService.BrowseResponseReceived += BrowseFragment.OnBrowseResponseReceived;
+            TabBadgeState.Initialize();
 
             SeekerState.SoulseekClient.PrivilegedUserListReceived += SoulseekClient_PrivilegedUserListReceived;
             SeekerState.SoulseekClient.PrivilegeNotificationReceived += SoulseekClient_PrivilegeNotificationReceived;

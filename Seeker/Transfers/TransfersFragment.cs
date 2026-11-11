@@ -194,6 +194,7 @@ namespace Seeker
         {
             SetRecyclerAdapter();
             SeekerState.MainActivityRef.SetTransferSupportActionBarState();
+            SeekerState.MainActivityRef.OnTransfersModeChanged();
             SetNoTransfersMessage();
         }
 
