@@ -118,13 +118,13 @@ namespace UnitTestCommon
         }
 
         [Test]
-        public void DateAdded_InsideFolder_Descending()
+        public void DateAdded_InsideFolder_AlwaysOldestFirst([Values(false, true)] bool descending)
         {
             var a = Add("u1", "f1", "a.mp3");
             var b = Add("u1", "f1", "b.mp3");
-            var uiState = new TransferUIState { GroupByFolder = true, CurrentlySelectedFolder = manager.AllFolderItems[0], SortKey = TransferSortKey.DateAdded, SortDescending = true };
+            var uiState = new TransferUIState { GroupByFolder = true, CurrentlySelectedFolder = manager.AllFolderItems[0], SortKey = TransferSortKey.DateAdded, SortDescending = descending };
 
-            CollectionAssert.AreEqual(new ITransferItem[] { b, a }, manager.GetUISnapshot(uiState));
+            CollectionAssert.AreEqual(new ITransferItem[] { a, b }, manager.GetUISnapshot(uiState));
         }
 
         [Test]

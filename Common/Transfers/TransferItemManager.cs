@@ -265,7 +265,9 @@ namespace Seeker
         // A copy of what the transfers list shows for uiState, in display order.
         public List<ITransferItem> GetUISnapshot(TransferUIState uiState)
         {
-            bool reverse = uiState.SortKey == TransferSortKey.DateAdded && uiState.SortDescending;
+            // inside a folder date added is always oldest first (track order)
+            bool insideFolder = uiState.GroupByFolder && uiState.CurrentlySelectedFolder != null;
+            bool reverse = uiState.SortKey == TransferSortKey.DateAdded && uiState.SortDescending && !insideFolder;
             List<ITransferItem> snapshot = CopyUIList(uiState, reverse);
             // performance: the source list is already sorted by added, so we can skip the sort
             if (uiState.SortKey != TransferSortKey.DateAdded)
