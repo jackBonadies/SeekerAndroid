@@ -71,7 +71,7 @@ namespace InstrumentationTests
             yield return "trailing.";
         }
 
-        // same text, NFC (precomposed) vs NFD (base + combining mark). print identically.
+        // same text, NFC (precomposed) vs NFD (base + combining mark) both print identically.
         private static readonly (string label, string nfc, string nfd)[] NormalizationCases =
         {
             ("dia", "Otro día", "Otro día"),
@@ -129,7 +129,7 @@ namespace InstrumentationTests
             Assert.That(mismatches, Is.Empty, string.Join("\n", mismatches));
         }
 
-        // MediaFileCreator.CreateMediaFile on a SAF tree folder.
+        // MediaFileCreator.CreateMediaFile on a SAF tree folder.  To test extension adding behavior.
         [Test]
         public void MediaFilesKeepTheirName()
         {
@@ -219,6 +219,47 @@ namespace InstrumentationTests
             {
                 System.IO.Directory.Delete(root.AbsolutePath, true);
             }
+        }
+
+        // A second create of the same name must not overwrite, and must be named like the provider names it ("a (1).flac").
+        [Test]
+        public void DuplicateCreateMatchesProvider()
+        {
+            var safParent = AndroidX.DocumentFile.Provider.DocumentFile.FromTreeUri(Application.Context, _scratchDir);
+            var root = new Java.IO.File(Application.Context.GetExternalFilesDir(null), "parity_" + Guid.NewGuid().ToString("N"));
+            root.Mkdirs();
+            try
+            {
+                var rawParent = AndroidX.DocumentFile.Provider.DocumentFile.FromFile(root);
+                Log.Info(Tag, "provider: " + _scratchDir.Authority + " vs " + rawParent.Uri + " api " + (int)Android.OS.Build.VERSION.SdkInt);
+                var mismatches = new List<string>();
+                foreach (string name in MediaFileNames())
+                {
+                    var (safFirst, safSecond) = CreateTwice(safParent, name);
+                    var (rawFirst, rawSecond) = CreateTwice(rawParent, name);
+                    bool ok = rawFirst == name && rawSecond != rawFirst && rawSecond == safSecond && safFirst == name;
+                    Log.Info(Tag, (ok ? "  same " : "  DIFF ") + name + ": saf '" + Escape(safFirst) + "' then '" + Escape(safSecond) + "', raw '" + Escape(rawFirst) + "' then '" + Escape(rawSecond) + "'");
+                    if (!ok)
+                    {
+                        mismatches.Add(name + ": saf '" + Escape(safFirst) + "' then '" + Escape(safSecond) + "', raw '" + Escape(rawFirst) + "' then '" + Escape(rawSecond) + "'");
+                    }
+                }
+                Assert.That(mismatches, Is.Empty, string.Join("\n", mismatches));
+            }
+            finally
+            {
+                System.IO.Directory.Delete(root.AbsolutePath, true);
+            }
+        }
+
+        private static (string first, string second) CreateTwice(AndroidX.DocumentFile.Provider.DocumentFile parent, string name)
+        {
+            var first = MediaFileCreator.CreateMediaFile(parent, name);
+            var second = MediaFileCreator.CreateMediaFile(parent, name);
+            var names = (first?.Name ?? "<null>", second?.Name ?? "<null>");
+            second?.Delete();
+            first?.Delete();
+            return names;
         }
 
         // Checks both the returned DocumentFile's name and the parent's listing, then deletes what was created.
