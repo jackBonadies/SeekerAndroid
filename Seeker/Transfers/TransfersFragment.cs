@@ -548,7 +548,7 @@ namespace Seeker
             {
                 return;
             }
-            SetNoTransfersMessage();
+            OnListStructureChanged();
             ITransferItem anchor = GetScrollAnchor(out int anchorPos, out int anchorOffset);
             // if at the very top stay there (so we can see rows added above us)
             if (anchorPos == 0 && anchorOffset >= 0)
@@ -623,7 +623,14 @@ namespace Seeker
         private void RemoveRow(ITransferItem item)
         {
             recyclerTransferAdapter.RemoveRow(item);
+            OnListStructureChanged();
+        }
+
+        // after rows were added or removed
+        private void OnListStructureChanged()
+        {
             SetNoTransfersMessage();
+            SeekerState.MainActivityRef?.RefreshTransferFolderSubtitle();
         }
 
         /// <summary>
@@ -1214,7 +1221,7 @@ namespace Seeker
                     adapter.RepaintRow(ti.Folder);
                 }
             }
-            SetNoTransfersMessage();
+            OnListStructureChanged();
         }
 
         private void SeekerState_DownloadAddedUINotify(object sender, DownloadAddedEventArgs e)
