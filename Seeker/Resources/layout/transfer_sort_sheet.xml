@@ -3,9 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="16dp"
     android:paddingBottom="16dp"
     android:background="?attr/pseudo_window_background_color">
+
+    <View
+        android:layout_width="32dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/search_bottom_sheet_drag_handle" />
 
     <TextView
         android:layout_width="match_parent"
@@ -16,7 +23,7 @@
         android:text="@string/sort_results_by"
         android:textSize="14sp"
         android:textStyle="bold"
-        android:textColor="?attr/mainTextColor" />
+        android:textColor="?attr/cellTextColorSubdued" />
 
     <LinearLayout
         android:id="@+id/transferSortRows"
