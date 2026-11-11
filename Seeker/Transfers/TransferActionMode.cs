@@ -162,14 +162,14 @@ namespace Seeker
                 return true;
             }
 
-            // for actions (pause/resume/retry) that mutate items in place: clear the selection and notify those rows
+            // for actions (pause/resume/retry) that mutate items in place: clear the selection and repaint those rows
             private static void NotifyChangedAndClear(TransferAdapterRecyclerVersion adapter)
             {
                 var selected = ViewState.BatchSelectedItems.ToList();
                 ViewState.BatchSelectedItems.Clear();
                 foreach (ITransferItem iti in selected)
                 {
-                    adapter.NotifyRowChanged(iti);
+                    adapter.RepaintRow(iti);
                 }
             }
 

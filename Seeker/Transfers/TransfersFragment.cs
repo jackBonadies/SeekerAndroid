@@ -584,21 +584,16 @@ namespace Seeker
         }
 
         // a row whose item changed in place. in folder view a file's row is its folder
-        private void NotifyTransferRowChanged(TransferItem ti)
+        private void RepaintTransferRow(TransferItem ti)
         {
             var adapter = recyclerTransferAdapter;
             if (rootView == null || adapter == null || ti == null)
             {
                 return;
             }
-            int pos = adapter.PositionOf(ti);
-            if (pos < 0 && ti.Folder != null)
+            if (!adapter.RepaintRow(ti))
             {
-                pos = adapter.PositionOf(ti.Folder);
-            }
-            if (pos >= 0)
-            {
-                adapter.NotifyItemChanged(pos);
+                adapter.RepaintRow(ti.Folder);
             }
         }
 
@@ -616,7 +611,7 @@ namespace Seeker
         /// <param name="e"></param>
         private void TransferQueueStateChanged(object sender, TransferItem e)
         {
-            SeekerApplication.RunOnUIThread(() => NotifyTransferRowChanged(e));
+            SeekerApplication.RunOnUIThread(() => RepaintTransferRow(e));
         }
 
         private void TransferOptions_Click(object sender, EventArgs e)
@@ -673,7 +668,7 @@ namespace Seeker
         {
             foreach (TransferItem ti in items)
             {
-                NotifyTransferRowChanged(ti);
+                RepaintTransferRow(ti);
             }
         }
 
@@ -720,7 +715,7 @@ namespace Seeker
                 return; //otherwise null ref with task!
             }
             item1.ClearStateForRetry();
-            SeekerApplication.RunOnUIThread(() => NotifyTransferRowChanged(item1));
+            SeekerApplication.RunOnUIThread(() => RepaintTransferRow(item1));
         }
 
         private bool NotLoggedInShowMessageGaurd(string msg)
@@ -749,10 +744,7 @@ namespace Seeker
                     Logger.InfoFirebase("ti is null");
                 }
 
-                int position = recyclerTransferAdapter.PositionOf(ti);
-
-
-                if (position == -1)
+                if (recyclerTransferAdapter.PositionOf(ti) == -1)
                 {
                     SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
                     return base.OnContextItemSelected(item);
@@ -919,7 +911,7 @@ namespace Seeker
                         break;
                     case TransferContextMenuItem.PauseFolderOrAbortUploads: //pause folder or abort uploads (uploads)
                         TransferItems.TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
-                        recyclerTransferAdapter.NotifyItemChanged(position);
+                        recyclerTransferAdapter.RepaintRow(ti);
                         break;
                     case TransferContextMenuItem.RetryFailedFiles: //retry failed downloads from folder
                         if (NotLoggedInShowMessageGaurd("retry folder"))
@@ -933,7 +925,7 @@ namespace Seeker
                         Logger.InfoFirebase("Abort Upload item pressed");
                         TransferItem uploadToCancel = ti as TransferItem;
                         TransferState.CancelAndRemoveToken(uploadToCancel);
-                        recyclerTransferAdapter.NotifyItemChanged(position);
+                        recyclerTransferAdapter.RepaintRow(ti);
                         break;
                     case TransferContextMenuItem.IgnoreUnshareUser: //ignore (unshare) user
                         Logger.InfoFirebase("Unshare User item pressed");
@@ -941,7 +933,7 @@ namespace Seeker
                         foreach (var tiToCancel in tItems)
                         {
                             TransferState.CancelAndRemoveToken(tiToCancel);
-                            NotifyTransferRowChanged(tiToCancel);
+                            RepaintTransferRow(tiToCancel);
                         }
                         UserListService.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, ti.GetUsername());
                         break;
@@ -1053,7 +1045,7 @@ namespace Seeker
                     }
                     else
                     {
-                        SeekerApplication.RunOnUIThread(() => NotifyTransferRowChanged(t));
+                        SeekerApplication.RunOnUIThread(() => RepaintTransferRow(t));
                     }
                 }
                 catch (System.Exception e)
@@ -1139,7 +1131,7 @@ namespace Seeker
 
         private void TransferStateChangedItem(object sender, TransferItem ti)
         {
-            SeekerApplication.RunOnUIThread(() => NotifyTransferRowChanged(ti));
+            SeekerApplication.RunOnUIThread(() => RepaintTransferRow(ti));
         }
 
 
@@ -1200,7 +1192,7 @@ namespace Seeker
                 }
                 else
                 {
-                    adapter.NotifyRowChanged(ti.Folder);
+                    adapter.RepaintRow(ti.Folder);
                 }
             }
             SetNoTransfersMessage();

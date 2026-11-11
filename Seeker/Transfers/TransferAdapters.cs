@@ -154,13 +154,17 @@ namespace Seeker
                 return true;
             }
 
-            public void NotifyRowChanged(ITransferItem item)
+            // repaints the item's row if a view is bound to it, if not bound, then the next bind reads the live fields
+            //   thus it gets updated either way
+            public bool RepaintRow(ITransferItem item)
             {
-                int pos = PositionOf(item);
-                if (pos >= 0)
+                ITransferItemView view = GetBoundView(item);
+                if (view == null)
                 {
-                    NotifyItemChanged(pos);
+                    return false;
                 }
+                view.setItem(item, this.IsInBatchSelectMode);
+                return true;
             }
 
             public ITransferItemView GetBoundView(ITransferItem item)

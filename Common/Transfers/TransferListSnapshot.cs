@@ -8,7 +8,6 @@ namespace Seeker
         public static TransferListSnapshot Empty => new TransferListSnapshot(new List<ITransferItem>());
 
         private readonly List<ITransferItem> items;
-        private Dictionary<ITransferItem, int>? positions;
 
         public TransferListSnapshot(List<ITransferItem> items)
         {
@@ -34,23 +33,19 @@ namespace Seeker
             {
                 return -1;
             }
-            // TODO revist this logic...
-            if (positions == null)
+            for (int i = 0; i < items.Count; i++)
             {
-                positions = new Dictionary<ITransferItem, int>(items.Count);
-                for (int i = 0; i < items.Count; i++)
+                if (ReferenceEquals(items[i], item))
                 {
-                    positions[items[i]] = i;
+                    return i;
                 }
             }
-            return positions.TryGetValue(item, out int pos) ? pos : -1;
+            return -1;
         }
 
         public void RemoveAt(int position)
         {
             items.RemoveAt(position);
-            // rebuilt lazily on the next lookup
-            positions = null;
         }
     }
 }
