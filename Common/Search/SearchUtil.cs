@@ -64,7 +64,7 @@ namespace Common.Search
                 searchTab.FilterSticky = PreferencesState.FilterSticky;
                 searchTab.TextFilter.Set(PreferencesState.FilterStickyString);
             }
-            searchTab.SortHelper = new SortedSet<SearchResponse>(new SearchResultComparableWishlist(searchTab.SortHelperSorting));
+            searchTab.SortHelper = new SortedSet<SearchResponse>(new SearchResultComparableWishlist(searchTab.SortHelperSorting, searchTab.SortHelperDescending));
             foreach (SearchResponse resp in searchTab.SearchResponses)
             {
                 searchTab.SortHelper.Add(resp);

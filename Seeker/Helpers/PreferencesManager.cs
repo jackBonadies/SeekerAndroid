@@ -57,6 +57,9 @@ namespace Seeker
             PreferencesState.TransferViewShowSpeed = prefs.GetBoolean(KeyConsts.M_TransfersShowSpeed, true);
             PreferencesState.TransferViewShowTimeRemaining = prefs.GetBoolean(KeyConsts.M_TransfersShowTimeRemaining, true);
             PreferencesState.TransferViewGroupByFolder = prefs.GetBoolean(KeyConsts.M_TransfersGroupByFolder, true);
+            var sortKey = (TransferSortKey)prefs.GetInt(KeyConsts.M_TransfersSortKey, (int)TransferSortKey.DateAdded);
+            PreferencesState.TransferViewSortKey = Enum.IsDefined(typeof(TransferSortKey), sortKey) ? sortKey : TransferSortKey.DateAdded;
+            PreferencesState.TransferViewSortDescending = prefs.GetBoolean(KeyConsts.M_TransfersSortDescending, true); // default is newest transfers first
             PreferencesState.TransferViewInUploadsMode = prefs.GetBoolean(KeyConsts.M_TransfersInUploadsMode, false);
             PreferencesState.DisableDownloadToastNotification = prefs.GetBoolean(KeyConsts.M_DisableToastNotifications, true);
             PreferencesState.MemoryBackedDownload = prefs.GetBoolean(KeyConsts.M_MemoryBackedDownload, false);
@@ -90,6 +93,8 @@ namespace Seeker
             PreferencesState.SearchResultStyle = LoadSearchResultStyle(prefs);
             PreferencesState.ExpandAllResults = prefs.GetBoolean(KeyConsts.M_ExpandAllResults, false);
             PreferencesState.DefaultSearchResultSortAlgorithm = (SearchResultSorting)(prefs.GetInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, 0));
+            // a default saved before directions existed gets that key's natural direction (bitrate highest first)
+            PreferencesState.DefaultSearchResultSortDescending = prefs.GetBoolean(KeyConsts.M_DefaultSearchResultSortDescending, PreferencesState.DefaultSearchResultSortAlgorithm.DefaultDescending());
 
             PreferencesState.SearchHistory = GetSearchHistory(prefs);
 
@@ -165,6 +170,7 @@ namespace Seeker
             PreferencesState.AllowUploadsOnMetered = prefs.GetBoolean(KeyConsts.M_AllowUploadsOnMetered, true);
             PreferencesState.RequireVpnForSharing = prefs.GetBoolean(KeyConsts.M_RequireVpnForSharing, false);
             PreferencesState.UserListSortOrder = (SortOrder)prefs.GetInt(KeyConsts.M_UserListSortOrder, 0);
+            PreferencesState.UserListSortDescending = prefs.GetBoolean(KeyConsts.M_UserListSortDescending, PreferencesState.UserListSortOrder == SortOrder.OnlineStatus);
             PreferencesState.LogDiagnostics = prefs.GetBoolean(KeyConsts.M_LOG_DIAGNOSTICS, false);
             PreferencesState.LimitSimultaneousDownloads = prefs.GetBoolean(KeyConsts.M_LimitSimultaneousDownloads, false);
             PreferencesState.MaxSimultaneousLimit = prefs.GetInt(KeyConsts.M_MaxSimultaneousLimit, 1);
@@ -251,6 +257,17 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_TransfersGroupByFolder, PreferencesState.TransferViewGroupByFolder);
+                editor.Apply();
+            }
+        }
+
+        public static void SaveTransferViewSort()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutInt(KeyConsts.M_TransfersSortKey, (int)PreferencesState.TransferViewSortKey);
+                editor.PutBoolean(KeyConsts.M_TransfersSortDescending, PreferencesState.TransferViewSortDescending);
                 editor.Apply();
             }
         }
@@ -353,6 +370,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, (int)PreferencesState.DefaultSearchResultSortAlgorithm);
+                editor.PutBoolean(KeyConsts.M_DefaultSearchResultSortDescending, PreferencesState.DefaultSearchResultSortDescending);
                 editor.Apply();
             }
         }
@@ -544,6 +562,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_UserListSortOrder, (int)PreferencesState.UserListSortOrder);
+                editor.PutBoolean(KeyConsts.M_UserListSortDescending, PreferencesState.UserListSortDescending);
                 editor.Apply();
             }
         }

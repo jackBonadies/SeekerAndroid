@@ -4,6 +4,7 @@ using Soulseek;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using CollectionAssert = NUnit.Framework.Legacy.CollectionAssert;
 
 namespace UnitTestCommon
 {
@@ -345,58 +346,21 @@ namespace UnitTestCommon
         // UI-coupled methods with TransferUIState
 
         [Test]
-        public void GetUICurrentList_NotGroupedByFolder_ReturnsAllTransferItems()
+        public void GetUISnapshot_NotGroupedByFolder_ReturnsAllTransferItems()
         {
-            var ti = CreateTransferItem("user1", "\\dir\\folder1\\file.mp3");
-            manager.Add(ti);
-
-            var uiState = new TransferUIState { GroupByFolder = false };
-            var result = manager.GetUICurrentList(uiState);
-
-            Assert.AreEqual(manager.AllTransferItems, result);
-        }
-
-        [Test]
-        public void GetUICurrentList_GroupedByFolder_NoFolderSelected_ReturnsAllFolderItems()
-        {
-            var ti = CreateTransferItem("user1", "\\dir\\folder1\\file.mp3");
-            manager.Add(ti);
-
-            var uiState = new TransferUIState { GroupByFolder = true, CurrentlySelectedFolder = null };
-            var result = manager.GetUICurrentList(uiState);
-
-            Assert.AreEqual(manager.AllFolderItems, result);
-        }
-
-        [Test]
-        public void GetUICurrentList_GroupedByFolder_FolderSelected_ReturnsFolderTransferItems()
-        {
-            var ti = CreateTransferItem("user1", "\\dir\\folder1\\file.mp3");
-            manager.Add(ti);
-
-            var folder = manager.AllFolderItems[0];
-            var uiState = new TransferUIState { GroupByFolder = true, CurrentlySelectedFolder = folder };
-            var result = manager.GetUICurrentList(uiState);
-
-            Assert.AreEqual(folder.TransferItems, result);
-        }
-
-        [Test]
-        public void GetItemAtUserIndex_NotGrouped_ReturnsTransferItem()
-        {
-            var ti1 = CreateTransferItem("user1", "\\dir\\folder1\\file1.mp3");
-            var ti2 = CreateTransferItem("user1", "\\dir\\folder1\\file2.mp3");
+            var ti1 = CreateTransferItem("user1", "\\dir\\folder1\\file.mp3", "folder1");
+            var ti2 = CreateTransferItem("user1", "\\dir\\folder2\\file.mp3", "folder2");
             manager.Add(ti1);
             manager.Add(ti2);
 
             var uiState = new TransferUIState { GroupByFolder = false };
-            var result = manager.GetItemAtUserIndex(1, uiState);
+            var result = manager.GetUISnapshot(uiState);
 
-            Assert.AreEqual(ti2, result);
+            CollectionAssert.AreEqual(new ITransferItem[] { ti1, ti2 }, result);
         }
 
         [Test]
-        public void GetItemAtUserIndex_GroupedNoFolder_ReturnsFolderItem()
+        public void GetUISnapshot_GroupedByFolder_NoFolderSelected_ReturnsAllFolderItems()
         {
             var ti1 = CreateTransferItem("user1", "\\dir\\folder1\\file.mp3", "folder1");
             var ti2 = CreateTransferItem("user1", "\\dir\\folder2\\file.mp3", "folder2");
@@ -404,14 +368,14 @@ namespace UnitTestCommon
             manager.Add(ti2);
 
             var uiState = new TransferUIState { GroupByFolder = true, CurrentlySelectedFolder = null };
-            var result = manager.GetItemAtUserIndex(0, uiState);
+            var result = manager.GetUISnapshot(uiState);
 
-            Assert.IsInstanceOf<FolderItem>(result);
-            Assert.AreEqual("folder1", (result as FolderItem).FolderName);
+            CollectionAssert.AreEqual(manager.AllFolderItems, result);
+            Assert.AreEqual("folder1", (result[0] as FolderItem).FolderName);
         }
 
         [Test]
-        public void GetItemAtUserIndex_GroupedWithFolder_ReturnsTransferItemFromFolder()
+        public void GetUISnapshot_GroupedByFolder_FolderSelected_ReturnsFolderTransferItems()
         {
             var ti1 = CreateTransferItem("user1", "\\dir\\folder1\\file1.mp3");
             var ti2 = CreateTransferItem("user1", "\\dir\\folder1\\file2.mp3");
@@ -420,46 +384,53 @@ namespace UnitTestCommon
 
             var folder = manager.AllFolderItems[0];
             var uiState = new TransferUIState { GroupByFolder = true, CurrentlySelectedFolder = folder };
-            var result = manager.GetItemAtUserIndex(1, uiState);
+            var result = manager.GetUISnapshot(uiState);
 
-            Assert.AreEqual(ti2, result);
+            CollectionAssert.AreEqual(new ITransferItem[] { ti1, ti2 }, result);
         }
 
         [Test]
-        public void GetUserIndexForTransferItem_NotGrouped_ReturnsIndex()
+        public void GetUISnapshot_IsACopy()
         {
             var ti1 = CreateTransferItem("user1", "\\dir\\folder1\\file1.mp3");
-            var ti2 = CreateTransferItem("user1", "\\dir\\folder1\\file2.mp3");
             manager.Add(ti1);
-            manager.Add(ti2);
 
             var uiState = new TransferUIState { GroupByFolder = false };
-            Assert.AreEqual(1, manager.GetUserIndexForTransferItem(ti2, uiState));
+            var result = manager.GetUISnapshot(uiState);
+            manager.Remove(ti1);
+            manager.Add(CreateTransferItem("user1", "\\dir\\folder1\\file2.mp3"));
+            manager.Add(CreateTransferItem("user1", "\\dir\\folder1\\file3.mp3"));
+
+            CollectionAssert.AreEqual(new ITransferItem[] { ti1 }, result);
         }
 
         [Test]
-        public void GetUserIndexForTransferItem_GroupedNoFolder_ReturnsFolderIndex()
-        {
-            var ti1 = CreateTransferItem("user1", "\\dir\\folder1\\file.mp3", "folder1");
-            var ti2 = CreateTransferItem("user1", "\\dir\\folder2\\file.mp3", "folder2");
-            manager.Add(ti1);
-            manager.Add(ti2);
-
-            var uiState = new TransferUIState { GroupByFolder = true, CurrentlySelectedFolder = null };
-            Assert.AreEqual(1, manager.GetUserIndexForTransferItem(ti2, uiState));
-        }
-
-        [Test]
-        public void GetUserIndexForTransferItem_GroupedWithFolder_ReturnsIndexInFolder()
+        public void Add_SetsFolderBackReference()
         {
             var ti1 = CreateTransferItem("user1", "\\dir\\folder1\\file1.mp3");
             var ti2 = CreateTransferItem("user1", "\\dir\\folder1\\file2.mp3");
+            var ti3 = CreateTransferItem("user1", "\\dir\\folder2\\file1.mp3", "folder2");
             manager.Add(ti1);
             manager.Add(ti2);
+            manager.Add(ti3);
 
-            var folder = manager.AllFolderItems[0];
-            var uiState = new TransferUIState { GroupByFolder = true, CurrentlySelectedFolder = folder };
-            Assert.AreEqual(1, manager.GetUserIndexForTransferItem(ti2, uiState));
+            Assert.AreSame(manager.AllFolderItems[0], ti1.Folder);
+            Assert.AreSame(manager.AllFolderItems[0], ti2.Folder);
+            Assert.AreSame(manager.AllFolderItems[1], ti3.Folder);
+        }
+
+        [Test]
+        public void ContainsFolder_FalseOnceLastItemRemoved()
+        {
+            var ti = CreateTransferItem("user1", "\\dir\\folder1\\file.mp3");
+            manager.Add(ti);
+            var folder = ti.Folder;
+            Assert.IsTrue(manager.ContainsFolder(folder));
+
+            manager.Remove(ti);
+
+            Assert.IsFalse(manager.ContainsFolder(folder));
+            Assert.IsTrue(folder.IsEmpty());
         }
 
         [Test]

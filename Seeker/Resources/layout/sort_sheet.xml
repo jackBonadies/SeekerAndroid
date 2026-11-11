@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="16dp"
+    android:background="?attr/pseudo_window_background_color">
+
+    <View
+        android:layout_width="32dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/search_bottom_sheet_drag_handle" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="8dp"
+        android:text="@string/sort_results_by"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="?attr/cellTextColorSubdued" />
+
+    <LinearLayout
+        android:id="@+id/sortSheetRows"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
+    <View
+        android:id="@+id/sortSheetDefaultDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"
+        android:background="?attr/slightestContrastColor"
+        android:visibility="gone" />
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/sortSheetSetAsDefault"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="24dp"
+        android:text="@string/SetAsDefault"
+        android:textSize="15sp"
+        android:textColor="?attr/normalTextColorNonTinted"
+        android:visibility="gone" />
+</LinearLayout>

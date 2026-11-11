@@ -262,153 +262,70 @@ namespace Seeker
             return transferItemConditionList;
         }
 
-        public object GetUICurrentList(TransferUIState uiState)
+        // A copy of what the transfers list shows for uiState, in display order.
+        public List<ITransferItem> GetUISnapshot(TransferUIState uiState)
         {
-            if (uiState.GroupByFolder)
+            bool reverse = uiState.SortKey == TransferSortKey.DateAdded && uiState.SortDescending;
+            List<ITransferItem> snapshot = CopyUIList(uiState, reverse);
+            // performance: the source list is already sorted by added, so we can skip the sort
+            if (uiState.SortKey != TransferSortKey.DateAdded)
             {
-                if (uiState.CurrentlySelectedFolder != null)
-                {
-                    return uiState.CurrentlySelectedFolder.TransferItems;
-                }
-                else
-                {
-                    return AllFolderItems;
-                }
+                TransferSort.Sort(snapshot, uiState.SortKey, uiState.SortDescending);
             }
-            else
-            {
-                return AllTransferItems;
-            }
+            return snapshot;
         }
 
-        public ITransferItem GetItemAtUserIndex(int indexOfItem, TransferUIState uiState)
+        private List<ITransferItem> CopyUIList(TransferUIState uiState, bool reverse)
         {
             if (uiState.GroupByFolder)
             {
                 if (uiState.CurrentlySelectedFolder != null)
                 {
-                    return uiState.CurrentlySelectedFolder.TransferItems[indexOfItem];
-                }
-                else
-                {
-                    return AllFolderItems[indexOfItem];
-                }
-            }
-            else
-            {
-                return AllTransferItems[indexOfItem];
-            }
-        }
-
-        /// <summary>
-        /// The index in the folder, the folder, or the overall index
-        /// </summary>
-        /// <param name="indexOfItem"></param>
-        /// <returns></returns>
-        public int GetUserIndexForTransferItem(TransferItem ti, TransferUIState uiState)
-        {
-            if (uiState.GroupByFolder)
-            {
-                if (uiState.CurrentlySelectedFolder != null)
-                {
-                    return uiState.CurrentlySelectedFolder.TransferItems.IndexOf(ti);
-                }
-                else
-                {
-                    string foldername = ti.FolderName;
-                    if (foldername == null)
+                    var folderItems = uiState.CurrentlySelectedFolder.TransferItems;
+                    lock (folderItems)
                     {
-                        foldername = SimpleHelpers.GetFolderNameFromFile(ti.FullFilename).ToString();
+                        return CopyToSnapshot(folderItems, reverse);
                     }
-                    return AllFolderItems.FindIndex((FolderItem fi) => { return fi.FolderName == foldername && fi.Username == ti.Username; });
+                }
+                lock (AllFolderItems)
+                {
+                    return CopyToSnapshot(AllFolderItems, reverse);
+                }
+            }
+            lock (AllTransferItems)
+            {
+                return CopyToSnapshot(AllTransferItems, reverse);
+            }
+        }
+
+        private static List<ITransferItem> CopyToSnapshot<T>(List<T> source, bool reverse) where T : class, ITransferItem
+        {
+            var copy = new List<ITransferItem>(source.Count);
+            if (reverse)
+            {
+                for (int i = source.Count - 1; i >= 0; i--)
+                {
+                    copy.Add(source[i]);
                 }
             }
             else
             {
-                return AllTransferItems.IndexOf(ti);
+                for (int i = 0; i < source.Count; i++)
+                {
+                    copy.Add(source[i]);
+                }
             }
+            return copy;
         }
 
-        public int GetIndexForFolderItem(FolderItem ti)
+        public bool ContainsFolder(FolderItem fi)
         {
             lock (AllFolderItems)
             {
-                return AllFolderItems.IndexOf(ti);
+                return AllFolderItems.Contains(fi);
             }
         }
 
-        public int GetUserIndexForITransferItem(ITransferItem iti, TransferUIState uiState)
-        {
-            if (iti is TransferItem ti)
-            {
-                return GetUserIndexForTransferItem(ti, uiState);
-            }
-            else if (iti is FolderItem fi)
-            {
-                return GetIndexForFolderItem(fi);
-            }
-            else
-            {
-                return -1;
-            }
-        }
-
-        /// <summary>
-        /// The index in the folder, the folder, or the overall index
-        /// </summary>
-        /// <param name="indexOfItem"></param>
-        /// <returns></returns>
-        public int GetUserIndexForTransferItem(string fullfilename, TransferUIState uiState)
-        {
-            if (uiState.GroupByFolder)
-            {
-                if (uiState.CurrentlySelectedFolder != null)
-                {
-                    return uiState.CurrentlySelectedFolder.TransferItems.FindIndex((ti) => ti.FullFilename == fullfilename);
-                }
-                else
-                {
-                    TransferItem ti;
-                    lock (AllTransferItems)
-                    {
-                        ti = AllTransferItems.Find((ti) => ti.FullFilename == fullfilename);
-                    }
-                    string foldername = ti.FolderName;
-                    if (foldername == null)
-                    {
-                        foldername = SimpleHelpers.GetFolderNameFromFile(ti.FullFilename).ToString();
-                    }
-                    return AllFolderItems.FindIndex((FolderItem fi) => { return fi.FolderName == foldername && fi.Username == ti.Username; });
-                }
-            }
-            else
-            {
-                return AllTransferItems.FindIndex((ti) => ti.FullFilename == fullfilename);
-            }
-        }
-
-
-        //public TransferItem GetTransferItemWithUserIndex(string fullFileName, out int indexOfItem)
-        //{
-        //    if (fullFileName == null)
-        //    {
-        //        indexOfItem = -1;
-        //        return null;
-        //    }
-        //    lock (AllTransferItems)
-        //    {
-        //        foreach (TransferItem item in AllTransferItems)
-        //        {
-        //            if (item.FullFilename.Equals(fullFileName)) //fullfilename includes dir so that takes care of any ambiguity...
-        //            {
-        //                indexOfItem = AllTransferItems.IndexOf(item);
-        //                return item;
-        //            }
-        //        }
-        //    }
-        //    indexOfItem = -1;
-        //    return null;
-        //}
 
 
         public TransferItem GetTransferItemWithIndexFromAll(string fullFileName, string username, out int indexOfItem)
@@ -570,18 +487,21 @@ namespace Seeker
         {
             lock (AllTransferItems)
             {
+                ti.Seq = TransferSort.NextSeq();
                 AllTransferItems.Add(ti);
-            }
-            lock (AllFolderItems)
-            {
-                var matchingFolder = GetMatchingFolder(ti);
-                if (matchingFolder == null)
+                lock (AllFolderItems)
                 {
-                    AllFolderItems.Add(new FolderItem(ti.FolderName, ti.Username, ti));
-                }
-                else
-                {
-                    matchingFolder.Add(ti);
+                    var matchingFolder = GetMatchingFolder(ti);
+                    if (matchingFolder == null)
+                    {
+                        var folder = new FolderItem(ti.FolderName, ti.Username, ti);
+                        folder.Seq = TransferSort.NextSeq();
+                        AllFolderItems.Add(folder);
+                    }
+                    else
+                    {
+                        matchingFolder.Add(ti);
+                    }
                 }
             }
             MarkTransfersDirty();

@@ -1240,6 +1240,23 @@ namespace Seeker
             }
         }
 
+        // after the open folder # of files changed
+        public void RefreshTransferFolderSubtitle()
+        {
+            if (pager == null || pager.CurrentItem != 2 || SupportActionBar == null)
+            {
+                return;
+            }
+            FolderItem folder = TransfersViewState.Instance.InUploadsMode
+                ? TransfersViewState.Instance.CurrentlySelectedUploadFolder
+                : TransfersViewState.Instance.CurrentlySelectedDLFolder;
+            if (folder == null)
+            {
+                return;
+            }
+            this.SupportActionBar.SubtitleFormatted = GetFolderSubtitle(folder);
+        }
+
         private static Android.Text.SpannableString GetFolderSubtitle(FolderItem folder)
         {
             int numFiles = folder.TransferItems.Count;

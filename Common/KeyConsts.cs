@@ -17,7 +17,9 @@ namespace Common
         public const string M_SearchHistory = "Momento_SearchHistoryArray";
 
         public const string M_DefaultSearchResultSortAlgorithm = "Momento_DefaultSearchResultSortAlgorithm";
+        public const string M_DefaultSearchResultSortDescending = "Momento_DefaultSearchResultSortDescending";
         public const string M_UserListSortOrder = "Momento_UserListSortHistory";
+        public const string M_UserListSortDescending = "Momento_UserListSortDescending";
 
         public const string M_AutoSetAwayOnInactivity = "Momento_AutoSetAwayOnInactivity";
         public const string M_AutoRetryBackOnline = "Momento_AutoRetryBackOnline";
@@ -61,6 +63,8 @@ namespace Common
         public const string M_TransfersShowTimeRemaining = "Momento_TransfersShowTimeRemaining";
         public const string M_TransfersGroupByFolder = "Momento_TransfersGroupByFolder";
         public const string M_TransfersInUploadsMode = "Momento_TransfersInUploadsMode";
+        public const string M_TransfersSortKey = "Momento_TransfersSortKey";
+        public const string M_TransfersSortDescending = "Momento_TransfersSortDescending";
         public const string M_DisableToastNotifications = "Momento_DisableToastNotifications";
         public const string M_MemoryBackedDownload = "Momento_MemoryBackedDownload";
         public const string M_FilterSticky = "Momento_FilterSticky";

@@ -583,6 +583,18 @@ namespace Seeker.Helpers
             }
         }
 
+        public static bool SortHelperDescending
+        {
+            get
+            {
+                return SearchTabCollection[CurrentTab].SortHelperDescending;
+            }
+            set
+            {
+                SearchTabCollection[CurrentTab].SortHelperDescending = value;
+            }
+        }
+
         public static int LastSearchResponseCount //static so when the fragment gets remade we can use it
         {
             get

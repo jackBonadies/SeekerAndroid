@@ -214,7 +214,6 @@ namespace Seeker.Services
                         if (slskDir1 == null || !slskDir1.Exists())
                         {
                             slskDir1 = rootdir.CreateDirectory("Soulseek Incomplete");
-                            //slskDir1 = rootdir.FindFile("Soulseek Incomplete");
                             if (slskDir1 == null)
                             {
                                 string diagMessage = CheckPermissions(rootdir.Uri);
@@ -232,8 +231,6 @@ namespace Seeker.Services
                             CreateNoMediaFile(slskDir1);
                         }
                     }
-                    //slskDir1 = rootdir.FindFile("Soulseek Incomplete"); //if it does not exist you then have to get it again!!
-                    //                                                  //else first time the song will be outside the directory
                     if (slskDir1 == null)
                     {
                         diagSlskDirExistsAfterCreation = false;
@@ -253,7 +250,6 @@ namespace Seeker.Services
                         if (folderDir1 == null || !folderDir1.Exists())
                         {
                             folderDir1 = CreateDirectoryChecked(slskDir1, album_folder_name);
-                            //folderDir1 = slskDir1.FindFile(album_folder_name); //if it does not exist you then have to get it again!!
                             if (folderDir1 == null)
                             {
                                 string rootUri = string.Empty;
@@ -638,7 +634,6 @@ namespace Seeker.Services
                             _depth--;
                         }
                     }
-                    //folderDir1 = slskDir1.FindFile(dir); //if it does not exist you then have to get it again!!
                 }
                 catch (Exception e)
                 {
@@ -707,7 +702,6 @@ namespace Seeker.Services
                             uri = DocumentsContract.MoveDocument(SeekerState.ActiveActivityRef.ContentResolver, uriOfIncomplete, parentUriOfIncomplete, folderDir1.Uri); //ADDED IN API 24!!
                             DeleteParentIfEmpty(DocumentFile.FromTreeUri(SeekerState.ActiveActivityRef, parentUriOfIncomplete));
                             //"/tree/primary:musictemp/document/primary:music2/J when two different uri trees the uri returned from move document is a mismash of the two... even tho it actually moves it correctly.
-                            //folderDir1.FindFile(name).Uri.Path is right uri and IsFile returns true...
                             if (SettingsActivity.UseIncompleteManualFolder()) //fix due to above^  otherwise "Play File" silently fails
                             {
                                 uri = folderDir1.FindFile(realName).Uri; //dont use name!!! in my case the name was .m4a but the actual file was .mp3!!

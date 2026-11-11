@@ -14,8 +14,9 @@ namespace Seeker
     {
         public class ActionModeCallback : Java.Lang.Object, ActionMode.ICallback
         {
-            public TransferAdapterRecyclerVersion Adapter;
             public TransfersFragment Frag;
+            // always the fragment's current adapter
+            private TransferAdapterRecyclerVersion Adapter => Frag.recyclerTransferAdapter;
             public bool OnCreateActionMode(ActionMode mode, IMenu menu)
             {
                 mode.MenuInflater.Inflate(Resource.Menu.transfers_menu_batch, menu);
@@ -97,19 +98,13 @@ namespace Seeker
                     case Resource.Id.action_cancel_and_clear_all_batch:
                         Logger.InfoFirebase("action_cancel_and_clear_batch Pressed");
                         TransferDebouncer.CancelAndClearAll.Trigger();
-                        // Capture positions BEFORE removal, descending so NotifyItemRemoved
-                        // calls don't reference indices that have already shifted.
-                        var removedPositions = ViewState.BatchSelectedItems
-                            .Select(it => TransferItems.TransferItemManagerWrapped.GetUserIndexForITransferItem(it))
-                            .Where(p => p >= 0)
-                            .OrderByDescending(p => p)
-                            .ToList();
+                        var removed = ViewState.BatchSelectedItems.ToList();
                         TransferItems.TransferItemManagerWrapped.CancelSelectedItems(true);
                         TransferItems.TransferItemManagerWrapped.ClearSelectedItemsAndClean();
                         ViewState.BatchSelectedItems.Clear();
-                        foreach (int pos in removedPositions)
+                        foreach (ITransferItem iti in removed)
                         {
-                            Adapter.NotifyItemRemoved(pos);
+                            Frag.RemoveRow(iti);
                         }
                         //since all selected stuff is going away. its what Gmail action mode does.
                         mode.Finish();
@@ -132,15 +127,11 @@ namespace Seeker
                         break;
                     case Resource.Id.select_all:
                         ViewState.BatchSelectedItems.Clear();
-                        int cnt = Adapter.ItemCount;
-                        for (int i = 0; i < cnt; i++)
+                        foreach (ITransferItem iti in Adapter.Items)
                         {
-                            var iti = TransferItems.TransferItemManagerWrapped.GetItemAtUserIndex(i);
-                            if (iti != null)
-                            {
-                                ViewState.BatchSelectedItems.Add(iti);
-                            }
+                            ViewState.BatchSelectedItems.Add(iti);
                         }
+                        int cnt = ViewState.BatchSelectedItems.Count;
 
                         Adapter.NotifyDataSetChanged();
 
@@ -149,12 +140,10 @@ namespace Seeker
                         return true;
                     case Resource.Id.invert_selection:
                         ForceOutIfZeroSelected = false;
-                        int cnt1 = Adapter.ItemCount;
                         var inverted = new HashSet<ITransferItem>();
-                        for (int i = 0; i < cnt1; i++)
+                        foreach (ITransferItem iti in Adapter.Items)
                         {
-                            var iti = TransferItems.TransferItemManagerWrapped.GetItemAtUserIndex(i);
-                            if (iti != null && !ViewState.BatchSelectedItems.Contains(iti))
+                            if (!ViewState.BatchSelectedItems.Contains(iti))
                             {
                                 inverted.Add(iti);
                             }
@@ -174,20 +163,14 @@ namespace Seeker
                 return true;
             }
 
-            /// <summary>
-            /// For actions (pause/resume/retry) that mutate items in place: derive each
-            /// selected item's current position, clear the selection, and notify those rows.
-            /// </summary>
+            // for actions (pause/resume/retry) that mutate items in place: clear the selection and repaint those rows
             private static void NotifyChangedAndClear(TransferAdapterRecyclerVersion adapter)
             {
-                var positions = ViewState.BatchSelectedItems
-                    .Select(it => TransferItems.TransferItemManagerWrapped.GetUserIndexForITransferItem(it))
-                    .Where(p => p >= 0)
-                    .ToList();
+                var selected = ViewState.BatchSelectedItems.ToList();
                 ViewState.BatchSelectedItems.Clear();
-                foreach (int pos in positions)
+                foreach (ITransferItem iti in selected)
                 {
-                    adapter.NotifyItemChanged(pos);
+                    adapter.RepaintRow(iti);
                 }
             }
 

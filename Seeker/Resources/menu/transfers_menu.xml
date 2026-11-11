@@ -21,6 +21,15 @@
     />
 
     <item
+        android:id="@+id/action_sort"
+        android:title="@string/sort"
+        app:iconTint="?attr/appBarIconColor"
+        app:showAsAction="always"
+        android:iconifiedByDefault="true"
+        android:icon="@drawable/sort"
+    />
+
+    <item
         android:id="@+id/action_clear_all_complete_and_aborted"
         android:title="@string/ClearAllCompleteAndAborted"
         app:showAsAction="never"
