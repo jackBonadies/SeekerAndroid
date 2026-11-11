@@ -128,6 +128,19 @@ namespace UnitTestCommon
         }
 
         [Test]
+        public void DateAdded_Flat_GroupsByFolderThenOldestFirst([Values(false, true)] bool descending)
+        {
+            var a1 = Add("u1", "a", "1.mp3");
+            var b1 = Add("u1", "b", "1.mp3");
+            var a2 = Add("u1", "a", "2.mp3");
+            var b2 = Add("u1", "b", "2.mp3");
+            var uiState = new TransferUIState { GroupByFolder = false, SortKey = TransferSortKey.DateAdded, SortDescending = descending };
+
+            var expected = descending ? new ITransferItem[] { b1, b2, a1, a2 } : new ITransferItem[] { a1, a2, b1, b2 };
+            CollectionAssert.AreEqual(expected, manager.GetUISnapshot(uiState));
+        }
+
+        [Test]
         public void FolderName_Folders_ByDisplayNameThenUser()
         {
             Add("zed", "Beta", "1.mp3");
