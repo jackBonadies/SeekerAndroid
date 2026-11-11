@@ -14,8 +14,9 @@ namespace Seeker
     {
         public class ActionModeCallback : Java.Lang.Object, ActionMode.ICallback
         {
-            public TransferAdapterRecyclerVersion Adapter;
             public TransfersFragment Frag;
+            // always the fragment's current adapter
+            private TransferAdapterRecyclerVersion Adapter => Frag.recyclerTransferAdapter;
             public bool OnCreateActionMode(ActionMode mode, IMenu menu)
             {
                 mode.MenuInflater.Inflate(Resource.Menu.transfers_menu_batch, menu);

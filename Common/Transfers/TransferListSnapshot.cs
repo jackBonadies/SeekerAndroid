@@ -5,8 +5,6 @@ namespace Seeker
     // UI owned, for transfers adapter
     public sealed class TransferListSnapshot
     {
-        public static TransferListSnapshot Empty => new TransferListSnapshot(new List<ITransferItem>());
-
         private readonly List<ITransferItem> items;
 
         public TransferListSnapshot(List<ITransferItem> items)

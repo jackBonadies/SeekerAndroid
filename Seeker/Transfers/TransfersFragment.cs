@@ -316,7 +316,7 @@ namespace Seeker
                     RetryAllConditionEntry(true, false);
                     return true;
                 case Resource.Id.batch_select:
-                    TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
+                    TransfersActionModeCallback = new ActionModeCallback() { Frag = this };
                     ForceOutIfZeroSelected = false;
                     TransfersActionMode = SeekerState.MainActivityRef.StartSupportActionMode(TransfersActionModeCallback);
                     recyclerTransferAdapter.IsInBatchSelectMode = true;
@@ -597,6 +597,28 @@ namespace Seeker
             }
         }
 
+        // same as RepaintTransferRow, but a folder row is repainted once no matter how many of its files changed
+        private void RepaintTransferRows(IEnumerable<TransferItem> items)
+        {
+            var adapter = recyclerTransferAdapter;
+            if (rootView == null || adapter == null)
+            {
+                return;
+            }
+            var foldersDone = new HashSet<FolderItem>();
+            foreach (TransferItem ti in items)
+            {
+                if (ti == null || adapter.RepaintRow(ti))
+                {
+                    continue;
+                }
+                if (ti.Folder != null && foldersDone.Add(ti.Folder))
+                {
+                    adapter.RepaintRow(ti.Folder);
+                }
+            }
+        }
+
         // for an item the caller just removed from its manager
         private void RemoveRow(ITransferItem item)
         {
@@ -666,10 +688,7 @@ namespace Seeker
 
         private void OnTransferItemsChanged(object sender, IReadOnlyList<TransferItem> items)
         {
-            foreach (TransferItem ti in items)
-            {
-                RepaintTransferRow(ti);
-            }
+            RepaintTransferRows(items);
         }
 
         private void OnTransferListRefreshRequested(object sender, EventArgs e)
@@ -933,8 +952,8 @@ namespace Seeker
                         foreach (var tiToCancel in tItems)
                         {
                             TransferState.CancelAndRemoveToken(tiToCancel);
-                            RepaintTransferRow(tiToCancel);
                         }
+                        RepaintTransferRows(tItems);
                         UserListService.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, ti.GetUsername());
                         break;
                 }
@@ -948,7 +967,7 @@ namespace Seeker
             {
                 return;
             }
-            TransfersActionModeCallback = new ActionModeCallback() { Adapter = recyclerTransferAdapter, Frag = this };
+            TransfersActionModeCallback = new ActionModeCallback() { Frag = this };
             ForceOutIfZeroSelected = true;
             TransfersActionMode = SeekerState.MainActivityRef.StartSupportActionMode(TransfersActionModeCallback);
             recyclerTransferAdapter.IsInBatchSelectMode = true;
