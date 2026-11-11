@@ -44,6 +44,21 @@ namespace Seeker
         BitRate = 3,
     }
 
+    public static class SearchResultSortingExtensions
+    {
+        // availability and speed only dont have direction (i.e. its always best first)
+        public static bool HasDirection(this SearchResultSorting sorting)
+        {
+            return sorting == SearchResultSorting.FolderAlphabetical || sorting == SearchResultSorting.BitRate;
+        }
+
+        // folder name A-Z, bitrate highest first
+        public static bool DefaultDescending(this SearchResultSorting sorting)
+        {
+            return sorting == SearchResultSorting.BitRate;
+        }
+    }
+
     public enum ChipType
     {
         FileType = 0,

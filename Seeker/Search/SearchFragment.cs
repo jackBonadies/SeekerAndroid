@@ -29,7 +29,7 @@ using Common.Search;
 using Android.Graphics.Drawables;
 namespace Seeker
 {
-    public partial class SearchFragment : Fragment
+    public partial class SearchFragment : Fragment, ISortSheetDefaultHost
     {
         public static event EventHandler<EventArgs> SearchHistoryCleared;
 
@@ -388,7 +388,7 @@ namespace Seeker
                     ShowChangeTargetDialog();
                     return true;
                 case Resource.Id.action_sort_results_by:
-                    ShowChangeSortOrderDialog();
+                    SortBottomSheet.Show(ChildFragmentManager);
                     return true;
                 case Resource.Id.action_search:
                     if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
@@ -1506,97 +1506,44 @@ namespace Seeker
 
 
 
-        public void ShowChangeSortOrderDialog()
+        private static readonly SortSheetOption[] SearchSortOptions =
         {
-            Context toUse = this.Activity != null ? this.Activity : SeekerState.MainActivityRef;
-            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(toUse);
-            builder.SetTitle(Resource.String.sort_results_by);
-            View viewInflated = LayoutInflater.From(toUse).Inflate(Resource.Layout.changeresultsortorder, this.rootView as ViewGroup, false); //TODO replace rootView with ActiveActivity.GetContent()
+            new SortSheetOption((int)SearchResultSorting.Available, Resource.String.Availability, hasDirection: false, defaultDescending: false),
+            new SortSheetOption((int)SearchResultSorting.Fastest, Resource.String.Speed, hasDirection: false, defaultDescending: false),
+            new SortSheetOption((int)SearchResultSorting.FolderAlphabetical, Resource.String.FolderName, SearchResultSorting.FolderAlphabetical.HasDirection(), SearchResultSorting.FolderAlphabetical.DefaultDescending()),
+            new SortSheetOption((int)SearchResultSorting.BitRate, Resource.String.bitrate, SearchResultSorting.BitRate.HasDirection(), SearchResultSorting.BitRate.DefaultDescending()),
+        };
 
-            AndroidX.AppCompat.Widget.AppCompatRadioButton sortAvailability = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.availability);
-            AndroidX.AppCompat.Widget.AppCompatRadioButton sortSpeed = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.speed);
-            AndroidX.AppCompat.Widget.AppCompatRadioButton sortFolderNameAlpha = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.folderNameAlpha);
-            AndroidX.AppCompat.Widget.AppCompatRadioButton sortBitrate = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.bitRate);
-            CheckBox checkBoxSetAsDefault = viewInflated.FindViewById<CheckBox>(Resource.Id.setAsDefault);
-            switch (SearchTabHelper.SortHelperSorting)
-            {
-                case SearchResultSorting.Available:
-                    sortAvailability.Checked = true;
-                    break;
-                case SearchResultSorting.Fastest:
-                    sortSpeed.Checked = true;
-                    break;
-                case SearchResultSorting.FolderAlphabetical:
-                    sortFolderNameAlpha.Checked = true;
-                    break;
-                case SearchResultSorting.BitRate:
-                    sortBitrate.Checked = true;
-                    break;
-            }
+        IReadOnlyList<SortSheetOption> ISortSheetHost.SortOptions => SearchSortOptions;
+        int ISortSheetHost.SortKey => (int)SearchTabHelper.SortHelperSorting;
+        bool ISortSheetHost.SortDescending => SearchTabHelper.SortHelperDescending;
 
-            sortAvailability.Click += SortAvailabilityClick;
-            sortSpeed.Click += SortSpeedClick;
-            sortFolderNameAlpha.Click += SortFoldernameAlphaClick;
-            sortBitrate.Click += SortBitrate_Click;
-
-            builder.SetView(viewInflated);
-
-            EventHandler<DialogClickEventArgs> positiveButtonEventHandler = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
-            {
-                //if cancelled via back button we dont go here
-
-                if (checkBoxSetAsDefault.Checked)
-                {
-                    var old = PreferencesState.DefaultSearchResultSortAlgorithm;
-                    PreferencesState.DefaultSearchResultSortAlgorithm = SearchTabHelper.SortHelperSorting; //whatever one we just changed it to.
-                    if (old != PreferencesState.DefaultSearchResultSortAlgorithm)
-                    {
-                        PreferencesManager.SaveDefaultSearchResultSortAlgorithm();
-                    }
-                }
-                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
-                {
-                    aDiag.Dismiss();
-                }
-                else
-                {
-                    dialogInstance.Dismiss();
-                }
-            });
-
-            builder.SetPositiveButton(Resource.String.okay, positiveButtonEventHandler);
-            dialogInstance = builder.Create();
-            dialogInstance.Show();
+        void ISortSheetHost.ApplySort(int key, bool descending)
+        {
+            ApplySearchSort((SearchResultSorting)key, descending);
         }
 
-        private void SortBitrate_Click(object sender, EventArgs e)
+        // the sort is per tab, the default is what new tabs start with
+        bool ISortSheetDefaultHost.IsSortDefault =>
+            SearchTabHelper.SortHelperSorting == PreferencesState.DefaultSearchResultSortAlgorithm
+            && (!SearchTabHelper.SortHelperSorting.HasDirection() || SearchTabHelper.SortHelperDescending == PreferencesState.DefaultSearchResultSortDescending);
+
+        void ISortSheetDefaultHost.SetSortAsDefault()
         {
-            UpdateSortAvailability(SearchResultSorting.BitRate);
+            PreferencesState.DefaultSearchResultSortAlgorithm = SearchTabHelper.SortHelperSorting;
+            PreferencesState.DefaultSearchResultSortDescending = SearchTabHelper.SortHelperDescending;
+            PreferencesManager.SaveDefaultSearchResultSortAlgorithm();
         }
 
-        private void SortAvailabilityClick(object sender, EventArgs e)
+        private void ApplySearchSort(SearchResultSorting searchResultSorting, bool descending)
         {
-            UpdateSortAvailability(SearchResultSorting.Available);
-        }
-
-        private void SortSpeedClick(object sender, EventArgs e)
-        {
-            UpdateSortAvailability(SearchResultSorting.Fastest);
-        }
-
-        private void SortFoldernameAlphaClick(object sender, EventArgs e)
-        {
-            UpdateSortAvailability(SearchResultSorting.FolderAlphabetical);
-        }
-
-        private void UpdateSortAvailability(SearchResultSorting searchResultSorting)
-        {
-            if (SearchTabHelper.SortHelperSorting != searchResultSorting)
+            if (SearchTabHelper.SortHelperSorting != searchResultSorting || SearchTabHelper.SortHelperDescending != descending)
             {
                 lock (SearchTabHelper.SortHelperLockObject) //this is also always going to be on the UI thread. so we have that guaranteeing safety. 
                 {
                     SearchTabHelper.SortHelperSorting = searchResultSorting;
-                    SearchTabHelper.SortHelper = new SortedSet<SearchResponse>(new SearchResultComparableWishlist(SearchTabHelper.SortHelperSorting));
+                    SearchTabHelper.SortHelperDescending = descending;
+                    SearchTabHelper.SortHelper = new SortedSet<SearchResponse>(new SearchResultComparableWishlist(SearchTabHelper.SortHelperSorting, SearchTabHelper.SortHelperDescending));
 
                     //put all the search responses into the new sort helper
                     if (SearchTabHelper.SearchResponses != null)

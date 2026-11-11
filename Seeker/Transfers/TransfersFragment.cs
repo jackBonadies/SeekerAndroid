@@ -22,7 +22,7 @@ using Seeker.Helpers;
 using Common;
 namespace Seeker
 {
-    public partial class TransfersFragment : Fragment, PopupMenu.IOnMenuItemClickListener
+    public partial class TransfersFragment : Fragment, PopupMenu.IOnMenuItemClickListener, ISortSheetHost
     {
         private static TransfersViewState ViewState => TransfersViewState.Instance;
 
@@ -223,10 +223,7 @@ namespace Seeker
                     SetRecyclerAdapter();
                     return true;
                 case Resource.Id.action_sort:
-                    if (ChildFragmentManager.FindFragmentByTag(TransferSortBottomSheet.TAG) == null)
-                    {
-                        new TransferSortBottomSheet().Show(ChildFragmentManager, TransferSortBottomSheet.TAG);
-                    }
+                    SortBottomSheet.Show(ChildFragmentManager);
                     return true;
                 case Resource.Id.action_show_size:
                     PreferencesState.TransferViewShowSizes = !PreferencesState.TransferViewShowSizes;
@@ -547,7 +544,26 @@ namespace Seeker
             }
         }
 
-        public void OnSortChanged()
+        private static readonly SortSheetOption[] TransferSortOptions =
+        {
+            new SortSheetOption((int)TransferSortKey.DateAdded, Resource.String.sort_date_added, hasDirection: true, defaultDescending: true),
+            new SortSheetOption((int)TransferSortKey.FolderName, Resource.String.sort_folder_name, hasDirection: true, defaultDescending: false),
+            new SortSheetOption((int)TransferSortKey.User, Resource.String.sort_user, hasDirection: true, defaultDescending: false),
+        };
+
+        IReadOnlyList<SortSheetOption> ISortSheetHost.SortOptions => TransferSortOptions;
+        int ISortSheetHost.SortKey => (int)ViewState.SortKey;
+        bool ISortSheetHost.SortDescending => ViewState.SortDescending;
+
+        void ISortSheetHost.ApplySort(int key, bool descending)
+        {
+            ViewState.SortKey = (TransferSortKey)key;
+            ViewState.SortDescending = descending;
+            PreferencesManager.SaveTransferViewSort();
+            OnSortChanged();
+        }
+
+        private void OnSortChanged()
         {
             if (rootView == null)
             {

@@ -14,11 +14,19 @@ namespace Seeker
 
     public class UserListAlphabeticalComparer : IComparer<UserListItem>
     {
+        private readonly bool descending;
+
+        public UserListAlphabeticalComparer(bool descending = false)
+        {
+            this.descending = descending;
+        }
+
         public int Compare(UserListItem x, UserListItem y)
         {
             if (x is UserListItem xData && y is UserListItem yData)
             {
-                return xData.Username.CompareTo(yData.Username);
+                int cmp = xData.Username.CompareTo(yData.Username);
+                return descending ? -cmp : cmp;
             }
             else
             {
@@ -32,7 +40,14 @@ namespace Seeker
     /// </summary>
     public class UserListOnlineStatusComparer : IComparer<UserListItem>
     {
-        // Compares by UserCount then Name
+        // descending = online first. tie breaker is A-Z
+        private readonly bool descending;
+
+        public UserListOnlineStatusComparer(bool descending = true)
+        {
+            this.descending = descending;
+        }
+
         public int Compare(UserListItem x, UserListItem y)
         {
             int xStatus = x.DoesNotExist ? -1 : (int)x.GetStatusFromItem(out _);
@@ -45,7 +60,7 @@ namespace Seeker
             }
             else
             {
-                return yStatus - xStatus;
+                return descending ? yStatus - xStatus : xStatus - yStatus;
             }
         }
     }
@@ -66,10 +81,10 @@ namespace Seeker
                     userlist.Reverse();
                     return userlist;
                 case SortOrder.Alphabetical:
-                    userlist.Sort(new UserListAlphabeticalComparer());
+                    userlist.Sort(new UserListAlphabeticalComparer(PreferencesState.UserListSortDescending));
                     return userlist;
                 case SortOrder.OnlineStatus:
-                    userlist.Sort(new UserListOnlineStatusComparer());
+                    userlist.Sort(new UserListOnlineStatusComparer(PreferencesState.UserListSortDescending));
                     return userlist;
                 default:
                     return userlist;
@@ -85,7 +100,7 @@ namespace Seeker
                     userlist.Reverse();
                     return userlist;
                 case SortOrder.Alphabetical:
-                    userlist.Sort(new UserListAlphabeticalComparer());
+                    userlist.Sort(new UserListAlphabeticalComparer(PreferencesState.UserListSortDescending));
                     return userlist;
                 case SortOrder.OnlineStatus:
                     //we do not keep any data on ignored users online status.

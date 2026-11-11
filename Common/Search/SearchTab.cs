@@ -17,8 +17,9 @@ namespace Seeker
         public Task DiskLoadTask = null;
         public bool DiskLoadInProgress => DiskLoadTask != null && !DiskLoadTask.IsCompleted;
         public readonly object DiskLoadLock = new object();
-        public SortedSet<SearchResponse> SortHelper = new SortedSet<SearchResponse>(new SearchResultComparable(PreferencesState.DefaultSearchResultSortAlgorithm));
+        public SortedSet<SearchResponse> SortHelper = new SortedSet<SearchResponse>(new SearchResultComparable(PreferencesState.DefaultSearchResultSortAlgorithm, PreferencesState.DefaultSearchResultSortDescending));
         public SearchResultSorting SortHelperSorting = PreferencesState.DefaultSearchResultSortAlgorithm;
+        public bool SortHelperDescending = PreferencesState.DefaultSearchResultSortDescending;
         public object SortHelperLockObject = new object();
         public TextFilter TextFilter = new TextFilter(supportsSpecialFlags: true);
         public bool FilterSticky = false;
@@ -53,7 +54,7 @@ namespace Seeker
         {
             SearchTab clone = new SearchTab();
             clone.SearchResponses = this.SearchResponses.ToList();
-            SortedSet<SearchResponse> cloned = new SortedSet<SearchResponse>(new SearchResultComparableWishlist(clone.SortHelperSorting));
+            SortedSet<SearchResponse> cloned = new SortedSet<SearchResponse>(new SearchResultComparableWishlist(clone.SortHelperSorting, clone.SortHelperDescending));
             //without lock, extremely easy to reproduce "collection was modified" exception if creating wishlist tab while searching.
             lock (this.SortHelperLockObject) //lock the sort helper we are copying from
             {

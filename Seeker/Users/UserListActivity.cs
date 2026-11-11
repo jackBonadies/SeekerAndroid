@@ -38,7 +38,7 @@ using Common;
 namespace Seeker
 {
     [Activity(Label = "UserListActivity", Theme = "@style/AppTheme.NoActionBar", Exported = false, ParentActivity = typeof(MainActivity))]
-    public class UserListActivity : ThemeableActivity
+    public class UserListActivity : ThemeableActivity, ISortSheetHost
     {
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
@@ -79,7 +79,7 @@ namespace Seeker
                     ShowEditTextDialogAddUserToList(true);
                     return true;
                 case Resource.Id.sort_user_list_action:
-                    ShowSortUserListDialog();
+                    SortBottomSheet.Show(SupportFragmentManager);
                     return true;
                 case Android.Resource.Id.Home:
                     OnBackPressedDispatcher.OnBackPressed();
@@ -251,84 +251,61 @@ namespace Seeker
             get => Common.PreferencesState.UserListSortOrder;
             set => Common.PreferencesState.UserListSortOrder = value;
         }
-        private static AndroidX.AppCompat.App.AlertDialog dialogInstance = null;
-        public void ShowSortUserListDialog()
+        private enum UserListSortKey
         {
-            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this);
-            builder.SetTitle(this.Resources.GetString(Resource.String.SortUsersBy));
-
-            View viewInflated = LayoutInflater.From(this).Inflate(Resource.Layout.change_sort_order_dialog, this.FindViewById(Android.Resource.Id.Content) as ViewGroup, false);
-
-            AndroidX.AppCompat.Widget.AppCompatRadioButton onlineStatus = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.onlineStatus);
-            AndroidX.AppCompat.Widget.AppCompatRadioButton alphaOrder = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.alphaOrder);
-            AndroidX.AppCompat.Widget.AppCompatRadioButton dateAddedDesc = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.dateAddedDesc);
-            AndroidX.AppCompat.Widget.AppCompatRadioButton dateAddedAsc = viewInflated.FindViewById<AndroidX.AppCompat.Widget.AppCompatRadioButton>(Resource.Id.dateAddedAsc);
-
-            RadioGroup radioGroupChangeUserSort = viewInflated.FindViewById<RadioGroup>(Resource.Id.radioGroupChangeUserSort);
-            radioGroupChangeUserSort.CheckedChange += RadioGroupChangeUserSort_CheckedChange;
-
-
-            switch (UserListSortOrder)
-            {
-                case SortOrder.DateAddedAsc:
-                    dateAddedAsc.Checked = true;
-                    break;
-                case SortOrder.DateAddedDesc:
-                    dateAddedDesc.Checked = true;
-                    break;
-                case SortOrder.Alphabetical:
-                    alphaOrder.Checked = true;
-                    break;
-                case SortOrder.OnlineStatus:
-                    onlineStatus.Checked = true;
-                    break;
-            }
-
-            builder.SetView(viewInflated);
-
-            EventHandler<DialogClickEventArgs> eventHandlerClose = new EventHandler<DialogClickEventArgs>((object sender, DialogClickEventArgs cancelArgs) =>
-            {
-                if (sender is AndroidX.AppCompat.App.AlertDialog aDiag)
-                {
-                    aDiag.Dismiss();
-                }
-                else
-                {
-                    dialogInstance.Dismiss();
-                }
-                dialogInstance = null; //memory cleanup
-            });
-
-            builder.SetPositiveButton(Resource.String.okay, eventHandlerClose);
-            dialogInstance = builder.Create();
-            dialogInstance.Show();
-
+            DateAdded = 0,
+            Name = 1,
+            OnlineStatus = 2,
         }
 
-        private void RadioGroupChangeUserSort_CheckedChange(object sender, RadioGroup.CheckedChangeEventArgs e)
+        private static readonly SortSheetOption[] UserListSortOptions =
         {
-            SortOrder prev = UserListSortOrder;
-            switch (e.CheckedId)
-            {
-                case Resource.Id.dateAddedAsc:
-                    UserListSortOrder = SortOrder.DateAddedAsc;
-                    break;
-                case Resource.Id.dateAddedDesc:
-                    UserListSortOrder = SortOrder.DateAddedDesc;
-                    break;
-                case Resource.Id.alphaOrder:
-                    UserListSortOrder = SortOrder.Alphabetical;
-                    break;
-                case Resource.Id.onlineStatus:
-                    UserListSortOrder = SortOrder.OnlineStatus;
-                    break;
-            }
+            new SortSheetOption((int)UserListSortKey.DateAdded, Resource.String.sort_date_added, hasDirection: true, defaultDescending: true),
+            new SortSheetOption((int)UserListSortKey.Name, Resource.String.Name, hasDirection: true, defaultDescending: false),
+            new SortSheetOption((int)UserListSortKey.OnlineStatus, Resource.String.OnlineStatus, hasDirection: true, defaultDescending: true),
+        };
 
-            if (prev != UserListSortOrder)
+        IReadOnlyList<SortSheetOption> ISortSheetHost.SortOptions => UserListSortOptions;
+
+        int ISortSheetHost.SortKey
+        {
+            get
             {
-                PreferencesManager.SaveUserListSortOrder();
-                this.RefreshUserList();
+                switch (UserListSortOrder)
+                {
+                    case SortOrder.Alphabetical:
+                        return (int)UserListSortKey.Name;
+                    case SortOrder.OnlineStatus:
+                        return (int)UserListSortKey.OnlineStatus;
+                    default:
+                        return (int)UserListSortKey.DateAdded;
+                }
             }
+        }
+
+        // date added keeps its direction in SortOrder (DateAddedAsc / Desc) as it always has
+        bool ISortSheetHost.SortDescending =>
+            UserListSortOrder == SortOrder.DateAddedDesc
+            || ((UserListSortOrder == SortOrder.Alphabetical || UserListSortOrder == SortOrder.OnlineStatus) && PreferencesState.UserListSortDescending);
+
+        void ISortSheetHost.ApplySort(int key, bool descending)
+        {
+            switch ((UserListSortKey)key)
+            {
+                case UserListSortKey.Name:
+                    UserListSortOrder = SortOrder.Alphabetical;
+                    PreferencesState.UserListSortDescending = descending;
+                    break;
+                case UserListSortKey.OnlineStatus:
+                    UserListSortOrder = SortOrder.OnlineStatus;
+                    PreferencesState.UserListSortDescending = descending;
+                    break;
+                default:
+                    UserListSortOrder = descending ? SortOrder.DateAddedDesc : SortOrder.DateAddedAsc;
+                    break;
+            }
+            PreferencesManager.SaveUserListSortOrder();
+            RefreshUserList();
         }
 
         public void ShowEditTextDialogAddUserToList(bool toIgnored)

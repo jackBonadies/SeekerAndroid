@@ -40,7 +40,7 @@ namespace Seeker
                 searchTab.FilterSticky = PreferencesState.FilterSticky;
                 searchTab.TextFilter.Set(PreferencesState.FilterStickyString);
             }
-            searchTab.SortHelper = new SortedSet<SearchResponse>(new SearchResultComparableWishlist(searchTab.SortHelperSorting));
+            searchTab.SortHelper = new SortedSet<SearchResponse>(new SearchResultComparableWishlist(searchTab.SortHelperSorting, searchTab.SortHelperDescending));
             if (responses != null)
             {
                 foreach (SearchResponse resp in searchTab.SearchResponses)

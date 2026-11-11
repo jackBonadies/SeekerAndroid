@@ -10,7 +10,7 @@
     android:background="?attr/selectableItemBackground">
 
     <TextView
-        android:id="@+id/transferSortLabel"
+        android:id="@+id/sortSheetLabel"
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="wrap_content"
@@ -18,7 +18,7 @@
         android:textColor="?attr/normalTextColorNonTinted" />
 
     <ImageView
-        android:id="@+id/transferSortDirection"
+        android:id="@+id/sortSheetDirection"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:tint="?attr/mainTextColor"

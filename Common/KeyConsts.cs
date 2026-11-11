@@ -17,7 +17,9 @@ namespace Common
         public const string M_SearchHistory = "Momento_SearchHistoryArray";
 
         public const string M_DefaultSearchResultSortAlgorithm = "Momento_DefaultSearchResultSortAlgorithm";
+        public const string M_DefaultSearchResultSortDescending = "Momento_DefaultSearchResultSortDescending";
         public const string M_UserListSortOrder = "Momento_UserListSortHistory";
+        public const string M_UserListSortDescending = "Momento_UserListSortDescending";
 
         public const string M_AutoSetAwayOnInactivity = "Momento_AutoSetAwayOnInactivity";
         public const string M_AutoRetryBackOnline = "Momento_AutoRetryBackOnline";

@@ -11,7 +11,7 @@ namespace Seeker.Search
 
     public class SearchResultComparableWishlist : SearchResultComparable
     {
-        public SearchResultComparableWishlist(SearchResultSorting _searchResultSorting) : base(_searchResultSorting)
+        public SearchResultComparableWishlist(SearchResultSorting _searchResultSorting, bool descending) : base(_searchResultSorting, descending)
         {
 
         }
@@ -48,9 +48,12 @@ namespace Seeker.Search
     public class SearchResultComparable : IComparer<SearchResponse>
     {
         private readonly SearchResultSorting searchResultSorting;
-        public SearchResultComparable(SearchResultSorting _searchResultSorting)
+        // only folder name and bitrate have a direction
+        private readonly bool descending;
+        public SearchResultComparable(SearchResultSorting _searchResultSorting, bool descending)
         {
             searchResultSorting = _searchResultSorting;
+            this.descending = descending;
         }
 
         private static int CompareBySpeed(SearchResponse x, SearchResponse y)
@@ -137,8 +140,11 @@ namespace Seeker.Search
             {
                 x.GetDominantFileTypeAndBitRate(PreferencesState.HideLockedResultsInSearch, out double xbitRate);
                 y.GetDominantFileTypeAndBitRate(PreferencesState.HideLockedResultsInSearch, out double ybitRate);
-                // descending — higher bitrate is better
-                int cmp = -xbitRate.CompareTo(ybitRate);
+                int cmp = xbitRate.CompareTo(ybitRate);
+                if (descending)
+                {
+                    cmp = -cmp;
+                }
                 if (cmp != 0) return cmp;
                 return CompareByAvailable(x, y);
             }
@@ -152,7 +158,7 @@ namespace Seeker.Search
                     int ret = xFolder.CompareTo(yFolder, StringComparison.CurrentCulture);
                     if (ret != 0)
                     {
-                        return ret;
+                        return descending ? -ret : ret;
                     }
                 }
                 else

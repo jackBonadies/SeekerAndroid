@@ -62,6 +62,7 @@ namespace Common
         public static bool HideLockedResultsInSearch = true;
         public static bool HideLockedResultsInBrowse = true;
         public static Seeker.SearchResultSorting DefaultSearchResultSortAlgorithm = Seeker.SearchResultSorting.Available;
+        public static bool DefaultSearchResultSortDescending = false;
         public static bool FilterSticky = false;
         public static string FilterStickyString = string.Empty;
         public static List<string> SearchHistory = new List<string>();
@@ -149,6 +150,8 @@ namespace Common
 
         // User list
         public static SortOrder UserListSortOrder = SortOrder.DateAddedAsc;
+        // name and online status only, date added carries its direction in the SortOrder
+        public static bool UserListSortDescending = false;
 
         // Filter controls
         public static FormatFilterType FilterFormat = FormatFilterType.Any;

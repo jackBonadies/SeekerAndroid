@@ -93,6 +93,8 @@ namespace Seeker
             PreferencesState.SearchResultStyle = LoadSearchResultStyle(prefs);
             PreferencesState.ExpandAllResults = prefs.GetBoolean(KeyConsts.M_ExpandAllResults, false);
             PreferencesState.DefaultSearchResultSortAlgorithm = (SearchResultSorting)(prefs.GetInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, 0));
+            // a default saved before directions existed gets that key's natural direction (bitrate highest first)
+            PreferencesState.DefaultSearchResultSortDescending = prefs.GetBoolean(KeyConsts.M_DefaultSearchResultSortDescending, PreferencesState.DefaultSearchResultSortAlgorithm.DefaultDescending());
 
             PreferencesState.SearchHistory = GetSearchHistory(prefs);
 
@@ -168,6 +170,7 @@ namespace Seeker
             PreferencesState.AllowUploadsOnMetered = prefs.GetBoolean(KeyConsts.M_AllowUploadsOnMetered, true);
             PreferencesState.RequireVpnForSharing = prefs.GetBoolean(KeyConsts.M_RequireVpnForSharing, false);
             PreferencesState.UserListSortOrder = (SortOrder)prefs.GetInt(KeyConsts.M_UserListSortOrder, 0);
+            PreferencesState.UserListSortDescending = prefs.GetBoolean(KeyConsts.M_UserListSortDescending, PreferencesState.UserListSortOrder == SortOrder.OnlineStatus);
             PreferencesState.LogDiagnostics = prefs.GetBoolean(KeyConsts.M_LOG_DIAGNOSTICS, false);
             PreferencesState.LimitSimultaneousDownloads = prefs.GetBoolean(KeyConsts.M_LimitSimultaneousDownloads, false);
             PreferencesState.MaxSimultaneousLimit = prefs.GetInt(KeyConsts.M_MaxSimultaneousLimit, 1);
@@ -367,6 +370,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_DefaultSearchResultSortAlgorithm, (int)PreferencesState.DefaultSearchResultSortAlgorithm);
+                editor.PutBoolean(KeyConsts.M_DefaultSearchResultSortDescending, PreferencesState.DefaultSearchResultSortDescending);
                 editor.Apply();
             }
         }
@@ -558,6 +562,7 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutInt(KeyConsts.M_UserListSortOrder, (int)PreferencesState.UserListSortOrder);
+                editor.PutBoolean(KeyConsts.M_UserListSortDescending, PreferencesState.UserListSortDescending);
                 editor.Apply();
             }
         }
