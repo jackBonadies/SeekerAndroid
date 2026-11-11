@@ -29,8 +29,10 @@ namespace Seeker.Services
         // item -> the request that owns it. full lifecycle from queued|locally (before slsk.net has knowledge) to continuation action
         private readonly ConcurrentDictionary<TransferItem, DownloadInfo> activeRequests = new ConcurrentDictionary<TransferItem, DownloadInfo>();
 
-        public event EventHandler<int> TransferItemChanged;
-        public event EventHandler<Action> TransferListRefreshRequested;
+        // selected rows changed
+        public event EventHandler<IReadOnlyList<TransferItem>> TransferItemsChanged;
+        // blanket rebuild
+        public event EventHandler TransferListRefreshRequested;
 
         public DownloadService(IToaster toaster, IFileSystemService fileSystemService, ISessionService sessionService, IMainThreadRunner mainThreadRunner, Func<ISoulseekClient> soulseekClientFactory, ILoggerBackend logger, INetworkStatus networkStatus)
         {
@@ -290,7 +292,7 @@ namespace Seeker.Services
             if (Array.IndexOf(slots, SlotCancelledWhilePending) >= 0)
             {
                 // cancelled before we registered, the callback ran inline above
-                mainThreadRunner.RunOnUiThread(() => TransferListRefreshRequested?.Invoke(null, null!));
+                mainThreadRunner.RunOnUiThread(() => TransferListRefreshRequested?.Invoke(null, EventArgs.Empty));
             }
         }
 
@@ -367,7 +369,7 @@ namespace Seeker.Services
             if (anyUpdatedHere)
             {
                 TransferItemManager.MarkTransfersDirty();
-                mainThreadRunner.RunOnUiThread(() => TransferListRefreshRequested?.Invoke(null, null!));
+                mainThreadRunner.RunOnUiThread(() => TransferListRefreshRequested?.Invoke(null, EventArgs.Empty));
             }
         }
 
@@ -846,7 +848,7 @@ namespace Seeker.Services
                 {
                     MarkTransferItemFailed(item, failureKind);
                     TransferItemManager.MarkTransfersDirty();
-                    mainThreadRunner.RunOnUiThread(() => TransferListRefreshRequested?.Invoke(null, null!));
+                    mainThreadRunner.RunOnUiThread(() => TransferListRefreshRequested?.Invoke(null, EventArgs.Empty));
                 }
                 // before any retry below re-claims it
                 ReleaseClaim(e.dlInfo);
@@ -1224,10 +1226,9 @@ namespace Seeker.Services
 
         public void DownloadRetryAll(IEnumerable<TransferItem> transferItemConditionList)
         {
-            var TransferItemManagerDL = TransferItems.TransferItemManagerDL;
-            var ViewState = TransfersViewState.Instance;
+            var changed = transferItemConditionList.ToList();
             var dlInfos = new List<DownloadInfo>();
-            foreach (TransferItem item in transferItemConditionList)
+            foreach (TransferItem item in changed)
             {
                 var dlInfo = PrepareRetry(item, restartActive: false);
                 if (dlInfo != null)
@@ -1237,49 +1238,7 @@ namespace Seeker.Services
             }
             StartDownloadsFireAndForget(dlInfos);
 
-            var refreshOnlySelected = new Action(() =>
-            {
-                mainThreadRunner.RunOnUiThread(
-                    () =>
-                    {
-                        var uiState = ViewState.CreateDLUIState();
-                        HashSet<int> indicesToUpdate = new HashSet<int>();
-                        foreach (TransferItem ti in transferItemConditionList)
-                        {
-                            int pos = TransferItemManagerDL.GetUserIndexForTransferItem(ti, uiState);
-                            if (pos == -1)
-                            {
-                                logger.Debug("pos == -1!!");
-                                continue;
-                            }
-
-                            if (indicesToUpdate.Contains(pos))
-                            {
-                                logger.Debug($"skipping same pos {pos}");
-                            }
-                            else
-                            {
-                                indicesToUpdate.Add(pos);
-                            }
-                        }
-                        if (ViewState.InUploadsMode)
-                        {
-                            return;
-                        }
-                        foreach (int i in indicesToUpdate)
-                        {
-                            logger.Debug($"retry: refreshing transfer row {i}");
-                            TransferItemChanged?.Invoke(null, i);
-                        }
-
-
-
-                    });
-            });
-            lock (TransferItemManagerDL.GetUICurrentList(ViewState.CreateDLUIState())) //TODO: test
-            { //also can update this to do a partial refresh...
-                TransferListRefreshRequested?.Invoke(null, refreshOnlySelected);
-            }
+            mainThreadRunner.RunOnUiThread(() => TransferItemsChanged?.Invoke(null, changed));
         }
 
     }

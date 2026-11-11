@@ -67,13 +67,7 @@ namespace Seeker
 
         private static TransferUIState CreateUIState()
         {
-            var vs = TransfersViewState.Instance;
-            return new TransferUIState
-            {
-                GroupByFolder = vs.GroupByFolder,
-                CurrentlySelectedFolder = vs.GetCurrentlySelectedFolder(),
-                BatchSelectedItems = vs.BatchSelectedItems,
-            };
+            return TransfersViewState.Instance.CreateUIState();
         }
 
         public void CancelSelectedItems(bool prepareForClean)
@@ -174,17 +168,14 @@ namespace Seeker
             }
         }
 
-        public object GetUICurrentList()
+        public TransferItemManager GetManagerForCurrentMode()
         {
-            var uiState = CreateUIState();
-            if (TransfersViewState.Instance.InUploadsMode)
-            {
-                return Uploads.GetUICurrentList(uiState);
-            }
-            else
-            {
-                return Downloads.GetUICurrentList(uiState);
-            }
+            return TransfersViewState.Instance.InUploadsMode ? Uploads : Downloads;
+        }
+
+        public bool ContainsFolder(FolderItem fi)
+        {
+            return GetManagerForCurrentMode().ContainsFolder(fi);
         }
 
         public TransferItem GetTransferItemWithIndexFromAll(string fullFileName, string username, bool isUpload, out int indexOfItem)
@@ -196,36 +187,6 @@ namespace Seeker
             else
             {
                 return Downloads.GetTransferItemWithIndexFromAll(fullFileName, username, out indexOfItem);
-            }
-        }
-
-        public int GetUserIndexForTransferItem(TransferItem ti) //todo null ti
-        {
-            var uiState = CreateUIState();
-            if (TransfersViewState.Instance.InUploadsMode && ti.IsUpload())
-            {
-                return Uploads.GetUserIndexForTransferItem(ti, uiState);
-            }
-            else if (!TransfersViewState.Instance.InUploadsMode && !(ti.IsUpload()))
-            {
-                return Downloads.GetUserIndexForTransferItem(ti, uiState);
-            }
-            else
-            {
-                return -1; //this is okay. we arent on that page so ui events are irrelevant
-            }
-        }
-
-        public ITransferItem GetItemAtUserIndex(int position)
-        {
-            var uiState = CreateUIState();
-            if (TransfersViewState.Instance.InUploadsMode)
-            {
-                return Uploads.GetItemAtUserIndex(position, uiState);
-            }
-            else
-            {
-                return Downloads.GetItemAtUserIndex(position, uiState);
             }
         }
 
@@ -283,31 +244,6 @@ namespace Seeker
                 {
                     CleanupEntry(cleanupItems);
                 }
-            }
-        }
-
-        public int GetIndexForFolderItem(FolderItem folderItem)
-        {
-            if (TransfersViewState.Instance.InUploadsMode)
-            {
-                return Uploads.GetIndexForFolderItem(folderItem);
-            }
-            else
-            {
-                return Downloads.GetIndexForFolderItem(folderItem);
-            }
-        }
-
-        public int GetUserIndexForITransferItem(ITransferItem iti)
-        {
-            var uiState = CreateUIState();
-            if (TransfersViewState.Instance.InUploadsMode)
-            {
-                return Uploads.GetUserIndexForITransferItem(iti, uiState);
-            }
-            else
-            {
-                return Downloads.GetUserIndexForITransferItem(iti, uiState);
             }
         }
     }

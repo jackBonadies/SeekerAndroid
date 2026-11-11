@@ -8,6 +8,7 @@ using Seeker.Helpers;
 using Seeker.Search;
 using Soulseek;
 using System;
+using System.Collections.Generic;
 
 using Common;
 namespace Seeker
@@ -16,14 +17,8 @@ namespace Seeker
     {
         public class TransferAdapterRecyclerIndividualItem : TransferAdapterRecyclerVersion
         {
-            public TransferAdapterRecyclerIndividualItem(System.Collections.IList ti) : base(ti)
+            public TransferAdapterRecyclerIndividualItem(TransferItemManager source, TransferUIState uiState) : base(source, uiState)
             {
-                localDataSet = ti;
-            }
-
-            public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
-            {
-                (holder as TransferViewHolder).getTransferItemView().setItem(localDataSet[position] as TransferItem, this.IsInBatchSelectMode);
             }
 
             public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
@@ -50,14 +45,8 @@ namespace Seeker
 
         public class TransferAdapterRecyclerFolderItem : TransferAdapterRecyclerVersion
         {
-            public TransferAdapterRecyclerFolderItem(System.Collections.IList ti) : base(ti)
+            public TransferAdapterRecyclerFolderItem(TransferItemManager source, TransferUIState uiState) : base(source, uiState)
             {
-                localDataSet = ti;
-            }
-
-            public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
-            {
-                (holder as TransferViewHolder).getTransferItemView().setItem(localDataSet[position] as FolderItem, this.IsInBatchSelectMode);
             }
 
             public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
@@ -108,10 +97,18 @@ namespace Seeker
 
         }
 
-        public abstract class TransferAdapterRecyclerVersion : RecyclerView.Adapter //<TransferAdapterRecyclerVersion.TransferViewHolder>
+        // Shows the UI snapshot of the manager list (see TransferListSnapshot)
+        public abstract class TransferAdapterRecyclerVersion : RecyclerView.Adapter
         {
-            protected System.Collections.IList localDataSet;
-            public override int ItemCount => localDataSet.Count;
+            // underlying source list
+            private readonly TransferItemManager source;
+            private readonly TransferUIState uiState;
+            // ui list (cloned from source list)
+            private TransferListSnapshot snapshot;
+            // item -> the view currently bound to it (for progress updates)
+            private readonly Dictionary<ITransferItem, ITransferItemView> boundViews = new Dictionary<ITransferItem, ITransferItemView>();
+
+            public override int ItemCount => snapshot.Count;
             protected ITransferItem selectedItem = null;
             public bool IsInBatchSelectMode;
 
@@ -120,11 +117,88 @@ namespace Seeker
             public void SelectedDebugInfo(ITransferItem iti)
             {
 
-                int position = TransferItems.TransferItemManagerWrapped.GetUserIndexForITransferItem(iti);
-                Logger.Debug($"position: {position} ti name: {iti.GetFolderName()}");
+                int position = PositionOf(iti);
+                Logger.Debug($"position: {position} ti name: {iti?.GetFolderName()}");
 
             }
 #endif
+
+            public IReadOnlyList<ITransferItem> Items => snapshot.Items;
+
+            public ITransferItem GetItem(int position)
+            {
+                return snapshot.GetItem(position);
+            }
+
+            public int PositionOf(ITransferItem item)
+            {
+                return snapshot.IndexOf(item);
+            }
+
+            public void Rebuild()
+            {
+                snapshot = new TransferListSnapshot(source.GetUISnapshot(uiState));
+                NotifyDataSetChanged();
+            }
+
+            // for a removal the caller just made in the manager. the rest of the manager's changes wait for the next Rebuild
+            public bool RemoveRow(ITransferItem item)
+            {
+                int pos = PositionOf(item);
+                if (pos < 0)
+                {
+                    return false;
+                }
+                snapshot.RemoveAt(pos);
+                NotifyItemRemoved(pos);
+                return true;
+            }
+
+            public void NotifyRowChanged(ITransferItem item)
+            {
+                int pos = PositionOf(item);
+                if (pos >= 0)
+                {
+                    NotifyItemChanged(pos);
+                }
+            }
+
+            public ITransferItemView GetBoundView(ITransferItem item)
+            {
+                if (item != null && boundViews.TryGetValue(item, out ITransferItemView view))
+                {
+                    return view;
+                }
+                return null;
+            }
+
+            public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
+            {
+                ITransferItemView view = (holder as TransferViewHolder).getTransferItemView();
+                UnregisterBoundView(view);
+                ITransferItem item = snapshot.GetItem(position);
+                view.setItem(item, this.IsInBatchSelectMode);
+                boundViews[item] = view;
+            }
+
+            public override void OnViewRecycled(Java.Lang.Object holder)
+            {
+                if (holder is TransferViewHolder transferHolder)
+                {
+                    UnregisterBoundView(transferHolder.getTransferItemView());
+                }
+                base.OnViewRecycled(holder);
+            }
+
+            private void UnregisterBoundView(ITransferItemView view)
+            {
+                ITransferItem previous = view.InnerTransferItem;
+                // another holder may have been bound to that item since
+                if (previous != null && boundViews.TryGetValue(previous, out ITransferItemView current) && current == view)
+                {
+                    boundViews.Remove(previous);
+                }
+            }
 
             public void setSelectedItem(ITransferItem item)
             {
@@ -169,9 +243,11 @@ namespace Seeker
             protected readonly bool showSpeed = false;
             protected readonly bool showSizes = false;
             protected readonly bool showTimeRemaining = false;
-            public TransferAdapterRecyclerVersion(System.Collections.IList tranfersList)
+            public TransferAdapterRecyclerVersion(TransferItemManager source, TransferUIState uiState)
             {
-                localDataSet = tranfersList;
+                this.source = source;
+                this.uiState = uiState;
+                snapshot = new TransferListSnapshot(source.GetUISnapshot(uiState));
                 showSpeed = PreferencesState.TransferViewShowSpeed;
                 showSizes = PreferencesState.TransferViewShowSizes;
                 showTimeRemaining = PreferencesState.TransferViewShowTimeRemaining;

@@ -12,6 +12,8 @@ namespace Seeker
         public string FolderName; //this is always ex "Album Name" or for depth > 1 "GrandParent/Parent".  Display Folder name is reversed.
         public string Username;
         public List<TransferItem> TransferItems;
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public long LastProgressPostMs;
 
         public FolderItem(string folderName, string username, TransferItem initialTransferItem)
         {
@@ -347,6 +349,7 @@ namespace Seeker
             {
                 TransferItems.Add(ti);
             }
+            ti.Folder = this;
         }
     }
 }

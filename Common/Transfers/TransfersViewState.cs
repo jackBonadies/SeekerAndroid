@@ -21,6 +21,8 @@ namespace Seeker
         public FolderItem? CurrentlySelectedDLFolder;
         public FolderItem? CurrentlySelectedUploadFolder;
         public HashSet<ITransferItem> BatchSelectedItems = new HashSet<ITransferItem>();
+        // the row at the top of the folder UI list, to keep users position
+        public ITransferItem? ScrollAnchorBeforeMovingIntoFolder;
         public int ScrollPositionBeforeMovingIntoFolder = int.MinValue;
         public int ScrollOffsetBeforeMovingIntoFolder = int.MinValue;
 
@@ -35,6 +37,16 @@ namespace Seeker
                 return CurrentlySelectedUploadFolder;
             else
                 return CurrentlySelectedDLFolder;
+        }
+
+        public TransferUIState CreateUIState()
+        {
+            return new TransferUIState
+            {
+                GroupByFolder = GroupByFolder,
+                CurrentlySelectedFolder = GetCurrentlySelectedFolder(),
+                BatchSelectedItems = BatchSelectedItems,
+            };
         }
 
         public TransferUIState CreateDLUIState()
@@ -53,6 +65,7 @@ namespace Seeker
             CurrentlySelectedDLFolder = null;
             CurrentlySelectedUploadFolder = null;
             BatchSelectedItems.Clear();
+            ScrollAnchorBeforeMovingIntoFolder = null;
             ScrollPositionBeforeMovingIntoFolder = int.MinValue;
             ScrollOffsetBeforeMovingIntoFolder = int.MinValue;
         }

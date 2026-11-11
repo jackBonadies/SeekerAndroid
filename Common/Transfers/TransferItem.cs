@@ -42,6 +42,10 @@ namespace Seeker
         public bool InProcessing = false; //whether its currently a task in Soulseek.Net.  so from Intialized / Queued to the end of the main download continuation task...
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public CancellationTokenSource CancellationTokenSource = null;
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public FolderItem Folder;
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public long LastProgressPostMs;
 
         public int QueueLength
         {
@@ -122,11 +126,6 @@ namespace Seeker
         public bool ShouldEncodeFileLatin1()
         {
             return WasFilenameLatin1Decoded;
-        }
-
-        public string GetThrottleKey()
-        {
-            return Username + " : " + FullFilename;
         }
 
         /// <summary>

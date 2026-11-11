@@ -8,20 +8,13 @@ using System;
 
 namespace Seeker.Transfers
 {
-    public class ItemRemovedEventArgs : EventArgs
-    {
-        public TransferItem Item;
-        // Pre-computed via GetUserIndexForTransferItem on the active tab. -1 if the item
-        // belongs to the other tab (downloads vs uploads) or otherwise isn't visible.
-        public int UserIndex;
-    }
-
     // Perform UI Agnostic Actions before routing to UI specific event handlers.
     internal static class TransferEventRouter
     {
         public static EventHandler<TransferItem> StateChangedForItem;
         public static EventHandler<ProgressUpdatedUIEventArgs> ProgressUpdated;
-        public static EventHandler<ItemRemovedEventArgs> ItemRemoved;
+        // raised on the UI thread, after the item was removed from its manager
+        public static EventHandler<TransferItem> ItemRemoved;
 
         public static void Wire(ISoulseekClient client)
         {
@@ -179,23 +172,13 @@ namespace Seeker.Transfers
                         (isUpload && PreferencesState.AutoClearCompleteUploads);
                     if (shouldAutoClear)
                     {
-                        // Pre-compute the on-screen position BEFORE removal; after Remove,
-                        // GetUserIndexForTransferItem can't find it.
-                        int idx = TransferItems.TransferItemManagerWrapped.GetUserIndexForTransferItem(relevantItem);
-                        Action action = () =>
+                        // on the UI thread so the list can drop the row in the same message
+                        SeekerApplication.RunOnUIThread(() =>
                         {
                             TransferItems.TransferItemManagerWrapped.Remove(relevantItem);
                             TransfersFragment.UpdateBatchSelectedItemsIfApplicable(relevantItem);
-                            ItemRemoved?.Invoke(null, new ItemRemovedEventArgs { Item = relevantItem, UserIndex = idx });
-                        };
-                        if (SeekerState.ActiveActivityRef != null)
-                        {
-                            SeekerState.ActiveActivityRef.RunOnUiThread(action);
-                        }
-                        else
-                        {
-                            action();
-                        }
+                            ItemRemoved?.Invoke(null, relevantItem);
+                        });
                     }
                 }
             }
