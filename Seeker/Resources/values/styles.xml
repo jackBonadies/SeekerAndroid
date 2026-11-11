@@ -165,6 +165,7 @@
     <style name="Widget.Seeker.BottomNavigation.Badge" parent="Widget.Material3.BottomNavigation.Badge">
         <item name="badgeWidth">@dimen/nav_badge_dot_size</item>
         <item name="badgeHeight">@dimen/nav_badge_dot_size</item>
+        <item name="verticalOffset">@dimen/nav_badge_dot_vertical_offset</item>
     </style>
 
     <!--<style name="Widget.App.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
