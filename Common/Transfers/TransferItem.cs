@@ -46,6 +46,9 @@ namespace Seeker
         public FolderItem Folder;
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public long LastProgressPostMs;
+        // date added order
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public long Seq;
 
         public int QueueLength
         {

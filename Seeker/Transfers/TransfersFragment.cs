@@ -222,6 +222,12 @@ namespace Seeker
                     PreferencesManager.SaveTransferViewGroupByFolder();
                     SetRecyclerAdapter();
                     return true;
+                case Resource.Id.action_sort:
+                    if (ChildFragmentManager.FindFragmentByTag(TransferSortBottomSheet.TAG) == null)
+                    {
+                        new TransferSortBottomSheet().Show(ChildFragmentManager, TransferSortBottomSheet.TAG);
+                    }
+                    return true;
                 case Resource.Id.action_show_size:
                     PreferencesState.TransferViewShowSizes = !PreferencesState.TransferViewShowSizes;
                     PreferencesManager.SaveTransferViewShowSizes();
@@ -539,6 +545,16 @@ namespace Seeker
             {
                 ((LinearLayoutManager)recycleLayoutManager).ScrollToPositionWithOffset(prevScrollPos, scrollOffset);
             }
+        }
+
+        public void OnSortChanged()
+        {
+            if (rootView == null)
+            {
+                return;
+            }
+            SetRecyclerAdapter();
+            recycleLayoutManager.ScrollToPosition(0);
         }
 
         // Re-reads the manager into the adapter (i.e. recreating the snapshot)

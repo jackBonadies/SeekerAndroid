@@ -265,6 +265,18 @@ namespace Seeker
         // A copy of what the transfers list shows for uiState, in display order.
         public List<ITransferItem> GetUISnapshot(TransferUIState uiState)
         {
+            bool reverse = uiState.SortKey == TransferSortKey.DateAdded && uiState.SortDescending;
+            List<ITransferItem> snapshot = CopyUIList(uiState, reverse);
+            // performance: the source list is already sorted by added, so we can skip the sort
+            if (uiState.SortKey != TransferSortKey.DateAdded)
+            {
+                TransferSort.Sort(snapshot, uiState.SortKey, uiState.SortDescending);
+            }
+            return snapshot;
+        }
+
+        private List<ITransferItem> CopyUIList(TransferUIState uiState, bool reverse)
+        {
             if (uiState.GroupByFolder)
             {
                 if (uiState.CurrentlySelectedFolder != null)
@@ -272,26 +284,36 @@ namespace Seeker
                     var folderItems = uiState.CurrentlySelectedFolder.TransferItems;
                     lock (folderItems)
                     {
-                        return CopyToSnapshot(folderItems);
+                        return CopyToSnapshot(folderItems, reverse);
                     }
                 }
                 lock (AllFolderItems)
                 {
-                    return CopyToSnapshot(AllFolderItems);
+                    return CopyToSnapshot(AllFolderItems, reverse);
                 }
             }
             lock (AllTransferItems)
             {
-                return CopyToSnapshot(AllTransferItems);
+                return CopyToSnapshot(AllTransferItems, reverse);
             }
         }
 
-        private static List<ITransferItem> CopyToSnapshot<T>(List<T> source) where T : class, ITransferItem
+        private static List<ITransferItem> CopyToSnapshot<T>(List<T> source, bool reverse) where T : class, ITransferItem
         {
             var copy = new List<ITransferItem>(source.Count);
-            for (int i = 0; i < source.Count; i++)
+            if (reverse)
             {
-                copy.Add(source[i]);
+                for (int i = source.Count - 1; i >= 0; i--)
+                {
+                    copy.Add(source[i]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < source.Count; i++)
+                {
+                    copy.Add(source[i]);
+                }
             }
             return copy;
         }
@@ -465,18 +487,21 @@ namespace Seeker
         {
             lock (AllTransferItems)
             {
+                ti.Seq = TransferSort.NextSeq();
                 AllTransferItems.Add(ti);
-            }
-            lock (AllFolderItems)
-            {
-                var matchingFolder = GetMatchingFolder(ti);
-                if (matchingFolder == null)
+                lock (AllFolderItems)
                 {
-                    AllFolderItems.Add(new FolderItem(ti.FolderName, ti.Username, ti));
-                }
-                else
-                {
-                    matchingFolder.Add(ti);
+                    var matchingFolder = GetMatchingFolder(ti);
+                    if (matchingFolder == null)
+                    {
+                        var folder = new FolderItem(ti.FolderName, ti.Username, ti);
+                        folder.Seq = TransferSort.NextSeq();
+                        AllFolderItems.Add(folder);
+                    }
+                    else
+                    {
+                        matchingFolder.Add(ti);
+                    }
                 }
             }
             MarkTransfersDirty();

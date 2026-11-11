@@ -57,6 +57,9 @@ namespace Seeker
             PreferencesState.TransferViewShowSpeed = prefs.GetBoolean(KeyConsts.M_TransfersShowSpeed, true);
             PreferencesState.TransferViewShowTimeRemaining = prefs.GetBoolean(KeyConsts.M_TransfersShowTimeRemaining, true);
             PreferencesState.TransferViewGroupByFolder = prefs.GetBoolean(KeyConsts.M_TransfersGroupByFolder, true);
+            var sortKey = (TransferSortKey)prefs.GetInt(KeyConsts.M_TransfersSortKey, (int)TransferSortKey.DateAdded);
+            PreferencesState.TransferViewSortKey = Enum.IsDefined(typeof(TransferSortKey), sortKey) ? sortKey : TransferSortKey.DateAdded;
+            PreferencesState.TransferViewSortDescending = prefs.GetBoolean(KeyConsts.M_TransfersSortDescending, true); // default is newest transfers first
             PreferencesState.TransferViewInUploadsMode = prefs.GetBoolean(KeyConsts.M_TransfersInUploadsMode, false);
             PreferencesState.DisableDownloadToastNotification = prefs.GetBoolean(KeyConsts.M_DisableToastNotifications, true);
             PreferencesState.MemoryBackedDownload = prefs.GetBoolean(KeyConsts.M_MemoryBackedDownload, false);
@@ -251,6 +254,17 @@ namespace Seeker
             {
                 var editor = SeekerState.SharedPreferences.Edit();
                 editor.PutBoolean(KeyConsts.M_TransfersGroupByFolder, PreferencesState.TransferViewGroupByFolder);
+                editor.Apply();
+            }
+        }
+
+        public static void SaveTransferViewSort()
+        {
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                editor.PutInt(KeyConsts.M_TransfersSortKey, (int)PreferencesState.TransferViewSortKey);
+                editor.PutBoolean(KeyConsts.M_TransfersSortDescending, PreferencesState.TransferViewSortDescending);
                 editor.Apply();
             }
         }

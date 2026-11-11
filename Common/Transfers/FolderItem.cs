@@ -14,6 +14,9 @@ namespace Seeker
         public List<TransferItem> TransferItems;
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public long LastProgressPostMs;
+        // creation order
+        [System.Xml.Serialization.XmlIgnoreAttribute]
+        public long Seq;
 
         public FolderItem(string folderName, string username, TransferItem initialTransferItem)
         {

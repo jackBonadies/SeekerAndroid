@@ -18,6 +18,18 @@ namespace Seeker
             get => PreferencesState.TransferViewInUploadsMode;
             set => PreferencesState.TransferViewInUploadsMode = value;
         }
+        public TransferSortKey SortKey
+        {
+            get => PreferencesState.TransferViewSortKey;
+            set => PreferencesState.TransferViewSortKey = value;
+        }
+
+        public bool SortDescending
+        {
+            get => PreferencesState.TransferViewSortDescending;
+            set => PreferencesState.TransferViewSortDescending = value;
+        }
+
         public FolderItem? CurrentlySelectedDLFolder;
         public FolderItem? CurrentlySelectedUploadFolder;
         public HashSet<ITransferItem> BatchSelectedItems = new HashSet<ITransferItem>();
@@ -46,6 +58,8 @@ namespace Seeker
                 GroupByFolder = GroupByFolder,
                 CurrentlySelectedFolder = GetCurrentlySelectedFolder(),
                 BatchSelectedItems = BatchSelectedItems,
+                SortKey = SortKey,
+                SortDescending = SortDescending,
             };
         }
 
@@ -56,6 +70,8 @@ namespace Seeker
                 GroupByFolder = GroupByFolder,
                 CurrentlySelectedFolder = CurrentlySelectedDLFolder,
                 BatchSelectedItems = BatchSelectedItems,
+                SortKey = SortKey,
+                SortDescending = SortDescending,
             };
         }
 

@@ -7,5 +7,7 @@ namespace Seeker
         public bool GroupByFolder;
         public FolderItem? CurrentlySelectedFolder;
         public HashSet<ITransferItem>? BatchSelectedItems;
+        public TransferSortKey SortKey;
+        public bool SortDescending;
     }
 }

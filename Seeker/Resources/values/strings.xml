@@ -676,6 +676,12 @@
     <string name="takes_effect_on_next_startup">This will take effect on next startup</string>
 
     <string name="sort_results_by">Sort by</string>
+    <string name="sort">Sort</string>
+    <string name="sort_date_added">Date added</string>
+    <string name="sort_folder_name">Folder name</string>
+    <string name="sort_user">User</string>
+    <string name="sort_ascending">Ascending</string>
+    <string name="sort_descending">Descending</string>
 
     <string name="next">Next</string>
     <string name="prev">Prev</string>
