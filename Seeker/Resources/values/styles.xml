@@ -158,6 +158,15 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.Material3.Light" />
 
+    <style name="ThemeOverlay.Seeker.BottomNavigationView" parent="ThemeOverlay.Material3.BottomNavigationView">
+        <item name="badgeStyle">@style/Widget.Seeker.BottomNavigation.Badge</item>
+    </style>
+
+    <style name="Widget.Seeker.BottomNavigation.Badge" parent="Widget.Material3.BottomNavigation.Badge">
+        <item name="badgeWidth">@dimen/nav_badge_dot_size</item>
+        <item name="badgeHeight">@dimen/nav_badge_dot_size</item>
+    </style>
+
     <!--<style name="Widget.App.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
     <item name="materialThemeOverlay">@style/ThemeOverlay.App.BottomNavigationView</item>
   </style>
