@@ -36,6 +36,7 @@ namespace Seeker
             public string Secondary;
             public string Tertiary;
             public long Seq;
+            public long FolderSeq;
             public ITransferItem Item;
         }
 
@@ -55,7 +56,16 @@ namespace Seeker
             int direction = descending ? -1 : 1;
             if (key == TransferSortKey.DateAdded)
             {
-                Array.Sort(entries, (a, b) => a.Seq.CompareTo(b.Seq) * direction);
+                // files are grouped by their folder's date added, oldest first within it
+                Array.Sort(entries, (a, b) =>
+                {
+                    int c = a.FolderSeq.CompareTo(b.FolderSeq);
+                    if (c != 0)
+                    {
+                        return c * direction;
+                    }
+                    return a.Seq.CompareTo(b.Seq);
+                });
             }
             else
             {
@@ -93,6 +103,7 @@ namespace Seeker
             var entry = new Entry { Item = item, Seq = GetSeq(item), Primary = string.Empty, Secondary = string.Empty, Tertiary = string.Empty };
             if (key == TransferSortKey.DateAdded)
             {
+                entry.FolderSeq = (item as TransferItem)?.Folder?.Seq ?? entry.Seq;
                 return entry;
             }
             if (item is FolderItem fi)

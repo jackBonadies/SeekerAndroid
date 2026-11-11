@@ -265,10 +265,14 @@ namespace Seeker
         // A copy of what the transfers list shows for uiState, in display order.
         public List<ITransferItem> GetUISnapshot(TransferUIState uiState)
         {
-            bool reverse = uiState.SortKey == TransferSortKey.DateAdded && uiState.SortDescending;
+            // inside a folder date added is always oldest first (track order)
+            bool insideFolder = uiState.GroupByFolder && uiState.CurrentlySelectedFolder != null;
+            // performance: grouped lists are already in date added order, so we can skip the sort.
+            // the flat list is not, since it groups files by folder.
+            bool fastPath = uiState.SortKey == TransferSortKey.DateAdded && uiState.GroupByFolder;
+            bool reverse = fastPath && uiState.SortDescending && !insideFolder;
             List<ITransferItem> snapshot = CopyUIList(uiState, reverse);
-            // performance: the source list is already sorted by added, so we can skip the sort
-            if (uiState.SortKey != TransferSortKey.DateAdded)
+            if (!fastPath)
             {
                 TransferSort.Sort(snapshot, uiState.SortKey, uiState.SortDescending);
             }
