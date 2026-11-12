@@ -113,7 +113,7 @@ namespace Common
         public static bool TransferViewShowTimeRemaining = false;
         public static bool TransferViewGroupByFolder = false;
         public static TransferSortKey TransferViewSortKey = TransferSortKey.DateAdded;
-        public static bool TransferViewSortDescending = false;
+        public static bool TransferViewSortDescending = true;
         public static volatile bool TransferViewInUploadsMode = false;
         public static bool AutoRetryBackOnline = true;
         public static bool NoSubfolderForSingle = false;
