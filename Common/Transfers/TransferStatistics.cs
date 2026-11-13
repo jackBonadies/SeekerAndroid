@@ -1,4 +1,7 @@
+using Seeker;
+using Soulseek;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Common.Transfers
@@ -60,6 +63,32 @@ namespace Common.Transfers
                     Interlocked.Increment(ref completedDownloads);
                 }
             }
+        }
+
+        // first init: start from the succeeded rows still in the transfer lists (TODO: can remove this once TransferStats version is widely adopted)
+        public static TransferStatisticsSnapshot CreateSeed(IEnumerable<TransferItem> downloads, IEnumerable<TransferItem> uploads, DateTime utcNow)
+        {
+            long completedDownloads = 0;
+            long downloadedBytes = 0;
+            long completedUploads = 0;
+            long uploadedBytes = 0;
+            foreach (var item in downloads)
+            {
+                if (item.State.HasFlag(TransferStates.Succeeded))
+                {
+                    completedDownloads++;
+                    downloadedBytes += Math.Max(0, item.Size);
+                }
+            }
+            foreach (var item in uploads)
+            {
+                if (item.State.HasFlag(TransferStates.Succeeded))
+                {
+                    completedUploads++;
+                    uploadedBytes += Math.Max(0, item.Size);
+                }
+            }
+            return new TransferStatisticsSnapshot(completedDownloads, downloadedBytes, completedUploads, uploadedBytes, utcNow.Ticks);
         }
 
         public void Reset(DateTime utcNow)

@@ -1042,8 +1042,8 @@ namespace Seeker
             long since = prefs.GetLong(KeyConsts.M_StatsSinceUtcTicks, 0);
             if (since == 0)
             {
-                // no transfer stats saved yet
-                ResetTransferStatistics();
+                // no transfer stats saved yet - must run after the transfer lists are restored (due to seeding)
+                SeedTransferStatistics();
                 return;
             }
             TransferStatistics.Instance.Restore(new TransferStatisticsSnapshot(
@@ -1054,9 +1054,34 @@ namespace Seeker
                 since));
         }
 
+        private static void SeedTransferStatistics()
+        {
+            List<TransferItem> downloads = SnapshotTransferItems(TransferItems.TransferItemManagerDL);
+            List<TransferItem> uploads = SnapshotTransferItems(TransferItems.TransferItemManagerUploads);
+            TransferStatistics.Instance.Restore(TransferStatistics.CreateSeed(downloads, uploads, DateTime.UtcNow));
+            SaveTransferStatistics();
+        }
+
+        private static List<TransferItem> SnapshotTransferItems(TransferItemManager manager)
+        {
+            if (manager?.AllTransferItems == null)
+            {
+                return new List<TransferItem>();
+            }
+            lock (manager.AllTransferItems)
+            {
+                return new List<TransferItem>(manager.AllTransferItems);
+            }
+        }
+
         public static void ResetTransferStatistics()
         {
             TransferStatistics.Instance.Reset(DateTime.UtcNow);
+            SaveTransferStatistics();
+        }
+
+        private static void SaveTransferStatistics()
+        {
             lock (SharedPrefLock)
             {
                 var editor = SeekerState.SharedPreferences.Edit();
