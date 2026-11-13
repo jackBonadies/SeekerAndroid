@@ -65,6 +65,11 @@ namespace Common
         public const string M_TransfersInUploadsMode = "Momento_TransfersInUploadsMode";
         public const string M_TransfersSortKey = "Momento_TransfersSortKey";
         public const string M_TransfersSortDescending = "Momento_TransfersSortDescending";
+        public const string M_StatsCompletedDownloads = "Momento_StatsCompletedDownloads";
+        public const string M_StatsDownloadedBytes = "Momento_StatsDownloadedBytes";
+        public const string M_StatsCompletedUploads = "Momento_StatsCompletedUploads";
+        public const string M_StatsUploadedBytes = "Momento_StatsUploadedBytes";
+        public const string M_StatsSinceUtcTicks = "Momento_StatsSinceUtcTicks";
         public const string M_DisableToastNotifications = "Momento_DisableToastNotifications";
         public const string M_MemoryBackedDownload = "Momento_MemoryBackedDownload";
         public const string M_FilterSticky = "Momento_FilterSticky";

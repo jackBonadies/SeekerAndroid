@@ -1,6 +1,7 @@
 using Android.Content;
 using Common;
 using Common.Messages;
+using Common.Transfers;
 using System;
 using System.Collections.Generic;
 
@@ -1023,6 +1024,8 @@ namespace Seeker
                     var editor = SeekerState.SharedPreferences.Edit();
                     editor.PutString(KeyConsts.M_TransferList, downloads);
                     editor.PutString(KeyConsts.M_TransferListUpload, uploads);
+                    // stats only change when transfer state does, so we bundle them in this write
+                    PutTransferStatistics(editor, TransferStatistics.Instance.GetSnapshot());
                     if (commit)
                     {
                         editor.Commit();
@@ -1032,6 +1035,43 @@ namespace Seeker
                         editor.Apply();
                     }
                 }
+        }
+
+        public static void RestoreTransferStatistics(ISharedPreferences prefs)
+        {
+            long since = prefs.GetLong(KeyConsts.M_StatsSinceUtcTicks, 0);
+            if (since == 0)
+            {
+                // no transfer stats saved yet
+                ResetTransferStatistics();
+                return;
+            }
+            TransferStatistics.Instance.Restore(new TransferStatisticsSnapshot(
+                prefs.GetLong(KeyConsts.M_StatsCompletedDownloads, 0),
+                prefs.GetLong(KeyConsts.M_StatsDownloadedBytes, 0),
+                prefs.GetLong(KeyConsts.M_StatsCompletedUploads, 0),
+                prefs.GetLong(KeyConsts.M_StatsUploadedBytes, 0),
+                since));
+        }
+
+        public static void ResetTransferStatistics()
+        {
+            TransferStatistics.Instance.Reset(DateTime.UtcNow);
+            lock (SharedPrefLock)
+            {
+                var editor = SeekerState.SharedPreferences.Edit();
+                PutTransferStatistics(editor, TransferStatistics.Instance.GetSnapshot());
+                editor.Apply();
+            }
+        }
+
+        private static void PutTransferStatistics(ISharedPreferencesEditor editor, TransferStatisticsSnapshot stats)
+        {
+            editor.PutLong(KeyConsts.M_StatsCompletedDownloads, stats.CompletedDownloads);
+            editor.PutLong(KeyConsts.M_StatsDownloadedBytes, stats.DownloadedBytes);
+            editor.PutLong(KeyConsts.M_StatsCompletedUploads, stats.CompletedUploads);
+            editor.PutLong(KeyConsts.M_StatsUploadedBytes, stats.UploadedBytes);
+            editor.PutLong(KeyConsts.M_StatsSinceUtcTicks, stats.SinceUtcTicks);
         }
 
         /// <summary>
