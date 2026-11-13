@@ -46,7 +46,7 @@ namespace Seeker
             root.FindViewById<TextView>(Resource.Id.statsUploadSize).Text = SimpleHelpers.GetHumanReadableSize(stats.UploadedBytes);
         }
 
-        // java medium date ("Mar 3, 2025") so the field order follows the locale
+        // locale specific formatter
         private static string FormatSince(long sinceUtcTicks)
         {
             var utc = new DateTime(sinceUtcTicks, DateTimeKind.Utc);

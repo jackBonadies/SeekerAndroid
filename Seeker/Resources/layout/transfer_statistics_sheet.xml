@@ -55,13 +55,13 @@
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:src="@drawable/arrow_down"
+            android:src="@drawable/download_tray_24"
             app:tint="?attr/mainTextColor" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="6dp"
             android:text="@string/Downloads"
             android:textSize="16sp"
             android:textStyle="bold"
@@ -138,13 +138,13 @@
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:src="@drawable/arrow_up"
+            android:src="@drawable/upload_tray_24"
             app:tint="?attr/mainTextColor" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="6dp"
             android:text="@string/Uploads"
             android:textSize="16sp"
             android:textStyle="bold"
