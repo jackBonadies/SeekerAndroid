@@ -49,6 +49,7 @@ namespace Seeker.Transfers
             }
             else if (e.Transfer.State.HasFlag(TransferStates.Completed) && !e.PreviousState.HasFlag(TransferStates.Completed))
             {
+                Common.Transfers.TransferStatistics.Instance.RecordFinished(isUpload, e.Transfer.State.HasFlag(TransferStates.Succeeded), e.Transfer.BytesTransferred, e.Transfer.StartOffset);
                 TransferItemManager.MarkTransfersDirty();
                 if (isUpload)
                 {

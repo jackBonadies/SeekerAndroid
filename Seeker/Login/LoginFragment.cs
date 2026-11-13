@@ -277,6 +277,7 @@ namespace Seeker
                 intent.PutExtra(SettingsActivity.SCROLL_TO_SHARING_SECTION_STRING, SettingsActivity.SCROLL_TO_SHARING_SECTION);
                 SeekerState.MainActivityRef.StartActivityForResult(intent, 140);
             };
+            rootView.FindViewById<View>(Resource.Id.menuTransferStatistics).Click += (s, e) => TransferStatisticsBottomSheet.Show(ChildFragmentManager);
             menuSettings.Click += Settings_Click;
             menuLogout.Click += LogoutClick;
         }

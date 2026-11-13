@@ -1006,5 +1006,13 @@
     <string name="keywords_force_filesystem">storage permission</string>
     <string name="keywords_edit_user_info">profile bio</string>
     <string name="keywords_restore_defaults">reset factory</string>
+    <string name="transfer_statistics">Transfer statistics</string>
+    <string name="transfer_statistics_since">Since {0}</string>
+    <string name="stats_files">Files</string>
+    <string name="stats_total_size">Total size</string>
+    <string name="reset_statistics">Reset statistics</string>
+    <string name="reset_statistics_confirm_title">Reset transfer statistics?</string>
+    <string name="reset_statistics_confirm_message">All download and upload totals will be set to zero. This cannot be undone.</string>
+    <string name="reset">Reset</string>
 
 </resources>

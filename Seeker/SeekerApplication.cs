@@ -1016,6 +1016,7 @@ namespace Seeker
                 {
                     TransferPersistenceWrapper.RestoreDownloadTransferItems(sharedPreferences);
                     TransferPersistenceWrapper.RestoreUploadTransferItems(sharedPreferences);
+                    PreferencesManager.RestoreTransferStatistics(sharedPreferences);
                     TransferItems.TransferItemManagerWrapped = new TransferItemManagerWrapper(TransferItems.TransferItemManagerUploads, TransferItems.TransferItemManagerDL, TransferCleanup.PerformCleanupItem);
                 }
             }
