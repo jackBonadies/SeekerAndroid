@@ -211,7 +211,15 @@ namespace Seeker.Services
             transferItem.CancellationTokenSource = cts;
             transferItem.Size = ourFile.Length();
             transferItem.isUpload = true;
+            // the peer's request is an upload's "add"
+            long requestStamp = TransferBands.NextStamp();
+            transferItem.MarkUserAction(requestStamp);
             transferItem = TransferItems.TransferItemManagerUploads.AddIfNotExistAndReturnTransfer(transferItem, out bool exists);
+            if (exists && !TransferBands.IsActive(transferItem))
+            {
+                // a re-request of a finished or aborted upload (an active one is rejected as a duplicate)
+                transferItem.MarkUserAction(requestStamp);
+            }
 
             if (!exists) //else the state will simply be updated a bit later.
             {

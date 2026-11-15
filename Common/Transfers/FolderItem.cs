@@ -312,46 +312,26 @@ namespace Seeker
             }
         }
 
-        private TransferBand cachedBand = TransferBand.Unset;
-        private long cachedBandStamp;
-
-        // band of the folder (best of its files) and when the folder entered it.
-        //   only move the actual stamp (time) when the whole folder moves. a file 
-        //   finishing or being retried inside an active folder does not change things.
+        // band of the folder (best of its files) and the last user action on any of its files
         public TransferBand GetBand(out long stamp)
         {
             lock (TransferItems)
             {
-                TransferBand band = TransferBand.Unset;
-                long newestActive = 0;
-                long newestAny = 0;
+                TransferBand band = TransferBand.Completed;
+                bool any = false;
+                stamp = 0;
                 foreach (TransferItem ti in TransferItems)
                 {
+                    any = true;
                     TransferBand fileBand = TransferBands.Of(ti.State);
-                    long fileStamp = System.Threading.Interlocked.Read(ref ti.BandStamp);
-                    newestAny = Math.Max(newestAny, fileStamp);
-                    if (fileBand == TransferBand.Active)
-                    {
-                        newestActive = Math.Max(newestActive, fileStamp);
-                    }
                     if (fileBand < band)
                     {
                         band = fileBand;
                     }
+                    stamp = Math.Max(stamp, System.Threading.Interlocked.Read(ref ti.LastActionStamp));
                 }
-                if (band == TransferBand.Unset)
-                {
-                    band = TransferBand.Paused;
-                }
-                // only update timestamp if the band actually changed
-                if (band != cachedBand)
-                {
-                    cachedBand = band;
-                    // leaving active is the newest thing that happened to any file
-                    cachedBandStamp = band == TransferBand.Active ? newestActive : newestAny;
-                }
-                stamp = cachedBandStamp;
-                return band;
+                // empty while it is being cleared
+                return any ? band : TransferBand.Paused;
             }
         }
 

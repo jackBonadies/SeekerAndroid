@@ -143,18 +143,18 @@ namespace Seeker
 
             private TransferListSnapshot CreateSnapshot()
             {
-                // bandkeys is a dict to detect when sort keys change (since unlike Alphabetical and DateAdded,
-                //   TransferState can change even if no new transfers are added / removed)
-                Dictionary<ITransferItem, TransferBandKey> bandKeys = uiState.SortKey == TransferSortKey.State
+                // sortKeys is a dict to detect when sort keys change (since unlike Alphabetical and DateAdded,
+                //   a row's state and last action can change even if no new transfers are added / removed)
+                Dictionary<ITransferItem, TransferBandKey> sortKeys = TransferSort.IsMutable(uiState.SortKey)
                     ? new Dictionary<ITransferItem, TransferBandKey>()
                     : null;
-                return new TransferListSnapshot(source.GetUISnapshot(uiState, bandKeys), bandKeys);
+                return new TransferListSnapshot(source.GetUISnapshot(uiState, sortKeys), sortKeys, uiState.SortKey);
             }
 
-            // the row changed band since the list was sorted. false if row does not exist in this view.
+            // the row's sort key changed since the list was sorted. false if row does not exist in this view.
             public bool NeedsResort(ITransferItem row)
             {
-                return snapshot.HasBandChanged(row);
+                return snapshot.HasSortKeyChanged(row);
             }
 
             // for a removal the caller just made in the manager. the rest of the manager's changes wait for the next Rebuild

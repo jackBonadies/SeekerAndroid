@@ -548,6 +548,7 @@ namespace Seeker
         private static readonly SortSheetOption[] TransferSortOptions =
         {
             new SortSheetOption((int)TransferSortKey.DateAdded, Resource.String.sort_date_added, hasDirection: true, defaultDescending: true),
+            new SortSheetOption((int)TransferSortKey.LastAction, Resource.String.sort_last_action, hasDirection: true, defaultDescending: true),
             new SortSheetOption((int)TransferSortKey.State, Resource.String.sort_state, hasDirection: true, defaultDescending: false),
             new SortSheetOption((int)TransferSortKey.FolderName, Resource.String.sort_folder_name, hasDirection: true, defaultDescending: false),
             new SortSheetOption((int)TransferSortKey.User, Resource.String.sort_user, hasDirection: true, defaultDescending: false),
@@ -611,9 +612,10 @@ namespace Seeker
             rebuildHandler.PostDelayed(rebuild, REBUILD_COALESCE_MS);
         }
 
-        private void ScheduleRebuildIfSortedByState()
+        // after a user action, which changes the rows' last action and (for pending rows) their state at once
+        public void ScheduleRebuildIfMutableSort()
         {
-            if (ViewState.SortKey == TransferSortKey.State)
+            if (TransferSort.IsMutable(ViewState.SortKey))
             {
                 ScheduleRebuild();
             }
@@ -996,8 +998,7 @@ namespace Seeker
                     case TransferContextMenuItem.PauseFolderOrAbortUploads: //pause folder or abort uploads (uploads)
                         TransferItems.TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
                         recyclerTransferAdapter.RepaintRow(ti);
-                        // rows that were only pending are paused already and may have moved the folder to another band
-                        ScheduleRebuildIfSortedByState();
+                        ScheduleRebuildIfMutableSort();
                         break;
                     case TransferContextMenuItem.RetryFailedFiles: //retry failed downloads from folder
                         if (NotLoggedInShowMessageGaurd("retry folder"))
@@ -1010,16 +1011,17 @@ namespace Seeker
                     case TransferContextMenuItem.AbortUpload: //abort upload
                         Logger.InfoFirebase("Abort Upload item pressed");
                         TransferItem uploadToCancel = ti as TransferItem;
+                        uploadToCancel.MarkUserPause(TransferBands.NextStamp());
                         TransferState.CancelAndRemoveToken(uploadToCancel);
                         RepaintTransferRow(uploadToCancel);
                         break;
                     case TransferContextMenuItem.IgnoreUnshareUser: //ignore (unshare) user
                         Logger.InfoFirebase("Unshare User item pressed");
                         IEnumerable<TransferItem> tItems = TransferItems.TransferItemManagerWrapped.GetTransferItemsForUser(ti.GetUsername());
-                        long ignoreBandStamp = TransferBands.NextStamp();
+                        long ignoreStamp = TransferBands.NextStamp();
                         foreach (var tiToCancel in tItems)
                         {
-                            tiToCancel.HintBandStamp(ignoreBandStamp, onlyIfActive: true);
+                            tiToCancel.MarkUserPause(ignoreStamp);
                             TransferState.CancelAndRemoveToken(tiToCancel);
                         }
                         RepaintTransferRows(tItems);

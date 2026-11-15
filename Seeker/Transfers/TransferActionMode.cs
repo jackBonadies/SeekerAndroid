@@ -112,6 +112,7 @@ namespace Seeker
                     case Resource.Id.pause_selected_batch:
                         TransferItems.TransferItemManagerWrapped.CancelSelectedItems(false);
                         NotifyChangedAndClear(Adapter);
+                        Frag.ScheduleRebuildIfMutableSort();
                         //since all selected stuff is going away. its what Gmail action mode does.
                         mode.Finish();
                         break;

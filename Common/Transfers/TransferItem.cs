@@ -17,10 +17,10 @@ namespace Seeker
         public int Progress;
         public long BytesTransferred;
         public bool Failed;
-        private TransferStates state;
-        // when the row entered its current band (i.e. was last meaningfully "touched", TransferBands.NextStamp)
-        // 0 for rows saved before this existed
-        public long BandStamp;
+        public TransferStates State;
+        // when the user last added, paused, resumed or retried this row (TransferBands.NextStamp). library
+        //   outcomes (completed, failed, auto retry) do not count. 0 for rows saved before this existed
+        public long LastActionStamp;
         public long Size;
 
         public bool isUpload;
@@ -52,59 +52,20 @@ namespace Seeker
         // date added order
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public long Seq;
-        // the stamp the next band change takes, see HintBandStamp
-        //   reason being: at say Cancel time, we set the cancellation token
-        //   but we do not transition into state cancelled until later.
-        //   this allows us to set the "next" bandstamp ahead of time
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public long BandStampHint;
 
-        // stamps BandStamp when the write moves the row to another band
-        [System.Xml.Serialization.XmlIgnoreAttribute]
-        public TransferStates State
+        // a batch operation passes one stamp to every row it changes, so they tie and keep track order
+        public void MarkUserAction(long stamp)
         {
-            get
-            {
-                return state;
-            }
-            set
-            {
-                TransferBand previous = TransferBands.Of(state);
-                state = value;
-                if (TransferBands.Of(value) != previous)
-                {
-                    long hint = Interlocked.Exchange(ref BandStampHint, 0);
-                    Interlocked.Exchange(ref BandStamp, hint != 0 ? hint : TransferBands.NextStamp());
-                }
-            }
+            Interlocked.Exchange(ref LastActionStamp, stamp);
         }
 
-        // it never stamps since its restored from persisted
-        [System.Xml.Serialization.XmlElement("State")]
-        public TransferStates PersistedState
+        // call before cancelling. a pause only changes rows that are active
+        public void MarkUserPause(long stamp)
         {
-            get
+            if (TransferBands.IsActive(this))
             {
-                return state;
+                MarkUserAction(stamp);
             }
-            set
-            {
-                state = value;
-            }
-        }
-
-        // hint for the next bandstamp
-        public void HintBandStamp(long stamp, bool onlyIfActive = false)
-        {
-            if (stamp == 0)
-            {
-                return;
-            }
-            if (onlyIfActive && TransferBands.Of(state) != TransferBand.Active)
-            {
-                return;
-            }
-            Interlocked.Exchange(ref BandStampHint, stamp);
         }
 
         public int QueueLength

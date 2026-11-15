@@ -6,27 +6,29 @@ namespace Seeker
     public sealed class TransferListSnapshot
     {
         private readonly List<ITransferItem> items;
-        // transferItem -> key we used to sort it
-        private readonly Dictionary<ITransferItem, TransferBandKey> bandKeys;
+        // transferItem -> key we used to sort it. null unless the sort key is mutable (TransferSort.IsMutable)
+        private readonly Dictionary<ITransferItem, TransferBandKey> sortKeys;
+        private readonly TransferSortKey sortKey;
 
-        public TransferListSnapshot(List<ITransferItem> items) : this(items, null)
+        public TransferListSnapshot(List<ITransferItem> items) : this(items, null, TransferSortKey.DateAdded)
         {
         }
 
-        public TransferListSnapshot(List<ITransferItem> items, Dictionary<ITransferItem, TransferBandKey> bandKeys)
+        public TransferListSnapshot(List<ITransferItem> items, Dictionary<ITransferItem, TransferBandKey> sortKeys, TransferSortKey sortKey)
         {
             this.items = items;
-            this.bandKeys = bandKeys;
+            this.sortKeys = sortKeys;
+            this.sortKey = sortKey;
         }
 
         // true if the row would now sort somewhere else i.e. the list needs a rebuild
-        public bool HasBandChanged(ITransferItem item)
+        public bool HasSortKeyChanged(ITransferItem item)
         {
-            if (item == null || bandKeys == null || !bandKeys.TryGetValue(item, out TransferBandKey sortedBy))
+            if (item == null || sortKeys == null || !sortKeys.TryGetValue(item, out TransferBandKey sortedBy))
             {
                 return false;
             }
-            return !sortedBy.Equals(TransferBands.KeyOf(item));
+            return !sortedBy.Equals(TransferSort.MutableKeyOf(item, sortKey));
         }
 
         public int Count => items.Count;
@@ -60,7 +62,7 @@ namespace Seeker
 
         public void RemoveAt(int position)
         {
-            bandKeys?.Remove(items[position]);
+            sortKeys?.Remove(items[position]);
             items.RemoveAt(position);
         }
     }

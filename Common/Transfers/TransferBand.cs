@@ -11,8 +11,6 @@ namespace Seeker
         Failed = 1,
         Paused = 2,
         Completed = 3,
-        // none (we sort these with paused)
-        Unset = 4,
     }
 
     public readonly struct TransferBandKey : IEquatable<TransferBandKey>
@@ -56,7 +54,8 @@ namespace Seeker
         {
             if (state == TransferStates.None)
             {
-                return TransferBand.Unset;
+                // legacy rows, shown as paused
+                return TransferBand.Paused;
             }
             if (state.HasFlag(TransferStates.Succeeded))
             {
@@ -94,12 +93,13 @@ namespace Seeker
                 return new TransferBandKey(folderBand, folderStamp);
             }
             var ti = (TransferItem)item;
-            TransferBand band = Of(ti.State);
-            if (band == TransferBand.Unset)
-            {
-                band = TransferBand.Paused;
-            }
-            return new TransferBandKey(band, Interlocked.Read(ref ti.BandStamp));
+            return new TransferBandKey(Of(ti.State), Interlocked.Read(ref ti.LastActionStamp));
+        }
+
+        // i.e. a pause would change it
+        public static bool IsActive(TransferItem ti)
+        {
+            return Of(ti.State) == TransferBand.Active;
         }
 
         // utc ticks, strictly increasing

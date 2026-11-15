@@ -17,6 +17,7 @@ namespace UnitTestCommon
         private const TransferStates Paused = TransferStates.Completed | TransferStates.Cancelled;
         private const TransferStates Errored = TransferStates.Completed | TransferStates.Errored;
         private const TransferStates Pending = TransferStates.Queued | TransferStates.Locally;
+        private const TransferStates Downloading = TransferStates.InProgress;
 
         private TransferItemManager manager;
 
@@ -26,7 +27,8 @@ namespace UnitTestCommon
             manager = new TransferItemManager(false);
         }
 
-        private TransferItem Add(string folder, string file, TransferStates state, long stamp = 0)
+        // stamp: the user action that added it, 0 for a row saved before the stamp existed
+        private TransferItem Add(string folder, string file, TransferStates state, long stamp)
         {
             var ti = new TransferItem
             {
@@ -34,17 +36,16 @@ namespace UnitTestCommon
                 FolderName = folder,
                 Filename = file,
                 FullFilename = @"\dir\" + folder + @"\" + file,
+                State = state,
+                LastActionStamp = stamp,
             };
-            ti.HintBandStamp(stamp);
-            ti.State = state;
             manager.Add(ti);
             return ti;
         }
 
-        private static void Move(TransferItem ti, TransferStates state, long stamp = 0)
+        private TransferItem Add(string folder, string file, TransferStates state)
         {
-            ti.HintBandStamp(stamp);
-            ti.State = state;
+            return Add(folder, file, state, TransferBands.NextStamp());
         }
 
         private FolderItem Folder(string name)
@@ -52,20 +53,25 @@ namespace UnitTestCommon
             return manager.AllFolderItems.First(f => f.FolderName == name);
         }
 
-        private List<ITransferItem> Sorted(bool groupByFolder, bool descending = false, FolderItem inFolder = null)
+        private List<ITransferItem> Sorted(TransferSortKey key, bool groupByFolder, bool descending = false, FolderItem inFolder = null)
         {
             return manager.GetUISnapshot(new TransferUIState
             {
                 GroupByFolder = groupByFolder,
                 CurrentlySelectedFolder = inFolder,
-                SortKey = TransferSortKey.State,
+                SortKey = key,
                 SortDescending = descending,
             });
         }
 
+        private List<string> SortedFolderNames(TransferSortKey key, bool descending = false)
+        {
+            return Sorted(key, groupByFolder: true, descending).Cast<FolderItem>().Select(f => f.FolderName).ToList();
+        }
+
         // --- band of a state, one case per status chip branch ---
 
-        [TestCase(TransferStates.None, TransferBand.Unset)]
+        [TestCase(TransferStates.None, TransferBand.Paused)]
         [TestCase(TransferStates.Completed | TransferStates.Succeeded, TransferBand.Completed)]
         [TestCase(TransferStates.InProgress, TransferBand.Active)]
         [TestCase(TransferStates.Initializing, TransferBand.Active)]
@@ -104,92 +110,99 @@ namespace UnitTestCommon
         {
             long future = TransferBands.NextStamp() + System.TimeSpan.FromHours(1).Ticks;
 
-            TransferBands.Observe(future);
+            Add("f1", "1.mp3", Done, future);
 
             Assert.Greater(TransferBands.NextStamp(), future);
         }
 
-        // --- stamping ---
+        // --- only user actions stamp ---
 
         [Test]
-        public void State_StampsOnlyWhenTheBandChanges()
+        public void StateChanges_NeverStamp()
         {
-            var ti = new TransferItem();
-            ti.State = Pending;
-            long entered = ti.BandStamp;
-            Assert.AreNotEqual(0, entered);
+            var ti = Add("f1", "1.mp3", Pending, 42);
 
             ti.State = TransferStates.Requested;
-            ti.State = TransferStates.Queued | TransferStates.Remotely;
-            ti.State = TransferStates.Initializing;
-            ti.State = TransferStates.InProgress;
-            Assert.AreEqual(entered, ti.BandStamp);
-
-            ti.State = Done;
-            Assert.Greater(ti.BandStamp, entered);
-        }
-
-        [Test]
-        public void State_AddingAFlagInsideTheBandDoesNotStamp()
-        {
-            var ti = new TransferItem();
+            ti.State = Downloading;
             ti.State = Errored;
-            long entered = ti.BandStamp;
-
-            ti.State |= TransferStates.UserOffline;
-
-            Assert.AreEqual(entered, ti.BandStamp);
-        }
-
-        [Test]
-        public void State_FirstWriteStampsEvenWhenQueuedPaused()
-        {
-            var ti = new TransferItem();
-
-            ti.State = TransferStates.Cancelled;
-
-            Assert.AreNotEqual(0, ti.BandStamp);
-        }
-
-        [Test]
-        public void Hint_IsUsedForTheNextBandChangeOnly()
-        {
-            var ti = new TransferItem();
             ti.State = Pending;
-
-            ti.HintBandStamp(42);
-            ti.State = TransferStates.Requested;
-            Assert.AreNotEqual(42, ti.BandStamp);
-            ti.State = Paused;
-            Assert.AreEqual(42, ti.BandStamp);
-
-            ti.State = Pending;
-            Assert.AreNotEqual(42, ti.BandStamp);
-        }
-
-        [Test]
-        public void Hint_OnlyIfActive_SkipsRowsACancelWillNotMove()
-        {
-            var ti = new TransferItem();
             ti.State = Done;
 
-            ti.HintBandStamp(42, onlyIfActive: true);
-            ti.State = Pending;
-
-            Assert.AreNotEqual(42, ti.BandStamp);
+            Assert.AreEqual(42, ti.LastActionStamp);
         }
 
         [Test]
-        public void PersistedState_NeverStamps()
+        public void MarkUserPause_OnlyStampsActiveRows()
         {
-            var ti = new TransferItem();
-            ti.State = TransferStates.InProgress;
-            long entered = ti.BandStamp;
+            var active = Add("f1", "1.mp3", Downloading, 1);
+            var done = Add("f1", "2.mp3", Done, 1);
+            var failed = Add("f1", "3.mp3", Errored, 1);
+            var paused = Add("f1", "4.mp3", Paused, 1);
 
-            ti.PersistedState = TransferStates.Cancelled;
+            foreach (var ti in new[] { active, done, failed, paused })
+            {
+                ti.MarkUserPause(99);
+            }
 
-            Assert.AreEqual(TransferStates.Cancelled, ti.State);
-            Assert.AreEqual(entered, ti.BandStamp);
+            Assert.AreEqual(99, active.LastActionStamp);
+            Assert.AreEqual(1, done.LastActionStamp);
+            Assert.AreEqual(1, failed.LastActionStamp);
+            Assert.AreEqual(1, paused.LastActionStamp);
+        }
+
+        [Test]
+        public void CancelAll_GivesTheActiveRowsOneStamp()
+        {
+            var a = Add("f1", "1.mp3", Downloading, 1);
+            var b = Add("f2", "1.mp3", Pending, 1);
+            var done = Add("f2", "2.mp3", Done, 1);
+
+            manager.CancelAll();
+
+            Assert.Greater(a.LastActionStamp, 1);
+            Assert.AreEqual(a.LastActionStamp, b.LastActionStamp);
+            Assert.AreEqual(1, done.LastActionStamp);
+        }
+
+        [Test]
+        public void CancelSelectedItems_SharesOneStampAcrossFoldersAndFiles()
+        {
+            var inFolder = Add("f1", "1.mp3", Downloading, 1);
+            var single = Add("f2", "1.mp3", Pending, 1);
+            var uiState = new TransferUIState { BatchSelectedItems = new HashSet<ITransferItem> { Folder("f1"), single } };
+
+            manager.CancelSelectedItems(uiState);
+
+            Assert.Greater(inFolder.LastActionStamp, 1);
+            Assert.AreEqual(inFolder.LastActionStamp, single.LastActionStamp);
+        }
+
+        [Test]
+        public void Relaunch_PausesActiveRowsWithoutStamping()
+        {
+            var active = Add("f1", "1.mp3", Downloading, 5);
+
+            manager.OnRelaunch();
+
+            Assert.AreEqual(TransferStates.Cancelled, active.State);
+            Assert.AreEqual(5, active.LastActionStamp);
+        }
+
+        [Test]
+        public void Relaunch_StampsLegacyRowsByFolderInDateAddedOrder()
+        {
+            var older1 = Add("older", "1.mp3", Done, 0);
+            var newer1 = Add("newer", "1.mp3", Done, 0);
+            var older2 = Add("older", "2.mp3", Done, 0);
+            var stamped = Add("newer", "2.mp3", Done);
+
+            manager.OnRelaunch();
+
+            Assert.AreEqual(older1.LastActionStamp, older2.LastActionStamp);
+            Assert.Less(older1.LastActionStamp, newer1.LastActionStamp);
+            Assert.Less(newer1.LastActionStamp, stamped.LastActionStamp);
+            CollectionAssert.AreEqual(new ITransferItem[] { newer1, older1, older2 },
+                Sorted(TransferSortKey.LastAction, groupByFolder: false, descending: true).Where(t => t != stamped));
         }
 
         // --- persistence ---
@@ -212,22 +225,19 @@ namespace UnitTestCommon
         }
 
         [Test]
-        public void Xml_KeepsTheStateElementAndTheStamp()
+        public void Xml_KeepsTheStateAndTheStamp()
         {
-            var ti = new TransferItem { Username = "u1", FullFilename = @"\a\b.mp3" };
-            ti.State = Done;
+            var ti = new TransferItem { Username = "u1", FullFilename = @"\a\b.mp3", State = Done, LastActionStamp = 1234 };
 
             string xml = Serialize(new List<TransferItem> { ti });
             var restored = Deserialize(xml).Single();
 
             StringAssert.Contains("<State>Completed Succeeded</State>", xml);
-            StringAssert.DoesNotContain("PersistedState", xml);
-            StringAssert.DoesNotContain("BandStampHint", xml);
             Assert.AreEqual(Done, restored.State);
-            Assert.AreEqual(ti.BandStamp, restored.BandStamp);
+            Assert.AreEqual(1234, restored.LastActionStamp);
         }
 
-        // the element order of a file written before the stamp existed (State was a field between Failed and Size)
+        // a file written before the stamp existed
         [Test]
         public void Xml_ReadsTheOldLayout()
         {
@@ -242,82 +252,78 @@ namespace UnitTestCommon
 
             Assert.AreEqual(TransferStates.Completed | TransferStates.Errored | TransferStates.UserOffline, restored.State);
             Assert.AreEqual(5, restored.Size);
-            Assert.AreEqual(0, restored.BandStamp);
+            Assert.AreEqual(0, restored.LastActionStamp);
         }
 
-        [Test]
-        public void Relaunch_PausesActiveRowsWithoutRestamping()
-        {
-            var active = Add("f1", "1.mp3", TransferStates.InProgress);
-            var done = Add("f1", "2.mp3", Done);
-            long activeStamp = active.BandStamp;
-            long doneStamp = done.BandStamp;
-
-            manager.OnRelaunch();
-
-            Assert.AreEqual(TransferStates.Cancelled, active.State);
-            Assert.AreEqual(activeStamp, active.BandStamp);
-            Assert.AreEqual(doneStamp, done.BandStamp);
-        }
-
-        // --- sorting files ---
+        // --- state sort ---
 
         [Test]
-        public void Files_SortByBand([Values(false, true)] bool descending)
+        public void State_SortsByBand([Values(false, true)] bool descending)
         {
             var done = Add("f1", "1.mp3", Done);
             var paused = Add("f1", "2.mp3", Paused);
             var failed = Add("f1", "3.mp3", Errored);
-            var active = Add("f1", "4.mp3", TransferStates.InProgress);
-            var queued = Add("f1", "5.mp3", TransferStates.Queued | TransferStates.Remotely, active.BandStamp);
+            var active = Add("f1", "4.mp3", Downloading);
 
             var expected = descending
-                ? new ITransferItem[] { done, paused, failed, active, queued }
-                : new ITransferItem[] { active, queued, failed, paused, done };
-            CollectionAssert.AreEqual(expected, Sorted(groupByFolder: false, descending));
-            CollectionAssert.AreEqual(expected, Sorted(groupByFolder: true, descending, Folder("f1")));
+                ? new ITransferItem[] { done, paused, failed, active }
+                : new ITransferItem[] { active, failed, paused, done };
+            CollectionAssert.AreEqual(expected, Sorted(TransferSortKey.State, groupByFolder: false, descending));
+            CollectionAssert.AreEqual(expected, Sorted(TransferSortKey.State, groupByFolder: true, descending, Folder("f1")));
         }
 
+        // within a band: the last action, newest first, whichever way the bands run
         [Test]
-        public void Files_NewestInABandIsFirst_BothDirections([Values(false, true)] bool descending)
+        public void State_NewestActionFirstInABand([Values(false, true)] bool descending)
         {
-            var first = Add("f1", "1.mp3", TransferStates.InProgress);
-            var second = Add("f1", "2.mp3", TransferStates.InProgress);
-            var third = Add("f1", "3.mp3", TransferStates.InProgress);
+            var first = Add("f1", "1.mp3", Downloading);
+            var second = Add("f1", "2.mp3", Downloading);
+            var third = Add("f1", "3.mp3", Downloading);
 
-            // the one added first finishes last
-            Move(second, Done);
-            Move(third, Done);
-            Move(first, Done);
+            // finishing is not an action, so the order they finish in does not matter
+            first.State = Done;
+            third.State = Done;
+            second.State = Done;
 
-            CollectionAssert.AreEqual(new ITransferItem[] { first, third, second }, Sorted(groupByFolder: false, descending));
+            CollectionAssert.AreEqual(new ITransferItem[] { third, second, first }, Sorted(TransferSortKey.State, groupByFolder: false, descending));
         }
 
         [Test]
-        public void Files_ABatchSharingAStampKeepsTrackOrder()
+        public void State_ABatchKeepsTrackOrder()
         {
             long added = TransferBands.NextStamp();
-            var a = Add("f1", "1.mp3", Pending, added);
-            var b = Add("f1", "2.mp3", Pending, added);
-            var c = Add("f1", "3.mp3", Pending, added);
-            long paused = TransferBands.NextStamp();
-            Move(c, Paused, paused);
-            Move(a, Paused, paused);
-            Move(b, Paused, paused);
+            var a = Add("f1", "1.mp3", Paused, added);
+            var b = Add("f1", "2.mp3", Paused, added);
+            var c = Add("f1", "3.mp3", Paused, added);
 
-            CollectionAssert.AreEqual(new ITransferItem[] { a, b, c }, Sorted(groupByFolder: false));
+            CollectionAssert.AreEqual(new ITransferItem[] { a, b, c }, Sorted(TransferSortKey.State, groupByFolder: false));
         }
 
         [Test]
-        public void Files_WithoutAStampFallBackToDateAdded()
+        public void State_RowsWithoutAStampFallBackToDateAdded()
         {
-            var a = Add("f1", "1.mp3", TransferStates.None);
-            var b = Add("f1", "2.mp3", TransferStates.None);
-            a.PersistedState = Done;
-            b.PersistedState = Done;
+            var a = Add("f1", "1.mp3", Done, 0);
+            var b = Add("f1", "2.mp3", Done, 0);
             var stamped = Add("f1", "3.mp3", Done);
 
-            CollectionAssert.AreEqual(new ITransferItem[] { stamped, a, b }, Sorted(groupByFolder: false));
+            CollectionAssert.AreEqual(new ITransferItem[] { stamped, a, b }, Sorted(TransferSortKey.State, groupByFolder: false));
+        }
+
+        [Test]
+        public void State_Folders([Values(false, true)] bool descending)
+        {
+            Add("done-old", "1.mp3", Done);
+            Add("active", "1.mp3", Downloading);
+            Add("active", "2.mp3", Done);
+            Add("paused", "1.mp3", Paused);
+            Add("failed", "1.mp3", Errored);
+            Add("failed", "2.mp3", Done);
+            Add("done-new", "1.mp3", Done);
+
+            var expected = descending
+                ? new[] { "done-new", "done-old", "paused", "failed", "active" }
+                : new[] { "active", "failed", "paused", "done-new", "done-old" };
+            CollectionAssert.AreEqual(expected, SortedFolderNames(TransferSortKey.State, descending));
         }
 
         // --- folders ---
@@ -331,7 +337,7 @@ namespace UnitTestCommon
                 new[] { Done, Paused },
                 new[] { Done, Paused, Errored },
                 new[] { Done, Paused, Errored, TransferStates.Queued | TransferStates.Remotely },
-                new[] { Errored, TransferStates.InProgress },
+                new[] { Errored, Downloading },
                 new[] { Paused, Pending },
                 new[] { Done, TransferStates.Completed | TransferStates.TimedOut },
                 new[] { Paused, TransferStates.Completed | TransferStates.Aborted },
@@ -353,148 +359,125 @@ namespace UnitTestCommon
         }
 
         [Test]
-        public void Folder_StaysPutWhileItsFilesFinishFailAndRetry()
+        public void Folder_StampIsTheNewestActionOnAnyFile()
+        {
+            long added = TransferBands.NextStamp();
+            var a = Add("f1", "1.mp3", Done, added);
+            Add("f1", "2.mp3", Errored, added);
+            var folder = Folder("f1");
+
+            a.State = Pending;
+            folder.GetBand(out long afterAutoRetry);
+            long retried = TransferBands.NextStamp();
+            a.MarkUserAction(retried);
+            folder.GetBand(out long afterUserRetry);
+
+            Assert.AreEqual(added, afterAutoRetry);
+            Assert.AreEqual(retried, afterUserRetry);
+        }
+
+        // --- last action sort ---
+
+        [Test]
+        public void LastAction_NewestFirstWhenDescending([Values(false, true)] bool descending)
+        {
+            var old = Add("f1", "1.mp3", Done);
+            var newer = Add("f2", "1.mp3", Paused);
+            var resumed = Add("f3", "1.mp3", Downloading);
+            old.MarkUserAction(TransferBands.NextStamp());
+
+            var expected = descending
+                ? new ITransferItem[] { old, resumed, newer }
+                : new ITransferItem[] { newer, resumed, old };
+            CollectionAssert.AreEqual(expected, Sorted(TransferSortKey.LastAction, groupByFolder: false, descending));
+        }
+
+        [Test]
+        public void LastAction_ABatchKeepsTrackOrderBothWays([Values(false, true)] bool descending)
         {
             long added = TransferBands.NextStamp();
             var a = Add("f1", "1.mp3", Pending, added);
             var b = Add("f1", "2.mp3", Pending, added);
             var c = Add("f1", "3.mp3", Pending, added);
-            var folder = Folder("f1");
-            Assert.AreEqual(TransferBand.Active, folder.GetBand(out long entered));
-            Assert.AreEqual(added, entered);
 
-            Move(a, Done);
-            Move(b, Errored);
-            Assert.AreEqual(TransferBand.Active, folder.GetBand(out long afterFailure));
-            Move(b, Pending);
-            Assert.AreEqual(TransferBand.Active, folder.GetBand(out long afterRetry));
-
-            Assert.AreEqual(added, afterFailure);
-            Assert.AreEqual(added, afterRetry);
-            Assert.Greater(b.BandStamp, added);
-            Assert.AreNotEqual(0, c.BandStamp);
+            CollectionAssert.AreEqual(new ITransferItem[] { a, b, c }, Sorted(TransferSortKey.LastAction, groupByFolder: false, descending));
+            CollectionAssert.AreEqual(new ITransferItem[] { a, b, c }, Sorted(TransferSortKey.LastAction, groupByFolder: true, descending, Folder("f1")));
         }
 
         [Test]
-        public void Folder_TakesTheStampOfWhatMovedItOutOfActive()
+        public void LastAction_IgnoresState()
         {
-            var a = Add("f1", "1.mp3", TransferStates.InProgress);
-            var b = Add("f1", "2.mp3", TransferStates.InProgress);
-            var folder = Folder("f1");
-            folder.GetBand(out _);
+            Add("older", "1.mp3", Downloading);
+            Add("newer", "1.mp3", Done);
 
-            Move(a, Done);
-            Move(b, Done);
-
-            Assert.AreEqual(TransferBand.Completed, folder.GetBand(out long stamp));
-            Assert.AreEqual(b.BandStamp, stamp);
-        }
-
-        [Test]
-        public void Folder_PausedAsABatchTakesTheSharedStamp()
-        {
-            var a = Add("f1", "1.mp3", TransferStates.InProgress);
-            var b = Add("f1", "2.mp3", TransferStates.Queued | TransferStates.Remotely);
-            var done = Add("f1", "3.mp3", Done);
-            var folder = Folder("f1");
-            folder.GetBand(out _);
-            long pauseAll = TransferBands.NextStamp();
-
-            foreach (var ti in new[] { a, b, done })
-            {
-                ti.HintBandStamp(pauseAll, onlyIfActive: true);
-            }
-            Move(b, Paused);
-            Move(a, Paused);
-
-            Assert.AreEqual(TransferBand.Paused, folder.GetBand(out long stamp));
-            Assert.AreEqual(pauseAll, stamp);
-            Assert.AreEqual(0, done.BandStampHint);
-        }
-
-        [Test]
-        public void Folder_ResumingIntoActiveTakesTheResumeStamp()
-        {
-            var a = Add("f1", "1.mp3", Paused);
-            var b = Add("f1", "2.mp3", Done);
-            var folder = Folder("f1");
-            folder.GetBand(out _);
-            long resume = TransferBands.NextStamp();
-
-            Move(a, Pending, resume);
-
-            Assert.AreEqual(TransferBand.Active, folder.GetBand(out long stamp));
-            Assert.AreEqual(resume, stamp);
-            Assert.Less(b.BandStamp, resume);
-        }
-
-        [Test]
-        public void Folders_SortByBandThenNewestFirst([Values(false, true)] bool descending)
-        {
-            Add("done-old", "1.mp3", Done);
-            Add("active", "1.mp3", TransferStates.InProgress);
-            Add("active", "2.mp3", Done);
-            Add("paused", "1.mp3", Paused);
-            Add("failed", "1.mp3", Errored);
-            Add("failed", "2.mp3", Done);
-            Add("done-new", "1.mp3", Done);
-
-            var names = Sorted(groupByFolder: true, descending).Cast<FolderItem>().Select(f => f.FolderName).ToList();
-
-            var expected = descending
-                ? new[] { "done-new", "done-old", "paused", "failed", "active" }
-                : new[] { "active", "failed", "paused", "done-new", "done-old" };
-            CollectionAssert.AreEqual(expected, names);
+            CollectionAssert.AreEqual(new[] { "newer", "older" }, SortedFolderNames(TransferSortKey.LastAction, descending: true));
         }
 
         // --- knowing when to re-sort ---
 
-        private TransferListSnapshot Snapshot(bool groupByFolder)
+        private TransferListSnapshot Snapshot(TransferSortKey key, bool groupByFolder)
         {
             var keys = new Dictionary<ITransferItem, TransferBandKey>();
-            var uiState = new TransferUIState { GroupByFolder = groupByFolder, SortKey = TransferSortKey.State };
-            return new TransferListSnapshot(manager.GetUISnapshot(uiState, keys), keys);
+            var uiState = new TransferUIState { GroupByFolder = groupByFolder, SortKey = key };
+            return new TransferListSnapshot(manager.GetUISnapshot(uiState, keys), keys, key);
         }
 
         [Test]
-        public void Snapshot_FileRow_ChangedOnlyByABandChange()
+        public void Snapshot_State_FileRowChangesWithItsBandOrAnAction()
         {
             var a = Add("f1", "1.mp3", Pending);
-            var snapshot = Snapshot(groupByFolder: false);
+            var snapshot = Snapshot(TransferSortKey.State, groupByFolder: false);
 
-            Move(a, TransferStates.InProgress);
-            Assert.IsFalse(snapshot.HasBandChanged(a));
+            a.State = Downloading;
+            Assert.IsFalse(snapshot.HasSortKeyChanged(a));
 
-            Move(a, Done);
-            Assert.IsTrue(snapshot.HasBandChanged(a));
-            Assert.IsFalse(snapshot.HasBandChanged(a.Folder));
+            a.State = Done;
+            Assert.IsTrue(snapshot.HasSortKeyChanged(a));
+
+            a.State = Pending;
+            Assert.IsFalse(snapshot.HasSortKeyChanged(a));
+            a.MarkUserAction(TransferBands.NextStamp());
+            Assert.IsTrue(snapshot.HasSortKeyChanged(a));
         }
 
         [Test]
-        public void Snapshot_FolderRow_ChangedOnlyWhenTheFolderChangesBand()
+        public void Snapshot_State_FolderRowChangesOnlyWithTheFolder()
         {
-            var a = Add("f1", "1.mp3", TransferStates.InProgress);
+            var a = Add("f1", "1.mp3", Downloading);
             var b = Add("f1", "2.mp3", TransferStates.Queued | TransferStates.Remotely);
-            var snapshot = Snapshot(groupByFolder: true);
+            var snapshot = Snapshot(TransferSortKey.State, groupByFolder: true);
 
-            Move(a, Done);
-            Assert.IsFalse(snapshot.HasBandChanged(a.Folder));
-            Assert.IsFalse(snapshot.HasBandChanged(a));
+            a.State = Done;
+            Assert.IsFalse(snapshot.HasSortKeyChanged(a.Folder));
+            Assert.IsFalse(snapshot.HasSortKeyChanged(a));
 
-            Move(b, Done);
-            Assert.IsTrue(snapshot.HasBandChanged(a.Folder));
+            b.State = Done;
+            Assert.IsTrue(snapshot.HasSortKeyChanged(a.Folder));
+        }
+
+        [Test]
+        public void Snapshot_LastAction_ChangesOnlyWithAnAction()
+        {
+            var a = Add("f1", "1.mp3", Pending);
+            var snapshot = Snapshot(TransferSortKey.LastAction, groupByFolder: true);
+
+            a.State = Done;
+            Assert.IsFalse(snapshot.HasSortKeyChanged(a.Folder));
+
+            a.MarkUserAction(TransferBands.NextStamp());
+            Assert.IsTrue(snapshot.HasSortKeyChanged(a.Folder));
         }
 
         [Test]
         public void Snapshot_OtherSorts_NeverReportAChange()
         {
             var a = Add("f1", "1.mp3", Pending);
-            var uiState = new TransferUIState { GroupByFolder = false, SortKey = TransferSortKey.DateAdded };
-            var snapshot = new TransferListSnapshot(manager.GetUISnapshot(uiState));
+            var snapshot = new TransferListSnapshot(Sorted(TransferSortKey.DateAdded, groupByFolder: false));
 
-            Move(a, Done);
+            a.State = Done;
+            a.MarkUserAction(TransferBands.NextStamp());
 
-            Assert.IsFalse(snapshot.HasBandChanged(a));
+            Assert.IsFalse(snapshot.HasSortKeyChanged(a));
         }
     }
 }
