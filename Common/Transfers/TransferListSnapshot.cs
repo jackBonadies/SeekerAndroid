@@ -6,10 +6,27 @@ namespace Seeker
     public sealed class TransferListSnapshot
     {
         private readonly List<ITransferItem> items;
+        // transferItem -> key we used to sort it
+        private readonly Dictionary<ITransferItem, TransferBandKey> bandKeys;
 
-        public TransferListSnapshot(List<ITransferItem> items)
+        public TransferListSnapshot(List<ITransferItem> items) : this(items, null)
+        {
+        }
+
+        public TransferListSnapshot(List<ITransferItem> items, Dictionary<ITransferItem, TransferBandKey> bandKeys)
         {
             this.items = items;
+            this.bandKeys = bandKeys;
+        }
+
+        // true if the row would now sort somewhere else i.e. the list needs a rebuild
+        public bool HasBandChanged(ITransferItem item)
+        {
+            if (item == null || bandKeys == null || !bandKeys.TryGetValue(item, out TransferBandKey sortedBy))
+            {
+                return false;
+            }
+            return !sortedBy.Equals(TransferBands.KeyOf(item));
         }
 
         public int Count => items.Count;
@@ -43,6 +60,7 @@ namespace Seeker
 
         public void RemoveAt(int position)
         {
+            bandKeys?.Remove(items[position]);
             items.RemoveAt(position);
         }
     }

@@ -158,7 +158,9 @@ namespace Seeker.Services
                 }
                 else
                 {
-                    Logger.Firebase("contains neither: " + lastPathSegment); //Download (on Android 9 emu)
+                    //Download case (on Android 9 emulator). Also opaque document ids (ex. Google Drive's acc=N;doc=encoded=...)
+                    bool hasOverride = !string.IsNullOrEmpty(uploadDirEntry.Info.DisplayNameOverride);
+                    Logger.Firebase($"contains neither: authority {uri.Authority} override {hasOverride} segment {lastPathSegment}");
                 }
             }
 

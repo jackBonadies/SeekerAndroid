@@ -10,6 +10,7 @@ namespace Seeker
         DateAdded = 0,
         FolderName = 1,
         User = 2,
+        State = 3,
     }
 
     public static class TransferSort
@@ -36,26 +37,54 @@ namespace Seeker
             public string Secondary;
             public string Tertiary;
             public long Seq;
+            public TransferBandKey BandKey;
             public ITransferItem Item;
         }
 
         // the direction applies to the primary key only, ties are always ascending
         public static void Sort(List<ITransferItem> items, TransferSortKey key, bool descending)
         {
-            if (items.Count < 2)
-            {
-                return;
-            }
+            Sort(items, key, descending, null);
+        }
+
+        public static void Sort(List<ITransferItem> items, TransferSortKey key, bool descending, Dictionary<ITransferItem, TransferBandKey>? bandKeys)
+        {
             var entries = new Entry[items.Count];
             for (int i = 0; i < items.Count; i++)
             {
                 entries[i] = CreateEntry(items[i], key);
+                if (key == TransferSortKey.State && bandKeys != null)
+                {
+                    bandKeys[items[i]] = entries[i].BandKey;
+                }
+            }
+            if (items.Count < 2)
+            {
+                return;
             }
 
             int direction = descending ? -1 : 1;
             if (key == TransferSortKey.DateAdded)
             {
                 Array.Sort(entries, (a, b) => a.Seq.CompareTo(b.Seq) * direction);
+            }
+            else if (key == TransferSortKey.State)
+            {
+                // the most recently touched in a band is first whether ascending or descending
+                Array.Sort(entries, (a, b) =>
+                {
+                    int c = a.BandKey.Band.CompareTo(b.BandKey.Band);
+                    if (c != 0)
+                    {
+                        return c * direction;
+                    }
+                    c = b.BandKey.Stamp.CompareTo(a.BandKey.Stamp);
+                    if (c != 0)
+                    {
+                        return c;
+                    }
+                    return a.Seq.CompareTo(b.Seq);
+                });
             }
             else
             {
@@ -93,6 +122,11 @@ namespace Seeker
             var entry = new Entry { Item = item, Seq = GetSeq(item), Primary = string.Empty, Secondary = string.Empty, Tertiary = string.Empty };
             if (key == TransferSortKey.DateAdded)
             {
+                return entry;
+            }
+            if (key == TransferSortKey.State)
+            {
+                entry.BandKey = TransferBands.KeyOf(item);
                 return entry;
             }
             if (item is FolderItem fi)

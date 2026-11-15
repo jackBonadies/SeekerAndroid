@@ -548,6 +548,7 @@ namespace Seeker
         private static readonly SortSheetOption[] TransferSortOptions =
         {
             new SortSheetOption((int)TransferSortKey.DateAdded, Resource.String.sort_date_added, hasDirection: true, defaultDescending: true),
+            new SortSheetOption((int)TransferSortKey.State, Resource.String.sort_state, hasDirection: true, defaultDescending: false),
             new SortSheetOption((int)TransferSortKey.FolderName, Resource.String.sort_folder_name, hasDirection: true, defaultDescending: false),
             new SortSheetOption((int)TransferSortKey.User, Resource.String.sort_user, hasDirection: true, defaultDescending: false),
         };
@@ -610,6 +611,14 @@ namespace Seeker
             rebuildHandler.PostDelayed(rebuild, REBUILD_COALESCE_MS);
         }
 
+        private void ScheduleRebuildIfSortedByState()
+        {
+            if (ViewState.SortKey == TransferSortKey.State)
+            {
+                ScheduleRebuild();
+            }
+        }
+
         private void RunScheduledRebuild()
         {
             Interlocked.Exchange(ref rebuildPending, 0);
@@ -628,6 +637,10 @@ namespace Seeker
             {
                 adapter.RepaintRow(ti.Folder);
             }
+            if (adapter.NeedsResort(ti) || adapter.NeedsResort(ti.Folder))
+            {
+                ScheduleRebuild();
+            }
         }
 
         // same as RepaintTransferRow, but a folder row is repainted once no matter how many of its files changed
@@ -639,16 +652,28 @@ namespace Seeker
                 return;
             }
             var foldersDone = new HashSet<FolderItem>();
+            bool needsResort = false;
             foreach (TransferItem ti in items)
             {
-                if (ti == null || adapter.RepaintRow(ti))
+                if (ti == null)
+                {
+                    continue;
+                }
+                needsResort |= adapter.NeedsResort(ti);
+                if (adapter.RepaintRow(ti))
                 {
                     continue;
                 }
                 if (ti.Folder != null && foldersDone.Add(ti.Folder))
                 {
                     adapter.RepaintRow(ti.Folder);
+                    // once per folder, it walks the folder's files
+                    needsResort |= adapter.NeedsResort(ti.Folder);
                 }
+            }
+            if (needsResort)
+            {
+                ScheduleRebuild();
             }
         }
 
@@ -971,6 +996,8 @@ namespace Seeker
                     case TransferContextMenuItem.PauseFolderOrAbortUploads: //pause folder or abort uploads (uploads)
                         TransferItems.TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
                         recyclerTransferAdapter.RepaintRow(ti);
+                        // rows that were only pending are paused already and may have moved the folder to another band
+                        ScheduleRebuildIfSortedByState();
                         break;
                     case TransferContextMenuItem.RetryFailedFiles: //retry failed downloads from folder
                         if (NotLoggedInShowMessageGaurd("retry folder"))
@@ -984,13 +1011,15 @@ namespace Seeker
                         Logger.InfoFirebase("Abort Upload item pressed");
                         TransferItem uploadToCancel = ti as TransferItem;
                         TransferState.CancelAndRemoveToken(uploadToCancel);
-                        recyclerTransferAdapter.RepaintRow(ti);
+                        RepaintTransferRow(uploadToCancel);
                         break;
                     case TransferContextMenuItem.IgnoreUnshareUser: //ignore (unshare) user
                         Logger.InfoFirebase("Unshare User item pressed");
                         IEnumerable<TransferItem> tItems = TransferItems.TransferItemManagerWrapped.GetTransferItemsForUser(ti.GetUsername());
+                        long ignoreBandStamp = TransferBands.NextStamp();
                         foreach (var tiToCancel in tItems)
                         {
+                            tiToCancel.HintBandStamp(ignoreBandStamp, onlyIfActive: true);
                             TransferState.CancelAndRemoveToken(tiToCancel);
                         }
                         RepaintTransferRows(tItems);

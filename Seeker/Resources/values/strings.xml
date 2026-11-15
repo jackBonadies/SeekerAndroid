@@ -680,6 +680,7 @@
     <string name="sort_date_added">Date added</string>
     <string name="sort_folder_name">Folder name</string>
     <string name="sort_user">User</string>
+    <string name="sort_state">State</string>
     <string name="sort_ascending">Ascending</string>
     <string name="sort_descending">Descending</string>
 

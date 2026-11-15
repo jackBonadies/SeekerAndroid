@@ -93,9 +93,11 @@ namespace Seeker.Services
         {
             var isSingle = files.Count() == 1;
             List<DownloadInfo> downloadInfos = new List<DownloadInfo>();
+            // status-wise everything here is tied (i.e. was last touched in the same operation)
+            long bandStamp = TransferBands.NextStamp();
             foreach (FullFileInfo file in files)
             {
-                var dlInfo = AddTransfer(username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded, isSingle);
+                var dlInfo = AddTransfer(username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded, isSingle, bandStamp);
                 if (dlInfo != null)
                 {
                     downloadInfos.Add(dlInfo);
@@ -305,6 +307,7 @@ namespace Seeker.Services
             var registrations = batch.Registrations;
             Exception? batchFailure = null;
             DownloadFailureKind batchFailureKind = DownloadFailureKind.Unknown;
+            long batchFailureBandStamp = 0;
             bool anyUpdatedHere = false;
             for (int i = 0; i < dlInfos.Count; i++)
             {
@@ -328,7 +331,7 @@ namespace Seeker.Services
                 {
                     // the last download failed with peer offline / unreachable / not logged in. dont wait for every
                     // other download to fail the same way, mark them failed here
-                    MarkTransferItemFailed(dlInfo.TransferItemReference, batchFailureKind);
+                    MarkTransferItemFailed(dlInfo.TransferItemReference, batchFailureKind, batchFailureBandStamp);
                     anyUpdatedHere = true;
                     dlTask = Task.FromException(batchFailure);
                     waitForNext = Task.CompletedTask;
@@ -364,6 +367,9 @@ namespace Seeker.Services
                 if (dlTask.IsFaulted && TryGetBatchFailure(dlTask.Exception, out batchFailure, out batchFailureKind))
                 {
                     logger.Debug($"{username} {batchFailureKind}, failing the remaining {dlInfos.Count - i - 1} downloads");
+                    // the row that failed for real and the rows failed for it share a stamp
+                    batchFailureBandStamp = TransferBands.NextStamp();
+                    ShareFailedBandStamp(dlInfo.TransferItemReference, batchFailureBandStamp);
                 }
             }
             if (anyUpdatedHere)
@@ -388,12 +394,13 @@ namespace Seeker.Services
         // mirrors what TransferEventRouter does for the library's Completed | Errored state, including the
         // UserOffline / CannotConnect flag it derives from Transfer.Exception. for failures the library never
         // saw, and so dont raise TransferStateChanged
-        private static void MarkTransferItemFailed(TransferItem? item, DownloadFailureKind kind)
+        private static void MarkTransferItemFailed(TransferItem? item, DownloadFailureKind kind, long bandStamp = 0)
         {
             if (item == null)
             {
                 return;
             }
+            item.HintBandStamp(bandStamp);
             item.State = TransferStates.Completed | TransferStates.Errored;
             if (kind == DownloadFailureKind.UserOffline)
             {
@@ -406,6 +413,23 @@ namespace Seeker.Services
             item.Failed = true;
             item.InProcessing = false;
             item.RemainingTime = null;
+        }
+
+        // the router may or may not have written the failure yet
+        private static void ShareFailedBandStamp(TransferItem? item, long bandStamp)
+        {
+            if (item == null)
+            {
+                return;
+            }
+            if (TransferBands.Of(item.State) == TransferBand.Failed)
+            {
+                Interlocked.Exchange(ref item.BandStamp, bandStamp);
+            }
+            else
+            {
+                item.HintBandStamp(bandStamp, onlyIfActive: true);
+            }
         }
 
         private static void MarkTransferItemCancelled(TransferItem item)
@@ -427,7 +451,7 @@ namespace Seeker.Services
         /// <summary>
         /// Adds a transfer to the list (i.e. for NEW items). Null if there is already a transfer either in motion or succeeded (and therefore we should not do anything)
         /// </summary>
-        public DownloadInfo? AddTransfer(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, bool isSingle)
+        public DownloadInfo? AddTransfer(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, bool isSingle, long bandStamp = 0)
         {
             var newItem = new TransferItem();
             newItem.Filename = SimpleHelpers.GetFileNameFromFile(fname).ToString();
@@ -442,6 +466,7 @@ namespace Seeker.Services
             {
                 newItem.TransferItemExtra = Transfers.TransferItemExtras.NoSubfolder;
             }
+            newItem.HintBandStamp(bandStamp);
             newItem.State = queuePaused ? TransferStates.Cancelled : TransferStates.Queued | TransferStates.Locally;
 
             var transferItem = TransferItems.TransferItemManagerDL.AddIfNotExistAndReturnTransfer(newItem, out bool exists);
@@ -455,7 +480,7 @@ namespace Seeker.Services
                     return null;
                 }
                 // re-request of a paused / failed / finished row is a retry of that row. null if a request already owns it (i.e. it is already in motion)
-                downloadInfo = PrepareRetry(transferItem, restartActive: false);
+                downloadInfo = PrepareRetry(transferItem, restartActive: false, bandStamp);
                 if (downloadInfo == null)
                 {
                     logger.Debug($"AddTransfer: {transferItem.Filename} is already being requested, skipping");
@@ -1189,7 +1214,8 @@ namespace Seeker.Services
 
         // claims the item for a new request. null if a request already owns it - restartActive cancels that one
         //   and its continuation re-requests it (CancelAndRetryFlag), bulk paths leave it alone.
-        private DownloadInfo? PrepareRetry(TransferItem item, bool restartActive)
+        // bandStamp: shared by a bulk operation, 0 for a single row
+        private DownloadInfo? PrepareRetry(TransferItem item, bool restartActive, long bandStamp = 0)
         {
             if (activeRequests.TryGetValue(item, out var owner))
             {
@@ -1219,6 +1245,7 @@ namespace Seeker.Services
             }
             TransferState.SetupCancellationToken(item, cts, out _);
             item.ClearStateForRetry();
+            item.HintBandStamp(bandStamp);
             // same initial state as AddTransfer
             item.State = TransferStates.Queued | TransferStates.Locally;
             return dlInfo;
@@ -1228,9 +1255,10 @@ namespace Seeker.Services
         {
             var changed = transferItemConditionList.ToList();
             var dlInfos = new List<DownloadInfo>();
+            long bandStamp = TransferBands.NextStamp();
             foreach (TransferItem item in changed)
             {
-                var dlInfo = PrepareRetry(item, restartActive: false);
+                var dlInfo = PrepareRetry(item, restartActive: false, bandStamp);
                 if (dlInfo != null)
                 {
                     dlInfos.Add(dlInfo);
