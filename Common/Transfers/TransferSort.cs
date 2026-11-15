@@ -10,7 +10,7 @@ namespace Seeker
         DateAdded = 0,
         FolderName = 1,
         User = 2,
-        State = 3,
+        Status = 3,
         LastAction = 4,
     }
 
@@ -35,7 +35,7 @@ namespace Seeker
         // keys that change while a row is listed, so the snapshot remembers what each row was sorted by
         public static bool IsMutable(TransferSortKey key)
         {
-            return key == TransferSortKey.State || key == TransferSortKey.LastAction;
+            return key == TransferSortKey.Status || key == TransferSortKey.LastAction;
         }
 
         // the part of a row's band and stamp that the key sorts on
@@ -84,7 +84,7 @@ namespace Seeker
             {
                 Array.Sort(entries, (a, b) => a.Seq.CompareTo(b.Seq) * direction);
             }
-            else if (key == TransferSortKey.State)
+            else if (key == TransferSortKey.Status)
             {
                 // the most recently touched in a band is first whether ascending or descending
                 Array.Sort(entries, (a, b) =>

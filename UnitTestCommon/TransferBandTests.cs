@@ -255,7 +255,7 @@ namespace UnitTestCommon
             Assert.AreEqual(0, restored.LastActionStamp);
         }
 
-        // --- state sort ---
+        // --- status sort ---
 
         [Test]
         public void State_SortsByBand([Values(false, true)] bool descending)
@@ -268,8 +268,8 @@ namespace UnitTestCommon
             var expected = descending
                 ? new ITransferItem[] { done, paused, failed, active }
                 : new ITransferItem[] { active, failed, paused, done };
-            CollectionAssert.AreEqual(expected, Sorted(TransferSortKey.State, groupByFolder: false, descending));
-            CollectionAssert.AreEqual(expected, Sorted(TransferSortKey.State, groupByFolder: true, descending, Folder("f1")));
+            CollectionAssert.AreEqual(expected, Sorted(TransferSortKey.Status, groupByFolder: false, descending));
+            CollectionAssert.AreEqual(expected, Sorted(TransferSortKey.Status, groupByFolder: true, descending, Folder("f1")));
         }
 
         // within a band: the last action, newest first, whichever way the bands run
@@ -285,7 +285,7 @@ namespace UnitTestCommon
             third.State = Done;
             second.State = Done;
 
-            CollectionAssert.AreEqual(new ITransferItem[] { third, second, first }, Sorted(TransferSortKey.State, groupByFolder: false, descending));
+            CollectionAssert.AreEqual(new ITransferItem[] { third, second, first }, Sorted(TransferSortKey.Status, groupByFolder: false, descending));
         }
 
         [Test]
@@ -296,7 +296,7 @@ namespace UnitTestCommon
             var b = Add("f1", "2.mp3", Paused, added);
             var c = Add("f1", "3.mp3", Paused, added);
 
-            CollectionAssert.AreEqual(new ITransferItem[] { a, b, c }, Sorted(TransferSortKey.State, groupByFolder: false));
+            CollectionAssert.AreEqual(new ITransferItem[] { a, b, c }, Sorted(TransferSortKey.Status, groupByFolder: false));
         }
 
         [Test]
@@ -306,7 +306,7 @@ namespace UnitTestCommon
             var b = Add("f1", "2.mp3", Done, 0);
             var stamped = Add("f1", "3.mp3", Done);
 
-            CollectionAssert.AreEqual(new ITransferItem[] { stamped, a, b }, Sorted(TransferSortKey.State, groupByFolder: false));
+            CollectionAssert.AreEqual(new ITransferItem[] { stamped, a, b }, Sorted(TransferSortKey.Status, groupByFolder: false));
         }
 
         [Test]
@@ -323,7 +323,7 @@ namespace UnitTestCommon
             var expected = descending
                 ? new[] { "done-new", "done-old", "paused", "failed", "active" }
                 : new[] { "active", "failed", "paused", "done-new", "done-old" };
-            CollectionAssert.AreEqual(expected, SortedFolderNames(TransferSortKey.State, descending));
+            CollectionAssert.AreEqual(expected, SortedFolderNames(TransferSortKey.Status, descending));
         }
 
         // --- folders ---
@@ -426,7 +426,7 @@ namespace UnitTestCommon
         public void Snapshot_State_FileRowChangesWithItsBandOrAnAction()
         {
             var a = Add("f1", "1.mp3", Pending);
-            var snapshot = Snapshot(TransferSortKey.State, groupByFolder: false);
+            var snapshot = Snapshot(TransferSortKey.Status, groupByFolder: false);
 
             a.State = Downloading;
             Assert.IsFalse(snapshot.HasSortKeyChanged(a));
@@ -445,7 +445,7 @@ namespace UnitTestCommon
         {
             var a = Add("f1", "1.mp3", Downloading);
             var b = Add("f1", "2.mp3", TransferStates.Queued | TransferStates.Remotely);
-            var snapshot = Snapshot(TransferSortKey.State, groupByFolder: true);
+            var snapshot = Snapshot(TransferSortKey.Status, groupByFolder: true);
 
             a.State = Done;
             Assert.IsFalse(snapshot.HasSortKeyChanged(a.Folder));

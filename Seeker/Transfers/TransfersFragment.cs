@@ -549,7 +549,7 @@ namespace Seeker
         {
             new SortSheetOption((int)TransferSortKey.DateAdded, Resource.String.sort_date_added, hasDirection: true, defaultDescending: true),
             new SortSheetOption((int)TransferSortKey.LastAction, Resource.String.sort_last_action, hasDirection: true, defaultDescending: true),
-            new SortSheetOption((int)TransferSortKey.State, Resource.String.sort_state, hasDirection: true, defaultDescending: false),
+            new SortSheetOption((int)TransferSortKey.Status, Resource.String.sort_status, hasDirection: true, defaultDescending: false),
             new SortSheetOption((int)TransferSortKey.FolderName, Resource.String.sort_folder_name, hasDirection: true, defaultDescending: false),
             new SortSheetOption((int)TransferSortKey.User, Resource.String.sort_user, hasDirection: true, defaultDescending: false),
         };
