@@ -179,7 +179,6 @@
     <string name="search_result_style_off">Off</string>
     <string name="search_result_style_on">On</string>
     <string name="expand_all">Expand all</string>
-    <string name="collapse_all">Collapse all</string>
 
     <string name="new_search_tab">New search</string>
     <string name="search_tabs_header">SEARCH TABS</string>
@@ -363,7 +362,7 @@
     <string name="allowed">Allowed</string>
     <string name="denied">Denied</string>
 
-    <string name="get_folder">Get folder</string>
+    <string name="get_folder">Show full folder</string>
 
     <string name="success_added_user">Successfully added user</string>
 
@@ -730,9 +729,7 @@
     <string name="NumFiles">Num files</string>
     <string name="NumSubfolders">Num subfolders</string>
 
-    <string name="HideTickerView">Hide ticker view</string>
     <string name="ShowTickerView">Show ticker view</string>
-    <string name="HideStatusView">Hide status view</string>
     <string name="ShowStatusView">Show status view</string>
 
     <string name="theUserJoined">joined</string>
@@ -752,7 +749,7 @@
     <string name="BrowseOnlyEmptyDir">User, {0}, is sharing only an empty directory.</string>
 
 
-    <string name="GetFolderDoesntWorkForLockedShares">Get folder does not work for locked shares.  Must use Browse or Browse at location instead.</string>
+    <string name="GetFolderDoesntWorkForLockedShares">Show full folder does not work for locked shares. Use Browse or Browse at location instead.</string>
     <string name="ImportWizard">Import wizard</string>
     <string name="Import">Import</string>
     <string name="SuccessfullyParsed">Successfully parsed! Tap next to proceed</string>
@@ -905,9 +902,6 @@
     <string name="CurrentIncompleteFolder">Incomplete folder</string>
     <string name="ClearFolder">Clear folder</string>
 
-    <string name="HideSize">Hide size</string>
-    <string name="HideSpeed">Hide speed</string>
-    <string name="HideTimeRemaining">Hide time remaining</string>
 
     <string name="Num_Selected">{0} selected</string>
     <string name="DeleteSelected">Delete selected</string>

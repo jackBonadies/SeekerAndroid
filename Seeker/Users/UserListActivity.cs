@@ -19,6 +19,7 @@
 
 using Seeker.Browse;
 using Seeker.Helpers;
+using Seeker.Helpers.AnchoredMenu;
 using Seeker.Messages;
 using Seeker.Users;
 using Android.App;
@@ -43,7 +44,20 @@ namespace Seeker
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
             MenuInflater.Inflate(Resource.Menu.user_list_menu, menu);
+            OverflowMenu.Attach(menu, Resource.Id.action_user_list_overflow, BuildOverflowMenu);
             return base.OnCreateOptionsMenu(menu);
+        }
+
+        private AnchoredMenuConfig BuildOverflowMenu()
+        {
+            var config = new AnchoredMenuConfig();
+            config.Rows.Add(new AnchoredMenuRow
+            {
+                IconResId = Resource.Drawable.account_cancel_outline,
+                Label = GetString(Resource.String.AddUserToIgnored),
+                OnClick = () => ShowEditTextDialogAddUserToList(true)
+            });
+            return config;
         }
 
         private void NotifyItemChanged(string username)
@@ -74,9 +88,6 @@ namespace Seeker
             {
                 case Resource.Id.add_user_action:
                     ShowEditTextDialogAddUserToList(false);
-                    return true;
-                case Resource.Id.add_user_to_ignored_action:
-                    ShowEditTextDialogAddUserToList(true);
                     return true;
                 case Resource.Id.sort_user_list_action:
                     SortBottomSheet.Show(SupportFragmentManager);

@@ -1,5 +1,6 @@
 using Android.Views;
 using Seeker.Helpers;
+using Seeker.Helpers.AnchoredMenu;
 using Seeker.Transfers;
 using Soulseek;
 using System;
@@ -20,36 +21,28 @@ namespace Seeker
             public bool OnCreateActionMode(ActionMode mode, IMenu menu)
             {
                 mode.MenuInflater.Inflate(Resource.Menu.transfers_menu_batch, menu);
+                OverflowMenu.Attach(menu, Resource.Id.action_transfers_batch_overflow, () => BuildOverflowMenu(mode), dismissWithAnchor: true);
                 UiHelpers.ApplyActionModeStatusBarInset(SeekerState.ActiveActivityRef);
                 return true;
             }
 
             public bool OnPrepareActionMode(ActionMode mode, IMenu menu)
             {
-                if (ViewState.BatchSelectedItems.Count == 0)
-                {
-                    menu.FindItem(Resource.Id.action_cancel_and_clear_all_batch).SetVisible(false);
-                }
-                else
-                {
-                    menu.FindItem(Resource.Id.action_cancel_and_clear_all_batch).SetVisible(true);
-                }
+                menu.FindItem(Resource.Id.action_cancel_and_clear_all_batch).SetVisible(ViewState.BatchSelectedItems.Count != 0);
+                return false;
+            }
 
-
-                if (ViewState.InUploadsMode)
+            private AnchoredMenuConfig BuildOverflowMenu(ActionMode mode)
+            {
+                if (TransfersActionMode == null)
                 {
-                    //the only thing you can do is clear and abort the selected
-                    menu.FindItem(Resource.Id.resume_selected_batch).SetVisible(false);
-                    menu.FindItem(Resource.Id.pause_selected_batch).SetVisible(false);
-                    menu.FindItem(Resource.Id.retry_all_failed_batch).SetVisible(false);
-                    return false;
+                    return null;
                 }
-                else
+                var ctx = Frag.Context ?? SeekerState.ActiveActivityRef;
+                var config = new AnchoredMenuConfig();
+                // uploads: the only thing you can do is clear and abort the selected (the bar's trash icon)
+                if (!ViewState.InUploadsMode)
                 {
-                    menu.FindItem(Resource.Id.resume_selected_batch).SetVisible(false);
-                    menu.FindItem(Resource.Id.pause_selected_batch).SetVisible(false);
-                    menu.FindItem(Resource.Id.retry_all_failed_batch).SetVisible(false);
-
                     List<TransferItem> transfersSelected = new List<TransferItem>();
                     foreach (ITransferItem iti in ViewState.BatchSelectedItems)
                     {
@@ -66,21 +59,47 @@ namespace Seeker
 
                     if (numPaused != 0)
                     {
-                        menu.FindItem(Resource.Id.resume_selected_batch).SetVisible(true);
+                        AddRow(config, Resource.Drawable.play_arrow_24, ctx.GetString(Resource.String.ResumeSelected), () => IfActive(() =>
+                        {
+                            Frag.RetryAllConditionEntry(false, true);
+                            NotifyChangedAndClear(Adapter);
+                            mode.Finish();
+                        }));
                     }
                     if (numInProgress != 0 || numQueued != 0)
                     {
-                        menu.FindItem(Resource.Id.pause_selected_batch).SetVisible(true);
+                        AddRow(config, Resource.Drawable.paused, ctx.GetString(Resource.String.PauseSelected), () => IfActive(() =>
+                        {
+                            TransferItems.TransferItemManagerWrapped.CancelSelectedItems(false);
+                            NotifyChangedAndClear(Adapter);
+                            Frag.ScheduleRebuildIfMutableSort();
+                            //since all selected stuff is going away. its what Gmail action mode does.
+                            mode.Finish();
+                        }));
                     }
                     if (numFailed != 0)
                     {
-                        menu.FindItem(Resource.Id.retry_all_failed_batch).SetVisible(true);
+                        AddRow(config, Resource.Drawable.baseline_refresh_white_24, ctx.GetString(Resource.String.RetryFailed), () => IfActive(() =>
+                        {
+                            Frag.RetryAllConditionEntry(true, true);
+                            NotifyChangedAndClear(Adapter);
+                            mode.Finish();
+                        }));
                     }
-
-                    //clear all complete??
-
+                    config.AddDivider();
                 }
-                return false;
+                AddRow(config, Resource.Drawable.select_all_24, ctx.GetString(Resource.String.SelectAll), () => IfActive(() => SelectAll(mode)));
+                AddRow(config, Resource.Drawable.ink_selection_24, ctx.GetString(Resource.String.InvertSelection), () => IfActive(() => InvertSelection(mode)));
+                return config;
+            }
+
+            // the mode can finish while the menu is open (a transfer completing clears the last selection)
+            private static void IfActive(Action action)
+            {
+                if (TransfersActionMode != null)
+                {
+                    action();
+                }
             }
 
             public bool OnActionItemClicked(ActionMode mode, IMenuItem item)
@@ -109,59 +128,56 @@ namespace Seeker
                         //since all selected stuff is going away. its what Gmail action mode does.
                         mode.Finish();
                         break;
-                    case Resource.Id.pause_selected_batch:
-                        TransferItems.TransferItemManagerWrapped.CancelSelectedItems(false);
-                        NotifyChangedAndClear(Adapter);
-                        Frag.ScheduleRebuildIfMutableSort();
-                        //since all selected stuff is going away. its what Gmail action mode does.
-                        mode.Finish();
-                        break;
-                    case Resource.Id.resume_selected_batch:
-                        Frag.RetryAllConditionEntry(false, true);
-                        NotifyChangedAndClear(Adapter);
-                        mode.Finish();
-                        break;
-                    case Resource.Id.retry_all_failed_batch:
-                        Frag.RetryAllConditionEntry(true, true);
-                        NotifyChangedAndClear(Adapter);
-                        mode.Finish();
-                        break;
-                    case Resource.Id.select_all:
-                        ViewState.BatchSelectedItems.Clear();
-                        foreach (ITransferItem iti in Adapter.Items)
-                        {
-                            ViewState.BatchSelectedItems.Add(iti);
-                        }
-                        int cnt = ViewState.BatchSelectedItems.Count;
-
-                        Adapter.NotifyDataSetChanged();
-
-                        mode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                        mode.Invalidate();
-                        return true;
-                    case Resource.Id.invert_selection:
-                        ForceOutIfZeroSelected = false;
-                        var inverted = new HashSet<ITransferItem>();
-                        foreach (ITransferItem iti in Adapter.Items)
-                        {
-                            if (!ViewState.BatchSelectedItems.Contains(iti))
-                            {
-                                inverted.Add(iti);
-                            }
-                        }
-                        ViewState.BatchSelectedItems.Clear();
-                        foreach (var iti in inverted)
-                        {
-                            ViewState.BatchSelectedItems.Add(iti);
-                        }
-
-                        Adapter.NotifyDataSetChanged();
-
-                        mode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), ViewState.BatchSelectedItems.Count.ToString());
-                        mode.Invalidate();
-                        return true;
                 }
                 return true;
+            }
+
+            private void SelectAll(ActionMode mode)
+            {
+                ViewState.BatchSelectedItems.Clear();
+                foreach (ITransferItem iti in Adapter.Items)
+                {
+                    ViewState.BatchSelectedItems.Add(iti);
+                }
+                int cnt = ViewState.BatchSelectedItems.Count;
+
+                Adapter.NotifyDataSetChanged();
+
+                mode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
+                mode.Invalidate();
+            }
+
+            private void InvertSelection(ActionMode mode)
+            {
+                ForceOutIfZeroSelected = false;
+                var inverted = new HashSet<ITransferItem>();
+                foreach (ITransferItem iti in Adapter.Items)
+                {
+                    if (!ViewState.BatchSelectedItems.Contains(iti))
+                    {
+                        inverted.Add(iti);
+                    }
+                }
+                ViewState.BatchSelectedItems.Clear();
+                foreach (var iti in inverted)
+                {
+                    ViewState.BatchSelectedItems.Add(iti);
+                }
+
+                Adapter.NotifyDataSetChanged();
+
+                mode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), ViewState.BatchSelectedItems.Count.ToString());
+                mode.Invalidate();
+            }
+
+            private static void AddRow(AnchoredMenuConfig config, int iconResId, string label, Action onClick)
+            {
+                config.Rows.Add(new AnchoredMenuRow
+                {
+                    IconResId = iconResId,
+                    Label = label,
+                    OnClick = onClick,
+                });
             }
 
             // for actions (pause/resume/retry) that mutate items in place: clear the selection and repaint those rows

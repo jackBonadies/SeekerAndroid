@@ -10,94 +10,11 @@
         app:showAsAction="always"
         android:iconifiedByDefault="false"
     />
-
+    <!-- Everything else lives in the anchored menu (BrowseFragment.BuildOverflowMenu). -->
     <item
-        android:id="@+id/action_browse_user"
-        android:title="@string/browse_user"
-        android:icon="@drawable/folder_account_outline"
-        app:iconTint="?attr/colorOnSurface"
-        app:showAsAction="never"
-        android:iconifiedByDefault="false"
+        android:id="@+id/action_browse_overflow"
+        android:title="@string/Options"
+        app:actionLayout="@layout/anchored_menu_overflow_button"
+        app:showAsAction="always"
     />
-
-    <item
-        android:id="@+id/action_download_files"
-        android:title="@string/download_folder"
-        android:icon="@drawable/download"
-        app:iconTint="?attr/colorOnSurface"
-        app:showAsAction="never"
-        android:iconifiedByDefault="false"
-    />
-
-    <item android:id="@+id/userOptions" android:title="@string/UserOptions">
-        <menu>
-            <item
-                android:id="@+id/action_add_user"
-                android:title="@string/add_user"
-                android:icon="@drawable/user_add"
-                app:iconTint="?attr/colorOnSurface"
-                app:showAsAction="never"
-                android:iconifiedByDefault="false"
-            />
-
-            <item
-                android:id="@+id/action_add_note"
-                android:title="@string/add_note"
-                android:icon="@drawable/user_note"
-                app:iconTint="?attr/colorOnSurface"
-                app:showAsAction="never"
-                android:iconifiedByDefault="false"
-            />
-
-            <item
-                android:id="@+id/action_get_user_info"
-                android:title="@string/get_user_info"
-                android:icon="@drawable/user_info"
-                app:iconTint="?attr/colorOnSurface"
-                app:showAsAction="never"
-                android:iconifiedByDefault="false"
-            />
-
-            <item
-                android:id="@+id/action_message_user"
-                android:title="@string/msg_user"
-                android:icon="@drawable/message_user"
-                app:iconTint="?attr/colorOnSurface"
-                app:showAsAction="never"
-                android:iconifiedByDefault="false"
-            />
-        </menu>
-    </item>
-
-    <item android:id="@+id/moreOptions" android:title="@string/more_options">
-        <menu>
-            <item
-                android:id="@+id/action_queue_folder_paused"
-                android:title="@string/QueueFolderAsPaused"
-                android:icon="@drawable/paused"
-                app:iconTint="?attr/colorOnSurface"
-                app:showAsAction="never"
-                android:iconifiedByDefault="false"
-            />
-
-            <item
-                android:id="@+id/action_show_folder_info"
-                android:title="@string/ShowFolderInfo"
-                android:icon="@drawable/information_outline"
-                app:iconTint="?attr/colorOnSurface"
-                app:showAsAction="never"
-                android:iconifiedByDefault="false"
-            />
-
-            <item
-                android:id="@+id/action_copy_folder_url"
-                android:title="@string/CopyFolderURL"
-                android:icon="@drawable/link_variant"
-                app:iconTint="?attr/colorOnSurface"
-                app:showAsAction="never"
-                android:iconifiedByDefault="false"
-            />
-
-        </menu>
-    </item>
 </menu>

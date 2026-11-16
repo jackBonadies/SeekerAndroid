@@ -34,6 +34,11 @@
         <item name="cornerSize">8dp</item>
     </style>
 
+    <style name="AnchoredMenuAnimation">
+        <item name="android:windowEnterAnimation">@anim/anchored_menu_enter</item>
+        <item name="android:windowExitAnimation">@anim/anchored_menu_exit</item>
+    </style>
+
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>

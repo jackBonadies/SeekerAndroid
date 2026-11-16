@@ -19,6 +19,8 @@
 
 using Seeker.Browse;
 using Seeker.Helpers;
+using Seeker.Helpers.AnchoredMenu;
+using Seeker.Helpers.ActionSheet;
 using Seeker.Messages;
 using Seeker.Services;
 using Android.Animation;
@@ -50,43 +52,24 @@ namespace Seeker
                 return false;
             }
             MenuInflater.Inflate(Resource.Menu.view_user_info_menu, menu);
+            OverflowMenu.Attach(menu, Resource.Id.action_view_user_info_overflow, BuildOverflowMenu);
             return base.OnCreateOptionsMenu(menu);
         }
 
-        public override bool OnPrepareOptionsMenu(IMenu menu)
+        private AnchoredMenuConfig BuildOverflowMenu()
         {
-            UiHelpers.SetMenuTitles(menu, userToView);
-            return base.OnPrepareOptionsMenu(menu);
+            if (HasNoUsername)
+            {
+                return null;
+            }
+            var userSection = ActionSheetActions.BuildUserActionsSection(userToView, this, null, new UserActionsOptions { ExcludeUserInfo = true });
+            return AnchoredMenuConfig.FromSection(userSection);
         }
 
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
-            if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted?.ToString(), userToView, this, null))
-            {
-                return true;
-            }
             switch (item.ItemId)
             {
-                case Resource.Id.browseUsersFiles:
-                    BrowseService.RequestFilesApi(userToView, null); 
-                    return true;
-                case Resource.Id.searchUserFiles:
-                    SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
-                    SearchTabHelper.SearchTargetChosenUser = this.userToView;
-                    Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                    intent.PutExtra(MainActivity.GoToSearchExtra, true);
-                    this.StartActivity(intent);
-                    return true;
-                case Resource.Id.messageUser:
-                    Intent intentMsg = new Intent(SeekerState.ActiveActivityRef, typeof(MessagesActivity));
-                    intentMsg.AddFlags(ActivityFlags.SingleTop);
-                    intentMsg.PutExtra(MessageController.FromUserName, this.userToView); //so we can go to this user..
-                    intentMsg.PutExtra(MessageController.ComingFromMessageTapped, true); //so we can go to this user..
-                    this.StartActivity(intentMsg);
-                    return true;
-                case Resource.Id.addUser:
-                    UserListService.AddUserAPI(SeekerState.ActiveActivityRef, this.userToView, null);
-                    return true;
                 case Android.Resource.Id.Home:
                     OnBackPressedDispatcher.OnBackPressed();
                     return true;

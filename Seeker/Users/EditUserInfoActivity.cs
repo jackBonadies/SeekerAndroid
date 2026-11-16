@@ -26,6 +26,7 @@ using Android.Widget;
 using AndroidX.Activity;
 using Java.Lang;
 using Seeker.Helpers;
+using Seeker.Helpers.AnchoredMenu;
 using System;
 using System.Linq;
 
@@ -39,7 +40,20 @@ namespace Seeker
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
             MenuInflater.Inflate(Resource.Menu.edit_user_info_menu, menu);
+            OverflowMenu.Attach(menu, Resource.Id.action_edit_user_info_overflow, BuildOverflowMenu);
             return base.OnCreateOptionsMenu(menu);
+        }
+
+        private AnchoredMenuConfig BuildOverflowMenu()
+        {
+            var config = new AnchoredMenuConfig();
+            config.Rows.Add(new AnchoredMenuRow
+            {
+                IconResId = Resource.Drawable.user_info,
+                Label = GetString(Resource.String.view_self),
+                OnClick = () => RequestedUserInfoHelper.LaunchUserInfoView(PreferencesState.Username)
+            });
+            return config;
         }
 
 
@@ -71,9 +85,6 @@ namespace Seeker
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.saved), ToastLength.Short);
                         this.InvalidateOptionsMenu();
                     }
-                    return true;
-                case Resource.Id.view_self_info_action:
-                    RequestedUserInfoHelper.LaunchUserInfoView(PreferencesState.Username);
                     return true;
                 case Android.Resource.Id.Home:
                     OnBackPressedDispatcher.OnBackPressed();
@@ -127,7 +138,6 @@ namespace Seeker
             SetContentView(Resource.Layout.edit_user_info_layout);
 
             AndroidX.AppCompat.Widget.Toolbar myToolbar = (AndroidX.AppCompat.Widget.Toolbar)FindViewById<AndroidX.AppCompat.Widget.Toolbar>(Resource.Id.edit_user_info_toolbar);
-            myToolbar.InflateMenu(Resource.Menu.messages_overview_list_menu);
             myToolbar.Title = this.GetString(Resource.String.edit_info);
             this.SetSupportActionBar(myToolbar);
             this.SupportActionBar.SetDisplayHomeAsUpEnabled(true);

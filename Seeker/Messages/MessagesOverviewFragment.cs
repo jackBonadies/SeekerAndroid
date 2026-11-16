@@ -6,6 +6,7 @@ using Android.Views;
 using Android.Widget;
 using AndroidX.RecyclerView.Widget;
 using Google.Android.Material.Snackbar;
+using Seeker.Helpers.AnchoredMenu;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -207,15 +208,14 @@ namespace Seeker.Messages
             public void OnCreateMenu(IMenu menu, MenuInflater menuInflater)
             {
                 menuInflater.Inflate(Resource.Menu.messages_overview_list_menu, menu);
-            }
-
-            public void OnPrepareMenu(IMenu menu)
-            {
-                menu.FindItem(Resource.Id.action_delete_all_messages)?.SetVisible(!MessageController.Messages.IsEmpty);
-                menu.FindItem(Resource.Id.mark_all_as_read_action)?.SetVisible(MessageController.GetTotalUnreadCount() > 0);
+                OverflowMenu.Attach(menu, Resource.Id.action_messages_overview_overflow, BuildOverflowMenu);
             }
 
 #pragma warning disable S1186 // Required override - omitting causes java.lang.AbstractMethodError at runtime
+            public void OnPrepareMenu(IMenu menu)
+            {
+            }
+
             public void OnMenuClosed(IMenu menu)
             {
             }
@@ -223,32 +223,54 @@ namespace Seeker.Messages
 
             public bool OnMenuItemSelected(IMenuItem item)
             {
+                return false;
+            }
+
+            private AnchoredMenuConfig BuildOverflowMenu()
+            {
                 var activity = fragment.Activity as MessagesActivity;
                 if (activity == null)
                 {
-                    return false;
+                    return null;
                 }
-                switch (item.ItemId)
+                var config = new AnchoredMenuConfig();
+                if (MessageController.GetTotalUnreadCount() > 0)
                 {
-                    case Resource.Id.mark_all_as_read_action:
-                        MessageController.MarkAllAsRead();
-                        fragment.recyclerAdapter.NotifyDataSetChanged();
-                        MessagesBroadcastReceiver.MarkAsReadFromNotification?.Invoke(null, null);
-                        return true;
-                    case Resource.Id.action_delete_all_messages:
-                        if (MessageController.Messages.IsEmpty)
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.mark_email_read_30dp,
+                        Label = activity.GetString(Resource.String.mark_all_as_read),
+                        OnClick = () =>
                         {
-                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.deleted_all_no_messages), ToastLength.Long);
-                            return true;
+                            MessageController.MarkAllAsRead();
+                            fragment.recyclerAdapter.NotifyDataSetChanged();
+                            MessagesBroadcastReceiver.MarkAsReadFromNotification?.Invoke(null, null);
                         }
-                        var (deletedAllMessages, deletedAllLastReadMessageCounts) = MessageController.DeleteAllMessagesWithUndo();
-                        fragment.RefreshAdapter();
-                        Snackbar sb = Snackbar.Make(fragment.View, SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong)
-                            .SetAction("Undo", (View v) => activity.GetUndoDeleteAllSnackBarAction(deletedAllMessages, deletedAllLastReadMessageCounts));
-                        sb.Show();
-                        return true;
+                    });
                 }
-                return false;
+                config.AddDivider();
+                config.Rows.Add(new AnchoredMenuRow
+                {
+                    IconResId = Resource.Drawable.trash_can_outline,
+                    Label = activity.GetString(Resource.String.delete_all_messages),
+                    Destructive = true,
+                    OnClick = () => DeleteAll(activity)
+                });
+                return config;
+            }
+
+            private void DeleteAll(MessagesActivity activity)
+            {
+                if (MessageController.Messages.IsEmpty)
+                {
+                    SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.deleted_all_no_messages), ToastLength.Long);
+                    return;
+                }
+                var (deletedAllMessages, deletedAllLastReadMessageCounts) = MessageController.DeleteAllMessagesWithUndo();
+                fragment.RefreshAdapter();
+                Snackbar sb = Snackbar.Make(fragment.View, SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_all_messages), Snackbar.LengthLong)
+                    .SetAction("Undo", (View v) => activity.GetUndoDeleteAllSnackBarAction(deletedAllMessages, deletedAllLastReadMessageCounts));
+                sb.Show();
             }
         }
     }

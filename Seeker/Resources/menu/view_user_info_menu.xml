@@ -1,14 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<!--For all properties see: https://aka.ms/android-menu-resource-->
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/addUser" android:title="@string/add_user" />
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+    <!-- Rows live in the anchored menu (ViewUserInfoActivity.BuildOverflowMenu). -->
     <item
-        android:id="@+id/browseUsersFiles"
-        android:title="@string/browse_files"
+        android:id="@+id/action_view_user_info_overflow"
+        android:title="@string/Options"
+        app:actionLayout="@layout/anchored_menu_overflow_button"
+        app:showAsAction="always"
     />
-    <item
-        android:id="@+id/searchUserFiles"
-        android:title="@string/search_user_files"
-    />
-    <item android:id="@+id/messageUser" android:title="@string/msg_user" />
 </menu>

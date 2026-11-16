@@ -30,6 +30,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Seeker.Helpers;
+using Seeker.Helpers.AnchoredMenu;
 using Seeker.Messages;
 using Common;
 namespace Seeker
@@ -73,7 +74,44 @@ namespace Seeker
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
         {
             inflater.Inflate(Resource.Menu.account_menu, menu);
+            OverflowMenu.Attach(menu, Resource.Id.action_home_overflow, BuildOverflowMenu);
             base.OnCreateOptionsMenu(menu, inflater);
+        }
+
+        private AnchoredMenuConfig BuildOverflowMenu()
+        {
+            var activity = Activity as MainActivity;
+            if (activity == null)
+            {
+                return null;
+            }
+            var config = new AnchoredMenuConfig();
+            config.Rows.Add(new AnchoredMenuRow
+            {
+                IconResId = Resource.Drawable.chat_bubble_outline_24,
+                Label = activity.GetString(Resource.String.messages),
+                OnClick = activity.OpenMessages
+            });
+            config.Rows.Add(new AnchoredMenuRow
+            {
+                IconResId = Resource.Drawable.outline_forum_white_24,
+                Label = activity.GetString(Resource.String.chatrooms),
+                OnClick = activity.OpenChatrooms
+            });
+            config.AddDivider();
+            config.Rows.Add(new AnchoredMenuRow
+            {
+                IconResId = Resource.Drawable.information_outline,
+                Label = activity.GetString(Resource.String.about_title),
+                OnClick = () => Seeker.Settings.Rows.AboutBottomSheet.Show(activity)
+            });
+            config.Rows.Add(new AnchoredMenuRow
+            {
+                IconResId = Resource.Drawable.power_settings_new_28dp,
+                Label = activity.GetString(Resource.String.shutdown),
+                OnClick = activity.Shutdown
+            });
+            return config;
         }
 
         public override void OnResume()

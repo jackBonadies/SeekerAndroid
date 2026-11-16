@@ -1,5 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<!--For all properties see: https://aka.ms/android-menu-resource-->
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -11,11 +10,11 @@
         app:iconTint="?attr/appBarIconColor"
         app:showAsAction="always"
     />
-
+    <!-- Everything else lives in the anchored menu (EditUserInfoActivity.BuildOverflowMenu). -->
     <item
-        android:id="@+id/view_self_info_action"
-        android:icon="@drawable/content_save_outline"
-        android:title="@string/view_self"
-        app:showAsAction="never"
+        android:id="@+id/action_edit_user_info_overflow"
+        android:title="@string/Options"
+        app:actionLayout="@layout/anchored_menu_overflow_button"
+        app:showAsAction="always"
     />
 </menu>

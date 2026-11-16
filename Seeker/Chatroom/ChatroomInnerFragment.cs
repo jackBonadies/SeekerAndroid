@@ -1162,13 +1162,7 @@ namespace Seeker.Chatroom
             public void OnCreateMenu(IMenu menu, MenuInflater menuInflater)
             {
                 menuInflater.Inflate(Resource.Menu.chatroom_inner_menu, menu);
-                var overflowItem = menu.FindItem(Resource.Id.action_chatroom_overflow);
-                var overflowView = overflowItem?.ActionView;
-                if (overflowView != null)
-                {
-                    overflowView.Click -= OnOverflowClick;
-                    overflowView.Click += OnOverflowClick;
-                }
+                OverflowMenu.Attach(menu, Resource.Id.action_chatroom_overflow, () => OurRoomInfo == null ? null : BuildConfig());
             }
 
 #pragma warning disable S1186 // Required override - omitting causes java.lang.AbstractMethodError at runtime
@@ -1184,21 +1178,6 @@ namespace Seeker.Chatroom
             public bool OnMenuItemSelected(IMenuItem item)
             {
                 return false;
-            }
-
-            private void OnOverflowClick(object sender, EventArgs e)
-            {
-                var anchor = sender as View;
-                if (anchor == null || OurRoomInfo == null)
-                {
-                    return;
-                }
-                var config = BuildConfig();
-                if (config.Rows.Count == 0)
-                {
-                    return;
-                }
-                AnchoredMenuPopup.Show(anchor, config);
             }
 
             private AnchoredMenuConfig BuildConfig()
@@ -1320,26 +1299,26 @@ namespace Seeker.Chatroom
                 var sub = new AnchoredMenuConfig();
                 sub.Rows.Add(new AnchoredMenuRow
                 {
+                    Kind = AnchoredMenuRowKind.Checkable,
                     IconResId = Resource.Drawable.pinboard_all_tickers_30dp,
-                    Label = ChatroomActivity.ShowTickerView
-                        ? ctx.GetString(Resource.String.HideTickerView)
-                        : ctx.GetString(Resource.String.ShowTickerView),
-                    OnClick = () =>
+                    Label = ctx.GetString(Resource.String.ShowTickerView),
+                    GetChecked = () => ChatroomActivity.ShowTickerView,
+                    OnChecked = isChecked =>
                     {
-                        ChatroomActivity.ShowTickerView = !ChatroomActivity.ShowTickerView;
+                        ChatroomActivity.ShowTickerView = isChecked;
                         fragment.SetTickerVisibility();
                         PreferencesManager.SaveShowTickerView();
                     }
                 });
                 sub.Rows.Add(new AnchoredMenuRow
                 {
+                    Kind = AnchoredMenuRowKind.Checkable,
                     IconResId = Resource.Drawable.person_text_user_status_view_30dp,
-                    Label = ChatroomActivity.ShowStatusesView
-                        ? ctx.GetString(Resource.String.HideStatusView)
-                        : ctx.GetString(Resource.String.ShowStatusView),
-                    OnClick = () =>
+                    Label = ctx.GetString(Resource.String.ShowStatusView),
+                    GetChecked = () => ChatroomActivity.ShowStatusesView,
+                    OnChecked = isChecked =>
                     {
-                        ChatroomActivity.ShowStatusesView = !ChatroomActivity.ShowStatusesView;
+                        ChatroomActivity.ShowStatusesView = isChecked;
                         fragment.SetActivityStatusesView();
                         PreferencesManager.SaveShowStatusesView();
                     }

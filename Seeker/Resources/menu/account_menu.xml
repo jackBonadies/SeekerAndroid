@@ -2,6 +2,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
 >
+    <!-- No ifRoom / never items: anything that does not fit would bring back the system overflow next to ours. -->
     <item
         android:id="@+id/user_list_action"
         android:icon="@drawable/baseline_group_white_24"
@@ -9,23 +10,6 @@
         app:iconTint="?attr/appBarIconColor"
         app:showAsAction="always"
     />
-
-    <item
-        android:id="@+id/messages_action"
-        android:icon="@drawable/baseline_chat_bubble_white_24"
-        android:title="@string/messages"
-        app:iconTint="?attr/appBarIconColor"
-        app:showAsAction="ifRoom"
-    />
-
-    <item
-        android:id="@+id/chatroom_action"
-        android:icon="@drawable/outline_forum_white_24"
-        android:title="@string/chatrooms"
-        app:iconTint="?attr/appBarIconColor"
-        app:showAsAction="ifRoom"
-    />
-
     <item
         android:id="@+id/settings_action"
         android:icon="@drawable/baseline_settings_white_24"
@@ -33,18 +17,10 @@
         app:iconTint="?attr/appBarIconColor"
         app:showAsAction="always"
     />
-
     <item
-        android:id="@+id/shutdown_action"
-        android:icon="@drawable/baseline_settings_white_24"
-        android:title="@string/shutdown"
-        app:showAsAction="never"
-    />
-
-    <item
-        android:id="@+id/about_action"
-        android:icon="@drawable/baseline_settings_white_24"
-        android:title="@string/about_title"
-        app:showAsAction="never"
+        android:id="@+id/action_home_overflow"
+        android:title="@string/Options"
+        app:actionLayout="@layout/anchored_menu_overflow_button"
+        app:showAsAction="always"
     />
 </menu>

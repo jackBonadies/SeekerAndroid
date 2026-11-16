@@ -18,11 +18,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Seeker.Helpers;
+using Seeker.Helpers.AnchoredMenu;
 
 using Common;
 namespace Seeker
 {
-    public partial class TransfersFragment : Fragment, PopupMenu.IOnMenuItemClickListener, ISortSheetHost
+    public partial class TransfersFragment : Fragment, ISortSheetHost
     {
         private static TransfersViewState ViewState => TransfersViewState.Instance;
 
@@ -49,145 +50,138 @@ namespace Seeker
         public override void OnCreateOptionsMenu(IMenu menu, MenuInflater inflater)
         {
             inflater.Inflate(Resource.Menu.transfers_menu, menu);
+            OverflowMenu.Attach(menu, Resource.Id.action_transfers_overflow, BuildOverflowMenu);
             base.OnCreateOptionsMenu(menu, inflater);
         }
 
         public override void OnPrepareOptionsMenu(IMenu menu)
         {
+            bool atRoot = ViewState.InUploadsMode
+                ? ViewState.CurrentlySelectedUploadFolder == null
+                : ViewState.CurrentlySelectedDLFolder == null;
+            menu.FindItem(Resource.Id.action_toggle_group_by)?.SetVisible(atRoot);
+            menu.FindItem(Resource.Id.action_toggle_download_upload)?.SetVisible(atRoot);
+            base.OnPrepareOptionsMenu(menu);
+        }
+
+        private AnchoredMenuConfig BuildOverflowMenu()
+        {
+            var ctx = Context;
+            if (ctx == null)
+            {
+                return null;
+            }
+            var config = new AnchoredMenuConfig();
             if (ViewState.InUploadsMode)
             {
-                menu.FindItem(Resource.Id.action_clear_all_complete_and_aborted).SetVisible(true);
-                menu.FindItem(Resource.Id.action_abort_all).SetVisible(true);
-                if (ViewState.CurrentlySelectedUploadFolder == null)
-                {
-                    menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(true);
-                    menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(true);
-
-
-                    //todo: menu options.  clear all completed and aborted
-                    //todo: menu options.  abort all - are you sure? dialog
-
-                    menu.FindItem(Resource.Id.action_resume_all).SetVisible(false);
-                    menu.FindItem(Resource.Id.action_pause_all).SetVisible(false);
-                    menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(false);
-                    menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(false);
-                    menu.FindItem(Resource.Id.retry_all_failed).SetVisible(false);
-
-                }
-                else
-                {
-
-
-                    menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(false);
-                    menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(false);
-
-                    menu.FindItem(Resource.Id.action_resume_all).SetVisible(false);
-                    menu.FindItem(Resource.Id.action_pause_all).SetVisible(false);
-                    menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(false);
-                    menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(false);
-                    menu.FindItem(Resource.Id.retry_all_failed).SetVisible(false);
-                }
+                AddRow(config, Resource.Drawable.clear_all_28dp, ctx.GetString(Resource.String.ClearAllCompleteAndAborted), ClearAllCompleteUploads);
+                config.AddDivider();
+                AddRow(config, Resource.Drawable.outline_cancel_white_24, ctx.GetString(Resource.String.AbortAll), AbortAllUploads, true);
             }
             else
             {
-                menu.FindItem(Resource.Id.action_abort_all).SetVisible(false); //nullref here...
-                menu.FindItem(Resource.Id.action_clear_all_complete_and_aborted).SetVisible(false);
-                if (ViewState.CurrentlySelectedDLFolder == null)
+                bool showResume = true;
+                bool showPause = true;
+                bool showClearComplete = true;
+                bool showRetry = true;
+                bool showCancelAndClear = true;
+                if (ViewState.CurrentlySelectedDLFolder != null)
                 {
-                    menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(true);
-                    menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(true);
-
-                    menu.FindItem(Resource.Id.action_resume_all).SetVisible(true);
-                    menu.FindItem(Resource.Id.action_pause_all).SetVisible(true);
-                    menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(true);
-                    menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(true);
-                    menu.FindItem(Resource.Id.retry_all_failed).SetVisible(true);
-                }
-                else
-                {
-
                     TransferViewHelper.GetStatusNumbers(ViewState.CurrentlySelectedDLFolder.TransferItems, out int numInProgress, out int numFailed, out int numPaused, out int numSucceeded, out int numQueued);
-                    //var state = ViewState.CurrentlySelectedDLFolder.GetState(out bool isFailed);
-
-                    if (numPaused != 0)
-                    {
-                        menu.FindItem(Resource.Id.action_resume_all).SetVisible(true);
-                    }
-                    else
-                    {
-                        menu.FindItem(Resource.Id.action_resume_all).SetVisible(false);
-                    }
-
-                    if (numInProgress != 0 || numQueued != 0)
-                    {
-                        menu.FindItem(Resource.Id.action_pause_all).SetVisible(true);
-                    }
-                    else
-                    {
-                        menu.FindItem(Resource.Id.action_pause_all).SetVisible(false);
-                    }
-
-                    if (numSucceeded != 0)
-                    {
-                        menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(true);
-                    }
-                    else
-                    {
-                        menu.FindItem(Resource.Id.action_clear_all_complete).SetVisible(false);
-                    }
-
-                    if (numFailed != 0)
-                    {
-                        menu.FindItem(Resource.Id.retry_all_failed).SetVisible(true);
-                    }
-                    else
-                    {
-                        menu.FindItem(Resource.Id.retry_all_failed).SetVisible(false);
-                    }
-
+                    showResume = numPaused != 0;
+                    showPause = numInProgress != 0 || numQueued != 0;
+                    showClearComplete = numSucceeded != 0;
+                    showRetry = numFailed != 0;
                     //i.e. if there are any not in the succeeded state that clear all complete would clear
-                    if (numFailed != 0 || numInProgress != 0 || numPaused != 0)
-                    {
-                        menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(true);
-                    }
-                    else
-                    {
-                        menu.FindItem(Resource.Id.action_cancel_and_clear_all).SetVisible(false);
-                    }
-
-                    menu.FindItem(Resource.Id.action_toggle_group_by).SetVisible(false);
-                    menu.FindItem(Resource.Id.action_toggle_download_upload).SetVisible(false);
+                    showCancelAndClear = numFailed != 0 || numInProgress != 0 || numPaused != 0;
+                }
+                if (showResume)
+                {
+                    AddRow(config, Resource.Drawable.play_arrow_24, ctx.GetString(Resource.String.resume_all), ResumeAllDownloads);
+                }
+                if (showPause)
+                {
+                    AddRow(config, Resource.Drawable.paused, ctx.GetString(Resource.String.pause_all), PauseAllDownloads);
+                }
+                if (showRetry)
+                {
+                    AddRow(config, Resource.Drawable.baseline_refresh_white_24, ctx.GetString(Resource.String.retry_all_failed), () => RetryAllConditionEntry(true, false));
+                }
+                if (showClearComplete)
+                {
+                    AddRow(config, Resource.Drawable.clear_all_28dp, ctx.GetString(Resource.String.clear_all_complete), ClearAllCompleteDownloads);
+                }
+                if (showCancelAndClear)
+                {
+                    config.AddDivider();
+                    AddRow(config, Resource.Drawable.trash_can_outline, ctx.GetString(Resource.String.cancel_and_clear_all), CancelAndClearAllDownloads, true);
                 }
             }
+            config.AddDivider();
+            config.Rows.Add(new AnchoredMenuRow
+            {
+                Kind = AnchoredMenuRowKind.Submenu,
+                IconResId = Resource.Drawable.settings_outline_30dp,
+                Label = ctx.GetString(Resource.String.Options),
+                SubMenu = BuildViewOptionsMenu(ctx),
+            });
+            return config;
+        }
 
-            if (PreferencesState.TransferViewShowSizes)
+        private AnchoredMenuConfig BuildViewOptionsMenu(Android.Content.Context ctx)
+        {
+            var sub = new AnchoredMenuConfig();
+            sub.Rows.Add(new AnchoredMenuRow
             {
-                menu.FindItem(Resource.Id.action_show_size).SetTitle(Resource.String.HideSize);
-            }
-            else
+                Kind = AnchoredMenuRowKind.Checkable,
+                IconResId = Resource.Drawable.hard_drive_24,
+                Label = ctx.GetString(Resource.String.ShowSize),
+                GetChecked = () => PreferencesState.TransferViewShowSizes,
+                OnChecked = isChecked =>
+                {
+                    PreferencesState.TransferViewShowSizes = isChecked;
+                    PreferencesManager.SaveTransferViewShowSizes();
+                    SetRecyclerAdapter(true);
+                }
+            });
+            sub.Rows.Add(new AnchoredMenuRow
             {
-                menu.FindItem(Resource.Id.action_show_size).SetTitle(Resource.String.ShowSize);
-            }
+                Kind = AnchoredMenuRowKind.Checkable,
+                IconResId = Resource.Drawable.speed_28dp,
+                Label = ctx.GetString(Resource.String.ShowSpeed),
+                GetChecked = () => PreferencesState.TransferViewShowSpeed,
+                OnChecked = isChecked =>
+                {
+                    PreferencesState.TransferViewShowSpeed = isChecked;
+                    PreferencesManager.SaveTransferViewShowSpeed();
+                    SetRecyclerAdapter(true);
+                }
+            });
+            sub.Rows.Add(new AnchoredMenuRow
+            {
+                Kind = AnchoredMenuRowKind.Checkable,
+                IconResId = Resource.Drawable.schedule_clock_28dp,
+                Label = ctx.GetString(Resource.String.ShowTimeRemaining),
+                GetChecked = () => PreferencesState.TransferViewShowTimeRemaining,
+                OnChecked = isChecked =>
+                {
+                    PreferencesState.TransferViewShowTimeRemaining = isChecked;
+                    PreferencesManager.SaveTransferViewShowTimeRemaining();
+                    SetRecyclerAdapter(true);
+                }
+            });
+            return sub;
+        }
 
-            if (PreferencesState.TransferViewShowSpeed)
+        private static void AddRow(AnchoredMenuConfig config, int iconResId, string label, Action onClick, bool destructive = false)
+        {
+            config.Rows.Add(new AnchoredMenuRow
             {
-                menu.FindItem(Resource.Id.action_show_speed).SetTitle(Resource.String.HideSpeed);
-            }
-            else
-            {
-                menu.FindItem(Resource.Id.action_show_speed).SetTitle(Resource.String.ShowSpeed);
-            }
-
-            if (PreferencesState.TransferViewShowTimeRemaining)
-            {
-                menu.FindItem(Resource.Id.action_show_time_remaining).SetTitle(Resource.String.HideTimeRemaining);
-            }
-            else
-            {
-                menu.FindItem(Resource.Id.action_show_time_remaining).SetTitle(Resource.String.ShowTimeRemaining);
-            }
-
-            base.OnPrepareOptionsMenu(menu);
+                IconResId = iconResId,
+                Label = label,
+                OnClick = onClick,
+                Destructive = destructive,
+            });
         }
 
         public void RefreshForModeSwitch()
@@ -205,19 +199,6 @@ namespace Seeker
                 case Android.Resource.Id.Home:
                     SeekerState.MainActivityRef.OnBackPressedDispatcher.OnBackPressed();
                     return true;
-                case Resource.Id.action_clear_all_complete: //clear all complete
-                    Logger.InfoFirebase("Clear All Complete Pressed");
-                    // TODO: move to helper (either TranferItemManager or Wrapper)
-                    if (ViewState.CurrentlySelectedDLFolder == null)
-                    {
-                        TransferItems.TransferItemManagerDL.ClearAllComplete();
-                    }
-                    else
-                    {
-                        TransferItems.TransferItemManagerDL.ClearAllCompleteFromFolder(ViewState.CurrentlySelectedDLFolder);
-                    }
-                    RebuildList();
-                    return true;
                 case Resource.Id.action_toggle_group_by: //toggle group by. group / ungroup by folder.
                     ViewState.GroupByFolder = !ViewState.GroupByFolder;
                     PreferencesManager.SaveTransferViewGroupByFolder();
@@ -226,110 +207,118 @@ namespace Seeker
                 case Resource.Id.action_sort:
                     SortBottomSheet.Show(ChildFragmentManager);
                     return true;
-                case Resource.Id.action_show_size:
-                    PreferencesState.TransferViewShowSizes = !PreferencesState.TransferViewShowSizes;
-                    PreferencesManager.SaveTransferViewShowSizes();
-                    SetRecyclerAdapter(true);
-                    return true;
-                case Resource.Id.action_show_speed:
-                    PreferencesState.TransferViewShowSpeed = !PreferencesState.TransferViewShowSpeed;
-                    PreferencesManager.SaveTransferViewShowSpeed();
-                    SetRecyclerAdapter(true);
-                    return true;
-                case Resource.Id.action_show_time_remaining:
-                    PreferencesState.TransferViewShowTimeRemaining = !PreferencesState.TransferViewShowTimeRemaining;
-                    PreferencesManager.SaveTransferViewShowTimeRemaining();
-                    SetRecyclerAdapter(true);
-                    return true;
-                case Resource.Id.action_clear_all_complete_and_aborted:
-                    Logger.InfoFirebase("Clear All Complete Pressed");
-                    // TODO: move to helper (either TranferItemManager or Wrapper)
-                    if (ViewState.CurrentlySelectedUploadFolder == null)
-                    {
-                        TransferItems.TransferItemManagerUploads.ClearAllComplete();
-                    }
-                    else
-                    {
-                        TransferItems.TransferItemManagerUploads.ClearAllCompleteFromFolder(ViewState.CurrentlySelectedUploadFolder);
-                    }
-                    RebuildList();
-                    return true;
                 case Resource.Id.action_toggle_download_upload:
                     ViewState.InUploadsMode = !ViewState.InUploadsMode;
                     PreferencesManager.SaveTransferViewInUploadsMode();
                     RefreshForModeSwitch();
                     return true;
-                case Resource.Id.action_cancel_and_clear_all: //cancel and clear all
-                    Logger.InfoFirebase("action_cancel_and_clear_all Pressed");
-                    TransferDebouncer.CancelAndClearAll.Trigger();
-                    // TODO: move to helper (either TranferItemManager or Wrapper)
-                    if (ViewState.CurrentlySelectedDLFolder == null)
-                    {
-                        TransferItems.TransferItemManagerDL.CancelAll(true);
-                        var cleanupItems = TransferItems.TransferItemManagerDL.ClearAllReturnCleanupItems();
-                        if (cleanupItems.Any()) TransferItems.TransferItemManagerWrapped.CleanupEntry(cleanupItems);
-                    }
-                    else
-                    {
-                        TransferItems.TransferItemManagerDL.CancelFolder(ViewState.CurrentlySelectedDLFolder, true);
-                        var cleanupItems = TransferItems.TransferItemManagerDL.ClearAllFromFolderReturnCleanupItems(ViewState.CurrentlySelectedDLFolder);
-                        if (cleanupItems.Any()) TransferItems.TransferItemManagerWrapped.CleanupEntry(cleanupItems);
-                    }
-                    RebuildList();
-                    return true;
-                case Resource.Id.action_abort_all: //abort all
-                    Logger.InfoFirebase("action_abort_all_pressed");
-                    TransferDebouncer.AbortAll.Trigger();
-                    // TODO: move to helper (either TranferItemManager or Wrapper)
-                    if (ViewState.CurrentlySelectedUploadFolder == null)
-                    {
-                        TransferItems.TransferItemManagerUploads.CancelAll();
-                    }
-                    else
-                    {
-                        TransferItems.TransferItemManagerUploads.CancelFolder(ViewState.CurrentlySelectedUploadFolder);
-                    }
-                    RebuildList();
-                    return true;
-                case Resource.Id.action_pause_all:
-                    Logger.InfoFirebase("pause all Pressed");
-                    TransferDebouncer.CancelAndClearAll.Trigger();
-                    // TODO: move to helper (either TranferItemManager or Wrapper)
-                    if (ViewState.CurrentlySelectedDLFolder == null)
-                    {
-                        TransferItems.TransferItemManagerDL.CancelAll();
-                    }
-                    else
-                    {
-                        TransferItems.TransferItemManagerDL.CancelFolder(ViewState.CurrentlySelectedDLFolder);
-                    }
-                    RebuildList();
-                    return true;
-                case Resource.Id.action_resume_all:
-                    Logger.InfoFirebase("resume all Pressed");
-                    // TODO: move to helper (either TranferItemManager or Wrapper)
-                    SessionService.Instance.RunWithReconnect(() =>
-                    {
-                        if (ViewState.CurrentlySelectedDLFolder == null)
-                            DownloadService.Instance.ResumeAllPaused();
-                        else
-                            DownloadService.Instance.ResumePausedFromFolder(ViewState.CurrentlySelectedDLFolder);
-                    });
-                    return true;
-                case Resource.Id.retry_all_failed:
-                    RetryAllConditionEntry(true, false);
-                    return true;
-                case Resource.Id.batch_select:
-                    TransfersActionModeCallback = new ActionModeCallback() { Frag = this };
-                    ForceOutIfZeroSelected = false;
-                    TransfersActionMode = SeekerState.MainActivityRef.StartSupportActionMode(TransfersActionModeCallback);
-                    recyclerTransferAdapter.IsInBatchSelectMode = true;
-                    recyclerTransferAdapter.NotifyDataSetChanged();
-                    TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), 0);
-                    TransfersActionMode.Invalidate();
-                    return true;
             }
             return base.OnOptionsItemSelected(item);
+        }
+
+        private void ClearAllCompleteDownloads()
+        {
+            Logger.InfoFirebase("Clear All Complete Pressed");
+            // TODO: move to helper (either TranferItemManager or Wrapper)
+            if (ViewState.CurrentlySelectedDLFolder == null)
+            {
+                TransferItems.TransferItemManagerDL.ClearAllComplete();
+            }
+            else
+            {
+                TransferItems.TransferItemManagerDL.ClearAllCompleteFromFolder(ViewState.CurrentlySelectedDLFolder);
+            }
+            RebuildList();
+        }
+
+        private void ClearAllCompleteUploads()
+        {
+            Logger.InfoFirebase("Clear All Complete Pressed");
+            // TODO: move to helper (either TranferItemManager or Wrapper)
+            if (ViewState.CurrentlySelectedUploadFolder == null)
+            {
+                TransferItems.TransferItemManagerUploads.ClearAllComplete();
+            }
+            else
+            {
+                TransferItems.TransferItemManagerUploads.ClearAllCompleteFromFolder(ViewState.CurrentlySelectedUploadFolder);
+            }
+            RebuildList();
+        }
+
+        private void CancelAndClearAllDownloads()
+        {
+            Logger.InfoFirebase("action_cancel_and_clear_all Pressed");
+            TransferDebouncer.CancelAndClearAll.Trigger();
+            // TODO: move to helper (either TranferItemManager or Wrapper)
+            if (ViewState.CurrentlySelectedDLFolder == null)
+            {
+                TransferItems.TransferItemManagerDL.CancelAll(true);
+                var cleanupItems = TransferItems.TransferItemManagerDL.ClearAllReturnCleanupItems();
+                if (cleanupItems.Any())
+                {
+                    TransferItems.TransferItemManagerWrapped.CleanupEntry(cleanupItems);
+                }
+            }
+            else
+            {
+                TransferItems.TransferItemManagerDL.CancelFolder(ViewState.CurrentlySelectedDLFolder, true);
+                var cleanupItems = TransferItems.TransferItemManagerDL.ClearAllFromFolderReturnCleanupItems(ViewState.CurrentlySelectedDLFolder);
+                if (cleanupItems.Any())
+                {
+                    TransferItems.TransferItemManagerWrapped.CleanupEntry(cleanupItems);
+                }
+            }
+            RebuildList();
+        }
+
+        private void AbortAllUploads()
+        {
+            Logger.InfoFirebase("action_abort_all_pressed");
+            TransferDebouncer.AbortAll.Trigger();
+            // TODO: move to helper (either TranferItemManager or Wrapper)
+            if (ViewState.CurrentlySelectedUploadFolder == null)
+            {
+                TransferItems.TransferItemManagerUploads.CancelAll();
+            }
+            else
+            {
+                TransferItems.TransferItemManagerUploads.CancelFolder(ViewState.CurrentlySelectedUploadFolder);
+            }
+            RebuildList();
+        }
+
+        private void PauseAllDownloads()
+        {
+            Logger.InfoFirebase("pause all Pressed");
+            TransferDebouncer.CancelAndClearAll.Trigger();
+            // TODO: move to helper (either TranferItemManager or Wrapper)
+            if (ViewState.CurrentlySelectedDLFolder == null)
+            {
+                TransferItems.TransferItemManagerDL.CancelAll();
+            }
+            else
+            {
+                TransferItems.TransferItemManagerDL.CancelFolder(ViewState.CurrentlySelectedDLFolder);
+            }
+            RebuildList();
+        }
+
+        private void ResumeAllDownloads()
+        {
+            Logger.InfoFirebase("resume all Pressed");
+            // TODO: move to helper (either TranferItemManager or Wrapper)
+            SessionService.Instance.RunWithReconnect(() =>
+            {
+                if (ViewState.CurrentlySelectedDLFolder == null)
+                {
+                    DownloadService.Instance.ResumeAllPaused();
+                }
+                else
+                {
+                    DownloadService.Instance.ResumePausedFromFolder(ViewState.CurrentlySelectedDLFolder);
+                }
+            });
         }
 
         public void RetryAllConditionEntry(bool failed, bool batchSelectedOnly)
@@ -701,29 +690,6 @@ namespace Seeker
         private void TransferQueueStateChanged(object sender, TransferItem e)
         {
             SeekerApplication.RunOnUIThread(() => RepaintTransferRow(e));
-        }
-
-        private void TransferOptions_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                PopupMenu popup = new PopupMenu(SeekerState.MainActivityRef, sender as View);
-                popup.SetOnMenuItemClickListener(this);//  setOnMenuItemClickListener(MainActivity.this);
-                popup.Inflate(Resource.Menu.transfers_options);
-                popup.Show();
-            }
-            catch (System.Exception error)
-            {
-                //in response to a crash android.view.WindowManager.BadTokenException
-                //This crash is usually caused by your app trying to display a dialog using a previously-finished Activity as a context.
-                //in this case not showing it is probably best... as opposed to a crash...
-                Logger.Firebase(error.Message + " POPUP BAD ERROR");
-            }
-        }
-
-        public bool OnMenuItemClick(IMenuItem item)
-        {
-            return false;
         }
 
 

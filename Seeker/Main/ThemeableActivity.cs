@@ -47,6 +47,22 @@ namespace Seeker
             base.OnCreate(savedInstanceState);
         }
 
+        protected override void OnPostCreate(Bundle savedInstanceState)
+        {
+            base.OnPostCreate(savedInstanceState);
+            // Edge-to-edge: in landscape the nav bar / cutout sits on a side and covered the toolbar's
+            // end icons. Left/right insets are 0 in portrait, so this is a no-op there.
+            // MainActivity pads its own main_root.
+            if (this is not MainActivity)
+            {
+                var content = FindViewById(Android.Resource.Id.Content);
+                if (content != null)
+                {
+                    ViewCompat.SetOnApplyWindowInsetsListener(content, new HorizontalInsetsListener());
+                }
+            }
+        }
+
         protected override void AttachBaseContext(Context @base)
         {
             if (!LocaleHelper.HasProperPerAppLanguageSupport() && PreferencesState.Language != PreferencesState.FieldLangAuto)
