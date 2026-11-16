@@ -33,6 +33,15 @@ namespace Seeker.Helpers.AnchoredMenu
             return popup;
         }
 
+        // Below the anchor, end edges aligned (above it when there is more room there), for menus
+        // opened from a view rather than the app bar.
+        public static AnchoredMenuPopup ShowAsDropDown(View anchor, AnchoredMenuConfig config)
+        {
+            var popup = new AnchoredMenuPopup(GetThemedContext(anchor), config);
+            popup.ShowBelow(anchor);
+            return popup;
+        }
+
         // An action view's context is the toolbar's app bar overlay theme (a dark ActionBar
         // overlay in the classic light themes), so resolve colours against the Activity instead.
         private static Context GetThemedContext(View anchor)
@@ -68,7 +77,7 @@ namespace Seeker.Helpers.AnchoredMenu
             this.rootConfig = config;
         }
 
-        private void ShowAt(View anchor, bool dismissWithAnchor)
+        private int CreateWindow()
         {
             var inflater = LayoutInflater.From(context);
             container = inflater.Inflate(Resource.Layout.anchored_menu_container, null);
@@ -87,6 +96,18 @@ namespace Seeker.Helpers.AnchoredMenu
             window.AnimationStyle = Resource.Style.AnchoredMenuAnimation;
             window.SetBackgroundDrawable(
                 AndroidX.Core.Content.ContextCompat.GetDrawable(context, Resource.Drawable.anchored_menu_background));
+            window.DismissEvent += OnDismissed;
+            return widthPx;
+        }
+
+        private int DpToPx(int dp)
+        {
+            return (int)(dp * context.Resources.DisplayMetrics.Density + 0.5f);
+        }
+
+        private void ShowAt(View anchor, bool dismissWithAnchor)
+        {
+            int widthPx = CreateWindow();
 
             int statusBarHeight = 0;
             int navBarHeight = 0;
@@ -105,9 +126,9 @@ namespace Seeker.Helpers.AnchoredMenu
                 }
             }
 
-            int marginRightPx = (int)(PopupMarginRight * density + 0.5f);
-            int marginTopPx = (int)(PopupMarginTop * density + 0.5f);
-            int marginBottomPx = (int)(PopupMarginBottom * density + 0.5f);
+            int marginRightPx = DpToPx(PopupMarginRight);
+            int marginTopPx = DpToPx(PopupMarginTop);
+            int marginBottomPx = DpToPx(PopupMarginBottom);
 
             int top = marginTopPx + statusBarHeight;
             maxHeightPx = anchor.RootView.Height - top - navBarHeight - marginBottomPx;
@@ -120,9 +141,21 @@ namespace Seeker.Helpers.AnchoredMenu
                 anchorWatchView = anchor;
                 anchorWatchView.ViewDetachedFromWindow += OnHostDetached;
             }
-            window.DismissEvent += OnDismissed;
 
             window.ShowAtLocation(anchor, GravityFlags.Top | GravityFlags.End, marginRightPx, top);
+        }
+
+        private void ShowBelow(View anchor)
+        {
+            int widthPx = CreateWindow();
+
+            maxHeightPx = window.GetMaxAvailableHeight(anchor) - DpToPx(PopupMarginBottom);
+            FitHeight(widthPx);
+
+            detachWatchView = anchor.RootView;
+            detachWatchView.ViewDetachedFromWindow += OnHostDetached;
+
+            window.ShowAsDropDown(anchor, -DpToPx(PopupMarginRight), 0, GravityFlags.End);
         }
 
         // A PopupWindow taller than the screen is clipped, not scrolled, so cap the list.
