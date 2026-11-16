@@ -19,6 +19,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Seeker.Helpers;
 using Seeker.Helpers.AnchoredMenu;
+using Seeker.Helpers.ActionSheet;
 
 using Common;
 namespace Seeker
@@ -424,8 +425,6 @@ namespace Seeker
             this.setupUpSharing = rootView.FindViewById<Button>(Resource.Id.setUpSharing);
             this.setupUpSharing.Click += SetupUpSharing_Click;
 
-            this.RegisterForContextMenu(recyclerViewTransferItems); //doesnt work for recycle views
-
             SetNoTransfersMessage();
 
             recycleLayoutManager = new CustomLinearLayoutManager(Activity);
@@ -780,222 +779,336 @@ namespace Seeker
             return false;
         }
 
-        public override bool OnContextItemSelected(IMenuItem item)
+        public void ShowTransferContextMenu(ITransferItem item)
         {
-            if (item.GroupId == UNIQUE_TRANSFER_GROUP_ID)
+            Context ctx = this.Context;
+            if (item == null || ctx == null)
             {
-                if (recyclerTransferAdapter == null)
+                return;
+            }
+
+            TransferItem ti = item as TransferItem;
+            FolderItem fi = item as FolderItem;
+            bool isUpload = item.IsUpload();
+            TransferStates folderState = TransferStates.None;
+            bool anyFailed = false;
+            if (fi != null)
+            {
+                folderState = fi.GetState(out anyFailed, out _);
+            }
+
+            var rows = new List<ActionSheetRow>();
+            void AddRow(int iconResId, int labelResId, Action<ITransferItem> action, bool destructive = false)
+            {
+                rows.Add(new ActionSheetRow
                 {
-                    Logger.InfoFirebase("recyclerTransferAdapter is null");
+                    IconResId = iconResId,
+                    Label = ctx.GetString(labelResId),
+                    Destructive = destructive,
+                    OnClick = () => RunIfStillListed(item, action),
+                });
+            }
+
+            // primary action
+            if (isUpload)
+            {
+                if (ti != null && !SimpleHelpers.IsUploadCompleteOrAborted(ti.State))
+                {
+                    AddRow(Resource.Drawable.outline_cancel_white_24, Resource.String.AbortUpload, AbortUpload);
                 }
-
-                ITransferItem ti = recyclerTransferAdapter.getSelectedItem();
-
-                if (ti == null)
+                else if (fi != null && !SimpleHelpers.IsUploadCompleteOrAborted(folderState))
                 {
-                    Logger.InfoFirebase("ti is null");
-                }
-
-                if (recyclerTransferAdapter.PositionOf(ti) == -1)
-                {
-                    SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
-                    return base.OnContextItemSelected(item);
-                }
-
-                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), ti.GetUsername(), SeekerState.ActiveActivityRef, this.View))
-                {
-                    Logger.Debug("handled by commons");
-                    return base.OnContextItemSelected(item);
-                }
-
-                switch ((TransferContextMenuItem)item.ItemId)
-                {
-                    case TransferContextMenuItem.RetryResumeDownload: //single transfer only
-                        //retry download (resume download)
-                        if (NotLoggedInShowMessageGaurd("start transfer"))
-                        {
-                            return true;
-                        }
-
-                        SessionService.Instance.RunWithReconnect(() => DownloadRetryLogic(ti as TransferItem));
-                        //Toast.MakeText(Applicatio,"Retrying...",ToastLength.Short).Show();
-                        break;
-                    case TransferContextMenuItem.ClearFromList:
-                        Logger.InfoFirebase("Clear Complete item pressed");
-                        if (ViewState.InUploadsMode)
-                        {
-                            // Uploads have no incomplete file to clean up.
-                            if (ti is TransferItem tiUpload)
-                            {
-                                TransferItems.TransferItemManagerWrapped.Remove(tiUpload);
-                            }
-                            else if (ti is FolderItem fiUpload)
-                            {
-                                TransferItems.TransferItemManagerWrapped.ClearAllFromFolder(fiUpload);
-                            }
-                        }
-                        else
-                        {
-                            if (ti is TransferItem tiDownload)
-                            {
-                                TransferItems.TransferItemManagerWrapped.RemoveAndCleanUp(tiDownload);
-                            }
-                            else if (ti is FolderItem fiDownload)
-                            {
-                                TransferItems.TransferItemManagerWrapped.RemoveAndCleanUp(fiDownload);
-                            }
-                        }
-                        RemoveRow(ti);
-                        break;
-                    case TransferContextMenuItem.CancelAndClear: //cancel and clear (downloads) OR abort and clear (uploads)
-                        Logger.InfoFirebase("Cancel and Clear item pressed");
-                        if (ti is TransferItem tti)
-                        {
-                            TransferState.CancelAndRemoveToken(tti);
-                            // TODO MOVE
-                            if (ViewState.InUploadsMode)
-                            {
-                                TransferItems.TransferItemManagerWrapped.Remove(tti);
-                            }
-                            else
-                            {
-                                TransferItems.TransferItemManagerWrapped.RemoveAndCleanUp(tti); //this means basically, wait for the stream to be closed. no race conditions..
-                            }
-                            RemoveRow(ti);
-                        }
-                        else if (ti is FolderItem fi)
-                        {
-                            TransferItems.TransferItemManagerWrapped.CancelFolder(fi, true);
-                            TransferItems.TransferItemManagerWrapped.ClearAllFromFolderAndClean(fi);
-                            RemoveRow(ti);
-                        }
-                        else
-                        {
-                            Logger.InfoFirebase("Cancel and Clear item pressed - bad item");
-                        }
-                        break;
-                    case TransferContextMenuItem.RefreshQueuePosition:
-                        if (NotLoggedInShowMessageGaurd("get queue position"))
-                        {
-                            return true;
-                        }
-
-                        //the folder implementation will re-request all queued files
-                        //recently I thought of just doing the lowest, but then if the lowest is ready, it will download leaving the other transfers behind.
-
-                        // TODO MOVE
-                        if (ti is TransferItem tiQueue)
-                        {
-                            GetQueuePosition(tiQueue);
-                        }
-                        else if (ti is FolderItem folderItem)
-                        {
-                            lock (folderItem.TransferItems)
-                            {
-                                foreach (TransferItem transferItem in folderItem.TransferItems.Where(ti => ti.State.HasFlag(TransferStates.Queued) && ti.State.HasFlag(TransferStates.Remotely)))
-                                {
-                                    GetQueuePosition(transferItem);
-                                }
-                            }
-                        }
-                        break;
-                    case TransferContextMenuItem.PlayFile:
-                        TransferItem tiPlay = ti as TransferItem;
-                        try
-                        {
-                            //tested on API25 and API30
-                            //AndroidX.Core.Content.FileProvider
-                            Android.Net.Uri uriToUse = null;
-                            if (PlatformInfo.UseLegacyStorage() && SimpleHelpers.IsFileUri(tiPlay.FinalUri)) //i.e. if it is a FILE URI.
-                            {
-                                uriToUse = AndroidX.Core.Content.FileProvider.GetUriForFile(this.Context, this.Context.ApplicationContext.PackageName + ".provider", new Java.IO.File(Android.Net.Uri.Parse(tiPlay.FinalUri).Path));
-                            }
-                            else
-                            {
-                                uriToUse = Android.Net.Uri.Parse(tiPlay.FinalUri);
-                            }
-                            Intent playFileIntent = new Intent(Intent.ActionView);
-                            //playFileIntent.SetDataAndType(uriToUse,"audio/*");
-                            playFileIntent.SetDataAndType(uriToUse, MediaMimeTypes.GetMimeTypeFromFilename(tiPlay.FullFilename));   //works
-                            playFileIntent.AddFlags(ActivityFlags.GrantReadUriPermission | /*ActivityFlags.NewTask |*/ ActivityFlags.GrantWriteUriPermission); //works.  newtask makes it go to foobar and immediately jump back
-                            //Intent chooser = Intent.CreateChooser(playFileIntent, "Play song with");
-                            this.StartActivity(playFileIntent); //also the chooser isnt needed.  if you show without the chooser, it will show you the options and you can check Only Once, Always.
-                        }
-                        catch (System.Exception e)
-                        {
-                            Logger.Firebase(e.Message + e.StackTrace);
-                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_play), ToastLength.Short); //normally bc no player is installed.
-                        }
-                        break;
-                    case TransferContextMenuItem.BrowseAtLocation: //browse at location (browse at folder)
-                        if (NotLoggedInShowMessageGaurd("browse folder"))
-                        {
-                            return true;
-                        }
-                        if (ti is TransferItem ttti)
-                        {
-                            string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(ttti.FullFilename);
-                            BrowseService.RequestFilesApi(ttti.Username, startingDir);
-                        }
-                        else if (ti is FolderItem fi)
-                        {
-                            if (fi.IsEmpty())
-                            {
-                                //since if auto clear is on, and the menu is already up, the final item in this folder can clear before we end up selecting something.
-                                SeekerApplication.Toaster.ShowToast("Folder is empty.", ToastLength.Short);
-                                return true;
-                            }
-                            string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(fi.TransferItems[0].FullFilename);
-                            for (int i = 0; i < fi.GetDirectoryLevel() - 1; i++)
-                            {
-                                startingDir = SimpleHelpers.GetDirectoryRequestFolderName(startingDir); //keep going up..
-                            }
-                            BrowseService.RequestFilesApi(fi.Username, startingDir);
-                        }
-                        break;
-                    case TransferContextMenuItem.ResumeFolder: //resume folder
-                        if (NotLoggedInShowMessageGaurd("resume folder"))
-                        {
-                            return true;
-                        }
-                        Logger.InfoFirebase("resume folder Pressed");
-                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.ResumePausedFromFolder(ti as FolderItem));
-                        break;
-                    case TransferContextMenuItem.PauseFolderOrAbortUploads: //pause folder or abort uploads (uploads)
-                        TransferItems.TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
-                        recyclerTransferAdapter.RepaintRow(ti);
-                        ScheduleRebuildIfMutableSort();
-                        break;
-                    case TransferContextMenuItem.RetryFailedFiles: //retry failed downloads from folder
-                        if (NotLoggedInShowMessageGaurd("retry folder"))
-                        {
-                            return true;
-                        }
-                        Logger.InfoFirebase("retry folder Pressed");
-                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.RetryFailedFromFolder(ti as FolderItem));
-                        break;
-                    case TransferContextMenuItem.AbortUpload: //abort upload
-                        Logger.InfoFirebase("Abort Upload item pressed");
-                        TransferItem uploadToCancel = ti as TransferItem;
-                        uploadToCancel.MarkUserPause(TransferBands.NextStamp());
-                        TransferState.CancelAndRemoveToken(uploadToCancel);
-                        RepaintTransferRow(uploadToCancel);
-                        break;
-                    case TransferContextMenuItem.IgnoreUnshareUser: //ignore (unshare) user
-                        Logger.InfoFirebase("Unshare User item pressed");
-                        IEnumerable<TransferItem> tItems = TransferItems.TransferItemManagerWrapped.GetTransferItemsForUser(ti.GetUsername());
-                        long ignoreStamp = TransferBands.NextStamp();
-                        foreach (var tiToCancel in tItems)
-                        {
-                            tiToCancel.MarkUserPause(ignoreStamp);
-                            TransferState.CancelAndRemoveToken(tiToCancel);
-                        }
-                        RepaintTransferRows(tItems);
-                        UserListService.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, ti.GetUsername());
-                        break;
+                    AddRow(Resource.Drawable.outline_cancel_white_24, Resource.String.AbortUploads, PauseFolder);
                 }
             }
-            return base.OnContextItemSelected(item);
+            else if (ti != null)
+            {
+                if (ti.State.HasFlag(TransferStates.Cancelled))
+                {
+                    AddRow(Resource.Drawable.play_arrow_24, Resource.String.resume_dl, RetryDownload);
+                }
+                else if (!ti.State.HasFlag(TransferStates.Succeeded))
+                {
+                    AddRow(Resource.Drawable.baseline_refresh_white_24, Resource.String.retry_dl, RetryDownload);
+                }
+            }
+            else if (fi != null)
+            {
+                if (folderState.HasFlag(TransferStates.Cancelled))
+                {
+                    AddRow(Resource.Drawable.play_arrow_24, Resource.String.ResumeFolder, ResumeFolder);
+                }
+                else if (!folderState.HasFlag(TransferStates.Completed) && !folderState.HasFlag(TransferStates.Succeeded) && !folderState.HasFlag(TransferStates.Errored) && !folderState.HasFlag(TransferStates.TimedOut) && !folderState.HasFlag(TransferStates.Rejected))
+                {
+                    AddRow(Resource.Drawable.paused, Resource.String.PauseFolder, PauseFolder);
+                }
+            }
+
+            if (!isUpload)
+            {
+                if (fi != null && (folderState.HasFlag(TransferStates.TimedOut) || folderState.HasFlag(TransferStates.Rejected) || folderState.HasFlag(TransferStates.Errored) || anyFailed))
+                {
+                    AddRow(Resource.Drawable.baseline_refresh_white_24, Resource.String.RetryFailedFiles, RetryFailedFiles);
+                }
+
+                // the queue length of a succeeded download can be 183 (queue length AND free upload slots)
+                TransferStates queueState = ti != null ? ti.State : folderState;
+                int queueLength = ti != null ? ti.QueueLength : fi.GetQueueLength();
+                if (queueLength > 0 && !queueState.HasFlag(TransferStates.Succeeded) && !queueState.HasFlag(TransferStates.Completed))
+                {
+                    AddRow(Resource.Drawable.schedule_clock_28dp, Resource.String.refresh_queue_pos, RefreshQueuePosition);
+                }
+
+                if (ti != null && ti.State.HasFlag(TransferStates.Succeeded) && ti.FinalUri != string.Empty)
+                {
+                    AddRow(Resource.Drawable.open_in_new, Resource.String.play_file, PlayFile);
+                }
+            }
+
+            AddRow(Resource.Drawable.folder_outline, Resource.String.browse_at_location, BrowseAtLocation);
+
+            string username = item.GetUsername();
+            rows.Add(new ActionSheetRow
+            {
+                IconResId = Resource.Drawable.user_person,
+                Label = ctx.GetString(Resource.String.UserOptions),
+                OnClick = () =>
+                {
+                    var userSection = ActionSheetActions.BuildUserActionsSection(username, ctx, this.View, new UserActionsOptions { IncludeGivePrivileges = true });
+                    IconMenuDialog.Show(ctx, userSection.Rows, username);
+                },
+            });
+
+            bool finished = isUpload
+                ? SimpleHelpers.IsUploadCompleteOrAborted(ti != null ? ti.State : folderState)
+                : (ti != null ? ti.State : folderState).HasFlag(TransferStates.Succeeded);
+            if (finished)
+            {
+                AddRow(Resource.Drawable.baseline_close_white_24, Resource.String.clear_from_list, ClearFromList);
+            }
+            else
+            {
+                int label = isUpload
+                    ? (ti != null ? Resource.String.AbortandClearUpload : Resource.String.AbortandClearUploads)
+                    : Resource.String.cancel_and_clear;
+                AddRow(Resource.Drawable.trash_can_outline, label, CancelAndClear, true);
+            }
+
+            if (isUpload)
+            {
+                AddRow(Resource.Drawable.account_cancel_outline, Resource.String.IgnoreUnshareUser, IgnoreUnshareUser, true);
+            }
+
+            IconMenuDialog.Show(ctx, rows);
+        }
+
+        // the row can be cleared (auto clear, another action) while the menu is up
+        private void RunIfStillListed(ITransferItem item, Action<ITransferItem> action)
+        {
+            if (recyclerTransferAdapter == null || recyclerTransferAdapter.PositionOf(item) == -1)
+            {
+                SeekerApplication.Toaster.ShowToast("Selected transfer does not exist anymore.. try again.", ToastLength.Short);
+                return;
+            }
+            action(item);
+        }
+
+        private void RetryDownload(ITransferItem ti)
+        {
+            if (NotLoggedInShowMessageGaurd("start transfer"))
+            {
+                return;
+            }
+            SessionService.Instance.RunWithReconnect(() => DownloadRetryLogic(ti as TransferItem));
+        }
+
+        private void ClearFromList(ITransferItem ti)
+        {
+            Logger.InfoFirebase("Clear Complete item pressed");
+            if (ViewState.InUploadsMode)
+            {
+                // Uploads have no incomplete file to clean up.
+                if (ti is TransferItem tiUpload)
+                {
+                    TransferItems.TransferItemManagerWrapped.Remove(tiUpload);
+                }
+                else if (ti is FolderItem fiUpload)
+                {
+                    TransferItems.TransferItemManagerWrapped.ClearAllFromFolder(fiUpload);
+                }
+            }
+            else
+            {
+                if (ti is TransferItem tiDownload)
+                {
+                    TransferItems.TransferItemManagerWrapped.RemoveAndCleanUp(tiDownload);
+                }
+                else if (ti is FolderItem fiDownload)
+                {
+                    TransferItems.TransferItemManagerWrapped.RemoveAndCleanUp(fiDownload);
+                }
+            }
+            RemoveRow(ti);
+        }
+
+        // cancel and clear (downloads) OR abort and clear (uploads)
+        private void CancelAndClear(ITransferItem ti)
+        {
+            Logger.InfoFirebase("Cancel and Clear item pressed");
+            if (ti is TransferItem tti)
+            {
+                TransferState.CancelAndRemoveToken(tti);
+                if (ViewState.InUploadsMode)
+                {
+                    TransferItems.TransferItemManagerWrapped.Remove(tti);
+                }
+                else
+                {
+                    TransferItems.TransferItemManagerWrapped.RemoveAndCleanUp(tti); //this means basically, wait for the stream to be closed. no race conditions..
+                }
+                RemoveRow(ti);
+            }
+            else if (ti is FolderItem fi)
+            {
+                TransferItems.TransferItemManagerWrapped.CancelFolder(fi, true);
+                TransferItems.TransferItemManagerWrapped.ClearAllFromFolderAndClean(fi);
+                RemoveRow(ti);
+            }
+            else
+            {
+                Logger.InfoFirebase("Cancel and Clear item pressed - bad item");
+            }
+        }
+
+        private void RefreshQueuePosition(ITransferItem ti)
+        {
+            if (NotLoggedInShowMessageGaurd("get queue position"))
+            {
+                return;
+            }
+
+            //the folder implementation will re-request all queued files
+            //recently I thought of just doing the lowest, but then if the lowest is ready, it will download leaving the other transfers behind.
+            if (ti is TransferItem tiQueue)
+            {
+                GetQueuePosition(tiQueue);
+            }
+            else if (ti is FolderItem folderItem)
+            {
+                lock (folderItem.TransferItems)
+                {
+                    foreach (TransferItem transferItem in folderItem.TransferItems.Where(t => t.State.HasFlag(TransferStates.Queued) && t.State.HasFlag(TransferStates.Remotely)))
+                    {
+                        GetQueuePosition(transferItem);
+                    }
+                }
+            }
+        }
+
+        private void PlayFile(ITransferItem ti)
+        {
+            TransferItem tiPlay = ti as TransferItem;
+            try
+            {
+                //tested on API25 and API30
+                Android.Net.Uri uriToUse = null;
+                if (PlatformInfo.UseLegacyStorage() && SimpleHelpers.IsFileUri(tiPlay.FinalUri)) //i.e. if it is a FILE URI.
+                {
+                    uriToUse = AndroidX.Core.Content.FileProvider.GetUriForFile(this.Context, this.Context.ApplicationContext.PackageName + ".provider", new Java.IO.File(Android.Net.Uri.Parse(tiPlay.FinalUri).Path));
+                }
+                else
+                {
+                    uriToUse = Android.Net.Uri.Parse(tiPlay.FinalUri);
+                }
+                Intent playFileIntent = new Intent(Intent.ActionView);
+                playFileIntent.SetDataAndType(uriToUse, MediaMimeTypes.GetMimeTypeFromFilename(tiPlay.FullFilename));
+                playFileIntent.AddFlags(ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission); // newtask makes it go to foobar and immediately jump back
+                this.StartActivity(playFileIntent); // no chooser needed, the system shows the options with Only Once / Always
+            }
+            catch (System.Exception e)
+            {
+                Logger.Firebase(e.Message + e.StackTrace);
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.failed_to_play), ToastLength.Short); //normally bc no player is installed.
+            }
+        }
+
+        private void BrowseAtLocation(ITransferItem ti)
+        {
+            if (NotLoggedInShowMessageGaurd("browse folder"))
+            {
+                return;
+            }
+            if (ti is TransferItem ttti)
+            {
+                string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(ttti.FullFilename);
+                BrowseService.RequestFilesApi(ttti.Username, startingDir);
+            }
+            else if (ti is FolderItem fi)
+            {
+                if (fi.IsEmpty())
+                {
+                    //since if auto clear is on, and the menu is already up, the final item in this folder can clear before we end up selecting something.
+                    SeekerApplication.Toaster.ShowToast("Folder is empty.", ToastLength.Short);
+                    return;
+                }
+                string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(fi.TransferItems[0].FullFilename);
+                for (int i = 0; i < fi.GetDirectoryLevel() - 1; i++)
+                {
+                    startingDir = SimpleHelpers.GetDirectoryRequestFolderName(startingDir); //keep going up..
+                }
+                BrowseService.RequestFilesApi(fi.Username, startingDir);
+            }
+        }
+
+        private void ResumeFolder(ITransferItem ti)
+        {
+            if (NotLoggedInShowMessageGaurd("resume folder"))
+            {
+                return;
+            }
+            Logger.InfoFirebase("resume folder Pressed");
+            SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.ResumePausedFromFolder(ti as FolderItem));
+        }
+
+        // pause folder (downloads) or abort uploads (uploads)
+        private void PauseFolder(ITransferItem ti)
+        {
+            TransferItems.TransferItemManagerWrapped.CancelFolder(ti as FolderItem);
+            recyclerTransferAdapter.RepaintRow(ti);
+            ScheduleRebuildIfMutableSort();
+        }
+
+        private void RetryFailedFiles(ITransferItem ti)
+        {
+            if (NotLoggedInShowMessageGaurd("retry folder"))
+            {
+                return;
+            }
+            Logger.InfoFirebase("retry folder Pressed");
+            SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.RetryFailedFromFolder(ti as FolderItem));
+        }
+
+        private void AbortUpload(ITransferItem ti)
+        {
+            Logger.InfoFirebase("Abort Upload item pressed");
+            TransferItem uploadToCancel = ti as TransferItem;
+            uploadToCancel.MarkUserPause(TransferBands.NextStamp());
+            TransferState.CancelAndRemoveToken(uploadToCancel);
+            RepaintTransferRow(uploadToCancel);
+        }
+
+        private void IgnoreUnshareUser(ITransferItem ti)
+        {
+            Logger.InfoFirebase("Unshare User item pressed");
+            IEnumerable<TransferItem> tItems = TransferItems.TransferItemManagerWrapped.GetTransferItemsForUser(ti.GetUsername());
+            long ignoreStamp = TransferBands.NextStamp();
+            foreach (var tiToCancel in tItems)
+            {
+                tiToCancel.MarkUserPause(ignoreStamp);
+                TransferState.CancelAndRemoveToken(tiToCancel);
+            }
+            RepaintTransferRows(tItems);
+            UserListService.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, ti.GetUsername());
         }
 
         public void EnterBatchSelect(int position)

@@ -60,7 +60,7 @@ namespace Seeker
         public bool GetShowTimeRemaining();
     }
 
-    public class TransferItemViewFolder : RelativeLayout, ITransferItemView, View.IOnCreateContextMenuListener
+    public class TransferItemViewFolder : RelativeLayout, ITransferItemView
     {
         public TransfersFragment.TransferViewHolder ViewHolder { get; set; }
         private TextView viewUsername;
@@ -198,11 +198,6 @@ namespace Seeker
             uploadInset.SetBounds(0, 0, iconSize, iconSize);
             cachedDownloadArrowSpan = new ImageSpan(downloadInset, SpanAlign.Bottom);
             cachedUploadArrowSpan = new ImageSpan(uploadInset, SpanAlign.Bottom);
-        }
-
-        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-        {
-            base.OnCreateContextMenu(menu);
         }
 
         public void setItem(ITransferItem item, bool isInBatchMode)
@@ -779,7 +774,7 @@ namespace Seeker
     }
 
 
-    public class TransferItemViewDetails : RelativeLayout, ITransferItemView, View.IOnCreateContextMenuListener
+    public class TransferItemViewDetails : RelativeLayout, ITransferItemView
     {
         public TransfersFragment.TransferViewHolder ViewHolder { get; set; }
         private TextView viewUsername;
@@ -922,15 +917,6 @@ namespace Seeker
                 selectionCheckbox.Visibility = ViewStates.Invisible;
                 this.Background = null;
             }
-        }
-
-        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-        {
-            base.OnCreateContextMenu(menu);
-            //AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-            menu.Add(0, 0, 0, Resource.String.retry_dl);
-            menu.Add(1, 1, 1, Resource.String.clear_from_list);
-            menu.Add(2, 2, 2, Resource.String.cancel_and_clear);
         }
     }
 

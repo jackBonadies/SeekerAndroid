@@ -935,81 +935,42 @@ namespace Seeker
                 // if browsing self with no username dont show download, copy, queue links
                 return;
             }
-            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
-            string[] items = new string[]
+            var rows = new List<ActionSheetRow>
             {
-                SeekerApplication.GetString(Resource.String.DownloadFile),
-                SeekerApplication.GetString(Resource.String.QueueSelectedAsPaused),
-                SeekerApplication.GetString(Resource.String.CopyURL)
-            };
-            int[] icons = new int[]
-            {
-                Resource.Drawable.download,
-                Resource.Drawable.paused,
-                Resource.Drawable.link_variant
-            };
-
-            var typedValue = new TypedValue();
-            Context.Theme.ResolveAttribute(Resource.Attribute.colorOnSurface, typedValue, true);
-            int tintColor = typedValue.Data;
-
-            var adapter = new IconMenuAdapter(this.Context, items, icons, tintColor);
-
-            EventHandler<DialogClickEventArgs> handler = (sender, args) =>
-            {
-                switch (args.Which)
+                new ActionSheetRow
                 {
-                    case 0: // Download File
+                    IconResId = Resource.Drawable.download,
+                    Label = SeekerApplication.GetString(Resource.String.DownloadFile),
+                    OnClick = () =>
+                    {
                         var ffi = BrowseUtils.ToFullFileInfo(dataItem);
                         SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(new[] { ffi }, false, state.CurrentUsername));
-                        break;
-                    case 1: // Queue as Paused
-                        var ffi2 = BrowseUtils.ToFullFileInfo(dataItem);
-                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(new[] { ffi2 }, true, state.CurrentUsername));
-                        break;
-                    case 2: // Copy URL
-                        var ffi3 = BrowseUtils.ToFullFileInfo(dataItem);
-                        string slskLink = CommonHelpers.CreateSlskLink(false, ffi3.FullFileName, state.CurrentUsername);
+                    }
+                },
+                new ActionSheetRow
+                {
+                    IconResId = Resource.Drawable.paused,
+                    Label = SeekerApplication.GetString(Resource.String.QueueSelectedAsPaused),
+                    OnClick = () =>
+                    {
+                        var ffi = BrowseUtils.ToFullFileInfo(dataItem);
+                        SessionService.Instance.RunWithReconnect(() => DownloadService.Instance.EnqueueFilesFireAndForget(new[] { ffi }, true, state.CurrentUsername));
+                    }
+                },
+                new ActionSheetRow
+                {
+                    IconResId = Resource.Drawable.link_variant,
+                    Label = SeekerApplication.GetString(Resource.String.CopyURL),
+                    OnClick = () =>
+                    {
+                        var ffi = BrowseUtils.ToFullFileInfo(dataItem);
+                        string slskLink = CommonHelpers.CreateSlskLink(false, ffi.FullFileName, state.CurrentUsername);
                         CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
-                        break;
-                }
+                    }
+                },
             };
-
-            builder.SetAdapter(adapter, handler);
-            builder.Show();
-        }
-
-        private sealed class IconMenuAdapter : ArrayAdapter<string>
-        {
-            private readonly int[] iconRes;
-            private readonly int tintColor;
-
-            public IconMenuAdapter(Context context, string[] items, int[] iconRes, int tintColor)
-                : base(context, 0, items)
-            {
-                this.iconRes = iconRes;
-                this.tintColor = tintColor;
-            }
-
-            public override View GetView(int position, View convertView, ViewGroup parent)
-            {
-                if (convertView == null)
-                {
-                    convertView = LayoutInflater.From(Context).Inflate(Resource.Layout.icon_menu_item, parent, false);
-                }
-
-                var icon = convertView.FindViewById<ImageView>(Resource.Id.menuIcon);
-                var text = convertView.FindViewById<TextView>(Resource.Id.menuText);
-
-                text.Text = GetItem(position);
-
-                var drawable = AndroidX.Core.Content.ContextCompat.GetDrawable(Context, iconRes[position]).Mutate();
-                AndroidX.Core.Graphics.Drawable.DrawableCompat.SetTint(drawable, new Android.Graphics.Color(tintColor));
-                icon.SetImageDrawable(drawable);
-
-                return convertView;
-            }
+            IconMenuDialog.Show(this.Context, rows);
         }
 
         private void ClearAllSelectedPositions()
@@ -1109,50 +1070,39 @@ namespace Seeker
                 ShowFolderSummaryDialog(BrowseUtils.GetFolderSummary(dataItem), dataItem.GetDisplayName());
                 return;
             }
-            var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(this.Context);
-            string[] items = new string[]
+            var rows = new List<ActionSheetRow>
             {
-                SeekerApplication.GetString(Resource.String.download_folder),
-                SeekerApplication.GetString(Resource.String.QueueFolderAsPaused),
-                SeekerApplication.GetString(Resource.String.ShowFolderInfo),
-                SeekerApplication.GetString(Resource.String.CopyURL)
-            };
-            int[] icons = new int[]
-            {
-                Resource.Drawable.download,
-                Resource.Drawable.paused,
-                Resource.Drawable.information_outline,
-                Resource.Drawable.link_variant
-            };
-
-            var tintColor = UiHelpers.GetColorFromAttribute(Context, Resource.Attribute.colorOnSurface, Context.Theme);
-
-            var adapter = new IconMenuAdapter(this.Context, items, icons, tintColor);
-
-            EventHandler<DialogClickEventArgs> handler = (sender, args) =>
-            {
-                switch (args.Which)
+                new ActionSheetRow
                 {
-                    case 0: // Download Folder
-                        DownloadUserFilesEntry(false, false, new List<DataItem> { dataItem });
-                        break;
-                    case 1: // Queue Folder as Paused
-                        DownloadUserFilesEntry(true, false, new List<DataItem> { dataItem });
-                        break;
-                    case 2: // Show Folder Info
-                        var folderSummary = BrowseUtils.GetFolderSummary(dataItem);
-                        ShowFolderSummaryDialog(folderSummary, dataItem.GetDisplayName());
-                        break;
-                    case 3: // Copy URL
+                    IconResId = Resource.Drawable.download,
+                    Label = SeekerApplication.GetString(Resource.String.download_folder),
+                    OnClick = () => DownloadUserFilesEntry(false, false, new List<DataItem> { dataItem })
+                },
+                new ActionSheetRow
+                {
+                    IconResId = Resource.Drawable.paused,
+                    Label = SeekerApplication.GetString(Resource.String.QueueFolderAsPaused),
+                    OnClick = () => DownloadUserFilesEntry(true, false, new List<DataItem> { dataItem })
+                },
+                new ActionSheetRow
+                {
+                    IconResId = Resource.Drawable.information_outline,
+                    Label = SeekerApplication.GetString(Resource.String.ShowFolderInfo),
+                    OnClick = () => ShowFolderSummaryDialog(BrowseUtils.GetFolderSummary(dataItem), dataItem.GetDisplayName())
+                },
+                new ActionSheetRow
+                {
+                    IconResId = Resource.Drawable.link_variant,
+                    Label = SeekerApplication.GetString(Resource.String.CopyURL),
+                    OnClick = () =>
+                    {
                         string slskLink = CommonHelpers.CreateSlskLink(true, dataItem.Directory.Name, state.CurrentUsername);
                         CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
                         SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.LinkCopied), ToastLength.Short);
-                        break;
-                }
+                    }
+                },
             };
-
-            builder.SetAdapter(adapter, handler);
-            builder.Show();
+            IconMenuDialog.Show(this.Context, rows);
         }
 
         public void ShowFolderSummaryDialog(FolderSummary folderSummary, string folderName = null)
