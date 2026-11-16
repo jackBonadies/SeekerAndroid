@@ -140,6 +140,7 @@ namespace Seeker
 
         public TransferItemViewFolder(Context context) : base(context)
         {
+            Foreground = UiHelpers.GetDrawableFromAttribute(context, Android.Resource.Attribute.SelectableItemBackground);
             LayoutInflater.From(context).Inflate(Resource.Layout.transfer_folder_item, this, true);
             setupChildren();
         }
@@ -843,6 +844,7 @@ namespace Seeker
         public bool showTimeRemaining;
         public TransferItemViewDetails(Context context) : base(context)
         {
+            Foreground = UiHelpers.GetDrawableFromAttribute(context, Android.Resource.Attribute.SelectableItemBackground);
             LayoutInflater.From(context).Inflate(Resource.Layout.transfer_single_item, this, true);
             setupChildren();
         }
