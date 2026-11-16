@@ -130,6 +130,20 @@ namespace Seeker
             return new Android.Graphics.Drawables.ColorDrawable(GetColorFromAttribute(c, Resource.Attribute.batchSelectHighlightColor));
         }
 
+        // opaque row backgrounds, so rows that cross during a move animation do not show through each other
+        public static void GetOpaqueRowColors(Context c, out Color normal, out Color batchSelected)
+        {
+            // activity_main paints pseudo_window_background_color over the window background
+            Color page = GetColorFromAttribute(c, Resource.Attribute.pseudo_window_background_color);
+            if (page.A != 255)
+            {
+                page = GetColorFromAttribute(c, Android.Resource.Attribute.ColorBackground);
+            }
+            Color highlight = GetColorFromAttribute(c, Resource.Attribute.batchSelectHighlightColor);
+            normal = page;
+            batchSelected = new Color(AndroidX.Core.Graphics.ColorUtils.CompositeColors(highlight.ToArgb(), page.ToArgb()));
+        }
+
         public static Color GetColorFromInteger(int color)
         {
             return Color.Argb(Color.GetAlphaComponent(color), Color.GetRedComponent(color), Color.GetGreenComponent(color), Color.GetBlueComponent(color));

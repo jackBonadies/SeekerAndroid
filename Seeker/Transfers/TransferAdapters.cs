@@ -135,6 +135,12 @@ namespace Seeker
                 return snapshot.IndexOf(item);
             }
 
+            public override long GetItemId(int position)
+            {
+                ITransferItem item = snapshot.GetItem(position);
+                return item == null ? RecyclerView.NoId : TransferSort.GetSeq(item);
+            }
+
             public void Rebuild()
             {
                 snapshot = CreateSnapshot();
@@ -269,6 +275,8 @@ namespace Seeker
                 this.source = source;
                 this.uiState = uiState;
                 snapshot = CreateSnapshot();
+                // with stable ids a rebuild (NotifyDataSetChanged) animates the rows that moved
+                HasStableIds = true;
                 showSpeed = PreferencesState.TransferViewShowSpeed;
                 showSizes = PreferencesState.TransferViewShowSizes;
                 showTimeRemaining = PreferencesState.TransferViewShowTimeRemaining;

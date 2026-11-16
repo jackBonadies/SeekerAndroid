@@ -477,6 +477,36 @@ namespace Seeker
             return recyclerTransferAdapter?.GetItem(position);
         }
 
+        // the first visible row that the rebuild will not move. null to keep the current position
+        private ITransferItem GetRebuildAnchor(out int position, out int offset, out bool isFirstVisible)
+        {
+            isFirstVisible = false;
+            ITransferItem first = GetScrollAnchor(out position, out offset);
+            // if at the very top stay there (so we can see rows added above us)
+            if (first == null || (position == 0 && offset >= 0))
+            {
+                return null;
+            }
+            var lm = (LinearLayoutManager)recycleLayoutManager;
+            int firstPos = position;
+            int lastPos = lm.FindLastVisibleItemPosition();
+            for (int pos = firstPos; pos <= lastPos; pos++)
+            {
+                ITransferItem item = recyclerTransferAdapter.GetItem(pos);
+                View v = lm.FindViewByPosition(pos);
+                // a row whose sort key changed is about to move (e.g. the one just paused), following it would move the viewport
+                if (item == null || v == null || recyclerTransferAdapter.NeedsResort(item))
+                {
+                    continue;
+                }
+                position = pos;
+                offset = lm.GetDecoratedTop(v) - lm.PaddingTop;
+                isFirstVisible = pos == firstPos;
+                return item;
+            }
+            return null;
+        }
+
         public void SaveScrollPositionOnMovingIntoFolder()
         {
             ViewState.ScrollAnchorBeforeMovingIntoFolder = GetScrollAnchor(out int position, out int offset);
@@ -572,17 +602,12 @@ namespace Seeker
                 return;
             }
             OnListStructureChanged();
-            ITransferItem anchor = GetScrollAnchor(out int anchorPos, out int anchorOffset);
-            // if at the very top stay there (so we can see rows added above us)
-            if (anchorPos == 0 && anchorOffset >= 0)
-            {
-                anchor = null;
-            }
+            ITransferItem anchor = GetRebuildAnchor(out int anchorPos, out int anchorOffset, out bool anchorIsFirstVisible);
             recyclerTransferAdapter.Rebuild();
             if (anchor != null)
             {
                 int newPos = recyclerTransferAdapter.PositionOf(anchor);
-                if (newPos >= 0 && newPos != anchorPos)
+                if (newPos >= 0 && (newPos != anchorPos || !anchorIsFirstVisible))
                 {
                     ((LinearLayoutManager)recycleLayoutManager).ScrollToPositionWithOffset(newPos, anchorOffset);
                 }
