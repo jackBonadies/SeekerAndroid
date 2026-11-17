@@ -254,23 +254,18 @@ namespace Seeker
         {
             var ctx = this.Context;
             var config = new AnchoredMenuConfig();
-            AddRow(config, Resource.Drawable.baseline_refresh_white_24, ctx.GetString(Resource.String.get_folder), GetFolderContents);
-            AddRow(config, Resource.Drawable.folder_outline, ctx.GetString(Resource.String.browse_at_location), BrowseAtLocation);
-            AddRow(config, Resource.Drawable.information_outline, ctx.GetString(Resource.String.quick_info), ShowMoreInfoDialog);
-            AddRow(config, Resource.Drawable.user_info, ctx.GetString(Resource.String.get_user_info),
+            config.AddRow(Resource.Drawable.baseline_refresh_white_24, ctx.GetString(Resource.String.get_folder), GetFolderContents);
+            config.AddRow(Resource.Drawable.folder_outline, ctx.GetString(Resource.String.browse_at_location), BrowseAtLocation);
+            config.AddRow(Resource.Drawable.information_outline, ctx.GetString(Resource.String.quick_info), ShowMoreInfoDialog);
+            config.AddRow(Resource.Drawable.user_info, ctx.GetString(Resource.String.get_user_info),
                 () => RequestedUserInfoHelper.RequestUserInfoApi(SearchResponse.Username));
             config.AddDivider();
-            AddRow(config, Resource.Drawable.paused, ctx.GetString(Resource.String.QueueFolderAsPaused), QueueFolderAsPaused);
+            config.AddRow(Resource.Drawable.paused, ctx.GetString(Resource.String.QueueFolderAsPaused), QueueFolderAsPaused);
             if (customAdapter != null && customAdapter.SelectedPositions.Count > 0)
             {
-                AddRow(config, Resource.Drawable.paused, ctx.GetString(Resource.String.QueueSelectedAsPaused), QueueSelectedAsPaused);
+                config.AddRow(Resource.Drawable.paused, ctx.GetString(Resource.String.QueueSelectedAsPaused), QueueSelectedAsPaused);
             }
             return config;
-        }
-
-        private static void AddRow(AnchoredMenuConfig config, int iconResId, string label, Action onClick)
-        {
-            config.Rows.Add(new AnchoredMenuRow { IconResId = iconResId, Label = label, OnClick = onClick });
         }
 
         private void ListView_ItemClick(object sender, AdapterView.ItemClickEventArgs e)

@@ -75,9 +75,9 @@ namespace Seeker
             var config = new AnchoredMenuConfig();
             if (ViewState.InUploadsMode)
             {
-                AddRow(config, Resource.Drawable.clear_all_28dp, ctx.GetString(Resource.String.ClearAllCompleteAndAborted), ClearAllCompleteUploads);
+                config.AddRow(Resource.Drawable.clear_all_28dp, ctx.GetString(Resource.String.ClearAllCompleteAndAborted), ClearAllCompleteUploads);
                 config.AddDivider();
-                AddRow(config, Resource.Drawable.outline_cancel_white_24, ctx.GetString(Resource.String.AbortAll), AbortAllUploads, true);
+                config.AddRow(Resource.Drawable.outline_cancel_white_24, ctx.GetString(Resource.String.AbortAll), AbortAllUploads, true);
             }
             else
             {
@@ -98,24 +98,24 @@ namespace Seeker
                 }
                 if (showResume)
                 {
-                    AddRow(config, Resource.Drawable.play_arrow_24, ctx.GetString(Resource.String.resume_all), ResumeAllDownloads);
+                    config.AddRow(Resource.Drawable.play_arrow_24, ctx.GetString(Resource.String.resume_all), ResumeAllDownloads);
                 }
                 if (showPause)
                 {
-                    AddRow(config, Resource.Drawable.paused, ctx.GetString(Resource.String.pause_all), PauseAllDownloads);
+                    config.AddRow(Resource.Drawable.paused, ctx.GetString(Resource.String.pause_all), PauseAllDownloads);
                 }
                 if (showRetry)
                 {
-                    AddRow(config, Resource.Drawable.baseline_refresh_white_24, ctx.GetString(Resource.String.retry_all_failed), () => RetryAllConditionEntry(true, false));
+                    config.AddRow(Resource.Drawable.baseline_refresh_white_24, ctx.GetString(Resource.String.retry_all_failed), () => RetryAllConditionEntry(true, false));
                 }
                 if (showClearComplete)
                 {
-                    AddRow(config, Resource.Drawable.clear_all_28dp, ctx.GetString(Resource.String.clear_all_complete), ClearAllCompleteDownloads);
+                    config.AddRow(Resource.Drawable.clear_all_28dp, ctx.GetString(Resource.String.clear_all_complete), ClearAllCompleteDownloads);
                 }
                 if (showCancelAndClear)
                 {
                     config.AddDivider();
-                    AddRow(config, Resource.Drawable.trash_can_outline, ctx.GetString(Resource.String.cancel_and_clear_all), CancelAndClearAllDownloads, true);
+                    config.AddRow(Resource.Drawable.trash_can_outline, ctx.GetString(Resource.String.cancel_and_clear_all), CancelAndClearAllDownloads, true);
                 }
             }
             config.AddDivider();
@@ -172,17 +172,6 @@ namespace Seeker
                 }
             });
             return sub;
-        }
-
-        private static void AddRow(AnchoredMenuConfig config, int iconResId, string label, Action onClick, bool destructive = false)
-        {
-            config.Rows.Add(new AnchoredMenuRow
-            {
-                IconResId = iconResId,
-                Label = label,
-                OnClick = onClick,
-                Destructive = destructive,
-            });
         }
 
         public void RefreshForModeSwitch()
@@ -1177,8 +1166,7 @@ namespace Seeker
             }
             else
             {
-                TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                TransfersActionMode.Invalidate();
+                BatchSelection.ShowCount(TransfersActionMode, cnt);
             }
         }
 
@@ -1211,8 +1199,7 @@ namespace Seeker
             }
             else
             {
-                TransfersActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), ViewState.BatchSelectedItems.Count.ToString());
-                TransfersActionMode.Invalidate();
+                BatchSelection.ShowCount(TransfersActionMode, ViewState.BatchSelectedItems.Count);
             }
         }
 

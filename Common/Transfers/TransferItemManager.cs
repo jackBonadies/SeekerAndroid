@@ -71,7 +71,6 @@ namespace Seeker
                     // "None" is equivalent to just being paused
                     if (ti.State == TransferStates.None || (ti.State & activeOrAborted) != 0)
                     {
-                        // not State: the row keeps the band stamp it had when it was last touched
                         ti.State = TransferStates.Cancelled;
                         ti.RemainingTime = null;
                     }

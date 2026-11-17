@@ -28,6 +28,18 @@ namespace Seeker.Helpers.AnchoredMenu
             return false;
         }
 
+        public AnchoredMenuConfig AddRow(int iconResId, string label, Action onClick, bool destructive = false)
+        {
+            Rows.Add(new AnchoredMenuRow
+            {
+                IconResId = iconResId,
+                Label = label,
+                OnClick = onClick,
+                Destructive = destructive,
+            });
+            return this;
+        }
+
         public AnchoredMenuConfig AddDivider()
         {
             Rows.Add(new AnchoredMenuRow { Kind = AnchoredMenuRowKind.Divider });

@@ -47,68 +47,46 @@ namespace Seeker
                 var config = new AnchoredMenuConfig();
                 if (!state.IsAnonymousSelf)
                 {
-                    AddRow(config, Resource.Drawable.paused, ctx.GetString(Resource.String.QueueSelectedAsPaused), () =>
+                    config.AddRow(Resource.Drawable.paused, ctx.GetString(Resource.String.QueueSelectedAsPaused), () => IfActive(() =>
                     {
                         Frag.DownloadBatchSelected(true);
                         BrowseActionMode?.Finish();
-                    });
+                    }));
                 }
-                AddRow(config, Resource.Drawable.information_outline, ctx.GetString(Resource.String.ShowSelectedInfo), Frag.ShowBatchSelectedInfo);
+                config.AddRow(Resource.Drawable.information_outline, ctx.GetString(Resource.String.ShowSelectedInfo), () => IfActive(Frag.ShowBatchSelectedInfo));
                 if (!state.IsAnonymousSelf)
                 {
-                    AddRow(config, Resource.Drawable.link_variant, ctx.GetString(Resource.String.CopySelectedURLs), () =>
+                    config.AddRow(Resource.Drawable.link_variant, ctx.GetString(Resource.String.CopySelectedURLs), () => IfActive(() =>
                     {
                         Frag.CopyBatchSelectedURLs();
                         BrowseActionMode?.Finish();
-                    });
+                    }));
                 }
                 config.AddDivider();
-                AddRow(config, Resource.Drawable.select_all_24, ctx.GetString(Resource.String.SelectAll), SelectAll);
-                AddRow(config, Resource.Drawable.ink_selection_24, ctx.GetString(Resource.String.InvertSelection), InvertSelection);
+                config.AddRow(Resource.Drawable.select_all_24, ctx.GetString(Resource.String.SelectAll), () => IfActive(SelectAll));
+                config.AddRow(Resource.Drawable.ink_selection_24, ctx.GetString(Resource.String.InvertSelection), () => IfActive(InvertSelection));
                 return config;
             }
 
-            private static void AddRow(AnchoredMenuConfig config, int iconResId, string label, System.Action onClick)
+            // the mode can finish while the menu is open
+            private static void IfActive(System.Action action)
             {
-                config.Rows.Add(new AnchoredMenuRow
+                if (BrowseActionMode != null)
                 {
-                    IconResId = iconResId,
-                    Label = label,
-                    // the mode can finish while the menu is open
-                    OnClick = () =>
-                    {
-                        if (BrowseActionMode != null)
-                        {
-                            onClick();
-                        }
-                    },
-                });
+                    action();
+                }
             }
 
             private void SelectAll()
             {
-                Adapter.SelectedPositions.Clear();
-                int cnt = Adapter.ItemCount;
-                for (int i = 0; i < cnt; i++)
-                {
-                    Adapter.SelectedPositions.Add(i);
-                }
+                BatchSelection.SelectAll(Adapter.SelectedPositions, BatchSelection.Positions(Adapter.ItemCount));
                 Adapter.NotifyDataSetChanged();
-                BrowseActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                BrowseActionMode.Invalidate();
+                BatchSelection.ShowCount(BrowseActionMode, Adapter.SelectedPositions.Count);
             }
 
             private void InvertSelection()
             {
-                List<int> oldOnes = Adapter.SelectedPositions.ToList();
-                Adapter.SelectedPositions.Clear();
-                List<int> all = new List<int>();
-                int cnt1 = Adapter.ItemCount;
-                for (int i = 0; i < cnt1; i++)
-                {
-                    all.Add(i);
-                }
-                Adapter.SelectedPositions = all.Except(oldOnes).ToList();
+                BatchSelection.Invert(Adapter.SelectedPositions, BatchSelection.Positions(Adapter.ItemCount));
                 Adapter.NotifyDataSetChanged();
                 if (Adapter.SelectedPositions.Count == 0)
                 {
@@ -116,8 +94,7 @@ namespace Seeker
                 }
                 else
                 {
-                    BrowseActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), Adapter.SelectedPositions.Count.ToString());
-                    BrowseActionMode.Invalidate();
+                    BatchSelection.ShowCount(BrowseActionMode, Adapter.SelectedPositions.Count);
                 }
             }
 
@@ -168,8 +145,7 @@ namespace Seeker
             }
             else
             {
-                BrowseActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                BrowseActionMode.Invalidate();
+                BatchSelection.ShowCount(BrowseActionMode, cnt);
             }
         }
 

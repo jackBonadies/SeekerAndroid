@@ -104,18 +104,8 @@ namespace Seeker.Messages
                     });
                 }
                 config.AddDivider();
-                config.Rows.Add(new AnchoredMenuRow
-                {
-                    IconResId = Resource.Drawable.select_all_24,
-                    Label = activity.GetString(Resource.String.SelectAll),
-                    OnClick = () => IfActive(SelectAll)
-                });
-                config.Rows.Add(new AnchoredMenuRow
-                {
-                    IconResId = Resource.Drawable.ink_selection_24,
-                    Label = activity.GetString(Resource.String.InvertSelection),
-                    OnClick = () => IfActive(InvertSelection)
-                });
+                config.AddRow(Resource.Drawable.select_all_24, activity.GetString(Resource.String.SelectAll), () => IfActive(SelectAll));
+                config.AddRow(Resource.Drawable.ink_selection_24, activity.GetString(Resource.String.InvertSelection), () => IfActive(InvertSelection));
                 return config;
             }
 
@@ -139,28 +129,14 @@ namespace Seeker.Messages
 
             private void SelectAll()
             {
-                Adapter.SelectedPositions.Clear();
-                int cnt = Adapter.ItemCount;
-                for (int i = 0; i < cnt; i++)
-                {
-                    Adapter.SelectedPositions.Add(i);
-                }
+                BatchSelection.SelectAll(Adapter.SelectedPositions, BatchSelection.Positions(Adapter.ItemCount));
                 Adapter.NotifyDataSetChanged();
-                MessagesOverviewActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                MessagesOverviewActionMode.Invalidate();
+                BatchSelection.ShowCount(MessagesOverviewActionMode, Adapter.SelectedPositions.Count);
             }
 
             private void InvertSelection()
             {
-                List<int> oldOnes = Adapter.SelectedPositions.ToList();
-                Adapter.SelectedPositions.Clear();
-                List<int> all = new List<int>();
-                int cnt1 = Adapter.ItemCount;
-                for (int i = 0; i < cnt1; i++)
-                {
-                    all.Add(i);
-                }
-                Adapter.SelectedPositions = all.Except(oldOnes).ToList();
+                BatchSelection.Invert(Adapter.SelectedPositions, BatchSelection.Positions(Adapter.ItemCount));
                 Adapter.NotifyDataSetChanged();
                 if (Adapter.SelectedPositions.Count == 0)
                 {
@@ -168,8 +144,7 @@ namespace Seeker.Messages
                 }
                 else
                 {
-                    MessagesOverviewActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), Adapter.SelectedPositions.Count.ToString());
-                    MessagesOverviewActionMode.Invalidate();
+                    BatchSelection.ShowCount(MessagesOverviewActionMode, Adapter.SelectedPositions.Count);
                 }
             }
 
@@ -227,8 +202,7 @@ namespace Seeker.Messages
             }
             else if (actionMode != null)
             {
-                actionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                actionMode.Invalidate();
+                BatchSelection.ShowCount(actionMode, cnt);
             }
         }
 

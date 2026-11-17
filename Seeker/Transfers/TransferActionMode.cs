@@ -59,7 +59,7 @@ namespace Seeker
 
                     if (numPaused != 0)
                     {
-                        AddRow(config, Resource.Drawable.play_arrow_24, ctx.GetString(Resource.String.ResumeSelected), () => IfActive(() =>
+                        config.AddRow(Resource.Drawable.play_arrow_24, ctx.GetString(Resource.String.ResumeSelected), () => IfActive(() =>
                         {
                             Frag.RetryAllConditionEntry(false, true);
                             NotifyChangedAndClear(Adapter);
@@ -68,7 +68,7 @@ namespace Seeker
                     }
                     if (numInProgress != 0 || numQueued != 0)
                     {
-                        AddRow(config, Resource.Drawable.paused, ctx.GetString(Resource.String.PauseSelected), () => IfActive(() =>
+                        config.AddRow(Resource.Drawable.paused, ctx.GetString(Resource.String.PauseSelected), () => IfActive(() =>
                         {
                             TransferItems.TransferItemManagerWrapped.CancelSelectedItems(false);
                             NotifyChangedAndClear(Adapter);
@@ -79,7 +79,7 @@ namespace Seeker
                     }
                     if (numFailed != 0)
                     {
-                        AddRow(config, Resource.Drawable.baseline_refresh_white_24, ctx.GetString(Resource.String.RetryFailed), () => IfActive(() =>
+                        config.AddRow(Resource.Drawable.baseline_refresh_white_24, ctx.GetString(Resource.String.RetryFailed), () => IfActive(() =>
                         {
                             Frag.RetryAllConditionEntry(true, true);
                             NotifyChangedAndClear(Adapter);
@@ -88,8 +88,8 @@ namespace Seeker
                     }
                     config.AddDivider();
                 }
-                AddRow(config, Resource.Drawable.select_all_24, ctx.GetString(Resource.String.SelectAll), () => IfActive(() => SelectAll(mode)));
-                AddRow(config, Resource.Drawable.ink_selection_24, ctx.GetString(Resource.String.InvertSelection), () => IfActive(() => InvertSelection(mode)));
+                config.AddRow(Resource.Drawable.select_all_24, ctx.GetString(Resource.String.SelectAll), () => IfActive(() => SelectAll(mode)));
+                config.AddRow(Resource.Drawable.ink_selection_24, ctx.GetString(Resource.String.InvertSelection), () => IfActive(() => InvertSelection(mode)));
                 return config;
             }
 
@@ -134,50 +134,17 @@ namespace Seeker
 
             private void SelectAll(ActionMode mode)
             {
-                ViewState.BatchSelectedItems.Clear();
-                foreach (ITransferItem iti in Adapter.Items)
-                {
-                    ViewState.BatchSelectedItems.Add(iti);
-                }
-                int cnt = ViewState.BatchSelectedItems.Count;
-
+                BatchSelection.SelectAll(ViewState.BatchSelectedItems, Adapter.Items);
                 Adapter.NotifyDataSetChanged();
-
-                mode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                mode.Invalidate();
+                BatchSelection.ShowCount(mode, ViewState.BatchSelectedItems.Count);
             }
 
             private void InvertSelection(ActionMode mode)
             {
                 ForceOutIfZeroSelected = false;
-                var inverted = new HashSet<ITransferItem>();
-                foreach (ITransferItem iti in Adapter.Items)
-                {
-                    if (!ViewState.BatchSelectedItems.Contains(iti))
-                    {
-                        inverted.Add(iti);
-                    }
-                }
-                ViewState.BatchSelectedItems.Clear();
-                foreach (var iti in inverted)
-                {
-                    ViewState.BatchSelectedItems.Add(iti);
-                }
-
+                BatchSelection.Invert(ViewState.BatchSelectedItems, Adapter.Items);
                 Adapter.NotifyDataSetChanged();
-
-                mode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), ViewState.BatchSelectedItems.Count.ToString());
-                mode.Invalidate();
-            }
-
-            private static void AddRow(AnchoredMenuConfig config, int iconResId, string label, Action onClick)
-            {
-                config.Rows.Add(new AnchoredMenuRow
-                {
-                    IconResId = iconResId,
-                    Label = label,
-                    OnClick = onClick,
-                });
+                BatchSelection.ShowCount(mode, ViewState.BatchSelectedItems.Count);
             }
 
             // for actions (pause/resume/retry) that mutate items in place: clear the selection and repaint those rows
