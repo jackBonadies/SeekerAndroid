@@ -10,8 +10,18 @@ namespace Seeker.Helpers
     // MaterialAlertDialog list with an icon per row (browse / transfers item menus)
     public static class IconMenuDialog
     {
+        // UI thread only. A second tap can reach the anchor before the first dialog takes input.
+        private static AndroidX.AppCompat.App.AlertDialog current;
+
+        // a dialog leaked by a destroyed activity can still report IsShowing, so also require its window
+        private static bool IsAnyShowing => current != null && current.IsShowing && current.Window?.DecorView?.IsAttachedToWindow == true;
+
         public static void Show(Context context, IList<ActionSheetRow> rows, string title = null)
         {
+            if (IsAnyShowing)
+            {
+                return;
+            }
             var builder = new Google.Android.Material.Dialog.MaterialAlertDialogBuilder(context);
             if (!string.IsNullOrEmpty(title))
             {
@@ -22,10 +32,20 @@ namespace Seeker.Helpers
             {
                 if (args.Which >= 0 && args.Which < rows.Count)
                 {
+                    // this dialog is still showing until the click returns, and a row may open another (User options)
+                    current = null;
                     rows[args.Which].OnClick?.Invoke();
                 }
             });
-            builder.Show();
+            var dialog = builder.Show();
+            current = dialog;
+            dialog.DismissEvent += (s, e) =>
+            {
+                if (current == dialog)
+                {
+                    current = null;
+                }
+            };
         }
 
         private sealed class IconMenuAdapter : ArrayAdapter<string>
