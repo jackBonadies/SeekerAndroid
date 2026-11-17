@@ -15,6 +15,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Seeker.Helpers;
+using Seeker.Helpers.AnchoredMenu;
+using Seeker.Helpers.ActionSheet;
 
 using Common;
 namespace Seeker.Messages
@@ -161,18 +163,14 @@ namespace Seeker.Messages
             public void OnCreateMenu(IMenu menu, MenuInflater menuInflater)
             {
                 menuInflater.Inflate(Resource.Menu.messages_inner_list_menu, menu);
-            }
-
-            public void OnPrepareMenu(IMenu menu)
-            {
-                UiHelpers.SetMenuTitles(menu, fragment.Username);
-                UiHelpers.SetIgnoreAddExclusive(menu, fragment.Username);
-                // new convos are not yet persisted with entries so nothing to delete
-                bool hasMessages = fragment.Username != null && MessageController.Messages.TryGetValue(fragment.Username, out var msgs) && msgs?.Count > 0;
-                menu.FindItem(Resource.Id.action_delete_messages)?.SetVisible(hasMessages);
+                OverflowMenu.Attach(menu, Resource.Id.action_messages_inner_overflow, BuildOverflowMenu);
             }
 
 #pragma warning disable S1186 // Required override - omitting causes java.lang.AbstractMethodError at runtime
+            public void OnPrepareMenu(IMenu menu)
+            {
+            }
+
             public void OnMenuClosed(IMenu menu)
             {
             }
@@ -180,43 +178,46 @@ namespace Seeker.Messages
 
             public bool OnMenuItemSelected(IMenuItem item)
             {
-                var activity = fragment.Activity;
-                if (activity == null)
-                {
-                    return false;
-                }
-                var username = fragment.Username;
-                if (UiHelpers.HandleCommonContextMenuActions(item.TitleFormatted.ToString(), username, activity, activity.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId)))
-                {
-                    return true;
-                }
-                switch (item.ItemId)
-                {
-                    case Resource.Id.action_add_to_user_list:
-                        UserListService.AddUserAPI(activity, username, new Action(() => { SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.success_added_user), ToastLength.Short); }));
-                        return true;
-                    case Resource.Id.action_search_files:
-                        SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
-                        SearchTabHelper.SearchTargetChosenUser = username;
-                        Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                        intent.PutExtra(MainActivity.GoToSearchExtra, true);
-                        fragment.StartActivity(intent);
-                        return true;
-                    case Resource.Id.action_browse_files:
-                        BrowseService.RequestFilesApi(username, null);
-                        return true;
-                    case Resource.Id.action_delete_messages:
-                        var (deletedMessages, deletedReadCount) = MessageController.DeleteMessageFromUserWithUndo(username);
-                        Snackbar sb1 = Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content),
-                                string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
-                                username),
-                                Snackbar.LengthLong)
-                            .SetAction(Resource.String.undo, (View v) => ItemTouchHelperMessageOverviewCallback.UndoSingleUserMessagesDeleteAction(null, (username, deletedMessages, deletedReadCount), -1, true));
-                        sb1.Show();
-                        (activity as MessagesActivity)?.SwitchToOuter(fragment, true);
-                        return true;
-                }
                 return false;
+            }
+
+            private AnchoredMenuConfig BuildOverflowMenu()
+            {
+                var activity = fragment.Activity;
+                var username = fragment.Username;
+                if (activity == null || string.IsNullOrEmpty(username))
+                {
+                    return null;
+                }
+                var snackView = activity.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId);
+                var userSection = ActionSheetActions.BuildUserActionsSection(username, activity, snackView, new UserActionsOptions { ExcludeMessage = true });
+                var config = AnchoredMenuConfig.FromSection(userSection);
+                // new convos are not yet persisted with entries so nothing to delete
+                bool hasMessages = MessageController.Messages.TryGetValue(username, out var msgs) && msgs?.Count > 0;
+                if (hasMessages)
+                {
+                    config.AddDivider();
+                    config.Rows.Add(new AnchoredMenuRow
+                    {
+                        IconResId = Resource.Drawable.trash_can_outline,
+                        Label = activity.GetString(Resource.String.delete_messages),
+                        Destructive = true,
+                        OnClick = () => DeleteConversation(activity, username)
+                    });
+                }
+                return config;
+            }
+
+            private void DeleteConversation(Android.App.Activity activity, string username)
+            {
+                var (deletedMessages, deletedReadCount) = MessageController.DeleteMessageFromUserWithUndo(username);
+                Snackbar sb1 = Snackbar.Make(SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Android.Resource.Id.Content),
+                        string.Format(SeekerState.ActiveActivityRef.GetString(Resource.String.deleted_message_history_with),
+                        username),
+                        Snackbar.LengthLong)
+                    .SetAction(Resource.String.undo, (View v) => ItemTouchHelperMessageOverviewCallback.UndoSingleUserMessagesDeleteAction(null, (username, deletedMessages, deletedReadCount), -1, true));
+                sb1.Show();
+                (activity as MessagesActivity)?.SwitchToOuter(fragment, true);
             }
         }
 

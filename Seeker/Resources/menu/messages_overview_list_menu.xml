@@ -2,16 +2,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
 >
+    <!-- Rows live in the anchored menu (MessagesOverviewFragment.BuildOverflowMenu). -->
     <item
-        android:id="@+id/mark_all_as_read_action"
-        android:title="@string/mark_all_as_read"
-        app:showAsAction="never"
-    />
-
-    <item
-        android:id="@+id/action_delete_all_messages"
-        android:icon="@drawable/baseline_delete_outline_white_24"
-        android:title="@string/delete_all_messages"
-        app:showAsAction="never"
+        android:id="@+id/action_messages_overview_overflow"
+        android:title="@string/Options"
+        app:actionLayout="@layout/anchored_menu_overflow_button"
+        app:showAsAction="always"
     />
 </menu>

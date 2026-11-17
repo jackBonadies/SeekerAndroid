@@ -10,49 +10,11 @@
         app:showAsAction="always"
         android:iconifiedByDefault="true"
     />
-
+    <!-- Everything else lives in the anchored menu (BrowseFragment.BrowseActionModeCallback.BuildOverflowMenu). -->
     <item
-        android:id="@+id/action_queue_paused_batch"
-        android:title="@string/QueueSelectedAsPaused"
-        android:icon="@drawable/paused"
-        app:iconTint="?attr/colorOnSurface"
-        app:showAsAction="never"
-        android:iconifiedByDefault="false"
-    />
-
-    <item
-        android:id="@+id/action_show_selected_info"
-        android:title="@string/ShowSelectedInfo"
-        android:icon="@drawable/information_outline"
-        app:iconTint="?attr/colorOnSurface"
-        app:showAsAction="never"
-        android:iconifiedByDefault="false"
-    />
-
-    <item
-        android:id="@+id/action_copy_selected_url_batch"
-        android:title="@string/CopySelectedURLs"
-        android:icon="@drawable/link_variant"
-        app:iconTint="?attr/colorOnSurface"
-        app:showAsAction="never"
-        android:iconifiedByDefault="false"
-    />
-
-    <item
-        android:id="@+id/select_all"
-        android:title="@string/SelectAll"
-        android:icon="@drawable/select_all"
-        app:iconTint="?attr/colorOnSurface"
-        app:showAsAction="never"
-        android:iconifiedByDefault="false"
-    />
-
-    <item
-        android:id="@+id/invert_selection"
-        android:title="@string/InvertSelection"
-        android:icon="@drawable/select_inverse"
-        app:iconTint="?attr/colorOnSurface"
-        app:showAsAction="never"
-        android:iconifiedByDefault="false"
+        android:id="@+id/action_browse_batch_overflow"
+        android:title="@string/Options"
+        app:actionLayout="@layout/anchored_menu_overflow_button"
+        app:showAsAction="always"
     />
 </menu>

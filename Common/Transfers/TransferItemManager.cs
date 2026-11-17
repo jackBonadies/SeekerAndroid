@@ -79,6 +79,12 @@ namespace Seeker
                     {
                         TransferState.UsersWhereDownloadFailedDueToOffline[ti.Username] = 0x0;
                     }
+
+                    // saved before the stamp existed: one per folder in date added order, below every real stamp (utc ticks)
+                    if (ti.LastActionStamp == 0)
+                    {
+                        ti.LastActionStamp = ti.Folder?.Seq ?? ti.Seq;
+                    }
                 }
             }
         }
@@ -265,6 +271,12 @@ namespace Seeker
         // A copy of what the transfers list shows for uiState, in display order.
         public List<ITransferItem> GetUISnapshot(TransferUIState uiState)
         {
+            return GetUISnapshot(uiState, null);
+        }
+
+        // sortKeys: filled with what each row was sorted by when the sort key is mutable
+        public List<ITransferItem> GetUISnapshot(TransferUIState uiState, Dictionary<ITransferItem, TransferBandKey> sortKeys)
+        {
             // inside a folder date added is always oldest first (track order)
             bool insideFolder = uiState.GroupByFolder && uiState.CurrentlySelectedFolder != null;
             bool reverse = uiState.SortKey == TransferSortKey.DateAdded && uiState.SortDescending && !insideFolder;
@@ -272,7 +284,7 @@ namespace Seeker
             // performance: the source list is already sorted by added, so we can skip the sort
             if (uiState.SortKey != TransferSortKey.DateAdded)
             {
-                TransferSort.Sort(snapshot, uiState.SortKey, uiState.SortDescending);
+                TransferSort.Sort(snapshot, uiState.SortKey, uiState.SortDescending, sortKeys);
             }
             return snapshot;
         }
@@ -490,6 +502,7 @@ namespace Seeker
             lock (AllTransferItems)
             {
                 ti.Seq = TransferSort.NextSeq();
+                TransferBands.Observe(ti.LastActionStamp);
                 AllTransferItems.Add(ti);
                 lock (AllFolderItems)
                 {
@@ -669,12 +682,15 @@ namespace Seeker
 
         public void CancelAll(bool prepareForClear = false)
         {
+            // one stamp for the whole operation
+            long actionStamp = TransferBands.NextStamp();
             lock (AllTransferItems)
             {
                 for (int i = 0; i < AllTransferItems.Count; i++)
                 {
                     //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
                     TransferItem ti = AllTransferItems[i];
+                    ti.MarkUserPause(actionStamp);
                     if (prepareForClear)
                     {
                         if (ti.InProcessing) //let continuation action clear this guy
@@ -693,16 +709,18 @@ namespace Seeker
 
         public void CancelSelectedItems(TransferUIState uiState, bool prepareForClear = false)
         {
+            long actionStamp = TransferBands.NextStamp();
             lock (AllTransferItems)
             {
                 foreach (ITransferItem iti in uiState.BatchSelectedItems)
                 {
                     if (iti is FolderItem fi)
                     {
-                        CancelFolder(fi, prepareForClear);
+                        CancelFolder(fi, prepareForClear, actionStamp);
                     }
                     else if (iti is TransferItem ti)
                     {
+                        ti.MarkUserPause(actionStamp);
                         if (prepareForClear)
                         {
                             if (ti.InProcessing) //let continuation action clear this guy
@@ -718,14 +736,20 @@ namespace Seeker
             MarkTransfersDirty();
         }
 
-        public void CancelFolder(FolderItem fi, bool prepareForClear = false)
+        // actionStamp: the caller's when the folder is part of a larger operation
+        public void CancelFolder(FolderItem fi, bool prepareForClear = false, long actionStamp = 0)
         {
+            if (actionStamp == 0)
+            {
+                actionStamp = TransferBands.NextStamp();
+            }
             lock (fi.TransferItems)
             {
                 for (int i = 0; i < fi.TransferItems.Count; i++)
                 {
                     //CancellationTokens[ProduceCancellationTokenKey(transferItems[i])]?.Cancel();
                     var ti = fi.TransferItems[i];
+                    ti.MarkUserPause(actionStamp);
                     if (prepareForClear && ti.InProcessing)
                     {
                         ti.CancelAndClearFlag = true;

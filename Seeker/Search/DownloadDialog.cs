@@ -30,6 +30,7 @@ using Common.Search;
 using Google.Android.Material.BottomSheet;
 using Seeker.Extensions.SearchResponseExtensions;
 using Seeker.Helpers;
+using Seeker.Helpers.AnchoredMenu;
 using Seeker.Services;
 using Soulseek;
 using System;
@@ -39,7 +40,7 @@ using System.Threading.Tasks;
 
 namespace Seeker
 {
-    class DownloadDialog : BottomSheetDialogFragment, PopupMenu.IOnMenuItemClickListener
+    class DownloadDialog : BottomSheetDialogFragment
     {
         public const string DOWNLOAD_DIALOG_FRAGMENT = "download_dialog_fragment";
 
@@ -240,28 +241,31 @@ namespace Seeker
         {
             try
             {
-                PopupMenu popup = new PopupMenu(SeekerState.MainActivityRef, sender as View, GravityFlags.Right);
-                popup.SetOnMenuItemClickListener(this);//  setOnMenuItemClickListener(MainActivity.this);
-                popup.Inflate(Resource.Menu.download_diag_options);
-
-                if (customAdapter.SelectedPositions.Count > 0)
-                {
-                    popup.Menu.FindItem(Resource.Id.download_selected_as_queued).SetVisible(true);
-                }
-                else
-                {
-                    popup.Menu.FindItem(Resource.Id.download_selected_as_queued).SetVisible(false);
-                }
-
-                popup.Show();
+                AnchoredMenuPopup.ShowAsDropDown(sender as View, BuildOptionsMenu());
             }
             catch (System.Exception error)
             {
-                //in response to a crash android.view.WindowManager.BadTokenException
-                //This crash is usually caused by your app trying to display a dialog using a previously-finished Activity as a context.
-                //in this case not showing it is probably best... as opposed to a crash...
+                // BadTokenException if the activity is already finishing
                 Logger.Firebase(error.Message + " POPUP BAD ERROR");
             }
+        }
+
+        private AnchoredMenuConfig BuildOptionsMenu()
+        {
+            var ctx = this.Context;
+            var config = new AnchoredMenuConfig();
+            config.AddRow(Resource.Drawable.baseline_refresh_white_24, ctx.GetString(Resource.String.get_folder), GetFolderContents);
+            config.AddRow(Resource.Drawable.folder_outline, ctx.GetString(Resource.String.browse_at_location), BrowseAtLocation);
+            config.AddRow(Resource.Drawable.information_outline, ctx.GetString(Resource.String.quick_info), ShowMoreInfoDialog);
+            config.AddRow(Resource.Drawable.user_info, ctx.GetString(Resource.String.get_user_info),
+                () => RequestedUserInfoHelper.RequestUserInfoApi(SearchResponse.Username));
+            config.AddDivider();
+            config.AddRow(Resource.Drawable.paused, ctx.GetString(Resource.String.QueueFolderAsPaused), QueueFolderAsPaused);
+            if (customAdapter != null && customAdapter.SelectedPositions.Count > 0)
+            {
+                config.AddRow(Resource.Drawable.paused, ctx.GetString(Resource.String.QueueSelectedAsPaused), QueueSelectedAsPaused);
+            }
+            return config;
         }
 
         private void ListView_ItemClick(object sender, AdapterView.ItemClickEventArgs e)
@@ -568,56 +572,34 @@ namespace Seeker
             }
         }
 
-        public bool OnMenuItemClick(IMenuItem item)
+        private void BrowseAtLocation()
         {
-            switch (item.ItemId)
+            string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(SearchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0).Filename);
+            if (!PreferencesState.HideLockedResultsInSearch && PreferencesState.HideLockedResultsInBrowse && SearchResponse.IsLockedOnly())
             {
-                case Resource.Id.getFolderContents:
-                    GetFolderContents();
-                    return true;
-                case Resource.Id.browseAtLocation:
-                    string startingDir = SimpleHelpers.GetDirectoryRequestFolderName(SearchResponse.GetElementAtAdapterPosition(PreferencesState.HideLockedResultsInSearch, 0).Filename);
-                    Action<View> action = new Action<View>((v) =>
-                    {
-                        this.Dismiss();
-                        ((AndroidX.ViewPager2.Widget.ViewPager2)(SeekerState.MainActivityRef.FindViewById(Resource.Id.pager))).SetCurrentItem(3, true);
-                    });
-                    if (!PreferencesState.HideLockedResultsInSearch && PreferencesState.HideLockedResultsInBrowse && SearchResponse.IsLockedOnly())
-                    {
-                        //this is if the user has show locked in search results but hide in browse results, then we cannot go to the folder if it is locked.
-                        startingDir = null;
-                    }
-                    Browse.BrowseService.RequestFilesApi(SearchResponse.Username, startingDir);
-                    return true;
-                case Resource.Id.moreInfo:
-                    ShowMoreInfoDialog();
-                    return true;
-                case Resource.Id.getUserInfo:
-                    RequestedUserInfoHelper.RequestUserInfoApi(SearchResponse.Username);
-                    return true;
-                case Resource.Id.download_folder_as_queued:
-                    {
-                        var filesToDownload = GetFilesToDownload(false);
-                        DownloadFiles(filesToDownload, SearchResponse.Username, true);
-                        Dismiss();
-                    }
-                    return true;
-                case Resource.Id.download_selected_as_queued:
-                    {
-                        if (this.customAdapter.SelectedPositions.Count == 0)
-                        {
-                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.nothing_selected_extra), ToastLength.Short);
-                            return true;
-                        }
-                        var filesToDownload = GetFilesToDownload(true);
-                        DownloadFiles(filesToDownload, SearchResponse.Username, true);
-                        Dismiss();
-                    }
-                    return true;
-                default:
-                    return false;
-
+                //this is if the user has show locked in search results but hide in browse results, then we cannot go to the folder if it is locked.
+                startingDir = null;
             }
+            Browse.BrowseService.RequestFilesApi(SearchResponse.Username, startingDir);
+        }
+
+        private void QueueFolderAsPaused()
+        {
+            var filesToDownload = GetFilesToDownload(false);
+            DownloadFiles(filesToDownload, SearchResponse.Username, true);
+            Dismiss();
+        }
+
+        private void QueueSelectedAsPaused()
+        {
+            if (this.customAdapter.SelectedPositions.Count == 0)
+            {
+                SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.nothing_selected_extra), ToastLength.Short);
+                return;
+            }
+            var filesToDownload = GetFilesToDownload(true);
+            DownloadFiles(filesToDownload, SearchResponse.Username, true);
+            Dismiss();
         }
     }
 

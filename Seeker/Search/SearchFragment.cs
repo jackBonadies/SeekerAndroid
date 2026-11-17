@@ -2,6 +2,7 @@
 using Seeker.Services;
 using Seeker.Extensions.SearchResponseExtensions;
 using Seeker.Helpers;
+using Seeker.Helpers.AnchoredMenu;
 using Seeker.Search;
 using Android.Animation;
 using Android.Content;
@@ -148,39 +149,72 @@ namespace Seeker
                 ContextCompat.GetDrawable(Context, Resource.Drawable.baseline_close_white_24));
             searchIcon.ShowSecond(SearchTabHelper.CurrentlySearching, 0);
             menu.FindItem(Resource.Id.action_search).SetIcon(searchIcon);
-            if (SearchTabHelper.SearchTarget == SearchTarget.Wishlist)
-            {
-                menu.FindItem(Resource.Id.action_add_to_wishlist).SetVisible(false);
-            }
-            else
-            {
-                menu.FindItem(Resource.Id.action_add_to_wishlist).SetVisible(true);
-            }
+            OverflowMenu.Attach(menu, Resource.Id.action_search_overflow, BuildOverflowMenu);
 
             ActionBarMenu = menu;
             base.OnCreateOptionsMenu(menu, inflater);
         }
 
-        public override void OnPrepareOptionsMenu(IMenu menu)
+        private AnchoredMenuConfig BuildOverflowMenu()
         {
-            var toggleItem = menu.FindItem(Resource.Id.action_toggle_expand_all);
-            if (toggleItem != null)
+            var ctx = Context;
+            if (ctx == null)
             {
-                bool isExpandable = PreferencesState.SearchResultStyle.HasFlag(SearchResultStyleEnum.Expandable);
-                toggleItem.SetVisible(isExpandable);
-                if (isExpandable)
-                {
-                    toggleItem.SetTitle(ExpandAllResults
-                        ? Resource.String.collapse_all
-                        : Resource.String.expand_all);
-                }
+                return null;
             }
-            //var groupedItem = menu.FindItem(Resource.Id.action_toggle_grouped_chips);
-            //if (groupedItem != null)
-            //{
-            //    groupedItem.SetChecked(PreferencesState.SmartFilterStyle == SmartFilterStyle.Grouped);
-            //}
-            base.OnPrepareOptionsMenu(menu);
+            bool isWishlist = SearchTabHelper.SearchTarget == SearchTarget.Wishlist;
+            var config = new AnchoredMenuConfig();
+            config.Rows.Add(new AnchoredMenuRow
+            {
+                IconResId = Resource.Drawable.person_search_24,
+                Label = ctx.GetString(Resource.String.change_target),
+                OnClick = () =>
+                {
+                    if (SearchTabHelper.SearchTarget == SearchTarget.Wishlist)
+                    {
+                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.wishlist_tab_target), ToastLength.Long);
+                        return;
+                    }
+                    ShowChangeTargetDialog();
+                }
+            });
+            config.Rows.Add(new AnchoredMenuRow
+            {
+                IconResId = Resource.Drawable.view_agenda_24,
+                Label = ctx.GetString(Resource.String.change_result_style),
+                OnClick = ShowChangeResultStyleBottomDialog
+            });
+            if (PreferencesState.SearchResultStyle.HasFlag(SearchResultStyleEnum.Expandable))
+            {
+                config.Rows.Add(new AnchoredMenuRow
+                {
+                    Kind = AnchoredMenuRowKind.Checkable,
+                    IconResId = Resource.Drawable.unfold_more_24,
+                    Label = ctx.GetString(Resource.String.expand_all),
+                    GetChecked = () => ExpandAllResults,
+                    OnChecked = isChecked =>
+                    {
+                        ExpandAllResults = isChecked;
+                        SearchResultStyleChanged();
+                    }
+                });
+            }
+            config.Rows.Add(new AnchoredMenuRow
+            {
+                IconResId = Resource.Drawable.sort,
+                Label = ctx.GetString(Resource.String.sort_results_by),
+                OnClick = () => SortBottomSheet.Show(ChildFragmentManager)
+            });
+            if (!isWishlist)
+            {
+                config.Rows.Add(new AnchoredMenuRow
+                {
+                    IconResId = Resource.Drawable.star_outline_24,
+                    Label = ctx.GetString(Resource.String.add_to_wish),
+                    OnClick = AddSearchToWishlist
+                });
+            }
+            return config;
         }
 
         public static void SetCustomViewTabNumberInner(View container)
@@ -379,17 +413,6 @@ namespace Seeker
 
             switch (item.ItemId)
             {
-                case Resource.Id.action_search_target:
-                    if (SearchTabHelper.SearchTarget == SearchTarget.Wishlist)
-                    {
-                        SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.wishlist_tab_target), ToastLength.Long);
-                        return true;
-                    }
-                    ShowChangeTargetDialog();
-                    return true;
-                case Resource.Id.action_sort_results_by:
-                    SortBottomSheet.Show(ChildFragmentManager);
-                    return true;
                 case Resource.Id.action_search:
                     if (SearchTabHelper.CurrentlySearching) //that means the user hit the "X" button
                     {
@@ -399,26 +422,6 @@ namespace Seeker
                     {
                         SubmitSearch(GetSearchBoxText());
                     }
-                    return true;
-                case Resource.Id.action_change_result_style:
-                    ShowChangeResultStyleBottomDialog();
-                    return true;
-                case Resource.Id.action_toggle_expand_all:
-                    ExpandAllResults = !ExpandAllResults;
-                    this.Activity?.InvalidateOptionsMenu();
-                    SearchResultStyleChanged();
-                    return true;
-                //case Resource.Id.action_toggle_grouped_chips:
-                //    PreferencesState.SmartFilterStyle =
-                //        PreferencesState.SmartFilterStyle == SmartFilterStyle.Grouped
-                //            ? SmartFilterStyle.Flat
-                //            : SmartFilterStyle.Grouped;
-                //    PreferencesManager.SaveSmartFilterStyle();
-                //    SwapChipAdapter();
-                //    this.Activity?.InvalidateOptionsMenu();
-                //    return true;
-                case Resource.Id.action_add_to_wishlist:
-                    AddSearchToWishlist();
                     return true;
             }
             return base.OnOptionsItemSelected(item);

@@ -38,10 +38,19 @@ namespace Seeker.Helpers.ActionSheet
                     options.OnAddRemoved, options.OnIgnoreChanged, options.OnNoteChanged)
             });
 
-            section.Rows.Add(MakeCommonRow(Resource.Drawable.message_user, Resource.String.msg_user, username, ctx, snackView, options));
-            section.Rows.Add(MakeCommonRow(Resource.Drawable.folder_shared_browse_outline_30dp, Resource.String.browse_user, username, ctx, snackView, options));
+            if (!options.ExcludeMessage)
+            {
+                section.Rows.Add(MakeCommonRow(Resource.Drawable.message_user, Resource.String.msg_user, username, ctx, snackView, options));
+            }
+            if (!options.ExcludeBrowse)
+            {
+                section.Rows.Add(MakeCommonRow(Resource.Drawable.folder_shared_browse_outline_30dp, Resource.String.browse_user, username, ctx, snackView, options));
+            }
             section.Rows.Add(MakeCommonRow(Resource.Drawable.search_users_files, Resource.String.search_user_files, username, ctx, snackView, options));
-            section.Rows.Add(MakeCommonRow(Resource.Drawable.user_info, Resource.String.get_user_info, username, ctx, snackView, options));
+            if (!options.ExcludeUserInfo)
+            {
+                section.Rows.Add(MakeCommonRow(Resource.Drawable.user_info, Resource.String.get_user_info, username, ctx, snackView, options));
+            }
 
             bool hasNote = UserMetadataService.UserNotes.ContainsKey(username);
             int noteStringId = hasNote ? Resource.String.edit_note : Resource.String.add_note;
@@ -170,6 +179,11 @@ namespace Seeker.Helpers.ActionSheet
         public bool IncludeOnlineAlert;
         public bool IncludeGivePrivileges;
         public RoomAdminContext RoomAdmin;
+
+        // drop the row for the screen the menu is shown on
+        public bool ExcludeMessage;
+        public bool ExcludeBrowse;
+        public bool ExcludeUserInfo;
 
         // Callbacks used only by RoomUserListDialog (chatroom user list) for its own row updates.
         // UserListActivity drives row updates through UserListService events instead, so it leaves these null.

@@ -4,6 +4,8 @@ using Android.Widget;
 using Google.Android.Material.Snackbar;
 using Seeker.Browse;
 using Seeker.Helpers;
+using Seeker.Helpers.AnchoredMenu;
+using Seeker.Helpers.ActionSheet;
 using Seeker.Services;
 using System;
 using System.Collections.Generic;
@@ -26,38 +28,15 @@ namespace Seeker.Messages
             public bool OnCreateActionMode(ActionMode mode, IMenu menu)
             {
                 mode.MenuInflater.Inflate(Resource.Menu.messages_overview_batch_menu, menu);
+                OverflowMenu.Attach(menu, Resource.Id.action_messages_batch_overflow, BuildOverflowMenu, dismissWithAnchor: true);
                 UiHelpers.ApplyActionModeStatusBarInset(SeekerState.ActiveActivityRef);
                 return true;
             }
 
             public bool OnPrepareActionMode(ActionMode mode, IMenu menu)
             {
-                int selectedCount = Adapter.SelectedPositions.Count;
-                bool singleSelected = selectedCount == 1;
-                bool anySelected = selectedCount > 0;
-
-                // Single-select only items
-                menu.FindItem(Resource.Id.action_browse_files)?.SetVisible(singleSelected);
-                menu.FindItem(Resource.Id.action_search_files)?.SetVisible(singleSelected);
-                menu.FindItem(Resource.Id.action_get_user_info)?.SetVisible(singleSelected);
-
-                // Single + multi items
-                menu.FindItem(Resource.Id.action_add_to_user_list)?.SetVisible(anySelected);
-                menu.FindItem(Resource.Id.action_ignore)?.SetVisible(anySelected);
+                bool anySelected = Adapter.SelectedPositions.Count > 0;
                 menu.FindItem(Resource.Id.action_mark_as_read)?.SetVisible(anySelected && GetSelectedUsernames().Any(u => MessageController.GetUnreadCount(u) > 0));
-
-                if (singleSelected)
-                {
-                    string username = Adapter.localDataSet[Adapter.SelectedPositions[0]];
-                    UiHelpers.SetMenuTitles(menu, username);
-                    UiHelpers.SetIgnoreAddExclusive(menu, username);
-                }
-                else if (anySelected)
-                {
-                    menu.FindItem(Resource.Id.action_add_to_user_list)?.SetTitle(Resource.String.add_to_user_list);
-                    menu.FindItem(Resource.Id.action_ignore)?.SetTitle(Resource.String.ignore_users);
-                }
-
                 return true;
             }
 
@@ -69,93 +48,110 @@ namespace Seeker.Messages
                     .ToList();
             }
 
-            public bool OnActionItemClicked(ActionMode mode, IMenuItem item)
+            private AnchoredMenuConfig BuildOverflowMenu()
             {
-                switch (item.ItemId)
+                if (MessagesOverviewActionMode == null)
                 {
-                    case Resource.Id.action_browse_files:
+                    return null;
+                }
+                var activity = SeekerState.ActiveActivityRef;
+                var selectedUsernames = GetSelectedUsernames();
+                var config = new AnchoredMenuConfig();
+                if (selectedUsernames.Count == 1)
+                {
+                    // same rows as the chat's own menu
+                    var snackView = activity.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId);
+                    var userSection = ActionSheetActions.BuildUserActionsSection(selectedUsernames[0], activity, snackView, new UserActionsOptions { ExcludeMessage = true });
+                    config.AddRows(userSection);
+                    foreach (var row in config.Rows)
                     {
-                        string username = GetSelectedUsernames().FirstOrDefault();
-                        if (username != null)
-                        {
-                            BrowseService.RequestFilesApi(username, null);
-                        }
-                        MessagesOverviewActionMode?.Finish();
-                        return true;
+                        var inner = row.OnClick;
+                        row.OnClick = () => ThenFinish(inner);
                     }
-                    case Resource.Id.action_search_files:
+                }
+                else if (selectedUsernames.Count > 1)
+                {
+                    config.Rows.Add(new AnchoredMenuRow
                     {
-                        string username = GetSelectedUsernames().FirstOrDefault();
-                        if (username != null)
+                        IconResId = Resource.Drawable.user_add,
+                        Label = activity.GetString(Resource.String.add_to_user_list),
+                        OnClick = () => ThenFinish(() =>
                         {
-                            SearchTabHelper.SearchTarget = SearchTarget.ChosenUser;
-                            SearchTabHelper.SearchTargetChosenUser = username;
-                            Intent intent = new Intent(SeekerState.ActiveActivityRef, typeof(MainActivity));
-                            intent.PutExtra(MainActivity.GoToSearchExtra, true);
-                            SeekerState.ActiveActivityRef.StartActivity(intent);
-                        }
-                        MessagesOverviewActionMode?.Finish();
-                        return true;
-                    }
-                    case Resource.Id.action_get_user_info:
-                    {
-                        string username = GetSelectedUsernames().FirstOrDefault();
-                        if (username != null)
-                        {
-                            RequestedUserInfoHelper.RequestUserInfoApi(username);
-                        }
-                        MessagesOverviewActionMode?.Finish();
-                        return true;
-                    }
-                    case Resource.Id.action_delete_messages:
-                        Frag.DeleteBatchSelected();
-                        return true;
-                    case Resource.Id.action_add_to_user_list:
-                    {
-                        var selectedUsernames = GetSelectedUsernames();
-                        if (selectedUsernames.Count == 1)
-                        {
-                            UiHelpers.HandleCommonContextMenuActions(
-                                item.TitleFormatted.ToString(), selectedUsernames[0],
-                                SeekerState.ActiveActivityRef,
-                                SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId));
-                        }
-                        else
-                        {
-                            foreach (string username in selectedUsernames)
+                            foreach (string username in GetSelectedUsernames())
                             {
                                 if (!UserListService.Instance.ContainsUser(username))
                                 {
                                     UserListService.AddUserAPI(SeekerState.ActiveActivityRef, username, new Action(() => { }));
                                 }
                             }
-                        }
-                        MessagesOverviewActionMode?.Finish();
-                        return true;
-                    }
-                    case Resource.Id.action_ignore:
+                        })
+                    });
+                    config.Rows.Add(new AnchoredMenuRow
                     {
-                        var selectedUsernames = GetSelectedUsernames();
-                        if (selectedUsernames.Count == 1)
+                        IconResId = Resource.Drawable.account_cancel_outline,
+                        Label = activity.GetString(Resource.String.ignore_users),
+                        Destructive = true,
+                        OnClick = () => ThenFinish(() =>
                         {
-                            UiHelpers.HandleCommonContextMenuActions(
-                                item.TitleFormatted.ToString(), selectedUsernames[0],
-                                SeekerState.ActiveActivityRef,
-                                SeekerState.ActiveActivityRef.FindViewById<ViewGroup>(Resource.Id.messagesMainLayoutId));
-                        }
-                        else
-                        {
-                            foreach (string username in selectedUsernames)
+                            foreach (string username in GetSelectedUsernames())
                             {
                                 if (!UserListService.Instance.IsUserInIgnoreList(username))
                                 {
                                     UserListService.AddToIgnoreListFeedback(SeekerState.ActiveActivityRef, username);
                                 }
                             }
-                        }
-                        MessagesOverviewActionMode?.Finish();
-                        return true;
-                    }
+                        })
+                    });
+                }
+                config.AddDivider();
+                config.AddRow(Resource.Drawable.select_all_24, activity.GetString(Resource.String.SelectAll), () => IfActive(SelectAll));
+                config.AddRow(Resource.Drawable.ink_selection_24, activity.GetString(Resource.String.InvertSelection), () => IfActive(InvertSelection));
+                return config;
+            }
+
+            // the mode can finish while the menu is open
+            private static void IfActive(Action action)
+            {
+                if (MessagesOverviewActionMode != null)
+                {
+                    action();
+                }
+            }
+
+            private static void ThenFinish(Action action)
+            {
+                IfActive(() =>
+                {
+                    action?.Invoke();
+                    MessagesOverviewActionMode?.Finish();
+                });
+            }
+
+            private void SelectAll()
+            {
+                BatchSelection.SelectAll(Adapter.SelectedPositions, BatchSelection.Positions(Adapter.ItemCount));
+                Adapter.NotifyDataSetChanged();
+                BatchSelection.ShowCount(MessagesOverviewActionMode, Adapter.SelectedPositions.Count);
+            }
+
+            private void InvertSelection()
+            {
+                BatchSelection.Invert(Adapter.SelectedPositions, BatchSelection.Positions(Adapter.ItemCount));
+                Adapter.NotifyDataSetChanged();
+                if (Adapter.SelectedPositions.Count == 0)
+                {
+                    MessagesOverviewActionMode?.Finish();
+                }
+                else
+                {
+                    BatchSelection.ShowCount(MessagesOverviewActionMode, Adapter.SelectedPositions.Count);
+                }
+            }
+
+            public bool OnActionItemClicked(ActionMode mode, IMenuItem item)
+            {
+                switch (item.ItemId)
+                {
                     case Resource.Id.action_delete_selected_batch:
                         Frag.DeleteBatchSelected();
                         return true;
@@ -164,38 +160,6 @@ namespace Seeker.Messages
                         Adapter.NotifyDataSetChanged();
                         MessagesBroadcastReceiver.MarkAsReadFromNotification?.Invoke(null, null);
                         MessagesOverviewActionMode?.Finish();
-                        return true;
-                    case Resource.Id.select_all:
-                        Adapter.SelectedPositions.Clear();
-                        int cnt = Adapter.ItemCount;
-                        for (int i = 0; i < cnt; i++)
-                        {
-                            Adapter.SelectedPositions.Add(i);
-                        }
-                        Adapter.NotifyDataSetChanged();
-                        MessagesOverviewActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                        MessagesOverviewActionMode.Invalidate();
-                        return true;
-                    case Resource.Id.invert_selection:
-                        List<int> oldOnes = Adapter.SelectedPositions.ToList();
-                        Adapter.SelectedPositions.Clear();
-                        List<int> all = new List<int>();
-                        int cnt1 = Adapter.ItemCount;
-                        for (int i = 0; i < cnt1; i++)
-                        {
-                            all.Add(i);
-                        }
-                        Adapter.SelectedPositions = all.Except(oldOnes).ToList();
-                        Adapter.NotifyDataSetChanged();
-                        if (Adapter.SelectedPositions.Count == 0)
-                        {
-                            MessagesOverviewActionMode?.Finish();
-                        }
-                        else
-                        {
-                            MessagesOverviewActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), Adapter.SelectedPositions.Count.ToString());
-                            MessagesOverviewActionMode.Invalidate();
-                        }
                         return true;
                 }
                 return true;
@@ -238,8 +202,7 @@ namespace Seeker.Messages
             }
             else if (actionMode != null)
             {
-                actionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                actionMode.Invalidate();
+                BatchSelection.ShowCount(actionMode, cnt);
             }
         }
 

@@ -10,6 +10,8 @@ namespace Seeker
         DateAdded = 0,
         FolderName = 1,
         User = 2,
+        Status = 3,
+        LastAction = 4,
     }
 
     public static class TransferSort
@@ -30,32 +32,88 @@ namespace Seeker
             return ((TransferItem)item).Seq;
         }
 
+        // keys that change while a row is listed, so the snapshot remembers what each row was sorted by
+        public static bool IsMutable(TransferSortKey key)
+        {
+            return key == TransferSortKey.Status || key == TransferSortKey.LastAction;
+        }
+
+        // the part of a row's band and stamp that the key sorts on
+        public static TransferBandKey MutableKeyOf(ITransferItem item, TransferSortKey key)
+        {
+            TransferBandKey full = TransferBands.KeyOf(item);
+            // i.e. if LastAction, ignore the "band" part (force to active)
+            return key == TransferSortKey.LastAction ? new TransferBandKey(TransferBand.Active, full.Stamp) : full;
+        }
+
         private struct Entry
         {
             public string Primary;
             public string Secondary;
             public string Tertiary;
             public long Seq;
+            public TransferBandKey BandKey;
             public ITransferItem Item;
         }
 
         // the direction applies to the primary key only, ties are always ascending
         public static void Sort(List<ITransferItem> items, TransferSortKey key, bool descending)
         {
-            if (items.Count < 2)
-            {
-                return;
-            }
+            Sort(items, key, descending, null);
+        }
+
+        // sortKeys: for a mutable key, receives the key each row was sorted by
+        public static void Sort(List<ITransferItem> items, TransferSortKey key, bool descending, Dictionary<ITransferItem, TransferBandKey>? sortKeys)
+        {
             var entries = new Entry[items.Count];
             for (int i = 0; i < items.Count; i++)
             {
                 entries[i] = CreateEntry(items[i], key);
+                if (IsMutable(key) && sortKeys != null)
+                {
+                    sortKeys[items[i]] = entries[i].BandKey;
+                }
+            }
+            if (items.Count < 2)
+            {
+                return;
             }
 
             int direction = descending ? -1 : 1;
             if (key == TransferSortKey.DateAdded)
             {
                 Array.Sort(entries, (a, b) => a.Seq.CompareTo(b.Seq) * direction);
+            }
+            else if (key == TransferSortKey.Status)
+            {
+                // the most recently touched in a band is first whether ascending or descending
+                Array.Sort(entries, (a, b) =>
+                {
+                    int c = a.BandKey.Band.CompareTo(b.BandKey.Band);
+                    if (c != 0)
+                    {
+                        return c * direction;
+                    }
+                    c = b.BandKey.Stamp.CompareTo(a.BandKey.Stamp);
+                    if (c != 0)
+                    {
+                        return c;
+                    }
+                    return a.Seq.CompareTo(b.Seq);
+                });
+            }
+            else if (key == TransferSortKey.LastAction)
+            {
+                // a batch shares a stamp, so it stays in date added (track) order
+                Array.Sort(entries, (a, b) =>
+                {
+                    int c = a.BandKey.Stamp.CompareTo(b.BandKey.Stamp);
+                    if (c != 0)
+                    {
+                        return c * direction;
+                    }
+                    return a.Seq.CompareTo(b.Seq);
+                });
             }
             else
             {
@@ -93,6 +151,11 @@ namespace Seeker
             var entry = new Entry { Item = item, Seq = GetSeq(item), Primary = string.Empty, Secondary = string.Empty, Tertiary = string.Empty };
             if (key == TransferSortKey.DateAdded)
             {
+                return entry;
+            }
+            if (IsMutable(key))
+            {
+                entry.BandKey = MutableKeyOf(item, key);
                 return entry;
             }
             if (item is FolderItem fi)

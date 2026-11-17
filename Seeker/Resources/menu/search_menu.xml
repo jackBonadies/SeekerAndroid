@@ -2,7 +2,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
 >
-
     <item
         android:id="@+id/action_search"
         android:title="@string/searches_tab2"
@@ -10,40 +9,11 @@
         app:showAsAction="always"
         android:iconifiedByDefault="true"
     />
-
-    <!-- Settings, should always be in the overflow -->
+    <!-- Everything else lives in the anchored menu (SearchFragment.BuildOverflowMenu). -->
     <item
-        android:id="@+id/action_search_target"
-        android:title="@string/change_target"
-        app:showAsAction="never"
-    />
-    <item
-        android:id="@+id/action_change_result_style"
-        android:title="@string/change_result_style"
-        app:showAsAction="never"
-    />
-
-    <item
-        android:id="@+id/action_toggle_expand_all"
-        android:title="@string/expand_all"
-        app:showAsAction="never"
-        android:visible="false"
-    />
-    <!--<item
-        android:id="@+id/action_toggle_grouped_chips"
-        android:title="@string/grouped_chips_toggle"
-        app:showAsAction="never"
-        android:checkable="true"
-    />-->
-    <item
-        android:id="@+id/action_sort_results_by"
-        android:title="@string/sort_results_by"
-        app:showAsAction="never"
-    />
-
-    <item
-        android:id="@+id/action_add_to_wishlist"
-        android:title="@string/add_to_wish"
-        app:showAsAction="never"
+        android:id="@+id/action_search_overflow"
+        android:title="@string/Options"
+        app:actionLayout="@layout/anchored_menu_overflow_button"
+        app:showAsAction="always"
     />
 </menu>

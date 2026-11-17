@@ -312,6 +312,29 @@ namespace Seeker
             }
         }
 
+        // band of the folder (best of its files) and the last user action on any of its files
+        public TransferBand GetBand(out long stamp)
+        {
+            lock (TransferItems)
+            {
+                TransferBand band = TransferBand.Completed;
+                bool any = false;
+                stamp = 0;
+                foreach (TransferItem ti in TransferItems)
+                {
+                    any = true;
+                    TransferBand fileBand = TransferBands.Of(ti.State);
+                    if (fileBand < band)
+                    {
+                        band = fileBand;
+                    }
+                    stamp = Math.Max(stamp, System.Threading.Interlocked.Read(ref ti.LastActionStamp));
+                }
+                // empty while it is being cleared
+                return any ? band : TransferBand.Paused;
+            }
+        }
+
         public void ClearAllComplete()
         {
             lock (TransferItems)

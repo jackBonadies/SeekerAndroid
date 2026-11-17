@@ -2,6 +2,7 @@ using Android.Views;
 using Common.Browse;
 using Seeker.Browse;
 using Seeker.Helpers;
+using Seeker.Helpers.AnchoredMenu;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -25,9 +26,8 @@ namespace Seeker
                 if (state.IsAnonymousSelf)
                 {
                     menu.FindItem(Resource.Id.action_download_batch)?.SetVisible(false);
-                    menu.FindItem(Resource.Id.action_queue_paused_batch)?.SetVisible(false);
-                    menu.FindItem(Resource.Id.action_copy_selected_url_batch)?.SetVisible(false);
                 }
+                OverflowMenu.Attach(menu, Resource.Id.action_browse_batch_overflow, BuildOverflowMenu, dismissWithAnchor: true);
                 UiHelpers.ApplyActionModeStatusBarInset(SeekerState.ActiveActivityRef);
                 return true;
             }
@@ -37,6 +37,67 @@ namespace Seeker
                 return false;
             }
 
+            private AnchoredMenuConfig BuildOverflowMenu()
+            {
+                if (BrowseActionMode == null)
+                {
+                    return null;
+                }
+                var ctx = Frag.Context ?? SeekerState.ActiveActivityRef;
+                var config = new AnchoredMenuConfig();
+                if (!state.IsAnonymousSelf)
+                {
+                    config.AddRow(Resource.Drawable.paused, ctx.GetString(Resource.String.QueueSelectedAsPaused), () => IfActive(() =>
+                    {
+                        Frag.DownloadBatchSelected(true);
+                        BrowseActionMode?.Finish();
+                    }));
+                }
+                config.AddRow(Resource.Drawable.information_outline, ctx.GetString(Resource.String.ShowSelectedInfo), () => IfActive(Frag.ShowBatchSelectedInfo));
+                if (!state.IsAnonymousSelf)
+                {
+                    config.AddRow(Resource.Drawable.link_variant, ctx.GetString(Resource.String.CopySelectedURLs), () => IfActive(() =>
+                    {
+                        Frag.CopyBatchSelectedURLs();
+                        BrowseActionMode?.Finish();
+                    }));
+                }
+                config.AddDivider();
+                config.AddRow(Resource.Drawable.select_all_24, ctx.GetString(Resource.String.SelectAll), () => IfActive(SelectAll));
+                config.AddRow(Resource.Drawable.ink_selection_24, ctx.GetString(Resource.String.InvertSelection), () => IfActive(InvertSelection));
+                return config;
+            }
+
+            // the mode can finish while the menu is open
+            private static void IfActive(System.Action action)
+            {
+                if (BrowseActionMode != null)
+                {
+                    action();
+                }
+            }
+
+            private void SelectAll()
+            {
+                BatchSelection.SelectAll(Adapter.SelectedPositions, BatchSelection.Positions(Adapter.ItemCount));
+                Adapter.NotifyDataSetChanged();
+                BatchSelection.ShowCount(BrowseActionMode, Adapter.SelectedPositions.Count);
+            }
+
+            private void InvertSelection()
+            {
+                BatchSelection.Invert(Adapter.SelectedPositions, BatchSelection.Positions(Adapter.ItemCount));
+                Adapter.NotifyDataSetChanged();
+                if (Adapter.SelectedPositions.Count == 0)
+                {
+                    BrowseActionMode?.Finish();
+                }
+                else
+                {
+                    BatchSelection.ShowCount(BrowseActionMode, Adapter.SelectedPositions.Count);
+                }
+            }
+
             public bool OnActionItemClicked(ActionMode mode, IMenuItem item)
             {
                 switch (item.ItemId)
@@ -44,49 +105,6 @@ namespace Seeker
                     case Resource.Id.action_download_batch:
                         Frag.DownloadBatchSelected(false);
                         BrowseActionMode?.Finish();
-                        return true;
-                    case Resource.Id.action_queue_paused_batch:
-                        Frag.DownloadBatchSelected(true);
-                        BrowseActionMode?.Finish();
-                        return true;
-                    case Resource.Id.action_show_selected_info:
-                        Frag.ShowBatchSelectedInfo();
-                        return true;
-                    case Resource.Id.action_copy_selected_url_batch:
-                        Frag.CopyBatchSelectedURLs();
-                        BrowseActionMode?.Finish();
-                        return true;
-                    case Resource.Id.select_all:
-                        Adapter.SelectedPositions.Clear();
-                        int cnt = Adapter.ItemCount;
-                        for (int i = 0; i < cnt; i++)
-                        {
-                            Adapter.SelectedPositions.Add(i);
-                        }
-                        Adapter.NotifyDataSetChanged();
-                        BrowseActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                        BrowseActionMode.Invalidate();
-                        return true;
-                    case Resource.Id.invert_selection:
-                        List<int> oldOnes = Adapter.SelectedPositions.ToList();
-                        Adapter.SelectedPositions.Clear();
-                        List<int> all = new List<int>();
-                        int cnt1 = Adapter.ItemCount;
-                        for (int i = 0; i < cnt1; i++)
-                        {
-                            all.Add(i);
-                        }
-                        Adapter.SelectedPositions = all.Except(oldOnes).ToList();
-                        Adapter.NotifyDataSetChanged();
-                        if (Adapter.SelectedPositions.Count == 0)
-                        {
-                            BrowseActionMode?.Finish();
-                        }
-                        else
-                        {
-                            BrowseActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), Adapter.SelectedPositions.Count.ToString());
-                            BrowseActionMode.Invalidate();
-                        }
                         return true;
                 }
                 return true;
@@ -127,8 +145,7 @@ namespace Seeker
             }
             else
             {
-                BrowseActionMode.Title = string.Format(SeekerApplication.GetString(Resource.String.Num_Selected), cnt.ToString());
-                BrowseActionMode.Invalidate();
+                BatchSelection.ShowCount(BrowseActionMode, cnt);
             }
         }
 

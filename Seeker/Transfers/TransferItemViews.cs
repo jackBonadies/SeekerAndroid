@@ -60,9 +60,11 @@ namespace Seeker
         public bool GetShowTimeRemaining();
     }
 
-    public class TransferItemViewFolder : RelativeLayout, ITransferItemView, View.IOnCreateContextMenuListener
+    public class TransferItemViewFolder : RelativeLayout, ITransferItemView
     {
         public TransfersFragment.TransferViewHolder ViewHolder { get; set; }
+        private readonly Color rowColor;
+        private readonly Color rowColorBatchSelected;
         private TextView viewUsername;
         private TextView viewFoldername;
         private TextView viewCurrentFilename;
@@ -140,6 +142,9 @@ namespace Seeker
 
         public TransferItemViewFolder(Context context) : base(context)
         {
+            Foreground = UiHelpers.GetDrawableFromAttribute(context, Android.Resource.Attribute.SelectableItemBackground);
+            UiHelpers.GetOpaqueRowColors(context, out rowColor, out rowColorBatchSelected);
+            SetBackgroundColor(rowColor);
             LayoutInflater.From(context).Inflate(Resource.Layout.transfer_folder_item, this, true);
             setupChildren();
         }
@@ -200,11 +205,6 @@ namespace Seeker
             cachedUploadArrowSpan = new ImageSpan(uploadInset, SpanAlign.Bottom);
         }
 
-        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-        {
-            base.OnCreateContextMenu(menu);
-        }
-
         public void setItem(ITransferItem item, bool isInBatchMode)
         {
             InnerTransferItem = item;
@@ -226,13 +226,13 @@ namespace Seeker
                 selectionCheckbox.Visibility = ViewStates.Visible;
                 bool isSelected = TransfersViewState.Instance.BatchSelectedItems.Contains(item);
                 selectionCheckbox.SetImageResource(isSelected ? Resource.Drawable.check_circle : Resource.Drawable.check_circle_outline);
-                this.Background = isSelected ? UiHelpers.GetBatchSelectHighlight(this.Context) : null;
+                SetBackgroundColor(isSelected ? rowColorBatchSelected : rowColor);
             }
             else
             {
                 FolderIndicator.Visibility = ViewStates.Visible;
                 selectionCheckbox.Visibility = ViewStates.Invisible;
-                this.Background = null;
+                SetBackgroundColor(rowColor);
             }
         }
     }
@@ -779,9 +779,11 @@ namespace Seeker
     }
 
 
-    public class TransferItemViewDetails : RelativeLayout, ITransferItemView, View.IOnCreateContextMenuListener
+    public class TransferItemViewDetails : RelativeLayout, ITransferItemView
     {
         public TransfersFragment.TransferViewHolder ViewHolder { get; set; }
+        private readonly Color rowColor;
+        private readonly Color rowColorBatchSelected;
         private TextView viewUsername;
         private TextView viewFilename;
 
@@ -848,6 +850,9 @@ namespace Seeker
         public bool showTimeRemaining;
         public TransferItemViewDetails(Context context) : base(context)
         {
+            Foreground = UiHelpers.GetDrawableFromAttribute(context, Android.Resource.Attribute.SelectableItemBackground);
+            UiHelpers.GetOpaqueRowColors(context, out rowColor, out rowColorBatchSelected);
+            SetBackgroundColor(rowColor);
             LayoutInflater.From(context).Inflate(Resource.Layout.transfer_single_item, this, true);
             setupChildren();
         }
@@ -914,23 +919,14 @@ namespace Seeker
                 selectionCheckbox.Visibility = ViewStates.Visible;
                 bool isSelected = TransfersViewState.Instance.BatchSelectedItems.Contains(item);
                 selectionCheckbox.SetImageResource(isSelected ? Resource.Drawable.check_circle : Resource.Drawable.check_circle_outline);
-                this.Background = isSelected ? UiHelpers.GetBatchSelectHighlight(this.Context) : null;
+                SetBackgroundColor(isSelected ? rowColorBatchSelected : rowColor);
             }
             else
             {
                 actionContainer.Visibility = ViewStates.Gone;
                 selectionCheckbox.Visibility = ViewStates.Invisible;
-                this.Background = null;
+                SetBackgroundColor(rowColor);
             }
-        }
-
-        public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-        {
-            base.OnCreateContextMenu(menu);
-            //AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-            menu.Add(0, 0, 0, Resource.String.retry_dl);
-            menu.Add(1, 1, 1, Resource.String.clear_from_list);
-            menu.Add(2, 2, 2, Resource.String.cancel_and_clear);
         }
     }
 

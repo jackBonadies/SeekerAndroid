@@ -767,34 +767,37 @@ namespace Seeker
                     Intent intent = new Intent(SeekerState.MainActivityRef, typeof(UserListActivity));
                     SeekerState.MainActivityRef.StartActivityForResult(intent, 141);
                     return true;
-                case Resource.Id.messages_action:
-                    Intent intentMessages = new Intent(SeekerState.MainActivityRef, typeof(MessagesActivity));
-                    SeekerState.MainActivityRef.StartActivityForResult(intentMessages, 142);
-                    return true;
-                case Resource.Id.chatroom_action:
-                    Intent intentChatroom = new Intent(SeekerState.MainActivityRef, typeof(ChatroomActivity));
-                    SeekerState.MainActivityRef.StartActivityForResult(intentChatroom, 143);
-                    return true;
                 case Resource.Id.settings_action:
                     Intent intent2 = new Intent(SeekerState.MainActivityRef, typeof(SettingsActivity));
                     SeekerState.MainActivityRef.StartActivityForResult(intent2, 140);
                     return true;
-                case Resource.Id.shutdown_action:
-                    Intent intent3 = new Intent(this, typeof(CloseActivity));
-                    //Clear all activities and start new task
-                    //ClearTask - causes any existing task that would be associated with the activity 
-                    // to be cleared before the activity is started. can only be used in conjunction with NewTask.
-                    // basically it clears all activities in the current task.
-                    intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
-                    this.StartActivity(intent3);
-                    this.FinishAndRemoveTask();
-                    return true;
-                case Resource.Id.about_action:
-                    Seeker.Settings.Rows.AboutBottomSheet.Show(this);
-                    return true;
             }
 
             return base.OnOptionsItemSelected(item);
+        }
+
+        public void OpenMessages()
+        {
+            Intent intentMessages = new Intent(this, typeof(MessagesActivity));
+            StartActivityForResult(intentMessages, 142);
+        }
+
+        public void OpenChatrooms()
+        {
+            Intent intentChatroom = new Intent(this, typeof(ChatroomActivity));
+            StartActivityForResult(intentChatroom, 143);
+        }
+
+        public void Shutdown()
+        {
+            Intent intent3 = new Intent(this, typeof(CloseActivity));
+            //Clear all activities and start new task
+            //ClearTask - causes any existing task that would be associated with the activity
+            // to be cleared before the activity is started. can only be used in conjunction with NewTask.
+            // basically it clears all activities in the current task.
+            intent3.SetFlags(ActivityFlags.ClearTask | ActivityFlags.NewTask);
+            this.StartActivity(intent3);
+            this.FinishAndRemoveTask();
         }
 
         // Intent extra keys — all intent extras targeting MainActivity are defined here.
@@ -1334,7 +1337,6 @@ namespace Seeker
 
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
-            //MenuInflater.Inflate(Resource.Menu.menu_main, menu);
             return base.OnCreateOptionsMenu(menu);
         }
 

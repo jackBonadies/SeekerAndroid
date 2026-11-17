@@ -2,8 +2,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
 >
-
-    <!-- "Mark Favorite", should appear as action button if possible -->
     <item
         android:id="@+id/add_user_action"
         android:icon="@drawable/baseline_add_white_24"
@@ -11,7 +9,6 @@
         app:iconTint="?attr/appBarIconColor"
         app:showAsAction="always"
     />
-
     <item
         android:id="@+id/sort_user_list_action"
         android:icon="@drawable/baseline_swap_vert_white_24"
@@ -19,17 +16,11 @@
         app:iconTint="?attr/appBarIconColor"
         app:showAsAction="always"
     />
-
+    <!-- Everything else lives in the anchored menu (UserListActivity.BuildOverflowMenu). -->
     <item
-        android:id="@+id/add_user_to_ignored_action"
-        android:icon="@drawable/baseline_add_white_24"
-        android:title="@string/AddUserToIgnored"
-        app:showAsAction="never"
+        android:id="@+id/action_user_list_overflow"
+        android:title="@string/Options"
+        app:actionLayout="@layout/anchored_menu_overflow_button"
+        app:showAsAction="always"
     />
-
-    <!-- Settings, should always be in the overflow -->
-    <!--
-  <item android:id="@+id/action_settings"
-        android:title="@string/abc_menu_enter_shortcut_label"
-        app:showAsAction="always"/>-->
 </menu>

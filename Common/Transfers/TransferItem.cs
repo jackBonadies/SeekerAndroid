@@ -18,6 +18,9 @@ namespace Seeker
         public long BytesTransferred;
         public bool Failed;
         public TransferStates State;
+        // when the user last added, paused, resumed or retried this row (TransferBands.NextStamp). library
+        //   outcomes (completed, failed, auto retry) do not count. 0 for rows saved before this existed
+        public long LastActionStamp;
         public long Size;
 
         public bool isUpload;
@@ -49,6 +52,21 @@ namespace Seeker
         // date added order
         [System.Xml.Serialization.XmlIgnoreAttribute]
         public long Seq;
+
+        // a batch operation passes one stamp to every row it changes, so they tie and keep track order
+        public void MarkUserAction(long stamp)
+        {
+            Interlocked.Exchange(ref LastActionStamp, stamp);
+        }
+
+        // call before cancelling. a pause only changes rows that are active
+        public void MarkUserPause(long stamp)
+        {
+            if (TransferBands.IsActive(this))
+            {
+                MarkUserAction(stamp);
+            }
+        }
 
         public int QueueLength
         {

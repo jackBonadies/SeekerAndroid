@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Grows out of the top-end corner, where the overflow button is. RTL mirror of anim/anchored_menu_enter. -->
+<set
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:interpolator/decelerate_cubic"
+    android:shareInterpolator="true">
+    <scale
+        android:duration="180"
+        android:fromXScale="0.85"
+        android:toXScale="1.0"
+        android:fromYScale="0.6"
+        android:toYScale="1.0"
+        android:pivotX="0%"
+        android:pivotY="0%" />
+    <alpha
+        android:duration="120"
+        android:fromAlpha="0.0"
+        android:toAlpha="1.0" />
+</set>

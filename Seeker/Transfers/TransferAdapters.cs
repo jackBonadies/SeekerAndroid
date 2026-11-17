@@ -135,10 +135,32 @@ namespace Seeker
                 return snapshot.IndexOf(item);
             }
 
+            public override long GetItemId(int position)
+            {
+                ITransferItem item = snapshot.GetItem(position);
+                return item == null ? RecyclerView.NoId : TransferSort.GetSeq(item);
+            }
+
             public void Rebuild()
             {
-                snapshot = new TransferListSnapshot(source.GetUISnapshot(uiState));
+                snapshot = CreateSnapshot();
                 NotifyDataSetChanged();
+            }
+
+            private TransferListSnapshot CreateSnapshot()
+            {
+                // sortKeys is a dict to detect when sort keys change (since unlike Alphabetical and DateAdded,
+                //   a row's state and last action can change even if no new transfers are added / removed)
+                Dictionary<ITransferItem, TransferBandKey> sortKeys = TransferSort.IsMutable(uiState.SortKey)
+                    ? new Dictionary<ITransferItem, TransferBandKey>()
+                    : null;
+                return new TransferListSnapshot(source.GetUISnapshot(uiState, sortKeys), sortKeys, uiState.SortKey);
+            }
+
+            // the row's sort key changed since the list was sorted. false if row does not exist in this view.
+            public bool NeedsResort(ITransferItem row)
+            {
+                return snapshot.HasSortKeyChanged(row);
             }
 
             // for a removal the caller just made in the manager. the rest of the manager's changes wait for the next Rebuild
@@ -223,8 +245,9 @@ namespace Seeker
 
             protected void ShowItemContextMenu(View rowView)
             {
-                setSelectedItem((rowView as ITransferItemView).InnerTransferItem);
-                rowView.ShowContextMenu();
+                ITransferItem item = (rowView as ITransferItemView).InnerTransferItem;
+                setSelectedItem(item);
+                TransfersFragment?.ShowTransferContextMenu(item);
             }
 
             protected void TransferAdapterRecyclerVersion_LongClick(object sender, View.LongClickEventArgs e)
@@ -251,7 +274,9 @@ namespace Seeker
             {
                 this.source = source;
                 this.uiState = uiState;
-                snapshot = new TransferListSnapshot(source.GetUISnapshot(uiState));
+                snapshot = CreateSnapshot();
+                // with stable ids a rebuild (NotifyDataSetChanged) animates the rows that moved
+                HasStableIds = true;
                 showSpeed = PreferencesState.TransferViewShowSpeed;
                 showSizes = PreferencesState.TransferViewShowSizes;
                 showTimeRemaining = PreferencesState.TransferViewShowTimeRemaining;
@@ -259,31 +284,7 @@ namespace Seeker
 
         }
 
-        public enum TransferContextMenuItem
-        {
-            RetryResumeDownload = 0,
-            ClearFromList = 1,
-            CancelAndClear = 2,
-            RefreshQueuePosition = 3,
-            PlayFile = 4,
-            UserOptions = 5,
-            BrowseUser = 6,
-            BrowseAtLocation = 7,
-            SearchUserFiles = 8,
-            AddRemoveUser = 9,
-            MessageUser = 10,
-            GetUserInfo = 11,
-            UserNote = 12,
-            GivePrivileges = 13,
-            ResumeFolder = 100,
-            PauseFolderOrAbortUploads = 101,
-            RetryFailedFiles = 102,
-            AbortUpload = 103,
-            IgnoreUnshareUser = 104,
-        }
-
-        public const int UNIQUE_TRANSFER_GROUP_ID = 303;
-        public class TransferViewHolder : RecyclerView.ViewHolder, View.IOnCreateContextMenuListener
+        public class TransferViewHolder : RecyclerView.ViewHolder
         {
             private ITransferItemView transferItemView;
 
@@ -292,208 +293,11 @@ namespace Seeker
             {
                 transferItemView = (ITransferItemView)view;
                 transferItemView.ViewHolder = this;
-                (transferItemView as View).SetOnCreateContextMenuListener(this);
             }
 
             public ITransferItemView getTransferItemView()
             {
                 return transferItemView;
-            }
-
-            public void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
-            {
-                ITransferItemView tvh = v as ITransferItemView;
-                TransferItem ti = null;
-                FolderItem fi = null;
-                TransferStates folderItemState = TransferStates.None;
-                bool isTransferItem = false;
-                bool anyFailed = false;
-                bool isUpload = false;
-                if (tvh?.InnerTransferItem is TransferItem tvhi)
-                {
-                    isTransferItem = true;
-                    ti = tvhi;
-                    isUpload = ti.IsUpload();
-                }
-                else if (tvh?.InnerTransferItem is FolderItem tvhf)
-                {
-                    fi = tvhf;
-                    folderItemState = fi.GetState(out anyFailed, out _);
-                    isUpload = fi.IsUpload();
-                }
-
-                if (isUpload)
-                {
-                    if (isTransferItem)
-                    {
-                        if (tvh != null && ti != null && !(SimpleHelpers.IsUploadCompleteOrAborted(ti.State)))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.AbortUpload, 0, Resource.String.AbortUpload);
-                        }
-                    }
-                    else
-                    {
-                        if (tvh != null && fi != null && !(SimpleHelpers.IsUploadCompleteOrAborted(folderItemState)))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.PauseFolderOrAbortUploads, 0, Resource.String.AbortUploads);
-                        }
-                    }
-                }
-                else
-                {
-                    if (isTransferItem)
-                    {
-                        if (tvh != null && ti != null && ti.State.HasFlag(TransferStates.Cancelled) /*&& ti.Progress > 0*/) //progress > 0 doesnt work if someone queues an item as paused...
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.RetryResumeDownload, 0, Resource.String.resume_dl);
-                        }
-                        else if (ti == null || (tvh != null && ti != null && (!ti.State.HasFlag(TransferStates.Succeeded)))) // i.e. if null its fine to show.
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.RetryResumeDownload, 0, Resource.String.retry_dl);
-                        }
-                    }
-                    else
-                    {
-                        if (tvh != null && fi != null && folderItemState.HasFlag(TransferStates.Cancelled))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ResumeFolder, 0, Resource.String.ResumeFolder);
-                        }
-                        else if (tvh != null && fi != null && (!folderItemState.HasFlag(TransferStates.Completed) && !folderItemState.HasFlag(TransferStates.Succeeded) && !folderItemState.HasFlag(TransferStates.Errored) && !folderItemState.HasFlag(TransferStates.TimedOut) && !folderItemState.HasFlag(TransferStates.Rejected)))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.PauseFolderOrAbortUploads, 0, Resource.String.PauseFolder);
-                        }
-                    }
-                }
-                if (isUpload)
-                {
-                    if (isTransferItem)
-                    {
-                        if (tvh != null && ti != null && (SimpleHelpers.IsUploadCompleteOrAborted(ti.State)))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ClearFromList, 1, Resource.String.clear_from_list);
-                            //if completed then we dont need to show the cancel option...
-                        }
-                        else
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.CancelAndClear, 2, Resource.String.AbortandClearUpload);
-                        }
-                    }
-                    else
-                    {
-                        if (tvh != null && fi != null && (SimpleHelpers.IsUploadCompleteOrAborted(folderItemState)))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ClearFromList, 1, Resource.String.clear_from_list);
-                        }
-                        else
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.CancelAndClear, 2, Resource.String.AbortandClearUploads);
-                        }
-                    }
-                }
-                else
-                {
-                    if (isTransferItem)
-                    {
-                        if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ClearFromList, 1, Resource.String.clear_from_list);
-                            //if completed then we dont need to show the cancel option...
-                        }
-                        else
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.CancelAndClear, 2, Resource.String.cancel_and_clear);
-                        }
-                    }
-                    else
-                    {
-                        if (tvh != null && fi != null && (folderItemState.HasFlag(TransferStates.Succeeded)))
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.ClearFromList, 1, Resource.String.clear_from_list);
-                        }
-                        else
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.CancelAndClear, 2, Resource.String.cancel_and_clear);
-                        }
-                    }
-                }
-
-                if (!isUpload)
-                {
-                    if (isTransferItem)
-                    {
-
-                        if (tvh != null && ti != null)
-                        {
-                            if (ti.QueueLength > 0)
-                            {
-                                //the queue length of a succeeded download can be 183......
-                                //bc queue length AND free upload slots!!
-                                if (ti.State.HasFlag(TransferStates.Succeeded) ||
-                                    ti.State.HasFlag(TransferStates.Completed))
-                                {
-                                    //no op
-                                }
-                                else
-                                {
-                                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.RefreshQueuePosition, 3, Resource.String.refresh_queue_pos);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (tvh != null && fi != null)
-                        {
-                            if (fi.GetQueueLength() > 0)
-                            {
-                                //the queue length of a succeeded download can be 183......
-                                //bc queue length AND free upload slots!!
-                                if (folderItemState.HasFlag(TransferStates.Succeeded) ||
-                                    folderItemState.HasFlag(TransferStates.Completed))
-                                {
-                                    //no op
-                                }
-                                else
-                                {
-                                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.RefreshQueuePosition, 3, Resource.String.refresh_queue_pos);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (!isUpload)
-                {
-                    if (isTransferItem)
-                    {
-                        if (tvh != null && ti != null && (ti.State.HasFlag(TransferStates.Succeeded)) && ti.FinalUri != string.Empty)
-                        {
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.PlayFile, 4, Resource.String.play_file);
-                        }
-                    }
-                    else
-                    {
-                        if (folderItemState.HasFlag(TransferStates.TimedOut) || folderItemState.HasFlag(TransferStates.Rejected) || folderItemState.HasFlag(TransferStates.Errored) || anyFailed)
-                        {
-                            //no op
-                            menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.RetryFailedFiles, 4, Resource.String.RetryFailedFiles);
-                        }
-                    }
-                }
-                var subMenu = menu.AddSubMenu(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.UserOptions, 5, Resource.String.UserOptions);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.BrowseUser, 6, Resource.String.browse_user);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.BrowseAtLocation, 7, Resource.String.browse_at_location);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.SearchUserFiles, 8, Resource.String.search_user_files);
-                UiHelpers.AddAddRemoveUserMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.AddRemoveUser, 9, tvh.InnerTransferItem.GetUsername(), false);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.MessageUser, 10, Resource.String.msg_user);
-                subMenu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.GetUserInfo, 11, Resource.String.get_user_info);
-                UiHelpers.AddUserNoteMenuItem(subMenu, UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.UserNote, 12, tvh.InnerTransferItem.GetUsername());
-                UiHelpers.AddGivePrivilegesIfApplicable(subMenu, (int)TransferContextMenuItem.GivePrivileges);
-
-                if (isUpload)
-                {
-                    menu.Add(UNIQUE_TRANSFER_GROUP_ID, (int)TransferContextMenuItem.IgnoreUnshareUser, 6, Resource.String.IgnoreUnshareUser);
-                }
             }
         }
     }

@@ -93,9 +93,10 @@ namespace Seeker.Services
         {
             var isSingle = files.Count() == 1;
             List<DownloadInfo> downloadInfos = new List<DownloadInfo>();
+            long actionStamp = TransferBands.NextStamp();
             foreach (FullFileInfo file in files)
             {
-                var dlInfo = AddTransfer(username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded, isSingle);
+                var dlInfo = AddTransfer(username, file.FullFileName, file.Size, int.MaxValue, file.Depth, queuePaused, file.wasFilenameLatin1Decoded, file.wasFolderLatin1Decoded, isSingle, actionStamp);
                 if (dlInfo != null)
                 {
                     downloadInfos.Add(dlInfo);
@@ -427,8 +428,12 @@ namespace Seeker.Services
         /// <summary>
         /// Adds a transfer to the list (i.e. for NEW items). Null if there is already a transfer either in motion or succeeded (and therefore we should not do anything)
         /// </summary>
-        public DownloadInfo? AddTransfer(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, bool isSingle)
+        public DownloadInfo? AddTransfer(string username, string fname, long size, int queueLength, int depth, bool queuePaused, bool wasLatin1Decoded, bool wasFolderLatin1Decoded, bool isSingle, long actionStamp = 0)
         {
+            if (actionStamp == 0)
+            {
+                actionStamp = TransferBands.NextStamp();
+            }
             var newItem = new TransferItem();
             newItem.Filename = SimpleHelpers.GetFileNameFromFile(fname).ToString();
             newItem.FolderName = SimpleHelpers.GetFolderNameFromFile(fname, depth).ToString();
@@ -442,6 +447,7 @@ namespace Seeker.Services
             {
                 newItem.TransferItemExtra = Transfers.TransferItemExtras.NoSubfolder;
             }
+            newItem.MarkUserAction(actionStamp);
             newItem.State = queuePaused ? TransferStates.Cancelled : TransferStates.Queued | TransferStates.Locally;
 
             var transferItem = TransferItems.TransferItemManagerDL.AddIfNotExistAndReturnTransfer(newItem, out bool exists);
@@ -455,7 +461,7 @@ namespace Seeker.Services
                     return null;
                 }
                 // re-request of a paused / failed / finished row is a retry of that row. null if a request already owns it (i.e. it is already in motion)
-                downloadInfo = PrepareRetry(transferItem, restartActive: false);
+                downloadInfo = PrepareRetry(transferItem, restartActive: false, actionStamp);
                 if (downloadInfo == null)
                 {
                     logger.Debug($"AddTransfer: {transferItem.Filename} is already being requested, skipping");
@@ -1148,7 +1154,7 @@ namespace Seeker.Services
             }
             try
             {
-                DownloadRetryAll(items);
+                DownloadRetryAll(items, userAction: false);
             }
             catch (Exception e)
             {
@@ -1178,7 +1184,7 @@ namespace Seeker.Services
         /// </summary>
         public bool RetryDownloadItem(TransferItem item)
         {
-            var dlInfo = PrepareRetry(item, restartActive: true);
+            var dlInfo = PrepareRetry(item, restartActive: true, TransferBands.NextStamp());
             if (dlInfo == null)
             {
                 return false;
@@ -1189,7 +1195,8 @@ namespace Seeker.Services
 
         // claims the item for a new request. null if a request already owns it - restartActive cancels that one
         //   and its continuation re-requests it (CancelAndRetryFlag), bulk paths leave it alone.
-        private DownloadInfo? PrepareRetry(TransferItem item, bool restartActive)
+        // actionStamp: the user's action (one per operation), 0 for an automatic re-request
+        private DownloadInfo? PrepareRetry(TransferItem item, bool restartActive, long actionStamp = 0)
         {
             if (activeRequests.TryGetValue(item, out var owner))
             {
@@ -1197,6 +1204,8 @@ namespace Seeker.Services
                 {
                     return null;
                 }
+                // the continuation restarts it without a stamp of its own
+                MarkUserActionIfAny(item, actionStamp);
                 item.CancelAndRetryFlag = true;
                 if (!owner.CancellationTokenSource.IsCancellationRequested)
                 {
@@ -1219,18 +1228,29 @@ namespace Seeker.Services
             }
             TransferState.SetupCancellationToken(item, cts, out _);
             item.ClearStateForRetry();
+            MarkUserActionIfAny(item, actionStamp);
             // same initial state as AddTransfer
             item.State = TransferStates.Queued | TransferStates.Locally;
             return dlInfo;
         }
 
-        public void DownloadRetryAll(IEnumerable<TransferItem> transferItemConditionList)
+        private static void MarkUserActionIfAny(TransferItem item, long actionStamp)
+        {
+            if (actionStamp != 0)
+            {
+                item.MarkUserAction(actionStamp);
+            }
+        }
+
+        // userAction: false for automatic retries, which leave the rows' last action alone
+        public void DownloadRetryAll(IEnumerable<TransferItem> transferItemConditionList, bool userAction = true)
         {
             var changed = transferItemConditionList.ToList();
             var dlInfos = new List<DownloadInfo>();
+            long actionStamp = userAction ? TransferBands.NextStamp() : 0;
             foreach (TransferItem item in changed)
             {
-                var dlInfo = PrepareRetry(item, restartActive: false);
+                var dlInfo = PrepareRetry(item, restartActive: false, actionStamp);
                 if (dlInfo != null)
                 {
                     dlInfos.Add(dlInfo);
