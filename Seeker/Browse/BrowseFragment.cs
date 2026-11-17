@@ -248,6 +248,12 @@ namespace Seeker
                     Label = ctx.GetString(Resource.String.CopyFolderURL),
                     OnClick = () =>
                     {
+                        // shouldnt be reachable (unless we do browse at location at a folder peer has since emptied)
+                        if (state.DataItems.Count == 0)
+                        {
+                            SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.NothingToCopy), ToastLength.Short);
+                            return;
+                        }
                         string fullDirName = state.DataItems[0].Node.Data.Name;
                         string slskLink = CommonHelpers.CreateSlskLink(true, fullDirName, state.CurrentUsername);
                         CommonHelpers.CopyTextToClipboard(SeekerState.ActiveActivityRef, slskLink);
