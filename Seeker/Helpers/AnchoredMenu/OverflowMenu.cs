@@ -19,6 +19,10 @@ namespace Seeker.Helpers.AnchoredMenu
             // the action view is new on every menu inflate, so this cannot double up
             view.Click += (s, e) =>
             {
+                if (AnchoredMenuPopup.IsAnyShowing)
+                {
+                    return;
+                }
                 var config = build();
                 if (config == null || !config.HasRows())
                 {

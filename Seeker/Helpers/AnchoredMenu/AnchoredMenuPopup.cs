@@ -23,13 +23,24 @@ namespace Seeker.Helpers.AnchoredMenu
 
         private bool selectionPending;
 
+        // UI thread only. A second tap can reach the anchor before the first popup's window takes
+        // input, which would stack two menus and let a row run twice.
+        private static AnchoredMenuPopup current;
+
+        public static bool IsAnyShowing => current?.window?.IsShowing == true;
+
         // dismissWithAnchor: also close when the anchor itself detaches. For action mode bars, which can
         // finish on their own (selection cleared, tab swipe). Not for toolbars: InvalidateOptionsMenu
         // recreates their action views.
         public static AnchoredMenuPopup Show(View anchor, AnchoredMenuConfig config, bool dismissWithAnchor = false)
         {
+            if (IsAnyShowing)
+            {
+                return null;
+            }
             var popup = new AnchoredMenuPopup(GetThemedContext(anchor), config);
             popup.ShowAt(anchor, dismissWithAnchor);
+            current = popup;
             return popup;
         }
 
@@ -37,8 +48,13 @@ namespace Seeker.Helpers.AnchoredMenu
         // opened from a view rather than the app bar.
         public static AnchoredMenuPopup ShowAsDropDown(View anchor, AnchoredMenuConfig config)
         {
+            if (IsAnyShowing)
+            {
+                return null;
+            }
             var popup = new AnchoredMenuPopup(GetThemedContext(anchor), config);
             popup.ShowBelow(anchor);
+            current = popup;
             return popup;
         }
 
@@ -185,6 +201,10 @@ namespace Seeker.Helpers.AnchoredMenu
 
         private void OnDismissed(object sender, EventArgs e)
         {
+            if (current == this)
+            {
+                current = null;
+            }
             if (detachWatchView != null)
             {
                 detachWatchView.ViewDetachedFromWindow -= OnHostDetached;

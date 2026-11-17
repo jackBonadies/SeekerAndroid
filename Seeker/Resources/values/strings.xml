@@ -838,7 +838,6 @@
     <string name="ClearAllCompleteAndAborted">Clear all complete and aborted</string>
     <string name="AbortAll">Abort all</string>
 
-    <string name="BatchSelect">Batch select</string>
     <string name="ShowSize">Show size</string>
     <string name="ShowSpeed">Show speed</string>
     <string name="ShowTimeRemaining">Show time remaining</string>
