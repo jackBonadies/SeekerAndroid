@@ -99,29 +99,31 @@ namespace Seeker.Browse
             {
                 Logger.Debug($"RequestFilesLogic {username} completed");
 
-                if (br.IsFaulted && br.Exception?.InnerException is TimeoutException)
+                // BrowseAsync wraps everything except timeout / offline / cancel in SoulseekClientException
+                Exception cause = br.IsFaulted ? DownloadFailureClassifier.GetCause(br.Exception) : null;
+                if (br.IsFaulted && cause is TimeoutException)
                 {
                     //timeout
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.browse_user_timeout), ToastLength.Short);
                     return;
                 }
-                else if (br.IsFaulted && br.Exception?.InnerException is ConnectionException && br.Exception?.InnerException?.InnerException is TimeoutException)
+                else if (br.IsFaulted && cause is ConnectionException && cause.InnerException is TimeoutException)
                 {
                     //timeout - this time when the connection was established, but the user has not written to us in over 15 (timeout) seconds. I tested and generally this is fixed by simply retrying.
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.browse_user_timeout), ToastLength.Short);
                     return;
                 }
-                else if (br.IsFaulted && br.Exception?.InnerException is ConnectionException && br.Exception?.InnerException?.InnerException != null && br.Exception.InnerException.InnerException.ToString().Contains("network subsystem is down", StringComparison.OrdinalIgnoreCase))
+                else if (br.IsFaulted && cause is ConnectionException && cause.InnerException != null && cause.InnerException.ToString().Contains("network subsystem is down", StringComparison.OrdinalIgnoreCase))
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.network_down), ToastLength.Short);
                     return;
                 }
-                else if (br.IsFaulted && br.Exception?.InnerException != null && br.Exception.InnerException.Message.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase))
+                else if (br.IsFaulted && cause != null && cause.Message.Contains(SimpleHelpers.FailedToEstablishDirectOrIndirectString, StringComparison.OrdinalIgnoreCase))
                 {
                     SeekerApplication.Toaster.ShowToast(SeekerApplication.GetString(Resource.String.browse_user_nodirectconnection), ToastLength.Short);
                     return;
                 }
-                else if (br.IsFaulted && br.Exception?.InnerException is UserOfflineException)
+                else if (br.IsFaulted && cause is UserOfflineException)
                 {
                     SeekerApplication.Toaster.ShowToast(String.Format(SeekerApplication.GetString(Resource.String.CannotBrowseUsernameOffline), username), ToastLength.Short);
                     return;
@@ -130,7 +132,7 @@ namespace Seeker.Browse
                 {
                     //shouldnt get here
                     SeekerApplication.Toaster.ShowToast(String.Format(SeekerApplication.GetString(Resource.String.FailedToBrowseUsernameUnspecifiedError), username), ToastLength.Short);
-                    Logger.Firebase("browse response faulted: " + username + br.Exception?.Message);
+                    Logger.Firebase("browse response faulted: " + username + " " + SimpleHelpers.DescribeException(br.Exception));
                     return;
                 }
 
