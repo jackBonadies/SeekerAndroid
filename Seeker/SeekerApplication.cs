@@ -280,7 +280,7 @@ namespace Seeker
 
             if (SeekerKeepAliveService.WifiKeepAlive_FullService == null)
             {
-                SeekerKeepAliveService.WifiKeepAlive_FullService = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService)).CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Keep Alive Service Wifi");
+                SeekerKeepAliveService.WifiKeepAlive_FullService = (this.GetSystemService(Context.WifiService) as Android.Net.Wifi.WifiManager)?.CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Keep Alive Service Wifi");
             }
 
             try
@@ -292,8 +292,8 @@ namespace Seeker
                 }
                 if (WifiKeepAlive_Transfer == null)
                 {
-                    WifiKeepAlive_Transfer = ((Android.Net.Wifi.WifiManager)this.GetSystemService(Context.WifiService)).CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Download Wifi_Keep_Alive");
-                    WifiKeepAlive_Transfer.SetReferenceCounted(false);
+                    WifiKeepAlive_Transfer = (this.GetSystemService(Context.WifiService) as Android.Net.Wifi.WifiManager)?.CreateWifiLock(Android.Net.WifiMode.FullHighPerf, "Seeker Download Wifi_Keep_Alive");
+                    WifiKeepAlive_Transfer?.SetReferenceCounted(false);
                 }
             }
             catch (Exception e)
