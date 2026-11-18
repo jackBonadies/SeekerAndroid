@@ -247,8 +247,8 @@ namespace Seeker.UPnP
         {
             try
             {
-                WifiManager wm = (WifiManager)Context.GetSystemService(Context.WifiService);
-                if (wm.WifiState == Android.Net.WifiState.Disabled) //if just mobile is on and wifi is off.
+                WifiManager wm = Context.GetSystemService(Context.WifiService) as WifiManager;
+                if (wm == null || wm.WifiState == Android.Net.WifiState.Disabled) //if just mobile is on and wifi is off.
                 {
                     return false;
                 }
@@ -280,8 +280,8 @@ namespace Seeker.UPnP
                     RunningStatus = UPnPRunningStatus.Finished;
                     throw new Exception("SearchAndSetMapping Context is null");
                 }
-                WifiManager wm = (WifiManager)Context.GetSystemService(Context.WifiService);
-                if (wm.WifiState == Android.Net.WifiState.Disabled) //if just mobile is on and wifi is off.
+                WifiManager wm = Context.GetSystemService(Context.WifiService) as WifiManager;
+                if (wm == null || wm.WifiState == Android.Net.WifiState.Disabled) //if just mobile is on and wifi is off.
                 {
                     //wifi is disabled.
                     DiagStatus = UPnPDiagStatus.WifiDisabled;
